@@ -9,8 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 /**
  * Simply Static view class
  */
-class Simply_Static_View
-{
+class Simply_Static_View {
 	/**
 	 * View variables array
 	 * @var array
@@ -44,8 +43,7 @@ class Simply_Static_View
 	/**
 	 * Performs initialization of the absolute path for views
 	 */
-	public function __construct()
-	{
+	public function __construct() {
 		// Looking for a basic directory where plugin resides
 		list($plugin_dir) = explode( '/', plugin_basename( __FILE__ ) );
 
@@ -62,8 +60,7 @@ class Simply_Static_View
 	 * @param string $template The template filename, without extension
 	 * @return Simply_Static_View
 	 */
-	public function set_template( $template )
-	{
+	public function set_template( $template ) {
 		$this->template = $template;
 		$this->variables = array();
 		return $this;
@@ -75,8 +72,7 @@ class Simply_Static_View
 	 * @param string $name The option name
 	 * @return mixed|null
 	 */
-	public function __get( $name )
-	{
+	public function __get( $name ) {
 		$value = array_key_exists( $name, $this->variables ) ? $this->variables[$name] : null;
 		return $value;
 	}
@@ -88,8 +84,7 @@ class Simply_Static_View
 	* @param mixed  $value The variable value
 	* @return Simply_Static_View
 	*/
-	public function __set( $name, $value )
-	{
+	public function __set( $name, $value ) {
 		$this->variables[$name] = $value;
 		return $this;
 	}
@@ -101,8 +96,7 @@ class Simply_Static_View
 	 * @param mixed $value The variable value
 	 * @return Simply_Static_View
 	 */
-	public function assign( $name, $value )
-	{
+	public function assign( $name, $value ) {
 		return $this->__set( $name, $value );
 	}
 
@@ -112,12 +106,10 @@ class Simply_Static_View
 	 * @throws WP_Error
 	 * @return Simply_Static_View
 	 */
-	public function render()
-	{
+	public function render() {
 		$file = $this->path . '/' . $this->template . $this->extension;
 
-		if ( ! is_readable( $file ) )
-		{
+		if ( ! is_readable( $file ) ) {
 			throw new WP_Error( "Can't find view template: " . $file );
 		}
 

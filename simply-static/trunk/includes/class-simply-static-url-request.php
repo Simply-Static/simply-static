@@ -9,8 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 /**
  * Simply Static URL request class
  */
-class Simply_Static_Url_Request
-{
+class Simply_Static_Url_Request {
 	/**
 	 * The URI resource
 	 * @var string
@@ -27,8 +26,7 @@ class Simply_Static_Url_Request
 	 * Constructor
 	 * @param string $url URI resource
 	 */
-	public function __construct( $url )
-	{
+	public function __construct( $url ) {
 		$this->url = filter_var( $url, FILTER_VALIDATE_URL );
 		// TODO: Set this as a const or an option
 		$response = wp_remote_get( $this->url, array( 'timeout' => 300 ) ); //set a long time out
@@ -40,8 +38,7 @@ class Simply_Static_Url_Request
 	 * Returns the sanitized URL
 	 * @return string
 	 */
-	public function get_url()
-	{
+	public function get_url() {
 		return $this->url;
 	}
 
@@ -50,10 +47,8 @@ class Simply_Static_Url_Request
 	 * @param string $new_body
 	 * @return void
 	 */
-	public function set_response_body( $new_body )
-	{
-		if ( is_array( $this->response ) )
-		{
+	public function set_response_body( $new_body ) {
+		if ( is_array( $this->response ) ) {
 			$this->response['body'] = $new_body;
 		}
 	}
@@ -62,8 +57,7 @@ class Simply_Static_Url_Request
 	 * Returns the HTTP response body
 	 * @return string
 	 */
-	public function get_response_body()
-	{
+	public function get_response_body() {
 		return isset( $this->response['body'] ) ? $this->response['body'] : '';
 	}
 
@@ -71,8 +65,7 @@ class Simply_Static_Url_Request
 	 * Returns the content type
 	 * @return string
 	 */
-	public function get_content_type()
-	{
+	public function get_content_type() {
 		return isset( $this->response['headers']['content-type'] ) ? $this->response['headers']['content-type'] : null;
 	}
 
@@ -80,8 +73,7 @@ class Simply_Static_Url_Request
 	 * Checks if content type is html
 	 * @return bool
 	 */
-	public function is_html()
-	{
+	public function is_html() {
 		return stripos( $this->get_content_type(), 'html' ) !== false;
 	}
 
@@ -89,10 +81,8 @@ class Simply_Static_Url_Request
 	 * Removes WordPress-specific meta tags
 	 * @return void
 	 */
-	public function cleanup()
-	{
-		if ( $this->is_html() )
-		{
+	public function cleanup() {
+		if ( $this->is_html() ) {
 			$response_body = preg_replace( '/<link rel=["\' ](pingback|alternate|EditURI|wlwmanifest|index|profile|prev)["\' ](.*?)>/si', '', $this->get_response_body() );
 			$response_body = preg_replace( '/<meta name=["\' ]generator["\' ](.*?)>/si', '', $response_body );
 			$this->set_response_body( $response_body );
@@ -104,12 +94,10 @@ class Simply_Static_Url_Request
 	 * @param string $origin_url Base URL of site. Used to extract URLs that relate only to the current site.
 	 * @return array
 	 */
-	public function extract_all_urls( $origin_url )
-	{
+	public function extract_all_urls( $origin_url ) {
 		$all_urls = array();
 
-		if ($this->is_html() && preg_match_all( '/' . str_replace('/', '\/', $origin_url ) . '[^"\'#\? ]+/i', $this->response['body'], $matches ) )
-		{
+		if ($this->is_html() && preg_match_all( '/' . str_replace( '/', '\/', $origin_url ) . '[^"\'#\? ]+/i', $this->response['body'], $matches ) ) {
 			$all_urls = array_unique( $matches[0] );
 		}
 
@@ -122,13 +110,11 @@ class Simply_Static_Url_Request
 	 * @param string $destination_url
 	 * @return void
 	 */
-	public function replace_url($origin_url, $destination_url)
-	{
-		if ($this->is_html())
-		{
-			$response_body = str_replace($origin_url, $destination_url, $this->get_response_body());
-			$response_body = str_replace('<head>', "<head>\n<base href=\"" . esc_attr($destination_url) . "\" />\n", $response_body);
-			$this->set_response_body($response_body);
+	public function replace_url($origin_url, $destination_url) {
+		if ( $this->is_html() ) {
+			$response_body = str_replace( $origin_url, $destination_url, $this->get_response_body() );
+			$response_body = str_replace( '<head>', "<head>\n<base href=\"" . esc_attr( $destination_url ) . "\" />\n", $response_body );
+			$this->set_response_body( $response_body );
 		}
 	}
 }

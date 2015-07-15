@@ -107,21 +107,17 @@ class Simply_Static {
 	public function activate()
 	{
 		// Not installed?
-		//if (null === $this->options->get_option('version'))
-		//{
+		if ( null === $this->options->get( 'version' ) ) {
 			$this->options
 				->set( 'version', self::VERSION )
-				->set( 'origin_scheme', is_ssl() ? 'https' : 'http' )
-				->set( 'origin_host', preg_replace( "(^https?://)", "", home_url() ) )
 				->set( 'destination_scheme', '' )
 				->set( 'destination_host', '' )
 				->set( 'additional_urls', '' )
 				->set( 'generate_zip', '0' )
 				->set( 'retain_static_files', '0' )
 				->save();
-		//}
+		}
 	}
-
 
 	/**
 	 * Include required files
@@ -151,7 +147,7 @@ class Simply_Static {
 		add_menu_page(
 			__( 'Simply Static Settings', self::SLUG ),
 			__( 'Simply Static', self::SLUG ),
-			'generate_static_site',
+			'manage_options',
 			self::SLUG,
 			array( self::$instance, 'display_generate_page' ),
 			plugins_url( 'images/icon-16x16.png', __FILE__ )
@@ -161,7 +157,7 @@ class Simply_Static {
 			self::SLUG,
 			__( 'Generate Static Site', self::SLUG ),
 			__( 'Generate', self::SLUG ),
-			'generate_static_site',
+			'manage_options',
 			self::SLUG,
 			array( self::$instance, 'display_generate_page' )
 		);
@@ -171,7 +167,7 @@ class Simply_Static {
 			__( 'Simply Static Settings', self::SLUG ),
 			__( 'Settings', self::SLUG ),
 			'manage_options',
-			self::SLUG,
+			self::SLUG . '-options',
 			array( self::$instance, 'display_options_page' )
 		);
 	}
@@ -199,13 +195,15 @@ class Simply_Static {
 	 * @return void
 	 */
 	public function display_options_page() {
-		$this->save_options();
+		if ( isset($_POST['save']) ) {
+			$this->save_options();
+		}
 
 		$this->view
 			->set_template( 'options' )
 			->assign( 'slug', self::SLUG )
-			->assign( 'origin_scheme', $this->options->get( 'origin_scheme' ) )
-			->assign( 'origin_host', $this->options->get( 'origin_host' ) )
+			->assign( 'origin_scheme', $this->get_origin_scheme() )
+			->assign( 'origin_host', $this->get_origin_host() )
 			->assign( 'destination_scheme', $this->options->get( 'destination_scheme' ) )
 			->assign( 'destination_host', $this->options->get( 'destination_host' ) )
 			->assign( 'additional_urls', $this->options->get( 'additional_urls' ) )
@@ -220,8 +218,6 @@ class Simply_Static {
 	 */
 	public function save_options() {
 		$this->options
-			->set( 'origin_scheme', filter_input( INPUT_POST, 'origin_scheme' ) )
-			->set( 'origin_host', untrailingslashit( filter_input( INPUT_POST, 'origin_host', FILTER_SANITIZE_URL ) ) )
 			->set( 'destination_scheme', filter_input( INPUT_POST, 'destination_scheme' ) )
 			->set( 'destination_host', untrailingslashit( filter_input( INPUT_POST, 'destination_host', FILTER_SANITIZE_URL ) ) )
 			->set( 'additional_urls', filter_input( INPUT_POST, 'additional_urls' ) )
@@ -263,7 +259,7 @@ class Simply_Static {
 		}
 
 		// Add URLs to queue
-		$origin_url = $this->options->get('origin_scheme') . '://' . $this->options->get('origin_host');
+		$origin_url = $this->get_origin_scheme() . '://' . $this->get_origin_host();
 		$destination_url = $this->options->get('destination_scheme') . '://' . $this->options->get('destination_host');
 		$urls_queue = array_unique( array_merge(
 			array( trailingslashit( $origin_url ) ),
@@ -319,7 +315,7 @@ class Simply_Static {
 	 * @return void
 	 */
 	public function save_url_to_file( $path, $content, $is_html, $archive_dir ) {
-		$path_info = pathinfo( $path && $path != '/' ? $path : 'index.html' )
+		$path_info = pathinfo( $path && $path != '/' ? $path : 'index.html' );
 
 		// Create file directory if it doesn't exist
 		$file_dir = $archive_dir . ( $path_info['dirname'] ? $path_info['dirname'] : '' );
@@ -335,5 +331,21 @@ class Simply_Static {
 		$file_extension = ( $is_html || ! isset( $path_info['extension'] ) ) ? 'html' : $path_info['extension'];
 		$file_name = $file_dir . '/' . $path_info['filename'] . '.' . $file_extension;
 		file_put_contents( $file_name, $content );
+	}
+
+	/**
+	 * Get the protocol used for the origin URL
+	 * @return string http or https
+	 */
+	public function get_origin_scheme() {
+		return is_ssl() ? 'https' : 'http';
+	}
+
+	/**
+	 * Get the host for the origin URL
+	 * @return string host (URL minus the protocol)
+	 */
+	public function get_origin_host() {
+		return untrailingslashit( preg_replace( "(^https?://)", "", home_url() ) );
 	}
 }
