@@ -132,18 +132,9 @@ class Simply_Static {
 	 * @return void
 	 */
 	private function includes() {
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-exception.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-options.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-view.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-request.php';
-	}
-
-	/**
-	 * Return localized plugin title
-	 * @return    string
-	 */
-	public static function get_plugin_title() {
-		return __( 'Simply Static', self::SLUG );
 	}
 
 	/**
@@ -162,8 +153,8 @@ class Simply_Static {
 	public function add_plugin_admin_menu() {
 		// Add main menu item
 		add_menu_page(
-			$this->get_plugin_title() . ' ' . __( 'Settings', self::SLUG ),
-			$this->get_plugin_title(),
+			__( 'Simply Static Settings', self::SLUG ),
+			__( 'Simply Static', self::SLUG ),
 			'manage_options',
 			self::SLUG,
 			array( self::$instance, 'display_plugin_admin_page' ),
@@ -171,8 +162,8 @@ class Simply_Static {
 		);
 
 		add_submenu_page(
-			$this->plugin_slug,
-			$this->get_plugin_title() . ' ' . __( 'Settings', self::SLUG ),
+			self::SLUG,
+			__( 'Simply Static Settings', self::SLUG ),
 			__( 'Settings', self::SLUG ),
 			'manage_options',
 			self::SLUG,
@@ -187,6 +178,7 @@ class Simply_Static {
 	public function display_plugin_admin_page() {
 		$this->view
 			->set_template('options')
+			->assign('slug', self::SLUG)
 			->render();
 	}
 

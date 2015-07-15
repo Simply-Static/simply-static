@@ -70,6 +70,31 @@ class Simply_Static_View
 	}
 
 	/**
+	 * Returns a value of the option identified by $name
+	 *
+	 * @param string $name The option name
+	 * @return mixed|null
+	 */
+	public function __get($name)
+	{
+		$value = array_key_exists($name, $this->variables) ? $this->variables[$name] : null;
+		return $value;
+	}
+
+	/**
+	* Updates the view variable identified by $name with the value provided in $value
+	*
+	* @param string $name The variable name
+	* @param mixed  $value The variable value
+	* @return StaticHtmlOutput_View
+	*/
+	public function __set($name, $value)
+	{
+		$this->variables[$name] = $value;
+		return $this;
+	}
+
+	/**
 	 * Updates the view variable identified by $name with the value provided in $value
 	 *
 	 * @param string $name The variable name
@@ -78,14 +103,13 @@ class Simply_Static_View
 	 */
 	public function assign($name, $value)
 	{
-		$this->variables[$name] = $value;
-		return $this;
+		return $this->__set($name, $value);
 	}
 
 	/**
 	 * Renders the view script
 	 *
-	 * @throws Simply_Static_Exception
+	 * @throws WP_Error
 	 * @return Simply_Static_View
 	 */
 	public function render()
@@ -94,28 +118,11 @@ class Simply_Static_View
 
 		if (!is_readable($file))
 		{
-			throw new Simply_Static_Exception("Can't find view template: " . $file);
+			throw new WP_Error("Can't find view template: " . $file);
 		}
 
 		include $file;
 
 		return $this;
 	}
-
-	// /**
-	//  * Returns the rendered view script
-	//  *
-	//  * @return string
-	//  */
-	// public function fetch()
-	// {
-	// 	ob_start();
-
-	// 	$this->render();
-	// 	$contents = ob_get_contents();
-
-	// 	ob_end_clean();
-
-	// 	return $contents;
-	// }
 }
