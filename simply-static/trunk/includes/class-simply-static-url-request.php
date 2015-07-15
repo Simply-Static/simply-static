@@ -7,7 +7,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * Simply Static url request class
+ * Simply Static URL request class
  */
 class Simply_Static_Url_Request
 {
@@ -27,16 +27,17 @@ class Simply_Static_Url_Request
 	 * Constructor
 	 * @param string $url URI resource
 	 */
-	public function __construct($url)
+	public function __construct( $url )
 	{
-		$this->url = filter_var($url, FILTER_VALIDATE_URL);
+		$this->url = filter_var( $url, FILTER_VALIDATE_URL );
 		// TODO: Set this as a const or an option
-		$response = wp_remote_get($this->url,array('timeout'=>300)); //set a long time out
-		$this->response = (is_wp_error($response) ? '' : $response);
+		$response = wp_remote_get( $this->url, array( 'timeout' => 300 ) ); //set a long time out
+		$this->response = ( is_wp_error( $response ) ? '' : $response );
+		$this->cleanup();
 	}
 
 	/**
-	 * Returns the sanitized url
+	 * Returns the sanitized URL
 	 * @return string
 	 */
 	public function get_url()
@@ -46,12 +47,12 @@ class Simply_Static_Url_Request
 
 	/**
 	 * Allows to override the HTTP response body
-	 * @param string $newBody
+	 * @param string $new_body
 	 * @return void
 	 */
-	public function set_response_body($new_body)
+	public function set_response_body( $new_body )
 	{
-		if (is_array($this->response))
+		if ( is_array( $this->response ) )
 		{
 			$this->response['body'] = $new_body;
 		}
@@ -63,7 +64,7 @@ class Simply_Static_Url_Request
 	 */
 	public function get_response_body()
 	{
-		return isset($this->response['body']) ? $this->response['body'] : '';
+		return isset( $this->response['body'] ) ? $this->response['body'] : '';
 	}
 
 	/**
@@ -72,7 +73,7 @@ class Simply_Static_Url_Request
 	 */
 	public function get_content_type()
 	{
-		return isset($this->response['headers']['content-type']) ? $this->response['headers']['content-type'] : null;
+		return isset( $this->response['headers']['content-type'] ) ? $this->response['headers']['content-type'] : null;
 	}
 
 	/**
@@ -81,7 +82,7 @@ class Simply_Static_Url_Request
 	 */
 	public function is_html()
 	{
-		return stripos($this->get_content_type(), 'html') !== false;
+		return stripos( $this->get_content_type(), 'html' ) !== false;
 	}
 
 	/**
@@ -90,43 +91,43 @@ class Simply_Static_Url_Request
 	 */
 	public function cleanup()
 	{
-		if ($this->is_html())
+		if ( $this->is_html() )
 		{
-			$response_body = preg_replace('/<link rel=["\' ](pingback|alternate|EditURI|wlwmanifest|index|profile|prev)["\' ](.*?)>/si', '', $this->get_response_body());
-			$response_body = preg_replace('/<meta name=["\' ]generator["\' ](.*?)>/si', '', $response_body);
-			$this->set_response_body($response_body);
+			$response_body = preg_replace( '/<link rel=["\' ](pingback|alternate|EditURI|wlwmanifest|index|profile|prev)["\' ](.*?)>/si', '', $this->get_response_body() );
+			$response_body = preg_replace( '/<meta name=["\' ]generator["\' ](.*?)>/si', '', $response_body );
+			$this->set_response_body( $response_body );
 		}
 	}
 
 	/**
-	 * Extracts the list of unique urls
-	 * @param string $base_url Base url of site. Used to extract urls that relate only to the current site.
+	 * Extracts the list of unique URLs
+	 * @param string $origin_url Base URL of site. Used to extract URLs that relate only to the current site.
 	 * @return array
 	 */
-	public function extract_all_urls($base_url)
+	public function extract_all_urls( $origin_url )
 	{
 		$all_urls = array();
 
-		if ($this->is_html() && preg_match_all('/' . str_replace('/', '\/', $base_url) . '[^"\'#\? ]+/i', $this->response['body'], $matches))
+		if ($this->is_html() && preg_match_all( '/' . str_replace('/', '\/', $origin_url ) . '[^"\'#\? ]+/i', $this->response['body'], $matches ) )
 		{
-			$all_urls = array_unique($matches[0]);
+			$all_urls = array_unique( $matches[0] );
 		}
 
 		return $all_urls;
 	}
 
 	/**
-	 * Replaces base url
-	 * @param string $old_base_url
-	 * @param string $new_base_url
+	 * Replaces base URL
+	 * @param string $origin_url
+	 * @param string $destination_url
 	 * @return void
 	 */
-	public function replace_base_url($old_base_url, $new_base_url)
+	public function replace_url($origin_url, $destination_url)
 	{
 		if ($this->is_html())
 		{
-			$response_body = str_replace($old_base_url, $new_base_url, $this->get_response_body());
-			$response_body = str_replace('<head>', "<head>\n<base href=\"" . esc_attr($new_base_url) . "\" />\n", $response_body);
+			$response_body = str_replace($origin_url, $destination_url, $this->get_response_body());
+			$response_body = str_replace('<head>', "<head>\n<base href=\"" . esc_attr($destination_url) . "\" />\n", $response_body);
 			$this->set_response_body($response_body);
 		}
 	}

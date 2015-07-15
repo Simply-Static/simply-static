@@ -6,13 +6,62 @@
 
 <div class="wrap">
 
-	<h2><?= __('Simply Static', $this->slug);?></h2>
+	<h2><?php echo __( 'Simply Static', $this->slug ); ?></h2>
 
 	<div class="postbox-container">
 		<div class="metabox-holder">
 			<div class="meta-box-sortables ui-sortable">
 
-				<p>I'm the options page. Hurray!</p>
+				<form id="options" method="post" action="">
+
+					<div class="postbox">
+						<div class="handlediv" title="Click to toggle"><br /></div>
+						<h3 class="hndle"><span><?php echo __( 'Options', $this->slug );?></span></h3>
+						<div class="inside">
+
+							<p>
+								<label for="origin_host"><?php echo __( 'Origin URL', $this->slug );?>:</label>
+								<select id="origin_scheme" name="origin_scheme" disabled>
+									<option value="http" <?php if ( $this->origin_scheme == 'http' ) { echo 'selected="selected"'; } ?>>http://</option>
+									<option value="https" <?php if ( $this->origin_scheme == 'https' ) { echo 'selected="selected"'; } ?>>https://</option>
+								</select>
+								<input type="text" id="origin_host" name="origin_host" value="<?php echo esc_attr( $this->origin_host ) ?>" size="50" disabled />
+							</p>
+
+							<p>
+								<label for="destination_host"><?php echo __( 'Destination URL', $this->slug );?>:</label>
+								<select id="destination_scheme" name="destination_scheme">
+									<option value="http" <?php if ( $this->destination_scheme == 'http' ) { echo 'selected="selected"'; } ?>>http://</option>
+									<option value="https" <?php if ( $this->destination_scheme == 'https' ) { echo 'selected="selected"'; } ?>>https://</option>
+								</select>
+								<input type="text" id="destination_host" name="destination_host" value="<?php echo esc_attr( $this->destination_host ) ?>" size="50" />
+							</p>
+
+							<p>
+								<label for="additional_urls"><?php echo __( 'Additional URLs', $this->slug );?>:</label>
+								<textarea class="widefat" name="additional_urls" id="additional_urls" rows="5" cols="10"><?php echo esc_html( $this->additional_urls ) ?></textarea>
+							</p>
+
+							<p>
+								<input name="generate_zip" id="generate_zip" value="1" type="checkbox" <?php if ( $this->generate_zip == 1 ) { echo "checked"; } ?> />
+								<label for="generate_zip"><?php echo __( 'Generate ZIP archive', $this->slug );?></label>
+							</p>
+
+							<p>
+								<input name="retain_static_files" id="retain_static_files" value="1" type="checkbox" <?php if ( $this->retain_static_files == 1 ) { echo "checked"; } ?> />
+								<label for="retain_static_files"><?php echo __( 'Retain generated static files on server', $this->slug );?></label>
+							</p>
+
+						</div>
+					</div>
+
+					<p class="submit">
+						<?php wp_nonce_field( $this->slug ) ?>
+						<input type="hidden" name="action" value="generate" />
+						<input class="button-primary" type="submit" name="save" value="<?php echo __( 'Save', $this->slug );?>" />
+					</p>
+
+				</form>
 
 			</div>
 		</div>

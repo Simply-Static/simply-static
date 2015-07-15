@@ -28,11 +28,11 @@ class Simply_Static_Options
 	 *
 	 * @param string $option_key The options key name
 	 */
-	public function __construct($option_key)
+	public function __construct( $option_key )
 	{
-		$options = get_option($option_key);
+		$options = get_option( $option_key );
 
-		if (false === $options)
+		if ( false === $options )
 		{
 			$options = array();
 		}
@@ -48,7 +48,7 @@ class Simply_Static_Options
 	 * @param mixed $value The option value
 	 * @return Simply_Static_Options
 	 */
-	public function set($name, $value)
+	public function set( $name, $value )
 	{
 		$this->options[$name] = $value;
 		return $this;
@@ -60,20 +60,20 @@ class Simply_Static_Options
 	 * @param string $name The option name
 	 * @return mixed|null
 	 */
-	public function get($name)
+	public function get( $name )
 	{
-		$value = array_key_exists($name, $this->options) ? $this->options[$name] : null;
+		$value = array_key_exists( $name, $this->options ) ? $this->options[$name] : null;
 		return $value;
 	}
 
 	/**
-	 * Saves the internal options data to the wp_options table using the stored $optionKey value as the key
+	 * Saves the internal options data to the wp_options table using the stored $option_key value as the key
 	 *
 	 * @return boolean
 	 */
 	public function save()
 	{
-		return update_option($this->option_key, $this->options);
+		return update_option( $this->option_key, $this->options );
 	}
 
 	/**
@@ -84,6 +84,6 @@ class Simply_Static_Options
 	 */
 	public function delete()
 	{
-		return delete_option($this->option_key);
+		return delete_option( $this->option_key );
 	}
 }

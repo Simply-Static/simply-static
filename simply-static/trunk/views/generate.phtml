@@ -1,0 +1,35 @@
+<?php
+/**
+ * @package Simply_Static
+ */
+?>
+
+<div class="wrap">
+
+	<h2><?php echo __( 'Simply Static', $this->slug ); ?></h2>
+
+	<?php if ( is_array( $this->export_log ) && count( $this->export_log ) ): ?>
+	<h3>Export Log</h3>
+	<pre class="export-log"><?php echo implode( "\n", array_keys( $this->export_log ) ) ?></pre>
+	<?php endif ?>
+
+	<div class="postbox-container">
+		<div class="metabox-holder">
+			<div class="meta-box-sortables ui-sortable">
+
+				<form id="generate" method="post" action="">
+
+					<? // TODO: Disable generate button if certain conditions aren't met. ?>
+					<? // e.g. no url structure, no destination set, etc. ?>
+					<p class="submit">
+						<?php wp_nonce_field( $this->slug ) ?>
+						<input class="button-primary" type="submit" name="submit" value="Generate" />
+					</p>
+
+				</form>
+
+			</div>
+		</div>
+	</div>
+
+</div>

@@ -47,12 +47,12 @@ class Simply_Static_View
 	public function __construct()
 	{
 		// Looking for a basic directory where plugin resides
-		list($plugin_dir) = explode('/', plugin_basename(__FILE__));
+		list($plugin_dir) = explode( '/', plugin_basename( __FILE__ ) );
 
 		// making up an absolute path to views directory
-		$path_array = array(WP_PLUGIN_DIR, $plugin_dir, $this->directory);
+		$path_array = array( WP_PLUGIN_DIR, $plugin_dir, $this->directory );
 
-		$this->path = implode('/', $path_array);
+		$this->path = implode( '/', $path_array );
 	}
 
 	/**
@@ -62,7 +62,7 @@ class Simply_Static_View
 	 * @param string $template The template filename, without extension
 	 * @return Simply_Static_View
 	 */
-	public function set_template($template)
+	public function set_template( $template )
 	{
 		$this->template = $template;
 		$this->variables = array();
@@ -75,9 +75,9 @@ class Simply_Static_View
 	 * @param string $name The option name
 	 * @return mixed|null
 	 */
-	public function __get($name)
+	public function __get( $name )
 	{
-		$value = array_key_exists($name, $this->variables) ? $this->variables[$name] : null;
+		$value = array_key_exists( $name, $this->variables ) ? $this->variables[$name] : null;
 		return $value;
 	}
 
@@ -86,9 +86,9 @@ class Simply_Static_View
 	*
 	* @param string $name The variable name
 	* @param mixed  $value The variable value
-	* @return StaticHtmlOutput_View
+	* @return Simply_Static_View
 	*/
-	public function __set($name, $value)
+	public function __set( $name, $value )
 	{
 		$this->variables[$name] = $value;
 		return $this;
@@ -101,9 +101,9 @@ class Simply_Static_View
 	 * @param mixed $value The variable value
 	 * @return Simply_Static_View
 	 */
-	public function assign($name, $value)
+	public function assign( $name, $value )
 	{
-		return $this->__set($name, $value);
+		return $this->__set( $name, $value );
 	}
 
 	/**
@@ -116,9 +116,9 @@ class Simply_Static_View
 	{
 		$file = $this->path . '/' . $this->template . $this->extension;
 
-		if (!is_readable($file))
+		if ( ! is_readable( $file ) )
 		{
-			throw new WP_Error("Can't find view template: " . $file);
+			throw new WP_Error( "Can't find view template: " . $file );
 		}
 
 		include $file;
