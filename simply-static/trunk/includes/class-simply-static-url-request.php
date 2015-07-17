@@ -30,8 +30,14 @@ class Simply_Static_Url_Request {
 		$this->url = filter_var( $url, FILTER_VALIDATE_URL );
 		// TODO: Set this as a const or an option
 		$response = wp_remote_get( $this->url, array( 'timeout' => 300 ) ); //set a long time out
-		$this->response = ( is_wp_error( $response ) ? '' : $response );
-		$this->cleanup();
+
+		if ( is_wp_error( $response ) ) {
+			$this->response = '';
+		} else {
+			$this->response = $response;
+			$this->cleanup();
+		}
+
 	}
 
 	/**

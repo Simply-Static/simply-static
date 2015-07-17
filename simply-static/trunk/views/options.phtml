@@ -22,8 +22,7 @@
 							<p>
 								<label for="origin_host"><?php echo __( 'Origin URL', $this->slug );?>:</label>
 								<select id="origin_scheme" name="origin_scheme" disabled>
-									<option value="http" <?php if ( $this->origin_scheme == 'http' ) { echo 'selected="selected"'; } ?>>http://</option>
-									<option value="https" <?php if ( $this->origin_scheme == 'https' ) { echo 'selected="selected"'; } ?>>https://</option>
+									<option value="<?php echo $this->origin_scheme; ?>"><?php echo $this->origin_scheme; ?>://</option>
 								</select>
 								<input type="text" id="origin_host" name="origin_host" value="<?php echo esc_attr( $this->origin_host ) ?>" size="50" disabled />
 							</p>

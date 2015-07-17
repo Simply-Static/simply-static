@@ -1,0 +1,10 @@
+.export-log {
+	height: 200px;
+	overflow: auto;
+	border: 1px solid #DFDFDF;
+	color: #000;
+	background: #fff;
+	margin: 0 0 15px;
+	padding: 3px 4px;
+	width: 95%;
+}

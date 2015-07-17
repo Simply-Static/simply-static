@@ -135,7 +135,7 @@ class Simply_Static {
 	 */
 	public function enqueue_admin_styles() {
 		// Plugin admin CSS. Tack on plugin version.
-		wp_enqueue_style( self::SLUG . '-admin-styles', plugins_url( 'css/admin.css', __FILE__ ), array(), self::VERSION );
+		wp_enqueue_style( self::SLUG . '-admin-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'css/admin.css', array(), self::VERSION );
 	}
 
 	/**
@@ -150,7 +150,7 @@ class Simply_Static {
 			'manage_options',
 			self::SLUG,
 			array( self::$instance, 'display_generate_page' ),
-			plugins_url( 'images/icon-16x16.png', __FILE__ )
+			plugin_dir_url( dirname( __FILE__ ) ) . 'images/icon-16x16.png'
 		);
 
 		add_submenu_page(
@@ -242,7 +242,7 @@ class Simply_Static {
 	 * Create a static version of the site
 	 * @return string $archive_dir The directory of the static files
 	 */
-	public function generate_archive() {
+	protected function generate_archive() {
 		global $blog_id;
 		// TODO: Do ajax calls instead of just running forever and ever
 		set_time_limit(0);
@@ -251,7 +251,7 @@ class Simply_Static {
 		$upload_dir = wp_upload_dir();
 		$current_user = wp_get_current_user();
 
-		$archive_name = $upload_dir['path'] . '/' . self::SLUG . $blog_id . '-' . time() . $current_user->user_login;
+		$archive_name = $upload_dir['path'] . '/' . self::SLUG . '-' . $blog_id . '-' . time() . $current_user->user_login;
 		$archive_dir = $archive_name . '/';
 
 		if ( ! file_exists( $archive_dir ) ) {
@@ -271,9 +271,15 @@ class Simply_Static {
 			$current_url = array_shift( $urls_queue );
 
 			// TODO: Just for testing
-			echo "Processing: " . $current_url;
+			// echo "Processing: " . $current_url;
 
 			$request = new Simply_Static_Url_Request( $current_url );
+			// No response body? Somehow our request failed
+			// (e.g. space in URL)
+			// TODO: Keep a queue of failed urls too
+			if ( $request->get_response_body() == '' ) {
+				continue;
+			}
 
 			$this->export_log[] = $current_url;
 
@@ -294,7 +300,7 @@ class Simply_Static {
 			// Save the page to our archive
 			$url_parts = parse_url( $request->get_url() );
 			$path = $url_parts['path'];
-			$content = $url->get_response_body();
+			$content = $request->get_response_body();
 			$is_html = $request->is_html();
 			$this->save_url_to_file( $path, $content, $is_html, $archive_dir );
 
@@ -302,8 +308,43 @@ class Simply_Static {
 			// - Generate ZIP
 			// - Delete file contents unless requested to keep
 
-			return $archive_dir;
 		}
+
+		return $archive_dir;
+	}
+
+	/**
+	 * Given a URL, convert it to a local directory, recursively scan that
+	 * directory for additional files, and then return a list of those files
+	 * converted back to URLs.
+	 * @param array $urls URLs to recursively scan
+	 * @return array $files URLs for local files
+	 */
+	protected function get_list_of_local_files_by_url( array $urls ) {
+		$files = array();
+
+		foreach ( $urls as $url ) {
+			// replace url with directory path
+			$directory = str_replace( home_url('/'), ABSPATH, $url );
+
+			// TODO: `stripos( $url, home_url('/') ) === 0` -- necessary?
+			// if this is a directory...
+			if ( stripos( $url, home_url('/') ) === 0 && is_dir($directory) ) {
+				$iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $directory ) );
+
+				foreach ( $iterator as $file_name => $file_object ) {
+					if ( is_file( $file_name ) ) {
+						$path_info = pathinfo( $file_name );
+
+						if ( isset( $path_info['extension'] ) && ! in_array( $path_info['extension'], array( 'php', 'phtml', 'tpl' ) ) ) {
+							array_push( $files, home_url( str_replace( ABSPATH, '', $file_name ) ) );
+						}
+					}
+				}
+			}
+		}
+
+		return $files;
 	}
 
 	/**
@@ -311,10 +352,10 @@ class Simply_Static {
 	 * @param string $path The relative path for the URL to save
 	 * @param string $content The contents of the page we want to save
 	 * @param boolean $is_html Is this an html page?
-	 * @param string The path to the archive directory
-	 * @return void
+	 * @param string $archive_dir The path to the archive directory
+	 * @return boolean $success Did we successfully save the file?
 	 */
-	public function save_url_to_file( $path, $content, $is_html, $archive_dir ) {
+	protected function save_url_to_file( $path, $content, $is_html, $archive_dir ) {
 		$path_info = pathinfo( $path && $path != '/' ? $path : 'index.html' );
 
 		// Create file directory if it doesn't exist
@@ -330,14 +371,15 @@ class Simply_Static {
 		// Save file contents
 		$file_extension = ( $is_html || ! isset( $path_info['extension'] ) ) ? 'html' : $path_info['extension'];
 		$file_name = $file_dir . '/' . $path_info['filename'] . '.' . $file_extension;
-		file_put_contents( $file_name, $content );
+		$success = file_put_contents( $file_name, $content );
+		return $success;
 	}
 
 	/**
 	 * Get the protocol used for the origin URL
 	 * @return string http or https
 	 */
-	public function get_origin_scheme() {
+	protected function get_origin_scheme() {
 		return is_ssl() ? 'https' : 'http';
 	}
 
@@ -345,7 +387,7 @@ class Simply_Static {
 	 * Get the host for the origin URL
 	 * @return string host (URL minus the protocol)
 	 */
-	public function get_origin_host() {
+	protected function get_origin_host() {
 		return untrailingslashit( preg_replace( "(^https?://)", "", home_url() ) );
 	}
 }
