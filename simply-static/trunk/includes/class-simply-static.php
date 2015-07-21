@@ -177,16 +177,18 @@ class Simply_Static {
 	 * @return void
 	 */
 	public function display_generate_page() {
-		if ( isset($_POST['generate']) ) {
+		if ( isset( $_POST['generate'] ) ) {
 			$archive_dir = $this->generate_archive();
+			$archive_url = $this->create_zip( $archive_dir );
 		} else {
 			$archive_dir = null;
+			$archive_url = null;
 		}
 
 		$this->view
 			->set_template( 'generate' )
 			->assign( 'export_log', $this->export_log )
-			->assign( 'archive_dir', $archive_dir )
+			->assign( 'archive_url', $archive_url )
 			->render();
 	}
 
@@ -195,7 +197,7 @@ class Simply_Static {
 	 * @return void
 	 */
 	public function display_options_page() {
-		if ( isset($_POST['save']) ) {
+		if ( isset( $_POST['save'] ) ) {
 			$this->save_options();
 		}
 
@@ -240,7 +242,7 @@ class Simply_Static {
 
 	/**
 	 * Create a static version of the site
-	 * @return string $archive_dir The directory of the static files
+	 * @return string $archive_dir The archive directory
 	 */
 	protected function generate_archive() {
 		global $blog_id;
@@ -248,11 +250,9 @@ class Simply_Static {
 		set_time_limit(0);
 
 		// Create archive directory
-		$upload_dir = wp_upload_dir();
 		$current_user = wp_get_current_user();
-
-		$archive_name = $upload_dir['path'] . '/' . self::SLUG . '-' . $blog_id . '-' . time() . $current_user->user_login;
-		$archive_dir = $archive_name . '/';
+		$archive_name = join( '-', array( self::SLUG, $blog_id, time(), $current_user->user_login ) );
+		$archive_dir = trailingslashit( $this->get_writeable_dir() . $archive_name );
 
 		if ( ! file_exists( $archive_dir ) ) {
 			wp_mkdir_p( $archive_dir );
@@ -303,14 +303,42 @@ class Simply_Static {
 			$content = $request->get_response_body();
 			$is_html = $request->is_html();
 			$this->save_url_to_file( $path, $content, $is_html, $archive_dir );
-
-			// TODO:
-			// - Generate ZIP
-			// - Delete file contents unless requested to keep
-
 		}
 
 		return $archive_dir;
+	}
+
+	/**
+	 * Create a ZIP file using the archive directory
+	 * @param $archive_dir The archive directory path
+	 * @return string $temporary_zip The path to the archive zip file
+	 */
+	protected function create_zip( $archive_dir ) {
+		$temporary_zip = untrailingslashit( $archive_dir ) . '.tmp';
+		$zip_archive = new ZipArchive();
+
+		if ( $zip_archive->open( $temporary_zip, ZIPARCHIVE::CREATE ) !== true ) {
+			return new WP_Error( "Unable to create ZIP archive" );
+		}
+
+		$iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $archive_dir ) );
+		foreach ( $iterator as $file_name => $file_object ) {
+			$base_name = basename( $file_name );
+
+			if ( $base_name != '.' && $base_name != '..' ) {
+				if ( ! $zip_archive->addFile( realpath( $file_name ), str_replace( $archive_dir, '', $file_name ) ) ) {
+					return new WP_Error( 'Could not add file: ' . $file_name );
+				}
+			}
+		}
+
+		$zip_archive->close();
+		$zip_file = untrailingslashit( $archive_dir ) . '.zip';
+		rename( $temporary_zip, $zip_file );
+
+		$archive_url = str_replace( ABSPATH, trailingslashit( home_url() ), $zip_file );
+
+		return $archive_url;
 	}
 
 	/**
@@ -373,6 +401,15 @@ class Simply_Static {
 		$file_name = $file_dir . '/' . $path_info['filename'] . '.' . $file_extension;
 		$success = file_put_contents( $file_name, $content );
 		return $success;
+	}
+
+	/**
+	 * Get a directory where we're able to write files
+	 * @return string writeable directory we can use
+	 */
+	protected function get_writeable_dir() {
+		$upload_dir = wp_upload_dir();
+		return trailingslashit( $upload_dir['path'] );
 	}
 
 	/**

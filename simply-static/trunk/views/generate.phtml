@@ -4,9 +4,12 @@
  */
 ?>
 
-<?php if ( $this->archive_dir ) : ?>
+<?php if ( $this->archive_url ) : ?>
 	<div class="updated fade">
-		<p><strong><?php echo __( 'Your files were saved to: ', $this->slug ) . $this->archive_dir; ?></strong></p>
+		<p><strong>
+			<?php echo __( 'Archive created successfully!', $this->slug ); ?>
+			<a href="<?php echo $this->archive_url; ?>"><?php echo __( 'Download archive', $this->slug ); ?></a>
+		</strong></p>
 	</div>
 <?php endif; ?>
 
