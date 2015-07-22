@@ -7,9 +7,9 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * Simply Static URL request class
+ * Simply Static URL fetcher class
  */
-class Simply_Static_Url_Request {
+class Simply_Static_Url_Fetcher {
 	/**
 	 * The URI resource
 	 * @var string
@@ -37,7 +37,6 @@ class Simply_Static_Url_Request {
 			$this->response = $response;
 			$this->cleanup();
 		}
-
 	}
 
 	/**
