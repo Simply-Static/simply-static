@@ -180,6 +180,7 @@ class Simply_Static {
 		if ( isset( $_POST['generate'] ) ) {
 			$archive_dir = $this->generate_archive();
 			$archive_url = $this->create_zip( $archive_dir );
+			$deleted_successfully = $this->delete_static_files( $archive_dir );
 		} else {
 			$archive_dir = null;
 			$archive_url = null;
@@ -339,6 +340,29 @@ class Simply_Static {
 		$archive_url = str_replace( ABSPATH, trailingslashit( home_url() ), $zip_file );
 
 		return $archive_url;
+	}
+
+	/**
+	 * Delete generated static files
+	 * @param $archive_dir The archive directory path
+	 * @return boolean $success Successful in deleting everything?
+	 */
+	protected function delete_static_files( $archive_dir ) {
+		$directory_iterator = new RecursiveDirectoryIterator( $archive_dir, FilesystemIterator::SKIP_DOTS );
+		$recursive_iterator = new RecursiveIteratorIterator( $directory_iterator, RecursiveIteratorIterator::CHILD_FIRST );
+
+		// recurse through the entire directory and delete all files / subdirectories
+		foreach ( $recursive_iterator as $file ) {
+			$success = $file->isDir() ? rmdir( $file ) : unlink( $file );
+			if ( ! $success ) {
+				return false;
+			}
+		}
+
+		// must make sure to delete the original directory at the end
+		$success = rmdir( $archive_dir );
+
+		return $success;
 	}
 
 	/**
