@@ -11,6 +11,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 class Simply_Static_Url_Fetcher {
 	/**
+	 * Timeout for fetching URLs
+	 * @var string
+	 */
+	const TIMEOUT = 300;
+
+	/**
 	 * The URI resource
 	 * @var string
 	 */
@@ -28,8 +34,7 @@ class Simply_Static_Url_Fetcher {
 	 */
 	public function __construct( $url ) {
 		$this->url = filter_var( $url, FILTER_VALIDATE_URL );
-		// TODO: Set this as a const or an option
-		$response = wp_remote_get( $this->url, array( 'timeout' => 300 ) ); //set a long time out
+		$response = wp_remote_get( $this->url, array( 'timeout' => self::TIMEOUT ) );
 
 		if ( is_wp_error( $response ) ) {
 			$this->response = '';

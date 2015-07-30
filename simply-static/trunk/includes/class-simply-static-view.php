@@ -11,6 +11,24 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 class Simply_Static_View {
 	/**
+	 * Layout (template) for the plugin
+	 * @var string
+	 */
+	const LAYOUT = 'layouts/admin.phtml';
+
+	/**
+	 * Base directory for views
+	 * @var string
+	 */
+	const DIRECTORY = 'views';
+
+	/**
+	 * View script extension
+	 * @var string
+	 */
+	const EXTENSION = '.phtml';
+
+	/**
 	 * View variables array
 	 * @var array
 	 */
@@ -21,18 +39,6 @@ class Simply_Static_View {
 	 * @var string
 	 */
 	protected $path = null;
-
-	/**
-	 * Base directory for views
-	 * @var string
-	 */
-	protected $directory = 'views';
-
-	/**
-	 * View script extension
-	 * @var string
-	 */
-	protected $extension = '.phtml';
 
 	/**
 	 * Template file name to render
@@ -48,7 +54,7 @@ class Simply_Static_View {
 		list($plugin_dir) = explode( '/', plugin_basename( __FILE__ ) );
 
 		// making up an absolute path to views directory
-		$path_array = array( WP_PLUGIN_DIR, $plugin_dir, $this->directory );
+		$path_array = array( WP_PLUGIN_DIR, $plugin_dir, self::DIRECTORY );
 
 		$this->path = implode( '/', $path_array );
 	}
@@ -61,8 +67,7 @@ class Simply_Static_View {
 	 * @return Simply_Static_View
 	 */
 	public function set_template( $template ) {
-		$this->template = $template;
-		$this->variables = array();
+		$this->template = trailingslashit( $this->path ) . $template . self::EXTENSION;
 		return $this;
 	}
 
@@ -107,13 +112,13 @@ class Simply_Static_View {
 	 * @return Simply_Static_View
 	 */
 	public function render() {
-		$file = $this->path . '/' . $this->template . $this->extension;
+		$layout = trailingslashit( $this->path ) . self::LAYOUT;
 
-		if ( ! is_readable( $file ) ) {
-			throw new WP_Error( "Can't find view template: " . $file );
+		if ( ! is_readable( $this->template ) ) {
+			throw new WP_Error( "Can't find view template: " . $this->template );
 		}
 
-		include $file;
+		include $layout;
 
 		return $this;
 	}

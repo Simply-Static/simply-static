@@ -11,11 +11,13 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 class Simply_Static {
 	/**
 	 * Plugin version
+	 * @var string
 	 */
 	const VERSION = '1.0.0';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, etc.
+	 * @var string
 	 */
 	const SLUG = 'simply-static';
 
@@ -184,16 +186,20 @@ class Simply_Static {
 			$archive_dir = $archive_creator->get_archive_directory();
 			// fyi: archive_url could be a WP_Error
 			$archive_url = $archive_creator->create_zip( $archive_dir );
+			$message = __( 'Archive created successfully!', self::SLUG );
+			$message .= ' <a href="' . $archive_url . '">' . __( 'Download archive', self::SLUG ) . '</a>';
 			$deleted_successfully = $archive_creator->delete_static_files( $archive_dir );
+
+			$export_log = $archive_creator->get_export_log();
 		} else {
-			$archive_dir = null;
-			$archive_url = null;
+			$export_log = null;
+			$message = null;
 		}
 
 		$this->view
 			->set_template( 'generate' )
-			->assign( 'export_log', $archive_creator->get_export_log() )
-			->assign( 'archive_url', $archive_url )
+			->assign( 'export_log', $export_log )
+			->assign( 'message', $message )
 			->render();
 	}
 

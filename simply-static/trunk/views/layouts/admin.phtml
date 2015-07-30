@@ -1,0 +1,54 @@
+<?php
+/**
+ * @package Simply_Static
+ */
+?>
+
+<?php if ( $this->message ) : ?>
+	<div class="updated fade">
+		<p><strong>
+			<?php echo $this->message; ?>
+		</strong></p>
+	</div>
+<?php endif; ?>
+
+<div class="wrap">
+	<div id="sist-container">
+
+		<div id="sist-content">
+			<?php include $this->template; ?>
+		</div>
+		<!-- .sist-content -->
+
+		<div id="sist-sidebar">
+			<div class="sidebar-container metabox-holder">
+				<div class="postbox">
+					<h3 class="wp-ui-primary">Like this plugin?</h3>
+					<div class="inside">
+						<div class="main">
+							<p>Join the mailing list to be notified when new features and plugins are released.</p>
+
+							<!-- Begin MailChimp Signup Form -->
+							<div id="mc_embed_signup">
+							<form action="//codeofconduct.us8.list-manage.com/subscribe/post?u=add8381918934d53034b89daf&amp;id=7b053181a2" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+							    <div id="mc_embed_signup_scroll">
+								<input type="email" value="" name="EMAIL" class="email" id="mce-EMAIL" placeholder="email address" required>
+							    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+							    <div style="position: absolute; left: -5000px;"><input type="text" name="b_add8381918934d53034b89daf_7b053181a2" tabindex="-1" value=""></div>
+							    <div class="clear"><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button-primary"></div>
+							    </div>
+							</form>
+							</div>
+							<!--End mc_embed_signup-->
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- .sist-sidebar -->
+
+	</div>
+	<!-- .sist-container -->
+</div>
+<!-- .wrap -->
