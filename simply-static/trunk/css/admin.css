@@ -1,3 +1,25 @@
+
+
+
+#sistContainer {
+	margin-right: 310px;
+}
+
+#sistContent {
+	width: 100%;
+	float: left;
+	min-width: 600px;
+}
+
+#sistSidebar {
+	float: right;
+	margin-right: -310px;
+	width: 290px;
+}
+
+
+/* Generate page */
+
 .export-log {
 	height: 200px;
 	overflow: auto;
@@ -12,22 +34,22 @@
 	padding: 3px 4px;
 }
 
-#sist-container {
-	margin-right: 310px;
+/* Forms */
+
+select:disabled, select.disabled {
+	border-color: rgba(222,222,222,.75);
+	background: rgba(255,255,255,.5);
+	color: rgba(51,51,51,.5);
 }
 
-#sist-content {
-	width: 100%;
-	float: left;
+.help-block {
+	display: block;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    color: #737373;
 }
 
-#sist-sidebar {
-	float: right;
-	margin-right: -310px;
-	width: 290px;
-}
-
-/* BEGIN Mailchimp Embedded Form CSS */
+/* Mailchimp Form CSS */
 
 /* Mailchimp original CSS at:
    http://cdn-images.mailchimp.com/embedcode/slim-081711.css
@@ -36,5 +58,3 @@
 #mc_embed_signup input:focus {border-color:#333;}
 #mc_embed_signup .clear {clear:none; display:inline;}
 #mc_embed_signup input.email {display:block; padding:8px 0; margin:0 4% 10px 0; text-indent:5px; width:58%; min-width:130px; width:100%;}
-
-/* END Mailchimp Embedded Form CSS */
