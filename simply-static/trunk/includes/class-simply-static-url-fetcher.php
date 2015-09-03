@@ -57,7 +57,7 @@ class Simply_Static_Url_Fetcher {
 	 * @param string $new_body
 	 * @return void
 	 */
-	public function set_response_body( $new_body ) {
+	private function set_response_body( $new_body ) {
 		if ( is_array( $this->response ) ) {
 			$this->response['body'] = $new_body;
 		}
@@ -69,6 +69,14 @@ class Simply_Static_Url_Fetcher {
 	 */
 	public function get_response_body() {
 		return isset( $this->response['body'] ) ? $this->response['body'] : '';
+	}
+
+	/**
+	 * Returns the HTTP response code
+	 * @return string
+	 */
+	public function get_response_code() {
+		return isset( $this->response['response']['code'] ) ? $this->response['response']['code'] : null;
 	}
 
 	/**
@@ -91,7 +99,7 @@ class Simply_Static_Url_Fetcher {
 	 * Removes WordPress-specific meta tags
 	 * @return void
 	 */
-	public function cleanup() {
+	private function cleanup() {
 		if ( $this->is_html() ) {
 			$response_body = preg_replace( '/<link rel=["\' ](pingback|alternate|EditURI|wlwmanifest|index|profile|prev)["\' ](.*?)>/si', '', $this->get_response_body() );
 			$response_body = preg_replace( '/<meta name=["\' ]generator["\' ](.*?)>/si', '', $response_body );

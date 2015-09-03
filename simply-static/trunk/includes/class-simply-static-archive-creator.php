@@ -102,7 +102,7 @@ class Simply_Static_Archive_Creator {
 			$this->get_list_of_local_files_by_url( array( get_template_directory_uri() ) ),
 			// using preg_split to intelligently break at newlines
 			// see: http://stackoverflow.com/questions/1483497/how-to-put-string-in-array-split-by-new-line
-			$this->get_list_of_local_files_by_url( preg_split( "/\r\n|\n|\r/", $this->additional_urls ) )
+			preg_split( "/\r\n|\n|\r/", $this->additional_urls )
 		) );
 
 		while ( count( $urls_queue ) ) {
@@ -115,6 +115,13 @@ class Simply_Static_Archive_Creator {
 			}
 
 			$request = new Simply_Static_Url_Fetcher( $current_url );
+
+			// Not a 200 for the response code? Move on.
+			// TODO: Keep a queue of failed urls too
+			if ( $request->get_response_code() != 200 ) {
+				continue;
+			}
+
 			// No response body? Somehow our request failed
 			// (e.g. space in URL)
 			// TODO: Keep a queue of failed urls too
