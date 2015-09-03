@@ -100,11 +100,19 @@ class Simply_Static_Archive_Creator {
 		$urls_queue = array_unique( array_merge(
 			array( trailingslashit( $origin_url ) ),
 			$this->get_list_of_local_files_by_url( array( get_template_directory_uri() ) ),
-			$this->get_list_of_local_files_by_url( explode( "\n", $this->additional_urls ) )
+			// using preg_split to intelligently break at newlines
+			// see: http://stackoverflow.com/questions/1483497/how-to-put-string-in-array-split-by-new-line
+			$this->get_list_of_local_files_by_url( preg_split( "/\r\n|\n|\r/", $this->additional_urls ) )
 		) );
 
 		while ( count( $urls_queue ) ) {
 			$current_url = array_shift( $urls_queue );
+
+			// Don't process URLs that don't match the home_url
+			// TODO: Keep a queue of failed urls too
+			if ( stripos( $current_url, home_url('/') ) !== 0 ) {
+				continue;
+			}
 
 			$request = new Simply_Static_Url_Fetcher( $current_url );
 			// No response body? Somehow our request failed
@@ -207,12 +215,13 @@ class Simply_Static_Archive_Creator {
 		$files = array();
 
 		foreach ( $urls as $url ) {
+
 			// replace url with directory path
 			$directory = str_replace( home_url('/'), ABSPATH, $url );
 
-			// TODO: `stripos( $url, home_url('/') ) === 0` -- necessary?
 			// if this is a directory...
-			if ( stripos( $url, home_url('/') ) === 0 && is_dir($directory) ) {
+			if ( is_dir($directory) ) {
+				// recursively iterate through it and add all sub-dirs/files
 				$iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $directory ) );
 
 				foreach ( $iterator as $file_name => $file_object ) {
@@ -224,6 +233,8 @@ class Simply_Static_Archive_Creator {
 						}
 					}
 				}
+			} else { // not a directory, so just add the url
+				array_push( $files, $url );
 			}
 		}
 
