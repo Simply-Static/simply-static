@@ -186,7 +186,7 @@ class Simply_Static {
 			$archive_dir = $archive_creator->get_archive_directory();
 			// fyi: archive_url could be a WP_Error
 			$archive_url = $archive_creator->create_zip( $archive_dir );
-			$message = __( 'Archive created successfully!', self::SLUG );
+			$message = __( 'Archive created.', self::SLUG );
 			$message .= ' <a href="' . $archive_url . '">' . __( 'Download archive', self::SLUG ) . '</a>';
 			$deleted_successfully = $archive_creator->delete_static_files( $archive_dir );
 
@@ -210,6 +210,8 @@ class Simply_Static {
 	public function display_options_page() {
 		if ( isset( $_POST['save'] ) ) {
 			$this->save_options();
+			$message = __( 'Settings saved.', self::SLUG );
+			$this->view->assign( 'message', $message );
 		}
 
 		$this->view
