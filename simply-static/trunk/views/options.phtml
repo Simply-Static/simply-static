@@ -21,7 +21,7 @@
 								<option value="<?php echo $this->origin_scheme; ?>"><?php echo $this->origin_scheme; ?>://</option>
 							</select>
 							<input aria-describedby="originHostHelpBlock" type="text" id="originHost" name="origin_host" value="<?php echo esc_attr( $this->origin_host ) ?>" size="50" disabled />
-							<p id="originHostHelpBlock" class="help-block">This is some helpful text. <a href="#">Click here to change these settings.</a></p>
+							<p id="originHostHelpBlock" class="help-block">This is the URL of your WordPress installation. You can edit the URL on <a href="<?php echo admin_url('/options-general.php'); ?>">the General Settings page</a>.</p>
 						</td>
 					</tr>
 					<tr>
@@ -34,7 +34,7 @@
 								<option value="https" <?php if ( $this->destination_scheme == 'https' ) { echo 'selected="selected"'; } ?>>https://</option>
 							</select>
 							<input aria-describedby="destinationHostHelpBlock" type="text" id="destinationHost" name="destination_host" value="<?php echo esc_attr( $this->destination_host ) ?>" size="50" />
-							<p id="destinationHostHelpBlock" class="help-block">This is some helpful text.</p>
+							<p id="destinationHostHelpBlock" class="help-block">This is the URL where your static site will live.</p>
 						</td>
 					</tr>
 					<tr>
@@ -43,7 +43,7 @@
 						</th>
 						<td>
 							<textarea class="widefat" name="additional_urls" id="additionalUrls" rows="5" cols="10"><?php echo esc_html( $this->additional_urls ) ?></textarea>
-							<p id="originHostHelpBlock" class="help-block">e.g. /page-im-not-linking-to or <?php echo $this->origin_scheme; ?>://<?php echo $this->origin_host; ?>/other-hidden-page</p>
+							<p id="originHostHelpBlock" class="help-block">Simply Static will create a static copy of any page it can find a link to, starting at <?php echo $this->origin_scheme; ?>://<?php echo $this->origin_host; ?>. If you have other pages or files that you want to include that <em>aren't</em> linked to, add the path or URL here. Examples: <code>/secret-image.jpg</code> or <code><?php echo $this->origin_scheme; ?>://<?php echo $this->origin_host; ?>/hidden-page</code></p>
 						</td>
 					</tr>
 					<tr>
