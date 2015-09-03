@@ -108,8 +108,9 @@ class Simply_Static {
 				->set( 'version', self::VERSION )
 				->set( 'destination_scheme', '' )
 				->set( 'destination_host', '' )
+				->set( 'static_files_dir', trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' ) )
 				->set( 'additional_urls', '' )
-				->set( 'generate_zip', '0' )
+				->set( 'generate_zip', '1' )
 				->set( 'retain_static_files', '0' )
 				->save();
 		}
@@ -178,17 +179,25 @@ class Simply_Static {
 		if ( isset( $_POST['generate'] ) ) {
 			$archive_creator = new Simply_Static_Archive_Creator(
 				self::SLUG,
-				$this->options->get('destination_scheme'),
-				$this->options->get('destination_host'),
-				$this->options->get('additional_urls')
+				$this->options->get( 'destination_scheme' ),
+				$this->options->get( 'destination_host' ),
+				$this->options->get( 'static_files_dir' ),
+				$this->options->get( 'additional_urls' )
 			);
 
 			$archive_dir = $archive_creator->get_archive_directory();
-			// fyi: archive_url could be a WP_Error
-			$archive_url = $archive_creator->create_zip( $archive_dir );
-			$message = __( 'Archive created.', self::SLUG );
-			$message .= ' <a href="' . $archive_url . '">' . __( 'Download archive', self::SLUG ) . '</a>';
-			$deleted_successfully = $archive_creator->delete_static_files( $archive_dir );
+			// TODO: archive_url could be a WP_Error
+			if ( $this->options->get( 'generate_zip' ) == '1' ) {
+				$archive_url = $archive_creator->create_zip();
+				$message = __( 'Archive created.', self::SLUG );
+				$message .= ' <a href="' . $archive_url . '">' . __( 'Download archive', self::SLUG ) . '</a>';
+			} else {
+				$message = __( 'Static files created.', self::SLUG );
+			}
+
+			if ( $this->options->get( 'retain_static_files' ) != '1' ) {
+				$deleted_successfully = $archive_creator->delete_static_files();
+			}
 
 			$export_log = $archive_creator->get_export_log();
 
@@ -220,6 +229,7 @@ class Simply_Static {
 			->assign( 'origin_host', sist_get_origin_host() )
 			->assign( 'destination_scheme', $this->options->get( 'destination_scheme' ) )
 			->assign( 'destination_host', $this->options->get( 'destination_host' ) )
+			->assign( 'static_files_dir', $this->options->get( 'static_files_dir' ) )
 			->assign( 'additional_urls', $this->options->get( 'additional_urls' ) )
 			->assign( 'generate_zip', $this->options->get( 'generate_zip' ) )
 			->assign( 'retain_static_files', $this->options->get( 'retain_static_files' ) )
@@ -234,6 +244,7 @@ class Simply_Static {
 		$this->options
 			->set( 'destination_scheme', filter_input( INPUT_POST, 'destination_scheme' ) )
 			->set( 'destination_host', untrailingslashit( filter_input( INPUT_POST, 'destination_host', FILTER_SANITIZE_URL ) ) )
+			->set( 'static_files_dir', trailingslashit( filter_input( INPUT_POST, 'static_files_dir' ) ) )
 			->set( 'additional_urls', filter_input( INPUT_POST, 'additional_urls' ) )
 			->set( 'generate_zip', filter_input( INPUT_POST, 'generate_zip' ) )
 			->set( 'retain_static_files', filter_input( INPUT_POST, 'retain_static_files' ) )

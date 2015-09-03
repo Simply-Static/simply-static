@@ -42,6 +42,12 @@ class Simply_Static_Archive_Creator {
 	protected $destination_host;
 
 	/**
+	 * The directory where static files should be saved
+	 * @var string
+	 */
+	protected $static_files_dir;
+
+	/**
 	 * Additional urls to add to the archive
 	 * @var string
 	 */
@@ -51,10 +57,11 @@ class Simply_Static_Archive_Creator {
 	 * Constructor
 	 * @param string $url URI resource
 	 */
-	public function __construct( $slug, $destination_scheme, $destination_host, $additional_urls ) {
+	public function __construct( $slug, $destination_scheme, $destination_host, $static_files_dir, $additional_urls ) {
 		$this->slug = $slug;
 		$this->destination_scheme = $destination_scheme;
 		$this->destination_host = $destination_host;
+		$this->static_files_dir = $static_files_dir;
 		$this->additional_urls = $additional_urls;
 
 		$this->generate_archive();
@@ -88,7 +95,10 @@ class Simply_Static_Archive_Creator {
 		// Create archive directory
 		$current_user = wp_get_current_user();
 		$archive_name = join( '-', array( $this->slug, $blog_id, time(), $current_user->user_login ) );
-		$this->archive_dir = trailingslashit( $this->get_writeable_dir() . $archive_name );
+		$this->archive_dir = trailingslashit( $this->static_files_dir . $archive_name );
+
+		error_log( $archive_name );
+		error_log( $this->archive_dir );
 
 		if ( ! file_exists( $this->archive_dir ) ) {
 			wp_mkdir_p( $this->archive_dir );
@@ -273,14 +283,5 @@ class Simply_Static_Archive_Creator {
 		$file_name = $file_dir . '/' . $path_info['filename'] . '.' . $file_extension;
 		$success = file_put_contents( $file_name, $content );
 		return $success;
-	}
-
-	/**
-	 * Get a directory where we're able to write files
-	 * @return string writeable directory we can use
-	 */
-	protected function get_writeable_dir() {
-		$upload_dir = wp_upload_dir();
-		return trailingslashit( $upload_dir['path'] );
 	}
 }

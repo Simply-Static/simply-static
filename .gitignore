@@ -1,0 +1,3 @@
+.DS_Store
+simply-static/trunk/static-files/*
+!simply-static/trunk/static-files/.keep

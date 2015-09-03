@@ -6,7 +6,7 @@
 
 <div class="wrap">
 
-	<h2><?php echo __( 'Simply Static', $this->slug ); ?></h2>
+	<h2><?php _e( 'Simply Static', $this->slug ); ?></h2>
 
 		<form id="options" method="post" action="">
 
@@ -14,19 +14,19 @@
 				<tbody>
 					<tr>
 						<th>
-							<label for="origin_host"><?php echo __( 'Origin URL', $this->slug );?></label>
+							<label for="origin_host"><?php _e( 'Origin URL', $this->slug );?></label>
 						</th>
 						<td>
 							<select id="originScheme" name="origin_scheme" disabled>
 								<option value="<?php echo $this->origin_scheme; ?>"><?php echo $this->origin_scheme; ?>://</option>
 							</select>
 							<input aria-describedby="originHostHelpBlock" type="text" id="originHost" name="origin_host" value="<?php echo esc_attr( $this->origin_host ) ?>" size="50" disabled />
-							<p id="originHostHelpBlock" class="help-block">This is the URL of your WordPress installation. You can edit the URL on <a href="<?php echo admin_url('/options-general.php'); ?>">the General Settings page</a>.</p>
+							<p id="originHostHelpBlock" class="help-block"><?php echo sprintf( __( 'This is the URL of your WordPress installation. You can edit the URL on <a href="%s">the General Settings page</a>.', $this->slug ), admin_url( '/options-general.php' ) ); ?></p>
 						</td>
 					</tr>
 					<tr>
 						<th>
-							<label for="destination_host"><?php echo __( 'Destination URL', $this->slug );?></label>
+							<label for="destination_host"><?php _e( 'Destination URL', $this->slug );?></label>
 						</th>
 						<td>
 							<select id="destinationScheme" name="destination_scheme">
@@ -34,16 +34,30 @@
 								<option value="https" <?php if ( $this->destination_scheme == 'https' ) { echo 'selected="selected"'; } ?>>https://</option>
 							</select>
 							<input aria-describedby="destinationHostHelpBlock" type="text" id="destinationHost" name="destination_host" value="<?php echo esc_attr( $this->destination_host ) ?>" size="50" />
-							<p id="destinationHostHelpBlock" class="help-block">This is the URL where your static site will live. When generating your static site, all links to the Origin URL will be replaced with the Destination URL.</p>
+							<p id="destinationHostHelpBlock" class="help-block"><?php _e( 'This is the URL where your static site will live. When generating your static site, all links to the Origin URL will be replaced with the Destination URL.', $this->slug ); ?></p>
 						</td>
 					</tr>
 					<tr>
 						<th>
-							<label for="additional_urls"><?php echo __( 'Additional URLs', $this->slug );?></label>
+							<label for="static_files_directory"><?php _e( 'Static Files Directory', $this->slug );?></label>
+						</th>
+						<td>
+							<input aria-describedby="staticFilesDirHelpBlock" type="text" id="staticFilesDir" name="static_files_dir" value="<?php echo esc_attr( $this->static_files_dir ) ?>" size="50" />
+							<p id="staticFilesDirHelpBlock" class="help-block"><?php _e( 'Your static files (and ZIP archives, if generated) are saved to this directory.', $this->slug ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th>
+							<label for="additional_urls"><?php _e( 'Additional URLs', $this->slug );?></label>
 						</th>
 						<td>
 							<textarea aria-describedby="additionalUrlsHelpBlock" class="widefat" name="additional_urls" id="additionalUrls" rows="5" cols="10"><?php echo esc_html( $this->additional_urls ) ?></textarea>
-							<p id="additionalUrlsHelpBlock" class="help-block">Simply Static will create a static copy of any page it can find a link to, starting at <?php echo $this->origin_scheme; ?>://<?php echo $this->origin_host; ?>. If you want to create static copies of pages or files that <em>aren't</em> linked to, add the URL here. Examples: <code><?php echo $this->origin_scheme; ?>://<?php echo $this->origin_host; ?>/hidden-page</code> or <code><?php echo $this->origin_scheme; ?>://<?php echo $this->origin_host; ?>/images/secret.jpg</code></p>
+							<p id="additionalUrlsHelpBlock" class="help-block">
+								<?php echo sprintf( __( "Simply Static will create a static copy of any page it can find a link to, starting at %s. If you want to create static copies of pages or files that <em>aren't</em> linked to, add the URL here. Examples: <code>%s</code> or <code>%s</code>", $this->slug),
+								$this->origin_scheme . '://' . $this->origin_host,
+								$this->origin_scheme . '://' . $this->origin_host . '/hidden-page',
+								$this->origin_scheme . '://' . $this->origin_host . '/images/secret.jpg' ); ?>
+							</p>
 						</td>
 					</tr>
 					<tr>
@@ -51,8 +65,10 @@
 
 						</th>
 						<td>
-							<input name="generate_zip" id="generateZip" value="1" type="checkbox" <?php if ( $this->generate_zip == 1 ) { echo "checked"; } ?> />
-							<label for="generate_zip"><?php echo __( 'Generate ZIP archive', $this->slug );?></label>
+							<label>
+								<input name="generate_zip" id="generateZip" value="1" type="checkbox" <?php if ( $this->generate_zip == 1 ) { echo "checked"; } ?> />
+								<?php _e( 'Generate ZIP archive', $this->slug );?>
+							</label>
 						</td>
 					</tr>
 					<tr>
@@ -60,8 +76,10 @@
 
 						</th>
 						<td>
-							<input name="retain_static_files" id="retainStaticFiles" value="1" type="checkbox" <?php if ( $this->retain_static_files == 1 ) { echo "checked"; } ?> />
-							<label for="retain_static_files"><?php echo __( 'Retain generated static files on server', $this->slug );?></label>
+							<label>
+								<input name="retain_static_files" id="retainStaticFiles" value="1" type="checkbox" <?php if ( $this->retain_static_files == 1 ) { echo "checked"; } ?> />
+								<?php _e( 'Retain generated static files on server', $this->slug );?>
+							</label>
 						</td>
 					</tr>
 				</tbody>
@@ -70,7 +88,7 @@
 			<p class="submit">
 				<?php wp_nonce_field( $this->slug ) ?>
 				<input type="hidden" name="action" value="generate" />
-				<input class="button-primary" type="submit" name="save" value="<?php echo __( 'Save', $this->slug );?>" />
+				<input class="button-primary" type="submit" name="save" value="<?php _e( 'Save', $this->slug );?>" />
 			</p>
 
 		</form>
