@@ -191,15 +191,14 @@ class Simply_Static {
 			$deleted_successfully = $archive_creator->delete_static_files( $archive_dir );
 
 			$export_log = $archive_creator->get_export_log();
-		} else {
-			$export_log = null;
-			$message = null;
+
+			$this->view
+				->assign( 'export_log', $export_log )
+				->assign( 'message', $message );
 		}
 
 		$this->view
 			->set_template( 'generate' )
-			->assign( 'export_log', $export_log )
-			->assign( 'message', $message )
 			->render();
 	}
 
