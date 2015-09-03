@@ -34,7 +34,7 @@
 								<option value="https" <?php if ( $this->destination_scheme == 'https' ) { echo 'selected="selected"'; } ?>>https://</option>
 							</select>
 							<input aria-describedby="destinationHostHelpBlock" type="text" id="destinationHost" name="destination_host" value="<?php echo esc_attr( $this->destination_host ) ?>" size="50" />
-							<p id="destinationHostHelpBlock" class="help-block">This is the URL where your static site will live.</p>
+							<p id="destinationHostHelpBlock" class="help-block">This is the URL where your static site will live. When generating your static site, all links to the Origin URL will be replaced with the Destination URL.</p>
 						</td>
 					</tr>
 					<tr>
@@ -42,8 +42,8 @@
 							<label for="additional_urls"><?php echo __( 'Additional URLs', $this->slug );?></label>
 						</th>
 						<td>
-							<textarea class="widefat" name="additional_urls" id="additionalUrls" rows="5" cols="10"><?php echo esc_html( $this->additional_urls ) ?></textarea>
-							<p id="originHostHelpBlock" class="help-block">Simply Static will create a static copy of any page it can find a link to, starting at <?php echo $this->origin_scheme; ?>://<?php echo $this->origin_host; ?>. If you have other pages or files that you want to include that <em>aren't</em> linked to, add the path or URL here. Examples: <code>/secret-image.jpg</code> or <code><?php echo $this->origin_scheme; ?>://<?php echo $this->origin_host; ?>/hidden-page</code></p>
+							<textarea aria-describedby="additionalUrlsHelpBlock" class="widefat" name="additional_urls" id="additionalUrls" rows="5" cols="10"><?php echo esc_html( $this->additional_urls ) ?></textarea>
+							<p id="additionalUrlsHelpBlock" class="help-block">Simply Static will create a static copy of any page it can find a link to, starting at <?php echo $this->origin_scheme; ?>://<?php echo $this->origin_host; ?>. If you want to create static copies of pages or files that <em>aren't</em> linked to, add the URL here. Examples: <code><?php echo $this->origin_scheme; ?>://<?php echo $this->origin_host; ?>/hidden-page</code> or <code><?php echo $this->origin_scheme; ?>://<?php echo $this->origin_host; ?>/images/secret.jpg</code></p>
 						</td>
 					</tr>
 					<tr>
