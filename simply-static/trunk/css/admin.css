@@ -1,6 +1,3 @@
-
-
-
 #sistContainer {
 	margin-right: 310px;
 }
@@ -16,7 +13,6 @@
 	margin-right: -310px;
 	width: 290px;
 }
-
 
 /* Generate page */
 
@@ -34,7 +30,15 @@
 	padding: 3px 4px;
 }
 
-/* Forms */
+/* Options page */
+
+.tab-pane {
+	display: none;
+}
+
+.tab-pane.active {
+	display: block;
+}
 
 select:disabled, select.disabled {
 	border-color: rgba(222,222,222,.75);

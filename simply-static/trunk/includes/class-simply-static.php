@@ -72,8 +72,10 @@ class Simply_Static {
 
 			// Load the text domain for i18n
 			add_action( 'plugins_loaded', array( self::$instance, 'load_textdomain' ) );
-			// Enqueue admin styles and scripts
+			// Enqueue admin styles
 			add_action( 'admin_enqueue_scripts', array( self::$instance, 'enqueue_admin_styles' ) );
+			// Enqueue admin scripts
+			add_action( 'admin_enqueue_scripts', array( self::$instance, 'enqueue_admin_scripts' ) );
 			// Add the options page and menu item.
 			add_action( 'admin_menu', array( self::$instance, 'add_plugin_admin_menu' ), 2 );
 		}
@@ -130,11 +132,20 @@ class Simply_Static {
 
 	/**
 	 * Enqueue admin-specific style sheets for this plugin's admin pages only
-	 * @return    null    Return early if no settings page is registered.
+	 * @return null Return early if no settings page is registered.
 	 */
 	public function enqueue_admin_styles() {
 		// Plugin admin CSS. Tack on plugin version.
 		wp_enqueue_style( self::SLUG . '-admin-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'css/admin.css', array(), self::VERSION );
+	}
+
+	/**
+	 * Enqueue admin-specific javascript files for this plugin's admin pages only
+	 * @return null Return early if no settings page is registered.
+	 */
+	public function enqueue_admin_scripts() {
+		// Plugin admin CSS. Tack on plugin version.
+		wp_enqueue_script( self::SLUG . '-admin-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'js/admin.js', array(), self::VERSION );
 	}
 
 	/**
