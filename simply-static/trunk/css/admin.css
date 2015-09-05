@@ -32,12 +32,12 @@
 
 /* Options page */
 
-.tab-pane {
+.tab-pane, tr.delivery-method {
 	display: none;
 }
 
-.tab-pane.active {
-	display: block;
+.tab-pane.active, tr.delivery-method.active {
+	display: table-row;
 }
 
 select:disabled, select.disabled {

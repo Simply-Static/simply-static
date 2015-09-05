@@ -25,4 +25,16 @@ jQuery( document ).ready( function() {
     // pretend the user clicked on the active tab
     jQuery( '.nav-tab-active' ).click();
 
+    // -----------------------------------------------------------------------//
+
+    // delivery method selection:
+    jQuery( '#deliveryMethod' ).change(function() {
+        var selected = jQuery( this ).val();
+        jQuery( '.delivery-method' ).removeClass( 'active' );
+        jQuery( '.' + selected + '.delivery-method' ).addClass( 'active ');
+    });
+
+    // pretend the user selected a value
+    jQuery(' #deliveryMethod' ).change();
+
 });

@@ -39,33 +39,32 @@
 							</th>
 							<td>
 								<select id="destinationScheme" name="destination_scheme">
-									<option value="http" <?php if ( $this->destination_scheme == 'http' ) { echo 'selected="selected"'; } ?>>http://</option>
-									<option value="https" <?php if ( $this->destination_scheme == 'https' ) { echo 'selected="selected"'; } ?>>https://</option>
+									<option value="http" <?php sist_selected_if( $this->destination_scheme == 'http' ) ?>>http://</option>
+									<option value="https" <?php sist_selected_if( $this->destination_scheme == 'https' ) ?>>https://</option>
 								</select>
 								<input aria-describedby="destinationHostHelpBlock" type="text" id="destinationHost" name="destination_host" value="<?php echo esc_attr( $this->destination_host ) ?>" size="50" />
 								<p id="destinationHostHelpBlock" class="help-block"><?php _e( 'This is the URL where your static site will live. When generating your static site, all links to the Origin URL will be replaced with the Destination URL.', $this->slug ); ?></p>
 							</td>
 						</tr>
 						<tr>
-							<th>
-
-							</th>
+							<th><?php _e( 'Choose your destination:' ); ?></th>
 							<td>
-								<label>
-									<input name="generate_zip" id="generateZip" value="1" type="checkbox" <?php if ( $this->generate_zip == 1 ) { echo "checked"; } ?> />
-									<?php _e( 'Generate ZIP archive', $this->slug );?>
-								</label>
+								<select name="delivery_method" id="deliveryMethod">
+									<option value="zip" <?php sist_selected_if( $this->delivery_method == 'zip' ) ?>><?php _e('ZIP Archive'); ?></option>
+									<option value="local" <?php sist_selected_if( $this->delivery_method == 'local' ) ?>><?php _e('Local Directory'); ?></option>
+								</select>
 							</td>
 						</tr>
-						<tr>
-							<th>
-
-							</th>
+						<tr class="delivery-method zip">
+							<th></th>
 							<td>
-								<label>
-									<input name="retain_static_files" id="retainStaticFiles" value="1" type="checkbox" <?php if ( $this->retain_static_files == 1 ) { echo "checked"; } ?> />
-									<?php _e( 'Retain generated static files on server', $this->slug );?>
-								</label>
+								<p><?php _e("Here's some information about creating ZIP archives."); ?></p>
+							</td>
+						</tr>
+						<tr class="delivery-method local">
+							<th></th>
+							<td>
+								<p><?php _e("Here's some information about saving to a local directory."); ?></p>
 							</td>
 						</tr>
 						<tr>
@@ -90,7 +89,17 @@
 							</th>
 							<td>
 								<input aria-describedby="staticFilesDirHelpBlock" type="text" id="staticFilesDir" name="static_files_dir" value="<?php echo esc_attr( $this->static_files_dir ) ?>" size="50" />
-								<p id="staticFilesDirHelpBlock" class="help-block"><?php _e( 'Your static files (and ZIP archives, if generated) are saved to this directory.', $this->slug ); ?></p>
+								<p id="staticFilesDirHelpBlock" class="help-block"><?php _e( 'Your static files (and ZIP archives, if generated) are temporarily saved to this directory.', $this->slug ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th></th>
+							<td>
+								<label>
+									<input aria-describedby="deleteTempFilesHelpBlock" name="delete_temp_files" id="deleteTempFiles" value="1" type="checkbox" <?php if ( $this->delete_temp_files == '1' ) { echo "checked"; } ?> />
+									<?php _e( 'Delete temporary static files', $this->slug );?>
+								</label>
+								<p id="deleteTempFilesHelpBlock" class="help-block">Static files are temporarily saved to the directory above before being copied to their destination. These files can be deleted after the copy process, or you can keep them as a backup.</p>
 							</td>
 						</tr>
 						<tr>

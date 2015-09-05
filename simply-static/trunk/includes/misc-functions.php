@@ -26,3 +26,12 @@ function sist_get_origin_scheme() {
 function sist_get_origin_host() {
 	return untrailingslashit( preg_replace( "(^https?://)", "", home_url() ) );
 }
+
+
+/**
+ * Echo the selected value for an option tag if the statement is true.
+ * @return null
+ */
+function sist_selected_if( $statement ) {
+	echo ( $statement == true ? 'selected="selected"' : '' );
+}

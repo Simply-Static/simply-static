@@ -112,8 +112,8 @@ class Simply_Static {
 				->set( 'destination_host', '' )
 				->set( 'static_files_dir', trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' ) )
 				->set( 'additional_urls', '' )
-				->set( 'generate_zip', '1' )
-				->set( 'retain_static_files', '0' )
+				->set( 'delivery_method', 'zip' )
+				->set( 'delete_temp_files', '1' )
 				->save();
 		}
 	}
@@ -198,7 +198,7 @@ class Simply_Static {
 
 			$archive_dir = $archive_creator->get_archive_directory();
 			// TODO: archive_url could be a WP_Error
-			if ( $this->options->get( 'generate_zip' ) == '1' ) {
+			if ( $this->options->get( 'delivery_method' ) == 'zip' ) {
 				$archive_url = $archive_creator->create_zip();
 				$message = __( 'Archive created.', self::SLUG );
 				$message .= ' <a href="' . $archive_url . '">' . __( 'Download archive', self::SLUG ) . '</a>';
@@ -206,7 +206,7 @@ class Simply_Static {
 				$message = __( 'Static files created.', self::SLUG );
 			}
 
-			if ( $this->options->get( 'retain_static_files' ) != '1' ) {
+			if ( $this->options->get( 'delete_temp_files' ) == '1' ) {
 				$deleted_successfully = $archive_creator->delete_static_files();
 			}
 
@@ -242,8 +242,8 @@ class Simply_Static {
 			->assign( 'destination_host', $this->options->get( 'destination_host' ) )
 			->assign( 'static_files_dir', $this->options->get( 'static_files_dir' ) )
 			->assign( 'additional_urls', $this->options->get( 'additional_urls' ) )
-			->assign( 'generate_zip', $this->options->get( 'generate_zip' ) )
-			->assign( 'retain_static_files', $this->options->get( 'retain_static_files' ) )
+			->assign( 'delivery_method', $this->options->get( 'delivery_method' ) )
+			->assign( 'delete_temp_files', $this->options->get( 'delete_temp_files' ) )
 			->render();
 	}
 
@@ -257,8 +257,8 @@ class Simply_Static {
 			->set( 'destination_host', untrailingslashit( filter_input( INPUT_POST, 'destination_host', FILTER_SANITIZE_URL ) ) )
 			->set( 'static_files_dir', trailingslashit( filter_input( INPUT_POST, 'static_files_dir' ) ) )
 			->set( 'additional_urls', filter_input( INPUT_POST, 'additional_urls' ) )
-			->set( 'generate_zip', filter_input( INPUT_POST, 'generate_zip' ) )
-			->set( 'retain_static_files', filter_input( INPUT_POST, 'retain_static_files' ) )
+			->set( 'delivery_method', filter_input( INPUT_POST, 'delivery_method' ) )
+			->set( 'delete_temp_files', filter_input( INPUT_POST, 'delete_temp_files' ) )
 			->save();
 	}
 
