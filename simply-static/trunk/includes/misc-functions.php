@@ -35,3 +35,18 @@ function sist_get_origin_host() {
 function sist_selected_if( $statement ) {
 	echo ( $statement == true ? 'selected="selected"' : '' );
 }
+
+/**
+ * Truncate if a string exceeds a certain length (30 chars by default)
+ */
+function sist_truncate( $string, $length = 30, $omission = '...' ) {
+	return ( strlen( $string ) > $length + 3 ) ? ( substr( $string, 0, $length ) . $omission ) : $string;
+}
+
+
+/**
+ * Use trailingslashit unless the string is empty
+ */
+function sist_trailingslashit_unless_blank( $string ) {
+	return $string === '' ? $string : trailingslashit( $string );
+}

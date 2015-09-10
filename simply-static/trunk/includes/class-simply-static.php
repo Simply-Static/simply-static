@@ -110,9 +110,10 @@ class Simply_Static {
 				->set( 'version', self::VERSION )
 				->set( 'destination_scheme', '' )
 				->set( 'destination_host', '' )
-				->set( 'static_files_dir', trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' ) )
+				->set( 'temp_files_dir', trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' ) )
 				->set( 'additional_urls', '' )
 				->set( 'delivery_method', 'zip' )
+				->set( 'local_dir', '' )
 				->set( 'delete_temp_files', '1' )
 				->save();
 		}
@@ -192,18 +193,23 @@ class Simply_Static {
 				self::SLUG,
 				$this->options->get( 'destination_scheme' ),
 				$this->options->get( 'destination_host' ),
-				$this->options->get( 'static_files_dir' ),
+				$this->options->get( 'temp_files_dir' ),
 				$this->options->get( 'additional_urls' )
 			);
 
-			$archive_dir = $archive_creator->get_archive_directory();
 			// TODO: archive_url could be a WP_Error
 			if ( $this->options->get( 'delivery_method' ) == 'zip' ) {
+
 				$archive_url = $archive_creator->create_zip();
 				$message = __( 'Archive created.', self::SLUG );
 				$message .= ' <a href="' . $archive_url . '">' . __( 'Download archive', self::SLUG ) . '</a>';
-			} else {
-				$message = __( 'Static files created.', self::SLUG );
+
+			} elseif ( $this->options->get( 'delivery_method' ) == 'local' ) {
+
+				$local_dir = $this->options->get( 'local_dir' );
+				$copied_successfully = $archive_creator->copy_static_files( $local_dir );
+				$message = __( 'Static files copied to: ' . $local_dir, self::SLUG );
+
 			}
 
 			if ( $this->options->get( 'delete_temp_files' ) == '1' ) {
@@ -240,9 +246,10 @@ class Simply_Static {
 			->assign( 'origin_host', sist_get_origin_host() )
 			->assign( 'destination_scheme', $this->options->get( 'destination_scheme' ) )
 			->assign( 'destination_host', $this->options->get( 'destination_host' ) )
-			->assign( 'static_files_dir', $this->options->get( 'static_files_dir' ) )
+			->assign( 'temp_files_dir', $this->options->get( 'temp_files_dir' ) )
 			->assign( 'additional_urls', $this->options->get( 'additional_urls' ) )
 			->assign( 'delivery_method', $this->options->get( 'delivery_method' ) )
+			->assign( 'local_dir', $this->options->get( 'local_dir' ) )
 			->assign( 'delete_temp_files', $this->options->get( 'delete_temp_files' ) )
 			->render();
 	}
@@ -255,9 +262,10 @@ class Simply_Static {
 		$this->options
 			->set( 'destination_scheme', filter_input( INPUT_POST, 'destination_scheme' ) )
 			->set( 'destination_host', untrailingslashit( filter_input( INPUT_POST, 'destination_host', FILTER_SANITIZE_URL ) ) )
-			->set( 'static_files_dir', trailingslashit( filter_input( INPUT_POST, 'static_files_dir' ) ) )
+			->set( 'temp_files_dir', sist_trailingslashit_unless_blank( filter_input( INPUT_POST, 'temp_files_dir' ) ) )
 			->set( 'additional_urls', filter_input( INPUT_POST, 'additional_urls' ) )
 			->set( 'delivery_method', filter_input( INPUT_POST, 'delivery_method' ) )
+			->set( 'local_dir', sist_trailingslashit_unless_blank( filter_input( INPUT_POST, 'local_dir' ) ) )
 			->set( 'delete_temp_files', filter_input( INPUT_POST, 'delete_temp_files' ) )
 			->save();
 	}

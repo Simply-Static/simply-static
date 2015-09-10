@@ -45,7 +45,7 @@ class Simply_Static_Archive_Creator {
 	 * The directory where static files should be saved
 	 * @var string
 	 */
-	protected $static_files_dir;
+	protected $temp_files_dir;
 
 	/**
 	 * Additional urls to add to the archive
@@ -57,11 +57,11 @@ class Simply_Static_Archive_Creator {
 	 * Constructor
 	 * @param string $url URI resource
 	 */
-	public function __construct( $slug, $destination_scheme, $destination_host, $static_files_dir, $additional_urls ) {
+	public function __construct( $slug, $destination_scheme, $destination_host, $temp_files_dir, $additional_urls ) {
 		$this->slug = $slug;
 		$this->destination_scheme = $destination_scheme;
 		$this->destination_host = $destination_host;
-		$this->static_files_dir = $static_files_dir;
+		$this->temp_files_dir = $temp_files_dir;
 		$this->additional_urls = $additional_urls;
 
 		$this->generate_archive();
@@ -95,7 +95,7 @@ class Simply_Static_Archive_Creator {
 		// Create archive directory
 		$current_user = wp_get_current_user();
 		$archive_name = join( '-', array( $this->slug, $blog_id, time(), $current_user->user_login ) );
-		$this->archive_dir = trailingslashit( $this->static_files_dir . $archive_name );
+		$this->archive_dir = trailingslashit( $this->temp_files_dir . $archive_name );
 
 		error_log( $archive_name );
 		error_log( $this->archive_dir );
@@ -199,6 +199,25 @@ class Simply_Static_Archive_Creator {
 	}
 
 	/**
+	* Copy static files to a local directory.
+	* @return boolean $success Successfully moved everything?
+	*/
+	public function copy_static_files( $local_dir ) {
+		$directory_iterator = new RecursiveDirectoryIterator( $this->archive_dir, RecursiveDirectoryIterator::SKIP_DOTS );
+		$recursive_iterator = new RecursiveIteratorIterator( $directory_iterator, RecursiveIteratorIterator::SELF_FIRST );
+
+		foreach ( $recursive_iterator as $item ) {
+			$path = $local_dir . DIRECTORY_SEPARATOR . $recursive_iterator->getSubPathName();
+			$success = $item->isDir() ? mkdir( $path ) : copy( $item, $path );
+			if ( ! $success ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Delete generated static files
 	 * @param $archive_dir The archive directory path
 	 * @return boolean $success Successful in deleting everything?
@@ -208,8 +227,8 @@ class Simply_Static_Archive_Creator {
 		$recursive_iterator = new RecursiveIteratorIterator( $directory_iterator, RecursiveIteratorIterator::CHILD_FIRST );
 
 		// recurse through the entire directory and delete all files / subdirectories
-		foreach ( $recursive_iterator as $file ) {
-			$success = $file->isDir() ? rmdir( $file ) : unlink( $file );
+		foreach ( $recursive_iterator as $item ) {
+			$success = $item->isDir() ? rmdir( $item ) : unlink( $item );
 			if ( ! $success ) {
 				return false;
 			}
@@ -229,6 +248,7 @@ class Simply_Static_Archive_Creator {
 	 * @return array $files URLs for local files
 	 */
 	protected function get_list_of_local_files_by_url( array $urls ) {
+		// TODO: Rename this function and have it find local files by directory.
 		$files = array();
 
 		foreach ( $urls as $url ) {
