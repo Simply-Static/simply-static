@@ -48,7 +48,7 @@
 						</tr>
 						<tr>
 							<th>
-								<label for='deliveryMethod'><?php _e( "Choose your destination:", $this->slug ); ?></label></th>
+								<label for='deliveryMethod'><?php _e( "Delivery Method", $this->slug ); ?></label></th>
 							<td>
 								<select name='delivery_method' id='deliveryMethod'>
 									<option value='zip' <?php sist_selected_if( $this->delivery_method == 'zip' ) ?>><?php _e( "ZIP Archive", $this->slug ); ?></option>
@@ -59,13 +59,13 @@
 						<tr class='delivery-method zip'>
 							<th></th>
 							<td>
-								<p><?php _e( "Saving a ZIP archive is Simply Static's default destination. When you generate your static files you will be prompted to download the ZIP archive.", $this->slug ); ?></p>
+								<p><?php _e( "Saving your static files to a ZIP archive is Simply Static's default delivery method. After generating your static files you will be prompted to download the ZIP archive.", $this->slug ); ?></p>
 							</td>
 						</tr>
 						<tr class='delivery-method local'>
 							<th></th>
 							<td>
-								<p><?php _e( "Saving your files to a local directory is useful if you want to serve your static files from the same server as your WordPress installation. WordPress can live on a subdomain (e.g. wordpress.example.com) while your static files are served from your primary domain (e.g. www.example.com).", $this->slug ); ?></p>
+								<p><?php _e( "Saving your static files to a local directory is useful if you want to serve your static files from the same server as your WordPress installation. WordPress can live on a subdomain (e.g. wordpress.example.com) while your static files are served from your primary domain (e.g. www.example.com).", $this->slug ); ?></p>
 							</td>
 						</tr>
 						<tr class='delivery-method local'>
