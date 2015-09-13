@@ -63,16 +63,6 @@ class Simply_Static_Archive_Creator {
 		$this->destination_host = $destination_host;
 		$this->temp_files_dir = $temp_files_dir;
 		$this->additional_urls = $additional_urls;
-
-		$this->generate_archive();
-	}
-
-	/**
-	 * Get the path to the archive directory
-	 * @param string $archive_dir file path to archive directory
-	 */
-	public function get_archive_directory() {
-		return $this->archive_dir;
 	}
 
 	/**
@@ -85,9 +75,9 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * Create a static version of the site
-	 * @return string $archive_dir The archive directory
+	 * @return void
 	 */
-	public function generate_archive() {
+	public function create_archive() {
 		global $blog_id;
 		// TODO: Do ajax calls instead of just running forever and ever
 		set_time_limit(0);
@@ -96,9 +86,6 @@ class Simply_Static_Archive_Creator {
 		$current_user = wp_get_current_user();
 		$archive_name = join( '-', array( $this->slug, $blog_id, time(), $current_user->user_login ) );
 		$this->archive_dir = trailingslashit( $this->temp_files_dir . $archive_name );
-
-		error_log( $archive_name );
-		error_log( $this->archive_dir );
 
 		if ( ! file_exists( $this->archive_dir ) ) {
 			wp_mkdir_p( $this->archive_dir );
@@ -126,16 +113,15 @@ class Simply_Static_Archive_Creator {
 
 			$request = new Simply_Static_Url_Fetcher( $current_url );
 
-			// Not a 200 for the response code? Move on.
+			// If we get a WP_Error then somehow our request failed (e.g. space in URL)
 			// TODO: Keep a queue of failed urls too
-			if ( $request->get_response_code() != 200 ) {
+			if ( is_wp_error( $request->fetch() ) ) {
 				continue;
 			}
 
-			// No response body? Somehow our request failed
-			// (e.g. space in URL)
+			// Not a 200 for the response code? Move on.
 			// TODO: Keep a queue of failed urls too
-			if ( $request->get_response_body() == '' ) {
+			if ( $request->get_response_code() != 200 ) {
 				continue;
 			}
 
@@ -162,20 +148,18 @@ class Simply_Static_Archive_Creator {
 			$is_html = $request->is_html();
 			$this->save_url_to_file( $path, $content, $is_html );
 		}
-
-		return $this->archive_dir;
 	}
 
 	/**
 	 * Create a ZIP file using the archive directory
-	 * @return string $temporary_zip The path to the archive zip file
+	 * @return string|WP_Error $temporary_zip The path to the archive zip file
 	 */
 	public function create_zip() {
 		$temporary_zip = untrailingslashit( $this->archive_dir ) . '.tmp';
 		$zip_archive = new ZipArchive();
 
 		if ( $zip_archive->open( $temporary_zip, ZIPARCHIVE::CREATE ) !== true ) {
-			return new WP_Error( "Unable to create ZIP archive" );
+			return new WP_Error( 'create_zip_failed', __( 'Unable to create ZIP archive', $this->slug ) );
 		}
 
 		$iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $this->archive_dir ) );
@@ -184,7 +168,7 @@ class Simply_Static_Archive_Creator {
 
 			if ( $base_name != '.' && $base_name != '..' ) {
 				if ( ! $zip_archive->addFile( realpath( $file_name ), str_replace( $this->archive_dir, '', $file_name ) ) ) {
-					return new WP_Error( 'Could not add file: ' . $file_name );
+					return new WP_Error( 'cannot_add_file_to_zip', sprintf( __( "Could not add file: %s", $this->slug ), $file_name ) );
 				}
 			}
 		}
@@ -193,7 +177,7 @@ class Simply_Static_Archive_Creator {
 		$zip_file = untrailingslashit( $this->archive_dir ) . '.zip';
 		rename( $temporary_zip, $zip_file );
 
-		$archive_url = str_replace( ABSPATH, trailingslashit( home_url() ), $zip_file );
+		$archive_url = str_replace( plugin_dir_path( dirname( __FILE__ ) ), plugin_dir_url( dirname( __FILE__ ) ), $zip_file );
 
 		return $archive_url;
 	}
@@ -254,7 +238,7 @@ class Simply_Static_Archive_Creator {
 		foreach ( $urls as $url ) {
 
 			// replace url with directory path
-			$directory = str_replace( home_url('/'), ABSPATH, $url );
+			$directory = str_replace( home_url('/'), plugin_dir_path( dirname( __FILE__ ) ), $url );
 
 			// if this is a directory...
 			if ( is_dir($directory) ) {
@@ -266,7 +250,7 @@ class Simply_Static_Archive_Creator {
 						$path_info = pathinfo( $file_name );
 
 						if ( isset( $path_info['extension'] ) && ! in_array( $path_info['extension'], array( 'php', 'phtml', 'tpl' ) ) ) {
-							array_push( $files, home_url( str_replace( ABSPATH, '', $file_name ) ) );
+							array_push( $files, home_url( str_replace( plugin_dir_path( dirname( __FILE__ ) ), '', $file_name ) ) );
 						}
 					}
 				}

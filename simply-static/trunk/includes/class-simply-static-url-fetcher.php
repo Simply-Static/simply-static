@@ -34,13 +34,21 @@ class Simply_Static_Url_Fetcher {
 	 */
 	public function __construct( $url ) {
 		$this->url = filter_var( $url, FILTER_VALIDATE_URL );
+	}
+
+	/**
+	 * Fetch the URL and set the response. Return the WP_Error if we get one.
+	 * @return boolean|WP_Error
+	 */
+	public function fetch() {
 		$response = wp_remote_get( $this->url, array( 'timeout' => self::TIMEOUT ) );
 
 		if ( is_wp_error( $response ) ) {
-			$this->response = '';
+			return $response;
 		} else {
 			$this->response = $response;
 			$this->cleanup();
+			return true;
 		}
 	}
 

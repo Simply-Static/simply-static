@@ -196,13 +196,19 @@ class Simply_Static {
 				$this->options->get( 'temp_files_dir' ),
 				$this->options->get( 'additional_urls' )
 			);
+			$archive_creator->create_archive();
 
 			// TODO: archive_url could be a WP_Error
 			if ( $this->options->get( 'delivery_method' ) == 'zip' ) {
 
 				$archive_url = $archive_creator->create_zip();
-				$message = __( 'Archive created.', self::SLUG );
-				$message .= ' <a href="' . $archive_url . '">' . __( 'Download archive', self::SLUG ) . '</a>';
+				if ( is_wp_error( $archive_url ) ) {
+					$message = $archive_url->get_error_message();
+				} else {
+					$message = __( 'Archive created.', self::SLUG );
+					$message .= ' <a href="' . $archive_url . '">' . __( 'Download archive', self::SLUG ) . '</a>';
+				}
+
 
 			} elseif ( $this->options->get( 'delivery_method' ) == 'local' ) {
 

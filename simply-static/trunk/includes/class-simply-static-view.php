@@ -108,14 +108,13 @@ class Simply_Static_View {
 	/**
 	 * Renders the view script
 	 *
-	 * @throws WP_Error
-	 * @return Simply_Static_View
+	 * @return Simply_Static_View|WP_Error
 	 */
 	public function render() {
 		$layout = trailingslashit( $this->path ) . self::LAYOUT;
 
 		if ( ! is_readable( $this->template ) ) {
-			throw new WP_Error( "Can't find view template: " . $this->template );
+			return new WP_Error( 'invalid_template', sprintf( __( "Can't find view template: %s", $this->slug ), $this->template ) );
 		}
 
 		include $layout;
