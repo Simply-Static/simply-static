@@ -46,6 +46,13 @@ class Simply_Static_View {
 	 */
 	protected $template = null;
 
+
+	/**
+	 * Flashes are quick status messages displayed at the top of the page
+	 * @var array
+	 */
+	protected $flashes = [];
+
 	/**
 	 * Performs initialization of the absolute path for views
 	 */
@@ -106,6 +113,17 @@ class Simply_Static_View {
 	}
 
 	/**
+	 * Displays a message at the top of the page
+	 *
+	 * @param string type The type of message to be displayed
+	 * @param string $message The message to be displayed
+	 * @return void
+	 */
+	public function add_flash( $type, $message ) {
+		array_push( $this->flashes, array( 'type' => $type, 'message' => $message ) );
+	}
+
+	/**
 	 * Renders the view script
 	 *
 	 * @return Simply_Static_View|WP_Error
@@ -116,6 +134,11 @@ class Simply_Static_View {
 		if ( ! is_readable( $this->template ) ) {
 			return new WP_Error( 'invalid_template', sprintf( __( "Can't find view template: %s", $this->slug ), $this->template ) );
 		}
+
+		//$errors = Simply_Static::check_system_requirements();
+		// if ( ! empty( $errors ) ) {
+		//
+		// }
 
 		include $layout;
 

@@ -203,18 +203,26 @@ class Simply_Static {
 
 				$archive_url = $archive_creator->create_zip();
 				if ( is_wp_error( $archive_url ) ) {
-					$message = $archive_url->get_error_message();
+					$error = $archive_url->get_error_message();
+					$this->view->add_flash( 'error', $error );
 				} else {
 					$message = __( 'Archive created.', self::SLUG );
 					$message .= ' <a href="' . $archive_url . '">' . __( 'Download archive', self::SLUG ) . '</a>';
+					$this->view->add_flash( 'updated', $message );
 				}
-
 
 			} elseif ( $this->options->get( 'delivery_method' ) == 'local' ) {
 
 				$local_dir = $this->options->get( 'local_dir' );
-				$copied_successfully = $archive_creator->copy_static_files( $local_dir );
-				$message = __( 'Static files copied to: ' . $local_dir, self::SLUG );
+				$result = $archive_creator->copy_static_files( $local_dir );
+
+				if ( is_wp_error( $result ) ) {
+					$error = $result->get_error_message();
+					$this->view->add_flash( 'error', $error );
+				} else {
+					$message = __( 'Static files copied to: ' . $local_dir, self::SLUG );
+					$this->view->add_flash( 'updated', $message );
+				}
 
 			}
 
@@ -223,10 +231,7 @@ class Simply_Static {
 			}
 
 			$export_log = $archive_creator->get_export_log();
-
-			$this->view
-				->assign( 'export_log', $export_log )
-				->assign( 'message', $message );
+			$this->view->assign( 'export_log', $export_log );
 		}
 
 		$this->view
@@ -242,7 +247,7 @@ class Simply_Static {
 		if ( isset( $_POST['save'] ) ) {
 			$this->save_options();
 			$message = __( 'Settings saved.', self::SLUG );
-			$this->view->assign( 'message', $message );
+			$this->view->add_flash( 'updated', $message );
 		}
 
 		$this->view
@@ -286,5 +291,14 @@ class Simply_Static {
 			false,
 			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
 		);
+	}
+
+	public function check_system_requirements() {
+		$errors = [];
+		if ( ! is_writable( $this->temp_files_dir ) ) {
+			sprintf( __( 'Your temporary save directory is not writeable: %s' , $this->slug ), $this->temp_files_dir );
+		}
+
+		return $errors;
 	}
 }

@@ -184,17 +184,17 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	* Copy static files to a local directory.
-	* @return boolean $success Successfully moved everything?
+	* @return boolean|WP_Error
 	*/
 	public function copy_static_files( $local_dir ) {
 		$directory_iterator = new RecursiveDirectoryIterator( $this->archive_dir, RecursiveDirectoryIterator::SKIP_DOTS );
 		$recursive_iterator = new RecursiveIteratorIterator( $directory_iterator, RecursiveIteratorIterator::SELF_FIRST );
 
 		foreach ( $recursive_iterator as $item ) {
-			$path = $local_dir . DIRECTORY_SEPARATOR . $recursive_iterator->getSubPathName();
+			$path = $local_dir . $recursive_iterator->getSubPathName();
 			$success = $item->isDir() ? mkdir( $path ) : copy( $item, $path );
 			if ( ! $success ) {
-				return false;
+				return new WP_Error( 'cannot_create_file_or_dir', sprintf( __( "Could not create file or directory: %s", $this->slug ), $path ) );
 			}
 		}
 
@@ -204,7 +204,7 @@ class Simply_Static_Archive_Creator {
 	/**
 	 * Delete generated static files
 	 * @param $archive_dir The archive directory path
-	 * @return boolean $success Successful in deleting everything?
+	 * @return boolean|WP_Error
 	 */
 	public function delete_static_files() {
 		$directory_iterator = new RecursiveDirectoryIterator( $this->archive_dir, FilesystemIterator::SKIP_DOTS );
@@ -214,14 +214,17 @@ class Simply_Static_Archive_Creator {
 		foreach ( $recursive_iterator as $item ) {
 			$success = $item->isDir() ? rmdir( $item ) : unlink( $item );
 			if ( ! $success ) {
-				return false;
+				return new WP_Error( 'cannot_delete_file_or_dir', sprintf( __( "Could not delete temporary file or directory: %s", $this->slug ), $item ) );
 			}
 		}
 
 		// must make sure to delete the original directory at the end
 		$success = rmdir( $this->archive_dir );
+		if ( ! $success ) {
+			return new WP_Error( 'cannot_delete_file_or_dir', sprintf( __( "Could not delete temporary file or directory: %s", $this->slug ), $item ) );
+		}
 
-		return $success;
+		return true;
 	}
 
 	/**

@@ -4,13 +4,13 @@
  */
 ?>
 
-<?php if ( $this->message ) : ?>
-	<div class="updated fade">
+<?php foreach ( $this->flashes as $flash ) : ?>
+	<div class="<?php echo $flash['type']; ?>">
 		<p><strong>
-			<?php echo $this->message; ?>
+			<?php echo $flash['message']; ?>
 		</strong></p>
 	</div>
-<?php endif; ?>
+<?php endforeach; ?>
 
 <div class="wrap">
 	<div id="sistContainer">
