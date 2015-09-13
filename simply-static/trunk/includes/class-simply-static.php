@@ -70,6 +70,11 @@ class Simply_Static {
 			self::$instance->options = new Simply_Static_Options( self::SLUG );
 			self::$instance->view = new Simply_Static_View();
 
+			$errors = self::$instance->check_system_requirements();
+			foreach ( $errors as $error ) {
+				self::$instance->view->add_flash( 'error', $error );
+			}
+
 			// Load the text domain for i18n
 			add_action( 'plugins_loaded', array( self::$instance, 'load_textdomain' ) );
 			// Enqueue admin styles
@@ -188,6 +193,10 @@ class Simply_Static {
 	 * @return void
 	 */
 	public function display_generate_page() {
+		if ( ! empty( $this->check_system_requirements() ) ) {
+			$this->view->assign( 'system_requirements_check_failed', true );
+		}
+
 		if ( isset( $_POST['generate'] ) ) {
 			$archive_creator = new Simply_Static_Archive_Creator(
 				self::SLUG,
@@ -295,8 +304,32 @@ class Simply_Static {
 
 	public function check_system_requirements() {
 		$errors = [];
-		if ( ! is_writable( $this->temp_files_dir ) ) {
-			sprintf( __( 'Your temporary save directory is not writeable: %s' , $this->slug ), $this->temp_files_dir );
+
+		$temp_files_dir = $this->options->get( 'temp_files_dir' );
+		if ( ! is_writable( $temp_files_dir ) ) {
+			array_push( $errors, sprintf( __( 'Your temporary save directory is not writeable: %s', self::SLUG ), $temp_files_dir ) );
+		}
+
+		if ( ! strlen( get_option( 'permalink_structure' ) ) ) {
+			array_push( $errors, sprintf( __( "Your site does not have a permalink structure set. You can select one on <a href='%s'>the Permalink Settings page</a>.", self::SLUG ), admin_url( '/options-permalink.php' ) ) );
+		}
+
+		if ( $this->options->get( 'delivery_method' ) == 'zip' ) {
+			if ( ! extension_loaded('zip') ) {
+				array_push( $errors, __( "Your server does not have the PHP zip extension enabled. Please visit <a href='http://www.php.net/manual/en/book.zip.php'>the PHP zip extension page</a> for more information on how to enable it.", self::SLUG ) );
+			}
+		}
+
+		if ( $this->options->get( 'delivery_method' ) == 'local' ) {
+			$local_dir = $this->options->get( 'local_dir' );
+
+			if ( file_exists( $local_dir ) ) {
+				if ( ! is_writeable( $local_dir ) ) {
+					array_push( $errors, sprintf( __( 'Your local files directory is not writeable: %s', self::SLUG ), $local_dir ) );
+				}
+			} else {
+				array_push( $errors, sprintf( __( 'Your local files directory does not exist: %s', self::SLUG ), $local_dir ) );
+			}
 		}
 
 		return $errors;

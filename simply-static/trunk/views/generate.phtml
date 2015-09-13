@@ -6,28 +6,28 @@
 
 <h2><?php _e( 'Simply Static', $this->slug ); ?></h2>
 
-<?php if ( is_array( $this->export_log ) && count( $this->export_log ) ): ?>
-<h3>Export Log</h3>
-<div class="export-log">
-	<pre><?php echo implode( "\n", $this->export_log ) ?></pre>
-</div>
-<?php endif ?>
+<div class="wrap">
 
-<div class="postbox-container">
-	<div class="metabox-holder">
-		<div class="meta-box-sortables ui-sortable">
-
-			<form id="generate" method="post" action="">
-
-				<? // TODO: Disable generate button if certain conditions aren't met. ?>
-				<? // e.g. no url structure, no destination set, etc. ?>
-				<p class="submit">
-					<?php wp_nonce_field( $this->slug ) ?>
-					<input class="button-primary" type="submit" name="generate" value="Generate" />
-				</p>
-
-			</form>
-
+	<?php if ( is_array( $this->export_log ) && count( $this->export_log ) ): ?>
+		<h3><?php _e( 'Export Log', $this->slug ); ?></h3>
+		<div class="export-log">
+			<pre><?php echo implode( "\n", $this->export_log ) ?></pre>
 		</div>
-	</div>
+	<?php endif ?>
+
+	<form id="generate" method="post" action="">
+
+		<?php if ( $this->system_requirements_check_failed ) : ?>
+			<p><?php _e( "Uh oh, we've found an issue that prevents us from creating a static copy of your site.", $this->slug ); ?></p>
+		<?php else : ?>
+			<p><?php _e( "Press the Generate button below to create a static copy of your site.", $this->slug ); ?></p>
+		<?php endif; ?>
+
+		<p class="submit">
+			<?php wp_nonce_field( $this->slug ) ?>
+			<input class="button-primary" type="submit" name="generate" value="Generate" <?php if ( $this->system_requirements_check_failed ) { echo 'disabled=disabled'; } ?> />
+		</p>
+
+	</form>
+
 </div>

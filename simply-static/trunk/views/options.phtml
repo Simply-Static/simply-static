@@ -13,8 +13,8 @@
 			<?php wp_nonce_field( $this->slug ) ?>
 
 			<h2 id='sistTabs' class='nav-tab-wrapper'>
-				<a class='nav-tab' id='general-tab' href='#tab-general'>General</a>
-				<a class='nav-tab' id='advanced-tab' href='#tab-advanced'>Advanced</a>
+				<a class='nav-tab' id='general-tab' href='#tab-general'><?php _e( 'General', $this->slug ); ?></a>
+				<a class='nav-tab' id='advanced-tab' href='#tab-advanced'><?php _e( 'Advanced', $this->slug ); ?></a>
 			</h2>
 
 			<div id='general' class='tab-pane'>
@@ -96,11 +96,11 @@
 					<tbody>
 						<tr>
 							<th>
-								<label for='staticFilesDir'><?php _e( "Static Files Directory", $this->slug );?></label>
+								<label for='tempFilesDir'><?php _e( "Temporary Files Directory", $this->slug );?></label>
 							</th>
 							<td>
-								<input aria-describedby='staticFilesDirHelpBlock' type='text' id='staticFilesDir' name='temp_files_dir' value='<?php echo esc_attr( $this->temp_files_dir ) ?>' class='widefat' />
-								<p id='staticFilesDirHelpBlock' class='help-block'><?php _e( "Your static files (and ZIP archives, if generated) are temporarily saved to this directory.", $this->slug ); ?></p>
+								<input aria-describedby='tempFilesDirHelpBlock' type='text' id='tempFilesDir' name='temp_files_dir' value='<?php echo esc_attr( $this->temp_files_dir ) ?>' class='widefat' />
+								<p id='tempFilesDirHelpBlock' class='help-block'><?php _e( "Your static files (and ZIP archives, if generated) are temporarily saved to this directory.", $this->slug ); ?></p>
 							</td>
 						</tr>
 						<tr>
@@ -108,7 +108,7 @@
 							<td>
 								<label>
 									<input aria-describedby='deleteTempFilesHelpBlock' name='delete_temp_files' id='deleteTempFiles' value='1' type='checkbox' <?php if ( $this->delete_temp_files == '1' ) { echo 'checked'; } ?> />
-									<?php _e( "Delete temporary static files", $this->slug ); ?>
+									<?php _e( "Delete temporary files", $this->slug ); ?>
 								</label>
 								<p id='deleteTempFilesHelpBlock' class='help-block'>
 									<?php _e( "Static files are temporarily saved to the directory above before being copied to their destination. These files can be deleted after the copy process, or you can keep them as a backup.", $this->slug ); ?>
