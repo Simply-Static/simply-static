@@ -82,7 +82,7 @@
 							<th></th>
 							<td>
 								<p class='submit'>
-									<input class='button-primary' type='submit' name='save' value='<?php _e( "Save Changes", $this->slug );?>' />
+									<input class='button button-primary' type='submit' name='save' value='<?php _e( "Save Changes", $this->slug );?>' />
 								</p>
 							</td>
 						</tr>
@@ -101,7 +101,7 @@
 							<td>
 								<?php $example_temp_files_dir = trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' );?>
 								<input aria-describedby='tempFilesDirHelpBlock' type='text' id='tempFilesDir' name='temp_files_dir' value='<?php echo esc_attr( $this->temp_files_dir ) ?>' placeholder='<?php echo $example_temp_files_dir; ?>'class='widefat' />
-								<p id='tempFilesDirHelpBlock' class='help-block'><?php _e( "Your static files (and ZIP archives, if generated) are temporarily saved to this directory.", $this->slug ); ?></p>
+								<p id='tempFilesDirHelpBlock' class='help-block'><?php _e( "Your static files (and ZIP archives, if generated) are temporarily saved to this directory. This directory must exist and be writeable.", $this->slug ); ?></p>
 							</td>
 						</tr>
 						<tr>
@@ -134,7 +134,7 @@
 							<th></th>
 							<td>
 								<p class='submit'>
-									<input class='button-primary' type='submit' name='save' value='<?php _e( "Save Changes", $this->slug );?>' />
+									<input class='button button-primary' type='submit' name='save' value='<?php _e( "Save Changes", $this->slug );?>' />
 								</p>
 							</td>
 						</tr>

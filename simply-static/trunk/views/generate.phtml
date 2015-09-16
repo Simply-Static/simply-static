@@ -20,12 +20,12 @@
 		<?php if ( $this->system_requirements_check_failed ) : ?>
 			<p><?php _e( "Uh oh, we've found an issue that prevents us from creating a static copy of your site.", $this->slug ); ?></p>
 		<?php else : ?>
-			<p><?php _e( "Press the Generate button below to create a static copy of your site.", $this->slug ); ?></p>
+			<p><?php _e( "Press the button below to create a static copy of your site.", $this->slug ); ?></p>
 		<?php endif; ?>
 
 		<p class="submit">
 			<?php wp_nonce_field( $this->slug ) ?>
-			<input class="button-primary" type="submit" name="generate" value="Generate" <?php if ( $this->system_requirements_check_failed ) { echo 'disabled=disabled'; } ?> />
+			<input class="button button-primary button-hero" type="submit" name="generate" value="Generate Static Files" <?php if ( $this->system_requirements_check_failed ) { echo 'disabled=disabled'; } ?> />
 		</p>
 
 	</form>

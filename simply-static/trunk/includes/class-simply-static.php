@@ -217,8 +217,8 @@ class Simply_Static {
 					$error = $archive_url->get_error_message();
 					$this->view->add_flash( 'error', $error );
 				} else {
-					$message = __( 'Archive created.', self::SLUG );
-					$message .= ' <a href="' . $archive_url . '">' . __( 'Download archive', self::SLUG ) . '</a>';
+					$message = __( 'ZIP archive created: ', self::SLUG );
+					$message .= ' <a href="' . $archive_url . '">' . __( 'Click here to download', self::SLUG ) . '</a>';
 					$this->view->add_flash( 'updated', $message );
 				}
 
