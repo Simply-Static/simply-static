@@ -73,8 +73,8 @@
 								<label for='local_dir'><?php _e( "Local Directory", $this->slug );?></label>
 							</th>
 							<td>
-								<?php $example_dir = plugin_dir_path( dirname( __FILE__ ) ); ?>
-								<input aria-describedby='localDirHelpBlock' type='text' id='localDir' name='local_dir' value='<?php echo esc_attr( $this->local_dir ) ?>' placeholder='<?php echo sist_truncate( $example_dir ); ?>' class='widefat' />
+								<?php $example_local_dir = plugin_dir_path( dirname( __FILE__ ) ); ?>
+								<input aria-describedby='localDirHelpBlock' type='text' id='localDir' name='local_dir' value='<?php echo esc_attr( $this->local_dir ) ?>' placeholder='<?php echo $example_local_dir; ?>' class='widefat' />
 								<p id='localDirHelpBlock' class='help-block'><?php _e( "This is the directory where your static files will be saved. The directory must exist and be writeable by the webserver.", $this->slug ); ?></p>
 							</td>
 						</tr>
@@ -99,7 +99,8 @@
 								<label for='tempFilesDir'><?php _e( "Temporary Files Directory", $this->slug );?></label>
 							</th>
 							<td>
-								<input aria-describedby='tempFilesDirHelpBlock' type='text' id='tempFilesDir' name='temp_files_dir' value='<?php echo esc_attr( $this->temp_files_dir ) ?>' class='widefat' />
+								<?php $example_temp_files_dir = trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' );?>
+								<input aria-describedby='tempFilesDirHelpBlock' type='text' id='tempFilesDir' name='temp_files_dir' value='<?php echo esc_attr( $this->temp_files_dir ) ?>' placeholder='<?php echo $example_temp_files_dir; ?>'class='widefat' />
 								<p id='tempFilesDirHelpBlock' class='help-block'><?php _e( "Your static files (and ZIP archives, if generated) are temporarily saved to this directory.", $this->slug ); ?></p>
 							</td>
 						</tr>

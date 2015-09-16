@@ -71,8 +71,10 @@ class Simply_Static {
 			self::$instance->view = new Simply_Static_View();
 
 			$errors = self::$instance->check_system_requirements();
-			foreach ( $errors as $error ) {
-				self::$instance->view->add_flash( 'error', $error );
+			foreach ( $errors as $field ) {
+				foreach ( $field as $error ) {
+					self::$instance->view->add_flash( 'error', $error );
+				}
 			}
 
 			// Load the text domain for i18n
@@ -113,8 +115,8 @@ class Simply_Static {
 		if ( null === $this->options->get( 'version' ) ) {
 			$this->options
 				->set( 'version', self::VERSION )
-				->set( 'destination_scheme', '' )
-				->set( 'destination_host', '' )
+				->set( 'destination_scheme', sist_get_origin_scheme() )
+				->set( 'destination_host', sist_get_origin_host() )
 				->set( 'temp_files_dir', trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' ) )
 				->set( 'additional_urls', '' )
 				->set( 'delivery_method', 'zip' )
@@ -305,30 +307,48 @@ class Simply_Static {
 	public function check_system_requirements() {
 		$errors = [];
 
-		$temp_files_dir = $this->options->get( 'temp_files_dir' );
-		if ( ! is_writable( $temp_files_dir ) ) {
-			array_push( $errors, sprintf( __( 'Your temporary save directory is not writeable: %s', self::SLUG ), $temp_files_dir ) );
+		$destination_host = $this->options->get( 'destination_host' );
+		if ( strlen( $destination_host ) === 0 ) {
+			$errors['destination_host'][] = __( 'Destination URL cannot be blank', self::SLUG );
 		}
 
-		if ( ! strlen( get_option( 'permalink_structure' ) ) ) {
-			array_push( $errors, sprintf( __( "Your site does not have a permalink structure set. You can select one on <a href='%s'>the Permalink Settings page</a>.", self::SLUG ), admin_url( '/options-permalink.php' ) ) );
+		$temp_files_dir = $this->options->get( 'temp_files_dir' );
+		if ( strlen( $temp_files_dir ) === 0 ) {
+			$errors['temp_files_dir'][] = __( 'Temporary Files Directory cannot be blank', self::SLUG );
+		} else {
+			if ( file_exists( $temp_files_dir ) ) {
+				if ( ! is_writeable( $temp_files_dir ) ) {
+					$errors['delivery_method'][] = sprintf( __( 'Temporary Files Directory is not writeable: %s', self::SLUG ), $temp_files_dir );
+				}
+			} else {
+				$errors['delivery_method'][] = sprintf( __( 'Temporary Files Directory does not exist: %s', self::SLUG ), $temp_files_dir );
+			}
+		}
+
+
+		if ( strlen( get_option( 'permalink_structure' ) ) === 0 ) {
+			$errors['permalink_structure'][] = sprintf( __( "Your site does not have a permalink structure set. You can select one on <a href='%s'>the Permalink Settings page</a>.", self::SLUG ), admin_url( '/options-permalink.php' ) );
 		}
 
 		if ( $this->options->get( 'delivery_method' ) == 'zip' ) {
 			if ( ! extension_loaded('zip') ) {
-				array_push( $errors, __( "Your server does not have the PHP zip extension enabled. Please visit <a href='http://www.php.net/manual/en/book.zip.php'>the PHP zip extension page</a> for more information on how to enable it.", self::SLUG ) );
+				$errors['delivery_method'][] = __( "Your server does not have the PHP zip extension enabled. Please visit <a href='http://www.php.net/manual/en/book.zip.php'>the PHP zip extension page</a> for more information on how to enable it.", self::SLUG );
 			}
 		}
 
 		if ( $this->options->get( 'delivery_method' ) == 'local' ) {
 			$local_dir = $this->options->get( 'local_dir' );
 
-			if ( file_exists( $local_dir ) ) {
-				if ( ! is_writeable( $local_dir ) ) {
-					array_push( $errors, sprintf( __( 'Your local files directory is not writeable: %s', self::SLUG ), $local_dir ) );
-				}
+			if ( strlen( $local_dir ) === 0 ) {
+				$errors['delivery_method'][] = __( 'Local Directory cannot be blank', self::SLUG );
 			} else {
-				array_push( $errors, sprintf( __( 'Your local files directory does not exist: %s', self::SLUG ), $local_dir ) );
+				if ( file_exists( $local_dir ) ) {
+					if ( ! is_writeable( $local_dir ) ) {
+						$errors['delivery_method'][] = sprintf( __( 'Local Directory is not writeable: %s', self::SLUG ), $local_dir );
+					}
+				} else {
+					$errors['delivery_method'][] = sprintf( __( 'Local Directory does not exist: %s', self::SLUG ), $local_dir );
+				}
 			}
 		}
 
