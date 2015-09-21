@@ -1,7 +1,8 @@
 === Simply Static ===
 Contributors: codeofconduct
+Donate link: https://codeofconduct.co/
 Tags: simply static, static, html, static site, performance, fast, optimization, availability, scaling, scalability, cdn, security, secure, zip
-Requires at least: 3.0.1
+Requires at least: 3.8
 Tested up to: 4.3
 Stable tag: 1.0.0
 License: GPLv2 or later
@@ -11,9 +12,9 @@ Create a static copy of your Wordpress site that you can serve on your favorite 
 
 == Description ==
 
-Do you love working with WordPress but wish you didn't have to be constantly vigilant about keeping it secure? What if, with a little bit of initial setup, you could make your WordPress installation virtually impervious to hackers and, as an added bonus, also make your site incredibly fast? Meet Simply Static.
+Do you love working with WordPress but wish it was easier to keep your site safe from hackers? What if you could set up your site to protect it from hackers and, as an added bonus, also make it load faster? Meet Simply Static.
 
-Simply Static creates a static copy of your WordPress site. Keep your WordPress installation hidden from the public and publish your static site to your favorite web server. And since your static site is just a collection of files with no server-side code or database, it runs incredibly fast and prevents most forms of hacking.
+Simply Static creates a static copy of your WordPress site. Keep your WordPress installation private and publish your static site for everyone else. And your static site will be incredibly fast since it's just collection of files with no server-side code or database to slow it down.
 
 == Installation ==
 
@@ -51,9 +52,9 @@ In the future we'll add more ways to transfer your files to other servers, such 
 
 = Will this plugin interfere with other plugins? =
 
-Simply Static's output is just a collection of static files: HTML, CSS, JS, images, etc. Anything that is publicly accessible and would require PHP in order to function will not work. That includes, but is not limited to: blog post comments, contact forms, forums, membership areas, and eCommerce.
+Simply Static's output is just a collection of static files: HTML, CSS, JS, images, etc. Any functionality that would require PHP in order to function will not work. That includes, but is not limited to: blog post comments, contact forms, forums, membership areas, and eCommerce.
 
-Note that you can achieve some of this functionality by using plugins that interact with third-party services. For example, for blog post comments you could use [Disqus](https://wordpress.org/plugins/disqus-comment-system/) and for forms you could use [Wufoo's plugin](https://wordpress.org/plugins/wufoo-shortcode/).
+Note that you can achieve some of this functionality by using plugins that interact with third-party services. For example, for blog post comments you could use [Disqus](https://wordpress.org/plugins/disqus-comment-system/) and for forms you could use [Wufoo](https://wordpress.org/plugins/wufoo-shortcode/).
 
 = How is Simply Static different from cache plugins? =
 
@@ -63,14 +64,15 @@ Simply Static creates a copy of your WordPress site that is intended to be used 
 
 == Screenshots ==
 
-1. This screen shot description corresponds to screenshot-1.(png|jpg|jpeg|gif). Note that the screenshot is taken from
-the /assets directory or the directory that contains the stable readme.txt (tags or trunk). Screenshots in the /assets
-directory take precedence. For example, `/assets/screenshot-1.png` would win over `/tags/4.3/screenshot-1.png`
-(or jpg, jpeg, gif).
-2. This is the second screen shot
+1. The Simply Static General Settings page. Set your Origin URL (for your WordPress installation), your Destination URL (for your static site), choose your Delivery Method, and you're ready to generate your static site.
+2. This is what the Simply Static Generate page looks like after you've generated your static files. We'll show you exactly which files we made a static copy of.
 
 == Changelog ==
 
 = 1.0.0 =
 
 * Initial release
+
+== Upgrade Notice ==
+
+n/a
