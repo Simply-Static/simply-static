@@ -198,7 +198,7 @@ class Simply_Static {
 	 * @return void
 	 */
 	public function display_generate_page() {
-		if ( ! empty( $this->check_system_requirements() ) ) {
+		if ( $this->check_system_requirements() ) {
 			$this->view->assign( 'system_requirements_check_failed', true );
 		}
 
