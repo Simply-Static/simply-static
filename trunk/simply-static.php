@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Simply Static
  * Plugin URI:        http://simplystatic.com
- * Description:       Produces a static HTML version of your Wordpress install and adjusts URLs accordingly.
+ * Description:       Produces a static HTML version of your WordPress install and adjusts URLs accordingly.
  * Version:           1.0.0
  * Author:            Code of Conduct
  * Author URI:        http://codeofconduct.co/

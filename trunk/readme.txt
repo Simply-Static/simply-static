@@ -8,7 +8,7 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Create a static copy of your Wordpress site that you can serve on your favorite web server.
+Create a static copy of your WordPress site that you can serve on your favorite web server.
 
 == Description ==
 
