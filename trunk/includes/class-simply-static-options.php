@@ -68,14 +68,4 @@ class Simply_Static_Options {
 	public function save() {
 		return update_option( $this->option_key, $this->options );
 	}
-
-	/**
-	 * Deletes the internal options data from the wp_options table.
-	 * This method is intended to be used as part of the uninstall process.
-	 *
-	 * @return boolean
-	 */
-	public function delete() {
-		return delete_option( $this->option_key );
-	}
 }
