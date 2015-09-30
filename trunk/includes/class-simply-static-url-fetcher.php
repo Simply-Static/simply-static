@@ -120,14 +120,9 @@ class Simply_Static_Url_Fetcher {
 	 * @param string $origin_url Base URL of site. Used to extract URLs that relate only to the current site.
 	 * @return array
 	 */
-	public function extract_all_urls( $origin_url ) {
-		$all_urls = array();
-
-		if ($this->is_html() && preg_match_all( '/' . str_replace( '/', '\/', $origin_url ) . '[^"\'#\? ]+/i', $this->response['body'], $matches ) ) {
-			$all_urls = array_unique( $matches[0] );
-		}
-
-		return $all_urls;
+	public function extract_urls( $origin_url ) {
+		$extractor = new Simply_Static_Url_Extractor( $this->response['body'], $origin_url );
+		return $extractor->extract_urls();
 	}
 
 	/**

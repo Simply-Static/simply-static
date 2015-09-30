@@ -127,7 +127,7 @@ class Simply_Static_Archive_Creator {
 			$this->export_log[] = $current_url;
 
 			// Fetch all URLs from the page and add them to the queue...
-			$urls = $request->extract_all_urls( $origin_url );
+			$urls = $request->extract_urls( $origin_url );
 			foreach ( $urls as $url ) {
 				// ...assuming they're not a URL we've already processed
 				// and they're not the same as the URL we got them from,

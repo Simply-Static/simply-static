@@ -133,6 +133,7 @@ class Simply_Static {
 	private function includes() {
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-options.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-view.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-extractor.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-fetcher.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-archive-creator.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/misc-functions.php';
