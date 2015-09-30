@@ -307,6 +307,10 @@ class Simply_Static {
 		);
 	}
 
+	/**
+	 * Loads the plugin language files
+	 * @return array $errors associative array containing errored field names and an array of error messages
+	 */
 	public function check_system_requirements() {
 		$errors = array();
 

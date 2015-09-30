@@ -96,7 +96,6 @@ class Simply_Static_Archive_Creator {
 		$destination_url = $this->destination_scheme . '://' . $this->destination_host;
 		$urls_queue = array_unique( array_merge(
 			array( trailingslashit( $origin_url ) ),
-			$this->get_list_of_local_files_by_url( array( get_template_directory_uri() ) ),
 			// using preg_split to intelligently break at newlines
 			// see: http://stackoverflow.com/questions/1483497/how-to-put-string-in-array-split-by-new-line
 			preg_split( "/\r\n|\n|\r/", $this->additional_urls )
@@ -225,44 +224,6 @@ class Simply_Static_Archive_Creator {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Given a URL, convert it to a local directory, recursively scan that
-	 * directory for additional files, and then return a list of those files
-	 * converted back to URLs.
-	 * @param array $urls URLs to recursively scan
-	 * @return array $files URLs for local files
-	 */
-	protected function get_list_of_local_files_by_url( array $urls ) {
-		// TODO: Rename this function and have it find local files by directory.
-		$files = array();
-
-		foreach ( $urls as $url ) {
-
-			// replace url with directory path
-			$directory = str_replace( home_url('/'), plugin_dir_path( dirname( __FILE__ ) ), $url );
-
-			// if this is a directory...
-			if ( is_dir($directory) ) {
-				// recursively iterate through it and add all sub-dirs/files
-				$iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $directory ) );
-
-				foreach ( $iterator as $file_name => $file_object ) {
-					if ( is_file( $file_name ) ) {
-						$path_info = pathinfo( $file_name );
-
-						if ( isset( $path_info['extension'] ) && ! in_array( $path_info['extension'], array( 'php', 'phtml', 'tpl' ) ) ) {
-							array_push( $files, home_url( str_replace( plugin_dir_path( dirname( __FILE__ ) ), '', $file_name ) ) );
-						}
-					}
-				}
-			} else { // not a directory, so just add the url
-				array_push( $files, $url );
-			}
-		}
-
-		return $files;
 	}
 
 	/**
