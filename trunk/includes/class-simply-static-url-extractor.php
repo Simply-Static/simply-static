@@ -14,99 +14,65 @@ class Simply_Static_Url_Extractor {
     /** @const */
 	protected static $match_elements = array(
         // HTML
-        array('element'=>'a',       'attribute'=>'href'),       // 2.0
-        array('element'=>'a',       'attribute'=>'urn'),        // 2.0
-        array('element'=>'base',    'attribute'=>'href'),       // 2.0
-        array('element'=>'form',    'attribute'=>'action'),     // 2.0
-        array('element'=>'img',     'attribute'=>'src'),        // 2.0
-        array('element'=>'link',    'attribute'=>'href'),       // 2.0
+        'a'              => array( 'href', 'urn' ),
+        'base'           => array( 'href' ),
+        'form'           => array( 'action', 'data' ),
+        'img'            => array( 'src', 'usemap', 'longdesc' ),
+        'link'           => array( 'href' ),
 
-        array('element'=>'applet',  'attribute'=>'code'),       // 3.2
-        array('element'=>'applet',  'attribute'=>'codebase'),   // 3.2
-        array('element'=>'area',    'attribute'=>'href'),       // 3.2
-        array('element'=>'body',    'attribute'=>'background'), // 3.2
-        array('element'=>'img',     'attribute'=>'usemap'),     // 3.2
-        array('element'=>'input',   'attribute'=>'src'),        // 3.2
+        'applet'         => array( 'code', 'codebase', 'archive', 'object' ),
+        'area'           => array( 'href' ),
+        'body'           => array( 'background', 'credits', 'instructions', 'logo' ),
+        'input'          => array( 'src', 'usemap', 'dynsrc', 'lowsrc', 'action', 'formaction' ),
 
-        array('element'=>'applet',  'attribute'=>'archive'),    // 4.01
-        array('element'=>'applet',  'attribute'=>'object'),     // 4.01
-        array('element'=>'blockquote','attribute'=>'cite'),     // 4.01
-        array('element'=>'del',     'attribute'=>'cite'),       // 4.01
-        array('element'=>'frame',   'attribute'=>'longdesc'),   // 4.01
-        array('element'=>'frame',   'attribute'=>'src'),        // 4.01
-        array('element'=>'head',    'attribute'=>'profile'),    // 4.01
-        array('element'=>'iframe',  'attribute'=>'longdesc'),   // 4.01
-        array('element'=>'iframe',  'attribute'=>'src'),        // 4.01
-        array('element'=>'img',     'attribute'=>'longdesc'),   // 4.01
-        array('element'=>'input',   'attribute'=>'usemap'),     // 4.01
-        array('element'=>'ins',     'attribute'=>'cite'),       // 4.01
-        array('element'=>'object',  'attribute'=>'archive'),    // 4.01
-        array('element'=>'object',  'attribute'=>'classid'),    // 4.01
-        array('element'=>'object',  'attribute'=>'codebase'),   // 4.01
-        array('element'=>'object',  'attribute'=>'data'),       // 4.01
-        array('element'=>'object',  'attribute'=>'usemap'),     // 4.01
-        array('element'=>'q',       'attribute'=>'cite'),       // 4.01
-        array('element'=>'script',  'attribute'=>'src'),        // 4.01
+        'blockquote'     => array( 'cite' ),
+        'del'            => array( 'cite' ),
+        'frame'          => array( 'longdesc', 'src' ),
+        'head'           => array( 'profile' ),
+        'iframe'         => array( 'longdesc', 'src' ),
+        'ins'            => array( 'cite' ),
+        'object'         => array( 'archive', 'classid', 'codebase', 'data', 'usemap' ),
+        'q'              => array( 'cite' ),
+        'script'         => array( 'src' ),
 
-        array('element'=>'audio',   'attribute'=>'src'),        // 5.0
-        array('element'=>'command', 'attribute'=>'icon'),       // 5.0
-        array('element'=>'embed',   'attribute'=>'src'),        // 5.0
-        array('element'=>'event-source','attribute'=>'src'),    // 5.0
-        array('element'=>'html',    'attribute'=>'manifest'),   // 5.0
-        array('element'=>'source',  'attribute'=>'src'),        // 5.0
-        array('element'=>'video',   'attribute'=>'src'),        // 5.0
-        array('element'=>'video',   'attribute'=>'poster'),     // 5.0
+        'audio'          => array( 'src' ),
+        'command'        => array( 'icon' ),
+        'embed'          => array( 'src', 'code', 'pluginspage' ),
+        'event-source'   => array( 'src' ),
+        'html'           => array( 'manifest', 'background', 'xmlns' ),
+        'source'         => array( 'src' ),
+        'video'          => array( 'src', 'poster' ),
 
-        array('element'=>'bgsound', 'attribute'=>'src'),        // Extension
-        array('element'=>'body',    'attribute'=>'credits'),    // Extension
-        array('element'=>'body',    'attribute'=>'instructions'),//Extension
-        array('element'=>'body',    'attribute'=>'logo'),       // Extension
-        array('element'=>'div',     'attribute'=>'href'),       // Extension
-        array('element'=>'div',     'attribute'=>'src'),        // Extension
-        array('element'=>'embed',   'attribute'=>'code'),       // Extension
-        array('element'=>'embed',   'attribute'=>'pluginspage'),// Extension
-        array('element'=>'html',    'attribute'=>'background'), // Extension
-        array('element'=>'ilayer',  'attribute'=>'src'),        // Extension
-        array('element'=>'img',     'attribute'=>'dynsrc'),     // Extension
-        array('element'=>'img',     'attribute'=>'lowsrc'),     // Extension
-        array('element'=>'input',   'attribute'=>'dynsrc'),     // Extension
-        array('element'=>'input',   'attribute'=>'lowsrc'),     // Extension
-        array('element'=>'table',   'attribute'=>'background'), // Extension
-        array('element'=>'td',      'attribute'=>'background'), // Extension
-        array('element'=>'th',      'attribute'=>'background'), // Extension
-        array('element'=>'layer',   'attribute'=>'src'),        // Extension
-        array('element'=>'xml',     'attribute'=>'src'),        // Extension
+        'bgsound'        => array( 'src' ),
+        'div'            => array( 'href', 'src' ),
+        'ilayer'         => array( 'src' ),
+        'img'            => array( 'dynsrc', 'lowsrc' ),
+        'table'          => array( 'background' ),
+        'td'             => array( 'background' ),
+        'th'             => array( 'background' ),
+        'layer'          => array( 'src' ),
+        'xml'            => array( 'src' ),
 
-        array('element'=>'button',  'attribute'=>'action'),     // Forms 2.0
-        array('element'=>'datalist','attribute'=>'data'),       // Forms 2.0
-        array('element'=>'form',    'attribute'=>'data'),       // Forms 2.0
-        array('element'=>'input',   'attribute'=>'action'),     // Forms 2.0
-        array('element'=>'select',  'attribute'=>'data'),       // Forms 2.0
+        'button'         => array( 'action', 'formaction' ),
+        'datalist'       => array( 'data' ),
+        'select'         => array( 'data' ),
 
-        // XHTML
-        array('element'=>'html',    'attribute'=>'xmlns'),
-
-        // WML
-        array('element'=>'access',  'attribute'=>'path'),       // 1.3
-        array('element'=>'card',    'attribute'=>'onenterforward'),// 1.3
-        array('element'=>'card',    'attribute'=>'onenterbackward'),// 1.3
-        array('element'=>'card',    'attribute'=>'ontimer'),    // 1.3
-        array('element'=>'go',      'attribute'=>'href'),       // 1.3
-        array('element'=>'option',  'attribute'=>'onpick'),     // 1.3
-        array('element'=>'template','attribute'=>'onenterforward'),// 1.3
-        array('element'=>'template','attribute'=>'onenterbackward'),// 1.3
-        array('element'=>'template','attribute'=>'ontimer'),    // 1.3
-        array('element'=>'wml',     'attribute'=>'xmlns'),      // 2.0
+        'access'         => array( 'path' ),
+        'card'           => array( 'onenterforward', 'onenterbackward', 'ontimer' ),
+        'go'             => array( 'href' ),
+        'option'         => array( 'onpick' ),
+        'template'       => array( 'onenterforward', 'onenterbackward', 'ontimer' ),
+        'wml'            => array( 'xmlns' )
     );
 
-    /** @const */
-    protected static $match_metas = array(
-        'content-base',
-        'content-location',
-        'referer',
-        'location',
-        'refresh',
-    );
+    // /** @const */
+    // protected static $match_metas = array(
+    //     'content-base',
+    //     'content-location',
+    //     'referer',
+    //     'location',
+    //     'refresh',
+    // );
 
 	/**
 	 * The URL request response
@@ -135,14 +101,19 @@ class Simply_Static_Url_Extractor {
 	 */
 	public function extract_urls() {
 
-        //$urls = $this->extract_urls_from_html();
+        if ( $this->response->is_html() ) {
+            $this->extracted_urls = $this->extract_urls_from_html();
+
+            // foreach ( $this->extracted_urls as $url ) {
+            //    error_log( $url );
+            // }
+        }
+
 
         //$this->remove_external_urls();
 
 
-        //foreach ( $this->extracted_urls as $url ) {
-        //    var_dump( $url );
-        //}
+
 
         // array_push( $extracted_urls, $this->extract_html_urls();
 
@@ -176,36 +147,48 @@ class Simply_Static_Url_Extractor {
         return substr($haystack, 0, strlen($needle)) === $needle;
     }
 
-    private function extract_html_urls() {
+    private function extract_urls_from_html() {
         // Extract all elements
 
+        $doc = new DOMDocument();
+        libxml_use_internal_errors(true);
+        $doc->loadHTML( $this->response->body );
+        libxml_use_internal_errors(false);
+        // get all elements on the page
+        $elements = $doc->getElementsByTagName( '*' );
+        foreach ( $elements as $element ) {
+            $tag = $element->tagName;
 
-        // Match elements and attributes
-        foreach ( self::$match_elements as $match_element )
-        {
-            $name = $match_element['element'];
-            $attr = $match_element['attribute'];
-            $pattern = '/^' . $name . '\s.*' . $attr . $value_pattern . '/iu';
-            if ( $name == 'object' )
-                $split_pattern = '/\s*/u';  // Space-separated URL list
-            else if ( $name == 'archive' )
-                $split_pattern = '/,\s*/u'; // Comma-separated URL list
-            else
-                unset( $split_pattern );    // Single URL
-            foreach ( $elements as $element )
-            {
-                if ( !preg_match( $pattern, $element, $match ) )
-                    continue;
-                $m = empty($match[3]) ? $match[4] : $match[3];
-                if ( !isset( $split_pattern ) )
-                    $this->extracted_urls[] = $m;
-                else
-                {
-                    $msplit = preg_split( $split_pattern, $m );
-                    foreach ( $msplit as $ms )
-                        $this->extracted_urls[] = $ms;
+            if ( array_key_exists( $tag, self::$match_elements ) ) {
+                $match_attributes = self::$match_elements[$tag];
+                foreach ( $match_attributes as $attribute_name ) {
+                    $url = $element->getAttribute( $attribute_name );
+                    if ( $url !== '' ) {
+                        // 0. (before this loop) parse the url for the page we're extracting from
+                        // 1. the host must either match or not be set
+                        //    if the host is a match:
+                        //      the url is good
+                        //    if the host is not set: (then we're dealing with a relative url)
+                        //      2. the scheme must not be set (to filter out java:, data:, etc.)
+                        //      3. properly handle ../ and ./ in the path
+                        //        ./ can just be removed, ../ goes up a level from the current path
+                        //      4. prepend host/+path depending on if the path starts with '/'
+                        $url = trim( $url );
+                        //error_log( $url . ' -- ' . filter_var( $url, FILTER_VALIDATE_URL ) );
+
+                        error_log( $url . ' ---------------------------------------------------------------------------------------- . ');
+
+                        ob_start();                    // start buffer capture
+                        var_dump( parse_url($url) );   // dump the values
+                        $contents = ob_get_contents(); // put the buffer into a variable
+                        ob_end_clean();                // end capture
+                        error_log( $contents );        // log contents of the result of var_dump( $object )
+
+                        $this->extracted_urls[] = $url;
+                    }
                 }
             }
+
         }
     }
 
