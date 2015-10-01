@@ -110,24 +110,24 @@ class Simply_Static_Archive_Creator {
 				continue;
 			}
 
-			$request = new Simply_Static_Url_Fetcher( $current_url );
+			$response = Simply_Static_Url_Fetcher::fetch( $current_url );
 
 			// If we get a WP_Error then somehow our request failed (e.g. space in URL)
 			// TODO: Keep a queue of failed urls too
-			if ( is_wp_error( $request->fetch() ) ) {
+			if ( is_wp_error( $response ) ) {
 				continue;
 			}
 
 			// Not a 200 for the response code? Move on.
 			// TODO: Keep a queue of failed urls too
-			if ( $request->get_response_code() != 200 ) {
+			if ( $response->code != 200 ) {
 				continue;
 			}
 
 			$this->export_log[] = $current_url;
 
 			// Fetch all URLs from the page and add them to the queue...
-			$urls = $request->extract_urls( $origin_url );
+			$urls = $response->extract_urls( $origin_url );
 			foreach ( $urls as $url ) {
 				// ...assuming they're not a URL we've already processed
 				// and they're not the same as the URL we got them from,
@@ -138,13 +138,13 @@ class Simply_Static_Archive_Creator {
 			}
 
 			// Replace the origin URL with the destination URL
-			$request->replace_url( $origin_url, $destination_url );
+			$response->replace_url( $origin_url, $destination_url );
 
 			// Save the page to our archive
-			$url_parts = parse_url( $request->get_url() );
+			$url_parts = parse_url( $response->url );
 			$path = $url_parts['path'];
-			$content = $request->get_response_body();
-			$is_html = $request->is_html();
+			$content = $response->body;
+			$is_html = $response->is_html();
 			$this->save_url_to_file( $path, $content, $is_html );
 		}
 	}
