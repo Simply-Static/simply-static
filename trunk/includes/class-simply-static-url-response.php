@@ -52,7 +52,7 @@ class Simply_Static_Url_Response {
 	 * @param string $url URI resource
 	 */
 	public function __construct( $url, $response ) {
-		$this->url = filter_var( $url, FILTER_VALIDATE_URL );
+		$this->url = $url;
 		$this->headers = $response['headers'];
 		$this->body = $response['body'];
 		$this->code = $response['response']['code'];

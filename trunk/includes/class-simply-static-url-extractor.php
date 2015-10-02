@@ -7,6 +7,14 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
+ * The following pages were incredibly helpful:
+ * - http://stackoverflow.com/questions/2725156/complete-list-of-html-tag-attributes-which-have-a-url-value
+ * - http://nadeausoftware.com/articles/2008/01/php_tip_how_extract_urls_web_page
+ * - http://nadeausoftware.com/articles/2008/01/php_tip_how_extract_urls_css_file
+ * - http://php.net/manual/en/book.dom.php
+ */
+
+/**
  * Simply Static URL extractor class
  */
 class Simply_Static_Url_Extractor {
@@ -102,58 +110,23 @@ class Simply_Static_Url_Extractor {
 	public function extract_urls() {
 
         if ( $this->response->is_html() ) {
-            $this->extracted_urls = $this->extract_urls_from_html();
-
-            // foreach ( $this->extracted_urls as $url ) {
-            //    error_log( $url );
-            // }
+            $this->extract_urls_from_html();
         }
 
-
-        //$this->remove_external_urls();
-
-
-
-
-        // array_push( $extracted_urls, $this->extract_html_urls();
-
-        $urls = array();
-		if (preg_match_all( '/' . str_replace( '/', '\/', $this->response->url ) . '[^"\'#\? ]+/i', $this->response->body, $matches ) ) {
-			$urls = array_unique( $matches[0] );
-		}
-
-		return $urls;
+		return array_unique( $this->extracted_urls );
 	}
-
-    private function remove_external_urls() {
-        $this->extracted_urls = array_filter( $this->extracted_urls, function( $url ) {
-            if ( stripos($url, 'fonts') !== false  ) {
-                error_log( $url );
-                error_log( '//: ' . $this->starts_with( $url, '//' ) );
-                error_log( 'http: ' . $this->starts_with( $url, 'http' ) );
-                error_log( 'base: ' . ! $this->starts_with( $url, $this->base_url ) );
-            }
-
-            if ( $this->starts_with( $url, '//' )
-            || $this->starts_with( $url, 'http' ) && ! $this->starts_with( $url, $this->base_url ) ) {
-                return false;
-            } else {
-                return true;
-            }
-        });
-    }
 
     private function starts_with( $haystack, $needle ) {
         return substr($haystack, 0, strlen($needle)) === $needle;
     }
 
     private function extract_urls_from_html() {
-        // Extract all elements
+        $parsed_page_url = parse_url( $this->response->url );
 
         $doc = new DOMDocument();
-        libxml_use_internal_errors(true);
+        libxml_use_internal_errors( true );
         $doc->loadHTML( $this->response->body );
-        libxml_use_internal_errors(false);
+        libxml_use_internal_errors( false );
         // get all elements on the page
         $elements = $doc->getElementsByTagName( '*' );
         foreach ( $elements as $element ) {
@@ -162,34 +135,38 @@ class Simply_Static_Url_Extractor {
             if ( array_key_exists( $tag, self::$match_elements ) ) {
                 $match_attributes = self::$match_elements[$tag];
                 foreach ( $match_attributes as $attribute_name ) {
-                    $url = $element->getAttribute( $attribute_name );
-                    if ( $url !== '' ) {
-                        // 0. (before this loop) parse the url for the page we're extracting from
-                        // 1. the host must either match or not be set
-                        //    if the host is a match:
-                        //      the url is good
-                        //    if the host is not set: (then we're dealing with a relative url)
-                        //      2. the scheme must not be set (to filter out java:, data:, etc.)
-                        //      3. properly handle ../ and ./ in the path
-                        //        ./ can just be removed, ../ goes up a level from the current path
-                        //      4. prepend host/+path depending on if the path starts with '/'
-                        $url = trim( $url );
-                        //error_log( $url . ' -- ' . filter_var( $url, FILTER_VALIDATE_URL ) );
+                    $extracted_url = $element->getAttribute( $attribute_name );
+                    if ( $extracted_url !== '' ) {
+                        $extracted_url = trim( $extracted_url );
+                        $parsed_extracted_url = parse_url( $extracted_url );
 
-                        error_log( $url . ' ---------------------------------------------------------------------------------------- . ');
-
-                        ob_start();                    // start buffer capture
-                        var_dump( parse_url($url) );   // dump the values
-                        $contents = ob_get_contents(); // put the buffer into a variable
-                        ob_end_clean();                // end capture
-                        error_log( $contents );        // log contents of the result of var_dump( $object )
-
-                        $this->extracted_urls[] = $url;
+                        // parse_url can sometimes return false -- checking that they're both not false
+                        if ( $parsed_page_url && $parsed_extracted_url ) {
+                            // if the extracted url has a host
+                            if ( array_key_exists( 'host', $parsed_extracted_url ) ) {
+                                // and a scheme
+                                if ( array_key_exists( 'scheme', $parsed_extracted_url ) ) {
+                                    // and that scheme+host matches the scheme+host of the page we extracted it from
+                                    if ( $parsed_page_url['scheme'] === $parsed_extracted_url['scheme']
+                                    && $parsed_page_url['host'] === $parsed_extracted_url['host'] ) {
+                                        $extracted_url = phpUri::parse( $this->response->url )->join( $parsed_extracted_url['path'] );
+                                        $this->extracted_urls[] = $extracted_url;
+                                    }
+                                }
+                            } else { // no host on extracted page (might be relative url)
+                                // filter out anything with a scheme, e.g. java:, data:, etc.)
+                                // also checking for a path (some links might only have a fragent, e.g. #section1)
+                                // and that the path is not just a slash
+                                if ( ! array_key_exists( 'scheme', $parsed_extracted_url ) && array_key_exists( 'path', $parsed_extracted_url ) ) {
+                                    // turn our relative url into an absolute url
+                                    $extracted_url = phpUri::parse( $this->response->url )->join( $parsed_extracted_url['path'] );
+                                    $this->extracted_urls[] = $extracted_url;
+                                }
+                            }
+                        }
                     }
                 }
             }
-
         }
     }
-
 }
