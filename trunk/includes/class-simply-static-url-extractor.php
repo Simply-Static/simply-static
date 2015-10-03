@@ -131,7 +131,7 @@ class Simply_Static_Url_Extractor {
 		}
 
 		if ( $this->response->is_css() ) {
-			$this->extract_urls_from_css();
+			$this->extract_urls_from_css( $this->response->body );
 		}
 
 		return array_unique( $this->extracted_urls );
@@ -151,13 +151,22 @@ class Simply_Static_Url_Extractor {
 		// get all elements on the page
 		$elements = $doc->getElementsByTagName( '*' );
 		foreach ( $elements as $element ) {
-			$tag = $element->tagName;
+			$tag_name = $element->tagName;
 
-			if ( array_key_exists( $tag, self::$match_elements ) ) {
-				$match_attributes = self::$match_elements[$tag];
-				foreach ( $match_attributes as $attribute_name ) {
-					$extracted_url = $element->getAttribute( $attribute_name );
-					$this->add_to_extracted_urls( $extracted_url );
+			if( $tag_name === 'style' ) {
+				$this->extract_urls_from_css( $element->nodeValue );
+			} else {
+				$style_attr_value = $element->getAttribute( 'style' );
+				if ( $style_attr_value !== '' ) {
+					$this->extract_urls_from_css( $style_attr_value );
+				}
+
+				if ( array_key_exists( $tag_name, self::$match_elements ) ) {
+					$match_attributes = self::$match_elements[ $tag_name ];
+					foreach ( $match_attributes as $attribute_name ) {
+						$extracted_url = $element->getAttribute( $attribute_name );
+						$this->add_to_extracted_urls( $extracted_url );
+					}
 				}
 			}
 		}
@@ -176,7 +185,7 @@ class Simply_Static_Url_Extractor {
 	 *
 	 * @return void
 	 */
-	private function extract_urls_from_css() {
+	private function extract_urls_from_css( $text ) {
 		$url_pattern	 = '(([^\\\\\'", \(\)]*(\\\\.)?)+)';
 		$urlfunc_pattern = 'url\(\s*[\'"]?' . $url_pattern . '[\'"]?\s*\)';
 
@@ -185,7 +194,7 @@ class Simply_Static_Url_Extractor {
 			'|(@import\s*'      . $urlfunc_pattern . ')'      .
 			'|('                . $urlfunc_pattern . ')'      . ')/iu';
 
-		if ( !preg_match_all( $pattern, $this->response->body, $matches, PREG_PATTERN_ORDER ) ) {
+		if ( !preg_match_all( $pattern, $text, $matches, PREG_PATTERN_ORDER ) ) {
 			return;
 		}
 
