@@ -50,3 +50,14 @@ function sist_truncate( $string, $length = 30, $omission = '...' ) {
 function sist_trailingslashit_unless_blank( $string ) {
 	return $string === '' ? $string : trailingslashit( $string );
 }
+
+/**
+ * Dump an object to error_log
+ */
+function sist_error_log( $object=null ){
+    ob_start();
+    var_dump( $object );
+    $contents = ob_get_contents();
+    ob_end_clean();
+    error_log( $contents );
+}
