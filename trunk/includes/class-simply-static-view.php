@@ -50,7 +50,7 @@ class Simply_Static_View {
 	 * Flashes are quick status messages displayed at the top of the page
 	 * @var array
 	 */
-	protected $flashes = [];
+	protected $flashes = array();
 
 	/**
 	 * Performs initialization of the absolute path for views

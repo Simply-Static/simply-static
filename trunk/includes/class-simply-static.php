@@ -308,7 +308,7 @@ class Simply_Static {
 	}
 
 	public function check_system_requirements() {
-		$errors = [];
+		$errors = array();
 
 		$destination_host = $this->options->get( 'destination_host' );
 		if ( strlen( $destination_host ) === 0 ) {
