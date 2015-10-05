@@ -4,7 +4,7 @@ Donate link: http://codeofconduct.co/
 Tags: simply static, html, static, static site, static site generator, performance, fast, optimization, availability, scaling, scalability, cdn, security, secure, zip
 Requires at least: 3.8
 Tested up to: 4.3
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -69,13 +69,17 @@ Simply Static creates a copy of your WordPress site that is intended to be used 
 
 == Changelog ==
 
+= 1.0.2, October 4, 2015 =
+
+* Fix: Was using PHP 5.4 array init syntax that failed in <= PHP 5.3
+
 = 1.0.1, September 29, 2015 =
 
-* Settings/options now deleted upon uninstallation
+* Fix: Settings/options now deleted upon uninstallation
 
 = 1.0.0, September 21, 2015 =
 
-* Initial release
+* New: Initial release
 
 == Upgrade Notice ==
 

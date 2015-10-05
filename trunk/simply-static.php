@@ -3,7 +3,7 @@
  * Plugin Name:       Simply Static
  * Plugin URI:        http://simplystatic.com
  * Description:       Produces a static HTML version of your WordPress install and adjusts URLs accordingly.
- * Version:           1.0.1
+ * Version:           1.0.2
  * Author:            Code of Conduct
  * Author URI:        http://codeofconduct.co/
  * License:           GPL-2.0+
