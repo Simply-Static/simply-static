@@ -17,4 +17,4 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 require plugin_dir_path( __FILE__ ) . 'includes/class-simply-static.php';
 
-Simply_Static::init(__FILE__);
+Simply_Static::init( __FILE__ );

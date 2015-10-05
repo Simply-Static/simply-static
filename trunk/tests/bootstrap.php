@@ -13,3 +13,7 @@ function _manually_load_plugin() {
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
 require $_tests_dir . '/includes/bootstrap.php';
+
+// Include helpers
+require_once 'helpers/class-simply-static-url-response-factory.php';
+require_once 'helpers/class-simply-static-url-extractor-factory.php';

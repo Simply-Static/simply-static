@@ -42,12 +42,6 @@ class Simply_Static_Url_Response {
 	public $message = '';
 
 	/**
-	 * The cookies from the response
-	 * @var string
-	 */
-	public $cookies = array();
-
-	/**
 	 * Constructor
 	 * @param string $url URI resource
 	 */
@@ -57,7 +51,6 @@ class Simply_Static_Url_Response {
 		$this->body = $response['body'];
 		$this->code = $response['response']['code'];
 		$this->message = $response['response']['message'];
-		$this->cookies = $response['cookies'];
 	}
 
 	/**
@@ -115,7 +108,6 @@ class Simply_Static_Url_Response {
 	public function replace_url( $origin_url, $destination_url ) {
 		if ( $this->is_html() ) {
 			$response_body = str_replace( $origin_url, $destination_url, $this->body );
-			$response_body = str_replace( '<head>', "<head>\n<base href=\"" . esc_attr( $destination_url ) . "\" />\n", $response_body );
 			$this->body = $response_body;
 		}
 	}
