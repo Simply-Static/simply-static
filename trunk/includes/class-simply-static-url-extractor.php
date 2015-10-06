@@ -25,7 +25,7 @@ class Simply_Static_Url_Extractor {
 		'a'            => array( 'href', 'urn' ),
 		'base'         => array( 'href' ),
 		'form'         => array( 'action', 'data' ),
-		'img'          => array( 'src', 'usemap', 'longdesc' ),
+		'img'          => array( 'src', 'usemap', 'longdesc', 'dynsrc', 'lowsrc' ),
 		'link'         => array( 'href' ),
 
 		'applet'       => array( 'code', 'codebase', 'archive', 'object' ),
@@ -54,7 +54,6 @@ class Simply_Static_Url_Extractor {
 		'bgsound'      => array( 'src' ),
 		'div'          => array( 'href', 'src' ),
 		'ilayer'       => array( 'src' ),
-		'img'          => array( 'dynsrc', 'lowsrc' ),
 		'table'        => array( 'background' ),
 		'td'           => array( 'background' ),
 		'th'           => array( 'background' ),
