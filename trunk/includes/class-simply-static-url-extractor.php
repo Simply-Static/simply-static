@@ -122,6 +122,9 @@ class Simply_Static_Url_Extractor {
 	 * extracts URLs from the same domain, either absolute urls or relative urls
 	 * that are then converted to absolute urls.
 	 *
+	 * Note that no validation is performed on whether the URLs would actually
+	 * return a 200/OK response.
+	 *
 	 * @return array $urls
 	 */
 	public function extract_urls() {
@@ -229,7 +232,7 @@ class Simply_Static_Url_Extractor {
 	 *
 	 * @return void
 	 */
-	function add_to_extracted_urls( $extracted_url ) {
+	private function add_to_extracted_urls( $extracted_url ) {
 		$extracted_url = trim( $extracted_url );
 		if ( $extracted_url !== '' ) {
 			$parsed_extracted_url = parse_url( $extracted_url );
@@ -248,10 +251,14 @@ class Simply_Static_Url_Extractor {
 						}
 					}
 				} else { // no host on extracted page (might be relative url)
-					// filter out anything with a scheme, e.g. java:, data:, etc.)
-					// also checking for a path (some links might only have a fragent, e.g. #section1)
-					// and that the path is not just a slash
-					if ( ! array_key_exists( 'scheme', $parsed_extracted_url ) && array_key_exists( 'path', $parsed_extracted_url ) ) {
+					// (a) filter out anything with a scheme, e.g. java:, data:, etc.)
+					// (b) also checking for a path (some links might only have a fragent, e.g. #section1)
+					// (c) and double-checking for bug in PHP <= 5.4.7 where URLs starting
+					// with '//' are identified as a path
+					// http://php.net/manual/en/function.parse-url.php#example-4617
+					if ( ! array_key_exists( 'scheme', $parsed_extracted_url )
+					&& array_key_exists( 'path', $parsed_extracted_url )
+					&& substr( $parsed_extracted_url['path'], 0, 2 ) !== '//' ) {
 						// turn our relative url into an absolute url
 						$extracted_url = phpUri::parse( $this->response->url )->join( $parsed_extracted_url['path'] );
 						$this->extracted_urls[] = $extracted_url;
