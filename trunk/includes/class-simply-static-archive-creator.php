@@ -9,48 +9,56 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * The path to the archive directory
+	 *
 	 * @var string
 	 */
 	protected $archive_dir;
 
 	/**
 	 * Export log (list of processed urls)
+	 *
 	 * @var array
 	 */
 	protected $export_log = array();
 
 	/**
 	 * The slug (id) used for the plugin
+	 *
 	 * @var string
 	 */
 	protected $slug;
 
 	/**
 	 * The protocol used for the destination URL
+	 *
 	 * @var string
 	 */
 	protected $destination_scheme;
 
 	/**
 	 * The host for the destination URL
+	 *
 	 * @var string
 	 */
 	protected $destination_host;
 
 	/**
 	 * The directory where static files should be saved
+	 *
 	 * @var string
 	 */
 	protected $temp_files_dir;
 
 	/**
 	 * Additional urls to add to the archive
+	 *
 	 * @var string
 	 */
 	protected $additional_urls;
 
 	/**
 	 * Constructor
+	 *
 	 * @param string $url URI resource
 	 */
 	public function __construct( $slug, $destination_scheme, $destination_host, $temp_files_dir, $additional_urls ) {
@@ -63,6 +71,7 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * Get the list of URLs in the archive
+	 *
 	 * @param array $export_log URLs that were successfully added to the archive
 	 */
 	public function get_export_log() {
@@ -71,6 +80,7 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * Create a static version of the site
+	 *
 	 * @return void
 	 */
 	public function create_archive() {
@@ -167,6 +177,7 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * Create a ZIP file using the archive directory
+	 *
 	 * @return string|WP_Error $temporary_zip The path to the archive zip file
 	 */
 	public function create_zip() {
@@ -198,7 +209,8 @@ class Simply_Static_Archive_Creator {
 	}
 
 	/**
-	* Copy static files to a local directory.
+	* Copy static files to a local directory
+	*
 	* @return boolean|WP_Error
 	*/
 	public function copy_static_files( $local_dir ) {
@@ -218,6 +230,7 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * Delete generated static files
+	 *
 	 * @param $archive_dir The archive directory path
 	 * @return boolean|WP_Error
 	 */
@@ -244,6 +257,7 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * Save the contents of a page to a file in our archive directory
+	 *
 	 * @param string $path The relative path for the URL to save
 	 * @param string $content The contents of the page we want to save
 	 * @param boolean $is_html Is this an html page?

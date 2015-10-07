@@ -8,12 +8,14 @@
 class Simply_Static_Options {
 	/**
 	 * Options array
+	 *
 	 * @var array
 	 */
 	protected $options = array();
 
 	/**
 	 * Defines options record in the wp_options table
+	 *
 	 * @var string
 	 */
 	protected $option_key = null;

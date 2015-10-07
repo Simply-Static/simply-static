@@ -9,36 +9,42 @@ class Simply_Static_View {
 
 	/**
 	 * Base directory for views
+	 *
 	 * @var string
 	 */
 	const DIRECTORY = 'views';
 
 	/**
 	 * View script extension
+	 *
 	 * @var string
 	 */
 	const EXTENSION = '.phtml';
 
 	/**
 	 * View variables array
+	 *
 	 * @var array
 	 */
 	protected $variables = array();
 
 	/**
 	 * Absolute path for view
+	 *
 	 * @var string
 	 */
 	protected $path = null;
 
 	/**
 	 * Template file name to render
+	 *
 	 * @var string
 	 */
 	protected $template = null;
 
 	/**
 	 * Flashes are quick status messages displayed at the top of the page
+	 *
 	 * @var array
 	 */
 	protected $flashes = array();

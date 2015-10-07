@@ -95,6 +95,7 @@ class Simply_Static_Url_Response {
 
 	// /**
 	//  * Removes WordPress-specific meta tags
+	//  *
 	//  * @return void
 	//  */
 	// protected function cleanup() {
@@ -107,6 +108,7 @@ class Simply_Static_Url_Response {
 
 	/**
 	 * Extracts the list of unique URLs
+	 *
 	 * @param string $origin_url Base URL of site. Used to extract URLs that relate only to the current site.
 	 * @return array
 	 */
@@ -117,6 +119,7 @@ class Simply_Static_Url_Response {
 
 	/**
 	 * Replaces base URL
+	 *
 	 * @param string $origin_url
 	 * @param string $destination_url
 	 * @return void

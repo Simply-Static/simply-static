@@ -8,54 +8,63 @@
 class Simply_Static {
 	/**
 	 * Plugin version
+	 *
 	 * @var string
 	 */
 	const VERSION = '1.0.2';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, etc.
+	 *
 	 * @var string
 	 */
 	const SLUG = 'simply-static';
 
 	/**
 	 * Singleton instance
+	 *
 	 * @var Simply_Static
 	 */
 	protected static $instance = null;
 
 	/**
 	 * An instance of the options structure containing all options for this plugin
+	 *
 	 * @var Simply_Static_Options
 	 */
 	protected $options = null;
 
 	/**
 	 * View object
+	 *
 	 * @var Simply_Static_View
 	 */
 	protected $view = null;
 
 	/**
 	 * Disable usage of "new"
+	 *
 	 * @return void
 	 */
 	protected function __construct() {}
 
 	/**
 	 * Disable cloning of the class
+	 *
 	 * @return void
 	 */
 	protected function __clone() {}
 
 	/**
 	 * Disable unserializing of the class
+	 *
 	 * @return void
 	 */
 	public function __wakeup() {}
 
 	/**
 	 * Return an instance of the Simply Static plugin
+	 *
 	 * @return Simply_Static
 	 */
 	public static function instance()
@@ -89,6 +98,7 @@ class Simply_Static {
 
 	/**
 	 * Initialize singleton instance
+	 *
 	 * @param string $bootstrap_file
 	 * @return Simply_Static
 	 */
@@ -104,6 +114,7 @@ class Simply_Static {
 
 	/**
 	 * Performs activation
+	 *
 	 * @return void
 	 */
 	public function activate()
@@ -125,6 +136,7 @@ class Simply_Static {
 
 	/**
 	 * Include required files
+	 *
 	 * @return void
 	 */
 	private function includes() {
@@ -140,6 +152,7 @@ class Simply_Static {
 
 	/**
 	 * Enqueue admin-specific style sheets for this plugin's admin pages only
+	 *
 	 * @return null Return early if no settings page is registered.
 	 */
 	public function enqueue_admin_styles() {
@@ -149,6 +162,7 @@ class Simply_Static {
 
 	/**
 	 * Enqueue admin-specific javascript files for this plugin's admin pages only
+	 *
 	 * @return null Return early if no settings page is registered.
 	 */
 	public function enqueue_admin_scripts() {
@@ -158,6 +172,7 @@ class Simply_Static {
 
 	/**
 	 * Register the administration menu for this plugin into the WordPress Dashboard menu.
+	 *
 	 * @return void
 	 */
 	public function add_plugin_admin_menu() {
@@ -195,6 +210,7 @@ class Simply_Static {
 
 	/**
 	 * Render the page for generating a static site.
+	 *
 	 * @return void
 	 */
 	public function display_generate_page() {
@@ -256,6 +272,7 @@ class Simply_Static {
 
 	/**
 	 * Render the options page.
+	 *
 	 * @return void
 	 */
 	public function display_options_page() {
@@ -283,6 +300,7 @@ class Simply_Static {
 
 	/**
 	 * Save the options from the options page.
+	 *
 	 * @return void
 	 */
 	public function save_options() {
@@ -299,6 +317,7 @@ class Simply_Static {
 
 	/**
 	 * Loads the plugin language files
+	 *
 	 * @return void
 	 */
 	public function load_textdomain() {
@@ -311,6 +330,7 @@ class Simply_Static {
 
 	/**
 	 * Loads the plugin language files
+	 *
 	 * @return array $errors associative array containing errored field names and an array of error messages
 	 */
 	public function check_system_requirements() {
