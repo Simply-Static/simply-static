@@ -76,13 +76,6 @@ class Simply_Static {
 			self::$instance->options = new Simply_Static_Options( self::SLUG );
 			self::$instance->view = new Simply_Static_View();
 
-			$errors = self::$instance->check_system_requirements();
-			foreach ( $errors as $field ) {
-				foreach ( $field as $error ) {
-					self::$instance->view->add_flash( 'error', $error );
-				}
-			}
-
 			// Load the text domain for i18n
 			add_action( 'plugins_loaded', array( self::$instance, 'load_textdomain' ) );
 			// Enqueue admin styles
