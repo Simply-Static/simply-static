@@ -60,7 +60,13 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 			"<a href='/12.htm#test'>12</a>"
 				=> self::DOMAIN . '/12.htm',
 			"<A HRef='/THIRTEEN.htm'>13</a>"
-				=> self::DOMAIN . '/THIRTEEN.htm'
+				=> self::DOMAIN . '/THIRTEEN.htm',
+			"<a href='" . self::DOMAIN . "/14.htm'>14</a>"
+				=> self::DOMAIN . '/14.htm',
+			"<a href='" . self::DOMAIN . "#section15'>15</a>"
+				=> false,
+			"<a href='" . self::DOMAIN . "/test#section16'>16</a>"
+				=> self::DOMAIN . '/test'
 		);
 
 		foreach ( $content_and_urls as $content => $url ) {

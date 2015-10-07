@@ -238,17 +238,19 @@ class Simply_Static_Url_Extractor {
 				if ( array_key_exists( 'host', $parsed_extracted_url ) ) {
 					// and a scheme
 					if ( array_key_exists( 'scheme', $parsed_extracted_url ) ) {
-						// and that scheme+host matches the scheme+host of the page we extracted it from
+						// and (a) that scheme+host matches the scheme+host of the page we extracted it from
+						// (b) that the path exists (some links might only have a fragent, e.g. #section1)
 						if ( $this->parsed_page_url['scheme'] === $parsed_extracted_url['scheme']
-						&& $this->parsed_page_url['host'] === $parsed_extracted_url['host'] ) {
+						&& $this->parsed_page_url['host'] === $parsed_extracted_url['host']
+						&& array_key_exists( 'path', $parsed_extracted_url ) ) {
 							$extracted_url = phpUri::parse( $this->response->url )->join( $parsed_extracted_url['path'] );
 							$this->extracted_urls[] = $extracted_url;
 						}
 					}
 				} else { // no host on extracted page (might be relative url)
 					// (a) filter out anything with a scheme, e.g. java:, data:, etc.)
-					// (b) also checking for a path (some links might only have a fragent, e.g. #section1)
-					// (c) and double-checking for bug in PHP <= 5.4.7 where URLs starting
+					// (b) check that path exists
+					// (c) and check for a bug in PHP <= 5.4.7 where URLs starting
 					// with '//' are identified as a path
 					// http://php.net/manual/en/function.parse-url.php#example-4617
 					if ( ! array_key_exists( 'scheme', $parsed_extracted_url )
