@@ -207,7 +207,7 @@ class Simply_Static_Archive_Creator {
 
 		foreach ( $recursive_iterator as $item ) {
 			$path = $local_dir . $recursive_iterator->getSubPathName();
-			$success = $item->isDir() ? mkdir( $path ) : copy( $item, $path );
+			$success = $item->isDir() ? wp_mkdir_p( $path ) : copy( $item, $path );
 			if ( ! $success ) {
 				return new WP_Error( 'cannot_create_file_or_dir', sprintf( __( "Could not create file or directory: %s", $this->slug ), $path ) );
 			}
