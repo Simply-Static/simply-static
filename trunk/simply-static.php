@@ -1,4 +1,5 @@
-<?php
+<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Plugin Name:       Simply Static
  * Plugin URI:        http://codeofconduct.co/simply-static
@@ -11,9 +12,6 @@
  * Text Domain:       simply-static
  * Domain Path:       /languages
  */
-
-// Exit if accessed directly
-if ( ! defined( 'ABSPATH' ) ) exit;
 
 require plugin_dir_path( __FILE__ ) . 'includes/class-simply-static.php';
 

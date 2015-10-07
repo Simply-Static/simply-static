@@ -1,20 +1,11 @@
-<?php
-/**
- * @package Simply_Static
- */
-
-// Exit if accessed directly
-if ( ! defined( 'ABSPATH' ) ) exit;
+<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
  * Simply Static view class
+ *
+ * @package Simply_Static
  */
 class Simply_Static_View {
-	/**
-	 * Layout (template) for the plugin
-	 * @var string
-	 */
-	const LAYOUT = 'layouts/admin.phtml';
 
 	/**
 	 * Base directory for views
@@ -66,14 +57,26 @@ class Simply_Static_View {
 	}
 
 	/**
-	 * Sets a template filename that will be used later in render() method.
-	 * Performs a reset of the view variables
+	 * Sets a layout that will be used later in render() method.
+	 *
+	 * @param string $template The template filename, without extension
+	 * @return Simply_Static_View
+	 */
+	public function set_layout( $layout ) {
+		$this->layout = trailingslashit( $this->path ) . 'layouts/' . $layout . self::EXTENSION;
+
+		return $this;
+	}
+
+	/**
+	 * Sets a template that will be used later in render() method.
 	 *
 	 * @param string $template The template filename, without extension
 	 * @return Simply_Static_View
 	 */
 	public function set_template( $template ) {
 		$this->template = trailingslashit( $this->path ) . $template . self::EXTENSION;
+
 		return $this;
 	}
 
@@ -123,19 +126,66 @@ class Simply_Static_View {
 	}
 
 	/**
-	 * Renders the view script
+	 * Returns the layout (if available) or template. Checks to make sure that
+	 * the file exists and is readable.
 	 *
-	 * @return Simply_Static_View|WP_Error
+	 * @return string|WP_Error
 	 */
-	public function render() {
-		$layout = trailingslashit( $this->path ) . self::LAYOUT;
+	private function get_renderable_file() {
 
+		// must include a template
 		if ( ! is_readable( $this->template ) ) {
 			return new WP_Error( 'invalid_template', sprintf( __( "Can't find view template: %s", $this->slug ), $this->template ) );
 		}
 
-		include $layout;
+		// layouts are optional. if no layout provided, use the template by itself.
+		if ( $this->layout ) {
+			if ( ! is_readable( $this->layout ) ) {
+				return new WP_Error( 'invalid_layout', sprintf( __( "Can't find view layout: %s", $this->slug ), $this->layout ) );
+			} else {
+				// the layout should include the template
+				return $this->layout;
+			}
+		} else {
+			return $this->template;
+		}
 
-		return $this;
+	}
+
+	/**
+	 * Renders the view script.
+	 *
+	 * @return Simply_Static_View|WP_Error
+	 */
+	public function render() {
+
+		$file = $this->get_renderable_file();
+
+		if ( is_wp_error( $file ) ) {
+			return $file;
+		} else {
+			include $file;
+			return $this;
+		}
+
+	}
+
+	/**
+	 * Returns the view as a string.
+	 *
+	 * @return string|WP_Error
+	 */
+	public function render_to_string() {
+
+		$file = $this->get_renderable_file();
+
+		if ( is_wp_error( $file ) ) {
+			return $file;
+		} else {
+			ob_start();
+	    include $file;
+	    return ob_get_clean();
+		}
+
 	}
 }

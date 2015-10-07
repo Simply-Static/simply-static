@@ -1,48 +1,51 @@
-<?php
-/**
- * @package Simply_Static
- */
-
-// Exit if accessed directly
-if ( ! defined( 'ABSPATH' ) ) exit;
+<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
  * Simply Static URL response class
+ *
+ * @package Simply_Static
  */
+
 class Simply_Static_Url_Response {
 
 	/**
 	 * The URI resource
+	 *
 	 * @var string
 	 */
 	public $url;
 
 	/**
 	 * The headers from the response
+	 *
 	 * @var string
 	 */
 	public $headers = array();
 
 	/**
 	 * The body content of the response
+	 *
 	 * @var string
 	 */
 	public $body = '';
 
 	/**
 	 * The code from the response, e.g. 200
+	 *
 	 * @var integer
 	 */
 	public $code = null;
 
 	/**
 	 * The message from the response, e.g. 'OK'
+	 *
 	 * @var string
 	 */
 	public $message = '';
 
 	/**
 	 * Constructor
+	 *
 	 * @param string $url URI resource
 	 */
 	public function __construct( $url, $response ) {
@@ -55,6 +58,7 @@ class Simply_Static_Url_Response {
 
 	/**
 	 * Returns the content type
+	 *
 	 * @return string
 	 */
 	public function get_content_type() {
@@ -63,6 +67,7 @@ class Simply_Static_Url_Response {
 
 	/**
 	 * Checks if content type is html
+	 *
 	 * @return bool
 	 */
 	public function is_html() {
@@ -71,10 +76,21 @@ class Simply_Static_Url_Response {
 
 	/**
 	 * Checks if content type is html
+	 *
 	 * @return bool
 	 */
 	public function is_css() {
 		return stripos( $this->get_content_type(), 'css' ) !== false;
+	}
+
+	/**
+	 * Checks for a location header (redirection URL). Returns an empty string if
+	 * it doesn't find one.
+	 *
+	 * @return string
+	 */
+	public function get_redirect_url() {
+		return array_key_exists( 'location', $this->headers ) ? $this->headers['location'] : '';
 	}
 
 	// /**

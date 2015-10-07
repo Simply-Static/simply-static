@@ -1,13 +1,9 @@
-<?php
-/**
- * @package Simply_Static
- */
-
-// Exit if accessed directly
-if ( ! defined( 'ABSPATH' ) ) exit;
+<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
  * Simply Static URL fetcher class
+ *
+ * @package Simply_Static
  */
 class Simply_Static_Url_Fetcher {
 
@@ -22,7 +18,10 @@ class Simply_Static_Url_Fetcher {
 	 * @return WP_Error|Simply_Static_Url_Response
 	 */
 	public static function fetch( $url ) {
-		$response = wp_remote_get( $url, array( 'timeout' => self::TIMEOUT ) );
+		$response = wp_remote_get( $url, array(
+			'timeout' => self::TIMEOUT,
+			'redirection' => 0 // disable redirection
+		) );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;

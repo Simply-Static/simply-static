@@ -1,4 +1,5 @@
-<?php
+<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 	/**
 	 * A php library for converting relative urls to absolute.
 	 * Website: https://github.com/monkeysuffrage/phpuri

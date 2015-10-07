@@ -1,13 +1,9 @@
-<?php
-/**
- * @package Simply_Static
- */
-
-// Exit if accessed directly
-if ( ! defined( 'ABSPATH' ) ) exit;
+<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
  * Simply Static URL fetcher class
+ *
+ * @package Simply_Static
  */
 class Simply_Static_Archive_Creator {
 
@@ -118,6 +114,29 @@ class Simply_Static_Archive_Creator {
 				continue;
 			}
 
+			$url_parts = parse_url( $response->url );
+			$path = $url_parts['path'];
+			$is_html = $response->is_html();
+
+			// If we get a 301 redirect, create a page that does a redirect
+			if ( $response->code === 301 ) {
+				error_log( $path . ' | ' . $response->get_redirect_url() . ' ---- ' );
+
+				if ( $response->get_redirect_url() !== '' ) {
+					$view = new Simply_Static_View();
+
+					$content = $view->set_template( 'redirect' )
+						->assign( 'redirect_url', $response->get_redirect_url() )
+						->render_to_string();
+
+					$this->save_url_to_file( $path, $content, $is_html );
+
+				}
+
+				continue;
+			}
+
+
 			// Not a 200 for the response code? Move on.
 			// TODO: Keep a queue of failed urls too
 			if ( $response->code != 200 ) {
@@ -141,10 +160,7 @@ class Simply_Static_Archive_Creator {
 			$response->replace_url( $origin_url, $destination_url );
 
 			// Save the page to our archive
-			$url_parts = parse_url( $response->url );
-			$path = $url_parts['path'];
 			$content = $response->body;
-			$is_html = $response->is_html();
 			$this->save_url_to_file( $path, $content, $is_html );
 		}
 	}

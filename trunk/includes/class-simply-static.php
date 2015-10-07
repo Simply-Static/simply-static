@@ -1,13 +1,10 @@
-<?php
+<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
- * The core plugin class.
+ * The core plugin class
  *
  * @package Simply_Static
  */
-
-// Exit if accessed directly
-if ( ! defined( 'ABSPATH' ) ) exit;
-
 class Simply_Static {
 	/**
 	 * Plugin version
@@ -252,6 +249,7 @@ class Simply_Static {
 		}
 
 		$this->view
+			->set_layout( 'admin' )
 			->set_template( 'generate' )
 			->render();
 	}
@@ -268,6 +266,7 @@ class Simply_Static {
 		}
 
 		$this->view
+			->set_layout( 'admin' )
 			->set_template( 'options' )
 			->assign( 'slug', self::SLUG )
 			->assign( 'origin_scheme', sist_get_origin_scheme() )

@@ -1,23 +1,19 @@
-<?php
-/**
- * @package Simply_Static
- */
-
-// Exit if accessed directly
-if ( ! defined( 'ABSPATH' ) ) exit;
-
-/**
- * The following pages were incredibly helpful:
- * - http://stackoverflow.com/questions/2725156/complete-list-of-html-tag-attributes-which-have-a-url-value
- * - http://nadeausoftware.com/articles/2008/01/php_tip_how_extract_urls_web_page
- * - http://nadeausoftware.com/articles/2008/01/php_tip_how_extract_urls_css_file
- * - http://php.net/manual/en/book.dom.php
- */
+<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
  * Simply Static URL extractor class
+ *
+ * @package Simply_Static
  */
 class Simply_Static_Url_Extractor {
+
+	/**
+	 * The following pages were incredibly helpful:
+	 * - http://stackoverflow.com/questions/2725156/complete-list-of-html-tag-attributes-which-have-a-url-value
+	 * - http://nadeausoftware.com/articles/2008/01/php_tip_how_extract_urls_web_page
+	 * - http://nadeausoftware.com/articles/2008/01/php_tip_how_extract_urls_css_file
+	 * - http://php.net/manual/en/book.dom.php
+	 */
 
 	/** @const */
 	protected static $match_elements = array(

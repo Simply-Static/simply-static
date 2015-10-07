@@ -1,13 +1,9 @@
-<?php
-/**
- * @package Simply_Static
- */
-
-// Exit if accessed directly
-if ( ! defined( 'ABSPATH' ) ) exit;
+<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
  * Simply Static options class
+ *
+ * @package Simply_Static
  */
 class Simply_Static_Options {
 	/**
