@@ -20,6 +20,7 @@ cp -R $CURRENT_DIR/assets $DEST_DIR
 cp -R $CURRENT_DIR/trunk $DEST_DIR
 
 # clear out the static-files directory
+rm -rf $DEST_DIR/trunk/static-files/*
 find $DEST_DIR/trunk/static-files/ -maxdepth 1 -type f -exec rm {} \;
 
 # remove test files/directories
