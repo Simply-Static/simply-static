@@ -4,7 +4,7 @@ Donate link: http://codeofconduct.co/
 Tags: simply static, html, static, static site, static site generator, performance, fast, optimization, availability, scaling, scalability, cdn, security, secure, zip, hardening
 Requires at least: 3.8
 Tested up to: 4.3
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,12 @@ Simply Static creates a copy of your WordPress site that is intended to be used 
 2. This is what the Simply Static Generate page looks like after you've generated your static files. We'll show you exactly which files we made a static copy of.
 
 == Changelog ==
+
+= 1.1.1, October 9, 2015 =
+
+* Fix: No longer checking for valid SSL certificates on local requests (allows for self-signed certs to work)
+* Fix: No longer creating redirect HTML pages for WP's 301 redirects from /path to /path/
+* Fix: Improved URL extraction from CSS files, particularly from larger files
 
 = 1.1.0, October 6, 2015 =
 
