@@ -61,8 +61,8 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 				=> self::DOMAIN . '/12.htm',
 			"<A HRef='/THIRTEEN.htm'>13</a>"
 				=> self::DOMAIN . '/THIRTEEN.htm',
-			"<a href='" . self::DOMAIN . "/14.htm'>14</a>"
-				=> self::DOMAIN . '/14.htm',
+			"<a href='" . self::DOMAIN . "/14'>14</a>"
+				=> self::DOMAIN . '/14',
 			"<a href='" . self::DOMAIN . "#section15'>15</a>"
 				=> false,
 			"<a href='" . self::DOMAIN . "/test#section16'>16</a>"
@@ -235,7 +235,9 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 				=> self::DOMAIN . '/two.css',
 			'@import \'three.css\';'
 				=> self::DOMAIN . '/blog/three.css',
-			'@import url("chrome://four/");'
+			'@import "./four.css" print;'
+				=> self::DOMAIN . '/blog/four.css',
+			'@import url("chrome://five/");'
 				=> false,
 			'@import url(\'six.css\') screen and (orientation:landscape);'
 				=> self::DOMAIN . '/blog/six.css',
@@ -256,4 +258,5 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 		}
 
 	}
+
 }

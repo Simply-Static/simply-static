@@ -11,7 +11,6 @@ class Simply_Static_Url_Extractor {
 	 * The following pages were incredibly helpful:
 	 * - http://stackoverflow.com/questions/2725156/complete-list-of-html-tag-attributes-which-have-a-url-value
 	 * - http://nadeausoftware.com/articles/2008/01/php_tip_how_extract_urls_web_page
-	 * - http://nadeausoftware.com/articles/2008/01/php_tip_how_extract_urls_css_file
 	 * - http://php.net/manual/en/book.dom.php
 	 */
 
@@ -184,38 +183,22 @@ class Simply_Static_Url_Extractor {
 	 * @return void
 	 */
 	private function extract_urls_from_css( $text ) {
-		$url_pattern	 = '(([^\\\\\'", \(\)]*(\\\\.)?)+)';
-		$urlfunc_pattern = 'url\(\s*[\'"]?' . $url_pattern . '[\'"]?\s*\)';
 
-		$pattern         = '/(' .
-			'(@import\s*[\'"]'  . $url_pattern     . '[\'"])' .
-			'|(@import\s*'      . $urlfunc_pattern . ')'      .
-			'|('                . $urlfunc_pattern . ')'      . ')/iu';
+		$patterns	= array( "/url\(\s*[\"']?([^)\"']+)/", // url()
+											 "/@import\s+[\"']([^\"']+)/" ); // @import w/o url()
 
-		if ( !preg_match_all( $pattern, $text, $matches, PREG_PATTERN_ORDER ) ) {
-			return;
-		}
+		foreach ( $patterns as $pattern ) {
+			if ( preg_match_all( $pattern, $text, $matches, PREG_PATTERN_ORDER ) === false ) {
+				return;
+			}
 
-		// @import '...' or @import "..."
-		foreach ( $matches[3] as $match ) {
-			if ( !empty($match) ) {
-				$this->add_to_extracted_urls( preg_replace( '/\\\\(.)/u', '\\1', $match ) );
+			foreach ( $matches[1] as $match ) {
+				if ( !empty($match) ) {
+					$this->add_to_extracted_urls( $match );
+				}
 			}
 		}
 
-		// @import url(...) or @import url('...') or @import url("...")
-		foreach ( $matches[7] as $match ) {
-			if ( !empty($match) ) {
-				$this->add_to_extracted_urls( preg_replace( '/\\\\(.)/u', '\\1', $match ) );
-			}
-		}
-
-		// url(...) or url('...') or url("...")
-		foreach ( $matches[11] as $match ) {
-			if ( !empty($match) ) {
-				$this->add_to_extracted_urls( preg_replace( '/\\\\(.)/u', '\\1', $match ) );
-			}
-		}
 	}
 
 	/**

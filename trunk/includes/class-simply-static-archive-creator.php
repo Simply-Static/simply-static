@@ -98,7 +98,7 @@ class Simply_Static_Archive_Creator {
 		}
 
 		// Add URLs to queue
-		$origin_url = sist_get_origin_scheme() . '://' . sist_get_origin_host();
+		$origin_url = home_url();
 		$destination_url = $this->destination_scheme . '://' . $this->destination_host;
 		$urls_queue = array_unique( array_merge(
 			array( trailingslashit( $origin_url ) ),
@@ -109,12 +109,6 @@ class Simply_Static_Archive_Creator {
 
 		while ( count( $urls_queue ) ) {
 			$current_url = array_shift( $urls_queue );
-
-			// Don't process URLs that don't match the home_url
-			// TODO: Keep a queue of failed urls too
-			if ( stripos( $current_url, home_url('/') ) !== 0 ) {
-				continue;
-			}
 
 			$response = Simply_Static_Url_Fetcher::fetch( $current_url );
 
@@ -128,24 +122,37 @@ class Simply_Static_Archive_Creator {
 			$path = $url_parts['path'];
 			$is_html = $response->is_html();
 
-			// If we get a 301 redirect, create a page that does a redirect
+			// If we get a 301 redirect...
 			if ( $response->code === 301 ) {
-				error_log( $path . ' | ' . $response->get_redirect_url() . ' ---- ' );
 
-				if ( $response->get_redirect_url() !== '' ) {
-					$view = new Simply_Static_View();
+				$redirect_url = $response->get_redirect_url();
 
-					$content = $view->set_template( 'redirect' )
-						->assign( 'redirect_url', $response->get_redirect_url() )
-						->render_to_string();
+				// WP likes to 301 redirect `/path` to `/path/` -- we want to
+				// check for this and just add the trailing slash'd version
+				if ( $redirect_url === trailingslashit( $current_url ) ) {
 
-					$this->save_url_to_file( $path, $content, $is_html );
+					$urls_queue = $this->add_url_to_queue( $urls_queue, $redirect_url );
 
+				} else {
+
+					// looks like a legit redirect; create a page that does a redirect
+
+					// if it's an origin url, we want to replace it with the destination
+					$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
+
+					if ( $redirect_url ) {
+						$view = new Simply_Static_View();
+
+						$content = $view->set_template( 'redirect' )
+							->assign( 'redirect_url', $redirect_url )
+							->render_to_string();
+
+						$this->save_url_to_file( $path, $content, $is_html );
+					}
 				}
 
 				continue;
 			}
-
 
 			// Not a 200 for the response code? Move on.
 			// TODO: Keep a queue of failed urls too
@@ -156,14 +163,9 @@ class Simply_Static_Archive_Creator {
 			$this->export_log[] = $current_url;
 
 			// Fetch all URLs from the page and add them to the queue...
-			$urls = $response->extract_urls( $origin_url );
+			$urls = $response->extract_urls();
 			foreach ( $urls as $url ) {
-				// ...assuming they're not a URL we've already processed
-				// and they're not the same as the URL we got them from,
-				// and they're not already in the queue to be processed
-				if ( ! in_array( $url, $this->export_log ) && $url != $current_url && ! in_array( $url, $urls_queue ) ) {
-					$urls_queue[] = $url;
-				}
+				$urls_queue = $this->add_url_to_queue( $urls_queue, $url );
 			}
 
 			// Replace the origin URL with the destination URL
@@ -173,6 +175,22 @@ class Simply_Static_Archive_Creator {
 			$content = $response->body;
 			$this->save_url_to_file( $path, $content, $is_html );
 		}
+	}
+
+	/**
+	 * Add a URL to the processing queue if we haven't already processed it and
+	 * if it's not in the queue to be processed
+	 *
+	 * @param array  $urls_queue Queue of URLs to be processed
+	 * @param string $url        URL to add to the processing queue
+	 * @return array             Queue of URLs to be processed
+	 */
+	private function add_url_to_queue( $urls_queue, $url ) {
+		if ( ! in_array( $url, $this->export_log ) && ! in_array( $url, $urls_queue ) ) {
+			$urls_queue[] = $url;
+		}
+
+		return $urls_queue;
 	}
 
 	/**

@@ -20,8 +20,14 @@ class Simply_Static_Url_Fetcher {
 	 * @return WP_Error|Simply_Static_Url_Response
 	 */
 	public static function fetch( $url ) {
+		// Don't process URLs that don't match the URL of this WordPress installation
+		if ( stripos( $url, home_url() ) !== 0 ) {
+			return new WP_Error( 'attempting_to_fetch_remote_url', sprintf( __( "Attempting to fetch remote URL: %s", Simply_Static::SLUG ), $url ) );
+		}
+
 		$response = wp_remote_get( $url, array(
 			'timeout' => self::TIMEOUT,
+			'sslverify' => false, // not verifying SSL because all calls are local
 			'redirection' => 0 // disable redirection
 		) );
 

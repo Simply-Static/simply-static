@@ -109,10 +109,9 @@ class Simply_Static_Url_Response {
 	/**
 	 * Extracts the list of unique URLs
 	 *
-	 * @param string $origin_url Base URL of site. Used to extract URLs that relate only to the current site.
 	 * @return array
 	 */
-	public function extract_urls( $origin_url ) {
+	public function extract_urls() {
 		$extractor = new Simply_Static_Url_Extractor( $this );
 		return $extractor->extract_urls();
 	}
