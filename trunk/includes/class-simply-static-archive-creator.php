@@ -123,7 +123,7 @@ class Simply_Static_Archive_Creator {
 			$is_html = $response->is_html();
 
 			// If we get a 301 redirect...
-			if ( $response->code === 301 ) {
+			if ( in_array( $response->code, array( 301, 302, 303, 307 ) ) ) {
 
 				$redirect_url = $response->get_redirect_url();
 
