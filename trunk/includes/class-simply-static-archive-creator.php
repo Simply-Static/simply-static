@@ -122,25 +122,34 @@ class Simply_Static_Archive_Creator {
 			$path = $url_parts['path'];
 			$is_html = $response->is_html();
 
-			// If we get a 301 redirect...
+			// If we get a 30x redirect...
 			if ( in_array( $response->code, array( 301, 302, 303, 307 ) ) ) {
 
 				$redirect_url = $response->get_redirect_url();
 
 				// WP likes to 301 redirect `/path` to `/path/` -- we want to
-				// check for this and just add the trailing slash'd version
+				// check for this and just add the trailing slashed version
 				if ( $redirect_url === trailingslashit( $current_url ) ) {
 
 					$urls_queue = $this->add_url_to_queue( $urls_queue, $redirect_url );
 
 				} else {
 
-					// looks like a legit redirect; create a page that does a redirect
-
-					// if it's an origin url, we want to replace it with the destination
-					$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
+					/// convert our potentially relative URL to an absolute URL
+					$redirect_url = sist_relative_to_absolute_url( $redirect_url, $current_url );
 
 					if ( $redirect_url ) {
+
+						// check if this is a local URL
+						if ( sist_is_local_url( $redirect_url ) ) {
+
+							// add the redirected page to the queue
+							$urls_queue = $this->add_url_to_queue( $urls_queue, $redirect_url );
+							// and update the URL
+							$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
+
+						}
+
 						$view = new Simply_Static_View();
 
 						$content = $view->set_template( 'redirect' )
@@ -148,6 +157,9 @@ class Simply_Static_Archive_Creator {
 							->render_to_string();
 
 						$this->save_url_to_file( $path, $content, $is_html );
+
+						$this->export_log[] = $current_url;
+
 					}
 				}
 

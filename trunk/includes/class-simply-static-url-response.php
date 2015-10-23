@@ -90,7 +90,7 @@ class Simply_Static_Url_Response {
 	 * @return string
 	 */
 	public function get_redirect_url() {
-		return array_key_exists( 'location', $this->headers ) ? $this->headers['location'] : '';
+		return isset( $this->headers['location'] ) ? $this->headers['location'] : '';
 	}
 
 	// /**

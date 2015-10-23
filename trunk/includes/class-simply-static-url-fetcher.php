@@ -21,7 +21,7 @@ class Simply_Static_Url_Fetcher {
 	 */
 	public static function fetch( $url ) {
 		// Don't process URLs that don't match the URL of this WordPress installation
-		if ( stripos( $url, home_url() ) !== 0 ) {
+		if ( ! sist_is_local_url( $url ) ) {
 			return new WP_Error( 'attempting_to_fetch_remote_url', sprintf( __( "Attempting to fetch remote URL: %s", Simply_Static::SLUG ), $url ) );
 		}
 

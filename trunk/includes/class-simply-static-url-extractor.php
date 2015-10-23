@@ -84,14 +84,6 @@ class Simply_Static_Url_Extractor {
 	protected $response;
 
 	/**
-	 * URL that has been parsed with parse_url
-	*
-	 * @var array
-	 */
-	protected $parsed_page_url = array();
-
-
-	/**
 	 * The url of the site
 	 *
 	 * @var array
@@ -106,7 +98,6 @@ class Simply_Static_Url_Extractor {
 	 */
 	public function __construct( $response ) {
 		$this->response = $response;
-		$this->parsed_page_url = parse_url( $response->url );
 	}
 
 	/**
@@ -184,8 +175,8 @@ class Simply_Static_Url_Extractor {
 	 */
 	private function extract_urls_from_css( $text ) {
 
-		$patterns	= array( "/url\(\s*[\"']?([^)\"']+)/", // url()
-											 "/@import\s+[\"']([^\"']+)/" ); // @import w/o url()
+		$patterns = array( "/url\(\s*[\"']?([^)\"']+)/", // url()
+		            "/@import\s+[\"']([^\"']+)/" ); // @import w/o url()
 
 		foreach ( $patterns as $pattern ) {
 			if ( preg_match_all( $pattern, $text, $matches, PREG_PATTERN_ORDER ) === false ) {
@@ -211,40 +202,10 @@ class Simply_Static_Url_Extractor {
 	 * @return void
 	 */
 	private function add_to_extracted_urls( $extracted_url ) {
-		$extracted_url = trim( $extracted_url );
-		if ( $extracted_url !== '' ) {
-			$parsed_extracted_url = parse_url( $extracted_url );
+		$absolute_url = sist_relative_to_absolute_url( $extracted_url, $this->response->url );
 
-			// parse_url can sometimes return false -- checking that they're both not false
-			if ( $this->parsed_page_url && $parsed_extracted_url ) {
-				// if the extracted url has a host
-				if ( array_key_exists( 'host', $parsed_extracted_url ) ) {
-					// and a scheme
-					if ( array_key_exists( 'scheme', $parsed_extracted_url ) ) {
-						// and (a) that scheme+host matches the scheme+host of the page we extracted it from
-						// (b) that the path exists (some links might only have a fragent, e.g. #section1)
-						if ( $this->parsed_page_url['scheme'] === $parsed_extracted_url['scheme']
-						&& $this->parsed_page_url['host'] === $parsed_extracted_url['host']
-						&& array_key_exists( 'path', $parsed_extracted_url ) ) {
-							$extracted_url = phpUri::parse( $this->response->url )->join( $parsed_extracted_url['path'] );
-							$this->extracted_urls[] = $extracted_url;
-						}
-					}
-				} else { // no host on extracted page (might be relative url)
-					// (a) filter out anything with a scheme, e.g. java:, data:, etc.)
-					// (b) check that path exists
-					// (c) and check for a bug in PHP <= 5.4.7 where URLs starting
-					// with '//' are identified as a path
-					// http://php.net/manual/en/function.parse-url.php#example-4617
-					if ( ! array_key_exists( 'scheme', $parsed_extracted_url )
-					&& array_key_exists( 'path', $parsed_extracted_url )
-					&& substr( $parsed_extracted_url['path'], 0, 2 ) !== '//' ) {
-						// turn our relative url into an absolute url
-						$extracted_url = phpUri::parse( $this->response->url )->join( $parsed_extracted_url['path'] );
-						$this->extracted_urls[] = $extracted_url;
-					}
-				}
-			}
+		if ( $absolute_url && sist_is_local_url( $absolute_url ) ) {
+			$this->extracted_urls[] = sist_remove_params_and_fragment( $absolute_url );
 		}
 	}
 }

@@ -7,12 +7,12 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 	/**
 	 * Set the test domain
 	 */
-	const DOMAIN = 'http://www.origin.test';
+	const DOMAIN = 'http://example.org';
 
 	/**
 	 * Set the test URL
 	 */
-	const URL = 'http://www.origin.test/blog/my-first-blog-post';
+	const URL = 'http://example.org/blog/my-first-blog-post';
 
 	/**
 	 * Helper function for creating extractors
@@ -64,9 +64,13 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 			"<a href='" . self::DOMAIN . "/14'>14</a>"
 				=> self::DOMAIN . '/14',
 			"<a href='" . self::DOMAIN . "#section15'>15</a>"
-				=> false,
+				=> self::DOMAIN,
 			"<a href='" . self::DOMAIN . "/test#section16'>16</a>"
-				=> self::DOMAIN . '/test'
+				=> self::DOMAIN . '/test',
+			"<a href='" . self::DOMAIN . "/test/17.htm'>17</a>"
+				=> self::DOMAIN . '/test/17.htm',
+			"<a href='http://www.external.com/18.htm'>18</a>"
+				=> false
 		);
 
 		foreach ( $content_and_urls as $content => $url ) {
