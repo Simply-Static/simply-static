@@ -4,7 +4,7 @@ Donate link: http://codeofconduct.co/
 Tags: simply static, html, static, static site, static site generator, performance, fast, optimization, availability, scaling, scalability, cdn, security, secure, zip, hardening
 Requires at least: 3.8
 Tested up to: 4.3
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,11 @@ Simply Static creates a copy of your WordPress site that is intended to be used 
 2. This is what the Simply Static Generate page looks like after you've generated your static files. We'll show you exactly which files we made a static copy of.
 
 == Changelog ==
+
+= 1.1.2, October 22, 2015 =
+
+* Fix: Now handling 302, 303, 307 HTTP codes for redirection in addition to 301
+* Fix: Redirection now properly handles relative URLs
 
 = 1.1.1, October 9, 2015 =
 
