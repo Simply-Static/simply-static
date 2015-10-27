@@ -94,11 +94,28 @@ function sist_relative_to_absolute_url( $extracted_url, $page_url ) {
 		return null;
 	}
 
+	// check for a protocol-less URL
+	// (Note: there's a bug in PHP <= 5.4.7 where parsed URLs starting with //
+	// are treated as a path. So we're doing this check upfront.)
+	// http://php.net/manual/en/function.parse-url.php#example-4617
+	if ( strpos( $extracted_url, '//' ) === 0 ) {
+
+		// if this is a local URL, add the protocol to the URL
+		if ( stripos( $extracted_url, '//' . sist_get_origin_host() ) === 0 ) {
+			$extracted_url = substr_replace( $extracted_url, sist_get_origin_scheme() . '://', 0, 2 );
+		}
+
+		return $extracted_url;
+
+	}
+
 	$parsed_extracted_url = parse_url( $extracted_url );
 
 	// parse_url can sometimes return false; bail if it does
 	if ( $parsed_extracted_url === false ) {
+
 		return null;
+
 	}
 
 	if ( isset( $parsed_extracted_url['host'] ) ) {
@@ -114,24 +131,14 @@ function sist_relative_to_absolute_url( $extracted_url, $page_url ) {
 
 		$path = isset( $parsed_extracted_url['path'] ) ? $parsed_extracted_url['path'] : '';
 
-		// Check for a bug in PHP <= 5.4.7 where URLs starting
-		// with '//' are identified as a path
-		// http://php.net/manual/en/function.parse-url.php#example-4617
-		if ( substr( $path, 0, 2 ) === '//' ) {
+		$query = isset( $parsed_extracted_url['query'] ) ? '?' . $parsed_extracted_url['query'] : '';
+		$fragment = isset( $parsed_extracted_url['fragment'] ) ? '#' . $parsed_extracted_url['fragment'] : '';
 
-			return $extracted_url;
+		// turn our relative url into an absolute url
+		$extracted_url = phpUri::parse( $page_url )->join( $path . $query . $fragment );
 
-		} else {
+		return $extracted_url;
 
-			$query = isset( $parsed_extracted_url['query'] ) ? '?' . $parsed_extracted_url['query'] : '';
-			$fragment = isset( $parsed_extracted_url['fragment'] ) ? '#' . $parsed_extracted_url['fragment'] : '';
-
-			// turn our relative url into an absolute url
-			$extracted_url = phpUri::parse( $page_url )->join( $path . $query . $fragment );
-
-			return $extracted_url;
-
-		}
 	}
 }
 

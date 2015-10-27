@@ -88,13 +88,16 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 				=> self::DOMAIN . '/test/17.htm',
 			// external urls don't get included
 			"<a href='http://www.external.com/18.htm'>18</a>"
-				=> false
+				=> false,
+			// protocol-less URLs
+			"<a href='//example.org/19.htm'>19</a>"
+				=> self::DOMAIN . '/19.htm'
 		);
 
 		foreach ( $content_and_urls as $content => $url ) {
 
 			$extractor = $this->build_extractor( 'html', $content );
-			$extracted_url = array_shift( $extractor->extract_urls() );
+			$extracted_url = current( $extractor->extract_urls() );
 			$this->assertEquals( $url, $extracted_url );
 
 		}
@@ -124,7 +127,7 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 		foreach ( $content_and_urls as $content => $url ) {
 
 			$extractor = $this->build_extractor( 'html', $content );
-			$extracted_url = array_shift( $extractor->extract_urls() );
+			$extracted_url = current( $extractor->extract_urls() );
 			$this->assertEquals( $url, $extracted_url );
 
 		}
@@ -216,7 +219,7 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 		foreach ( $content_and_urls as $content => $url ) {
 
 			$extractor = $this->build_extractor( 'html', $content );
-			$extracted_url = array_shift( $extractor->extract_urls() );
+			$extracted_url = current( $extractor->extract_urls() );
 			$this->assertEquals( $url, $extracted_url );
 
 		}
@@ -238,7 +241,7 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 		foreach ( $content_and_urls as $content => $url ) {
 
 			$extractor = $this->build_extractor( 'html', $content );
-			$extracted_url = array_shift( $extractor->extract_urls() );
+			$extracted_url = current( $extractor->extract_urls() );
 			$this->assertEquals( $url, $extracted_url );
 
 		}
@@ -274,7 +277,7 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 		foreach ( $content_and_urls as $content => $url ) {
 
 			$extractor = $this->build_extractor( 'css', $content );
-			$extracted_url = array_shift( $extractor->extract_urls() );
+			$extracted_url = current( $extractor->extract_urls() );
 			$this->assertEquals( $url, $extracted_url );
 
 		}
