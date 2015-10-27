@@ -34,41 +34,59 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 	public function test_extract_urls_with_html_links() {
 
 		$content_and_urls = array(
+			// basic relative url
 			"<a href='/one.htm'>one</a>"
 				=> self::DOMAIN . '/one.htm',
+			// extra spacing around href attribute
 			"<a href='    /two.htm  '>two</a>"
 				=> self::DOMAIN . '/two.htm',
+			// no quotes around href attribute
 			"<a href=three.htm>three</a>"
 				=> self::DOMAIN . '/blog/three.htm',
+			// support for ../ links
 			'<a href="../four.htm">four</a>'
 				=> self::DOMAIN . '/four.htm',
+			// support for ./ links
 			'<a href=./five.htm>five</a>'
 				=> self::DOMAIN . '/blog/five.htm',
+			// extra spacing between href name and value
 			'<a href = six.htm>six</a>'
 				=> self::DOMAIN . '/blog/six.htm',
+			// space in url
 			"<a href='file seven.pdf'>seven</a>"
 				=> self::DOMAIN . '/blog/file seven.pdf',
 			// This fails:
+			// space in url and no quotes
 			//'<a href=file eight.pdf>eight</a>'
 			//	=> self::DOMAIN . '/blog/file eight.pdf'
+			//	multiple attributes with no spacing
 			'<a href=nine.htm test=test>nine</a>'
 				=> self::DOMAIN . '/blog/nine.htm',
+			// relative url with path
 			"<a href='/path/ten.htm'>ten</a>"
 				=> self::DOMAIN . '/path/ten.htm',
+			// query params get striped out
 			"<a href='/11.htm?test=true'>11</a>"
 				=> self::DOMAIN . '/11.htm',
+			// fragments get striped out
 			"<a href='/12.htm#test'>12</a>"
 				=> self::DOMAIN . '/12.htm',
+			// non-standard casing
 			"<A HRef='/THIRTEEN.htm'>13</a>"
 				=> self::DOMAIN . '/THIRTEEN.htm',
+			// absolute url
 			"<a href='" . self::DOMAIN . "/14'>14</a>"
 				=> self::DOMAIN . '/14',
+			// absolute url with fragment only
 			"<a href='" . self::DOMAIN . "#section15'>15</a>"
 				=> self::DOMAIN,
+			// absolute url with path and fragment
 			"<a href='" . self::DOMAIN . "/test#section16'>16</a>"
 				=> self::DOMAIN . '/test',
+			// absolute url with path
 			"<a href='" . self::DOMAIN . "/test/17.htm'>17</a>"
 				=> self::DOMAIN . '/test/17.htm',
+			// external urls don't get included
 			"<a href='http://www.external.com/18.htm'>18</a>"
 				=> false
 		);
