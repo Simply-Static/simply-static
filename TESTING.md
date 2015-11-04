@@ -1,7 +1,7 @@
 ## Run tests
 
     1. Symlink the plugin directory into a working WordPress installation's `wp-content/plugins` directory.
-    2. In this symlinked directory, run ``./bin/install-wp-tests.sh DB_NAME DB_USER DB_PASS 127.0.0.1 latest`
+    2. In this symlinked directory, run `./bin/install-wp-tests.sh DB_NAME DB_USER DB_PASS 127.0.0.1 latest`
         (where DB_NAME, DB_USER, and DB_PASS are the database name, username, and password respectively)
         The database will be automatically created using the username and password provided.
     3. Run `phpunit`
