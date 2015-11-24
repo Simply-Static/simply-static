@@ -98,7 +98,7 @@ class Simply_Static_Archive_Creator {
 		}
 
 		// Add URLs to queue
-		$origin_url = home_url();
+		$origin_url = sist_home_url();
 		$destination_url = $this->destination_scheme . '://' . $this->destination_host;
 		$origin_path_length = strlen( parse_url( $origin_url, PHP_URL_PATH ) );
 		$urls_queue = array_unique( array_merge(
@@ -120,6 +120,8 @@ class Simply_Static_Archive_Creator {
 			}
 
 			$url_parts = parse_url( $response->url );
+			// TODO: This could throw an `Undefined index` error on URLs without
+			// a path, e.g. http://www.example.com (no trailing slash)
 			$path = $url_parts['path'];
 			if ( $origin_path_length > 1 ) { // prevents removal of '/'
 				$path = substr( $path, $origin_path_length );
