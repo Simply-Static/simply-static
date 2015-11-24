@@ -239,7 +239,7 @@ class Simply_Static_Archive_Creator {
 		$zip_file = untrailingslashit( $this->archive_dir ) . '.zip';
 		rename( $temporary_zip, $zip_file );
 
-		$archive_url = str_replace( plugin_dir_path( dirname( __FILE__ ) ), plugin_dir_url( dirname( __FILE__ ) ), $zip_file );
+		$archive_url = get_admin_url( null, 'admin.php' ) . '?download=' . basename( $zip_file );
 
 		return $archive_url;
 	}

@@ -76,6 +76,8 @@ class Simply_Static {
 			self::$instance->options = new Simply_Static_Options( self::SLUG );
 			self::$instance->view = new Simply_Static_View();
 
+			// Check for pending file download
+			add_action( 'plugins_loaded', array( self::$instance, 'download_file' ) );
 			// Load the text domain for i18n
 			add_action( 'plugins_loaded', array( self::$instance, 'load_textdomain' ) );
 			// Enqueue admin styles
@@ -224,13 +226,13 @@ class Simply_Static {
 			// TODO: archive_url could be a WP_Error
 			if ( $this->options->get( 'delivery_method' ) == 'zip' ) {
 
-				$archive_url = $archive_creator->create_zip();
-				if ( is_wp_error( $archive_url ) ) {
-					$error = $archive_url->get_error_message();
+				$zip_file = $archive_creator->create_zip();
+				if ( is_wp_error( $zip_file ) ) {
+					$error = $zip_file->get_error_message();
 					$this->view->add_flash( 'error', $error );
 				} else {
 					$message = __( 'ZIP archive created: ', self::SLUG );
-					$message .= ' <a href="' . $archive_url . '">' . __( 'Click here to download', self::SLUG ) . '</a>';
+					$message .= ' <a href="' . $zip_file . '">' . __( 'Click here to download', self::SLUG ) . '</a>';
 					$this->view->add_flash( 'updated', $message );
 				}
 
@@ -375,5 +377,23 @@ class Simply_Static {
 		}
 
 		return $errors;
+	}
+
+	/**
+	 * Check for a pending file download; prompt user to download file
+	 *
+	 * @return null
+	 */
+	public function download_file() {
+		if( isset( $_GET['download'] ) ) {
+			$filename = $_GET['download'];
+			header( 'Content-Description: File Transfer' );
+			header( 'Content-Disposition: attachment; filename=' . $filename );
+			header( 'Content-Type: application/zip, application/octet-stream; charset=' . get_option( 'blog_charset' ), true );
+			header( 'Pragma: no-cache' );
+			header( 'Expires: 0' );
+			readfile( path_join( self::$instance->options->get( 'temp_files_dir' ), $filename ) );
+			exit();
+		}
 	}
 }
