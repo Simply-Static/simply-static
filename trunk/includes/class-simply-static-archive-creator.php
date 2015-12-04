@@ -98,8 +98,9 @@ class Simply_Static_Archive_Creator {
 		}
 
 		// Add URLs to queue
-		$origin_url = home_url();
+		$origin_url = sist_home_url();
 		$destination_url = $this->destination_scheme . '://' . $this->destination_host;
+		$origin_path_length = strlen( parse_url( $origin_url, PHP_URL_PATH ) );
 		$urls_queue = array_unique( array_merge(
 			array( trailingslashit( $origin_url ) ),
 			// using preg_split to intelligently break at newlines
@@ -119,7 +120,12 @@ class Simply_Static_Archive_Creator {
 			}
 
 			$url_parts = parse_url( $response->url );
+			// TODO: This could throw an `Undefined index` error on URLs without
+			// a path, e.g. http://www.example.com (no trailing slash)
 			$path = $url_parts['path'];
+			if ( $origin_path_length > 1 ) { // prevents removal of '/'
+				$path = substr( $path, $origin_path_length );
+			}
 			$is_html = $response->is_html();
 
 			// If we get a 30x redirect...
@@ -233,9 +239,9 @@ class Simply_Static_Archive_Creator {
 		$zip_file = untrailingslashit( $this->archive_dir ) . '.zip';
 		rename( $temporary_zip, $zip_file );
 
-		$archive_url = str_replace( plugin_dir_path( dirname( __FILE__ ) ), plugin_dir_url( dirname( __FILE__ ) ), $zip_file );
+		$download_url = get_admin_url( null, 'admin.php' ) . '?download=' . basename( $zip_file );
 
-		return $archive_url;
+		return $download_url;
 	}
 
 	/**

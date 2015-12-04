@@ -26,7 +26,7 @@ function sist_get_origin_scheme() {
 * @return string host (URL minus the protocol)
 */
 function sist_get_origin_host() {
-	return untrailingslashit( preg_replace( "(^https?://)", "", home_url() ) );
+	return untrailingslashit( preg_replace( "(^https?://)", "", sist_home_url() ) );
 }
 
 
@@ -149,7 +149,16 @@ function sist_relative_to_absolute_url( $extracted_url, $page_url ) {
  * @return boolean      true if URL is local, false otherwise
  */
 function sist_is_local_url( $url ) {
-	return ( stripos( $url, home_url() ) === 0 );
+	return ( stripos( $url, sist_home_url() ) === 0 );
+}
+
+/**
+ * Wrapper around home_url(). Useful for swapping out the URL during debugging.
+ *
+ * @return string home URL
+ */
+function sist_home_url() {
+	return home_url();
 }
 
 /**
