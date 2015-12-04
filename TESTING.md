@@ -42,7 +42,7 @@ Open up `~/.bashrc` with your favorite text editor:
 
 Add this after/below your rbenv declaration:
 
-    export PATH="/home/scott/.phpenv/bin:$PATH"
+    export PATH="/home/USERNAME/.phpenv/bin:$PATH"
     eval "$(phpenv init -)"
 
 Save that, and then run:
