@@ -123,11 +123,12 @@ class Simply_Static_Url_Response {
 	 * @param string $destination_url
 	 * @return void
 	 */
-	public function replace_url( $origin_url, $destination_url ) {
+	public function replace_urls( $destination_url ) {
 		if ( $this->is_html() ) {
-			$response_body = str_replace( $origin_url, $destination_url, $this->body );
+			// replace any instance of the origin url, whether it starts with https://, http://, or //
+			$response_body = preg_replace( '/(https?:)?\/\/' . addcslashes( sist_origin_host(), '/' ) . '/i', $destination_url, $this->body );
 			// also replace wp_json_encode'd urls, as used by `concatemoji`
-			$response_body = str_replace( addcslashes( $origin_url, '/' ), addcslashes( $destination_url, '/' ), $response_body );
+			$response_body = str_replace( addcslashes( sist_origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
 			$this->body = $response_body;
 		}
 	}

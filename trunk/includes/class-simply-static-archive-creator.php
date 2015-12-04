@@ -98,7 +98,7 @@ class Simply_Static_Archive_Creator {
 		}
 
 		// Add URLs to queue
-		$origin_url = sist_home_url();
+		$origin_url = sist_origin_url();
 		$destination_url = $this->destination_scheme . '://' . $this->destination_host;
 		$origin_path_length = strlen( parse_url( $origin_url, PHP_URL_PATH ) );
 		$urls_queue = array_unique( array_merge(
@@ -187,7 +187,7 @@ class Simply_Static_Archive_Creator {
 			}
 
 			// Replace the origin URL with the destination URL
-			$response->replace_url( $origin_url, $destination_url );
+			$response->replace_urls( $destination_url );
 
 			// Save the page to our archive
 			$content = $response->body;

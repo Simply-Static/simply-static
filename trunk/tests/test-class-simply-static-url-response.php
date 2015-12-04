@@ -30,16 +30,16 @@ class Simply_Static_Url_Response_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers Simply_Static_Url_Response::replace_url
+	 * @covers Simply_Static_Url_Response::replace_urls
 	 */
-	public function test_replace_url() {
-		$origin_url = 'www.origin.test';
-		$destination_url = 'www.destination.test';
+	public function test_replace_urls() {
+		$origin_url = 'http://example.org';
+		$destination_url = 'http://www.destination.test';
 
 		$content = $origin_url;
 
 		$response = Simply_Static_Url_Response_Factory::build( 'html', $content );
-		$response->replace_url( $origin_url, $destination_url );
+		$response->replace_urls( $destination_url );
 
 		$this->assertEquals( $destination_url, $response->body );
 	}

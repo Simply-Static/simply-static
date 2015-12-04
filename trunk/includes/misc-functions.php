@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 *
 * @return string http or https
 */
-function sist_get_origin_scheme() {
+function sist_origin_scheme() {
 	return is_ssl() ? 'https' : 'http';
 }
 
@@ -25,10 +25,27 @@ function sist_get_origin_scheme() {
 *
 * @return string host (URL minus the protocol)
 */
-function sist_get_origin_host() {
-	return untrailingslashit( preg_replace( "(^https?://)", "", sist_home_url() ) );
+function sist_origin_host() {
+	return untrailingslashit( preg_replace( "(^https?://)", "", sist_origin_url() ) );
 }
 
+/**
+ * Wrapper around home_url(). Useful for swapping out the URL during debugging.
+ *
+ * @return string home URL
+ */
+function sist_origin_url() {
+	return home_url();
+}
+
+/**
+ * Wrapper around site_url(). Returns the URL used for the WP installation.
+ *
+ * @return string home URL
+ */
+function sist_wp_installation_url() {
+	return site_url();
+}
 
 /**
  * Echo the selected value for an option tag if the statement is true.
@@ -101,8 +118,8 @@ function sist_relative_to_absolute_url( $extracted_url, $page_url ) {
 	if ( strpos( $extracted_url, '//' ) === 0 ) {
 
 		// if this is a local URL, add the protocol to the URL
-		if ( stripos( $extracted_url, '//' . sist_get_origin_host() ) === 0 ) {
-			$extracted_url = substr_replace( $extracted_url, sist_get_origin_scheme() . '://', 0, 2 );
+		if ( stripos( $extracted_url, '//' . sist_origin_host() ) === 0 ) {
+			$extracted_url = substr_replace( $extracted_url, sist_origin_scheme() . '://', 0, 2 );
 		}
 
 		return $extracted_url;
@@ -149,16 +166,7 @@ function sist_relative_to_absolute_url( $extracted_url, $page_url ) {
  * @return boolean      true if URL is local, false otherwise
  */
 function sist_is_local_url( $url ) {
-	return ( stripos( $url, sist_home_url() ) === 0 );
-}
-
-/**
- * Wrapper around home_url(). Useful for swapping out the URL during debugging.
- *
- * @return string home URL
- */
-function sist_home_url() {
-	return home_url();
+	return ( stripos( $url, sist_origin_url() ) === 0 );
 }
 
 /**

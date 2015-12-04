@@ -118,8 +118,8 @@ class Simply_Static {
 		if ( null === $this->options->get( 'version' ) ) {
 			$this->options
 				->set( 'version', self::VERSION )
-				->set( 'destination_scheme', sist_get_origin_scheme() )
-				->set( 'destination_host', sist_get_origin_host() )
+				->set( 'destination_scheme', sist_origin_scheme() )
+				->set( 'destination_host', sist_origin_host() )
 				->set( 'temp_files_dir', trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' ) )
 				->set( 'additional_urls', '' )
 				->set( 'delivery_method', 'zip' )
@@ -281,8 +281,8 @@ class Simply_Static {
 			->set_layout( 'admin' )
 			->set_template( 'options' )
 			->assign( 'slug', self::SLUG )
-			->assign( 'origin_scheme', sist_get_origin_scheme() )
-			->assign( 'origin_host', sist_get_origin_host() )
+			->assign( 'origin_scheme', sist_origin_scheme() )
+			->assign( 'origin_host', sist_origin_host() )
 			->assign( 'destination_scheme', $this->options->get( 'destination_scheme' ) )
 			->assign( 'destination_host', $this->options->get( 'destination_host' ) )
 			->assign( 'temp_files_dir', $this->options->get( 'temp_files_dir' ) )
