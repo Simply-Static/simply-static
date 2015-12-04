@@ -126,6 +126,8 @@ class Simply_Static_Url_Response {
 	public function replace_url( $origin_url, $destination_url ) {
 		if ( $this->is_html() ) {
 			$response_body = str_replace( $origin_url, $destination_url, $this->body );
+			// also replace wp_json_encode'd urls, as used by `concatemoji`
+			$response_body = str_replace( addcslashes( $origin_url, '/' ), addcslashes( $destination_url, '/' ), $response_body );
 			$this->body = $response_body;
 		}
 	}
