@@ -226,13 +226,13 @@ class Simply_Static {
 			// TODO: archive_url could be a WP_Error
 			if ( $this->options->get( 'delivery_method' ) == 'zip' ) {
 
-				$zip_file = $archive_creator->create_zip();
-				if ( is_wp_error( $zip_file ) ) {
-					$error = $zip_file->get_error_message();
+				$download_url = $archive_creator->create_zip();
+				if ( is_wp_error( $download_url ) ) {
+					$error = $download_url->get_error_message();
 					$this->view->add_flash( 'error', $error );
 				} else {
 					$message = __( 'ZIP archive created: ', self::SLUG );
-					$message .= ' <a href="' . $zip_file . '">' . __( 'Click here to download', self::SLUG ) . '</a>';
+					$message .= ' <a href="' . $download_url . '">' . __( 'Click here to download', self::SLUG ) . '</a>';
 					$this->view->add_flash( 'updated', $message );
 				}
 
