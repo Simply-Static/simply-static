@@ -1,7 +1,10 @@
 <?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
- * Simply Static URL extractor class
+ * Simply Static URL extractor class. Note that in addition to extracting URLs
+ * this class also makes modifications to the Simply_Static_Url_Response
+ * that is passed into it: URLs in the body of the response are updated to
+ * be absolute URLs.
  *
  * @package Simply_Static
  */
@@ -93,8 +96,7 @@ class Simply_Static_Url_Extractor {
 	/**
 	 * Constructor
 	 *
-	 * @param string $page_contents The contents of the html/css/etc. page/file
-	 * @param string $url The url of the site
+	 * @param string response URL Response object
 	 */
 	public function __construct( $response ) {
 		$this->response = $response;
@@ -113,13 +115,12 @@ class Simply_Static_Url_Extractor {
 	 * @return array $urls
 	 */
 	public function extract_urls() {
-
 		if ( $this->response->is_html() ) {
-			$this->extract_urls_from_html();
+			$this->response->body = $this->extract_urls_from_html();
 		}
 
 		if ( $this->response->is_css() ) {
-			$this->extract_urls_from_css( $this->response->body );
+			$this->response->body = $this->extract_urls_from_css( $this->response->body );
 		}
 
 		return array_unique( $this->extracted_urls );
@@ -127,14 +128,18 @@ class Simply_Static_Url_Extractor {
 
 	/**
 	 * Loops through all elements in the DOM to pull out URLs
-	*
-	 * @return void
+	 *
+	 * @return string The HTML with all URLs made absolute
 	 */
 	private function extract_urls_from_html() {
-
 		$doc = new DOMDocument();
+		// ensuring we don't throw visible errors during html loading
 		libxml_use_internal_errors( true );
-		$doc->loadHTML( $this->response->body );
+
+		// DOMDocument doesn't handle encoding correctly and garbles the output
+		$this->response->body = mb_convert_encoding( $this->response->body, 'HTML-ENTITIES', 'UTF-8' );
+		@$doc->loadHTML( $this->response->body );  // suppress warnings
+
 		libxml_use_internal_errors( false );
 		// get all elements on the page
 		$elements = $doc->getElementsByTagName( '*' );
@@ -142,22 +147,30 @@ class Simply_Static_Url_Extractor {
 			$tag_name = $element->tagName;
 
 			if( $tag_name === 'style' ) {
-				$this->extract_urls_from_css( $element->nodeValue );
+				$updated_css = $this->extract_urls_from_css( $element->nodeValue );
+				$element->nodeValue = $updated_css;
 			} else {
 				$style_attr_value = $element->getAttribute( 'style' );
 				if ( $style_attr_value !== '' ) {
-					$this->extract_urls_from_css( $style_attr_value );
+					$updated_css = $this->extract_urls_from_css( $style_attr_value );
+					$element->setAttribute( 'style', $updated_css );
 				}
 
 				if ( array_key_exists( $tag_name, self::$match_elements ) ) {
 					$match_attributes = self::$match_elements[ $tag_name ];
 					foreach ( $match_attributes as $attribute_name ) {
 						$extracted_url = $element->getAttribute( $attribute_name );
-						$this->add_to_extracted_urls( $extracted_url );
+						if ( $extracted_url !== '' ) {
+							$absolute_extracted_url = $this->add_to_extracted_urls( $extracted_url );
+							$element->setAttribute( $attribute_name, $absolute_extracted_url );
+						}
 					}
 				}
 			}
 		}
+
+		// update the response body with updated links
+		return $doc->saveHTML();
 	}
 
 	/**
@@ -171,25 +184,39 @@ class Simply_Static_Url_Extractor {
 	 * URLs are either contained within url(), part of an @import statement,
 	 * or both.
 	 *
-	 * @return void
+	 * @param  string $text The CSS to extract URLs from
+	 * @return string The CSS with all URLs made absolute
 	 */
 	private function extract_urls_from_css( $text ) {
-
 		$patterns = array( "/url\(\s*[\"']?([^)\"']+)/", // url()
 		            "/@import\s+[\"']([^\"']+)/" ); // @import w/o url()
 
 		foreach ( $patterns as $pattern ) {
-			if ( preg_match_all( $pattern, $text, $matches, PREG_PATTERN_ORDER ) === false ) {
-				return;
-			}
-
-			foreach ( $matches[1] as $match ) {
-				if ( !empty($match) ) {
-					$this->add_to_extracted_urls( $match );
-				}
-			}
+			$text = preg_replace_callback( $pattern, array( $this, 'css_matches' ), $text );
 		}
 
+		return $text;
+	}
+
+	/**
+	 * callback function for preg_replace in extract_urls_from_css
+	 *
+	 * Takes the match, extracts the URL, adds it to the list of URLs, converts
+	 * the URL to an absolute URL.
+	 *
+	 * @param  array $matches Array of preg_replace matches
+	 * @return string An updated string for the text that was originally matched
+	 */
+	private function css_matches( $matches ) {
+		$full_match = $matches[0];
+		$extracted_url = $matches[1];
+
+		if ( isset( $extracted_url ) && $extracted_url !== '' ) {
+			$absolute_extracted_url = $this->add_to_extracted_urls( $extracted_url );
+			$full_match = str_ireplace( $extracted_url, $absolute_extracted_url, $full_match );
+		}
+
+		return $full_match;
 	}
 
 	/**
@@ -199,7 +226,8 @@ class Simply_Static_Url_Extractor {
 	 * extracted from. Relative URLs are converted to absolute URLs before being
 	 * added to the array.
 	 *
-	 * @return void
+	 * @return string The URL that should be added to the list of extracted URLs
+	 * @return string The URL, converted to an absolute URL
 	 */
 	private function add_to_extracted_urls( $extracted_url ) {
 		$absolute_url = sist_relative_to_absolute_url( $extracted_url, $this->response->url );
@@ -207,5 +235,7 @@ class Simply_Static_Url_Extractor {
 		if ( $absolute_url && sist_is_local_url( $absolute_url ) ) {
 			$this->extracted_urls[] = sist_remove_params_and_fragment( $absolute_url );
 		}
+
+		return $absolute_url;
 	}
 }

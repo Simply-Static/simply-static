@@ -124,10 +124,15 @@ class Simply_Static_Url_Response {
 	 * @return void
 	 */
 	public function replace_urls( $destination_url ) {
-		if ( $this->is_html() ) {
+		/* TODO: Might want to eventually rope this into extract_urls_from_html/
+		 	extract_urls_from_css so that we're only doing preg_replace/
+			str_replace once. Only reason I'm not doing that now is because of
+			the fix for wp_json_encode.
+		*/
+		if ( $this->is_html() || $this->is_css() ) {
 			// replace any instance of the origin url, whether it starts with https://, http://, or //
 			$response_body = preg_replace( '/(https?:)?\/\/' . addcslashes( sist_origin_host(), '/' ) . '/i', $destination_url, $this->body );
-			// also replace wp_json_encode'd urls, as used by `concatemoji`
+			// also replace wp_json_encode'd urls, as used by WP's `concatemoji`
 			$response_body = str_replace( addcslashes( sist_origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
 			$this->body = $response_body;
 		}

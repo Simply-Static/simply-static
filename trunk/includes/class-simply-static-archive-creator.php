@@ -100,7 +100,6 @@ class Simply_Static_Archive_Creator {
 		// Add URLs to queue
 		$origin_url = sist_origin_url();
 		$destination_url = $this->destination_scheme . '://' . $this->destination_host;
-		$origin_path_length = strlen( parse_url( $origin_url, PHP_URL_PATH ) );
 		$urls_queue = array_unique( array_merge(
 			array( trailingslashit( $origin_url ) ),
 			// using preg_split to intelligently break at newlines
@@ -123,9 +122,6 @@ class Simply_Static_Archive_Creator {
 			// TODO: This could throw an `Undefined index` error on URLs without
 			// a path, e.g. http://www.example.com (no trailing slash)
 			$path = $url_parts['path'];
-			if ( $origin_path_length > 1 ) { // prevents removal of '/'
-				$path = substr( $path, $origin_path_length );
-			}
 			$is_html = $response->is_html();
 
 			// If we get a 30x redirect...
@@ -182,6 +178,7 @@ class Simply_Static_Archive_Creator {
 
 			// Fetch all URLs from the page and add them to the queue...
 			$urls = $response->extract_urls();
+
 			foreach ( $urls as $url ) {
 				$urls_queue = $this->add_url_to_queue( $urls_queue, $url );
 			}
