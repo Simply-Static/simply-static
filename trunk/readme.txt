@@ -32,23 +32,25 @@ or
 
 == Frequently Asked Questions ==
 
-= Who should use Simply Static? =
-
-Simply Static is great for sites with no user interactivity, such as blogs (with comments disabled) or brochure-ware sites for small businesses (with no forms).
-
 = What does Simply Static do? =
 
 Simply Static generates static (HTML) copies of your WordPress pages. It works a bit like a web crawler, starting at the main page of your website and looking for links to other pages to create static copies of. It also includes any images, CSS & JS files, and any other files that it can find a link to.
 
 As Simply Static is creating the static pages, it will automatically replace the URL for the WordPress installation with the URL for the site that you're going to have hosting the static files. So if WordPress is hosted at wordpress.example.com and your static site will be at www.example.com, all instances of wordpress.example.com will be replaced with www.example.com.
 
+= Who should use Simply Static? =
+
+Simply Static is great for sites with no user interactivity, such as blogs (with comments disabled) or brochure-ware sites for small businesses (with no forms).
+
+= Are there any limitations? =
+
+Yes. Simply Static is only able to create a static copy of an entire site. It cannot selectively create static copies of specific pages, such as recently added posts. This means that if you have a site with 20,000 posts, and you add a new post, Simply Static will create a static copy of all 20,001 posts. This, combined with the fact that the plugin doesn't provide any kind of progress notification, means that Simply Static will provide a less-than-optimal experience for very large WordPress sites. We do plan to support very large sites eventually.
+
 = How do I set up Simply Static? =
 
 Let's assume you presently have WordPress hosting a site at www.example.com, and that's where you'd like to have your static site instead. Your first task is going to be to move your WordPress installation to a subdomain, such as wordpress.example.com. Once that is complete, you'll set up www.example.com to receive your static files.
 
 If www.example.com is on the same server as your WordPress installation, you can have Simply Static copy the static files to the directory that www.example.com is serving files from. If www.example.com is on a different server, you can download a zip of your static files and then upload them to www.example.com.
-
-In the future we'll add more ways to transfer your files to other servers, such as FTP, SFTP, and SCP, and add support for specialty destinations like Amazon S3.
 
 = Will this plugin interfere with other plugins? =
 
@@ -61,6 +63,10 @@ Note that you can achieve some of this functionality by using plugins that inter
 Cache plugins -- such as W3 Total Cache or WP Super Cache -- make your existing WordPress site faster by caching pages as they're visited. This makes your site much faster, but still leaves your WordPress installation accessible to the outside world. Unless you keep on top of updates, your WordPress installation can become vulnerable to hackers due to security vulnerabilities that are found over time.
 
 Simply Static creates a copy of your WordPress site that is intended to be used completely separately from your WordPress installation. Your WordPress installation lives on one server and your static site is served on a different server. Or, they're both on the same server, but your WordPress installation is restricted to only allow access from certain ip addresses or with an additional username/password requirement. Your static site is just a collection of static files with no server-side code or database -- nothing for hackers to hack -- while your WordPress installation remains safe and secure.
+
+= Does Simply Static work on Windows hosts? What about WAMP? =
+
+No. We haven't done any testing on Windows and, based on user feedback, it seems like it is not working on Windows presently.
 
 == Screenshots ==
 
