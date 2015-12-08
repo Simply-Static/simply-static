@@ -4,7 +4,7 @@ Donate link: http://codeofconduct.co/
 Tags: simply static, html, static, static site, static site generator, performance, fast, optimization, availability, scaling, scalability, cdn, security, secure, zip, hardening
 Requires at least: 3.8
 Tested up to: 4.3
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -74,6 +74,13 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 2. This is what the Simply Static Generate page looks like after you've generated your static files. We'll show you exactly which files we made a static copy of.
 
 == Changelog ==
+
+= 1.1.3, December 7, 2015 =
+
+* Fix: Able to fetch protocol-less URLs, e.g. href='//example.com/image.png'
+* Fix: Static files won't be put in a subdirectory if your WP install is in a subdirectory
+* Fix: Able to download ZIP regardless of whether files are on an accessible path on the server
+* Fix: Escaped URLs, such as those used by WP's concatemoji, are now properly replaced with Destination URLs
 
 = 1.1.2, October 22, 2015 =
 
