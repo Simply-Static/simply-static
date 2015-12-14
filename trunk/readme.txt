@@ -1,9 +1,9 @@
 === Simply Static ===
 Contributors: codeofconduct
 Donate link: http://codeofconduct.co/
-Tags: simply static, html, static, static site, static site generator, performance, fast, optimization, availability, scaling, scalability, cdn, security, secure, zip, hardening
+Tags: simply static, html, static, static site, static site generator, static website generator, performance, fast, optimization, availability, scaling, scalability, cdn, security, secure, zip, hardening
 Requires at least: 3.8
-Tested up to: 4.3
+Tested up to: 4.4
 Stable tag: 1.1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
