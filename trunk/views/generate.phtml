@@ -11,7 +11,25 @@
 	<?php if ( is_array( $this->export_log ) && count( $this->export_log ) ): ?>
 		<h3><?php _e( 'Export Log', $this->slug ); ?></h3>
 		<div class="export-log">
-			<pre><?php echo implode( "\n", $this->export_log ) ?></pre>
+			<table class="widefat">
+				<thead>
+					<tr>
+						<th>Code</th>
+						<th>URL</th>
+						<th>Found on</th>
+					</tr>
+				</thead>
+				<tbody>
+
+				<?php foreach ( $this->export_log as $url => $data ) : ?>
+					<tr>
+						<td><?php echo $data['code']; ?></td>
+						<td><?php echo $url; ?></td>
+						<td><?php echo $data['source_url']; ?></td>
+					</tr>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
 		</div>
 	<?php endif ?>
 

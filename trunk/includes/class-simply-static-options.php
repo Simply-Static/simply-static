@@ -44,7 +44,7 @@ class Simply_Static_Options {
 	 * @return Simply_Static_Options
 	 */
 	public function set( $name, $value ) {
-		$this->options[$name] = $value;
+		$this->options[ $name ] = $value;
 		return $this;
 	}
 
@@ -55,7 +55,7 @@ class Simply_Static_Options {
 	 * @return mixed|null
 	 */
 	public function get( $name ) {
-		return array_key_exists( $name, $this->options ) ? $this->options[$name] : null;
+		return array_key_exists( $name, $this->options ) ? $this->options[ $name ] : null;
 	}
 
 	/**

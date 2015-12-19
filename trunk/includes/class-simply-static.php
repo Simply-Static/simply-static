@@ -11,7 +11,7 @@ class Simply_Static {
 	 *
 	 * @var string
 	 */
-	const VERSION = '1.1.3';
+	const VERSION = '1.2.0';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, etc.
@@ -142,6 +142,7 @@ class Simply_Static {
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-fetcher.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-response.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-archive-creator.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-export-log.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/misc-functions.php';
 	}
 
@@ -255,7 +256,8 @@ class Simply_Static {
 				$deleted_successfully = $archive_creator->delete_static_files();
 			}
 
-			$export_log = $archive_creator->get_export_log();
+			$export_log = $archive_creator->export_log->sort()->get_log();
+
 			$this->view->assign( 'export_log', $export_log );
 		}
 

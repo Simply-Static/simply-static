@@ -93,7 +93,7 @@ class Simply_Static_View {
 	 * @return mixed|null
 	 */
 	public function __get( $name ) {
-		$value = array_key_exists( $name, $this->variables ) ? $this->variables[$name] : null;
+		$value = array_key_exists( $name, $this->variables ) ? $this->variables[ $name ] : null;
 		return $value;
 	}
 
@@ -105,7 +105,7 @@ class Simply_Static_View {
 	* @return Simply_Static_View
 	*/
 	public function __set( $name, $value ) {
-		$this->variables[$name] = $value;
+		$this->variables[ $name ] = $value;
 		return $this;
 	}
 

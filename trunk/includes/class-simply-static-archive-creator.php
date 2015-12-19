@@ -15,11 +15,18 @@ class Simply_Static_Archive_Creator {
 	protected $archive_dir;
 
 	/**
-	 * Export log (list of processed urls)
+	 * Export log (processed urls, http/error codes, and source URLs)
+	 *
+	 * @var Simply_Static_Export_Log
+	 */
+	public $export_log = null;
+
+	/**
+	 * Queue of URLs to be processed
 	 *
 	 * @var array
 	 */
-	protected $export_log = array();
+	public $urls_queue = null;
 
 	/**
 	 * The slug (id) used for the plugin
@@ -67,15 +74,7 @@ class Simply_Static_Archive_Creator {
 		$this->destination_host = $destination_host;
 		$this->temp_files_dir = $temp_files_dir;
 		$this->additional_urls = $additional_urls;
-	}
-
-	/**
-	 * Get the list of URLs in the archive
-	 *
-	 * @param array $export_log URLs that were successfully added to the archive
-	 */
-	public function get_export_log() {
-		return $this->export_log;
+		$this->export_log = new Simply_Static_Export_Log();
 	}
 
 	/**
@@ -101,15 +100,15 @@ class Simply_Static_Archive_Creator {
 		$origin_url = sist_origin_url();
 		$destination_url = $this->destination_scheme . '://' . $this->destination_host;
 		$origin_path_length = strlen( parse_url( $origin_url, PHP_URL_PATH ) );
-		$urls_queue = array_unique( array_merge(
+		$this->urls_queue = array_unique( array_merge(
 			array( trailingslashit( $origin_url ) ),
 			// using preg_split to intelligently break at newlines
 			// see: http://stackoverflow.com/questions/1483497/how-to-put-string-in-array-split-by-new-line
 			preg_split( "/\r\n|\n|\r/", $this->additional_urls )
 		) );
 
-		while ( count( $urls_queue ) ) {
-			$current_url = array_shift( $urls_queue );
+		while ( count( $this->urls_queue ) ) {
+			$current_url = array_shift( $this->urls_queue );
 
 			$response = Simply_Static_Url_Fetcher::fetch( $current_url );
 
@@ -119,10 +118,11 @@ class Simply_Static_Archive_Creator {
 				continue;
 			}
 
+			$this->export_log->set_response_code( $current_url, $response->code );
+
 			$url_parts = parse_url( $response->url );
-			// TODO: This could throw an `Undefined index` error on URLs without
-			// a path, e.g. http://www.example.com (no trailing slash)
-			$path = $url_parts['path'];
+			// a domain with no trailing slash has no path, so we're giving it one
+			$path = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
 			if ( $origin_path_length > 1 ) { // prevents removal of '/'
 				$path = substr( $path, $origin_path_length );
 			}
@@ -138,7 +138,7 @@ class Simply_Static_Archive_Creator {
 				// check for this and just add the trailing slashed version
 				if ( $redirect_url === trailingslashit( $current_url ) ) {
 
-					$urls_queue = $this->add_url_to_queue( $urls_queue, $redirect_url );
+					$this->add_url_to_queue( $redirect_url );
 
 				} else {
 
@@ -151,7 +151,8 @@ class Simply_Static_Archive_Creator {
 						if ( sist_is_local_url( $redirect_url ) ) {
 
 							// add the redirected page to the queue
-							$urls_queue = $this->add_url_to_queue( $urls_queue, $redirect_url );
+							$this->add_url_to_queue( $redirect_url );
+							$this->export_log->set_source_url( $redirect_url, $current_url );
 							// and update the URL
 							$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
 
@@ -164,9 +165,6 @@ class Simply_Static_Archive_Creator {
 							->render_to_string();
 
 						$this->save_url_to_file( $path, $content, $is_html );
-
-						$this->export_log[] = $current_url;
-
 					}
 				}
 
@@ -179,13 +177,12 @@ class Simply_Static_Archive_Creator {
 				continue;
 			}
 
-			$this->export_log[] = $current_url;
-
 			// Fetch all URLs from the page and add them to the queue...
 			$urls = $response->extract_urls();
 
 			foreach ( $urls as $url ) {
-				$urls_queue = $this->add_url_to_queue( $urls_queue, $url );
+				$this->add_url_to_queue( $url );
+				$this->export_log->set_source_url( $url, $current_url );
 			}
 
 			// Replace the origin URL with the destination URL
@@ -197,6 +194,8 @@ class Simply_Static_Archive_Creator {
 		}
 	}
 
+
+
 	/**
 	 * Add a URL to the processing queue if we haven't already processed it and
 	 * if it's not in the queue to be processed
@@ -205,12 +204,12 @@ class Simply_Static_Archive_Creator {
 	 * @param string $url        URL to add to the processing queue
 	 * @return array             Queue of URLs to be processed
 	 */
-	private function add_url_to_queue( $urls_queue, $url ) {
-		if ( ! in_array( $url, $this->export_log ) && ! in_array( $url, $urls_queue ) ) {
-			$urls_queue[] = $url;
+	private function add_url_to_queue( $url ) {
+		if ( ! $this->export_log->includes( $url ) && ! in_array( $url, $this->urls_queue ) ) {
+			$this->urls_queue[] = $url;
 		}
 
-		return $urls_queue;
+		return $this->urls_queue;
 	}
 
 	/**
