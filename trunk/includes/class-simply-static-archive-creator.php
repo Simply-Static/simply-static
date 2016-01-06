@@ -113,7 +113,6 @@ class Simply_Static_Archive_Creator {
 			$response = Simply_Static_Url_Fetcher::fetch( $current_url );
 
 			// If we get a WP_Error then somehow our request failed (e.g. space in URL)
-			// TODO: Keep a queue of failed urls too
 			if ( is_wp_error( $response ) ) {
 				continue;
 			}
@@ -172,7 +171,6 @@ class Simply_Static_Archive_Creator {
 			}
 
 			// Not a 200 for the response code? Move on.
-			// TODO: Keep a queue of failed urls too
 			if ( $response->code != 200 ) {
 				continue;
 			}

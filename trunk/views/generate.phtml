@@ -9,6 +9,8 @@
 <div class="wrap">
 
 	<?php if ( is_array( $this->export_log ) && count( $this->export_log ) ): ?>
+		<?php $http_codes = array( '1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0 ); ?>
+
 		<h3><?php _e( 'Export Log', $this->slug ); ?></h3>
 		<div class="export-log">
 			<table class="widefat">
@@ -22,15 +24,29 @@
 				<tbody>
 
 				<?php foreach ( $this->export_log as $url => $data ) : ?>
+					<?php
+						$digit = substr( $data['code'], 0, 1 ); // get first digit of error code
+						$http_codes[ $digit ] += 1;
+					?>
+
 					<tr>
 						<td><?php echo $data['code']; ?></td>
-						<td><?php echo $url; ?></td>
-						<td><?php echo $data['source_url']; ?></td>
+						<td><a href="<?php echo $url; ?>"><?php echo $url; ?></a></td>
+						<td><a href="<?php echo $data['source_url']; ?>"><?php echo $data['source_url']; ?></a></td>
 					</tr>
 				<?php endforeach; ?>
 				</tbody>
 			</table>
 		</div>
+
+
+		<p>1xx Informational: <b><?php echo $http_codes['1']; ?></b> |
+			2xx Success: <b><?php echo $http_codes['2']; ?></b> |
+			3xx Redirection: <b><?php echo $http_codes['3']; ?></b> |
+			4xx Client Error: <b><?php echo $http_codes['4']; ?></b> |
+			5xx Server Error: <b><?php echo $http_codes['5']; ?></b> |
+			<?php echo sprintf( __( "More information on HTTP status codes is available on <a href='%s'>Wikipedia</a>.", $this->slug ), 'https://en.wikipedia.org/wiki/List_of_HTTP_status_codes' ); ?></p>
+		<hr />
 	<?php endif ?>
 
 	<form id="generate" method="post" action="">
