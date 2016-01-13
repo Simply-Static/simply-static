@@ -131,6 +131,17 @@
 							</td>
 						</tr>
 						<tr>
+							<th>
+								<label for='additionalFiles'><?php _e( "Additional Files and Directories", $this->slug );?></label>
+							</th>
+							<td>
+								<textarea aria-describedby='additionalFilesHelpBlock' class='widefat' name='additional_files' id='additionalFiles' rows='5' cols='10'><?php echo esc_html( $this->additional_files ) ?></textarea>
+								<p id='additionalFilesHelpBlock' class='help-block'>
+									<?php echo sprintf( __( "Sometimes you may want to include additional files (such as files referenced via AJAX) or directories. Add the paths to those files or directories here (one per line). Relative paths begin from this directory: <code>%s</code>", $this->slug ), get_home_path() ); ?>
+								</p>
+							</td>
+						</tr>
+						<tr>
 							<th></th>
 							<td>
 								<p class='submit'>
