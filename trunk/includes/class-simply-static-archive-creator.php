@@ -105,7 +105,7 @@ class Simply_Static_Archive_Creator {
 			array( trailingslashit( $origin_url ) ),
 			// using preg_split to intelligently break at newlines
 			// see: http://stackoverflow.com/questions/1483497/how-to-put-string-in-array-split-by-new-line
-			preg_split( "/\r\n|\n|\r/", $this->additional_urls )
+			sist_string_to_array( $this->additional_urls )
 		) );
 
 
@@ -113,7 +113,7 @@ class Simply_Static_Archive_Creator {
 
 
 		// Convert additional files to URLs and add to queue
-		foreach ( preg_split( "/\r\n|\n|\r/", $this->additional_files ) as $item ) {
+		foreach ( sist_string_to_array( $this->additional_files ) as $item ) {
 			// $iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $this->archive_dir ) );
 			// foreach ( $iterator as $file_name => $file_object ) {
 			// get_home_path()

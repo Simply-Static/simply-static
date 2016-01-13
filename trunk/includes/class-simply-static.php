@@ -397,6 +397,24 @@ class Simply_Static {
 			}
 		}
 
+		$additional_urls = sist_string_to_array( $this->options->get( 'additional_urls' ) );
+		foreach ( $additional_urls as $url ) {
+			if ( ! sist_is_local_url( $url  ) ) {
+				$errors['additional_urls'][] = sprintf( __( 'An Additional URL does not start with <code>%s</code>: %s', self::SLUG ),
+				sist_origin_url(),
+				$url );
+			}
+		}
+
+		$additional_files = sist_string_to_array( $this->options->get( 'additional_files' ) );
+		foreach ( $additional_files as $file ) {
+			if ( stripos( $file, get_home_path() ) !== 0 ) {
+				$errors['additional_urls'][] = sprintf( __( 'An Additional File or Directory does not start with <code>%s</code>: %s', self::SLUG ),
+				get_home_path(),
+				$file );
+			}
+		}
+
 		return $errors;
 	}
 
