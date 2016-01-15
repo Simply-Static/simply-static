@@ -124,9 +124,21 @@
 								<textarea aria-describedby='additionalUrlsHelpBlock' class='widefat' name='additional_urls' id='additionalUrls' rows='5' cols='10'><?php echo esc_html( $this->additional_urls ) ?></textarea>
 								<p id='additionalUrlsHelpBlock' class='help-block'>
 									<?php echo sprintf( __( "Simply Static will create a static copy of any page it can find a link to, starting at %s. If you want to create static copies of pages or files that <em>aren't</em> linked to, add the URLs here (one per line). Examples: <code>%s</code> or <code>%s</code>", $this->slug),
-									$this->origin_scheme . '://' . $this->origin_host,
-									$this->origin_scheme . '://' . $this->origin_host . '/hidden-page',
-									$this->origin_scheme . '://' . $this->origin_host . '/images/secret.jpg' ); ?>
+									sist_origin_url(),
+									sist_origin_url() . __( "/hidden-page", $this->slug ),
+									sist_origin_url() . __( "/images/secret.jpg", $this->slug ) ); ?>
+								</p>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<label for='additionalFiles'><?php _e( "Additional Files and Directories", $this->slug );?></label>
+							</th>
+							<td>
+								<textarea aria-describedby='additionalFilesHelpBlock' class='widefat' name='additional_files' id='additionalFiles' rows='5' cols='10'><?php echo esc_html( $this->additional_files ) ?></textarea>
+								<p id='additionalFilesHelpBlock' class='help-block'>
+									<?php echo sprintf( __( "Sometimes you may want to include additional files (such as files referenced via AJAX) or directories. Add the paths to those files or directories here (one per line). Examples: <code>%s</code> or <code>%s</code>", $this->slug ), get_home_path() .  __( "fancy.pdf", $this->slug ),
+									get_home_path() .  __( "additional-directory", $this->slug )); ?>
 								</p>
 							</td>
 						</tr>

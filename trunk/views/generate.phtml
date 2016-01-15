@@ -40,11 +40,11 @@
 		</div>
 
 
-		<p>1xx Informational: <b><?php echo $http_codes['1']; ?></b> |
-			2xx Success: <b><?php echo $http_codes['2']; ?></b> |
-			3xx Redirection: <b><?php echo $http_codes['3']; ?></b> |
-			4xx Client Error: <b><?php echo $http_codes['4']; ?></b> |
-			5xx Server Error: <b><?php echo $http_codes['5']; ?></b> |
+		<p><?php _e( '1xx Informational:', $this->slug ); ?> <b><?php echo $http_codes['1']; ?></b> |
+			<?php _e( '2xx Success:', $this->slug ); ?> <b><?php echo $http_codes['2']; ?></b> |
+			<?php _e( '3xx Redirection:', $this->slug ); ?> <b><?php echo $http_codes['3']; ?></b> |
+			<?php _e( '4xx Client Error:', $this->slug ); ?> <b><?php echo $http_codes['4']; ?></b> |
+			<?php _e( '5xx Server Error:', $this->slug ); ?> <b><?php echo $http_codes['5']; ?></b> |
 			<?php echo sprintf( __( "More information on HTTP status codes is available on <a href='%s'>Wikipedia</a>.", $this->slug ), 'https://en.wikipedia.org/wiki/List_of_HTTP_status_codes' ); ?></p>
 		<hr />
 	<?php endif ?>

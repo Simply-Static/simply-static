@@ -65,7 +65,6 @@ function sist_truncate( $string, $length = 30, $omission = '...' ) {
 	return ( strlen( $string ) > $length + 3 ) ? ( substr( $string, 0, $length ) . $omission ) : $string;
 }
 
-
 /**
  * Use trailingslashit unless the string is empty
  *
@@ -87,7 +86,6 @@ function sist_error_log( $object=null ){
     ob_end_clean();
     error_log( $contents );
 }
-
 
 /**
  * Given a URL extracted from a page, return an absolute URL
@@ -177,4 +175,17 @@ function sist_is_local_url( $url ) {
  */
 function sist_remove_params_and_fragment( $url ) {
 	return preg_replace('/(\?|#).*/', '', $url);
+}
+
+/**
+ * Converts a textarea into an array w/ each line being an entry in the array
+ *
+ * @param  string $textarea Textarea to convert
+ * @return array            Converted array
+ */
+function sist_string_to_array( $textarea ) {
+	$lines =  preg_split( "/\r\n|\n|\r/", $textarea );
+	array_walk( $lines, 'trim' );
+	$lines = array_filter( $lines );
+	return $lines;
 }

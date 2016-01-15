@@ -22,13 +22,6 @@ class Simply_Static_Archive_Creator {
 	public $export_log = null;
 
 	/**
-	 * Queue of URLs to be processed
-	 *
-	 * @var array
-	 */
-	public $urls_queue = null;
-
-	/**
 	 * The slug (id) used for the plugin
 	 *
 	 * @var string
@@ -64,16 +57,24 @@ class Simply_Static_Archive_Creator {
 	protected $additional_urls;
 
 	/**
+	 * Additional files to add to the archive
+	 *
+	 * @var string
+	 */
+	protected $additional_files;
+
+	/**
 	 * Constructor
 	 *
 	 * @param string $url URI resource
 	 */
-	public function __construct( $slug, $destination_scheme, $destination_host, $temp_files_dir, $additional_urls ) {
+	public function __construct( $slug, $destination_scheme, $destination_host, $temp_files_dir, $additional_urls, $additional_files ) {
 		$this->slug = $slug;
 		$this->destination_scheme = $destination_scheme;
 		$this->destination_host = $destination_host;
 		$this->temp_files_dir = $temp_files_dir;
 		$this->additional_urls = $additional_urls;
+		$this->additional_files = $additional_files;
 		$this->export_log = new Simply_Static_Export_Log();
 	}
 
@@ -100,15 +101,48 @@ class Simply_Static_Archive_Creator {
 		$origin_url = sist_origin_url();
 		$destination_url = $this->destination_scheme . '://' . $this->destination_host;
 		$origin_path_length = strlen( parse_url( $origin_url, PHP_URL_PATH ) );
-		$this->urls_queue = array_unique( array_merge(
+		$urls_queue = array_unique( array_merge(
 			array( trailingslashit( $origin_url ) ),
 			// using preg_split to intelligently break at newlines
 			// see: http://stackoverflow.com/questions/1483497/how-to-put-string-in-array-split-by-new-line
-			preg_split( "/\r\n|\n|\r/", $this->additional_urls )
+			sist_string_to_array( $this->additional_urls )
 		) );
 
-		while ( count( $this->urls_queue ) ) {
-			$current_url = array_shift( $this->urls_queue );
+
+
+
+
+		// Convert additional files to URLs and add to queue
+		foreach ( sist_string_to_array( $this->additional_files ) as $item ) {
+			// $iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $this->archive_dir ) );
+			// foreach ( $iterator as $file_name => $file_object ) {
+			// get_home_path()
+			// sist_origin_url()
+
+			// if file is a file, convert to url and add to queue
+			// if file is a directory, recursively iterate and grab all files, for each file, convert to url
+
+			if ( file_exists( $item ) ) {
+				if ( is_file( $item ) ) {
+					$url = str_replace( get_home_path(), trailingslashit( sist_origin_url() ), $item );
+					$urls_queue = $this->add_url_to_queue( $url, $urls_queue );
+				} else {
+					$iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $item, RecursiveDirectoryIterator::SKIP_DOTS ) );
+
+					foreach ( $iterator as $file_name => $file_object ) {
+						$url = str_replace( get_home_path(), trailingslashit( sist_origin_url() ), $file_name );
+						$urls_queue = $this->add_url_to_queue( $url, $urls_queue );
+					}
+				}
+			}
+		}
+
+
+
+
+
+		while ( count( $urls_queue ) ) {
+			$current_url = array_shift( $urls_queue );
 
 			$response = Simply_Static_Url_Fetcher::fetch( $current_url );
 
@@ -137,7 +171,7 @@ class Simply_Static_Archive_Creator {
 				// check for this and just add the trailing slashed version
 				if ( $redirect_url === trailingslashit( $current_url ) ) {
 
-					$this->add_url_to_queue( $redirect_url );
+					$urls_queue = $this->add_url_to_queue( $redirect_url, $urls_queue );
 
 				} else {
 
@@ -150,7 +184,7 @@ class Simply_Static_Archive_Creator {
 						if ( sist_is_local_url( $redirect_url ) ) {
 
 							// add the redirected page to the queue
-							$this->add_url_to_queue( $redirect_url );
+							$urls_queue = $this->add_url_to_queue( $redirect_url, $urls_queue );
 							$this->export_log->set_source_url( $redirect_url, $current_url );
 							// and update the URL
 							$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
@@ -179,7 +213,7 @@ class Simply_Static_Archive_Creator {
 			$urls = $response->extract_urls();
 
 			foreach ( $urls as $url ) {
-				$this->add_url_to_queue( $url );
+				$urls_queue = $this->add_url_to_queue( $url, $urls_queue );
 				$this->export_log->set_source_url( $url, $current_url );
 			}
 
@@ -192,22 +226,20 @@ class Simply_Static_Archive_Creator {
 		}
 	}
 
-
-
 	/**
 	 * Add a URL to the processing queue if we haven't already processed it and
 	 * if it's not in the queue to be processed
 	 *
-	 * @param array  $urls_queue Queue of URLs to be processed
 	 * @param string $url        URL to add to the processing queue
+	 * @param array  $urls_queue Queue of URLs to be processed
 	 * @return array             Queue of URLs to be processed
 	 */
-	private function add_url_to_queue( $url ) {
-		if ( ! $this->export_log->includes( $url ) && ! in_array( $url, $this->urls_queue ) ) {
-			$this->urls_queue[] = $url;
+	private function add_url_to_queue( $url, $queue ) {
+		if ( ! $this->export_log->includes( $url ) && ! in_array( $url, $queue ) ) {
+			$queue[] = $url;
 		}
 
-		return $this->urls_queue;
+		return $queue;
 	}
 
 	/**

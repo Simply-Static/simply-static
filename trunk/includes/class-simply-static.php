@@ -126,6 +126,21 @@ class Simply_Static {
 				->set( 'local_dir', '' )
 				->set( 'delete_temp_files', '1' )
 				->save();
+		} else {
+			// check if we're behind on our version
+			if ( version_compare( $this->options->get( 'version' ), self::VERSION, '<' ) ) {
+
+				// version 1.2 introduced the ability to specify additional files
+				if ( version_compare( $this->options->get( 'version' ), '1.2.0', '<' ) ) {
+					$this->options
+						->set( 'additional_files', '' );
+				}
+
+				// update the version and save
+				$this->options
+					->set( 'version', self::VERSION )
+					->save();
+			}
 		}
 	}
 
@@ -220,7 +235,9 @@ class Simply_Static {
 				$this->options->get( 'destination_scheme' ),
 				$this->options->get( 'destination_host' ),
 				$this->options->get( 'temp_files_dir' ),
-				$this->options->get( 'additional_urls' )
+				$this->options->get( 'additional_urls' ),
+				$this->options->get( 'additional_files' ),
+				$this->options->get( 'additional_files' )
 			);
 			$archive_creator->create_archive();
 
@@ -289,6 +306,7 @@ class Simply_Static {
 			->assign( 'destination_host', $this->options->get( 'destination_host' ) )
 			->assign( 'temp_files_dir', $this->options->get( 'temp_files_dir' ) )
 			->assign( 'additional_urls', $this->options->get( 'additional_urls' ) )
+			->assign( 'additional_files', $this->options->get( 'additional_files' ) )
 			->assign( 'delivery_method', $this->options->get( 'delivery_method' ) )
 			->assign( 'local_dir', $this->options->get( 'local_dir' ) )
 			->assign( 'delete_temp_files', $this->options->get( 'delete_temp_files' ) )
@@ -306,6 +324,7 @@ class Simply_Static {
 			->set( 'destination_host', untrailingslashit( filter_input( INPUT_POST, 'destination_host', FILTER_SANITIZE_URL ) ) )
 			->set( 'temp_files_dir', sist_trailingslashit_unless_blank( filter_input( INPUT_POST, 'temp_files_dir' ) ) )
 			->set( 'additional_urls', filter_input( INPUT_POST, 'additional_urls' ) )
+			->set( 'additional_files', filter_input( INPUT_POST, 'additional_files' ) )
 			->set( 'delivery_method', filter_input( INPUT_POST, 'delivery_method' ) )
 			->set( 'local_dir', sist_trailingslashit_unless_blank( filter_input( INPUT_POST, 'local_dir' ) ) )
 			->set( 'delete_temp_files', filter_input( INPUT_POST, 'delete_temp_files' ) )
@@ -375,6 +394,24 @@ class Simply_Static {
 				} else {
 					$errors['delivery_method'][] = sprintf( __( 'Local Directory does not exist: %s', self::SLUG ), $local_dir );
 				}
+			}
+		}
+
+		$additional_urls = sist_string_to_array( $this->options->get( 'additional_urls' ) );
+		foreach ( $additional_urls as $url ) {
+			if ( ! sist_is_local_url( $url  ) ) {
+				$errors['additional_urls'][] = sprintf( __( 'An Additional URL does not start with <code>%s</code>: %s', self::SLUG ),
+				sist_origin_url(),
+				$url );
+			}
+		}
+
+		$additional_files = sist_string_to_array( $this->options->get( 'additional_files' ) );
+		foreach ( $additional_files as $file ) {
+			if ( stripos( $file, get_home_path() ) !== 0 ) {
+				$errors['additional_urls'][] = sprintf( __( 'An Additional File or Directory does not start with <code>%s</code>: %s', self::SLUG ),
+				get_home_path(),
+				$file );
 			}
 		}
 
