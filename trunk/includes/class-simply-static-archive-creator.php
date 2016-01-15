@@ -248,29 +248,20 @@ class Simply_Static_Archive_Creator {
 	 * @return string|WP_Error $temporary_zip The path to the archive zip file
 	 */
 	public function create_zip() {
-		$temporary_zip = untrailingslashit( $this->archive_dir ) . '.tmp';
-		$zip_archive = new ZipArchive();
+		$zip_filename = untrailingslashit( $this->archive_dir ) . '.zip';
+		$zip_archive = new PclZip($zip_filename);
 
-		if ( $zip_archive->open( $temporary_zip, ZIPARCHIVE::CREATE ) !== true ) {
+		$files = array();
+		$iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $this->archive_dir, RecursiveDirectoryIterator::SKIP_DOTS ) );
+		foreach ( $iterator as $file_name => $file_object ) {
+			$files[] = realpath( $file_name );
+		}
+
+		if ( $zip_archive->create( $files, PCLZIP_OPT_REMOVE_PATH, $this->archive_dir ) === 0 ) {
 			return new WP_Error( 'create_zip_failed', __( 'Unable to create ZIP archive', $this->slug ) );
 		}
 
-		$iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $this->archive_dir ) );
-		foreach ( $iterator as $file_name => $file_object ) {
-			$base_name = basename( $file_name );
-
-			if ( $base_name != '.' && $base_name != '..' ) {
-				if ( ! $zip_archive->addFile( realpath( $file_name ), str_replace( $this->archive_dir, '', $file_name ) ) ) {
-					return new WP_Error( 'cannot_add_file_to_zip', sprintf( __( "Could not add file: %s", $this->slug ), $file_name ) );
-				}
-			}
-		}
-
-		$zip_archive->close();
-		$zip_file = untrailingslashit( $this->archive_dir ) . '.zip';
-		rename( $temporary_zip, $zip_file );
-
-		$download_url = get_admin_url( null, 'admin.php' ) . '?download=' . basename( $zip_file );
+		$download_url = get_admin_url( null, 'admin.php' ) . '?download=' . basename( $zip_filename );
 
 		return $download_url;
 	}

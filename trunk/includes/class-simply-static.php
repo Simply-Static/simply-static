@@ -151,6 +151,7 @@ class Simply_Static {
 	 */
 	private function includes() {
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/phpuri.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/pclzip.lib.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-options.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-view.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-extractor.php';
