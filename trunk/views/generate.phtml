@@ -6,14 +6,14 @@
 
 <h2><?php _e( 'Simply Static', $this->slug ); ?></h2>
 
-<div class="wrap">
+<div class='wrap'>
 
 	<?php if ( is_array( $this->export_log ) && count( $this->export_log ) ): ?>
 		<?php $http_codes = array( '1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0 ); ?>
 
 		<h3><?php _e( 'Export Log', $this->slug ); ?></h3>
-		<div class="export-log">
-			<table class="widefat">
+		<div class='export-log'>
+			<table class='widefat'>
 				<thead>
 					<tr>
 						<th>Code</th>
@@ -31,8 +31,8 @@
 
 					<tr>
 						<td><?php echo $data['code']; ?></td>
-						<td><a href="<?php echo $url; ?>"><?php echo $url; ?></a></td>
-						<td><a href="<?php echo $data['source_url']; ?>"><?php echo $data['source_url']; ?></a></td>
+						<td><a href='<?php echo $url; ?>'><?php echo $url; ?></a></td>
+						<td><a href='<?php echo $data['source_url']; ?>'><?php echo $data['source_url']; ?></a></td>
 					</tr>
 				<?php endforeach; ?>
 				</tbody>
@@ -49,7 +49,10 @@
 		<hr />
 	<?php endif ?>
 
-	<form id="generate" method="post" action="">
+	<form id='generateForm' method='post' action=''>
+
+		<?php wp_nonce_field( $this->slug ) ?>
+		<input type='hidden' name='_generate' value='1' />
 
 		<?php if ( $this->system_requirements_check_failed ) : ?>
 			<p><?php _e( "Uh oh, we've found an issue that prevents us from creating a static copy of your site.", $this->slug ); ?></p>
@@ -58,9 +61,9 @@
 			<p><?php _e( "Note: on large sites this process may take a while.", $this->slug ); ?></p>
 		<?php endif; ?>
 
-		<p class="submit">
-			<?php wp_nonce_field( $this->slug ) ?>
-			<input class="button button-primary button-hero" type="submit" name="generate" value="Generate Static Files" <?php if ( $this->system_requirements_check_failed ) { echo 'disabled=disabled'; } ?> />
+		<p class='submit'>
+			<input id='generate' class='button button-primary button-hero' type='submit' name='generate' value='<?php _e( "Generate Static Files", $this->slug );?>' <?php if ( $this->system_requirements_check_failed ) { echo 'disabled=disabled'; } ?> />
+			<span class='spinner'></span>
 		</p>
 
 	</form>

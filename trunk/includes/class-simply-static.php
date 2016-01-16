@@ -230,7 +230,7 @@ class Simply_Static {
 			$this->view->assign( 'system_requirements_check_failed', true );
 		}
 
-		if ( isset( $_POST['generate'] ) ) {
+		if ( isset( $_POST['_generate'] ) ) {
 			$archive_creator = new Simply_Static_Archive_Creator(
 				self::SLUG,
 				$this->options->get( 'destination_scheme' ),
@@ -291,7 +291,7 @@ class Simply_Static {
 	 * @return void
 	 */
 	public function display_options_page() {
-		if ( isset( $_POST['save'] ) ) {
+		if ( isset( $_POST['_options'] ) ) {
 			$this->save_options();
 			$message = __( 'Settings saved.', self::SLUG );
 			$this->view->add_flash( 'updated', $message );

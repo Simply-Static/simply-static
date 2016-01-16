@@ -2,13 +2,13 @@
 	margin-right: 310px;
 }
 
-#sistContent {
+#sistContainer #sistContent {
 	width: 100%;
 	float: left;
 	min-width: 600px;
 }
 
-#sistSidebar {
+#sistContainer #sistSidebar {
 	float: right;
 	margin-right: -310px;
 	width: 290px;
@@ -16,30 +16,34 @@
 
 /* Generate page */
 
-.export-log table {
+#sistContainer .export-log table {
 	height: 400px;
 	overflow-y: auto;
 	overflow-x: hidden;
 	display: block;
 }
 
+#sistContainer #generateForm .submit .spinner {
+	float: none;
+}
+
 /* Options page */
 
-.tab-pane, tr.delivery-method {
+#sistContainer .tab-pane, tr.delivery-method {
 	display: none;
 }
 
-.tab-pane.active, tr.delivery-method.active {
+#sistContainer .tab-pane.active, tr.delivery-method.active {
 	display: table-row;
 }
 
-select:disabled, select.disabled {
+#sistContainer select:disabled, select.disabled {
 	border-color: rgba(222,222,222,.75);
 	background: rgba(255,255,255,.5);
 	color: rgba(51,51,51,.5);
 }
 
-.help-block {
+#sistContainer .help-block {
 	display: block;
 	margin-top: 5px;
 	margin-bottom: 10px;
@@ -51,7 +55,7 @@ select:disabled, select.disabled {
 /* Mailchimp original CSS at:
    http://cdn-images.mailchimp.com/embedcode/slim-081711.css
 */
-#mc_embed_signup input {border:1px solid #999; -webkit-appearance:none;}
-#mc_embed_signup input:focus {border-color:#333;}
-#mc_embed_signup .clear {clear:none; display:inline;}
-#mc_embed_signup input.email {display:block; padding:8px 0; margin:0 4% 10px 0; text-indent:5px; width:58%; min-width:130px; width:100%;}
+#sistContainer #mc_embed_signup input {border:1px solid #999; -webkit-appearance:none;}
+#sistContainer #mc_embed_signup input:focus {border-color:#333;}
+#sistContainer #mc_embed_signup .clear {clear:none; display:inline;}
+#sistContainer #mc_embed_signup input.email {display:block; padding:8px 0; margin:0 4% 10px 0; text-indent:5px; width:58%; min-width:130px; width:100%;}
