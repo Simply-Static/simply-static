@@ -209,7 +209,7 @@ class Simply_Static_Archive_Creator {
 				$this->export_log->set_source_url( $url, $current_url );
 			}
 
-			// Replace the origin URL with the destination URL
+			// Replace the origin URL with the destination URL within the content
 			$response->replace_urls( $destination_url );
 
 			// Save the page to our archive

@@ -75,6 +75,12 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 
 == Changelog ==
 
+= 1.2.0, January 16, 2016 =
+
+* New: The export log now lists off all URLs, their http status codes, and the first page it was linked from
+* New: You can specify additional files/directories to include in your static archive
+* Fix: Switched libraries for ZIP generation, which should reduce extraction errors
+
 = 1.1.3, December 7, 2015 =
 
 * Fix: Able to fetch protocol-less URLs, e.g. href='//example.com/image.png'
