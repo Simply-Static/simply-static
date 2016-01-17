@@ -136,62 +136,6 @@ class Simply_Static_Archive_Creator {
 		while ( count( $urls_queue ) ) {
 			$current_url = array_shift( $urls_queue );
 
-			// see if we can just directly copy over a file prior to fetching it
-			$static_file_extensions = array(
-				'html', 'htm', 'xhtml', // html
-				'txt', 'text', 'md', 'markdown', 'csv', // text files
-				'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', // microsoft files
-				'css', // stylesheets
-				'js', // javascript
-				'gif', 'png', 'jpg', 'jpeg', 'tif', 'tiff', 'bmp', 'psd', 'ai', 'eps', 'ps', // images
-				'mp3', 'mpa', 'midi', 'mid', 'wav', 'wma', 'm4a', // music
-				'ico', //favicon,
-				'ttf', 'woff', 'otf', 'eot', // fonts
-				'svg', 'svgz', // images
-				'avi', 'mpeg', 'mpg', 'mov', 'qt', 'ram', 'mp4', 'wmv', // video
-				'gz', 'zip', 'rar', // zips
-				'pdf', // PDF
-				'swf', 'flv' // flash
-			);
-
-			$is_static = false;
-			$url_length = strlen( $current_url );
-			foreach ( $static_file_extensions as $extension ) {
-				$extension_length = strlen( $extension );
-				$expected_position = $url_length - $extension_length;
-
-				// try to find a matching file extension -- if you do, break out of the foreach
-				if ( strripos( $current_url, $extension ) === $expected_position ) {
-					$is_static = true;
-					break;
-				}
-			}
-
-			if ( $is_static ) {
-				// first, check to see if we can actually find the static file
-				$url_parts = parse_url( $current_url );
-				// a domain with no trailing slash has no path, so we're giving it one
-				$path = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
-
-				$path_info = pathinfo( $path );
-				$source_file_dir = untrailingslashit( get_home_path() ) . ( $path_info['dirname'] ? $path_info['dirname'] : '' ) . DIRECTORY_SEPARATOR;
-				$file_name = $path_info['filename'] . '.' . $path_info['extension'];
-
-				// second, copy the static file to the archive directory
-				$archive_file_dir = untrailingslashit( $this->archive_dir ) . ( $path_info['dirname'] ? $path_info['dirname'] : '' ) . DIRECTORY_SEPARATOR;
-
-				if ( file_exists( $source_file_dir . $file_name ) ) {
-					if ( ! file_exists( $archive_file_dir ) ) {
-						wp_mkdir_p( $archive_file_dir );
-					}
-					if ( copy( $source_file_dir . $file_name, $archive_file_dir . $file_name ) ) {
-						$this->export_log->set_response_code( $current_url, '200' );
-						// if the source file exists and we're able to copy it, then don't do any further processing
-						continue;
-					}
-				}
-			}
-
 			$response = Simply_Static_Url_Fetcher::fetch( $current_url );
 
 			// If we get a WP_Error then somehow our request failed (e.g. space in URL)
