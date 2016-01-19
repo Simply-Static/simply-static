@@ -317,7 +317,7 @@ class Simply_Static_Archive_Creator {
 		$path_info = pathinfo( $path && $path != '/' ? $path : 'index.html' );
 
 		// Create file directory if it doesn't exist
-		$file_dir = untrailingslashit( $this->archive_dir ) . ( $path_info['dirname'] ? $path_info['dirname'] : '' );
+		$file_dir = $this->archive_dir . ( $path_info['dirname'] ? $path_info['dirname'] : '' );
 		if ( empty( $path_info['extension'] ) && $path_info['basename'] == $path_info['filename'] ) {
 			$file_dir .= DIRECTORY_SEPARATOR . $path_info['basename'];
 			$path_info['filename'] = 'index';
