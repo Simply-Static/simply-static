@@ -11,14 +11,14 @@ class Simply_Static {
 	 *
 	 * @var string
 	 */
-	const VERSION = '1.2.2';
+	const VERSION = '1.3.0';
 
 	/**
-	 * The slug of the plugin; used in actions, filters, i18n, etc.
+	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
 	 *
 	 * @var string
 	 */
-	const SLUG = 'simply-static';
+	const SLUG = 'simply_static'; // keep it short; stick to alphas & underscores
 
 	/**
 	 * Singleton instance
@@ -40,6 +40,13 @@ class Simply_Static {
 	 * @var Simply_Static_View
 	 */
 	protected $view = null;
+
+	/**
+	 * Name of the URLs table
+	 *
+	 * @var string
+	 */
+	protected $urls_table_name = null;
 
 	/**
 	 * Disable usage of "new"
@@ -75,6 +82,7 @@ class Simply_Static {
 			self::$instance->includes();
 			self::$instance->options = new Simply_Static_Options( self::SLUG );
 			self::$instance->view = new Simply_Static_View();
+			self::$instance->urls_table_name = self::urls_table_name();
 
 			// Check for pending file download
 			add_action( 'plugins_loaded', array( self::$instance, 'download_file' ) );
@@ -128,12 +136,23 @@ class Simply_Static {
 				->save();
 		} else {
 			// check if we're behind on our version
-			if ( version_compare( $this->options->get( 'version' ), self::VERSION, '<' ) ) {
+		if ( version_compare( $this->options->get( 'version' ), self::VERSION, '<' ) ) {
 
 				// version 1.2 introduced the ability to specify additional files
 				if ( version_compare( $this->options->get( 'version' ), '1.2.0', '<' ) ) {
 					$this->options
 						->set( 'additional_files', '' );
+				}
+
+				if ( version_compare( $this->options->get( 'version' ), '1.3.0', '<' ) ) {
+					// version 1.3 changed the options key
+					if( get_option( 'simply-static' ) ) {
+			            update_option( 'simply_static', get_option( 'simply-static' ) );
+			            delete_option( 'simply-static' );
+			        }
+
+					// and added a database table for tracking urls/progress
+					$this->create_urls_table();
 				}
 
 				// update the version and save
@@ -142,6 +161,42 @@ class Simply_Static {
 					->save();
 			}
 		}
+	}
+
+	private function create_urls_table() {
+		global $wpdb;
+
+		$charset_collate = $wpdb->get_charset_collate();
+
+		$sql = "CREATE TABLE $this->urls_table_name (
+			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+			found_on_id BIGINT(20) UNSIGNED NULL,
+			url_path VARCHAR(255) NOT NULL,
+			file_path VARCHAR(255) NOT NULL,
+			http_status_code SMALLINT(20) NOT NULL,
+			hash BINARY(20) NOT NULL,
+			last_modified_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+			last_checked_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+			last_uploaded_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+			created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+			updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+			KEY url_path (url_path)
+		) $charset_collate;";
+
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		dbDelta( $sql );
+	}
+
+	private function drop_urls_table() {
+		global $wpdb;
+
+		$wpdb->query( "DROP TABLE IF EXISTS $this->urls_table_name" );
+	}
+
+	static private function urls_table_name() {
+		global $wpdb;
+
+		return $wpdb->prefix . self::SLUG . '_urls';
 	}
 
 	/**
