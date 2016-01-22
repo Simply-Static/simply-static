@@ -253,7 +253,7 @@ class Simply_Static_Archive_Creator {
 			return new WP_Error( 'create_zip_failed', __( 'Unable to create ZIP archive', $this->slug ) );
 		}
 
-		$download_url = get_admin_url( null, 'admin.php' ) . '?download=' . basename( $zip_filename );
+		$download_url = get_admin_url( null, 'admin.php' ) . '?' . $this->slug . '_zip_download=' . basename( $zip_filename );
 
 		return $download_url;
 	}

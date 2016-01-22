@@ -425,8 +425,8 @@ class Simply_Static {
 	 * @return null
 	 */
 	public function download_file() {
-		if( isset( $_GET['download'] ) ) {
-			$filename = $_GET['download'];
+		if( isset( $_GET[ self::SLUG . '_zip_download' ] ) ) {
+			$filename = $_GET[ self::SLUG . '_zip_download' ];
 			header( 'Content-Description: File Transfer' );
 			header( 'Content-Disposition: attachment; filename=' . $filename );
 			header( 'Content-Type: application/zip, application/octet-stream; charset=' . get_option( 'blog_charset' ), true );
