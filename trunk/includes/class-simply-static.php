@@ -351,6 +351,8 @@ class Simply_Static {
 	 * @return array $errors associative array containing errored field names and an array of error messages
 	 */
 	public function check_system_requirements() {
+		global $wp_filesystem;
+
 		$errors = array();
 
 		$destination_host = $this->options->get( 'destination_host' );
@@ -409,10 +411,12 @@ class Simply_Static {
 
 		$additional_files = sist_string_to_array( $this->options->get( 'additional_files' ) );
 		foreach ( $additional_files as $file ) {
-			if ( stripos( $file, get_home_path() ) !== 0 ) {
-				$errors['additional_urls'][] = sprintf( __( 'An Additional File or Directory does not start with <code>%s</code>: %s', self::SLUG ),
+			if ( stripos( $file, get_home_path() ) !== 0 && stripos( $file, WP_PLUGIN_DIR ) !== 0 && stripos( $file, WP_CONTENT_DIR ) !== 0  ) {
+				$errors['additional_urls'][] = sprintf( __( 'An Additional File or Directory is not located within an expected directory: %s<br />It should be in one of these directories (or a subdirectory):<br  /><code>%s</code><br /> <code>%s</code><br /> <code>%s</code>', self::SLUG ),
+				$file,
 				get_home_path(),
-				$file );
+				WP_PLUGIN_DIR,
+				WP_CONTENT_DIR );
 			}
 		}
 

@@ -138,8 +138,9 @@
 							<td>
 								<textarea aria-describedby='additionalFilesHelpBlock' class='widefat' name='additional_files' id='additionalFiles' rows='5' cols='10'><?php echo esc_html( $this->additional_files ) ?></textarea>
 								<p id='additionalFilesHelpBlock' class='help-block'>
-									<?php echo sprintf( __( "Sometimes you may want to include additional files (such as files referenced via AJAX) or directories. Add the paths to those files or directories here (one per line). Examples: <code>%s</code> or <code>%s</code>", $this->slug ), get_home_path() .  __( "fancy.pdf", $this->slug ),
-									get_home_path() .  __( "additional-directory", $this->slug )); ?>
+									<?php echo sprintf( __( "Sometimes you may want to include additional files (such as files referenced via AJAX) or directories. Add the paths to those files or directories here (one per line). Examples: <code>%s</code> or <code>%s</code>", $this->slug ),
+									get_home_path() .  __( "additional-directory", $this->slug ),
+									trailingslashit( WP_CONTENT_DIR ) .  __( "fancy.pdf", $this->slug ) ); ?>
 								</p>
 							</td>
 						</tr>

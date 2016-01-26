@@ -110,23 +110,18 @@ class Simply_Static_Archive_Creator {
 
 		// Convert additional files to URLs and add to queue
 		foreach ( sist_string_to_array( $this->additional_files ) as $item ) {
-			// $iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $this->archive_dir ) );
-			// foreach ( $iterator as $file_name => $file_object ) {
-			// get_home_path()
-			// sist_origin_url()
 
 			// if file is a file, convert to url and add to queue
 			// if file is a directory, recursively iterate and grab all files, for each file, convert to url
-
 			if ( file_exists( $item ) ) {
 				if ( is_file( $item ) ) {
-					$url = str_replace( get_home_path(), trailingslashit( sist_origin_url() ), $item );
+					$url = $this->convert_path_to_url( $item );
 					$urls_queue = $this->add_url_to_queue( $url, $urls_queue );
 				} else {
 					$iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $item, RecursiveDirectoryIterator::SKIP_DOTS ) );
 
 					foreach ( $iterator as $file_name => $file_object ) {
-						$url = str_replace( get_home_path(), trailingslashit( sist_origin_url() ), $file_name );
+						$url = $this->convert_path_to_url( $file_name );
 						$urls_queue = $this->add_url_to_queue( $url, $urls_queue );
 					}
 				}
@@ -216,6 +211,24 @@ class Simply_Static_Archive_Creator {
 			$content = $response->body;
 			$this->save_url_to_file( $path, $content, $is_html );
 		}
+	}
+
+	/**
+	 * Convert a directory path into a valid WordPress URL
+	 *
+	 * @param  string $path The path to a directory or a file
+	 * @return string       The WordPress URL for the given path
+	 */
+	private function convert_path_to_url( $path ) {
+		$url = $path;
+		if ( stripos( $path, WP_PLUGIN_DIR ) === 0 ) {
+			$url = str_replace( WP_PLUGIN_DIR, trailingslashit(WP_PLUGIN_URL ), $path );
+		} elseif ( stripos( $path, WP_CONTENT_DIR ) === 0 ) {
+			$url = str_replace( WP_CONTENT_DIR, trailingslashit( WP_CONTENT_URL ), $path );
+		} elseif ( stripos( $path, get_home_path() ) === 0 ) {
+			$url = str_replace( get_home_path(), trailingslashit( sist_origin_url() ), $path );
+		}
+		return $url;
 	}
 
 	/**
