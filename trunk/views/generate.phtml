@@ -8,7 +8,7 @@
 
 <div class='wrap'>
 
-	<?php if ( is_array( $this->export_log ) && count( $this->export_log ) ): ?>
+	<?php if ( is_array( $this->static_files ) && count( $this->static_files ) ): ?>
 		<?php $http_codes = array( '1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0 ); ?>
 
 		<h3><?php _e( 'Export Log', $this->slug ); ?></h3>
@@ -23,16 +23,27 @@
 				</thead>
 				<tbody>
 
-				<?php foreach ( $this->export_log as $url => $data ) : ?>
+				<?php
+					function find_first_match( $static_files, $id ) {
+						foreach ( $static_files as $static_file ) {
+							if ( $static_file->id === $id ) {
+								return $static_file;
+							}
+						}
+					}
+				?>
+
+				<?php foreach ( $this->static_files as $static_file ) : ?>
 					<?php
-						$digit = substr( $data['code'], 0, 1 ); // get first digit of error code
+						$digit = substr( $static_file->http_status_code, 0, 1 ); // get first digit of error code
 						$http_codes[ $digit ] += 1;
 					?>
 
 					<tr>
-						<td><?php echo $data['code']; ?></td>
-						<td><a href='<?php echo $url; ?>'><?php echo $url; ?></a></td>
-						<td><a href='<?php echo $data['source_url']; ?>'><?php echo $data['source_url']; ?></a></td>
+						<td><?php echo $static_file->http_status_code; ?></td>
+						<td><a href='<?php echo $static_file->url; ?>'><?php echo $static_file->url; ?></a></td>
+						<?php $parent_static_file = find_first_match( $this->static_files, $static_file->found_on_id ); ?>
+						<td><a href='<?php echo $parent_static_file->url; ?>'><?php echo $parent_static_file->url; ?></a></td>
 					</tr>
 				<?php endforeach; ?>
 				</tbody>

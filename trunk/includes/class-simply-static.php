@@ -212,7 +212,6 @@ class Simply_Static {
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-fetcher.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-response.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-archive-creator.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-export-log.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-model.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-file.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/misc-functions.php';
@@ -326,9 +325,9 @@ class Simply_Static {
 				$deleted_successfully = $archive_creator->delete_static_files();
 			}
 
-			$export_log = $archive_creator->export_log->sort()->get_log();
+			$static_files = Simply_Static_File::all();
 
-			$this->view->assign( 'export_log', $export_log );
+			$this->view->assign( 'static_files', $static_files );
 		}
 
 		$this->view

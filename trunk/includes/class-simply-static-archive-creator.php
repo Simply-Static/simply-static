@@ -14,12 +14,6 @@ class Simply_Static_Archive_Creator {
 	protected $archive_dir;
 
 	/**
-	 * Export log (processed urls, http/error codes, and source URLs)
-	 * @var Simply_Static_Export_Log
-	 */
-	public $export_log = null;
-
-	/**
 	 * The slug (id) used for the plugin
 	 * @var string
 	 */
@@ -66,7 +60,6 @@ class Simply_Static_Archive_Creator {
 		$this->temp_files_dir = $temp_files_dir;
 		$this->additional_urls = $additional_urls;
 		$this->additional_files = $additional_files;
-		$this->export_log = new Simply_Static_Export_Log();
 	}
 
 	/**
@@ -138,8 +131,6 @@ class Simply_Static_Archive_Creator {
 			$static_file->http_status_code = $response->code;
 			$static_file->save();
 
-			$this->export_log->set_response_code( $current_url, $response->code );
-
 			$url_parts = parse_url( $response->url );
 			// a domain with no trailing slash has no path, so we're giving it one
 			$path = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
@@ -172,7 +163,6 @@ class Simply_Static_Archive_Creator {
 
 							// add the redirected page to the queue
 							$urls_queue = $this->add_url_to_queue( $redirect_url, $urls_queue );
-							$this->export_log->set_source_url( $redirect_url, $current_url );
 
 							$redirect_static_file = Simply_Static_File::find_or_initialize_by( 'url' , $redirect_url );
 							if ( $redirect_static_file->found_on_id === null ) {
@@ -203,12 +193,23 @@ class Simply_Static_Archive_Creator {
 				continue;
 			}
 
+			$content = $response->body;
+			$hash = sha1( $content, true );
+
+			if ( $hash === $static_file->hash ) {
+				// continue;
+			} else {
+				$static_file->hash = $hash;
+				$static_file->save();
+			}
+
+
+
 			// Fetch all URLs from the page and add them to the queue...
 			$urls = $response->extract_urls();
 
 			foreach ( $urls as $url ) {
 				$urls_queue = $this->add_url_to_queue( $url, $urls_queue );
-				$this->export_log->set_source_url( $url, $current_url );
 
 				$extracted_static_file = Simply_Static_File::find_or_initialize_by( 'url' , $url );
 				if ( $extracted_static_file->found_on_id === null ) {
@@ -222,7 +223,6 @@ class Simply_Static_Archive_Creator {
 			$response->replace_urls( $destination_url );
 
 			// Save the page to our archive
-			$content = $response->body;
 			$this->save_url_to_file( $path, $content, $is_html );
 		}
 	}
@@ -255,7 +255,9 @@ class Simply_Static_Archive_Creator {
 	 * @return array             Queue of URLs to be processed
 	 */
 	private function add_url_to_queue( $url, $queue ) {
-		if ( ! $this->export_log->includes( $url ) && ! in_array( $url, $queue ) ) {
+		// TODO:
+		// if ( ! $this->export_log->includes( $url ) && ! in_array( $url, $queue ) ) {
+		if ( ! in_array( $url, $queue ) ) {
 			$queue[] = $url;
 		}
 

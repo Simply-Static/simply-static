@@ -95,6 +95,31 @@ class Simply_Static_Model {
 	}
 
 	/**
+	 * Returns an array of all records in the table
+	 * @return array Array of all records
+	 */
+	public static function all() {
+		global $wpdb;
+
+		$rows = $wpdb->get_results(
+			'SELECT * FROM ' . self::table_name(),
+			ARRAY_A
+		);
+
+		if ( $rows === null ) {
+			return null;
+		} else {
+			$records = array();
+
+			foreach ( $rows as $row ) {
+				$records[] = self::initialize( $row );
+			}
+
+			return $records;
+		}
+	}
+
+	/**
 	 * Find and return an the first record matching the column name/value
 	 *
 	 * Example: find_by( 'id', 123 )
