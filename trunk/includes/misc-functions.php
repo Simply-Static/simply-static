@@ -2,18 +2,11 @@
 
 /**
  * Miscellaneous functions for use across the plugin
- *
  * @package Simply_Static
  */
 
-// Exit if accessed directly.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
 * Get the protocol used for the origin URL
-*
 * @return string http or https
 */
 function sist_origin_scheme() {
@@ -22,7 +15,6 @@ function sist_origin_scheme() {
 
 /**
 * Get the host for the origin URL
-*
 * @return string host (URL minus the protocol)
 */
 function sist_origin_host() {
@@ -31,7 +23,6 @@ function sist_origin_host() {
 
 /**
  * Wrapper around home_url(). Useful for swapping out the URL during debugging.
- *
  * @return string home URL
  */
 function sist_origin_url() {
@@ -40,7 +31,6 @@ function sist_origin_url() {
 
 /**
  * Wrapper around site_url(). Returns the URL used for the WP installation.
- *
  * @return string home URL
  */
 function sist_wp_installation_url() {
@@ -49,7 +39,6 @@ function sist_wp_installation_url() {
 
 /**
  * Echo the selected value for an option tag if the statement is true.
- *
  * @return null
  */
 function sist_selected_if( $statement ) {
@@ -58,7 +47,6 @@ function sist_selected_if( $statement ) {
 
 /**
  * Truncate if a string exceeds a certain length (30 chars by default)
- *
  * @return string
  */
 function sist_truncate( $string, $length = 30, $omission = '...' ) {
@@ -67,7 +55,6 @@ function sist_truncate( $string, $length = 30, $omission = '...' ) {
 
 /**
  * Use trailingslashit unless the string is empty
- *
  * @return string
  */
 function sist_trailingslashit_unless_blank( $string ) {
@@ -76,7 +63,6 @@ function sist_trailingslashit_unless_blank( $string ) {
 
 /**
  * Dump an object to error_log
- *
  * @return string
  */
 function sist_error_log( $object=null ){
@@ -159,7 +145,6 @@ function sist_relative_to_absolute_url( $extracted_url, $page_url ) {
 
 /**
  * Check if URL starts with same URL as WordPress installation
- *
  * @param  string  $url URL to check
  * @return boolean      true if URL is local, false otherwise
  */
@@ -169,7 +154,6 @@ function sist_is_local_url( $url ) {
 
 /**
  * Returns a URL w/o the query string or fragment (i.e. nothing after the path)
- *
  * @param  string $url URL to remove query string/fragment from
  * @return string      URL without query string/fragment
  */
@@ -179,7 +163,6 @@ function sist_remove_params_and_fragment( $url ) {
 
 /**
  * Converts a textarea into an array w/ each line being an entry in the array
- *
  * @param  string $textarea Textarea to convert
  * @return array            Converted array
  */
@@ -192,7 +175,6 @@ function sist_string_to_array( $textarea ) {
 
 /**
  * Get the current datetime formated as a string for entry into MySQL
- *
  * @return string MySQL formatted datetime
  */
 function sist_formatted_datetime() {

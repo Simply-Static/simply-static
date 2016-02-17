@@ -9,63 +9,54 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * The path to the archive directory
-	 *
 	 * @var string
 	 */
 	protected $archive_dir;
 
 	/**
 	 * Export log (processed urls, http/error codes, and source URLs)
-	 *
 	 * @var Simply_Static_Export_Log
 	 */
 	public $export_log = null;
 
 	/**
 	 * The slug (id) used for the plugin
-	 *
 	 * @var string
 	 */
 	protected $slug;
 
 	/**
 	 * The protocol used for the destination URL
-	 *
 	 * @var string
 	 */
 	protected $destination_scheme;
 
 	/**
 	 * The host for the destination URL
-	 *
 	 * @var string
 	 */
 	protected $destination_host;
 
 	/**
 	 * The directory where static files should be saved
-	 *
 	 * @var string
 	 */
 	protected $temp_files_dir;
 
 	/**
 	 * Additional urls to add to the archive
-	 *
 	 * @var string
 	 */
 	protected $additional_urls;
 
 	/**
 	 * Additional files to add to the archive
-	 *
 	 * @var string
 	 */
 	protected $additional_files;
 
 	/**
 	 * Constructor
-	 *
 	 * @param string $url URI resource
 	 */
 	public function __construct( $slug, $destination_scheme, $destination_host, $temp_files_dir, $additional_urls, $additional_files ) {
@@ -80,7 +71,6 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * Create a static version of the site
-	 *
 	 * @return void
 	 */
 	public function create_archive() {
@@ -221,7 +211,6 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * Convert a directory path into a valid WordPress URL
-	 *
 	 * @param  string $path The path to a directory or a file
 	 * @return string       The WordPress URL for the given path
 	 */
@@ -238,9 +227,11 @@ class Simply_Static_Archive_Creator {
 	}
 
 	/**
-	 * Add a URL to the processing queue if we haven't already processed it and
-	 * if it's not in the queue to be processed
+	 * Add a URL to the processing queue
 	 *
+	 * (if we haven't already processed it and if it's not in the queue to be
+	 * processed)
+	 * 
 	 * @param string $url        URL to add to the processing queue
 	 * @param array  $urls_queue Queue of URLs to be processed
 	 * @return array             Queue of URLs to be processed
@@ -255,7 +246,6 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * Create a ZIP file using the archive directory
-	 *
 	 * @return string|WP_Error $temporary_zip The path to the archive zip file
 	 */
 	public function create_zip() {
@@ -279,7 +269,6 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	* Copy static files to a local directory
-	*
 	* @return boolean|WP_Error
 	*/
 	public function copy_static_files( $local_dir ) {
@@ -299,7 +288,6 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * Delete generated static files
-	 *
 	 * @param $archive_dir The archive directory path
 	 * @return boolean|WP_Error
 	 */
@@ -326,7 +314,6 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * Save the contents of a page to a file in our archive directory
-	 *
 	 * @param string $path The relative path for the URL to save
 	 * @param string $content The contents of the page we want to save
 	 * @param boolean $is_html Is this an html page?

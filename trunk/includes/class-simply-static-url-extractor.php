@@ -1,11 +1,12 @@
 <?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
- * Simply Static URL extractor class. Note that in addition to extracting URLs
- * this class also makes modifications to the Simply_Static_Url_Response
- * that is passed into it: URLs in the body of the response are updated to
- * be absolute URLs.
+ * Simply Static URL extractor class
  *
+ * Note that in addition to extracting URLs this class also makes modifications
+ * to the Simply_Static_Url_Response that is passed into it: URLs in the body of
+ * the response are updated to be absolute URLs.
+ * 
  * @package Simply_Static
  */
 class Simply_Static_Url_Extractor {
@@ -81,21 +82,18 @@ class Simply_Static_Url_Extractor {
 
 	/**
 	 * The URL request response
-	*
 	 * @var Simply_Static_Url_Response
 	 */
 	protected $response;
 
 	/**
 	 * The url of the site
-	 *
 	 * @var array
 	 */
 	protected $extracted_urls = array();
 
 	/**
 	 * Constructor
-	 *
 	 * @param string response URL Response object
 	 */
 	public function __construct( $response ) {
@@ -128,7 +126,6 @@ class Simply_Static_Url_Extractor {
 
 	/**
 	 * Loops through all elements in the DOM to pull out URLs
-	 *
 	 * @return string The HTML with all URLs made absolute
 	 */
 	private function extract_urls_from_html() {

@@ -2,7 +2,6 @@
 
 /**
  * Simply Static URL response class
- *
  * @package Simply_Static
  */
 
@@ -10,42 +9,36 @@ class Simply_Static_Url_Response {
 
 	/**
 	 * The URI resource
-	 *
 	 * @var string
 	 */
 	public $url;
 
 	/**
 	 * The headers from the response
-	 *
 	 * @var string
 	 */
 	public $headers = array();
 
 	/**
 	 * The body content of the response
-	 *
 	 * @var string
 	 */
 	public $body = '';
 
 	/**
 	 * The code from the response, e.g. 200
-	 *
 	 * @var integer
 	 */
 	public $code = null;
 
 	/**
 	 * The message from the response, e.g. 'OK'
-	 *
 	 * @var string
 	 */
 	public $message = '';
 
 	/**
 	 * Constructor
-	 *
 	 * @param string $url URI resource
 	 */
 	public function __construct( $url, $response ) {
@@ -58,7 +51,6 @@ class Simply_Static_Url_Response {
 
 	/**
 	 * Returns the content type
-	 *
 	 * @return string
 	 */
 	public function get_content_type() {
@@ -67,7 +59,6 @@ class Simply_Static_Url_Response {
 
 	/**
 	 * Checks if content type is html
-	 *
 	 * @return bool
 	 */
 	public function is_html() {
@@ -76,7 +67,6 @@ class Simply_Static_Url_Response {
 
 	/**
 	 * Checks if content type is html
-	 *
 	 * @return bool
 	 */
 	public function is_css() {
@@ -84,8 +74,9 @@ class Simply_Static_Url_Response {
 	}
 
 	/**
-	 * Checks for a location header (redirection URL). Returns an empty string if
-	 * it doesn't find one.
+	 * Checks for a location header (redirection URL)
+	 *
+	 * Returns an empty string if it doesn't find one.
 	 *
 	 * @return string
 	 */
@@ -108,7 +99,6 @@ class Simply_Static_Url_Response {
 
 	/**
 	 * Extracts the list of unique URLs
-	 *
 	 * @return array
 	 */
 	public function extract_urls() {
@@ -118,7 +108,6 @@ class Simply_Static_Url_Response {
 
 	/**
 	 * Replaces base URL
-	 *
 	 * @param string $origin_url
 	 * @param string $destination_url
 	 * @return void

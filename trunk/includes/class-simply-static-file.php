@@ -2,7 +2,6 @@
 
 /**
  * Simply Static File class, for tracking the state of static files
- *
  * @package Simply_Static
  */
 class Simply_Static_File extends Simply_Static_Model {

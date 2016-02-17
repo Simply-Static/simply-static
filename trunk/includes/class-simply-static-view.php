@@ -2,55 +2,48 @@
 
 /**
  * Simply Static view class
- *
  * @package Simply_Static
  */
 class Simply_Static_View {
 
 	/**
 	 * Base directory for views
-	 *
 	 * @var string
 	 */
 	const DIRECTORY = 'views';
 
 	/**
 	 * View script extension
-	 *
 	 * @var string
 	 */
 	const EXTENSION = '.phtml';
 
 	/**
 	 * View variables array
-	 *
 	 * @var array
 	 */
 	protected $variables = array();
 
 	/**
 	 * Absolute path for view
-	 *
 	 * @var string
 	 */
 	protected $path = null;
 
 	/**
 	 * Template file name to render
-	 *
 	 * @var string
 	 */
 	protected $template = null;
 
 	/**
 	 * Flashes are quick status messages displayed at the top of the page
-	 *
 	 * @var array
 	 */
 	protected $flashes = array();
 
 	/**
-	 * Performs initialization of the absolute path for views
+	 * Contructor - Performs initialization of the absolute path for views
 	 */
 	public function __construct() {
 		// Looking for a basic directory where plugin resides
@@ -63,8 +56,7 @@ class Simply_Static_View {
 	}
 
 	/**
-	 * Sets a layout that will be used later in render() method.
-	 *
+	 * Sets a layout that will be used later in render() method
 	 * @param string $template The template filename, without extension
 	 * @return Simply_Static_View
 	 */
@@ -75,8 +67,7 @@ class Simply_Static_View {
 	}
 
 	/**
-	 * Sets a template that will be used later in render() method.
-	 *
+	 * Sets a template that will be used later in render() method
 	 * @param string $template The template filename, without extension
 	 * @return Simply_Static_View
 	 */
@@ -88,7 +79,6 @@ class Simply_Static_View {
 
 	/**
 	 * Returns a value of the option identified by $name
-	 *
 	 * @param string $name The option name
 	 * @return mixed|null
 	 */
@@ -99,7 +89,6 @@ class Simply_Static_View {
 
 	/**
 	* Updates the view variable identified by $name with the value provided in $value
-	*
 	* @param string $name The variable name
 	* @param mixed  $value The variable value
 	* @return Simply_Static_View
@@ -111,7 +100,6 @@ class Simply_Static_View {
 
 	/**
 	 * Updates the view variable identified by $name with the value provided in $value
-	 *
 	 * @param string $name The variable name
 	 * @param mixed $value The variable value
 	 * @return Simply_Static_View
@@ -122,7 +110,6 @@ class Simply_Static_View {
 
 	/**
 	 * Add a flash message to be displayed at the top of the page
-	 *
 	 * @param string $type The type of message to be displayed
 	 * @param string $message The message to be displayed
 	 * @return void
@@ -132,8 +119,9 @@ class Simply_Static_View {
 	}
 
 	/**
-	 * Returns the layout (if available) or template. Checks to make sure that
-	 * the file exists and is readable.
+	 * Returns the layout (if available) or template
+	 *
+	 * Checks to make sure that the file exists and is readable.
 	 *
 	 * @return string|WP_Error
 	 */
@@ -159,8 +147,7 @@ class Simply_Static_View {
 	}
 
 	/**
-	 * Check Simply_Static's system requirements and add errors as necessary.
-	 *
+	 * Check Simply_Static's system requirements and add errors as necessary
 	 * @return void
 	 */
 	private function check_for_errors() {

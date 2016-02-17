@@ -1,7 +1,10 @@
 <?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
- * Simply Static File class, for tracking the state of static files
+ * Simply Static Model class
+ *
+ * Represents a single database table with accessors for finding, creating, and
+ * updating records.
  *
  * @package Simply_Static
  */
@@ -14,21 +17,26 @@ class Simply_Static_Model {
 	protected static $table_name = '';
 
 	/**
-	 * A list of the columns for the model, in the format of 'col_name' => 'col_definition', e.g.
+	 * A list of the columns for the model
+	 *
+	 * In the format of 'col_name' => 'col_definition', e.g.
 	 *     'id' => 'BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY'
+	 *
 	 * @var array
 	 */
 	protected static $columns = array();
 
 	/**
-	 * A list of the indexes for the model, in the format of 'index_name' => 'index_def', e.g.
+	 * A list of the indexes for the model
+	 *
+	 * In the format of 'index_name' => 'index_def', e.g.
 	 *     'url' => 'url'
+	 *
 	 * @var array
 	 */
 	protected static $indexes = array();
 
 	/**
-	 *
 	 * The name of the primary key for the model
 	 * @var string
 	 */
@@ -46,6 +54,7 @@ class Simply_Static_Model {
 	 * Retrieve the value of a field for the model
 	 *
 	 * Returns an exception if you try to retrieve a field that isn't set.
+	 *
 	 * @param  string $field_name The name of the field to retrieve
 	 * @return mixed              The value for the field
 	 */
@@ -62,6 +71,7 @@ class Simply_Static_Model {
 	 *
 	 * Returns an exception if you try to set a field that isn't one of the
 	 * model's columns.
+	 *
 	 * @param string $field_name  The name of the field to set
 	 * @param mixed  $field_value The value for the field
 	 * @return mixed              The value of the field that was set
@@ -88,6 +98,7 @@ class Simply_Static_Model {
 	 * Find and return an the first record matching the column name/value
 	 *
 	 * Example: find_by( 'id', 123 )
+	 *
 	 * @param  string $column_name The name of the column to search on
 	 * @param  string $value       The value that the column should contain
 	 * @return static|null         An instance of the class, or null
@@ -112,6 +123,7 @@ class Simply_Static_Model {
 	 *
 	 * Finds the first record with the given column name/value, or initializes
 	 * an instance of the model if one is not found.
+	 *
 	 * @param  string $column_name The name of the column to search on
 	 * @param  string $value       The value that the column should contain
 	 * @return static              An instance of the class (might not exist in db yet)
@@ -157,6 +169,7 @@ class Simply_Static_Model {
 	 *
 	 * If the model is new a record gets created in the database, otherwise the
 	 * existing record gets updated.
+	 *
 	 * @param  array $attributes Array of attributes to set
 	 * @return boolean           An instance of the class
 	 */
@@ -192,6 +205,7 @@ class Simply_Static_Model {
 	 *
 	 * Technically this is checking whether the model has its primary key set.
 	 * If it is set, we assume the record exists in the database.
+	 * 
 	 * @return boolean Does this model exist in the db?
 	 */
 	public function exists() {

@@ -2,27 +2,23 @@
 
 /**
  * Simply Static options class
- *
  * @package Simply_Static
  */
 class Simply_Static_Options {
 	/**
 	 * Options array
-	 *
 	 * @var array
 	 */
 	protected $options = array();
 
 	/**
 	 * Defines options record in the wp_options table
-	 *
 	 * @var string
 	 */
 	protected $option_key = null;
 
 	/**
 	 * Performs initializion of the options structure
-	 *
 	 * @param string $option_key The options key name
 	 */
 	public function __construct( $option_key ) {
@@ -38,7 +34,6 @@ class Simply_Static_Options {
 
 	/**
 	 * Updates the option identified by $name with the value provided in $value
-	 *
 	 * @param string $name The option name
 	 * @param mixed $value The option value
 	 * @return Simply_Static_Options
@@ -50,7 +45,6 @@ class Simply_Static_Options {
 
 	/**
 	 * Returns a value of the option identified by $name
-	 *
 	 * @param string $name The option name
 	 * @return mixed|null
 	 */
@@ -60,7 +54,6 @@ class Simply_Static_Options {
 
 	/**
 	 * Saves the internal options data to the wp_options table using the stored $option_key value as the key
-	 *
 	 * @return boolean
 	 */
 	public function save() {

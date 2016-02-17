@@ -2,14 +2,12 @@
 
 /**
  * Simply Static export log
- *
  * @package Simply_Static
  */
 class Simply_Static_Export_Log {
 
 	/**
 	 * Array of URLs containing arrays of http/error codes and source URLs
-	 *
 	 * @var Simply_Static_View
 	 */
 	protected $log = array();

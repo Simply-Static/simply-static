@@ -2,21 +2,18 @@
 
 /**
  * Simply Static URL fetcher class
- *
  * @package Simply_Static
  */
 class Simply_Static_Url_Fetcher {
 
 	/**
 	 * Timeout for fetching URLs
-	 *
 	 * @var string
 	 */
 	const TIMEOUT = 300;
 
     /**
 	 * Fetch the URL and return a WP_Error if we get one, otherwise a Response class.
-	 *
 	 * @return WP_Error|Simply_Static_Url_Response
 	 */
 	public static function fetch( $url ) {
