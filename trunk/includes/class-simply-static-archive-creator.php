@@ -141,7 +141,9 @@ class Simply_Static_Archive_Creator {
 			$data = array(
 				'http_status_code' => $response->code
 			);
-			Simply_Static_File::find_or_create_by( 'url', $current_url, $data );
+			$static_file = Simply_Static_File::find_or_initialize_by( 'url', $current_url );
+			$static_file->save();
+
 			$this->export_log->set_response_code( $current_url, $response->code );
 
 			$url_parts = parse_url( $response->url );

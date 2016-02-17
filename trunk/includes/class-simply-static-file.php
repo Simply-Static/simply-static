@@ -1,50 +1,31 @@
 <?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
- * Simply Static file class, for tracking the state of static files
+ * Simply Static File class, for tracking the state of static files
  *
  * @package Simply_Static
  */
-class Simply_Static_File {
+class Simply_Static_File extends Simply_Static_Model {
 
-    /**
-	 * Returns the name of the URLs table
-	 *
-	 * @return void
-	 */
-	static private function table_name() {
-		global $wpdb;
+	protected static $table_name = 'files';
 
-		return $wpdb->prefix . Simply_Static::SLUG . '_files';
-	}
+	protected static $columns = array(
+		'id'                => 'BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY',
+		'found_on_id'       => 'BIGINT(20) UNSIGNED NULL',
+		'url'               => 'VARCHAR(255) NOT NULL',
+		'file_path'         => 'VARCHAR(255) NOT NULL',
+		'http_status_code'  => 'SMALLINT(20) NOT NULL',
+		'hash'              => 'BINARY(20) NOT NULL',
+		'last_checked_at'   => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
+		'last_modified_at'  => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
+		'last_uploaded_at'  => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
+		'created_at'        => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
+		'updated_at'        => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'"
+	);
 
-    public static function find_by( $field_name, $field_value ) {
-        global $wpdb;
+	protected static $indexes = array(
+		'url' => 'url'
+	);
 
-        $row = $wpdb->get_row(
-            $wpdb->prepare( 'SELECT * FROM ' . self::table_name() . ' WHERE ' . $field_name . ' = %s', $field_value )
-        );
-        error_log( $wpdb->last_query );
-        return $row;
-    }
-
-    public static function find_or_create_by( $field_name, $field_value, $data = array() ) {
-        global $wpdb;
-
-        $row = self::find_by( $field_name, $field_value );
-        if ( $row ) {
-            $wpdb->update( self::table_name(), $data, array( $field_name => $field_value ) );
-            error_log( $wpdb->last_query );
-            return $row;
-        } else {
-            // automatically add $field_name/value to $data if it's not there
-            if ( ! isset( $data[ $field_name ] ) ) {
-                $data[ $field_name ] = $field_value;
-            }
-            $wpdb->insert( self::table_name(), $data );
-            error_log( $wpdb->last_query );
-            return (object) $data;
-        }
-    }
-
+	protected static $primary_key = 'id';
 }

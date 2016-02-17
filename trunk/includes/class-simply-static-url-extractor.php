@@ -146,7 +146,7 @@ class Simply_Static_Url_Extractor {
 		foreach ( $elements as $element ) {
 			$tag_name = $element->tagName;
 
-			if( $tag_name === 'style' ) {
+			if ( $tag_name === 'style' ) {
 				$updated_css = $this->extract_urls_from_css( $element->nodeValue );
 				$element->nodeValue = $updated_css;
 			} else {

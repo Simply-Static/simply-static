@@ -146,7 +146,7 @@ class Simply_Static {
 
 				if ( version_compare( $this->options->get( 'version' ), '1.3.0', '<' ) ) {
 					// version 1.3 changed the options key
-					if( get_option( 'simply-static' ) ) {
+					if ( get_option( 'simply-static' ) ) {
 			            update_option( 'simply_static', get_option( 'simply-static' ) );
 			            delete_option( 'simply-static' );
 			        }
@@ -185,7 +185,7 @@ class Simply_Static {
 			last_uploaded_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
 			created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
 			updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-			KEY url (url)
+			INDEX url (url)
 		) $charset_collate;";
 
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
@@ -230,6 +230,7 @@ class Simply_Static {
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-response.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-archive-creator.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-export-log.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-model.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-file.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/misc-functions.php';
 	}
@@ -501,7 +502,7 @@ class Simply_Static {
 	 * @return null
 	 */
 	public function download_file() {
-		if( isset( $_GET[ self::SLUG . '_zip_download' ] ) ) {
+		if ( isset( $_GET[ self::SLUG . '_zip_download' ] ) ) {
 			$filename = $_GET[ self::SLUG . '_zip_download' ];
 			header( 'Content-Description: File Transfer' );
 			header( 'Content-Disposition: attachment; filename=' . $filename );

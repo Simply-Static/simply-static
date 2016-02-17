@@ -80,11 +80,11 @@ function sist_trailingslashit_unless_blank( $string ) {
  * @return string
  */
 function sist_error_log( $object=null ){
-    ob_start();
-    var_dump( $object );
-    $contents = ob_get_contents();
-    ob_end_clean();
-    error_log( $contents );
+	ob_start();
+	var_dump( $object );
+	$contents = ob_get_contents();
+	ob_end_clean();
+	error_log( $contents );
 }
 
 /**
@@ -188,4 +188,13 @@ function sist_string_to_array( $textarea ) {
 	array_walk( $lines, 'trim' );
 	$lines = array_filter( $lines );
 	return $lines;
+}
+
+/**
+ * Get the current datetime formated as a string for entry into MySQL
+ *
+ * @return string MySQL formatted datetime
+ */
+function sist_formatted_datetime() {
+	return date('Y/m/d H:i:s');
 }
