@@ -78,6 +78,9 @@ class Simply_Static_Archive_Creator {
 		// TODO: Do ajax calls instead of just running forever and ever
 		set_time_limit(0);
 
+		// Reset all of the values for where a page was found
+		Simply_Static_File::update_all( 'found_on_id', null );
+
 		// Create archive directory
 		$current_user = wp_get_current_user();
 		$archive_name = join( '-', array( $this->slug, $blog_id, time(), $current_user->user_login ) );
@@ -132,6 +135,7 @@ class Simply_Static_Archive_Creator {
 				'http_status_code' => $response->code
 			);
 			$static_file = Simply_Static_File::find_or_initialize_by( 'url', $current_url );
+			$static_file->http_status_code = $response->code;
 			$static_file->save();
 
 			$this->export_log->set_response_code( $current_url, $response->code );
@@ -169,6 +173,13 @@ class Simply_Static_Archive_Creator {
 							// add the redirected page to the queue
 							$urls_queue = $this->add_url_to_queue( $redirect_url, $urls_queue );
 							$this->export_log->set_source_url( $redirect_url, $current_url );
+
+							$redirect_static_file = Simply_Static_File::find_or_initialize_by( 'url' , $redirect_url );
+							if ( $redirect_static_file->found_on_id === null ) {
+								$redirect_static_file->found_on_id = $static_file->id;
+								$redirect_static_file->save();
+							}
+
 							// and update the URL
 							$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
 
@@ -198,6 +209,13 @@ class Simply_Static_Archive_Creator {
 			foreach ( $urls as $url ) {
 				$urls_queue = $this->add_url_to_queue( $url, $urls_queue );
 				$this->export_log->set_source_url( $url, $current_url );
+
+				$extracted_static_file = Simply_Static_File::find_or_initialize_by( 'url' , $url );
+				if ( $extracted_static_file->found_on_id === null ) {
+					$extracted_static_file->found_on_id = $static_file->id;
+					$extracted_static_file->save();
+				}
+
 			}
 
 			// Replace the origin URL with the destination URL within the content
@@ -231,7 +249,7 @@ class Simply_Static_Archive_Creator {
 	 *
 	 * (if we haven't already processed it and if it's not in the queue to be
 	 * processed)
-	 * 
+	 *
 	 * @param string $url        URL to add to the processing queue
 	 * @param array  $urls_queue Queue of URLs to be processed
 	 * @return array             Queue of URLs to be processed

@@ -139,6 +139,20 @@ class Simply_Static_Model {
 	}
 
 	/**
+	 * Find the first record with the given column name/value, or create it
+	 * @param  string $column_name The name of the column to search on
+	 * @param  string $value       The value that the column should contain
+	 * @return static              An instance of the class (might not exist in db yet)
+	 */
+	public static function find_or_create_by( $column_name, $value ) {
+		$obj = self::find_or_initialize_by( $column_name, $value );
+		if ( ! $obj->exists() ) {
+			$obj->save();
+		}
+		return $obj;
+	}
+
+	/**
 	 * Initialize an instance of the class and set its attributes
 	 * @param  array $attributes Array of attributes to set for the class
 	 * @return static            An instance of the class
@@ -150,6 +164,25 @@ class Simply_Static_Model {
 		}
 		$obj->attributes( $attributes );
 		return $obj;
+	}
+
+	/**
+	 * Update all records to set the column name equal to the value
+	 * @param  string $column_name The name of the column to search on
+	 * @param  string $value       The value that the column should contain
+	 * @return int|null            The number of rows updated, or null if failure
+	 */
+	public static function update_all( $column_name, $value ) {
+		global $wpdb;
+
+		if ( $value === null ) {
+			$sql = 'UPDATE ' . self::table_name() . ' SET ' . $column_name . ' = NULL';
+		} else {
+			$sql = $wpdb->prepare( 'UPDATE ' . self::table_name() . ' SET ' . $column_name . ' = %s', $value );
+		}
+
+		$rows_updated = $wpdb->query( $sql );
+		return $rows_updated;
 	}
 
 	/**
@@ -205,7 +238,7 @@ class Simply_Static_Model {
 	 *
 	 * Technically this is checking whether the model has its primary key set.
 	 * If it is set, we assume the record exists in the database.
-	 * 
+	 *
 	 * @return boolean Does this model exist in the db?
 	 */
 	public function exists() {
