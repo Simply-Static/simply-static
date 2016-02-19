@@ -299,6 +299,17 @@ class Simply_Static_Model {
 		return $this->$primary_key !== null;
 	}
 
+	public function is_content_identical( $content ) {
+		$hash = sha1( $content, true );
+		return $hash === $this->content_hash;
+	}
+
+	public function set_content_hash( $content ) {
+		$hash = sha1( $content, true );
+		$this->content_hash = $hash;
+		$this->last_modified_at = sist_formatted_datetime();
+	}
+
 	public static function where_sql( $column_name, $value ) {
 		$where_sql = ' ' . $column_name . ' ';
 		$where_sql .= ( $value === null ) ? 'IS ' : '= ';

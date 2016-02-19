@@ -71,9 +71,6 @@ class Simply_Static_Archive_Creator {
 		// TODO: Do ajax calls instead of just running forever and ever
 		set_time_limit(0);
 
-		// Reset all of the values for where a page was found
-		Simply_Static_File::update_all( 'found_on_id', null );
-
 		// Create archive directory
 		$current_user = wp_get_current_user();
 		$archive_name = join( '-', array( $this->slug, $blog_id, time(), $current_user->user_login ) );
@@ -121,6 +118,10 @@ class Simply_Static_Archive_Creator {
 
 		while ( $static_files = Simply_Static_File::where( 'last_checked_at < ? OR last_checked_at IS NULL LIMIT 10', $now ) ) {
 			while ( $static_file = array_shift( $static_files ) ) {
+
+				error_log('----');
+				sist_error_log( $static_file );
+
 				$current_url = $static_file->url;
 
 				$response = Simply_Static_Url_Fetcher::fetch( $current_url );
@@ -168,7 +169,7 @@ class Simply_Static_Archive_Creator {
 							if ( sist_is_local_url( $redirect_url ) ) {
 
 								$redirect_static_file = Simply_Static_File::find_or_create_by( 'url' , $redirect_url );
-								if ( $redirect_static_file->found_on_id === null ) {
+								if ( $redirect_static_file->found_on_id !== $static_file->id ) {
 									$redirect_static_file->found_on_id = $static_file->id;
 									$redirect_static_file->save();
 								}
@@ -197,27 +198,22 @@ class Simply_Static_Archive_Creator {
 				}
 
 				$content = $response->body;
-				$hash = sha1( $content, true );
 
-				if ( $hash === $static_file->hash ) {
-					// continue;
-				} else {
-					$static_file->hash = $hash;
-					$static_file->save();
+				// if the content is identical, move on to the next file
+				if ( $static_file->is_content_identical( $content ) ) {
+					continue;
 				}
-
-
 
 				// Fetch all URLs from the page and add them to the queue...
 				$urls = $response->extract_urls();
 
 				foreach ( $urls as $url ) {
 					$extracted_static_file = Simply_Static_File::find_or_create_by( 'url' , $url );
-					if ( $extracted_static_file->found_on_id === null ) {
+					if ( $extracted_static_file->found_on_id !== $static_file->id ) {
+						error_log( $static_file->id );
 						$extracted_static_file->found_on_id = $static_file->id;
 						$extracted_static_file->save();
 					}
-
 				}
 
 				// Replace the origin URL with the destination URL within the content
@@ -225,6 +221,10 @@ class Simply_Static_Archive_Creator {
 
 				// Save the page to our archive
 				$this->save_url_to_file( $path, $content, $is_html );
+
+				$static_file->set_content_hash( $content );
+				$static_file->file_path = $path;
+				$static_file->save();
 			}
 		}
 	}

@@ -43,7 +43,11 @@
 						<td><?php echo $static_file->http_status_code; ?></td>
 						<td><a href='<?php echo $static_file->url; ?>'><?php echo $static_file->url; ?></a></td>
 						<?php $parent_static_file = find_first_match( $this->static_files, $static_file->found_on_id ); ?>
-						<td><a href='<?php echo $parent_static_file->url; ?>'><?php echo $parent_static_file->url; ?></a></td>
+						<td>
+							<?php if ( $parent_static_file ): ?>
+								<a href='<?php echo $parent_static_file->url; ?>'><?php echo $parent_static_file->url; ?></a>
+							<?php endif; ?>
+						</td>
 					</tr>
 				<?php endforeach; ?>
 				</tbody>

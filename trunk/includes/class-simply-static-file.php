@@ -14,7 +14,7 @@ class Simply_Static_File extends Simply_Static_Model {
 		'url'               => 'VARCHAR(255) NOT NULL',
 		'file_path'         => 'VARCHAR(255) NOT NULL',
 		'http_status_code'  => 'SMALLINT(20) NOT NULL',
-		'hash'              => 'BINARY(20) NOT NULL',
+		'content_hash'      => 'BINARY(20) NOT NULL',
 		'last_checked_at'   => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
 		'last_modified_at'  => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
 		'last_uploaded_at'  => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
