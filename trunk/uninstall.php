@@ -11,4 +11,8 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) exit;
 // Delete Simply Static's settings
 delete_option( 'simply_static' );
 
-Simply_Static::instance()->drop_files_table();
+require plugin_dir_path( __FILE__ ) . 'includes/class-simply-static.php';
+require plugin_dir_path( __FILE__ ) . 'includes/class-simply-static-model.php';
+require plugin_dir_path( __FILE__ ) . 'includes/class-simply-static-file.php';
+
+Simply_Static_File::drop_table();

@@ -36,12 +36,6 @@ class Simply_Static {
 	protected $view = null;
 
 	/**
-	 * Name of the URLs table
-	 * @var string
-	 */
-	protected $files_table_name = null;
-
-	/**
 	 * Disable usage of "new"
 	 * @return void
 	 */
@@ -71,7 +65,6 @@ class Simply_Static {
 			self::$instance->includes();
 			self::$instance->options = new Simply_Static_Options( self::SLUG );
 			self::$instance->view = new Simply_Static_View();
-			self::$instance->files_table_name = self::files_table_name();
 
 			// Check for pending file download
 			add_action( 'plugins_loaded', array( self::$instance, 'download_file' ) );
@@ -139,7 +132,7 @@ class Simply_Static {
 			        }
 
 					// and added a database table for tracking urls/progress
-					$this->create_files_table();
+					Simply_Static_File::create_table();
 				}
 
 				// always update the version and save
@@ -148,55 +141,6 @@ class Simply_Static {
 					->save();
 			}
 		}
-	}
-
-	/**
-	 * Creates the URLs table
-	 * @return void
-	 */
-	private function create_files_table() {
-		global $wpdb;
-
-		$charset_collate = $wpdb->get_charset_collate();
-
-		$sql = "CREATE TABLE $this->files_table_name (
-			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-			found_on_id BIGINT(20) UNSIGNED NULL,
-			url VARCHAR(255) NOT NULL,
-			file_path VARCHAR(255) NOT NULL,
-			http_status_code SMALLINT(20) NOT NULL,
-			hash BINARY(20) NOT NULL,
-			last_checked_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-			last_modified_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-			last_uploaded_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-			created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-			updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-			INDEX url (url)
-		) $charset_collate;";
-
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-		dbDelta( $sql );
-	}
-
-	/**
-	 * Drops the URLs table
-	 * @return void
-	 */
-	private function drop_files_table() {
-		global $wpdb;
-
-		$wpdb->query( "DROP TABLE IF EXISTS $this->files_table_name" );
-	}
-
-
-	/**
-	 * Returns the name of the URLs table
-	 * @return void
-	 */
-	static private function files_table_name() {
-		global $wpdb;
-
-		return $wpdb->prefix . self::SLUG . '_files';
 	}
 
 	/**

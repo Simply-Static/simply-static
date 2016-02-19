@@ -96,13 +96,41 @@ class Simply_Static_Model {
 
 	/**
 	 * Returns an array of all records in the table
-	 * @return array Array of all records
+	 * @return array|null Array of all records, or null if query failure
 	 */
 	public static function all() {
 		global $wpdb;
 
 		$rows = $wpdb->get_results(
 			'SELECT * FROM ' . self::table_name(),
+			ARRAY_A
+		);
+
+		if ( $rows === null ) {
+			return null;
+		} else {
+			$records = array();
+
+			foreach ( $rows as $row ) {
+				$records[] = self::initialize( $row );
+			}
+
+			return $records;
+		}
+	}
+
+	public static function where( $query, $args ) {
+		global $wpdb;
+
+		$where_values = func_get_args();
+		array_shift( $where_values );
+
+		foreach ( $where_values as $value ) {
+			$query = preg_replace( '/\?/', self::value_placeholder( $value ), $query, 1 );
+		}
+
+		$rows = $wpdb->get_results(
+			$wpdb->prepare( 'SELECT * FROM ' . self::table_name() . ' WHERE ' . $query, $where_values ),
 			ARRAY_A
 		);
 
@@ -132,7 +160,7 @@ class Simply_Static_Model {
 		global $wpdb;
 
 		$attributes = $wpdb->get_row(
-			$wpdb->prepare( 'SELECT * FROM ' . self::table_name() . ' WHERE ' . $column_name . ' = %s', $value ),
+			$wpdb->prepare( 'SELECT * FROM ' . self::table_name() . ' WHERE ' . self::where_sql( $column_name, $value ), $value ),
 			ARRAY_A
 		);
 
@@ -201,9 +229,9 @@ class Simply_Static_Model {
 		global $wpdb;
 
 		if ( $value === null ) {
-			$sql = 'UPDATE ' . self::table_name() . ' SET ' . $column_name . ' = NULL';
+			$sql = 'UPDATE ' . self::table_name() . ' SET ' . self::update_set_sql( $column_name, $value );
 		} else {
-			$sql = $wpdb->prepare( 'UPDATE ' . self::table_name() . ' SET ' . $column_name . ' = %s', $value );
+			$sql = $wpdb->prepare( 'UPDATE ' . self::table_name() . ' SET ' . self::update_set_sql( $column_name, $value ), $value );
 		}
 
 		$rows_updated = $wpdb->query( $sql );
@@ -235,7 +263,7 @@ class Simply_Static_Model {
 		global $wpdb;
 
 		// autoset created_at/updated_at upon save
-		if ( ! $this->exists() ) {
+		if ( $this->created_at === null ) {
 			$this->created_at = sist_formatted_datetime();
 		}
 		$this->updated_at = sist_formatted_datetime();
@@ -269,5 +297,64 @@ class Simply_Static_Model {
 	public function exists() {
 		$primary_key = static::$primary_key;
 		return $this->$primary_key !== null;
+	}
+
+	public static function where_sql( $column_name, $value ) {
+		$where_sql = ' ' . $column_name . ' ';
+		$where_sql .= ( $value === null ) ? 'IS ' : '= ';
+		$where_sql .= self::value_placeholder( $value );
+		return $where_sql;
+	}
+
+	public static function update_set_sql( $column_name, $value ) {
+		$where_sql = ' ' . $column_name . ' = ' . self::value_placeholder( $value );
+		return $where_sql;
+	}
+
+	public static function value_placeholder( $value ) {
+		if ( $value === null ) {
+			return 'NULL';
+		} elseif ( is_float( $value ) ) {
+			return '%f';
+		} elseif ( is_integer( $value ) ) {
+			return '%d';
+		} else {
+			return '%s';
+		}
+	}
+
+	/**
+	 * Creates the table for the model
+	 * @return void
+	 */
+	public static function create_table() {
+		global $wpdb;
+
+		$charset_collate = $wpdb->get_charset_collate();
+		$sql = 'CREATE TABLE ' . self::table_name() . ' (';
+
+		foreach ( static::$columns as $column_name => $column_definition ) {
+			$sql .= $column_name . ' ' . $column_definition . ', ';
+		}
+		foreach ( static::$indexes as $index ) {
+			$sql .= $index . ', ';
+		}
+
+		// remove trailing comma
+		$sql = rtrim( $sql, ',' );
+		$sql .= ') ' . $charset_collate;
+
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		dbDelta( $sql );
+	}
+
+	/**
+	 * Drops the table for the model
+	 * @return void
+	 */
+	public static function drop_table() {
+		global $wpdb;
+
+		$wpdb->query( 'DROP TABLE IF EXISTS ' . self::table_name() );
 	}
 }
