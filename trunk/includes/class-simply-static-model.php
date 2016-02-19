@@ -269,7 +269,7 @@ class Simply_Static_Model {
 		$this->updated_at = sist_formatted_datetime();
 
 		// remove null data
-		$fields = array_filter( $this->data );
+		$fields = array_filter( $this->data, function($v) { return $v !== null; } );
 
 		if ( $this->exists() ) {
 			$primary_key = static::$primary_key;

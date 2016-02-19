@@ -91,7 +91,9 @@ class Simply_Static_Archive_Creator {
 			sist_string_to_array( $this->additional_urls )
 		) );
 		foreach ( $urls as $url ) {
-			Simply_Static_File::find_or_create_by( 'url', $url );
+			$static_file = Simply_Static_File::find_or_initialize_by( 'url', $url );
+			$static_file->found_on_id = 0;
+			$static_file->save();
 		}
 
 		// Convert additional files to URLs and add to queue
@@ -108,7 +110,9 @@ class Simply_Static_Archive_Creator {
 
 					foreach ( $iterator as $file_name => $file_object ) {
 						$url = $this->convert_path_to_url( $file_name );
-						Simply_Static_File::find_or_create_by( 'url', $url );
+						$static_file = Simply_Static_File::find_or_initialize_by( 'url', $url );
+						$static_file->found_on_id = 0;
+						$static_file->save();
 					}
 				}
 			}
@@ -118,9 +122,6 @@ class Simply_Static_Archive_Creator {
 
 		while ( $static_files = Simply_Static_File::where( 'last_checked_at < ? OR last_checked_at IS NULL LIMIT 10', $now ) ) {
 			while ( $static_file = array_shift( $static_files ) ) {
-
-				error_log('----');
-				sist_error_log( $static_file );
 
 				$current_url = $static_file->url;
 
@@ -152,41 +153,29 @@ class Simply_Static_Archive_Creator {
 
 					$redirect_url = $response->get_redirect_url();
 
-					// WP likes to 301 redirect `/path` to `/path/` -- we want to
-					// check for this and just add the trailing slashed version
-					if ( $redirect_url === trailingslashit( $current_url ) ) {
+					/// convert our potentially relative URL to an absolute URL
+					$redirect_url = sist_relative_to_absolute_url( $redirect_url, $current_url );
 
-						Simply_Static_File::find_or_create_by( 'url', $redirect_url );
+					if ( $redirect_url ) {
 
-					} else {
+						// check if this is a local URL
+						if ( sist_is_local_url( $redirect_url ) ) {
 
-						/// convert our potentially relative URL to an absolute URL
-						$redirect_url = sist_relative_to_absolute_url( $redirect_url, $current_url );
+							$this->set_url_found_on( $static_file, $redirect_url, $now );
+							$redirect_static_file = Simply_Static_File::find_or_create_by( 'url' , $redirect_url );
 
-						if ( $redirect_url ) {
+							// and update the URL
+							$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
 
-							// check if this is a local URL
-							if ( sist_is_local_url( $redirect_url ) ) {
-
-								$redirect_static_file = Simply_Static_File::find_or_create_by( 'url' , $redirect_url );
-								if ( $redirect_static_file->found_on_id !== $static_file->id ) {
-									$redirect_static_file->found_on_id = $static_file->id;
-									$redirect_static_file->save();
-								}
-
-								// and update the URL
-								$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
-
-							}
-
-							$view = new Simply_Static_View();
-
-							$content = $view->set_template( 'redirect' )
-								->assign( 'redirect_url', $redirect_url )
-								->render_to_string();
-
-							$this->save_url_to_file( $path, $content, $is_html );
 						}
+
+						$view = new Simply_Static_View();
+
+						$content = $view->set_template( 'redirect' )
+							->assign( 'redirect_url', $redirect_url )
+							->render_to_string();
+
+						$this->save_url_to_file( $path, $content, $is_html );
 					}
 
 					continue;
@@ -208,12 +197,7 @@ class Simply_Static_Archive_Creator {
 				$urls = $response->extract_urls();
 
 				foreach ( $urls as $url ) {
-					$extracted_static_file = Simply_Static_File::find_or_create_by( 'url' , $url );
-					if ( $extracted_static_file->found_on_id !== $static_file->id ) {
-						error_log( $static_file->id );
-						$extracted_static_file->found_on_id = $static_file->id;
-						$extracted_static_file->save();
-					}
+					$this->set_url_found_on( $static_file, $url, $now );
 				}
 
 				// Replace the origin URL with the destination URL within the content
@@ -226,6 +210,14 @@ class Simply_Static_Archive_Creator {
 				$static_file->file_path = $path;
 				$static_file->save();
 			}
+		}
+	}
+
+	private function set_url_found_on( $static_file, $child_url, $start_time ) {
+		$child_static_file = Simply_Static_File::find_or_create_by( 'url' , $child_url );
+		if ( $child_static_file->found_on_id === null || $child_static_file->updated_at < $start_time ) {
+			$child_static_file->found_on_id = $static_file->id;
+			$child_static_file->save();
 		}
 	}
 
@@ -245,7 +237,6 @@ class Simply_Static_Archive_Creator {
 		}
 		return $url;
 	}
-
 
 	/**
 	 * Create a ZIP file using the archive directory
