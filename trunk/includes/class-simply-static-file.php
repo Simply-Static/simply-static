@@ -23,8 +23,10 @@ class Simply_Static_File extends Simply_Static_Model {
 	);
 
 	protected static $indexes = array(
-		'PRIMARY KEY (id)',
-		'UNIQUE KEY (url)'
+		'KEY url (url)',
+		'KEY last_checked_at (last_checked_at)',
+		'KEY last_modified_at (last_modified_at)',
+		'KEY last_uploaded_at (last_uploaded_at)'
 	);
 
 	protected static $primary_key = 'id';
