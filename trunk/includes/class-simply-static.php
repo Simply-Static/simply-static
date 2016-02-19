@@ -102,29 +102,30 @@ class Simply_Static {
 	 */
 	public function activate()
 	{
-		// Not installed?
-		if ( null === $this->options->get( 'version' ) ) {
+		$version = $this->options->get( 'version' );
+
+		// Never installed?
+		if ( null === $version ) {
 			$this->options
-				->set( 'version', self::VERSION )
 				->set( 'destination_scheme', sist_origin_scheme() )
 				->set( 'destination_host', sist_origin_host() )
 				->set( 'temp_files_dir', trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' ) )
 				->set( 'additional_urls', '' )
 				->set( 'delivery_method', 'zip' )
 				->set( 'local_dir', '' )
-				->set( 'delete_temp_files', '1' )
-				->save();
-		} else {
-			// check if we're behind on our version
-		if ( version_compare( $this->options->get( 'version' ), self::VERSION, '<' ) ) {
+				->set( 'delete_temp_files', '1' );
+		}
+
+		// perform migrations
+		if ( version_compare( $version, self::VERSION, '<' ) ) {
 
 				// version 1.2 introduced the ability to specify additional files
-				if ( version_compare( $this->options->get( 'version' ), '1.2.0', '<' ) ) {
+				if ( version_compare( $version, '1.2.0', '<' ) ) {
 					$this->options
 						->set( 'additional_files', '' );
 				}
 
-				if ( version_compare( $this->options->get( 'version' ), '1.3.0', '<' ) ) {
+				if ( version_compare( $version, '1.3.0', '<' ) ) {
 					// version 1.3 changed the options key
 					if ( get_option( 'simply-static' ) ) {
 			            update_option( 'simply_static', get_option( 'simply-static' ) );
@@ -140,7 +141,7 @@ class Simply_Static {
 					->set( 'version', self::VERSION )
 					->save();
 			}
-		}
+
 	}
 
 	/**

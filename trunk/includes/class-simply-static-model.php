@@ -334,10 +334,10 @@ class Simply_Static_Model {
 		$sql = 'CREATE TABLE ' . self::table_name() . ' (';
 
 		foreach ( static::$columns as $column_name => $column_definition ) {
-			$sql .= $column_name . ' ' . $column_definition . ', ';
+			$sql .= $column_name . ' ' . $column_definition . ',';
 		}
 		foreach ( static::$indexes as $index ) {
-			$sql .= $index . ', ';
+			$sql .= $index . ',';
 		}
 
 		// remove trailing comma
