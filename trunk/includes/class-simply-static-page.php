@@ -9,17 +9,17 @@ class Simply_Static_Page extends Simply_Static_Model {
 	protected static $table_name = 'pages';
 
 	protected static $columns = array(
-		'id'                => 'BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY',
-		'found_on_id'       => 'BIGINT(20) UNSIGNED NULL',
-		'url'               => 'VARCHAR(255) NOT NULL',
-		'file_path'         => 'VARCHAR(255) NOT NULL',
-		'http_status_code'  => 'SMALLINT(20) NOT NULL',
-		'content_hash'      => 'BINARY(20) NOT NULL',
-		'last_checked_at'   => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
-		'last_modified_at'  => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
-		'last_uploaded_at'  => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
-		'created_at'        => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
-		'updated_at'        => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'"
+		'id'                  => 'BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY',
+		'found_on_id'         => 'BIGINT(20) UNSIGNED NULL',
+		'url'                 => 'VARCHAR(255) NOT NULL',
+		'file_path'           => 'VARCHAR(255) NOT NULL',
+		'http_status_code'    => 'SMALLINT(20) NOT NULL',
+		'content_hash'        => 'BINARY(20) NOT NULL',
+		'last_checked_at'     => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
+		'last_modified_at'    => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
+		'last_transferred_at' => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
+		'created_at'          => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
+		'updated_at'          => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'"
 	);
 
 	protected static $indexes = array(
