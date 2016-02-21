@@ -13,6 +13,6 @@ delete_option( 'simply_static' );
 
 require plugin_dir_path( __FILE__ ) . 'includes/class-simply-static.php';
 require plugin_dir_path( __FILE__ ) . 'includes/class-simply-static-model.php';
-require plugin_dir_path( __FILE__ ) . 'includes/class-simply-static-file.php';
+require plugin_dir_path( __FILE__ ) . 'includes/class-simply-static-page.php';
 
-Simply_Static_File::drop_table();
+Simply_Static_Page::drop_table();

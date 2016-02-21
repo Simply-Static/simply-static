@@ -5,7 +5,6 @@
  *
  * Represents a single database table with accessors for finding, creating, and
  * updating records.
- *
  * @package Simply_Static
  */
 class Simply_Static_Model {
@@ -21,7 +20,6 @@ class Simply_Static_Model {
 	 *
 	 * In the format of 'col_name' => 'col_definition', e.g.
 	 *     'id' => 'BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY'
-	 *
 	 * @var array
 	 */
 	protected static $columns = array();
@@ -31,7 +29,6 @@ class Simply_Static_Model {
 	 *
 	 * In the format of 'index_name' => 'index_def', e.g.
 	 *     'url' => 'url'
-	 *
 	 * @var array
 	 */
 	protected static $indexes = array();
@@ -54,7 +51,6 @@ class Simply_Static_Model {
 	 * Retrieve the value of a field for the model
 	 *
 	 * Returns an exception if you try to retrieve a field that isn't set.
-	 *
 	 * @param  string $field_name The name of the field to retrieve
 	 * @return mixed              The value for the field
 	 */
@@ -71,7 +67,6 @@ class Simply_Static_Model {
 	 *
 	 * Returns an exception if you try to set a field that isn't one of the
 	 * model's columns.
-	 *
 	 * @param string $field_name  The name of the field to set
 	 * @param mixed  $field_value The value for the field
 	 * @return mixed              The value of the field that was set
@@ -119,6 +114,12 @@ class Simply_Static_Model {
 		}
 	}
 
+	/**
+	 * Find records matching a where query, replacing ? with $args
+	 * @param  string     $query The SQL query to perform
+	 * @param  array      $args  Arguments to replace ?'s with
+	 * @return array|null        An array of records, or null if failure
+	 */
 	public static function where( $query, $args ) {
 		global $wpdb;
 
@@ -151,7 +152,6 @@ class Simply_Static_Model {
 	 * Find and return an the first record matching the column name/value
 	 *
 	 * Example: find_by( 'id', 123 )
-	 *
 	 * @param  string $column_name The name of the column to search on
 	 * @param  string $value       The value that the column should contain
 	 * @return static|null         An instance of the class, or null
@@ -176,7 +176,6 @@ class Simply_Static_Model {
 	 *
 	 * Finds the first record with the given column name/value, or initializes
 	 * an instance of the model if one is not found.
-	 *
 	 * @param  string $column_name The name of the column to search on
 	 * @param  string $value       The value that the column should contain
 	 * @return static              An instance of the class (might not exist in db yet)
@@ -255,7 +254,6 @@ class Simply_Static_Model {
 	 *
 	 * If the model is new a record gets created in the database, otherwise the
 	 * existing record gets updated.
-	 *
 	 * @param  array $attributes Array of attributes to set
 	 * @return boolean           An instance of the class
 	 */
@@ -291,13 +289,13 @@ class Simply_Static_Model {
 	 *
 	 * Technically this is checking whether the model has its primary key set.
 	 * If it is set, we assume the record exists in the database.
-	 *
 	 * @return boolean Does this model exist in the db?
 	 */
 	public function exists() {
 		$primary_key = static::$primary_key;
 		return $this->$primary_key !== null;
 	}
+
 
 	public function is_content_identical( $content ) {
 		$hash = sha1( $content, true );
@@ -335,7 +333,7 @@ class Simply_Static_Model {
 	}
 
 	/**
-	 * Creates the table for the model
+	 * Create the table for the model
 	 * @return void
 	 */
 	public static function create_table() {
@@ -360,7 +358,7 @@ class Simply_Static_Model {
 	}
 
 	/**
-	 * Drops the table for the model
+	 * Drop the table for the model
 	 * @return void
 	 */
 	public static function drop_table() {

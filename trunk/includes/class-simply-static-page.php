@@ -1,12 +1,12 @@
 <?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
- * Simply Static File class, for tracking the state of static files
+ * Simply Static Page class, for tracking the status of pages / static files
  * @package Simply_Static
  */
-class Simply_Static_File extends Simply_Static_Model {
+class Simply_Static_Page extends Simply_Static_Model {
 
-	protected static $table_name = 'files';
+	protected static $table_name = 'pages';
 
 	protected static $columns = array(
 		'id'                => 'BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY',

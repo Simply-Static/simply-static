@@ -133,7 +133,7 @@ class Simply_Static {
 			        }
 
 					// and added a database table for tracking urls/progress
-					Simply_Static_File::create_table();
+					Simply_Static_Page::create_table();
 				}
 
 				// always update the version and save
@@ -158,7 +158,7 @@ class Simply_Static {
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-response.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-archive-creator.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-model.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-file.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-page.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/misc-functions.php';
 	}
 
@@ -270,7 +270,7 @@ class Simply_Static {
 				$deleted_successfully = $archive_creator->delete_static_files();
 			}
 
-			$static_files = Simply_Static_File::all();
+			$static_files = Simply_Static_Page::all();
 
 			$this->view->assign( 'static_files', $static_files );
 		}

@@ -91,7 +91,7 @@ class Simply_Static_Archive_Creator {
 			sist_string_to_array( $this->additional_urls )
 		) );
 		foreach ( $urls as $url ) {
-			$static_file = Simply_Static_File::find_or_initialize_by( 'url', $url );
+			$static_file = Simply_Static_Page::find_or_initialize_by( 'url', $url );
 			$static_file->found_on_id = 0;
 			$static_file->save();
 		}
@@ -104,13 +104,13 @@ class Simply_Static_Archive_Creator {
 			if ( file_exists( $item ) ) {
 				if ( is_file( $item ) ) {
 					$url = $this->convert_path_to_url( $item );
-					Simply_Static_File::find_or_create_by( 'url', $url );
+					Simply_Static_Page::find_or_create_by( 'url', $url );
 				} else {
 					$iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $item, RecursiveDirectoryIterator::SKIP_DOTS ) );
 
 					foreach ( $iterator as $file_name => $file_object ) {
 						$url = $this->convert_path_to_url( $file_name );
-						$static_file = Simply_Static_File::find_or_initialize_by( 'url', $url );
+						$static_file = Simply_Static_Page::find_or_initialize_by( 'url', $url );
 						$static_file->found_on_id = 0;
 						$static_file->save();
 					}
@@ -120,7 +120,7 @@ class Simply_Static_Archive_Creator {
 
 		$now = sist_formatted_datetime();
 
-		while ( $static_files = Simply_Static_File::where( 'last_checked_at < ? OR last_checked_at IS NULL LIMIT 10', $now ) ) {
+		while ( $static_files = Simply_Static_Page::where( 'last_checked_at < ? OR last_checked_at IS NULL LIMIT 10', $now ) ) {
 			while ( $static_file = array_shift( $static_files ) ) {
 
 				$current_url = $static_file->url;
@@ -162,7 +162,7 @@ class Simply_Static_Archive_Creator {
 						if ( sist_is_local_url( $redirect_url ) ) {
 
 							$this->set_url_found_on( $static_file, $redirect_url, $now );
-							$redirect_static_file = Simply_Static_File::find_or_create_by( 'url' , $redirect_url );
+							$redirect_static_file = Simply_Static_Page::find_or_create_by( 'url' , $redirect_url );
 
 							// and update the URL
 							$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
@@ -214,7 +214,7 @@ class Simply_Static_Archive_Creator {
 	}
 
 	private function set_url_found_on( $static_file, $child_url, $start_time ) {
-		$child_static_file = Simply_Static_File::find_or_create_by( 'url' , $child_url );
+		$child_static_file = Simply_Static_Page::find_or_create_by( 'url' , $child_url );
 		if ( $child_static_file->found_on_id === null || $child_static_file->updated_at < $start_time ) {
 			$child_static_file->found_on_id = $static_file->id;
 			$child_static_file->save();
