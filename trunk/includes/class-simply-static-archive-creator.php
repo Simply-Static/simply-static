@@ -153,29 +153,48 @@ class Simply_Static_Archive_Creator {
 
 					$redirect_url = $response->get_redirect_url();
 
-					/// convert our potentially relative URL to an absolute URL
-					$redirect_url = sist_relative_to_absolute_url( $redirect_url, $current_url );
+					// WP likes to 301 redirect `/path` to `/path/` -- we want to
+					// check for this and just add the trailing slashed version
+					if ( $redirect_url === trailingslashit( $current_url ) ) {
 
-					if ( $redirect_url ) {
+						$this->set_url_found_on( $static_file, $redirect_url, $now );
 
-						// check if this is a local URL
-						if ( sist_is_local_url( $redirect_url ) ) {
+					} else {
 
-							$this->set_url_found_on( $static_file, $redirect_url, $now );
-							$redirect_static_file = Simply_Static_Page::find_or_create_by( 'url' , $redirect_url );
+						/// convert our potentially relative URL to an absolute URL
+						$redirect_url = sist_relative_to_absolute_url( $redirect_url, $current_url );
 
-							// and update the URL
-							$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
+						if ( $redirect_url ) {
 
+							// check if this is a local URL
+							if ( sist_is_local_url( $redirect_url ) ) {
+
+								$this->set_url_found_on( $static_file, $redirect_url, $now );
+								// and update the URL
+								$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
+
+							}
+
+							$view = new Simply_Static_View();
+
+							$content = $view->set_template( 'redirect' )
+								->assign( 'redirect_url', $redirect_url )
+								->render_to_string();
+
+							// // if the content is identical, move on to the next file
+							// if ( $static_file->is_content_identical( $content ) ) {
+							// 	continue;
+							// }
+
+							$file_path = $this->save_url_to_file( $path, $content, $is_html );
+							if ( $file_path ) {
+								$static_file->file_path = $file_path;
+							}
+
+							$static_file->set_content_hash( $content );
+
+							$static_file->save();
 						}
-
-						$view = new Simply_Static_View();
-
-						$content = $view->set_template( 'redirect' )
-							->assign( 'redirect_url', $redirect_url )
-							->render_to_string();
-
-						$this->save_url_to_file( $path, $content, $is_html );
 					}
 
 					continue;
@@ -188,10 +207,10 @@ class Simply_Static_Archive_Creator {
 
 				$content = $response->body;
 
-				// if the content is identical, move on to the next file
-				if ( $static_file->is_content_identical( $content ) ) {
-					continue;
-				}
+				// // if the content is identical, move on to the next file
+				// if ( $static_file->is_content_identical( $content ) ) {
+				// 	continue;
+				// }
 
 				// Fetch all URLs from the page and add them to the queue...
 				$urls = $response->extract_urls();
@@ -204,10 +223,12 @@ class Simply_Static_Archive_Creator {
 				$response->replace_urls( $destination_url );
 
 				// Save the page to our archive
-				$this->save_url_to_file( $path, $content, $is_html );
+				$file_path = $this->save_url_to_file( $path, $content, $is_html );
+				if ( $file_path ) {
+					$static_file->file_path = $file_path;
+				}
 
 				$static_file->set_content_hash( $content );
-				$static_file->file_path = $path;
 				$static_file->save();
 			}
 		}
@@ -308,10 +329,10 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * Save the contents of a page to a file in our archive directory
-	 * @param string $path The relative path for the URL to save
-	 * @param string $content The contents of the page we want to save
-	 * @param boolean $is_html Is this an html page?
-	 * @return boolean $success Did we successfully save the file?
+	 * @param string        $path    The relative path for the URL to save
+	 * @param string        $content The contents of the page we want to save
+	 * @param boolean       $is_html Is this an html page?
+	 * @return string|false $success The path of the file, or false if failed to save
 	 */
 	protected function save_url_to_file( $path, $content, $is_html ) {
 		$path_info = pathinfo( $path && $path != '/' ? $path : 'index.html' );
@@ -330,6 +351,6 @@ class Simply_Static_Archive_Creator {
 		$file_extension = ( $is_html || ! isset( $path_info['extension'] ) ) ? 'html' : $path_info['extension'];
 		$file_name = $file_dir . DIRECTORY_SEPARATOR . $path_info['filename'] . '.' . $file_extension;
 		$success = file_put_contents( $file_name, $content );
-		return $success;
+		return $success ? $file_name : false;
 	}
 }
