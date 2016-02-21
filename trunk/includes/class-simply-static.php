@@ -254,7 +254,7 @@ class Simply_Static {
 			} elseif ( $this->options->get( 'delivery_method' ) == 'local' ) {
 
 				$local_dir = $this->options->get( 'local_dir' );
-				$result = $archive_creator->copy_static_files( $local_dir );
+				$result = $archive_creator->copy_temp_static_files( $local_dir );
 
 				if ( is_wp_error( $result ) ) {
 					$error = $result->get_error_message();
@@ -267,12 +267,12 @@ class Simply_Static {
 			}
 
 			if ( $this->options->get( 'delete_temp_files' ) == '1' ) {
-				$deleted_successfully = $archive_creator->delete_static_files();
+				$deleted_successfully = $archive_creator->delete_temp_static_files();
 			}
 
-			$static_files = Simply_Static_Page::all();
+			$static_pages = Simply_Static_Page::all();
 
-			$this->view->assign( 'static_files', $static_files );
+			$this->view->assign( 'static_pages', $static_pages );
 		}
 
 		$this->view

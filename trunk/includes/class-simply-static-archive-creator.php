@@ -67,63 +67,20 @@ class Simply_Static_Archive_Creator {
 	 * @return void
 	 */
 	public function create_archive() {
-		global $blog_id;
 		// TODO: Do ajax calls instead of just running forever and ever
 		set_time_limit(0);
 
-		// Create archive directory
-		$current_user = wp_get_current_user();
-		$archive_name = join( '-', array( $this->slug, $blog_id, time(), $current_user->user_login ) );
-		$this->archive_dir = trailingslashit( $this->temp_files_dir . $archive_name );
+		$this->create_archive_dir();
 
-		if ( ! file_exists( $this->archive_dir ) ) {
-			wp_mkdir_p( $this->archive_dir );
-		}
-
-		// Add URLs to queue
-		$origin_url = sist_origin_url();
-		$destination_url = $this->destination_scheme . '://' . $this->destination_host;
-		$origin_path_length = strlen( parse_url( $origin_url, PHP_URL_PATH ) );
-		$urls = array_unique( array_merge(
-			array( trailingslashit( $origin_url ) ),
-			// using preg_split to intelligently break at newlines
-			// see: http://stackoverflow.com/questions/1483497/how-to-put-string-in-array-split-by-new-line
-			sist_string_to_array( $this->additional_urls )
-		) );
-		foreach ( $urls as $url ) {
-			$static_file = Simply_Static_Page::find_or_initialize_by( 'url', $url );
-			$static_file->found_on_id = 0;
-			$static_file->save();
-		}
-
-		// Convert additional files to URLs and add to queue
-		foreach ( sist_string_to_array( $this->additional_files ) as $item ) {
-
-			// if file is a file, convert to url and add to queue
-			// if file is a directory, recursively iterate and grab all files, for each file, convert to url
-			if ( file_exists( $item ) ) {
-				if ( is_file( $item ) ) {
-					$url = $this->convert_path_to_url( $item );
-					Simply_Static_Page::find_or_create_by( 'url', $url );
-				} else {
-					$iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $item, RecursiveDirectoryIterator::SKIP_DOTS ) );
-
-					foreach ( $iterator as $file_name => $file_object ) {
-						$url = $this->convert_path_to_url( $file_name );
-						$static_file = Simply_Static_Page::find_or_initialize_by( 'url', $url );
-						$static_file->found_on_id = 0;
-						$static_file->save();
-					}
-				}
-			}
-		}
+		$this->add_origin_and_additional_urls_to_db();
+		$this->add_additional_files_to_db();
 
 		$now = sist_formatted_datetime();
 
-		while ( $static_files = Simply_Static_Page::where( 'last_checked_at < ? OR last_checked_at IS NULL LIMIT 10', $now ) ) {
-			while ( $static_file = array_shift( $static_files ) ) {
+		while ( $static_pages = Simply_Static_Page::where( 'last_checked_at < ? OR last_checked_at IS NULL LIMIT 10', $now ) ) {
+			while ( $static_page = array_shift( $static_pages ) ) {
 
-				$current_url = $static_file->url;
+				$current_url = $static_page->url;
 
 				$response = Simply_Static_Url_Fetcher::fetch( $current_url );
 
@@ -135,68 +92,13 @@ class Simply_Static_Archive_Creator {
 				$data = array(
 					'http_status_code' => $response->code
 				);
-				$static_file->http_status_code = $response->code;
-				$static_file->last_checked_at = sist_formatted_datetime();
-				$static_file->save();
-
-				$url_parts = parse_url( $response->url );
-				// a domain with no trailing slash has no path, so we're giving it one
-				$path = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
-				if ( $origin_path_length > 1 ) { // prevents removal of '/'
-					$path = substr( $path, $origin_path_length );
-				}
-
-				$is_html = $response->is_html();
+				$static_page->http_status_code = $response->code;
+				$static_page->last_checked_at = sist_formatted_datetime();
+				$static_page->save();
 
 				// If we get a 30x redirect...
 				if ( in_array( $response->code, array( 301, 302, 303, 307 ) ) ) {
-
-					$redirect_url = $response->get_redirect_url();
-
-					// WP likes to 301 redirect `/path` to `/path/` -- we want to
-					// check for this and just add the trailing slashed version
-					if ( $redirect_url === trailingslashit( $current_url ) ) {
-
-						$this->set_url_found_on( $static_file, $redirect_url, $now );
-
-					} else {
-
-						/// convert our potentially relative URL to an absolute URL
-						$redirect_url = sist_relative_to_absolute_url( $redirect_url, $current_url );
-
-						if ( $redirect_url ) {
-
-							// check if this is a local URL
-							if ( sist_is_local_url( $redirect_url ) ) {
-
-								$this->set_url_found_on( $static_file, $redirect_url, $now );
-								// and update the URL
-								$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
-
-							}
-
-							$view = new Simply_Static_View();
-
-							$content = $view->set_template( 'redirect' )
-								->assign( 'redirect_url', $redirect_url )
-								->render_to_string();
-
-							// // if the content is identical, move on to the next file
-							// if ( $static_file->is_content_identical( $content ) ) {
-							// 	continue;
-							// }
-
-							$file_path = $this->save_url_to_file( $path, $content, $is_html );
-							if ( $file_path ) {
-								$static_file->file_path = $file_path;
-							}
-
-							$static_file->set_content_hash( $content );
-
-							$static_file->save();
-						}
-					}
-
+					$this->handle_30x_redirect( $static_page, $response, $now );
 					continue;
 				}
 
@@ -205,50 +107,181 @@ class Simply_Static_Archive_Creator {
 					continue;
 				}
 
-				$content = $response->body;
+				$this->handle_200_response( $static_page, $response, $now );
+			}
+		}
+	}
+
+	private function handle_200_response( $static_page, $response, $now ) {
+		$content = $response->body;
+
+		// // if the content is identical, move on to the next file
+		// if ( $static_page->is_content_identical( $content ) ) {
+		// 	continue;
+		// }
+
+		// Fetch all URLs from the page and add them to the queue...
+		$urls = $response->extract_urls();
+
+		foreach ( $urls as $url ) {
+			$this->set_url_found_on( $static_page, $url, $now );
+		}
+
+		// Replace the origin URL with the destination URL within the content
+		$response->replace_urls( $this->destination_scheme, $this->destination_host );
+
+		// Save the page to our archive
+		$file_path = $this->save_url_to_file( $response->url, $content, $response->is_html() );
+		if ( $file_path ) {
+			$static_page->file_path = $file_path;
+		}
+
+		$static_page->set_content_hash( $content );
+		$static_page->save();
+	}
+
+	/**
+	 * [handle_30x_redirect description]
+	 * @param  [type]  $static_page     [description]
+	 * @param  [type]  $response        [description]
+	 * @param  [type]  $now             [description]
+	 * @return void
+	 */
+	// TODO: This is a ridiculous number of parameters...
+	private function handle_30x_redirect( $static_page, $response, $now ) {
+		$origin_url = sist_origin_url();
+		$destination_url = $this->destination_scheme . '://' . $this->destination_host;
+		$current_url = $static_page->url;
+		$redirect_url = $response->get_redirect_url();
+
+		// WP likes to 301 redirect `/path` to `/path/` -- we want to
+		// check for this and just add the trailing slashed version
+		if ( $redirect_url === trailingslashit( $current_url ) ) {
+
+			$this->set_url_found_on( $static_page, $redirect_url, $now );
+
+		} else {
+
+			/// convert our potentially relative URL to an absolute URL
+			$redirect_url = sist_relative_to_absolute_url( $redirect_url, $current_url );
+
+			if ( $redirect_url ) {
+
+				// check if this is a local URL
+				if ( sist_is_local_url( $redirect_url ) ) {
+
+					$this->set_url_found_on( $static_page, $redirect_url, $now );
+					// and update the URL
+					$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
+
+				}
+
+				$view = new Simply_Static_View();
+
+				$content = $view->set_template( 'redirect' )
+					->assign( 'redirect_url', $redirect_url )
+					->render_to_string();
 
 				// // if the content is identical, move on to the next file
-				// if ( $static_file->is_content_identical( $content ) ) {
+				// if ( $static_page->is_content_identical( $content ) ) {
 				// 	continue;
 				// }
 
-				// Fetch all URLs from the page and add them to the queue...
-				$urls = $response->extract_urls();
-
-				foreach ( $urls as $url ) {
-					$this->set_url_found_on( $static_file, $url, $now );
-				}
-
-				// Replace the origin URL with the destination URL within the content
-				$response->replace_urls( $destination_url );
-
-				// Save the page to our archive
-				$file_path = $this->save_url_to_file( $path, $content, $is_html );
+				$file_path = $this->save_url_to_file( $response->url, $content, $response->is_html() );
 				if ( $file_path ) {
-					$static_file->file_path = $file_path;
+					$static_page->file_path = $file_path;
 				}
 
-				$static_file->set_content_hash( $content );
-				$static_file->save();
+				$static_page->set_content_hash( $content );
+
+				$static_page->save();
 			}
 		}
 	}
 
 	/**
-	 * Set the ID for which page a URL was found on
+	 * Create the temporary archive directory
+	 * @return void
+	 */
+	private function create_archive_dir() {
+		global $blog_id;
+
+		// Create archive directory
+		$current_user = wp_get_current_user();
+		$archive_name = join( '-', array( $this->slug, $blog_id, time(), $current_user->user_login ) );
+		$this->archive_dir = trailingslashit( $this->temp_files_dir . $archive_name );
+
+		if ( ! file_exists( $this->archive_dir ) ) {
+			wp_mkdir_p( $this->archive_dir );
+		}
+	}
+
+	/**
+	 * Ensure the Origin URL and user-specified Additional URLs are in the DB
+	 * @return void
+	 */
+	private function add_origin_and_additional_urls_to_db() {
+		$urls = array_unique( array_merge(
+			array( trailingslashit( sist_origin_url() ) ),
+			sist_string_to_array( $this->additional_urls )
+		) );
+		foreach ( $urls as $url ) {
+			$static_page = Simply_Static_Page::find_or_initialize_by( 'url', $url );
+			// setting to 0 for "not found anywhere" since it's either the origin
+			// or something the user specified
+			$static_page->found_on_id = 0;
+			$static_page->save();
+		}
+	}
+
+	/**
+	 * Convert Additional Files/Directories to URLs and add them to the database
+	 * @return void
+	 */
+	private function add_additional_files_to_db() {
+		// Convert additional files to URLs and add to queue
+		foreach ( sist_string_to_array( $this->additional_files ) as $item ) {
+
+			// If item is a file, convert to url and insert into database.
+			// If item is a directory, recursively iterate and grab all files,
+			// and for each file, convert to url and insert into database.
+			if ( file_exists( $item ) ) {
+				if ( is_file( $item ) ) {
+					$url = $this->convert_path_to_url( $item );
+					$static_page = Simply_Static_Page::find_or_create_by( 'url', $url );
+					// setting found_on_id to 0 since this was user-specified
+					$static_page->found_on_id = 0;
+					$static_page->save();
+				} else {
+					$iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $item, RecursiveDirectoryIterator::SKIP_DOTS ) );
+
+					foreach ( $iterator as $file_name => $file_object ) {
+						$url = $this->convert_path_to_url( $file_name );
+						$static_page = Simply_Static_Page::find_or_initialize_by( 'url', $url );
+						$static_page->found_on_id = 0;
+						$static_page->save();
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Set ID for which page a URL was found on (& create page if not in DB yet)
 	 *
-	 * Given a URL, find the associated Simply_Static_File, and then set the ID
+	 * Given a URL, find the associated Simply_Static_Page, and then set the ID
 	 * for which page it was found on if the ID isn't yet set or if the record
 	 * hasn't been updated in this instance of static generation yet.
-	 * @param Simply_Static_File $static_file The record for the parent page
+	 * @param Simply_Static_Page $static_page The record for the parent page
 	 * @param string             $child_url   The URL of the child page
 	 * @param string             $start_time  Static generation start time
+	 * @return void
 	 */
-	private function set_url_found_on( $static_file, $child_url, $start_time ) {
-		$child_static_file = Simply_Static_Page::find_or_create_by( 'url' , $child_url );
-		if ( $child_static_file->found_on_id === null || $child_static_file->updated_at < $start_time ) {
-			$child_static_file->found_on_id = $static_file->id;
-			$child_static_file->save();
+	private function set_url_found_on( $static_page, $child_url, $start_time ) {
+		$child_static_page = Simply_Static_Page::find_or_create_by( 'url' , $child_url );
+		if ( $child_static_page->found_on_id === null || $child_static_page->updated_at < $start_time ) {
+			$child_static_page->found_on_id = $static_page->id;
+			$child_static_page->save();
 		}
 	}
 
@@ -293,10 +326,10 @@ class Simply_Static_Archive_Creator {
 	}
 
 	/**
-	* Copy static files to a local directory
+	* Copy temporary static files to a local directory
 	* @return boolean|WP_Error
 	*/
-	public function copy_static_files( $local_dir ) {
+	public function copy_temp_static_files( $local_dir ) {
 		$directory_iterator = new RecursiveDirectoryIterator( $this->archive_dir, RecursiveDirectoryIterator::SKIP_DOTS );
 		$recursive_iterator = new RecursiveIteratorIterator( $directory_iterator, RecursiveIteratorIterator::SELF_FIRST );
 
@@ -312,11 +345,11 @@ class Simply_Static_Archive_Creator {
 	}
 
 	/**
-	 * Delete generated static files
+	 * Delete temporary generated static files
 	 * @param $archive_dir The archive directory path
 	 * @return boolean|WP_Error
 	 */
-	public function delete_static_files() {
+	public function delete_temp_static_files() {
 		$directory_iterator = new RecursiveDirectoryIterator( $this->archive_dir, FilesystemIterator::SKIP_DOTS );
 		$recursive_iterator = new RecursiveIteratorIterator( $directory_iterator, RecursiveIteratorIterator::CHILD_FIRST );
 
@@ -339,12 +372,21 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * Save the contents of a page to a file in our archive directory
-	 * @param string        $path    The relative path for the URL to save
-	 * @param string        $content The contents of the page we want to save
+	 * @param string        $url     The URL for the content
+	 * @param string        $content The content of the page we want to save
 	 * @param boolean       $is_html Is this an html page?
 	 * @return string|false $success The path of the file, or false if failed to save
 	 */
-	protected function save_url_to_file( $path, $content, $is_html ) {
+	protected function save_url_to_file( $url, $content, $is_html ) {
+		$url_parts = parse_url( $url );
+		// a domain with no trailing slash has no path, so we're giving it one
+		$path = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
+
+		$origin_path_length = strlen( parse_url( sist_origin_url(), PHP_URL_PATH ) );
+		if ( $origin_path_length > 1 ) { // prevents removal of '/'
+			$path = substr( $path, $origin_path_length );
+		}
+
 		$path_info = pathinfo( $path && $path != '/' ? $path : 'index.html' );
 
 		// Create file directory if it doesn't exist

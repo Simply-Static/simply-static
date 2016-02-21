@@ -8,7 +8,7 @@
 
 <div class='wrap'>
 
-	<?php if ( is_array( $this->static_files ) && count( $this->static_files ) ): ?>
+	<?php if ( is_array( $this->static_pages ) && count( $this->static_pages ) ): ?>
 		<?php $http_codes = array( '1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0 ); ?>
 
 		<h3><?php _e( 'Export Log', $this->slug ); ?></h3>
@@ -24,28 +24,28 @@
 				<tbody>
 
 				<?php
-					function find_first_match( $static_files, $id ) {
-						foreach ( $static_files as $static_file ) {
-							if ( $static_file->id === $id ) {
-								return $static_file;
+					function find_first_match( $static_pages, $id ) {
+						foreach ( $static_pages as $static_page ) {
+							if ( $static_page->id === $id ) {
+								return $static_page;
 							}
 						}
 					}
 				?>
 
-				<?php foreach ( $this->static_files as $static_file ) : ?>
+				<?php foreach ( $this->static_pages as $static_page ) : ?>
 					<?php
-						$digit = substr( $static_file->http_status_code, 0, 1 ); // get first digit of error code
+						$digit = substr( $static_page->http_status_code, 0, 1 ); // get first digit of error code
 						$http_codes[ $digit ] += 1;
 					?>
 
 					<tr>
-						<td><?php echo $static_file->http_status_code; ?></td>
-						<td><a href='<?php echo $static_file->url; ?>'><?php echo $static_file->url; ?></a></td>
-						<?php $parent_static_file = find_first_match( $this->static_files, $static_file->found_on_id ); ?>
+						<td><?php echo $static_page->http_status_code; ?></td>
+						<td><a href='<?php echo $static_page->url; ?>'><?php echo $static_page->url; ?></a></td>
+						<?php $parent_static_page = find_first_match( $this->static_pages, $static_page->found_on_id ); ?>
 						<td>
-							<?php if ( $parent_static_file ): ?>
-								<a href='<?php echo $parent_static_file->url; ?>'><?php echo $parent_static_file->url; ?></a>
+							<?php if ( $parent_static_page ): ?>
+								<a href='<?php echo $parent_static_page->url; ?>'><?php echo $parent_static_page->url; ?></a>
 							<?php endif; ?>
 						</td>
 					</tr>

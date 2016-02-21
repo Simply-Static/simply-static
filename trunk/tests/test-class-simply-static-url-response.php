@@ -43,14 +43,15 @@ class Simply_Static_Url_Response_Test extends WP_UnitTestCase {
 	 * @covers Simply_Static_Url_Response::replace_urls
 	 */
 	public function test_replace_urls() {
-		$destination_url = 'http://www.destination.test';
+		$destination_scheme = 'http://';
+		$destination_host = 'www.destination.test';
 
 		$content = self::DOMAIN;
 
 		$response = Simply_Static_Url_Response_Factory::build( 'html', $content, self::URL );
-		$response->replace_urls( $destination_url );
+		$response->replace_urls( $destination_scheme, $destination_host );
 
-		$this->assertEquals( $destination_url, $response->body );
+		$this->assertEquals( $destination_scheme . '://' . $destination_host, $response->body );
 	}
 
 	public function test_extractor_updates_urls_in_html() {

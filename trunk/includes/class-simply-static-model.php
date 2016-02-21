@@ -56,7 +56,7 @@ class Simply_Static_Model {
 	 */
 	public function __get( $field_name ) {
 		if ( ! array_key_exists( $field_name, $this->data ) ) {
-			throw new Exception('Undefined variable for ' . static::class);
+			throw new Exception( 'Undefined variable for ' . get_called_class() );
 		} else {
 			return $this->data[ $field_name ];
 		}
@@ -73,7 +73,7 @@ class Simply_Static_Model {
 	 */
 	public function __set( $field_name, $field_value ) {
 		if ( ! array_key_exists( $field_name, static::$columns ) ) {
-			throw new Exception('Column doesn\'t exist for ' . static::class);
+			throw new Exception( 'Column doesn\'t exist for ' . get_called_class() );
 		} else {
 			return $this->data[ $field_name ] = $field_value;
 		}
