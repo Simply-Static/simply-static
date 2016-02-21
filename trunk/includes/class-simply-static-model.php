@@ -296,18 +296,32 @@ class Simply_Static_Model {
 		return $this->$primary_key !== null;
 	}
 
-
+	/**
+	 * Check if the hash for the content matches the prior hash for the page
+	 * @param  string  $content The content of the page/file
+	 * @return boolean          Is the hash a match?
+	 */
 	public function is_content_identical( $content ) {
 		$hash = sha1( $content, true );
 		return $hash === $this->content_hash;
 	}
 
+	/**
+	 * Set the hash for the content and update the last_modified_at value
+	 * @param string $content The content of the page/file
+	 */
 	public function set_content_hash( $content ) {
 		$hash = sha1( $content, true );
 		$this->content_hash = $hash;
 		$this->last_modified_at = sist_formatted_datetime();
 	}
 
+	/**
+	 * Generate a SQL fragment for use in WHERE x=y
+	 * @param  string $column_name The name of the column
+	 * @param  mixed  $value       The value for the column
+	 * @return string              The SQL fragment to be used in WHERE x=y
+	 */
 	public static function where_sql( $column_name, $value ) {
 		$where_sql = ' ' . $column_name . ' ';
 		$where_sql .= ( $value === null ) ? 'IS ' : '= ';
@@ -315,11 +329,22 @@ class Simply_Static_Model {
 		return $where_sql;
 	}
 
+	/**
+	 * Generate a SQL fragment for use in UPDATE queries to SET x=y
+	 * @param  string $column_name The name of the column
+	 * @param  mixed  $value       The value for the column
+	 * @return string              The SQL fragment to be used in SET x=y
+	 */
 	public static function update_set_sql( $column_name, $value ) {
 		$where_sql = ' ' . $column_name . ' = ' . self::value_placeholder( $value );
 		return $where_sql;
 	}
 
+	/**
+	 * Return a placeholder (or NULL) based on the value for use in SQL queries
+	 * @param  mixed $value The value for the SQL query
+	 * @return string       The placeholder (or NULL) to be used in the SQL query
+	 */
 	public static function value_placeholder( $value ) {
 		if ( $value === null ) {
 			return 'NULL';
@@ -334,6 +359,10 @@ class Simply_Static_Model {
 
 	/**
 	 * Create the table for the model
+	 *
+	 * Uses the static::$table_name and loops through all of the columns in
+	 * static::$columns and the indexes in static::$indexes to create a SQL
+	 * query for creating the table.
 	 * @return void
 	 */
 	public static function create_table() {

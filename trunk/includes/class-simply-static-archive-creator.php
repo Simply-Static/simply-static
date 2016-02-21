@@ -234,6 +234,16 @@ class Simply_Static_Archive_Creator {
 		}
 	}
 
+	/**
+	 * Set the ID for which page a URL was found on
+	 *
+	 * Given a URL, find the associated Simply_Static_File, and then set the ID
+	 * for which page it was found on if the ID isn't yet set or if the record
+	 * hasn't been updated in this instance of static generation yet.
+	 * @param Simply_Static_File $static_file The record for the parent page
+	 * @param string             $child_url   The URL of the child page
+	 * @param string             $start_time  Static generation start time
+	 */
 	private function set_url_found_on( $static_file, $child_url, $start_time ) {
 		$child_static_file = Simply_Static_Page::find_or_create_by( 'url' , $child_url );
 		if ( $child_static_file->found_on_id === null || $child_static_file->updated_at < $start_time ) {
