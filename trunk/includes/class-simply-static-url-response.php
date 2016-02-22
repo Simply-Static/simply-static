@@ -11,7 +11,7 @@ class Simply_Static_Url_Response {
 	 * The URI resource
 	 * @var string
 	 */
-	public $url;
+	public $url = null;
 
 	/**
 	 * The headers from the response

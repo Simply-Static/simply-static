@@ -254,7 +254,7 @@ class Simply_Static {
 			} elseif ( $this->options->get( 'delivery_method' ) == 'local' ) {
 
 				$local_dir = $this->options->get( 'local_dir' );
-				$result = $archive_creator->copy_temp_static_files( $local_dir );
+				$result = $archive_creator->copy_static_files( $local_dir );
 
 				if ( is_wp_error( $result ) ) {
 					$error = $result->get_error_message();

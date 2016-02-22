@@ -11,43 +11,49 @@ class Simply_Static_Archive_Creator {
 	 * The path to the archive directory
 	 * @var string
 	 */
-	protected $archive_dir;
+	protected $archive_dir = null;
 
 	/**
 	 * The slug (id) used for the plugin
 	 * @var string
 	 */
-	protected $slug;
+	protected $slug = null;
 
 	/**
 	 * The protocol used for the destination URL
 	 * @var string
 	 */
-	protected $destination_scheme;
+	protected $destination_scheme = null;
 
 	/**
 	 * The host for the destination URL
 	 * @var string
 	 */
-	protected $destination_host;
+	protected $destination_host = null;
 
 	/**
 	 * The directory where static files should be saved
 	 * @var string
 	 */
-	protected $temp_files_dir;
+	protected $temp_files_dir = null;
 
 	/**
 	 * Additional urls to add to the archive
 	 * @var string
 	 */
-	protected $additional_urls;
+	protected $additional_urls = null;
 
 	/**
 	 * Additional files to add to the archive
 	 * @var string
 	 */
-	protected $additional_files;
+	protected $additional_files = null;
+
+	/**
+	 * The datetime string for when we started the archive generation process
+	 * @var string
+	 */
+	protected $archive_start_time = null;
 
 	/**
 	 * Constructor
@@ -75,9 +81,9 @@ class Simply_Static_Archive_Creator {
 		$this->add_origin_and_additional_urls_to_db();
 		$this->add_additional_files_to_db();
 
-		$now = sist_formatted_datetime();
+		$this->archive_start_time = sist_formatted_datetime();
 
-		while ( $static_pages = Simply_Static_Page::where( 'last_checked_at < ? OR last_checked_at IS NULL LIMIT 10', $now ) ) {
+		while ( $static_pages = Simply_Static_Page::where( 'last_checked_at < ? OR last_checked_at IS NULL LIMIT 10', $this->archive_start_time ) ) {
 			while ( $static_page = array_shift( $static_pages ) ) {
 
 				$current_url = $static_page->url;
@@ -98,7 +104,7 @@ class Simply_Static_Archive_Creator {
 
 				// If we get a 30x redirect...
 				if ( in_array( $response->code, array( 301, 302, 303, 307 ) ) ) {
-					$this->handle_30x_redirect( $static_page, $response, $now );
+					$this->handle_30x_redirect( $static_page, $response );
 					continue;
 				}
 
@@ -107,12 +113,18 @@ class Simply_Static_Archive_Creator {
 					continue;
 				}
 
-				$this->handle_200_response( $static_page, $response, $now );
+				$this->handle_200_response( $static_page, $response );
 			}
 		}
 	}
 
-	private function handle_200_response( $static_page, $response, $now ) {
+	/**
+	 * Process the response for a 200 response (success)
+	 * @param  Simply_Static_Page         $static_page Record to update
+	 * @param  Simply_Static_Url_Response $response    URL response to process
+	 * @return void
+	 */
+	private function handle_200_response( $static_page, $response ) {
 		$content = $response->body;
 
 		// // if the content is identical, move on to the next file
@@ -124,7 +136,7 @@ class Simply_Static_Archive_Creator {
 		$urls = $response->extract_urls();
 
 		foreach ( $urls as $url ) {
-			$this->set_url_found_on( $static_page, $url, $now );
+			$this->set_url_found_on( $static_page, $url, $this->archive_start_time );
 		}
 
 		// Replace the origin URL with the destination URL within the content
@@ -141,14 +153,12 @@ class Simply_Static_Archive_Creator {
 	}
 
 	/**
-	 * [handle_30x_redirect description]
-	 * @param  [type]  $static_page     [description]
-	 * @param  [type]  $response        [description]
-	 * @param  [type]  $now             [description]
+	 * Process the response to a 30x redirection
+	 * @param  Simply_Static_Page         $static_page Record to update
+	 * @param  Simply_Static_Url_Response $response    URL response to process
 	 * @return void
 	 */
-	// TODO: This is a ridiculous number of parameters...
-	private function handle_30x_redirect( $static_page, $response, $now ) {
+	private function handle_30x_redirect( $static_page, $response ) {
 		$origin_url = sist_origin_url();
 		$destination_url = $this->destination_scheme . '://' . $this->destination_host;
 		$current_url = $static_page->url;
@@ -158,7 +168,7 @@ class Simply_Static_Archive_Creator {
 		// check for this and just add the trailing slashed version
 		if ( $redirect_url === trailingslashit( $current_url ) ) {
 
-			$this->set_url_found_on( $static_page, $redirect_url, $now );
+			$this->set_url_found_on( $static_page, $redirect_url, $this->archive_start_time );
 
 		} else {
 
@@ -170,7 +180,7 @@ class Simply_Static_Archive_Creator {
 				// check if this is a local URL
 				if ( sist_is_local_url( $redirect_url ) ) {
 
-					$this->set_url_found_on( $static_page, $redirect_url, $now );
+					$this->set_url_found_on( $static_page, $redirect_url, $this->archive_start_time );
 					// and update the URL
 					$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
 
@@ -329,7 +339,7 @@ class Simply_Static_Archive_Creator {
 	* Copy temporary static files to a local directory
 	* @return boolean|WP_Error
 	*/
-	public function copy_temp_static_files( $local_dir ) {
+	public function copy_static_files( $local_dir ) {
 		$directory_iterator = new RecursiveDirectoryIterator( $this->archive_dir, RecursiveDirectoryIterator::SKIP_DOTS );
 		$recursive_iterator = new RecursiveIteratorIterator( $directory_iterator, RecursiveIteratorIterator::SELF_FIRST );
 
@@ -345,7 +355,7 @@ class Simply_Static_Archive_Creator {
 	}
 
 	/**
-	 * Delete temporary generated static files
+	 * Delete temporary, generated static files
 	 * @param $archive_dir The archive directory path
 	 * @return boolean|WP_Error
 	 */

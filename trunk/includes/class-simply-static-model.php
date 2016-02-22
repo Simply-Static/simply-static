@@ -13,7 +13,7 @@ class Simply_Static_Model {
 	 * The name of the table (prefixed with the name of the plugin)
 	 * @var string
 	 */
-	protected static $table_name = '';
+	protected static $table_name = null;
 
 	/**
 	 * A list of the columns for the model
@@ -37,7 +37,7 @@ class Simply_Static_Model {
 	 * The name of the primary key for the model
 	 * @var string
 	 */
-	protected static $primary_key = '';
+	protected static $primary_key = null;
 
 	/**************************************************************************/
 
