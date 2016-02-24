@@ -362,26 +362,6 @@ class Simply_Static_Archive_Creator {
 		return true;
 	}
 
-	// /**
-	// * Copy temporary static files to a local directory
-	// * @param  string        $destination_dir The directory to put the files
-	// * @return true|WP_Error                  True on success, WP_Error otherwise
-	// */
-	// public function copy_static_files( $destination_dir ) {
-	// 	$directory_iterator = new RecursiveDirectoryIterator( $this->archive_dir, RecursiveDirectoryIterator::SKIP_DOTS );
-	// 	$recursive_iterator = new RecursiveIteratorIterator( $directory_iterator, RecursiveIteratorIterator::SELF_FIRST );
-	//
-	// 	foreach ( $recursive_iterator as $item ) {
-	// 		$path = $destination_dir . $recursive_iterator->getSubPathName();
-	// 		$success = $item->isDir() ? wp_mkdir_p( $path ) : copy( $item, $path );
-	// 		if ( ! $success ) {
-	// 			return new WP_Error( 'cannot_create_file_or_dir', sprintf( __( "Could not create file or directory: %s", $this->slug ), $path ) );
-	// 		}
-	// 	}
-	//
-	// 	return true;
-	// }
-
 	/**
 	 * Delete temporary, generated static files
 	 * @return true|WP_Error True on success, WP_Error otherwise
