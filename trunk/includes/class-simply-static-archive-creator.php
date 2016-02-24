@@ -8,7 +8,7 @@
 class Simply_Static_Archive_Creator {
 
 	/**
-	 * The path to the archive directory
+	 * The path to the temporary archive directory
 	 * @var string
 	 */
 	protected $archive_dir = null;
@@ -127,10 +127,12 @@ class Simply_Static_Archive_Creator {
 	private function handle_200_response( $static_page, $response ) {
 		$content = $response->body;
 
-		// // if the content is identical, move on to the next file
-		// if ( $static_page->is_content_identical( $content ) ) {
-		// 	continue;
-		// }
+		// if the content is identical, move on to the next file
+		if ( $static_page->is_content_identical( $content ) ) {
+			// continue;
+		} else {
+			$static_page->set_content_hash( $content );
+		}
 
 		// Fetch all URLs from the page and add them to the queue...
 		$urls = $response->extract_urls();
@@ -148,7 +150,6 @@ class Simply_Static_Archive_Creator {
 			$static_page->file_path = $file_path;
 		}
 
-		$static_page->set_content_hash( $content );
 		$static_page->save();
 	}
 
@@ -192,17 +193,17 @@ class Simply_Static_Archive_Creator {
 					->assign( 'redirect_url', $redirect_url )
 					->render_to_string();
 
-				// // if the content is identical, move on to the next file
-				// if ( $static_page->is_content_identical( $content ) ) {
-				// 	continue;
-				// }
+				// if the content is identical, move on to the next file
+				if ( $static_page->is_content_identical( $content ) ) {
+					// continue;
+				} else {
+					$static_page->set_content_hash( $content );
+				}
 
 				$file_path = $this->save_url_to_file( $response->url, $content, $response->is_html() );
 				if ( $file_path ) {
 					$static_page->file_path = $file_path;
 				}
-
-				$static_page->set_content_hash( $content );
 
 				$static_page->save();
 			}
@@ -219,7 +220,7 @@ class Simply_Static_Archive_Creator {
 		// Create archive directory
 		$current_user = wp_get_current_user();
 		$archive_name = join( '-', array( $this->slug, $blog_id, time(), $current_user->user_login ) );
-		$this->archive_dir = trailingslashit( $this->temp_files_dir . $archive_name );
+		$this->archive_dir = $this->temp_files_dir . $archive_name;
 
 		if ( ! file_exists( $this->archive_dir ) ) {
 			wp_mkdir_p( $this->archive_dir );
@@ -337,14 +338,14 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	* Copy temporary static files to a local directory
-	* @return boolean|WP_Error
+	* @return true|WP_Error
 	*/
-	public function copy_static_files( $local_dir ) {
+	public function copy_static_files( $destination_dir ) {
 		$directory_iterator = new RecursiveDirectoryIterator( $this->archive_dir, RecursiveDirectoryIterator::SKIP_DOTS );
 		$recursive_iterator = new RecursiveIteratorIterator( $directory_iterator, RecursiveIteratorIterator::SELF_FIRST );
 
 		foreach ( $recursive_iterator as $item ) {
-			$path = $local_dir . $recursive_iterator->getSubPathName();
+			$path = $destination_dir . $recursive_iterator->getSubPathName();
 			$success = $item->isDir() ? wp_mkdir_p( $path ) : copy( $item, $path );
 			if ( ! $success ) {
 				return new WP_Error( 'cannot_create_file_or_dir', sprintf( __( "Could not create file or directory: %s", $this->slug ), $path ) );
@@ -357,7 +358,7 @@ class Simply_Static_Archive_Creator {
 	/**
 	 * Delete temporary, generated static files
 	 * @param $archive_dir The archive directory path
-	 * @return boolean|WP_Error
+	 * @return true|WP_Error
 	 */
 	public function delete_temp_static_files() {
 		$directory_iterator = new RecursiveDirectoryIterator( $this->archive_dir, FilesystemIterator::SKIP_DOTS );
@@ -385,7 +386,7 @@ class Simply_Static_Archive_Creator {
 	 * @param string        $url     The URL for the content
 	 * @param string        $content The content of the page we want to save
 	 * @param boolean       $is_html Is this an html page?
-	 * @return string|false $success The path of the file, or false if failed to save
+	 * @return string|false $success The relative path of the file, or false if failed to save
 	 */
 	protected function save_url_to_file( $url, $content, $is_html ) {
 		$url_parts = parse_url( $url );
@@ -397,21 +398,26 @@ class Simply_Static_Archive_Creator {
 			$path = substr( $path, $origin_path_length );
 		}
 
-		$path_info = pathinfo( $path && $path != '/' ? $path : 'index.html' );
+		$path_info = sist_url_path_info( $path );
 
-		// Create file directory if it doesn't exist
-		$file_dir = $this->archive_dir . ( $path_info['dirname'] ? $path_info['dirname'] : '' );
-		if ( empty( $path_info['extension'] ) && $path_info['basename'] == $path_info['filename'] ) {
-			$file_dir .= DIRECTORY_SEPARATOR . $path_info['basename'];
+		$file_dir = $this->archive_dir . $path_info['dirname'];
+		$file_dir = sist_add_trailing_directory_separator( $file_dir );
+
+		// If there's no extension, we're going to create a directory with the
+		// filename and place an index.html file in there.
+		if ( empty( $path_info['extension'] ) ) {
+			$file_dir .= $path_info['filename'];
+			$file_dir = sist_add_trailing_directory_separator( $file_dir );
 			$path_info['filename'] = 'index';
+			$path_info['extension'] = 'html';
 		}
+
 		if ( ! file_exists( $file_dir ) ) {
 			wp_mkdir_p( $file_dir );
 		}
 
 		// Save file contents
-		$file_extension = ( $is_html || ! isset( $path_info['extension'] ) ) ? 'html' : $path_info['extension'];
-		$file_name = $file_dir . DIRECTORY_SEPARATOR . $path_info['filename'] . '.' . $file_extension;
+		$file_name = $file_dir . $path_info['filename'] . '.' . $path_info['extension'];
 		$success = file_put_contents( $file_name, $content );
 		return $success ? $file_name : false;
 	}

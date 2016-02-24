@@ -176,9 +176,69 @@ function sist_string_to_array( $textarea ) {
 }
 
 /**
- * Get the current datetime formated as a string for entry into MySQL
+ * Get the current datetime formatted as a string for entry into MySQL
  * @return string MySQL formatted datetime
  */
 function sist_formatted_datetime() {
 	return date('Y-m-d H:i:s');
+}
+
+/**
+ * Similar to PHP's pathinfo(), but designed with URLs in mind (instead of directories)
+ *
+ * Example:
+ *   $info = sist_url_path_info( '/manual/en/function.pathinfo.php?test=true' );
+ *     $info['dirname']   === '/manual/en/'
+ *     $info['basename']  === 'function.pathinfo.php'
+ *     $info['extension'] === 'php'
+ *     $info['filename']  === 'function.pathinfo'
+ * @param  string $path The URL path
+ * @return [type]       [description]
+ */
+function sist_url_path_info( $path ) {
+	$info = array();
+
+    // remove anything in the path after '#' or '?'
+    foreach ( array( '#', '?' ) as $character ) {
+        $char_location = strpos( $path, $character );
+        if ( $char_location !== false ) {
+            $path = substr( $path, 0, $char_location );
+        }
+    }
+
+    $last_slash_location = strrpos( $path, '/' );
+    $info['dirname'] = substr( $path, 0, $last_slash_location+1 );
+    $info['basename'] = substr( $path, $last_slash_location+1 );
+
+    $last_dot_location = strrpos( $info['basename'], '.' );
+    if ( $last_dot_location === false ) {
+        $info['filename'] = $info['basename'];
+    } else {
+        $info['filename'] = substr( $info['basename'], 0, $last_dot_location );
+        $info['extension'] = substr( $info['basename'], $last_dot_location+1 );
+    }
+
+    return $info;
+}
+
+/**
+ * Like WP's trailingslashit(), but for file paths
+ *
+ * Ensures that there is exactly one trailing directory separator at the end of
+ * the path.
+ * @param string $path File path to add ending directory separator to
+ */
+function sist_add_trailing_directory_separator( $path ) {
+	return sist_remove_trailing_directory_separator( $path ) . DIRECTORY_SEPARATOR;
+}
+
+/**
+ * Like WP's untrailingslashit(), but for file paths
+ *
+ * If there are multiple directory separators at the end of the path, they will
+ * all be removed.
+ * @param string $path File path to remove ending directory separators from
+ */
+function sist_remove_trailing_directory_separator( $path ) {
+	return rtrim( $path, DIRECTORY_SEPARATOR );
 }
