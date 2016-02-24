@@ -30,4 +30,24 @@ class Simply_Static_Page extends Simply_Static_Model {
 	);
 
 	protected static $primary_key = 'id';
+
+	/**
+	 * Check if the hash for the content matches the prior hash for the page
+	 * @param  string  $content The content of the page/file
+	 * @return boolean          Is the hash a match?
+	 */
+	public function is_content_identical( $content ) {
+		$hash = sha1( $content, true );
+		return $hash === $this->content_hash;
+	}
+
+	/**
+	 * Set the hash for the content and update the last_modified_at value
+	 * @param string $content The content of the page/file
+	 */
+	public function set_content_hash( $content ) {
+		$hash = sha1( $content, true );
+		$this->content_hash = $hash;
+		$this->last_modified_at = sist_formatted_datetime();
+	}
 }

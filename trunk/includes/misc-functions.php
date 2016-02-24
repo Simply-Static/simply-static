@@ -196,49 +196,77 @@ function sist_formatted_datetime() {
  * @return [type]       [description]
  */
 function sist_url_path_info( $path ) {
-	$info = array();
+	$info = array(
+		'dirname' => '',
+		'basename' => '',
+		'filename' => '',
+		'extension' => ''
+	);
 
-    // remove anything in the path after '#' or '?'
-    foreach ( array( '#', '?' ) as $character ) {
-        $char_location = strpos( $path, $character );
-        if ( $char_location !== false ) {
-            $path = substr( $path, 0, $char_location );
-        }
-    }
+	// remove anything in the path after '#' or '?'
+	foreach ( array( '#', '?' ) as $character ) {
+		$char_location = strpos( $path, $character );
+		if ( $char_location !== false ) {
+			$path = substr( $path, 0, $char_location );
+		}
+	}
 
-    $last_slash_location = strrpos( $path, '/' );
-    $info['dirname'] = substr( $path, 0, $last_slash_location+1 );
-    $info['basename'] = substr( $path, $last_slash_location+1 );
+	// everything after the last slash is the filename
+	$last_slash_location = strrpos( $path, '/' );
+	if ( $last_slash_location === false ) {
+		$info['basename'] = $path;
+	} else {
+		$info['dirname'] = substr( $path, 0, $last_slash_location+1 );
+		$info['basename'] = substr( $path, $last_slash_location+1 );
+	}
 
-    $last_dot_location = strrpos( $info['basename'], '.' );
-    if ( $last_dot_location === false ) {
-        $info['filename'] = $info['basename'];
-    } else {
-        $info['filename'] = substr( $info['basename'], 0, $last_dot_location );
-        $info['extension'] = substr( $info['basename'], $last_dot_location+1 );
-    }
+	// finding the dot for the extension
+	$last_dot_location = strrpos( $info['basename'], '.' );
+	if ( $last_dot_location === false ) {
+		$info['filename'] = $info['basename'];
+	} else {
+		$info['filename'] = substr( $info['basename'], 0, $last_dot_location );
+		$info['extension'] = substr( $info['basename'], $last_dot_location+1 );
+	}
 
-    return $info;
+	// substr sets false if it fails, we're going to reset those values to ''
+	foreach ( $info as $name => $value ) {
+		if ( $value === false ) {
+			$info[ $name ] = '';
+		}
+	}
+
+	return $info;
 }
 
 /**
- * Like WP's trailingslashit(), but for file paths
- *
- * Ensures that there is exactly one trailing directory separator at the end of
- * the path.
- * @param string $path File path to add ending directory separator to
+ * Ensure there is a single trailing directory separator on the path
+ * @param string $path File path to add trailing directory separator to
  */
 function sist_add_trailing_directory_separator( $path ) {
 	return sist_remove_trailing_directory_separator( $path ) . DIRECTORY_SEPARATOR;
 }
 
 /**
- * Like WP's untrailingslashit(), but for file paths
- *
- * If there are multiple directory separators at the end of the path, they will
- * all be removed.
- * @param string $path File path to remove ending directory separators from
+ * Remove all trailing directory separators
+ * @param string $path File path to remove trailing directory separators from
  */
 function sist_remove_trailing_directory_separator( $path ) {
 	return rtrim( $path, DIRECTORY_SEPARATOR );
+}
+
+/**
+ * Ensure there is a single leading directory separator on the path
+ * @param string $path File path to add leading directory separator to
+ */
+function sist_add_leading_directory_separator( $path ) {
+	return DIRECTORY_SEPARATOR . sist_remove_leading_directory_separator( $path );
+}
+
+/**
+ * Remove all leading directory separators
+ * @param string $path File path to remove leading directory separators from
+ */
+function sist_remove_leading_directory_separator( $path ) {
+	return ltrim( $path, DIRECTORY_SEPARATOR );
 }

@@ -83,7 +83,9 @@ class Simply_Static_Archive_Creator {
 
 		$this->archive_start_time = sist_formatted_datetime();
 
-		while ( $static_pages = Simply_Static_Page::where( 'last_checked_at < ? OR last_checked_at IS NULL LIMIT 10', $this->archive_start_time ) ) {
+		$batch_size = 10;
+
+		while ( $static_pages = Simply_Static_Page::where( 'last_checked_at < ? OR last_checked_at IS NULL LIMIT ' . $batch_size, $this->archive_start_time ) ) {
 			while ( $static_page = array_shift( $static_pages ) ) {
 
 				$current_url = $static_page->url;
@@ -220,7 +222,7 @@ class Simply_Static_Archive_Creator {
 		// Create archive directory
 		$current_user = wp_get_current_user();
 		$archive_name = join( '-', array( $this->slug, $blog_id, time(), $current_user->user_login ) );
-		$this->archive_dir = $this->temp_files_dir . $archive_name;
+		$this->archive_dir = sist_add_trailing_directory_separator( $this->temp_files_dir . $archive_name );
 
 		if ( ! file_exists( $this->archive_dir ) ) {
 			wp_mkdir_p( $this->archive_dir );
@@ -338,27 +340,51 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	* Copy temporary static files to a local directory
-	* @return true|WP_Error
+	* @param  string        $destination_dir The directory to put the files
+	* @return true|WP_Error                  True on success, WP_Error otherwise
 	*/
 	public function copy_static_files( $destination_dir ) {
-		$directory_iterator = new RecursiveDirectoryIterator( $this->archive_dir, RecursiveDirectoryIterator::SKIP_DOTS );
-		$recursive_iterator = new RecursiveIteratorIterator( $directory_iterator, RecursiveIteratorIterator::SELF_FIRST );
+		$batch_size = 100;
 
-		foreach ( $recursive_iterator as $item ) {
-			$path = $destination_dir . $recursive_iterator->getSubPathName();
-			$success = $item->isDir() ? wp_mkdir_p( $path ) : copy( $item, $path );
-			if ( ! $success ) {
-				return new WP_Error( 'cannot_create_file_or_dir', sprintf( __( "Could not create file or directory: %s", $this->slug ), $path ) );
+		// TODO: also check for recent modification time
+		// last_modified_at > ? AND
+		while ( $static_pages = Simply_Static_Page::where( "file_path IS NOT NULL AND file_path != '' AND ( last_transferred_at < ? OR last_transferred_at IS NULL ) LIMIT " . $batch_size, $this->archive_start_time ) ) {
+			while ( $static_page = array_shift( $static_pages ) ) {
+				$path_info = sist_url_path_info( $static_page->file_path );
+				wp_mkdir_p( $destination_dir . $path_info['dirname'] );
+				copy( $this->archive_dir . $static_page->file_path, $destination_dir . $static_page->file_path );
+
+				$static_page->last_transferred_at = sist_formatted_datetime();
+				$static_page->save();
 			}
 		}
 
 		return true;
 	}
 
+	// /**
+	// * Copy temporary static files to a local directory
+	// * @param  string        $destination_dir The directory to put the files
+	// * @return true|WP_Error                  True on success, WP_Error otherwise
+	// */
+	// public function copy_static_files( $destination_dir ) {
+	// 	$directory_iterator = new RecursiveDirectoryIterator( $this->archive_dir, RecursiveDirectoryIterator::SKIP_DOTS );
+	// 	$recursive_iterator = new RecursiveIteratorIterator( $directory_iterator, RecursiveIteratorIterator::SELF_FIRST );
+	//
+	// 	foreach ( $recursive_iterator as $item ) {
+	// 		$path = $destination_dir . $recursive_iterator->getSubPathName();
+	// 		$success = $item->isDir() ? wp_mkdir_p( $path ) : copy( $item, $path );
+	// 		if ( ! $success ) {
+	// 			return new WP_Error( 'cannot_create_file_or_dir', sprintf( __( "Could not create file or directory: %s", $this->slug ), $path ) );
+	// 		}
+	// 	}
+	//
+	// 	return true;
+	// }
+
 	/**
 	 * Delete temporary, generated static files
-	 * @param $archive_dir The archive directory path
-	 * @return true|WP_Error
+	 * @return true|WP_Error True on success, WP_Error otherwise
 	 */
 	public function delete_temp_static_files() {
 		$directory_iterator = new RecursiveDirectoryIterator( $this->archive_dir, FilesystemIterator::SKIP_DOTS );
@@ -386,7 +412,7 @@ class Simply_Static_Archive_Creator {
 	 * @param string        $url     The URL for the content
 	 * @param string        $content The content of the page we want to save
 	 * @param boolean       $is_html Is this an html page?
-	 * @return string|false $success The relative path of the file, or false if failed to save
+	 * @return string|false          The relative path+filename, or false if failed to save
 	 */
 	protected function save_url_to_file( $url, $content, $is_html ) {
 		$url_parts = parse_url( $url );
@@ -400,25 +426,30 @@ class Simply_Static_Archive_Creator {
 
 		$path_info = sist_url_path_info( $path );
 
-		$file_dir = $this->archive_dir . $path_info['dirname'];
-		$file_dir = sist_add_trailing_directory_separator( $file_dir );
+		$relative_file_dir = $path_info['dirname'];
+		$relative_file_dir = sist_remove_leading_directory_separator( $relative_file_dir );
 
 		// If there's no extension, we're going to create a directory with the
 		// filename and place an index.html file in there.
-		if ( empty( $path_info['extension'] ) ) {
-			$file_dir .= $path_info['filename'];
-			$file_dir = sist_add_trailing_directory_separator( $file_dir );
+		if ( $path_info['extension'] === '' ) {
+			if ( $path_info['filename'] !== '' ) {
+				// the filename would be blank for the root url, in that
+				// instance we don't want to add an extra slash
+				$relative_file_dir .= $path_info['filename'];
+				$relative_file_dir = sist_add_trailing_directory_separator( $relative_file_dir );
+			}
 			$path_info['filename'] = 'index';
 			$path_info['extension'] = 'html';
 		}
 
-		if ( ! file_exists( $file_dir ) ) {
-			wp_mkdir_p( $file_dir );
+		if ( ! file_exists( $this->archive_dir . $relative_file_dir ) ) {
+			wp_mkdir_p( $this->archive_dir . $relative_file_dir );
 		}
 
 		// Save file contents
-		$file_name = $file_dir . $path_info['filename'] . '.' . $path_info['extension'];
-		$success = file_put_contents( $file_name, $content );
-		return $success ? $file_name : false;
+		$relative_file_name = $relative_file_dir . $path_info['filename'] . '.' . $path_info['extension'];
+
+		$success = file_put_contents( $this->archive_dir . $relative_file_name, $content );
+		return $success ? $relative_file_name : false;
 	}
 }
