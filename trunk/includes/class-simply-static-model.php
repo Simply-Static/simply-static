@@ -48,6 +48,12 @@ class Simply_Static_Model {
 	private $data = array();
 
 	/**
+	 * Track if this record has had changed made to it
+	 * @var boolean
+	 */
+	private $changed = false;
+
+	/**
 	 * Retrieve the value of a field for the model
 	 *
 	 * Returns an exception if you try to retrieve a field that isn't set.
@@ -75,6 +81,9 @@ class Simply_Static_Model {
 		if ( ! array_key_exists( $field_name, static::$columns ) ) {
 			throw new Exception( 'Column doesn\'t exist for ' . get_called_class() );
 		} else {
+			if ( ! array_key_exists( $field_name, $this->data ) || $this->data[ $field_name ] !== $field_value ) {
+				$this->changed = true;
+			}
 			return $this->data[ $field_name ] = $field_value;
 		}
 	}
@@ -268,6 +277,16 @@ class Simply_Static_Model {
 
 		// remove null data
 		$fields = array_filter( $this->data, function($v) { return $v !== null; } );
+
+		// If we haven't changed anything, don't bother updating the DB, and
+		// return that saving was successful.
+		if ( $this->changed === false ) {
+			return true;
+		} else {
+			// otherwise, we're going to save this record, so mark that we're
+			// not changed anymore.
+			$this->changed = false;
+		}
 
 		if ( $this->exists() ) {
 			$primary_key = static::$primary_key;
