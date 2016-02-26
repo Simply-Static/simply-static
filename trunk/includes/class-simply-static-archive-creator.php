@@ -76,6 +76,8 @@ class Simply_Static_Archive_Creator {
 		// TODO: Do ajax calls instead of just running forever and ever
 		set_time_limit(0);
 
+		Simply_Static_Page::update_all( 'error_message', NULL );
+
 		$this->create_archive_dir();
 
 		$this->add_origin_and_additional_urls_to_db();
@@ -340,8 +342,8 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	* Copy temporary static files to a local directory
-	* @param  string        $destination_dir The directory to put the files
-	* @return true|WP_Error                  True on success, WP_Error otherwise
+	* @param  string $destination_dir The directory to put the files
+	* @return void
 	*/
 	public function copy_static_files( $destination_dir ) {
 		$batch_size = 100;
@@ -358,8 +360,6 @@ class Simply_Static_Archive_Creator {
 				$static_page->save();
 			}
 		}
-
-		return true;
 	}
 
 	/**

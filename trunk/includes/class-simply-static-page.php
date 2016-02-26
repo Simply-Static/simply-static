@@ -12,9 +12,10 @@ class Simply_Static_Page extends Simply_Static_Model {
 		'id'                  => 'BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY',
 		'found_on_id'         => 'BIGINT(20) UNSIGNED NULL',
 		'url'                 => 'VARCHAR(255) NOT NULL',
-		'file_path'           => 'VARCHAR(255) NOT NULL',
-		'http_status_code'    => 'SMALLINT(20) NOT NULL',
-		'content_hash'        => 'BINARY(20) NOT NULL',
+		'file_path'           => 'VARCHAR(255) NULL',
+		'http_status_code'    => 'SMALLINT(20) NULL',
+		'content_hash'        => 'BINARY(20) NULL',
+		'error_message'       => 'VARCHAR(255) NULL',
 		'last_checked_at'     => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
 		'last_modified_at'    => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
 		'last_transferred_at' => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
@@ -26,7 +27,7 @@ class Simply_Static_Page extends Simply_Static_Model {
 		'KEY url (url)',
 		'KEY last_checked_at (last_checked_at)',
 		'KEY last_modified_at (last_modified_at)',
-		'KEY last_uploaded_at (last_uploaded_at)'
+		'KEY last_transferred_at (last_transferred_at)'
 	);
 
 	protected static $primary_key = 'id';

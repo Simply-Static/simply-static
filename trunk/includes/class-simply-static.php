@@ -240,7 +240,6 @@ class Simply_Static {
 
 			// TODO: archive_url could be a WP_Error
 			if ( $this->options->get( 'delivery_method' ) == 'zip' ) {
-
 				$download_url = $archive_creator->create_zip();
 				if ( is_wp_error( $download_url ) ) {
 					$error = $download_url->get_error_message();
@@ -250,20 +249,12 @@ class Simply_Static {
 					$message .= ' <a href="' . $download_url . '">' . __( 'Click here to download', self::SLUG ) . '</a>';
 					$this->view->add_flash( 'updated', $message );
 				}
-
 			} elseif ( $this->options->get( 'delivery_method' ) == 'local' ) {
-
 				$local_dir = $this->options->get( 'local_dir' );
-				$result = $archive_creator->copy_static_files( $local_dir );
+				$archive_creator->copy_static_files( $local_dir );
 
-				if ( is_wp_error( $result ) ) {
-					$error = $result->get_error_message();
-					$this->view->add_flash( 'error', $error );
-				} else {
-					$message = __( 'Static files copied to: ' . $local_dir, self::SLUG );
-					$this->view->add_flash( 'updated', $message );
-				}
-
+				$message = __( 'Static files copied to: ' . $local_dir, self::SLUG );
+				$this->view->add_flash( 'updated', $message );
 			}
 
 			if ( $this->options->get( 'delete_temp_files' ) == '1' ) {
