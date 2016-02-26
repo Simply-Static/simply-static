@@ -8,17 +8,21 @@
 
 <div class='wrap'>
 
-	<?php if ( is_array( $this->static_pages ) && count( $this->static_pages ) ): ?>
+	<?php if ( is_array( $this->static_pages ) && count( $this->static_pages ) ) : ?>
 		<?php $http_codes = array( '1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0 ); ?>
+		<?php $num_errors = count( array_filter( $this->static_pages, function($p) { return $p->error_message != false; } ) ); ?>
 
 		<h3><?php _e( 'Export Log', $this->slug ); ?></h3>
 		<div class='export-log'>
 			<table class='widefat'>
 				<thead>
 					<tr>
-						<th>Code</th>
-						<th>URL</th>
-						<th>Found on</th>
+						<th><?php _e( 'Code', $this->slug ); ?></th>
+						<th><?php _e( 'URL', $this->slug ); ?></th>
+						<th><?php _e( 'Found on', $this->slug ); ?></th>
+						<?php if ( $num_errors > 0 ) : ?>
+						<th><?php echo sprintf( __( "Errors (%d)", $this->slug ), $num_errors ); ?></th>
+						<?php endif; ?>
 					</tr>
 				</thead>
 				<tbody>
@@ -46,8 +50,17 @@
 						<td>
 							<?php if ( $parent_static_page ): ?>
 								<a href='<?php echo $parent_static_page->url; ?>'><?php echo $parent_static_page->url; ?></a>
+							<?php else: ?>
+								&mdash;
 							<?php endif; ?>
 						</td>
+						<?php if ( $num_errors > 0 ) : ?>
+						<td>
+							<?php $msg = $static_page->error_message; if ( isset( $msg ) ) : ?>
+								<?php echo __( $msg, $this->slug ); ?>
+							<?php endif; ?>
+						</td>
+						<?php endif; ?>
 					</tr>
 				<?php endforeach; ?>
 				</tbody>

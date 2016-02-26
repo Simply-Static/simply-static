@@ -149,7 +149,7 @@ class Simply_Static_Archive_Creator {
 		$response->replace_urls( $this->destination_scheme, $this->destination_host );
 
 		// Save the page to our archive
-		$file_path = $this->save_url_to_file( $response->url, $content, $response->is_html() );
+		$file_path = $this->save_url_to_file( $static_page, $content, $response->is_html() );
 		if ( $file_path ) {
 			$static_page->file_path = $file_path;
 		}
@@ -204,7 +204,7 @@ class Simply_Static_Archive_Creator {
 					$static_page->set_content_hash( $content );
 				}
 
-				$file_path = $this->save_url_to_file( $response->url, $content, $response->is_html() );
+				$file_path = $this->save_url_to_file( $static_page, $content, $response->is_html() );
 				if ( $file_path ) {
 					$static_page->file_path = $file_path;
 				}
@@ -353,8 +353,23 @@ class Simply_Static_Archive_Creator {
 		while ( $static_pages = Simply_Static_Page::where( "file_path IS NOT NULL AND file_path != '' AND ( last_transferred_at < ? OR last_transferred_at IS NULL ) LIMIT " . $batch_size, $this->archive_start_time ) ) {
 			while ( $static_page = array_shift( $static_pages ) ) {
 				$path_info = sist_url_path_info( $static_page->file_path );
-				wp_mkdir_p( $destination_dir . $path_info['dirname'] );
-				copy( $this->archive_dir . $static_page->file_path, $destination_dir . $static_page->file_path );
+				$create_dir = wp_mkdir_p( $destination_dir . $path_info['dirname'] );
+				if ( $create_dir === false ) {
+					$static_page->set_error_message( 'Unable to create destination directory' );
+				} else {
+					$origin_file_path = $this->archive_dir . $static_page->file_path;
+					$destination_file_path = $destination_dir . $static_page->file_path;
+
+					// check that destination file doesn't exist OR exists but is writeable
+					if ( ! file_exists( $destination_file_path ) || is_writable( $destination_file_path ) ) {
+						$copy = copy( $origin_file_path, $destination_file_path );
+						if ( $copy === false ) {
+							$static_page->set_error_message( 'Unable to copy file to destination' );
+						}
+					} else {
+						$static_page->set_error_message( 'Destination file exists and is unwriteable' );
+					}
+				}
 
 				$static_page->last_transferred_at = sist_formatted_datetime();
 				$static_page->save();
@@ -389,13 +404,13 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * Save the contents of a page to a file in our archive directory
-	 * @param string        $url     The URL for the content
-	 * @param string        $content The content of the page we want to save
-	 * @param boolean       $is_html Is this an html page?
-	 * @return string|false          The relative path+filename, or false if failed to save
+	 * @param Simply_Static_Page $static_page The Simply_Static_Page record
+	 * @param string             $content The content of the page we want to save
+	 * @param boolean            $is_html Is this an html page?
+	 * @return void
 	 */
-	protected function save_url_to_file( $url, $content, $is_html ) {
-		$url_parts = parse_url( $url );
+	protected function save_url_to_file( $static_page, $content, $is_html ) {
+		$url_parts = parse_url( $static_page->url );
 		// a domain with no trailing slash has no path, so we're giving it one
 		$path = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
 
@@ -422,14 +437,21 @@ class Simply_Static_Archive_Creator {
 			$path_info['extension'] = 'html';
 		}
 
-		if ( ! file_exists( $this->archive_dir . $relative_file_dir ) ) {
-			wp_mkdir_p( $this->archive_dir . $relative_file_dir );
+		$create_dir = wp_mkdir_p( $this->archive_dir . $relative_file_dir );
+		if ( $create_dir === false ) {
+			$static_page->set_error_message( 'Unable to create temporary directory' );
+		} else {
+			$relative_file_name = $relative_file_dir . $path_info['filename'] . '.' . $path_info['extension'];
+			// check that file doesn't exist OR exists but is writeable
+			// (generally, we'd expect it to never exist)
+			if ( ! file_exists( $relative_file_name ) || is_writable( $relative_file_name ) ) {
+				$write = file_put_contents( $this->archive_dir . $relative_file_name, $content );
+				if ( $write === false ) {
+					$static_page->set_error_message( 'Unable to write temporary file' );
+				}
+			} else {
+				$static_page->set_error_message( 'Temporary file exists and is unwriteable' );
+			}
 		}
-
-		// Save file contents
-		$relative_file_name = $relative_file_dir . $path_info['filename'] . '.' . $path_info['extension'];
-
-		$success = file_put_contents( $this->archive_dir . $relative_file_name, $content );
-		return $success ? $relative_file_name : false;
 	}
 }

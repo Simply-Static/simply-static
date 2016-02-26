@@ -51,4 +51,17 @@ class Simply_Static_Page extends Simply_Static_Model {
 		$this->content_hash = $hash;
 		$this->last_modified_at = sist_formatted_datetime();
 	}
+
+	/**
+	 * Set an error message if an error message hasn't already been set
+	 *
+	 * This ensures that we only display the first error message encountered
+	 * instead of the last.
+	 * @param string $message The error message
+	 */
+	public function set_error_message( $message ) {
+		if ( ! $this->error_message ) {
+			$this->error_message = $message;
+		}
+	}
 }
