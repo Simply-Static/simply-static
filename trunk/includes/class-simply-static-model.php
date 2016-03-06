@@ -124,6 +124,30 @@ class Simply_Static_Model {
 	}
 
 	/**
+	 * Returns the number of pages in the table
+	 * @return int Count of the number of pages in the table
+	 */
+	public static function count() {
+		global $wpdb;
+
+		return $wpdb->get_var( 'SELECT COUNT(*) FROM ' .self::table_name() );
+	}
+
+	/**
+	 * Returns the number of pages in the table
+	 * @param  string     $query The SQL query to perform
+	 * @param  array      $args  Arguments to replace ?'s with
+	 * @return int Count of the number of pages in the table
+	 */
+	public static function count_where( $query ) {
+		global $wpdb;
+
+		$count = $wpdb->get_var( 'SELECT COUNT(*) FROM ' .self::table_name() . ' WHERE ' . $query );
+
+		return $count;
+	}
+
+	/**
 	 * Find records matching a where query, replacing ? with $args
 	 * @param  string     $query The SQL query to perform
 	 * @param  array      $args  Arguments to replace ?'s with

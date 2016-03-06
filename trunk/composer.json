@@ -2,8 +2,7 @@
     "name": "code-of-conduct/simply-static",
     "require": {
         "pclzip/pclzip": "^2.8",
-        "pguardiario/phpuri": "dev-master",
-        "yohang/finite": "^1.1"
+        "pguardiario/phpuri": "dev-master"
     },
     "minimum-stability": "dev",
     "prefer-stable": true

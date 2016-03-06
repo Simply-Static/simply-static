@@ -76,9 +76,34 @@ class Simply_Static {
 			add_action( 'admin_enqueue_scripts', array( self::$instance, 'enqueue_admin_scripts' ) );
 			// Add the options page and menu item.
 			add_action( 'admin_menu', array( self::$instance, 'add_plugin_admin_menu' ), 2 );
+			// Handle AJAX requests
+			add_action( 'wp_ajax_generate_static_archive', array( self::$instance, 'generate_static_archive' ) );
 		}
 
 		return self::$instance;
+	}
+
+	function generate_static_archive() {
+
+		$action = $_POST['perform'];
+
+		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
+
+		$archive_manager->perform( $action );
+
+		$state_name = $archive_manager->get_state_name();
+		$done = $archive_manager->has_finished();
+
+		error_log( 'current state: ' . $state_name . ' | action requested: ' . $action );
+
+		// sist_error_log( $archive_manager->get_status_messages() );
+
+		// send json response and die()
+		wp_send_json( array(
+			'state_name' => $state_name,
+			'status_messages' => $archive_manager->get_status_messages(),
+			'done' => $done
+		) );
 	}
 
 	/**
@@ -158,6 +183,7 @@ class Simply_Static {
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-archive-creator.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-model.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-page.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-archive-manager.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/misc-functions.php';
 	}
 
@@ -167,7 +193,7 @@ class Simply_Static {
 	 */
 	public function enqueue_admin_styles() {
 		// Plugin admin CSS. Tack on plugin version.
-		wp_enqueue_style( self::SLUG . '-admin-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'css/admin.css', array(), self::VERSION );
+		wp_enqueue_style( self::SLUG . '-admin-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'css/admin.css', array(), time() );
 	}
 
 	/**
@@ -176,7 +202,7 @@ class Simply_Static {
 	 */
 	public function enqueue_admin_scripts() {
 		// Plugin admin CSS. Tack on plugin version.
-		wp_enqueue_script( self::SLUG . '-admin-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'js/admin.js', array(), self::VERSION );
+		wp_enqueue_script( self::SLUG . '-admin-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'js/admin.js', array(), time() );
 	}
 
 	/**
@@ -225,45 +251,44 @@ class Simply_Static {
 			$this->view->assign( 'system_requirements_check_failed', true );
 		}
 
-		if ( isset( $_POST['_generate'] ) ) {
-			$archive_creator = new Simply_Static_Archive_Creator(
-				self::SLUG,
-				$this->options->get( 'destination_scheme' ),
-				$this->options->get( 'destination_host' ),
-				$this->options->get( 'temp_files_dir' ),
-				$this->options->get( 'additional_urls' ),
-				$this->options->get( 'additional_files' ),
-				$this->options->get( 'additional_files' )
-			);
-			$archive_creator->create_archive();
-
-			// TODO: archive_url could be a WP_Error
-			if ( $this->options->get( 'delivery_method' ) == 'zip' ) {
-				$download_url = $archive_creator->create_zip();
-				if ( is_wp_error( $download_url ) ) {
-					$error = $download_url->get_error_message();
-					$this->view->add_flash( 'error', $error );
-				} else {
-					$message = __( 'ZIP archive created: ', self::SLUG );
-					$message .= ' <a href="' . $download_url . '">' . __( 'Click here to download', self::SLUG ) . '</a>';
-					$this->view->add_flash( 'updated', $message );
-				}
-			} elseif ( $this->options->get( 'delivery_method' ) == 'local' ) {
-				$local_dir = $this->options->get( 'local_dir' );
-				$archive_creator->copy_static_files( $local_dir );
-
-				$message = __( 'Static files copied to: ' . $local_dir, self::SLUG );
-				$this->view->add_flash( 'updated', $message );
-			}
-
-			if ( $this->options->get( 'delete_temp_files' ) == '1' ) {
-				$deleted_successfully = $archive_creator->delete_temp_static_files();
-			}
-
-			$static_pages = Simply_Static_Page::all();
-
-			$this->view->assign( 'static_pages', $static_pages );
-		}
+		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
+		$this->view->assign( 'archive_generation_ready_to_start', $archive_manager->ready_to_start() );
+		//
+		// if ( isset( $_POST['_generate'] ) ) {
+		// 	$archive_creator = new Simply_Static_Archive_Creator(
+		// 		self::SLUG,
+		// 		$this->options->get( 'destination_scheme' ),
+		// 		$this->options->get( 'destination_host' )
+		// 	);
+		// 	$archive_creator->create_archive();
+		//
+		// 	// TODO: archive_url could be a WP_Error
+		// 	if ( $this->options->get( 'delivery_method' ) == 'zip' ) {
+		// 		$download_url = $archive_creator->create_zip();
+		// 		if ( is_wp_error( $download_url ) ) {
+		// 			$error = $download_url->get_error_message();
+		// 			$this->view->add_flash( 'error', $error );
+		// 		} else {
+		// 			$message = __( 'ZIP archive created: ', self::SLUG );
+		// 			$message .= ' <a href="' . $download_url . '">' . __( 'Click here to download', self::SLUG ) . '</a>';
+		// 			$this->view->add_flash( 'updated', $message );
+		// 		}
+		// 	} elseif ( $this->options->get( 'delivery_method' ) == 'local' ) {
+		// 		$local_dir = $this->options->get( 'local_dir' );
+		// 		$archive_creator->copy_static_files( $local_dir );
+		//
+		// 		$message = __( 'Static files copied to: ' . $local_dir, self::SLUG );
+		// 		$this->view->add_flash( 'updated', $message );
+		// 	}
+		//
+		// 	if ( $this->options->get( 'delete_temp_files' ) == '1' ) {
+		// 		$deleted_successfully = $archive_creator->delete_temp_static_files();
+		// 	}
+		//
+		// 	$static_pages = Simply_Static_Page::all();
+		//
+		// 	$this->view->assign( 'static_pages', $static_pages );
+		// }
 
 		$this->view
 			->set_layout( 'admin' )

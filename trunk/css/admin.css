@@ -23,8 +23,9 @@
 	display: block;
 }
 
-#sistContainer #generateForm .submit .spinner {
+#sistContainer .actions .spinner {
 	float: none;
+	margin-top: 12px;
 }
 
 /* Options page */
@@ -48,6 +49,10 @@
 	margin-top: 5px;
 	margin-bottom: 10px;
 	color: #737373;
+}
+
+#sistContainer .button.hide {
+	display: none;
 }
 
 /* Mailchimp Form CSS */

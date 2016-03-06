@@ -7,7 +7,7 @@
 <h2><?php _e( 'Simply Static', $this->slug ); ?></h2>
 
 <div class='wrap'>
-
+<!--
 	<?php if ( is_array( $this->static_pages ) && count( $this->static_pages ) ) : ?>
 		<?php $http_codes = array( '1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0 ); ?>
 		<?php $num_errors = count( array_filter( $this->static_pages, function($p) { return $p->error_message != false; } ) ); ?>
@@ -75,25 +75,30 @@
 			<?php _e( '5xx Server Error:', $this->slug ); ?> <b><?php echo $http_codes['5']; ?></b> |
 			<?php echo sprintf( __( "More information on HTTP status codes is available on <a href='%s'>Wikipedia</a>.", $this->slug ), 'https://en.wikipedia.org/wiki/List_of_HTTP_status_codes' ); ?></p>
 		<hr />
-	<?php endif ?>
+	<?php endif ?> -->
 
-	<form id='generateForm' method='post' action=''>
 
-		<?php wp_nonce_field( $this->slug ) ?>
-		<input type='hidden' name='_generate' value='1' />
+	<?php wp_nonce_field( $this->slug ) ?>
+	<input type='hidden' name='_generate' value='1' />
 
-		<?php if ( $this->system_requirements_check_failed ) : ?>
-			<p><?php _e( "Uh oh, we've found an issue that prevents us from creating a static copy of your site.", $this->slug ); ?></p>
-		<?php else : ?>
-			<p><?php _e( "Press the button below to create a static copy of your site.", $this->slug ); ?></p>
-			<p><?php _e( "Note: on large sites this process may take a while.", $this->slug ); ?></p>
-		<?php endif; ?>
+	<?php if ( $this->system_requirements_check_failed ) : ?>
+		<p><?php _e( "Uh oh, we've found an issue that prevents us from creating a static copy of your site.", $this->slug ); ?></p>
+	<?php else : ?>
+		<p><?php _e( "Press the button below to create a static copy of your site.", $this->slug ); ?></p>
+		<p><?php _e( "Note: on large sites this process may take a while.", $this->slug ); ?></p>
+	<?php endif; ?>
 
-		<p class='submit'>
-			<input id='generate' class='button button-primary button-hero' type='submit' name='generate' value='<?php _e( "Generate Static Files", $this->slug );?>' <?php if ( $this->system_requirements_check_failed ) { echo 'disabled=disabled'; } ?> />
-			<span class='spinner'></span>
-		</p>
+	<div class='actions'>
+		<input id='generate' class='button button-primary button-hero <?php if ( ! $this->archive_generation_ready_to_start ) { echo 'hide'; } ?>' type='submit' name='generate' value='<?php _e( "Generate Static Files", $this->slug ); ?>' <?php if ( $this->system_requirements_check_failed ) { echo 'disabled=disabled'; } ?> />
 
-	</form>
+		<input id='pause' class='button button-hero hide' type='submit' name='pause' value='<?php _e( "Pause", $this->slug ); ?>' />
+
+		<input id='resume' class='button button-primary button-hero <?php if ( $this->archive_generation_ready_to_start ) { echo 'hide'; } ?>' type='submit' name='resume' value='<?php _e( "Resume", $this->slug ); ?>' <?php if ( $this->system_requirements_check_failed ) { echo 'disabled=disabled'; } ?> />
+
+		<input id='cancel' class='button button-cancel button-hero <?php if ( $this->archive_generation_ready_to_start ) { echo 'hide'; } ?>' type='submit' name='cancel' value='<?php _e( "Cancel", $this->slug ); ?>'  <?php if ( $this->system_requirements_check_failed ) { echo 'disabled=disabled'; } ?> />
+
+		<span class='spinner'></span>
+	</div>
+
 
 </div>
