@@ -161,12 +161,43 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 			$extractor = $this->build_extractor( 'html', $content );
 			$extracted_urls = $extractor->extract_urls();
 
-			foreach ( $extracted_urls as $extracted_url ) {
-				$this->assertTrue( in_array( $extracted_url, $urls ) );
+			foreach ( $urls as $url ) {
+				$this->assertTrue( in_array( $url, $extracted_urls ) );
 			}
 
 		}
 
+	}
+
+	/**
+	 * Test URL extraction on img HTML elements with the srcset attribute
+	 */
+	public function test_extract_urls_with_srcset() {
+		$content_and_urls = array(
+			'<img width="1200" height="750" src="/wp-content/uploads/2013/03/soworthloving-wallpaper-1200x750.jpg" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="Markup: Image Alignment" srcset="/wp-content/uploads/2013/03/soworthloving-wallpaper-300x188.jpg 300w, /wp-content/uploads/2013/03/soworthloving-wallpaper-768x480.jpg 768w, /wp-content/uploads/2013/03/soworthloving-wallpaper-1024x640.jpg 1024w, /wp-content/uploads/2013/03/soworthloving-wallpaper-1200x750.jpg 1200w" sizes="(max-width: 709px) 85vw, (max-width: 909px) 67vw, (max-width: 984px) 60vw, (max-width: 1362px) 62vw, 840px">' => array(
+				self::DOMAIN . '/wp-content/uploads/2013/03/soworthloving-wallpaper-300x188.jpg',
+				self::DOMAIN . '/wp-content/uploads/2013/03/soworthloving-wallpaper-768x480.jpg',
+				self::DOMAIN . '/wp-content/uploads/2013/03/soworthloving-wallpaper-1024x640.jpg',
+				self::DOMAIN . '/wp-content/uploads/2013/03/soworthloving-wallpaper-1200x750.jpg',
+			),
+			'<img src="" srcset="       soworthloving-wallpaper-300x188.jpg       300w     ,   soworthloving wallpaper 768x480.jpg 768w  , soworthloving-wallpaper-1024x640.jpg   1024w  , soworthloving-wallpaper-1200x750.jpg 1200w" sizes="(max-width: 709px) 85vw, (max-width: 909px) 67vw, (max-width: 984px) 60vw, (max-width: 1362px) 62vw, 840px">' => array(
+				self::DOMAIN . '/blog/soworthloving-wallpaper-300x188.jpg',
+				self::DOMAIN . '/blog/soworthloving wallpaper 768x480.jpg',
+				self::DOMAIN . '/blog/soworthloving-wallpaper-1024x640.jpg',
+				self::DOMAIN . '/blog/soworthloving-wallpaper-1200x750.jpg',
+			)
+		);
+
+		foreach ( $content_and_urls as $content => $urls ) {
+
+			$extractor = $this->build_extractor( 'html', $content );
+			$extracted_urls = $extractor->extract_urls();
+
+			foreach ( $urls as $url ) {
+				$this->assertTrue( in_array( $url, $extracted_urls ) );
+			}
+
+		}
 	}
 
 	// TODO: Not presently handling delimited attributes.

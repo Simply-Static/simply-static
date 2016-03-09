@@ -23,7 +23,7 @@ class Simply_Static_Url_Extractor {
 		'a'            => array( 'href', 'urn' ),
 		'base'         => array( 'href' ),
 		'form'         => array( 'action', 'data' ),
-		'img'          => array( 'src', 'usemap', 'longdesc', 'dynsrc', 'lowsrc' ),
+		'img'          => array( 'src', 'usemap', 'longdesc', 'dynsrc', 'lowsrc', 'srcset' ),
 		'link'         => array( 'href' ),
 
 		'applet'       => array( 'code', 'codebase', 'archive', 'object' ),
@@ -159,10 +159,21 @@ class Simply_Static_Url_Extractor {
 				if ( array_key_exists( $tag_name, self::$match_elements ) ) {
 					$match_attributes = self::$match_elements[ $tag_name ];
 					foreach ( $match_attributes as $attribute_name ) {
-						$extracted_url = $element->getAttribute( $attribute_name );
-						if ( $extracted_url !== '' ) {
-							$absolute_extracted_url = $this->add_to_extracted_urls( $extracted_url );
-							$element->setAttribute( $attribute_name, $absolute_extracted_url );
+
+						$extracted_urls = array();
+						// srcset is a fair bit different from most html
+						// attributes, so it gets it's own processsing
+						if ( $attribute_name === 'srcset' ) {
+							$extracted_urls = $this->extract_urls_from_srcset( $element->getAttribute( $attribute_name ) );
+						} else {
+							$extracted_urls[] = $element->getAttribute( $attribute_name );
+						}
+
+						foreach ( $extracted_urls as $extracted_url ) {
+							if ( $extracted_url !== '' ) {
+								$absolute_extracted_url = $this->add_to_extracted_urls( $extracted_url );
+								$element->setAttribute( $attribute_name, $absolute_extracted_url );
+							}
 						}
 					}
 				}
@@ -171,6 +182,18 @@ class Simply_Static_Url_Extractor {
 
 		// update the response body with updated links
 		return $doc->saveHTML();
+	}
+
+	private function extract_urls_from_srcset( $srcset ) {
+		$extracted_urls = array();
+
+		foreach( explode( ',', $srcset ) as $url_and_descriptor ) {
+			// remove the (optional) descriptor
+			// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-srcset
+			$extracted_urls[] = trim( preg_replace( '/[\d\.]+[xw]\s*$/', '', $url_and_descriptor ) );
+		}
+
+		return $extracted_urls;
 	}
 
 	/**
