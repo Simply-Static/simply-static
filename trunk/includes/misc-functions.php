@@ -26,7 +26,7 @@ function sist_origin_scheme() {
 * @return string host (URL minus the protocol)
 */
 function sist_origin_host() {
-	return untrailingslashit( preg_replace( "(^https?://)", "", sist_origin_url() ) );
+	return untrailingslashit( sist_strip_protocol_from_url( sist_origin_url() ) );
 }
 
 /**
@@ -160,11 +160,12 @@ function sist_relative_to_absolute_url( $extracted_url, $page_url ) {
 /**
  * Check if URL starts with same URL as WordPress installation
  *
+ * Both http and https are assumed to be the same domain.
  * @param  string  $url URL to check
  * @return boolean      true if URL is local, false otherwise
  */
 function sist_is_local_url( $url ) {
-	return ( stripos( $url, sist_origin_url() ) === 0 );
+	return ( stripos( sist_strip_protocol_from_url( $url ), sist_origin_host() ) === 0 );
 }
 
 /**
@@ -188,4 +189,26 @@ function sist_string_to_array( $textarea ) {
 	array_walk( $lines, 'trim' );
 	$lines = array_filter( $lines );
 	return $lines;
+}
+
+/**
+ * Remove the http/https protocol from a URL
+ *
+ * @param  string $url URL to remove protocol from
+ * @return string      URL sans http/https protocol
+ */
+function sist_strip_protocol_from_url( $url ) {
+	$pattern = '/^https?:\/\//';
+	return preg_replace( $pattern, '', $url );
+}
+
+/**
+ * Remove index.html/index.php from a URL
+ *
+ * @param  string $url URL to remove index file from
+ * @return string      URL sans index file
+ */
+function sist_strip_index_filenames_from_url( $url ) {
+	$pattern = '/index.(html?|php)$/';
+	return preg_replace( $pattern, '', $url );
 }

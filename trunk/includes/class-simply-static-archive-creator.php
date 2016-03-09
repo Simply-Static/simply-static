@@ -160,6 +160,15 @@ class Simply_Static_Archive_Creator {
 
 					$urls_queue = $this->add_url_to_queue( $redirect_url, $urls_queue );
 
+				// Don't create a redirect page if it's just a redirect from
+				// http to https. Instead just add the new url to the queue.
+				// TODO: Make this less horrible.
+			} else if (
+			sist_strip_index_filenames_from_url( sist_remove_params_and_fragment( sist_strip_protocol_from_url( $redirect_url ) ) ) ===
+			sist_strip_index_filenames_from_url( sist_remove_params_and_fragment( sist_strip_protocol_from_url( $current_url ) ) ) ) {
+
+					$urls_queue = $this->add_url_to_queue( $redirect_url, $urls_queue );
+
 				} else {
 
 					/// convert our potentially relative URL to an absolute URL
