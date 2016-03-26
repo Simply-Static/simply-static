@@ -11,7 +11,7 @@ class Simply_Static {
 	 *
 	 * @var string
 	 */
-	const VERSION = '1.2.3';
+	const VERSION = '1.2.4';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, etc.
