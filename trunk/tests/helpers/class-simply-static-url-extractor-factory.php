@@ -13,4 +13,8 @@ class Simply_Static_Url_Extractor_Factory extends WP_UnitTestCase {
 
 		return new Simply_Static_Url_Extractor( $response );
 	}
+
+	public static function build_from_response( $response ) {
+		return new Simply_Static_Url_Extractor( $response );
+	}
 }

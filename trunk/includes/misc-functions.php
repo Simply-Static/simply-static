@@ -92,7 +92,7 @@ function sist_error_log( $object=null ){
  *
  * Takes a URL (e.g. /test) extracted from a page (e.g. http://foo.com/bar/) and
  * returns an absolute URL (e.g. http://foo.com/bar/test). Absolute URLs are
- * returned as-is.
+ * returned as-is. Exception: links beginning with a # (hash) are left as-is.
  *
  * A null value is returned in the event that the extracted_url is blank or it's
  * unable to be parsed.
@@ -105,8 +105,14 @@ function sist_relative_to_absolute_url( $extracted_url, $page_url ) {
 
 	$extracted_url = trim( $extracted_url );
 
+	// we can't do anything with blank urls
 	if ( $extracted_url === '' ) {
 		return null;
+	}
+
+	// if we get a hash, e.g. href='#section-three', just return it as-is
+	if ( strpos( $extracted_url, '#' ) === 0 ) {
+		return $extracted_url;
 	}
 
 	// check for a protocol-less URL
