@@ -5,22 +5,24 @@
 #sistContainer #sistContent {
 	width: 100%;
 	float: left;
-	min-width: 600px;
+	max-width: 800px;
 }
 
 #sistContainer #sistSidebar {
-	float: right;
-	margin-right: -310px;
+	float: left;
 	width: 290px;
 }
 
 /* Generate page */
 
-#sistContainer .export-log table {
-	height: 400px;
-	overflow-y: auto;
-	overflow-x: hidden;
+#sistContainer #activityLog {
+	border: 1px solid #000;
+	background-color: #EFF;
+	color: #000;
 	display: block;
+	height: 100px;
+	overflow: auto;
+	padding: 5px;
 }
 
 #sistContainer .actions .spinner {

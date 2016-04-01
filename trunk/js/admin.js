@@ -39,14 +39,11 @@ jQuery( document ).ready( function( $ ) {
 
 	// -----------------------------------------------------------------------//
 
-	// // Upon form submission, disable the Generate button and show a spinner
-	// $( '#sistContainer #generateForm' ).submit( function( e ) {
-	//	 $( '#sistContainer #generateForm .spinner' ).addClass( 'is-active' );
-	//	 $( '#sistContainer #generate' ).attr( 'disabled', 'disabled' );
-	// } );
+	// for pausing the continuing requests to WP ajax archive generation
 	var pause = false;
 
 	$( '#sistContainer #generate' ).click( function( e ) {
+		$( '#sistContainer #activityLog' ).html('');
 		initiate_action( 'start' );
 	} );
 
@@ -63,6 +60,7 @@ jQuery( document ).ready( function( $ ) {
 		pause = true;
 	} );
 
+	// disable all actions and show spinner
 	function initiate_action( action ) {
 		pause = false;
 
@@ -85,20 +83,32 @@ jQuery( document ).ready( function( $ ) {
 	}
 
 	function handle_response_from_archive_manager( response ) {
-		console.log( JSON.stringify( response ) );
+		// loop through the responses and create an .activity div for each one
+		// in #activityLog
+		$.each( response.status_messages, function( state_name, status ) {
+			var $activity = $( '#sistContainer #activityLog' ).find( '.activity.' + state_name );
+			if ( ! $activity.length ) {
+				$activity = $("<div class='activity " + state_name + "'></div>").appendTo( $( '#sistContainer #activityLog' ) );
+			}
+			$activity.html( '[' + status['datetime'] + '] ' + status['message'] );
+		} );
 
+		// re-enable and hide all actions
 		$( '#sistContainer .actions input' )
 			.removeAttr( 'disabled' )
 			.addClass( 'hide' );
 
 		if ( response.done == true ) {
+			// remove spinner and show #generate
 			$( '#sistContainer .actions .spinner' ).removeClass( 'is-active' );
 			$( '#sistContainer #generate' ).removeClass( 'hide' );
 		} else {
 			if ( pause == true ) {
+				// remove spinner and show #resume/#cancel
 				$( '#sistContainer .actions .spinner' ).removeClass( 'is-active' );
 				$( '#sistContainer #resume, #sistContainer #cancel' ).removeClass( 'hide' );
 			} else {
+				// show #hide and send ajax request to continue generating
 				$( '#sistContainer #pause' ).removeClass( 'hide' );
 				send_action_to_archive_manager( 'continue' );
 			}

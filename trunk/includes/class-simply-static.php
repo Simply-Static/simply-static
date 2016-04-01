@@ -253,7 +253,9 @@ class Simply_Static {
 		}
 
 		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
-		$this->view->assign( 'archive_generation_ready_to_start', $archive_manager->ready_to_start() );
+		$this->view
+			->assign( 'archive_generation_ready_to_start', $archive_manager->ready_to_start() )
+			->assign( 'status_messages', $archive_manager->get_status_messages() );
 		//
 		// if ( isset( $_POST['_generate'] ) ) {
 		// 	$archive_creator = new Simply_Static_Archive_Creator(

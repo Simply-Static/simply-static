@@ -147,7 +147,16 @@ class Simply_Static_Archive_Manager {
 	private function save_status_message( $message ) {
 		$state_name = $this->get_state_name();
 		$messages = $this->get_status_messages();
-		$messages[ $state_name ] = $message;
+
+		if ( ! array_key_exists( $state_name, $messages ) ) {
+			$messages[ $state_name ] = array(
+				'message' => $message,
+				'datetime' => sist_formatted_datetime()
+			);
+		} else {
+			$messages[ $state_name ]['message'] = $message;
+		}
+
 		$this->options
 			->set( 'archive_status_messages', $messages )
 			->save();
