@@ -49,7 +49,7 @@ class Simply_Static_View {
 		// Looking for a basic directory where plugin resides
 		list($plugin_dir) = explode( '/', plugin_basename( __FILE__ ) );
 
-		// making up an absolute path to views directory
+		// create an absolute path to views directory
 		$path_array = array( WP_PLUGIN_DIR, $plugin_dir, self::DIRECTORY );
 
 		$this->path = implode( '/', $path_array );

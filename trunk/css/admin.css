@@ -1,16 +1,16 @@
 #sistContainer {
-	margin-right: 310px;
+	/*margin-right: 310px;*/
 }
 
 #sistContainer #sistContent {
 	width: 100%;
 	float: left;
-	max-width: 800px;
+	max-width: calc( 100% - 300px );
 }
 
 #sistContainer #sistSidebar {
 	float: left;
-	width: 290px;
+	width: 280px;
 }
 
 /* Generate page */
@@ -25,9 +25,21 @@
 	padding: 5px;
 }
 
-#sistContainer .actions .spinner {
+#sistContainer .spinner {
 	float: none;
+}
+
+#sistContainer .actions .spinner {
 	margin-top: 12px;
+}
+
+/* Adding this to ensure table fits within parent div */
+#sistContainer #exportLog table {
+	word-break: break-all;
+}
+
+#sistContainer #exportLog td.status-code {
+	min-width: 35px;
 }
 
 /* Options page */

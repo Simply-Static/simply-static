@@ -81,32 +81,11 @@ class Simply_Static {
 			add_action( 'admin_menu', array( self::$instance, 'add_plugin_admin_menu' ), 2 );
 			// Handle AJAX requests
 			add_action( 'wp_ajax_generate_static_archive', array( self::$instance, 'generate_static_archive' ) );
+			add_action( 'wp_ajax_render_export_log', array( self::$instance, 'render_export_log' ) );
+			add_action( 'wp_ajax_render_activity_log', array( self::$instance, 'render_activity_log' ) );
 		}
 
 		return self::$instance;
-	}
-
-	function generate_static_archive() {
-
-		$action = $_POST['perform'];
-
-		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
-
-		$archive_manager->perform( $action );
-
-		$state_name = $archive_manager->get_state_name();
-		$done = $archive_manager->has_finished();
-
-		error_log( 'current state: ' . $state_name . ' | action requested: ' . $action );
-
-		// sist_error_log( $archive_manager->get_status_messages() );
-
-		// send json response and die()
-		wp_send_json( array(
-			'state_name' => $state_name,
-			'status_messages' => $archive_manager->get_status_messages(),
-			'done' => $done
-		) );
 	}
 
 	/**
@@ -147,28 +126,28 @@ class Simply_Static {
 		// perform migrations
 		if ( version_compare( $version, self::VERSION, '<' ) ) {
 
-				// version 1.2 introduced the ability to specify additional files
-				if ( version_compare( $version, '1.2.0', '<' ) ) {
-					$this->options
-						->set( 'additional_files', '' );
-				}
-
-				if ( version_compare( $version, '1.3.0', '<' ) ) {
-					// version 1.3 changed the options key
-					if ( get_option( 'simply-static' ) ) {
-			            update_option( 'simply_static', get_option( 'simply-static' ) );
-			            delete_option( 'simply-static' );
-			        }
-
-					// and added a database table for tracking urls/progress
-					Simply_Static_Page::create_table();
-				}
-
-				// always update the version and save
+			// version 1.2 introduced the ability to specify additional files
+			if ( version_compare( $version, '1.2.0', '<' ) ) {
 				$this->options
-					->set( 'version', self::VERSION )
-					->save();
+					->set( 'additional_files', '' );
 			}
+
+			if ( version_compare( $version, '1.3.0', '<' ) ) {
+				// version 1.3 changed the options key
+				if ( get_option( 'simply-static' ) ) {
+		            update_option( 'simply_static', get_option( 'simply-static' ) );
+		            delete_option( 'simply-static' );
+		        }
+
+				// and added a database table for tracking urls/progress
+				Simply_Static_Page::create_table();
+			}
+
+			// always update the version and save
+			$this->options
+				->set( 'version', self::VERSION )
+				->save();
+		}
 
 	}
 
@@ -243,6 +222,30 @@ class Simply_Static {
 		);
 	}
 
+	function generate_static_archive() {
+
+		$action = $_POST['perform'];
+
+		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
+
+		$archive_manager->perform( $action );
+
+		$state_name = $archive_manager->get_state_name();
+		$done = $archive_manager->has_finished();
+
+		$activity_log_html = $this->view
+			->set_template( '_activity_log' )
+			->assign( 'status_messages', $archive_manager->get_status_messages() )
+			->render_to_string();
+
+		// send json response and die()
+		wp_send_json( array(
+			'state_name' => $state_name,
+			'activity_log_html' => $activity_log_html,
+			'done' => $done
+		) );
+	}
+
 	/**
 	 * Render the page for generating a static site.
 	 * @return void
@@ -253,9 +256,24 @@ class Simply_Static {
 		}
 
 		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
+
+		$partial_view = new Simply_Static_View();
+		$activity_log_html = $partial_view
+			->set_template( '_activity_log' )
+			->assign( 'status_messages', $archive_manager->get_status_messages() )
+			->render_to_string();
+
+		$partial_view = new Simply_Static_View();
+		$static_pages = Simply_Static_Page::all();
+		$export_log_html = $this->view
+			->set_template( '_export_log' )
+			->assign( 'static_pages', $static_pages )
+			->render_to_string();
+
 		$this->view
-			->assign( 'archive_generation_ready_to_start', $archive_manager->ready_to_start() )
-			->assign( 'status_messages', $archive_manager->get_status_messages() );
+			->assign( 'activity_log', $activity_log_html )
+			->assign( 'export_log', $export_log_html )
+			->assign( 'archive_generation_ready_to_start', $archive_manager->ready_to_start() );
 		//
 		// if ( isset( $_POST['_generate'] ) ) {
 		// 	$archive_creator = new Simply_Static_Archive_Creator(
@@ -297,6 +315,34 @@ class Simply_Static {
 			->set_layout( 'admin' )
 			->set_template( 'generate' )
 			->render();
+	}
+
+	public function render_activity_log() {
+		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
+
+		$content = $this->view
+			->set_template( '_activity_log' )
+			->assign( 'status_messages', $archive_manager->get_status_messages() )
+			->render_to_string();
+
+		// send json response and die()
+		wp_send_json( array(
+			'html' => $content
+		) );
+	}
+
+	public function render_export_log() {
+		$static_pages = Simply_Static_Page::all();
+
+		$content = $this->view
+			->set_template( '_export_log' )
+			->assign( 'static_pages', $static_pages )
+			->render_to_string();
+
+		// send json response and die()
+		wp_send_json( array(
+			'html' => $content
+		) );
 	}
 
 	/**

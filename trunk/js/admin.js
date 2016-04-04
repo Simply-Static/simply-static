@@ -77,7 +77,7 @@ jQuery( document ).ready( function( $ ) {
 			'perform': action
 		};
 
-		$.post( window.ajaxurl, data, function(response) {
+		$.post( window.ajaxurl, data, function( response ) {
 			handle_response_from_archive_manager( response );
 		} );
 	}
@@ -85,13 +85,7 @@ jQuery( document ).ready( function( $ ) {
 	function handle_response_from_archive_manager( response ) {
 		// loop through the responses and create an .activity div for each one
 		// in #activityLog
-		$.each( response.status_messages, function( state_name, status ) {
-			var $activity = $( '#sistContainer #activityLog' ).find( '.activity.' + state_name );
-			if ( ! $activity.length ) {
-				$activity = $("<div class='activity " + state_name + "'></div>").appendTo( $( '#sistContainer #activityLog' ) );
-			}
-			$activity.html( '[' + status['datetime'] + '] ' + status['message'] );
-		} );
+		$('#activityLog').html( response.activity_log_html );
 
 		// re-enable and hide all actions
 		$( '#sistContainer .actions input' )
@@ -102,6 +96,8 @@ jQuery( document ).ready( function( $ ) {
 			// remove spinner and show #generate
 			$( '#sistContainer .actions .spinner' ).removeClass( 'is-active' );
 			$( '#sistContainer #generate' ).removeClass( 'hide' );
+
+			display_export_log();
 		} else {
 			if ( pause == true ) {
 				// remove spinner and show #resume/#cancel
@@ -113,6 +109,30 @@ jQuery( document ).ready( function( $ ) {
 				send_action_to_archive_manager( 'continue' );
 			}
 		}
+	}
+
+	function display_export_log() {
+		var data = {
+			'action': 'render_export_log'
+		};
+
+		$('#exportLog').html( "<span class='spinner is-active'></span>" );
+
+		$.post( window.ajaxurl, data, function( response ) {
+			$('#exportLog').html( response.html );
+		} );
+	}
+
+	function display_activity_log() {
+		var data = {
+			'action': 'render_activity_log'
+		};
+
+		$('#activityLog').html( "<span class='spinner is-active'></span>" );
+
+		$.post( window.ajaxurl, data, function( response ) {
+			$('#activityLog').html( response.html );
+		} );
 	}
 
 } );
