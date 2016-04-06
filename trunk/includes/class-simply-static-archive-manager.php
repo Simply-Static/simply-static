@@ -7,6 +7,7 @@
  */
 class Simply_Static_Archive_Manager {
 
+	/** @const */
 	private static $states = array(
 		'idle' => [
 			'type' => 'final',
@@ -99,7 +100,6 @@ class Simply_Static_Archive_Manager {
 			$function_name = 'handle_ajax_' . $action;
 			$this->$function_name();
 		} catch ( Exception $e ) {
-			error_log('--1--');
 			$this->error_occurred( new WP_Error( 'unexpected_error', __( 'An unknown error has occurred' ) ) );
 		}
 	}
@@ -109,7 +109,6 @@ class Simply_Static_Archive_Manager {
 	// WP_Error = set error state
 	private function next_or_error( $result ) {
 		if ( is_wp_error( $result ) ) {
-			error_log('--2--');
 			$this->error_occurred( $result );
 		} else {
 			if ( $result == true && ! $this->has_finished() ) {
@@ -124,7 +123,6 @@ class Simply_Static_Archive_Manager {
 			$this->next_or_error( $this->handle_setup_state() );
 		} else {
 			// unknown action or transition to wrong state
-			error_log('--3--');
 			$this->error_occurred( new WP_Error( 'invalid_state_transition' ) );
 		}
 	}
@@ -184,7 +182,6 @@ class Simply_Static_Archive_Manager {
 	}
 
 	public function ready_to_start() {
-		$state = $this->get_state();
 		return $this->has_finished();
 	}
 
@@ -195,7 +192,6 @@ class Simply_Static_Archive_Manager {
 
 	private function apply( $transition_name ) {
 		$state = $this->get_state();
-		sist_error_log( $state['transitions'] );
 		$new_state_name = $state['transitions'][ $transition_name ];
 		return $this->options->set( 'archive_state_name', $new_state_name )->save();
 	}
@@ -212,6 +208,7 @@ class Simply_Static_Archive_Manager {
 			->set( 'archive_creator_id', $current_user->ID )
 			->set( 'archive_blog_id', $blog_id )
 			->set( 'archive_start_time', sist_formatted_datetime() )
+			->set( 'archive_end_time', NULL )
 			->save();
 
 		$message = __( 'Setting up', Simply_Static::SLUG );
@@ -229,6 +226,9 @@ class Simply_Static_Archive_Manager {
 
 		// clear out any saved error messages on pages
 		Simply_Static_Page::update_all( 'error_message', NULL );
+
+		// delete pages that we can't process
+		Simply_Static_Page::delete_where( 'http_status_code NOT IN (?)', implode( ',', Simply_Static_Archive_Creator::$processable_status_codes ) );
 
 		// add origin url and additional urls/files to database
 		Simply_Static_Archive_Creator::add_origin_and_additional_urls_to_db( $this->options->get( 'additional_urls' ) );
@@ -302,14 +302,14 @@ class Simply_Static_Archive_Manager {
 	private function handle_wrapup_state() {
 		$this->save_status_message( __( 'Wrapping up', Simply_Static::SLUG ) );
 
-		$archive_creator = new Simply_Static_Archive_Creator(
-			$this->options->get( 'destination_scheme' ),
-			$this->options->get( 'destination_host' ),
-			$this->get_archive_dir(),
-			$this->get_start_time()
-		);
-
 		if ( $this->options->get( 'delete_temp_files' ) === '1' ) {
+			$archive_creator = new Simply_Static_Archive_Creator(
+				$this->options->get( 'destination_scheme' ),
+				$this->options->get( 'destination_host' ),
+				$this->get_archive_dir(),
+				$this->get_start_time()
+			);
+
 			$deleted_successfully = $archive_creator->delete_temp_static_files();
 		}
 
@@ -317,7 +317,13 @@ class Simply_Static_Archive_Manager {
 	}
 
 	private function handle_finished_state() {
-		$this->save_status_message( __( 'Done!', Simply_Static::SLUG ) );
+		$end_time = sist_formatted_datetime();
+		$start_time = $this->get_start_time();
+		$duration = strtotime( $end_time ) - strtotime( $start_time );
+		$time_string = gmdate( "H:i:s", $duration );
+
+		$this->options->set( 'archive_end_time', $end_time );
+		$this->save_status_message( sprintf( __( 'Done! Finished in %s', Simply_Static::SLUG ), $time_string ) );
 
 		return true;
 	}
@@ -334,9 +340,6 @@ class Simply_Static_Archive_Manager {
 	}
 
 	private function handle_error_state( $wp_error ) {
-		error_log('----------------');
-		sist_error_log( $wp_error );
-
 		$message = sprintf( __( "Error: %s", Simply_Static::SLUG ), $wp_error->get_error_message() );
 		$this->save_status_message( $message );
 

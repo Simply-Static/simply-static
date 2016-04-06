@@ -6,8 +6,10 @@
  */
 class Simply_Static_Page extends Simply_Static_Model {
 
+	/** @const */
 	protected static $table_name = 'pages';
 
+	/** @const */
 	protected static $columns = array(
 		'id'                  => 'BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY',
 		'found_on_id'         => 'BIGINT(20) UNSIGNED NULL',
@@ -23,6 +25,7 @@ class Simply_Static_Page extends Simply_Static_Model {
 		'updated_at'          => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'"
 	);
 
+	/** @const */
 	protected static $indexes = array(
 		'KEY url (url)',
 		'KEY last_checked_at (last_checked_at)',
@@ -30,6 +33,7 @@ class Simply_Static_Page extends Simply_Static_Model {
 		'KEY last_transferred_at (last_transferred_at)'
 	);
 
+	/** @const */
 	protected static $primary_key = 'id';
 
 	/**

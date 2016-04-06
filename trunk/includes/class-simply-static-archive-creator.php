@@ -6,6 +6,11 @@
  */
 class Simply_Static_Archive_Creator {
 
+	/** @const */
+	public static $processable_status_codes = array(
+		200, 301, 302, 303, 307, 308
+	);
+
 	/**
 	 * The path to the temporary archive directory
 	 * @var string
@@ -73,7 +78,7 @@ class Simply_Static_Archive_Creator {
 			$static_page->save();
 
 			// If we get a 30x redirect...
-			if ( in_array( $response->code, array( 301, 302, 303, 307 ) ) ) {
+			if ( in_array( $response->code, array( 301, 302, 303, 307, 308 ) ) ) {
 				$this->handle_30x_redirect( $static_page, $response );
 				continue;
 			}

@@ -136,7 +136,6 @@ class Simply_Static_Model {
 	/**
 	 * Returns the number of pages in the table
 	 * @param  string     $query The SQL query to perform
-	 * @param  array      $args  Arguments to replace ?'s with
 	 * @return int Count of the number of pages in the table
 	 */
 	public static function count_where( $query ) {
@@ -145,6 +144,40 @@ class Simply_Static_Model {
 		$count = $wpdb->get_var( 'SELECT COUNT(*) FROM ' .self::table_name() . ' WHERE ' . $query );
 
 		return $count;
+	}
+
+	/**
+	 * Delete records matching a where query, replacing ? with $args
+	 * @param  string     $query The SQL query to perform
+	 * @param  array      $args  Arguments to replace ?'s with
+	 * @return array|null        An array of records, or null if failure
+	 */
+	public static function delete_where( $query, $args ) {
+		global $wpdb;
+
+		$where_values = func_get_args();
+		array_shift( $where_values );
+
+		foreach ( $where_values as $value ) {
+			$query = preg_replace( '/\?/', self::value_placeholder( $value ), $query, 1 );
+		}
+
+		$rows = $wpdb->get_results(
+			$wpdb->prepare( 'DELETE FROM ' . self::table_name() . ' WHERE ' . $query, $where_values ),
+			ARRAY_A
+		);
+
+		if ( $rows === null ) {
+			return null;
+		} else {
+			$records = array();
+
+			foreach ( $rows as $row ) {
+				$records[] = self::initialize( $row );
+			}
+
+			return $records;
+		}
 	}
 
 	/**

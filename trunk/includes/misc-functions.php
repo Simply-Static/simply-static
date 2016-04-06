@@ -180,7 +180,7 @@ function sist_string_to_array( $textarea ) {
  * @return string MySQL formatted datetime
  */
 function sist_formatted_datetime() {
-	return date('Y-m-d H:i:s');
+	return date( 'Y-m-d H:i:s' );
 }
 
 /**
