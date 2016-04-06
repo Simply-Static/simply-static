@@ -3,7 +3,3 @@
 # keep the static-files directory but ignore anything in it, except the .keep file
 trunk/static-files/*
 !trunk/static-files/.keep
-
-# ignore the vendor directory
-# https://getcomposer.org/doc/faqs/should-i-commit-the-dependencies-in-my-vendor-directory.md
-trunk/vendor
