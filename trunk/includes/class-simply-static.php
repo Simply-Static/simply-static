@@ -171,7 +171,7 @@ class Simply_Static {
 
 	/**
 	 * Enqueue admin-specific style sheets for this plugin's admin pages only
-	 * @return null Return early if no settings page is registered.
+	 * @return void
 	 */
 	public function enqueue_admin_styles() {
 		// Plugin admin CSS. Tack on plugin version.
@@ -180,7 +180,7 @@ class Simply_Static {
 
 	/**
 	 * Enqueue admin-specific javascript files for this plugin's admin pages only
-	 * @return null Return early if no settings page is registered.
+	 * @return void
 	 */
 	public function enqueue_admin_scripts() {
 		// Plugin admin CSS. Tack on plugin version.
@@ -222,8 +222,16 @@ class Simply_Static {
 		);
 	}
 
+	/**
+	 * Handle requests for generating a static archive and send a response via ajax
+	 *
+	 * Expects a POST param called 'perform' which is one of: start, continue,
+	 * cancel. Those actions are passed along to the Archive Manager which will
+	 * dole out small portions of work to the Archive Creator, slowly building
+	 * out a static archive over repeated requests.
+	 * @return void
+	 */
 	function generate_static_archive() {
-
 		$action = $_POST['perform'];
 
 		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
@@ -247,76 +255,9 @@ class Simply_Static {
 	}
 
 	/**
-	 * Render the page for generating a static site.
+	 * Render the activity log and send it via ajax
 	 * @return void
 	 */
-	public function display_generate_page() {
-		if ( $this->check_system_requirements() ) {
-			$this->view->assign( 'system_requirements_check_failed', true );
-		}
-
-		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
-
-		$partial_view = new Simply_Static_View();
-		$activity_log_html = $partial_view
-			->set_template( '_activity_log' )
-			->assign( 'status_messages', $archive_manager->get_status_messages() )
-			->render_to_string();
-
-		$partial_view = new Simply_Static_View();
-		$static_pages = Simply_Static_Page::all();
-		$export_log_html = $this->view
-			->set_template( '_export_log' )
-			->assign( 'static_pages', $static_pages )
-			->render_to_string();
-
-		$this->view
-			->assign( 'activity_log', $activity_log_html )
-			->assign( 'export_log', $export_log_html )
-			->assign( 'archive_generation_ready_to_start', $archive_manager->ready_to_start() );
-		//
-		// if ( isset( $_POST['_generate'] ) ) {
-		// 	$archive_creator = new Simply_Static_Archive_Creator(
-		// 		self::SLUG,
-		// 		$this->options->get( 'destination_scheme' ),
-		// 		$this->options->get( 'destination_host' )
-		// 	);
-		// 	$archive_creator->create_archive();
-		//
-		// 	// TODO: archive_url could be a WP_Error
-		// 	if ( $this->options->get( 'delivery_method' ) == 'zip' ) {
-		// 		$download_url = $archive_creator->create_zip();
-		// 		if ( is_wp_error( $download_url ) ) {
-		// 			$error = $download_url->get_error_message();
-		// 			$this->view->add_flash( 'error', $error );
-		// 		} else {
-		// 			$message = __( 'ZIP archive created: ', self::SLUG );
-		// 			$message .= ' <a href="' . $download_url . '">' . __( 'Click here to download', self::SLUG ) . '</a>';
-		// 			$this->view->add_flash( 'updated', $message );
-		// 		}
-		// 	} elseif ( $this->options->get( 'delivery_method' ) == 'local' ) {
-		// 		$local_dir = $this->options->get( 'local_dir' );
-		// 		$archive_creator->copy_static_files( $local_dir );
-		//
-		// 		$message = __( 'Static files copied to: ' . $local_dir, self::SLUG );
-		// 		$this->view->add_flash( 'updated', $message );
-		// 	}
-		//
-		// 	if ( $this->options->get( 'delete_temp_files' ) == '1' ) {
-		// 		$deleted_successfully = $archive_creator->delete_temp_static_files();
-		// 	}
-		//
-		// 	$static_pages = Simply_Static_Page::all();
-		//
-		// 	$this->view->assign( 'static_pages', $static_pages );
-		// }
-
-		$this->view
-			->set_layout( 'admin' )
-			->set_template( 'generate' )
-			->render();
-	}
-
 	public function render_activity_log() {
 		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
 
@@ -331,6 +272,10 @@ class Simply_Static {
 		) );
 	}
 
+	/**
+	 * Render the export log and send it via ajax
+	 * @return void
+	 */
 	public function render_export_log() {
 		$static_pages = Simply_Static_Page::all();
 
@@ -346,7 +291,42 @@ class Simply_Static {
 	}
 
 	/**
-	 * Render the options page.
+	 * Render the page for generating a static site
+	 * @return void
+	 */
+	public function display_generate_page() {
+		if ( $this->check_system_requirements() ) {
+			$this->view->assign( 'system_requirements_check_failed', true );
+		}
+
+		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
+
+		// render the activity log to a string
+		$partial_view = new Simply_Static_View();
+		$activity_log_html = $partial_view
+			->set_template( '_activity_log' )
+			->assign( 'status_messages', $archive_manager->get_status_messages() )
+			->render_to_string();
+
+		// render the export log to a string
+		$partial_view = new Simply_Static_View();
+		$static_pages = Simply_Static_Page::all();
+		$export_log_html = $this->view
+			->set_template( '_export_log' )
+			->assign( 'static_pages', $static_pages )
+			->render_to_string();
+
+		$this->view
+			->set_layout( 'admin' )
+			->set_template( 'generate' )
+			->assign( 'activity_log', $activity_log_html )
+			->assign( 'export_log', $export_log_html )
+			->assign( 'archive_generation_ready_to_start', $archive_manager->has_finished() )
+			->render();
+	}
+
+	/**
+	 * Render the options page
 	 * @return void
 	 */
 	public function display_settings_page() {
@@ -373,7 +353,7 @@ class Simply_Static {
 	}
 
 	/**
-	 * Save the options from the options page.
+	 * Save the options from the options page
 	 * @return void
 	 */
 	public function save_options() {

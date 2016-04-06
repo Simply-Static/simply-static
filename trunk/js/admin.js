@@ -123,16 +123,4 @@ jQuery( document ).ready( function( $ ) {
 		} );
 	}
 
-	function display_activity_log() {
-		var data = {
-			'action': 'render_activity_log'
-		};
-
-		$('#activityLog').html( "<span class='spinner is-active'></span>" );
-
-		$.post( window.ajaxurl, data, function( response ) {
-			$('#activityLog').html( response.html );
-		} );
-	}
-
 } );

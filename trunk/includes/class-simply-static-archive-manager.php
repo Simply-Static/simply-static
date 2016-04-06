@@ -72,7 +72,7 @@ class Simply_Static_Archive_Manager {
 	);
 
 	/**
-	 * Stores options for the archive manager using the options class
+	 * Stores options for the archive manager using Simply_Static_Options
 	 * @var Simply_Static_Options
 	 */
 	protected $options = null;
@@ -84,17 +84,18 @@ class Simply_Static_Archive_Manager {
 	public function __construct( $options ) {
 		$this->options = $options;
 
+		// Set the initial archive state to 'idle'
 		if ( $this->options->get( 'archive_state_name' ) === null ) {
-			$this->init();
+			$this->options
+				->set( 'archive_state_name', 'idle' )
+				->save();
 		}
 	}
 
-	private function init() {
-		$this->options
-			->set( 'archive_state_name', 'idle' )
-			->save();
-	}
-
+	/**
+	 * Take an AJAX action and dole it out to a corresponding function
+	 * @return void
+	 */
 	public function perform( $action ) {
 		try {
 			$function_name = 'handle_ajax_' . $action;
@@ -104,9 +105,16 @@ class Simply_Static_Archive_Manager {
 		}
 	}
 
-	// true = state completed successfully
-	// false = state not yet done
-	// WP_Error = set error state
+	/**
+	 * Determine whether to move to the next state, stay put, or throw an error
+	 *
+	 * Check the $result, if it's...
+	 * - true = state completed successfully (move to next state)
+	 * - false = state not yet done (stay in same state)
+	 * - WP_Error = something failed (set error state)
+	 * @param boolean|WP_Error $result The result of processing from Archive_Creator
+	 * @return void
+	 */
 	private function next_or_error( $result ) {
 		if ( is_wp_error( $result ) ) {
 			$this->error_occurred( $result );
@@ -117,6 +125,10 @@ class Simply_Static_Archive_Manager {
 		}
 	}
 
+	/**
+	 * Handle an ajax 'start' request (or set error if not possible)
+	 * @return void
+	 */
 	private function handle_ajax_start() {
 		if ( $this->can( 'start' ) ) {
 			$this->apply( 'start' );
@@ -127,31 +139,49 @@ class Simply_Static_Archive_Manager {
 		}
 	}
 
+	/**
+	 * Handle an ajax 'continue' request
+	 * @return void
+	 */
 	private function handle_ajax_continue() {
 		$state_name = $this->get_state_name();
 		$function_name = 'handle_' . $state_name . '_state';
 		$this->next_or_error( $this->$function_name() );
 	}
 
+	/**
+	 * Handle an ajax 'cancel' request
+	 * @return void
+	 */
 	private function handle_ajax_cancel() {
 		$this->apply( 'cancel' );
 		$this->handle_cancelled_state();
 	}
 
+	/**
+	 * Get an array of status messages for the current job
+	 * @return array
+	 */
 	public function get_status_messages() {
 		return $this->options->get( 'archive_status_messages' );
 	}
 
+	/**
+	 * Add a message to the array of status messages for the job
+	 * @param  string $message Message to display about the status of the job
+	 * @return void
+	 */
 	private function save_status_message( $message ) {
 		$state_name = $this->get_state_name();
 		$messages = $this->get_status_messages();
 
+		// if the state exists, set the datetime and message
 		if ( ! array_key_exists( $state_name, $messages ) ) {
 			$messages[ $state_name ] = array(
 				'message' => $message,
 				'datetime' => sist_formatted_datetime()
 			);
-		} else {
+		} else { // otherwise just update the message
 			$messages[ $state_name ]['message'] = $message;
 		}
 
@@ -160,42 +190,77 @@ class Simply_Static_Archive_Manager {
 			->save();
 	}
 
+	/**
+	 * Get the name of the current state
+	 * @return string The name of the current state
+	 */
 	public function get_state_name() {
 		return $this->options->get( 'archive_state_name' );
 	}
 
+	/**
+	 * Return the array of info on the current state
+	 * @return array Returns info from static $states for the current state
+	 */
 	private function get_state() {
 		return self::$states[ $this->get_state_name() ];
 	}
 
+	/**
+	 * Get the current path to the temp static archive directory
+	 * @return string The path to the temp static archive directory
+	 */
 	private function get_archive_dir() {
 		return sist_add_trailing_directory_separator( $this->options->get( 'temp_files_dir' ) . $this->options->get( 'archive_name' )  );
 	}
 
+	/**
+	 * Get the datetime that archive creation started
+	 * @return string Starting datetime for archive creation
+	 */
 	private function get_start_time() {
 		return $this->options->get( 'archive_start_time' );
 	}
 
+	/**
+	 * Are we done building the static archive?
+	 * @return boolean Return true if we're done building the archive, false otherwise
+	 */
 	public function has_finished() {
 		$state = $this->get_state();
 		return $state['type'] == 'final';
 	}
 
-	public function ready_to_start() {
-		return $this->has_finished();
-	}
-
+	/**
+	 * Can we transition to a new state from our current state?
+	 * @param  string  $transition_name The name of the transition
+	 * @return boolean                  Return true if we can transition, false otherwise
+	 */
 	private function can( $transition_name ) {
 		$state = $this->get_state();
 		return isset( $state['transitions'][ $transition_name ] );
 	}
 
+	/**
+	 * Apply a transition to a new state
+	 * @param  string $transition_name The name of the transition
+	 * @return boolean                 Was the transition successful?
+	 */
 	private function apply( $transition_name ) {
 		$state = $this->get_state();
-		$new_state_name = $state['transitions'][ $transition_name ];
-		return $this->options->set( 'archive_state_name', $new_state_name )->save();
+		if ( $this->can( $transition_name ) ) {
+			$new_state_name = $state['transitions'][ $transition_name ];
+			$this->options->set( 'archive_state_name', $new_state_name )->save();
+			return true;
+		} else {
+			return false;
+		}
 	}
 
+	/**
+	 * Do processing for the 'setup' state
+	 * @return true|WP_Error Returns true if successful or WP_Error if there's a problem
+	 */
 	private function handle_setup_state() {
 		global $blog_id;
 
@@ -237,6 +302,10 @@ class Simply_Static_Archive_Manager {
 		return true;
 	}
 
+	/**
+	 * Do processing for the 'fetching' state
+	 * @return boolean|WP_Error true if done processing, false if more processing, WP_Error if problem
+	 */
 	private function handle_fetching_state() {
 		$archive_creator = new Simply_Static_Archive_Creator(
 			$this->options->get( 'destination_scheme' ),
@@ -258,6 +327,10 @@ class Simply_Static_Archive_Manager {
 		}
 	}
 
+	/**
+	 * Do processing for the 'transferring' state
+	 * @return boolean|WP_Error true if done processing, false if more processing, WP_Error if problem
+	 */
 	private function handle_transferring_state() {
 		$archive_creator = new Simply_Static_Archive_Creator(
 			$this->options->get( 'destination_scheme' ),
@@ -299,6 +372,10 @@ class Simply_Static_Archive_Manager {
 		}
 	}
 
+	/**
+	 * Do processing for the 'wrapup' state
+	 * @return true Continue on to next step
+	 */
 	private function handle_wrapup_state() {
 		$this->save_status_message( __( 'Wrapping up', Simply_Static::SLUG ) );
 
@@ -316,6 +393,10 @@ class Simply_Static_Archive_Manager {
 		return true;
 	}
 
+	/**
+	 * Do processing for the 'finished' state
+	 * @return true Continue on to next step
+	 */
 	private function handle_finished_state() {
 		$end_time = sist_formatted_datetime();
 		$start_time = $this->get_start_time();
@@ -328,17 +409,30 @@ class Simply_Static_Archive_Manager {
 		return true;
 	}
 
+	/**
+	 * Do processing for the 'cancelled' state
+	 * @return false Do not do additional processing
+	 */
 	private function handle_cancelled_state() {
 		$this->save_status_message( __( 'Cancelled', Simply_Static::SLUG ) );
 
 		return false;
 	}
 
+	/**
+	 * Change to the error state and immediately process it
+	 * @return void
+	 */
 	private function error_occurred( $wp_error ) {
 		$this->apply( 'error' );
 		$this->handle_error_state( $wp_error );
 	}
 
+	/**
+	 * Do processing for the 'error' state
+	 * @param  WP_Error $wp_error WP_Error to process
+	 * @return false              Do not do additional processing
+	 */
 	private function handle_error_state( $wp_error ) {
 		$message = sprintf( __( "Error: %s", Simply_Static::SLUG ), $wp_error->get_error_message() );
 		$this->save_status_message( $message );
