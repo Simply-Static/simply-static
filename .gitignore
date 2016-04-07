@@ -1,5 +1,5 @@
 .DS_Store
 
 # keep the static-files directory but ignore anything in it, except the .keep file
-trunk/static-files/*
-!trunk/static-files/.keep
+static-files/*
+!static-files/.keep
