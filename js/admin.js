@@ -39,6 +39,10 @@ jQuery( document ).ready( function( $ ) {
 
 	// -----------------------------------------------------------------------//
 
+	// display the export and activity log on page load
+	display_export_log();
+	display_activity_log();
+
 	// for pausing the continuing requests to WP ajax archive generation
 	var pause = false;
 
@@ -120,6 +124,18 @@ jQuery( document ).ready( function( $ ) {
 
 		$.post( window.ajaxurl, data, function( response ) {
 			$('#exportLog').html( response.html );
+		} );
+	}
+
+	function display_activity_log() {
+		var data = {
+			'action': 'render_activity_log'
+		};
+
+		$('#activityLog').html( "<span class='spinner is-active'></span>" );
+
+		$.post( window.ajaxurl, data, function( response ) {
+			$('#activityLog').html( response.html );
 		} );
 	}
 

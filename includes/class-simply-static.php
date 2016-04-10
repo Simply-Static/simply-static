@@ -301,26 +301,9 @@ class Simply_Static {
 
 		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
 
-		// render the activity log to a string
-		$partial_view = new Simply_Static_View();
-		$activity_log_html = $partial_view
-			->set_template( '_activity_log' )
-			->assign( 'status_messages', $archive_manager->get_status_messages() )
-			->render_to_string();
-
-		// render the export log to a string
-		$partial_view = new Simply_Static_View();
-		$static_pages = Simply_Static_Page::all();
-		$export_log_html = $this->view
-			->set_template( '_export_log' )
-			->assign( 'static_pages', $static_pages )
-			->render_to_string();
-
 		$this->view
 			->set_layout( 'admin' )
 			->set_template( 'generate' )
-			->assign( 'activity_log', $activity_log_html )
-			->assign( 'export_log', $export_log_html )
 			->assign( 'archive_generation_ready_to_start', $archive_manager->has_finished() )
 			->render();
 	}
