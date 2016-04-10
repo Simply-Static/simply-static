@@ -1,0 +1,12 @@
+{
+    "name": "code-of-conduct/simply-static",
+    "require": {
+        "pclzip/pclzip": "^2.8",
+        "pguardiario/phpuri": "dev-master"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "preferred-install": "dist"
+    }
+}
