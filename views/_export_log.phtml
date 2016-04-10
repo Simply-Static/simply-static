@@ -27,8 +27,11 @@
 
 		<?php foreach ( $this->static_pages as $static_page ) : ?>
 			<?php
-				$digit = substr( $static_page->http_status_code, 0, 1 ); // get first digit of error code
-				$http_codes[ $digit ] += 1;
+				$code = $static_page->http_status_code;
+				if ( $code !== NULL ) {
+					$digit = substr( $static_page->http_status_code, 0, 1 ); // get first digit of error code
+					$http_codes[ $digit ] += 1;
+				}
 			?>
 
 			<tr>

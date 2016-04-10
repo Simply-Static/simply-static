@@ -88,6 +88,7 @@ class Simply_Static_Archive_Manager {
 		if ( $this->options->get( 'archive_state_name' ) === null ) {
 			$this->options
 				->set( 'archive_state_name', 'idle' )
+				->set( 'archive_status_messages', array() )
 				->save();
 		}
 	}
