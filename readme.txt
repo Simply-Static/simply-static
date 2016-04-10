@@ -75,7 +75,12 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 
 == Changelog ==
 
-= 1.2.4, March 8, 2016 =
+= 1.3.0, April 9, 2016 =
+
+* New: Static archive creation handled via AJAX; PHP timeouts are a thing of the past
+* New: Activity Log - see what Simply Static is doing while it's working
+
+= 1.2.4, March 25, 2016 =
 
 * Fix: Link hashes (e.g. href='#section-three') will no longer be rewritten as full URLs
 
