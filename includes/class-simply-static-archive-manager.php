@@ -9,66 +9,66 @@ class Simply_Static_Archive_Manager {
 
 	/** @const */
 	private static $states = array(
-		'idle' => [
+		'idle' => array(
 			'type' => 'final',
-			'transitions' => [
+			'transitions' => array(
 				'start' => 'setup',
 				'error' => 'error'
-			]
-		],
-		'setup' => [
+			)
+		),
+		'setup' => array(
 			'type' => 'normal',
-			'transitions' => [
+			'transitions' => array(
 				'next' => 'fetching',
 				'cancel' => 'cancelled',
 				'error' => 'error'
-			]
-		],
-		'fetching' => [
+			)
+		),
+		'fetching' => array(
 			'type' => 'normal',
-			'transitions' => [
+			'transitions' => array(
 				'next' => 'transferring',
 				'cancel' => 'cancelled',
 				'error' => 'error'
-			]
-		],
-		'transferring' => [
+			)
+		),
+		'transferring' => array(
 			'type' => 'normal',
-			'transitions' => [
+			'transitions' => array(
 				'next' => 'wrapup',
 				'cancel' => 'cancelled',
 				'error' => 'error'
-			]
-		],
-		'wrapup' => [
+			)
+		),
+		'wrapup' => array(
 			'type' => 'normal',
-			'transitions' => [
+			'transitions' => array(
 				'next' => 'finished',
 				'cancel' => 'cancelled',
 				'error' => 'error'
-			]
-		],
-		'finished' => [
+			)
+		),
+		'finished' => array(
 			'type' => 'normal',
-			'transitions' => [
+			'transitions' => array(
 				'next' => 'idle',
 				'cancel' => 'cancel',
 				'error' => 'error'
-			]
-		],
-		'cancelled' => [
+			)
+		),
+		'cancelled' => array(
 			'type' => 'final',
-			'transitions' => [
+			'transitions' => array(
 				'start' => 'setup',
 				'error' => 'error'
-			]
-		],
-		'error' => [
+			)
+		),
+		'error' => array(
 			'type' => 'final',
-			'transitions' => [
+			'transitions' => array(
 				'start' => 'setup'
-			]
-		]
+			)
+		)
 	);
 
 	/**
