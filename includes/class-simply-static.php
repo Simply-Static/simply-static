@@ -210,7 +210,7 @@ class Simply_Static {
 	 */
 	public function enqueue_admin_styles() {
 		// Plugin admin CSS. Tack on plugin version.
-		wp_enqueue_style( self::SLUG . '-admin-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'css/admin.css', array(), time() );
+		wp_enqueue_style( self::SLUG . '-admin-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'css/admin.css', array(), self::VERSION );
 	}
 
 	/**
@@ -219,7 +219,7 @@ class Simply_Static {
 	 */
 	public function enqueue_admin_scripts() {
 		// Plugin admin CSS. Tack on plugin version.
-		wp_enqueue_script( self::SLUG . '-admin-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'js/admin.js', array(), time() );
+		wp_enqueue_script( self::SLUG . '-admin-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'js/admin.js', array(), self::VERSION );
 	}
 
 	/**
