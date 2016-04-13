@@ -79,6 +79,8 @@ class Simply_Static {
 			add_action( 'admin_enqueue_scripts', array( self::$instance, 'enqueue_admin_scripts' ) );
 			// Add the options page and menu item.
 			add_action( 'admin_menu', array( self::$instance, 'add_plugin_admin_menu' ), 2 );
+			// Handle upgrades
+			add_action( 'upgrader_process_complete', array( self::$instance, 'handle_upgrader_process_complete' ), 10, 2 );
 			// Handle AJAX requests
 			add_action( 'wp_ajax_generate_static_archive', array( self::$instance, 'generate_static_archive' ) );
 			add_action( 'wp_ajax_render_export_log', array( self::$instance, 'render_export_log' ) );
@@ -109,6 +111,40 @@ class Simply_Static {
 	 */
 	public function activate()
 	{
+		$this->do_upgrade();
+	}
+
+	/**
+	 * Handle WP notifications that something is getting upgraded
+	 * @param  Plugin_Upgrader $upgrader_object [description]
+	 * @param  array           $context_array   [description]
+	 * @return void
+	 */
+	public function handle_upgrader_process_complete( $upgrader_object, $context_array ) {
+		// We could be upgrading a few different things (plugins, themes, core).
+		if ( $context_array['action'] == 'update' && $context_array['type'] == 'plugin' ) {
+			// Okay, so we're definitely updating plugin(s). Now, which ones...
+			// Depending on WP version, this could be set a couple different ways.
+			if ( isset( $context_array['plugin'] ) ) {
+				if ( $context_array['plugin'] == SIST_BASENAME ) {
+					$this->do_upgrade();
+				}
+			} else if ( isset( $context_array['plugins'] ) ) {
+				foreach ( $context_array['plugins'] as $plugin_path ) {
+					if ( $plugin_path == SIST_BASENAME ) {
+						$this->do_upgrade();
+					}
+				}
+			} else {
+				// Well, this is unexpected. Better just to do an upgrade to be
+				// safe. It can't hurt to try to upgrade too many times. It'll
+				// definitely hurt not to do an upgrade when one is needed.
+				$this->do_upgrade();
+			}
+		}
+	}
+
+	private function do_upgrade() {
 		$version = $this->options->get( 'version' );
 
 		// Never installed?
@@ -123,7 +159,7 @@ class Simply_Static {
 				->set( 'delete_temp_files', '1' );
 		}
 
-		// perform migrations
+		// perform migrations if our saved version # doesn't match the current version
 		if ( version_compare( $version, self::VERSION, '<' ) ) {
 
 			// version 1.2 introduced the ability to specify additional files
@@ -132,12 +168,12 @@ class Simply_Static {
 					->set( 'additional_files', '' );
 			}
 
-			if ( version_compare( $version, '1.3.0', '<' ) ) {
+			if ( version_compare( $version, '1.3.1', '<' ) ) {
 				// version 1.3 changed the options key
 				if ( get_option( 'simply-static' ) ) {
-		            update_option( 'simply_static', get_option( 'simply-static' ) );
-		            delete_option( 'simply-static' );
-		        }
+					update_option( 'simply_static', get_option( 'simply-static' ) );
+					delete_option( 'simply-static' );
+				}
 
 				// and added a database table for tracking urls/progress
 				Simply_Static_Page::create_table();
@@ -148,7 +184,6 @@ class Simply_Static {
 				->set( 'version', self::VERSION )
 				->save();
 		}
-
 	}
 
 	/**

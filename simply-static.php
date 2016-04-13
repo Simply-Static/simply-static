@@ -13,6 +13,18 @@
  * Domain Path:       /languages
  */
 
+if ( ! defined( 'SIST_FILE' ) ) {
+	define( 'SIST_FILE', __FILE__ );
+}
+
+if ( ! defined( 'SIST_PATH' ) ) {
+	define( 'SIST_PATH', plugin_dir_path( SIST_FILE ) );
+}
+
+if ( ! defined( 'SIST_BASENAME' ) ) {
+	define( 'SIST_BASENAME', plugin_basename( SIST_FILE ) );
+}
+
 require plugin_dir_path( __FILE__ ) . 'includes/class-simply-static.php';
 
 Simply_Static::init( __FILE__ );
