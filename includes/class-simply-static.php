@@ -145,6 +145,12 @@ class Simply_Static {
 	}
 
 	private function do_upgrade() {
+		// version 1.3 changed the options key
+		if ( get_option( 'simply-static' ) ) {
+			update_option( 'simply_static', get_option( 'simply-static' ) );
+			delete_option( 'simply-static' );
+		}
+
 		$version = $this->options->get( 'version' );
 
 		// Never installed?
@@ -168,22 +174,16 @@ class Simply_Static {
 					->set( 'additional_files', '' );
 			}
 
-			if ( version_compare( $version, '1.3.1', '<' ) ) {
-				// version 1.3 changed the options key
-				if ( get_option( 'simply-static' ) ) {
-					update_option( 'simply_static', get_option( 'simply-static' ) );
-					delete_option( 'simply-static' );
-				}
-
-				// and added a database table for tracking urls/progress
+			if ( version_compare( $version, '1.3.2', '<' ) ) {
+				// version 1.3 added a database table for tracking urls/progress
 				Simply_Static_Page::create_table();
 			}
-
-			// always update the version and save
-			$this->options
-				->set( 'version', self::VERSION )
-				->save();
 		}
+
+		// always update the version and save
+		$this->options
+			->set( 'version', self::VERSION )
+			->save();
 	}
 
 	/**
