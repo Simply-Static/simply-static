@@ -274,7 +274,7 @@ class Simply_Static_Archive_Manager {
 			->set( 'archive_creator_id', $current_user->ID )
 			->set( 'archive_blog_id', $blog_id )
 			->set( 'archive_start_time', sist_formatted_datetime() )
-			->set( 'archive_end_time', NULL )
+			->set( 'archive_end_time', null )
 			->save();
 
 		$message = __( 'Setting up', Simply_Static::SLUG );
@@ -291,7 +291,7 @@ class Simply_Static_Archive_Manager {
 		}
 
 		// clear out any saved error messages on pages
-		Simply_Static_Page::update_all( 'error_message', NULL );
+		Simply_Static_Page::update_all( 'error_message', null );
 
 		// delete pages that we can't process
 		Simply_Static_Page::delete_where( 'http_status_code NOT IN (?)', implode( ',', Simply_Static_Archive_Creator::$processable_status_codes ) );

@@ -310,7 +310,7 @@ class Simply_Static_Archive_Creator {
 	 * @param Simply_Static_Page $static_page The Simply_Static_Page record
 	 * @param string             $content The content of the page we want to save
 	 * @param boolean            $is_html Is this an html page?
-	 * @return string|NULL                The file path of the saved file
+	 * @return string|null                The file path of the saved file
 	 */
 	protected function save_url_to_file( $static_page, $content, $is_html ) {
 		$url_parts = parse_url( $static_page->url );
@@ -361,7 +361,7 @@ class Simply_Static_Archive_Creator {
 			}
 		}
 
-		return NULL;
+		return null;
 	}
 
 	/**
