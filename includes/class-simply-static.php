@@ -85,6 +85,8 @@ class Simply_Static {
 			add_action( 'wp_ajax_generate_static_archive', array( self::$instance, 'generate_static_archive' ) );
 			add_action( 'wp_ajax_render_export_log', array( self::$instance, 'render_export_log' ) );
 			add_action( 'wp_ajax_render_activity_log', array( self::$instance, 'render_activity_log' ) );
+
+			self::$instance->activate();
 		}
 
 		return self::$instance;
@@ -98,53 +100,14 @@ class Simply_Static {
 	public static function init( $bootstrap_file )
 	{
 		$instance = self::instance();
-
-		// Activation
-		register_activation_hook( $bootstrap_file, array( $instance, 'activate' ) );
-
 		return $instance;
 	}
 
 	/**
-	 * Performs activation
+	 * Create settings and setup database
 	 * @return void
 	 */
-	public function activate()
-	{
-		$this->do_upgrade();
-	}
-
-	/**
-	 * Handle WP notifications that something is getting upgraded
-	 * @param  Plugin_Upgrader $upgrader_object [description]
-	 * @param  array           $context_array   [description]
-	 * @return void
-	 */
-	public function handle_upgrader_process_complete( $upgrader_object, $context_array ) {
-		// We could be upgrading a few different things (plugins, themes, core).
-		if ( $context_array['action'] == 'update' && $context_array['type'] == 'plugin' ) {
-			// Okay, so we're definitely updating plugin(s). Now, which ones...
-			// Depending on WP version, this could be set a couple different ways.
-			if ( isset( $context_array['plugin'] ) ) {
-				if ( $context_array['plugin'] == SIST_BASENAME ) {
-					$this->do_upgrade();
-				}
-			} else if ( isset( $context_array['plugins'] ) ) {
-				foreach ( $context_array['plugins'] as $plugin_path ) {
-					if ( $plugin_path == SIST_BASENAME ) {
-						$this->do_upgrade();
-					}
-				}
-			} else {
-				// Well, this is unexpected. Better just to do an upgrade to be
-				// safe. It can't hurt to try to upgrade too many times. It'll
-				// definitely hurt not to do an upgrade when one is needed.
-				$this->do_upgrade();
-			}
-		}
-	}
-
-	private function do_upgrade() {
+	private function activate() {
 		// version 1.3 changed the options key
 		if ( get_option( 'simply-static' ) ) {
 			update_option( 'simply_static', get_option( 'simply-static' ) );
