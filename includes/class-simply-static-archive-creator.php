@@ -101,6 +101,9 @@ class Simply_Static_Archive_Creator {
 	 * @return void
 	 */
 	private function handle_200_response( $static_page, $response ) {
+		// Replace the origin URL with the destination URL within the content
+		$response->replace_urls( $this->destination_scheme, $this->destination_host );
+
 		$content = $response->body;
 
 		// if the content is identical, move on to the next file
@@ -116,9 +119,6 @@ class Simply_Static_Archive_Creator {
 		foreach ( $urls as $url ) {
 			$this->set_url_found_on( $static_page, $url, $this->archive_start_time );
 		}
-
-		// Replace the origin URL with the destination URL within the content
-		$response->replace_urls( $this->destination_scheme, $this->destination_host );
 
 		// Save the page to our archive
 		$file_path = $this->save_url_to_file( $static_page, $content, $response->is_html() );
