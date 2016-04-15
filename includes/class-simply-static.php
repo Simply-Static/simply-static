@@ -9,7 +9,7 @@ class Simply_Static {
 	 * Plugin version
 	 * @var string
 	 */
-	const VERSION = '1.3.3';
+	const VERSION = '1.3.4';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
