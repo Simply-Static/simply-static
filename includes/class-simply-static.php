@@ -109,9 +109,13 @@ class Simply_Static {
 	 */
 	private function activate() {
 		// version 1.3 changed the options key
-		if ( get_option( 'simply-static' ) ) {
-			update_option( 'simply_static', get_option( 'simply-static' ) );
+		$old_ss_options = get_option( 'simply-static' );
+		if ( $old_ss_options ) {
+			update_option( 'simply_static', $old_ss_options );
 			delete_option( 'simply-static' );
+
+			// update Simply_Static_Options again to pull in updated data
+			$this->options = new Simply_Static_Options( self::SLUG );
 		}
 
 		$version = $this->options->get( 'version' );

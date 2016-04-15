@@ -419,24 +419,28 @@ class Simply_Static_Model {
 	 * Uses the static::$table_name and loops through all of the columns in
 	 * static::$columns and the indexes in static::$indexes to create a SQL
 	 * query for creating the table.
+	 *
+	 * http://wordpress.stackexchange.com/questions/78667/dbdelta-alter-table-syntax
 	 * @return void
 	 */
 	public static function create_table() {
 		global $wpdb;
 
 		$charset_collate = $wpdb->get_charset_collate();
-		$sql = 'CREATE TABLE ' . self::table_name() . ' (';
+		$sql = 'CREATE TABLE ' . self::table_name() . ' (' . "\n";
 
 		foreach ( static::$columns as $column_name => $column_definition ) {
-			$sql .= $column_name . ' ' . $column_definition . ',';
+			$sql .= $column_name . ' ' . $column_definition . ', ' . "\n";
 		}
 		foreach ( static::$indexes as $index ) {
-			$sql .= $index . ',';
+			$sql .= $index . ', ' . "\n";
 		}
 
+		// remove trailing newline
+		$sql = rtrim( $sql, "\n" );
 		// remove trailing comma
-		$sql = rtrim( $sql, ',' );
-		$sql .= ') ' . $charset_collate;
+		$sql = rtrim( $sql, ', ' );
+		$sql .= "\n" . ') ' . "\n" . $charset_collate;
 
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 		dbDelta( $sql );

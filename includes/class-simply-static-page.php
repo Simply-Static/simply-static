@@ -11,7 +11,7 @@ class Simply_Static_Page extends Simply_Static_Model {
 
 	/** @const */
 	protected static $columns = array(
-		'id'                  => 'BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY',
+		'id'                  => 'BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT',
 		'found_on_id'         => 'BIGINT(20) UNSIGNED NULL',
 		'url'                 => 'VARCHAR(255) NOT NULL',
 		'file_path'           => 'VARCHAR(255) NULL',
@@ -27,6 +27,7 @@ class Simply_Static_Page extends Simply_Static_Model {
 
 	/** @const */
 	protected static $indexes = array(
+		'PRIMARY KEY  (id)',
 		'KEY url (url)',
 		'KEY last_checked_at (last_checked_at)',
 		'KEY last_modified_at (last_modified_at)',
