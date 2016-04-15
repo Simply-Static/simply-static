@@ -79,8 +79,6 @@ class Simply_Static {
 			add_action( 'admin_enqueue_scripts', array( self::$instance, 'enqueue_admin_scripts' ) );
 			// Add the options page and menu item.
 			add_action( 'admin_menu', array( self::$instance, 'add_plugin_admin_menu' ), 2 );
-			// Handle upgrades
-			add_action( 'upgrader_process_complete', array( self::$instance, 'handle_upgrader_process_complete' ), 10, 2 );
 			// Handle AJAX requests
 			add_action( 'wp_ajax_generate_static_archive', array( self::$instance, 'generate_static_archive' ) );
 			add_action( 'wp_ajax_render_export_log', array( self::$instance, 'render_export_log' ) );
