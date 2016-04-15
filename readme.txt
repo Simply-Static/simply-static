@@ -12,9 +12,28 @@ Create a static copy of your WordPress site that you can serve on your favorite 
 
 == Description ==
 
-Do you love working with WordPress but wish it was easier to keep your site safe from hackers? What if you could set up your site to protect it from hackers and, as an added bonus, also make it load faster? Meet Simply Static.
+Simply Static is a static site generator for WordPress that helps you create a static site that you can serve separately from your WordPress installation. This provides a couple benefits. One, this allows you to keep WordPress in a secure location that no one can access but you. Two, your static site is going to be really, _really_ fast.
 
-Simply Static creates a static copy of your WordPress site. Keep your WordPress installation private and publish your static site for everyone else. And your static site will be incredibly fast since it's just collection of files with no server-side code or database to slow it down.
+= Security =
+
+WordPress is used by one in four websites[1]. That makes it a prime target for hackers. There are a lot of ways that your site can be compromised, but two-thirds of all hacks are caused by vulnerabilities in WordPress plugins, themes, and core files[2].
+
+Keeping WordPress secure requires constant vigilance. Exploits are being found for WordPress themes and plugins every day. Even WordPress itself has critical vulnerabilities from time to time. If you don’t stay on top of updates, your site *will* get hacked. It’s just a matter of when.
+
+But what if there was an easy way to keep WordPress secure? What if you could lock WordPress away somewhere where no one can get to it but you?
+
+With Simply Static you can put your WordPress installation in a secure location and publish a static site for the rest of the world to see. You can keep WordPress at a secret URL, protect it with .htaccess, or even put it behind a VPN. Simply Static will create static copies of all of the pages from your WordPress installation and replace the URLs to match where you’ll be hosting it.
+
+= Performance =
+
+Every time you visit a WordPress page it needs to perform database queries to fetch content and run PHP code to render the page. These actions take time to perform.
+
+With Simply Static, you’re creating a static copy of all of your WordPress pages. That time to create each page is incurred once, when Simply Static runs. When someone visits your static site they can instantly receive the page because Simply Static already did the work of creating it.
+
+Depending on the complexity of your site, theme, and plugins, using a static site can easily increase the performance of your site by 10x.
+
+[1] http://venturebeat.com/2015/11/08/wordpress-now-powers-25-of-the-web/
+[2] https://www.wordfence.com/blog/2016/03/attackers-gain-access-wordpress-sites/
 
 == Installation ==
 
