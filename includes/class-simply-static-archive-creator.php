@@ -101,6 +101,13 @@ class Simply_Static_Archive_Creator {
 	 * @return void
 	 */
 	private function handle_200_response( $static_page, $response ) {
+		// Fetch all URLs from the page and add them to the queue...
+		$urls = $response->extract_urls();
+
+		foreach ( $urls as $url ) {
+			$this->set_url_found_on( $static_page, $url, $this->archive_start_time );
+		}
+
 		// Replace the origin URL with the destination URL within the content
 		$response->replace_urls( $this->destination_scheme, $this->destination_host );
 
@@ -111,13 +118,6 @@ class Simply_Static_Archive_Creator {
 			// continue;
 		} else {
 			$static_page->set_content_hash( $content );
-		}
-
-		// Fetch all URLs from the page and add them to the queue...
-		$urls = $response->extract_urls();
-
-		foreach ( $urls as $url ) {
-			$this->set_url_found_on( $static_page, $url, $this->archive_start_time );
 		}
 
 		// Save the page to our archive
