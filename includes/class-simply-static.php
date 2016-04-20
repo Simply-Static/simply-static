@@ -195,9 +195,9 @@ class Simply_Static {
 
 		// Add main menu item
 		add_menu_page(
-			__( 'Simply Static Settings', self::SLUG ),
 			__( 'Simply Static', self::SLUG ),
-			'manage_options',
+			__( 'Simply Static', self::SLUG ),
+			'edit_posts',
 			self::SLUG,
 			array( self::$instance, 'display_generate_page' ),
 			self::ICON_SVG
@@ -207,7 +207,7 @@ class Simply_Static {
 			self::SLUG,
 			__( 'Generate Static Site', self::SLUG ),
 			__( 'Generate', self::SLUG ),
-			'manage_options',
+			'edit_posts',
 			self::SLUG,
 			array( self::$instance, 'display_generate_page' )
 		);
