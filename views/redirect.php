@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title><?php _e( 'Redirecting...', $this->slug ); ?></title>
+		<title><?php _e( 'Redirecting...', Simply_Static::SLUG ); ?></title>
 		<noscript>
 			<meta http-equiv="refresh" content="0;url=<?php echo $this->redirect_url; ?>">
 		</noscript>

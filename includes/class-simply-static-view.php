@@ -16,7 +16,7 @@ class Simply_Static_View {
 	 * View script extension
 	 * @var string
 	 */
-	const EXTENSION = '.phtml';
+	const EXTENSION = '.php';
 
 	/**
 	 * View variables array

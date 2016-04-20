@@ -1,0 +1,149 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Simply Static 1.3.5\n"
+"POT-Creation-Date: 2016-04-15 18:13+0100\n"
+"PO-Revision-Date: 2016-04-15 18:37+0100\n"
+"Last-Translator: \n"
+"Language-Team: Tips02 <translate@tips02.fr>\n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.7\n"
+"X-Poedit-KeywordsList: _;gettext;gettext_noop;__\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: includes/class-simply-static-archive-creator.php:275
+msgid "Unable to create ZIP archive"
+msgstr "Impossible de créer l'archive ZIP"
+
+#: includes/class-simply-static-archive-creator.php:296
+#, php-format
+msgid "Could not create file or directory: %s"
+msgstr "Impossible de créer le fichier ou le répertoire : %s"
+
+#: includes/class-simply-static-archive-creator.php:317
+#: includes/class-simply-static-archive-creator.php:324
+#, php-format
+msgid "Could not delete temporary file or directory: %s"
+msgstr "Impossible d'effacer les fichiers temporaires ou le répertoire : %s"
+
+#: includes/class-simply-static-url-fetcher.php:25
+#, php-format
+msgid "Attempting to fetch remote URL: %s"
+msgstr "Tentative de parcours de l'URL distante : %s"
+
+#: includes/class-simply-static-view.php:144
+#, php-format
+msgid "Can't find view template: %s"
+msgstr "Ne peut trouver le modèle de vue : %s"
+
+#: includes/class-simply-static-view.php:150
+#, php-format
+msgid "Can't find view layout: %s"
+msgstr "Ne peut trouver la mise en page : %s"
+
+#: includes/class-simply-static.php:196 includes/class-simply-static.php:215
+msgid "Simply Static Settings"
+msgstr "Paramètre Simply Static"
+
+#: includes/class-simply-static.php:197
+msgid "Simply Static"
+msgstr ""
+
+#: includes/class-simply-static.php:206
+msgid "Generate Static Site"
+msgstr "Générer les fichiers statiques du site"
+
+#: includes/class-simply-static.php:207
+msgid "Generate"
+msgstr "Générer"
+
+#: includes/class-simply-static.php:216
+msgid "Settings"
+msgstr "Paramètres"
+
+#: includes/class-simply-static.php:253
+msgid "ZIP archive created: "
+msgstr "Archive ZIP créée : "
+
+#: includes/class-simply-static.php:254
+msgid "Click here to download"
+msgstr "Cliquez-ici pour télécharger"
+
+#: includes/class-simply-static.php:267
+msgid "Static files copied to: "
+msgstr "Fichiers statiques copier dans : "
+
+#: includes/class-simply-static.php:296
+msgid "Settings saved."
+msgstr "Paramètres sauvegardés."
+
+#: includes/class-simply-static.php:360
+msgid "Destination URL cannot be blank"
+msgstr "Le répertoire de destination ne peut être vide"
+
+#: includes/class-simply-static.php:365
+msgid "Temporary Files Directory cannot be blank"
+msgstr "Le répertoire temporaire ne peut être vide"
+
+#: includes/class-simply-static.php:369
+#, php-format
+msgid "Temporary Files Directory is not writeable: %s"
+msgstr "Impossible d'écrire dans le répertoire des fichiers : %s"
+
+#: includes/class-simply-static.php:372
+#, php-format
+msgid "Temporary Files Directory does not exist: %s"
+msgstr "Le répertoire temporaire n'existe pas : %s"
+
+#: includes/class-simply-static.php:378
+#, php-format
+msgid ""
+"Your site does not have a permalink structure set. You can select one on <a "
+"href='%s'>the Permalink Settings page</a>."
+msgstr ""
+"Votre site n'a pas la structure des permaliens activée. Vous pouvez en "
+"sélectionner une sur <a href='%s'>la page des paramètres des Permaliens</a>."
+
+#: includes/class-simply-static.php:383
+msgid ""
+"Your server does not have the PHP zip extension enabled. Please visit <a "
+"href='http://www.php.net/manual/en/book.zip.php'>the PHP zip extension page</"
+"a> for more information on how to enable it."
+msgstr ""
+"Votre serveur n'a pas l'extension PHP zip activé. Rendez vous sur <a "
+"href='http://www.php.net/manual/en/book.zip.php'>la page PHP de l'extension "
+"zip</a> pour plus d'information pour l'activer."
+
+#: includes/class-simply-static.php:391
+msgid "Local Directory cannot be blank"
+msgstr "Le répertoire local ne peut pas être vide"
+
+#: includes/class-simply-static.php:395
+#, php-format
+msgid "Local Directory is not writeable: %s"
+msgstr "Il n'est pas possible d'écrire dans le répertoire local : %s"
+
+#: includes/class-simply-static.php:398
+#, php-format
+msgid "Local Directory does not exist: %s"
+msgstr "Le répertoire local n'existe pas : %s"
+
+#: includes/class-simply-static.php:406
+#, php-format
+msgid "An Additional URL does not start with <code>%s</code>: %s"
+msgstr "Une URL additionnelle ne commence pas par <code>%s</code>: %s"
+
+#: includes/class-simply-static.php:415
+#, php-format
+msgid ""
+"An Additional File or Directory is not located within an expected directory: "
+"%s<br />It should be in one of these directories (or a subdirectory):<br  /"
+"><code>%s</code><br /> <code>%s</code><br /> <code>%s</code>"
+msgstr ""
+"Un fichier ou un répertoire additionnel ne peut être localisé dans le "
+"répertoire attendu : %s<br/>Cela pourrait être un de ces répertoire  (ou "
+"sous-répertoire) : <br/><code>%s</code><br /> <code>%s</code><br /> <code>"
+"%s</code>"
