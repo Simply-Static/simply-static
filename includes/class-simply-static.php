@@ -143,6 +143,19 @@ class Simply_Static {
 				// version 1.3 added a database table for tracking urls/progress
 				Simply_Static_Page::create_table();
 			}
+
+			if ( version_compare( $version, '1.3.6', '<' ) ) {
+				// check for, and add, the WP emoji url if it's missing
+				$emoji_url = includes_url( 'js/wp-emoji-release.min.js' );
+				$additional_urls = $this->options->get( 'additional_urls' );
+				$urls_array = sist_string_to_array( $additional_urls );
+
+				if ( ! in_array( $emoji_url, $urls_array ) ) {
+					$additional_urls = $emoji_url . "\n" . $additional_urls;
+					$this->options->set( 'additional_urls', $additional_urls );
+				}
+
+			}
 		}
 
 		// always update the version and save
