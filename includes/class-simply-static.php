@@ -62,8 +62,7 @@ class Simply_Static {
 	 */
 	public static function instance()
 	{
-		if ( null === self::$instance )
-		{
+		if ( null === self::$instance ) {
 			self::$instance = new self();
 			self::$instance->includes();
 			self::$instance->options = new Simply_Static_Options( self::SLUG );
@@ -154,8 +153,12 @@ class Simply_Static {
 					$additional_urls = $emoji_url . "\n" . $additional_urls;
 					$this->options->set( 'additional_urls', $additional_urls );
 				}
-
 			}
+
+			if ( version_compare( $version, '1.4.0', '<' ) ) {
+				$this->options
+					->set( 'debugging_mode', '' );
+				}
 		}
 
 		// always update the version and save
@@ -179,6 +182,8 @@ class Simply_Static {
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-model.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-page.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-archive-manager.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-diagnostic.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-sql-permissions.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/misc-functions.php';
 	}
 
@@ -232,6 +237,15 @@ class Simply_Static {
 			'manage_options',
 			self::SLUG . '_settings',
 			array( self::$instance, 'display_settings_page' )
+		);
+
+		add_submenu_page(
+			self::SLUG,
+			__( 'Simply Static Diagnostics', self::SLUG ),
+			__( 'Diagnostics', self::SLUG ),
+			'manage_options',
+			self::SLUG . '_diagnostics',
+			array( self::$instance, 'display_diagnostics_page' )
 		);
 	}
 
@@ -348,6 +362,23 @@ class Simply_Static {
 			->render();
 	}
 
+	public function display_diagnostics_page() {
+		if ( isset( $_POST['_diagnostics'] ) ) {
+			$this->save_diagnostics();
+			$message = __( 'Settings saved.', self::SLUG );
+			$this->view->add_flash( 'updated', $message );
+		}
+
+		$diagnostic = new Simply_Static_Diagnostic( $this->options );
+		$results = $diagnostic->results;
+
+		$this->view
+			->set_layout( 'admin' )
+			->set_template( 'diagnostics' )
+			->assign( 'results', $results )
+			->render();
+	}
+
 	/**
 	 * Save the options from the options page
 	 * @return void
@@ -362,6 +393,16 @@ class Simply_Static {
 			->set( 'delivery_method', filter_input( INPUT_POST, 'delivery_method' ) )
 			->set( 'local_dir', sist_trailingslashit_unless_blank( filter_input( INPUT_POST, 'local_dir' ) ) )
 			->set( 'delete_temp_files', filter_input( INPUT_POST, 'delete_temp_files' ) )
+			->save();
+	}
+
+	/**
+	 * Save the options from the options page
+	 * @return void
+	 */
+	public function save_diagnostics() {
+		$this->options
+			->set( 'debugging_mode', filter_input( INPUT_POST, 'debugging_mode' ) )
 			->save();
 	}
 
@@ -409,11 +450,11 @@ class Simply_Static {
 			$errors['permalink_structure'][] = sprintf( __( "Your site does not have a permalink structure set. You can select one on <a href='%s'>the Permalink Settings page</a>.", self::SLUG ), admin_url( '/options-permalink.php' ) );
 		}
 
-		if ( $this->options->get( 'delivery_method' ) == 'zip' ) {
-			if ( ! extension_loaded('zip') ) {
-				$errors['delivery_method'][] = __( "Your server does not have the PHP zip extension enabled. Please visit <a href='http://www.php.net/manual/en/book.zip.php'>the PHP zip extension page</a> for more information on how to enable it.", self::SLUG );
-			}
-		}
+		// if ( $this->options->get( 'delivery_method' ) == 'zip' ) {
+		// 	if ( ! extension_loaded('zip') ) {
+		// 		$errors['delivery_method'][] = __( "Your server does not have the PHP zip extension enabled. Please visit <a href='http://www.php.net/manual/en/book.zip.php'>the PHP zip extension page</a> for more information on how to enable it.", self::SLUG );
+		// 	}
+		// }
 
 		if ( $this->options->get( 'delivery_method' ) == 'local' ) {
 			$local_dir = $this->options->get( 'local_dir' );
@@ -469,5 +510,13 @@ class Simply_Static {
 			readfile( path_join( self::$instance->options->get( 'temp_files_dir' ), $filename ) );
 			exit();
 		}
+	}
+
+	/**
+	 * Return whether or not debug mode is on
+	 * @return boolean Debug mode enabled?
+	 */
+	public function debug_on() {
+		return $this->options->get( 'debugging_mode' ) === '1';
 	}
 }

@@ -2,7 +2,7 @@
 	<?php $http_codes = array( '1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0 ); ?>
 	<?php $num_errors = count( array_filter( $this->static_pages, function($p) { return $p->error_message != false; } ) ); ?>
 
-	<table class='widefat'>
+	<table class='widefat striped'>
 		<thead>
 			<tr>
 				<th><?php _e( 'Code', Simply_Static::SLUG ); ?></th>
