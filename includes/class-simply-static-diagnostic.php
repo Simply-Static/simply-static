@@ -16,7 +16,7 @@ class Simply_Static_Diagnostic {
 	);
 
 	protected $description = array(
-		'Simply Static' => array(
+		'URLs' => array(
 			array( 'function' => 'is_destination_host_a_valid_url' )
 		),
 		'Filesystem' => array(
@@ -60,7 +60,7 @@ class Simply_Static_Diagnostic {
 
 		$additional_urls = sist_string_to_array( $this->options->get( 'additional_urls' ) );
 		foreach ( $additional_urls as $url ) {
-			$this->description['Simply Static'][] = array(
+			$this->description['URLs'][] = array(
 				'function' => 'is_additional_url_valid',
 				'param' => $url
 			);
@@ -68,7 +68,7 @@ class Simply_Static_Diagnostic {
 
 		$additional_files = sist_string_to_array( $this->options->get( 'additional_files' ) );
 		foreach ( $additional_files as $file ) {
-			$this->description['Simply Static'][] = array(
+			$this->description['Filesystem'][] = array(
 				'function' => 'is_additional_file_valid',
 				'param' => $file
 			);
@@ -81,7 +81,7 @@ class Simply_Static_Diagnostic {
 				$result = $this->$test['function']( $param );
 
 				if ( ! isset( $result['message'] ) ) {
-					$result['message'] = $result['test'] ? 'OK' : 'FAIL';
+					$result['message'] = $result['test'] ? __( 'OK', Simply_Static::SLUG ) : __( 'FAIL', Simply_Static::SLUG );
 				}
 
 				$this->results[ $title ][] = $result;
@@ -104,10 +104,10 @@ class Simply_Static_Diagnostic {
 		$label = sprintf( __( 'Checking if Additional URL <code>%s</code> is valid', Simply_Static::SLUG ), $url );
 		if ( filter_var( $url, FILTER_VALIDATE_URL ) === false ) {
 			$test = false;
-			$message = 'Not a valid URL';
+			$message = __( 'Not a valid URL', Simply_Static::SLUG );
 		} else if ( ! sist_is_local_url( $url ) ) {
 			$test = false;
-			$message = 'Not a local URL';
+			$message = __( 'Not a local URL', Simply_Static::SLUG );
 		} else {
 			$test = true;
 			$message = null;
@@ -121,11 +121,22 @@ class Simply_Static_Diagnostic {
 	}
 
 	public function is_additional_file_valid( $file ) {
-
 		$label = sprintf( __( 'Checking if Additional File/Dir <code>%s</code> is valid', Simply_Static::SLUG ), $file );
+		if ( stripos( $file, get_home_path() ) !== 0 && stripos( $file, WP_PLUGIN_DIR ) !== 0 && stripos( $file, WP_CONTENT_DIR ) !== 0 ) {
+			$test = false;
+			$message = __( 'Not a valid path', Simply_Static::SLUG );
+		} else if ( ! is_readable( $file ) ) {
+			$test = false;
+			$message = __( 'Not readable', Simply_Static::SLUG );;
+		} else {
+			$test = true;
+			$message = null;
+		}
+
 		return array(
 			'label' => $label,
-			'test' => stripos( $file, get_home_path() ) === 0 || stripos( $file, WP_PLUGIN_DIR ) === 0 || stripos( $file, WP_CONTENT_DIR ) === 0
+			'test' => $test,
+			'message' => $message
 		);
 	}
 
