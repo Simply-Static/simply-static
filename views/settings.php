@@ -74,9 +74,10 @@
 								<label for='local_dir'><?php _e( "Local Directory", Simply_Static::SLUG );?></label>
 							</th>
 							<td>
-								<?php $example_local_dir = plugin_dir_path( dirname( __FILE__ ) ); ?>
-								<input aria-describedby='localDirHelpBlock' type='text' id='localDir' name='local_dir' value='<?php echo esc_attr( $this->local_dir ) ?>' placeholder='<?php echo $example_local_dir; ?>' class='widefat' />
-								<p id='localDirHelpBlock' class='help-block'><?php _e( "This is the directory where your static files will be saved. The directory must exist and be writeable by the webserver.", Simply_Static::SLUG ); ?></p>
+								<?php $example_local_dir = trailingslashit( untrailingslashit( get_home_path() ) . '_static' ); ?>
+								<input aria-describedby='localDirHelpBlock' type='text' id='localDir' name='local_dir' value='<?php echo esc_attr( $this->local_dir ) ?>' class='widefat' />
+								<p id='localDirHelpBlock' class='help-block'><?php _e( "This is the directory where your static files will be saved. The directory must exist and be writeable by the webserver.", Simply_Static::SLUG ); ?><br />
+								<?php echo sprintf( __( "Example: <code>%s</code>", Simply_Static::SLUG ), $example_local_dir ); ?></p>
 							</td>
 						</tr>
 						<tr>
@@ -101,8 +102,9 @@
 							</th>
 							<td>
 								<?php $example_temp_files_dir = trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' );?>
-								<input aria-describedby='tempFilesDirHelpBlock' type='text' id='tempFilesDir' name='temp_files_dir' value='<?php echo esc_attr( $this->temp_files_dir ) ?>' placeholder='<?php echo $example_temp_files_dir; ?>'class='widefat' />
-								<p id='tempFilesDirHelpBlock' class='help-block'><?php _e( "Your static files (and ZIP archives, if generated) are temporarily saved to this directory. This directory must exist and be writeable.", Simply_Static::SLUG ); ?></p>
+								<input aria-describedby='tempFilesDirHelpBlock' type='text' id='tempFilesDir' name='temp_files_dir' value='<?php echo esc_attr( $this->temp_files_dir ) ?>' class='widefat' />
+								<p id='tempFilesDirHelpBlock' class='help-block'><?php _e( "Your static files (and ZIP archives, if generated) are temporarily saved to this directory. This directory must exist and be writeable.", Simply_Static::SLUG ); ?><br />
+								<?php echo sprintf( __( "Default: <code>%s</code>", Simply_Static::SLUG ), $example_temp_files_dir ); ?></p>
 							</td>
 						</tr>
 						<tr>
@@ -124,8 +126,8 @@
 							<td>
 								<textarea aria-describedby='additionalUrlsHelpBlock' class='widefat' name='additional_urls' id='additionalUrls' rows='5' cols='10'><?php echo esc_html( $this->additional_urls ) ?></textarea>
 								<p id='additionalUrlsHelpBlock' class='help-block'>
-									<?php echo sprintf( __( "Simply Static will create a static copy of any page it can find a link to, starting at %s. If you want to create static copies of pages or files that <em>aren't</em> linked to, add the URLs here (one per line). Examples: <code>%s</code> or <code>%s</code>", Simply_Static::SLUG ),
-									sist_origin_url(),
+									<?php echo sprintf( __( "Simply Static will create a static copy of any page it can find a link to, starting at %s. If you want to create static copies of pages or files that <em>aren't</em> linked to, add the URLs here (one per line).", Simply_Static::SLUG ), sist_origin_url() ); ?><br />
+									<?php echo sprintf( __( "Examples: <code>%s</code> or <code>%s</code>", Simply_Static::SLUG ),
 									sist_origin_url() . __( "/hidden-page", Simply_Static::SLUG ),
 									sist_origin_url() . __( "/images/secret.jpg", Simply_Static::SLUG ) ); ?>
 								</p>
@@ -138,7 +140,8 @@
 							<td>
 								<textarea aria-describedby='additionalFilesHelpBlock' class='widefat' name='additional_files' id='additionalFiles' rows='5' cols='10'><?php echo esc_html( $this->additional_files ) ?></textarea>
 								<p id='additionalFilesHelpBlock' class='help-block'>
-									<?php echo sprintf( __( "Sometimes you may want to include additional files (such as files referenced via AJAX) or directories. Add the paths to those files or directories here (one per line). Examples: <code>%s</code> or <code>%s</code>", Simply_Static::SLUG ),
+									<?php _e( "Sometimes you may want to include additional files (such as files referenced via AJAX) or directories. Add the paths to those files or directories here (one per line).", Simply_Static::SLUG ); ?><br />
+									<?php echo sprintf( __( "Examples: <code>%s</code> or <code>%s</code>", Simply_Static::SLUG ),
 									get_home_path() .  __( "additional-directory", Simply_Static::SLUG ),
 									trailingslashit( WP_CONTENT_DIR ) .  __( "fancy.pdf", Simply_Static::SLUG ) ); ?>
 								</p>
