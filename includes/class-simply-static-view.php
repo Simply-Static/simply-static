@@ -147,29 +147,11 @@ class Simply_Static_View {
 	}
 
 	/**
-	 * Check Simply_Static's system requirements and add errors as necessary
-	 * @return void
-	 */
-	private function check_for_errors() {
-
-		$errors = Simply_Static::instance()->check_system_requirements();
-
-		foreach ( $errors as $field ) {
-			foreach ( $field as $error ) {
-				$this->add_flash( 'error', $error );
-			}
-		}
-
-	}
-
-	/**
 	 * Renders the view script.
 	 *
 	 * @return Simply_Static_View|WP_Error
 	 */
 	public function render() {
-
-		$this->check_for_errors();
 
 		$file = $this->get_renderable_file();
 

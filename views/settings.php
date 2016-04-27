@@ -6,7 +6,7 @@
 
 <h1><?php _e( 'Simply Static &rsaquo; Settings', Simply_Static::SLUG ); ?></h1>
 
-<div class='wrap'>
+<div class='wrap' id='settingsPage'>
 
 		<form id='optionsForm' method='post' action=''>
 

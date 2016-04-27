@@ -17,26 +17,26 @@ class Simply_Static_Diagnostic {
 
 	protected $description = array(
 		'Simply Static' => array(
-			'is_destination_host_a_valid_url' => null
+			array( 'function' => 'is_destination_host_a_valid_url' )
 		),
 		'Filesystem' => array(
-			'is_temp_files_dir_readable' => null,
-			'is_temp_files_dir_writeable' => null
+			array( 'function' => 'is_temp_files_dir_readable' ),
+			array( 'function' => 'is_temp_files_dir_writeable' )
 		),
 		'WordPress' => array(
-			'is_permalink_structure_set' => null
+			array( 'function' => 'is_permalink_structure_set' )
 		),
 		'MySQL' => array(
-			'user_can_delete' => null,
-			'user_can_insert' => null,
-			'user_can_select' => null,
-			'user_can_create' => null,
-			'user_can_alter' => null,
-			'user_can_drop' => null
+			array( 'function' => 'user_can_delete' ),
+			array( 'function' => 'user_can_insert' ),
+			array( 'function' => 'user_can_select' ),
+			array( 'function' => 'user_can_create' ),
+			array( 'function' => 'user_can_alter' ),
+			array( 'function' => 'user_can_drop' )
 		),
 		'PHP' => array(
-			'php_version' => null,
-			'has_curl' => null
+			array( 'function' => 'php_version' ),
+			array( 'function' => 'has_curl' )
 		)
 	);
 
@@ -53,25 +53,32 @@ class Simply_Static_Diagnostic {
 
 		if ( $this->options->get( 'delivery_method' ) == 'local' ) {
 			$local_dir = $this->options->get( 'local_dir' );
-			$this->description['Filesystem']['is_local_dir_writeable'] = null;
+			$this->description['Filesystem'][] = array(
+				'function' => 'is_local_dir_writeable'
+			);
 		}
 
 		$additional_urls = sist_string_to_array( $this->options->get( 'additional_urls' ) );
 		foreach ( $additional_urls as $url ) {
-			$this->description['Simply Static']['is_additional_url_valid'] = $url;
+			$this->description['Simply Static'][] = array(
+				'function' => 'is_additional_url_valid',
+				'param' => $url
+			);
 		}
 
 		$additional_files = sist_string_to_array( $this->options->get( 'additional_files' ) );
 		foreach ( $additional_files as $file ) {
-			$this->description['Simply Static']['is_additional_file_valid'] = $file;
+			$this->description['Simply Static'][] = array(
+				'function' => 'is_additional_file_valid',
+				'param' => $file
+			);
 		}
 
 		foreach ( $this->description as $title => $tests ) {
 			$this->results[ $title ] = array();
-			foreach ( $tests as $function => $param ) {
-				error_log($function);
-				error_log($param);
-				$result = $this->$function( $param );
+			foreach ( $tests as $test ) {
+				$param = isset( $test['param'] ) ? $test['param'] : null;
+				$result = $this->$test['function']( $param );
 
 				if ( ! isset( $result['message'] ) ) {
 					$result['message'] = $result['test'] ? 'OK' : 'FAIL';
@@ -86,7 +93,7 @@ class Simply_Static_Diagnostic {
 		$destination_scheme = $this->options->get( 'destination_scheme' );
 		$destination_host = $this->options->get( 'destination_host' );
 		$destination_url = $destination_scheme . '://' . $destination_host;
-		$label = sprintf( __( 'Checking if Destination URL <code>%s</code> is a valid URL', Simply_Static::SLUG ), $destination_url );
+		$label = sprintf( __( 'Checking if Destination URL <code>%s</code> is valid', Simply_Static::SLUG ), $destination_url );
 		return array(
 			'label' => $label,
 			'test' => filter_var( $destination_url, FILTER_VALIDATE_URL ) !== false
@@ -100,7 +107,6 @@ class Simply_Static_Diagnostic {
 			$message = 'Not a valid URL';
 		} else if ( ! sist_is_local_url( $url ) ) {
 			$test = false;
-			// "does not start with <code>%s</code>: %s"
 			$message = 'Not a local URL';
 		} else {
 			$test = true;
@@ -115,16 +121,11 @@ class Simply_Static_Diagnostic {
 	}
 
 	public function is_additional_file_valid( $file ) {
-		// $errors['additional_urls'][] = sprintf( __( 'An Additional File or Directory is not located within an expected directory: %s<br />It should be in one of these directories (or a subdirectory):<br  /><code>%s</code><br /> <code>%s</code><br /> <code>%s</code>', self::SLUG ),
-		// $file,
-		// get_home_path(),
-		// WP_PLUGIN_DIR,
-		// WP_CONTENT_DIR );
 
 		$label = sprintf( __( 'Checking if Additional File/Dir <code>%s</code> is valid', Simply_Static::SLUG ), $file );
 		return array(
 			'label' => $label,
-			'test' => stripos( $file, get_home_path() ) !== 0 && stripos( $file, WP_PLUGIN_DIR ) !== 0 && stripos( $file, WP_CONTENT_DIR ) !== 0
+			'test' => stripos( $file, get_home_path() ) === 0 || stripos( $file, WP_PLUGIN_DIR ) === 0 || stripos( $file, WP_CONTENT_DIR ) === 0
 		);
 	}
 

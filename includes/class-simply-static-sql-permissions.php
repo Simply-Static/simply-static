@@ -47,7 +47,7 @@ class Simply_Static_Sql_Permissions {
 	public function __wakeup() {}
 
 	/**
-	 * Return an instance of the Simply Static plugin
+	 * Return an instance of Simply_Static_Sql_Permissions
 	 * @return Simply_Static_Sql_Permissions
 	 */
 	public static function instance() {
@@ -57,17 +57,23 @@ class Simply_Static_Sql_Permissions {
 			global $wpdb;
 			$rows = $wpdb->get_results( 'SHOW GRANTS FOR current_user()', ARRAY_N );
 
+			// Loop through all of the grants and set permissions to true where
+			// we're able to find them.
 			foreach ( $rows as $row ) {
 				preg_match( '/GRANT (.+) ON (.+) TO/', $row[0], $matches );
-				foreach ( explode( ',', $matches[1] ) as $permission ) {
-					$permission = str_replace( ' ', '_', trim( strtolower( $permission ) ) );
-					if ( $permission === 'all_privileges' ) {
-						foreach ( self::$instance->permissions as $key => $value ) {
-							self::$instance->permissions[$key] = true;
+				// Removing backticks and backslashes for easier matching
+				$db_name = preg_replace('/[\\\`]/', '', $matches[2]);
+				// Check for matches for all dbs (*.*) or this specific WP db
+				if ( in_array( $db_name, array( '*.*', $wpdb->dbname . '.*' ) ) ) {
+					foreach ( explode( ',', $matches[1] ) as $permission ) {
+						$permission = str_replace( ' ', '_', trim( strtolower( $permission ) ) );
+						if ( $permission === 'all_privileges' ) {
+							foreach ( self::$instance->permissions as $key => $value ) {
+								self::$instance->permissions[ $key ] = true;
+							}
 						}
-						break 2;
+						self::$instance->permissions[ $permission ] = true;
 					}
-					self::$instance->permissions[$permission] = true;
 				}
 			}
 		}

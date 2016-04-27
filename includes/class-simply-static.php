@@ -322,10 +322,6 @@ class Simply_Static {
 	 * @return void
 	 */
 	public function display_generate_page() {
-		if ( $this->check_system_requirements() ) {
-			$this->view->assign( 'system_requirements_check_failed', true );
-		}
-
 		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
 
 		$this->view
@@ -416,83 +412,6 @@ class Simply_Static {
 			false,
 			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
 		);
-	}
-
-	/**
-	 * Loads the plugin language files
-	 * @return array $errors associative array containing errored field names and an array of error messages
-	 */
-	public function check_system_requirements() {
-		global $wp_filesystem;
-
-		$errors = array();
-
-		$destination_host = $this->options->get( 'destination_host' );
-		if ( strlen( $destination_host ) === 0 ) {
-			$errors['destination_host'][] = __( 'Destination URL cannot be blank', self::SLUG );
-		}
-
-		$temp_files_dir = $this->options->get( 'temp_files_dir' );
-		if ( strlen( $temp_files_dir ) === 0 ) {
-			$errors['temp_files_dir'][] = __( 'Temporary Files Directory cannot be blank', self::SLUG );
-		} else {
-			if ( file_exists( $temp_files_dir ) ) {
-				if ( ! is_writeable( $temp_files_dir ) ) {
-					$errors['delivery_method'][] = sprintf( __( 'Temporary Files Directory is not writeable: %s', self::SLUG ), $temp_files_dir );
-				}
-			} else {
-				$errors['delivery_method'][] = sprintf( __( 'Temporary Files Directory does not exist: %s', self::SLUG ), $temp_files_dir );
-			}
-		}
-
-
-		if ( strlen( get_option( 'permalink_structure' ) ) === 0 ) {
-			$errors['permalink_structure'][] = sprintf( __( "Your site does not have a permalink structure set. You can select one on <a href='%s'>the Permalink Settings page</a>.", self::SLUG ), admin_url( '/options-permalink.php' ) );
-		}
-
-		// if ( $this->options->get( 'delivery_method' ) == 'zip' ) {
-		// 	if ( ! extension_loaded('zip') ) {
-		// 		$errors['delivery_method'][] = __( "Your server does not have the PHP zip extension enabled. Please visit <a href='http://www.php.net/manual/en/book.zip.php'>the PHP zip extension page</a> for more information on how to enable it.", self::SLUG );
-		// 	}
-		// }
-
-		if ( $this->options->get( 'delivery_method' ) == 'local' ) {
-			$local_dir = $this->options->get( 'local_dir' );
-
-			if ( strlen( $local_dir ) === 0 ) {
-				$errors['delivery_method'][] = __( 'Local Directory cannot be blank', self::SLUG );
-			} else {
-				if ( file_exists( $local_dir ) ) {
-					if ( ! is_writeable( $local_dir ) ) {
-						$errors['delivery_method'][] = sprintf( __( 'Local Directory is not writeable: %s', self::SLUG ), $local_dir );
-					}
-				} else {
-					$errors['delivery_method'][] = sprintf( __( 'Local Directory does not exist: %s', self::SLUG ), $local_dir );
-				}
-			}
-		}
-
-		$additional_urls = sist_string_to_array( $this->options->get( 'additional_urls' ) );
-		foreach ( $additional_urls as $url ) {
-			if ( ! sist_is_local_url( $url  ) ) {
-				$errors['additional_urls'][] = sprintf( __( 'An Additional URL does not start with <code>%s</code>: %s', self::SLUG ),
-				sist_origin_url(),
-				$url );
-			}
-		}
-
-		$additional_files = sist_string_to_array( $this->options->get( 'additional_files' ) );
-		foreach ( $additional_files as $file ) {
-			if ( stripos( $file, get_home_path() ) !== 0 && stripos( $file, WP_PLUGIN_DIR ) !== 0 && stripos( $file, WP_CONTENT_DIR ) !== 0  ) {
-				$errors['additional_urls'][] = sprintf( __( 'An Additional File or Directory is not located within an expected directory: %s<br />It should be in one of these directories (or a subdirectory):<br  /><code>%s</code><br /> <code>%s</code><br /> <code>%s</code>', self::SLUG ),
-				$file,
-				get_home_path(),
-				WP_PLUGIN_DIR,
-				WP_CONTENT_DIR );
-			}
-		}
-
-		return $errors;
 	}
 
 	/**
