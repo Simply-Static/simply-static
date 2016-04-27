@@ -67,6 +67,7 @@ class Simply_Static_Archive_Creator {
 
 			// If we get a WP_Error then somehow our request failed (e.g. space in URL)
 			if ( is_wp_error( $response ) ) {
+				$this->handle_fetch_error( $static_page );
 				continue;
 			}
 
@@ -92,6 +93,17 @@ class Simply_Static_Archive_Creator {
 		}
 
 		return array( $pages_processed, $total_pages );
+	}
+
+	/**
+	 * Process the response for a 200 response (success)
+	 * @param  Simply_Static_Page         $static_page Record to update
+	 * @return void
+	 */
+	private function handle_fetch_error( $static_page ) {
+		$static_page->http_status_code = null;
+		$static_page->last_checked_at = sist_formatted_datetime();
+		$static_page->save();
 	}
 
 	/**
