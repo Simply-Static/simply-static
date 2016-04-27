@@ -296,7 +296,7 @@ class Simply_Static_Archive_Manager {
 		Simply_Static_Page::update_all( 'error_message', null );
 
 		// delete pages that we can't process
-		Simply_Static_Page::delete_where( 'http_status_code NOT IN (?)', implode( ',', Simply_Static_Archive_Creator::$processable_status_codes ) );
+		Simply_Static_Page::delete_where( 'http_status_code IS NULL OR http_status_code NOT IN (?)', implode( ',', Simply_Static_Archive_Creator::$processable_status_codes ) );
 
 		// add origin url and additional urls/files to database
 		Simply_Static_Archive_Creator::add_origin_and_additional_urls_to_db( $this->options->get( 'additional_urls' ) );
