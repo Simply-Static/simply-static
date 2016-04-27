@@ -6,7 +6,7 @@
  * Note that in addition to extracting URLs this class also makes modifications
  * to the Simply_Static_Url_Response that is passed into it: URLs in the body of
  * the response are updated to be absolute URLs.
- * 
+ *
  * @package Simply_Static
  */
 class Simply_Static_Url_Extractor {
@@ -133,8 +133,12 @@ class Simply_Static_Url_Extractor {
 		// ensuring we don't throw visible errors during html loading
 		libxml_use_internal_errors( true );
 
-		// DOMDocument doesn't handle encoding correctly and garbles the output
-		$this->response->body = mb_convert_encoding( $this->response->body, 'HTML-ENTITIES', 'UTF-8' );
+		// DOMDocument doesn't handle encoding correctly and garbles the output.
+		// mb_convert_encoding is an extension though, so we're checking if it's
+		// available first.
+		if ( function_exists( 'mb_convert_encoding' ) ) {
+			$this->response->body = mb_convert_encoding( $this->response->body, 'HTML-ENTITIES', 'UTF-8' );
+		}
 		@$doc->loadHTML( $this->response->body );  // suppress warnings
 
 		libxml_use_internal_errors( false );

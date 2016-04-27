@@ -25,6 +25,10 @@
 	padding: 5px;
 }
 
+#sistContainer #activityLog .error-state {
+	color: #dc143c;
+}
+
 #sistContainer .spinner {
 	float: none;
 }
@@ -40,6 +44,10 @@
 
 #sistContainer #exportLog td.status-code {
 	min-width: 35px;
+}
+
+#sistContainer .button.hide {
+	display: none;
 }
 
 /* Options page */
@@ -65,8 +73,35 @@
 	color: #737373;
 }
 
-#sistContainer .button.hide {
-	display: none;
+/* Diagnostics page */
+
+#sistContainer #diagnosticsPage table.striped {
+	margin-bottom: 20px;
+}
+
+#sistContainer #diagnosticsPage td.label {
+	width: 75%;
+}
+
+#sistContainer #diagnosticsPage td.test {
+	font-weight: bold;
+	width: 25%;
+}
+
+#sistContainer #diagnosticsPage td.test.success {
+	color: #008000;
+}
+
+#sistContainer #diagnosticsPage td.test.success::before {
+	content: "\2713  ";
+}
+
+#sistContainer #diagnosticsPage td.test.error {
+	color: #dc143c;
+}
+
+#sistContainer #diagnosticsPage td.test.error::before {
+	content: "\2717  ";
 }
 
 /* Mailchimp Form CSS */

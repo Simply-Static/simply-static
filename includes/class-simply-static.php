@@ -62,8 +62,7 @@ class Simply_Static {
 	 */
 	public static function instance()
 	{
-		if ( null === self::$instance )
-		{
+		if ( null === self::$instance ) {
 			self::$instance = new self();
 			self::$instance->includes();
 			self::$instance->options = new Simply_Static_Options( self::SLUG );
@@ -154,8 +153,12 @@ class Simply_Static {
 					$additional_urls = $emoji_url . "\n" . $additional_urls;
 					$this->options->set( 'additional_urls', $additional_urls );
 				}
-
 			}
+
+			if ( version_compare( $version, '1.4.0', '<' ) ) {
+				$this->options
+					->set( 'debugging_mode', '' );
+				}
 		}
 
 		// always update the version and save
@@ -179,6 +182,8 @@ class Simply_Static {
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-model.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-page.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-archive-manager.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-diagnostic.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-sql-permissions.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/misc-functions.php';
 	}
 
@@ -232,6 +237,15 @@ class Simply_Static {
 			'manage_options',
 			self::SLUG . '_settings',
 			array( self::$instance, 'display_settings_page' )
+		);
+
+		add_submenu_page(
+			self::SLUG,
+			__( 'Simply Static Diagnostics', self::SLUG ),
+			__( 'Diagnostics', self::SLUG ),
+			'manage_options',
+			self::SLUG . '_diagnostics',
+			array( self::$instance, 'display_diagnostics_page' )
 		);
 	}
 
@@ -308,10 +322,6 @@ class Simply_Static {
 	 * @return void
 	 */
 	public function display_generate_page() {
-		if ( $this->check_system_requirements() ) {
-			$this->view->assign( 'system_requirements_check_failed', true );
-		}
-
 		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
 
 		$this->view
@@ -348,6 +358,23 @@ class Simply_Static {
 			->render();
 	}
 
+	public function display_diagnostics_page() {
+		if ( isset( $_POST['_diagnostics'] ) ) {
+			$this->save_diagnostics();
+			$message = __( 'Settings saved.', self::SLUG );
+			$this->view->add_flash( 'updated', $message );
+		}
+
+		$diagnostic = new Simply_Static_Diagnostic( $this->options );
+		$results = $diagnostic->results;
+
+		$this->view
+			->set_layout( 'admin' )
+			->set_template( 'diagnostics' )
+			->assign( 'results', $results )
+			->render();
+	}
+
 	/**
 	 * Save the options from the options page
 	 * @return void
@@ -366,6 +393,16 @@ class Simply_Static {
 	}
 
 	/**
+	 * Save the options from the options page
+	 * @return void
+	 */
+	public function save_diagnostics() {
+		$this->options
+			->set( 'debugging_mode', filter_input( INPUT_POST, 'debugging_mode' ) )
+			->save();
+	}
+
+	/**
 	 * Loads the plugin language files
 	 * @return void
 	 */
@@ -375,83 +412,6 @@ class Simply_Static {
 			false,
 			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
 		);
-	}
-
-	/**
-	 * Loads the plugin language files
-	 * @return array $errors associative array containing errored field names and an array of error messages
-	 */
-	public function check_system_requirements() {
-		global $wp_filesystem;
-
-		$errors = array();
-
-		$destination_host = $this->options->get( 'destination_host' );
-		if ( strlen( $destination_host ) === 0 ) {
-			$errors['destination_host'][] = __( 'Destination URL cannot be blank', self::SLUG );
-		}
-
-		$temp_files_dir = $this->options->get( 'temp_files_dir' );
-		if ( strlen( $temp_files_dir ) === 0 ) {
-			$errors['temp_files_dir'][] = __( 'Temporary Files Directory cannot be blank', self::SLUG );
-		} else {
-			if ( file_exists( $temp_files_dir ) ) {
-				if ( ! is_writeable( $temp_files_dir ) ) {
-					$errors['delivery_method'][] = sprintf( __( 'Temporary Files Directory is not writeable: %s', self::SLUG ), $temp_files_dir );
-				}
-			} else {
-				$errors['delivery_method'][] = sprintf( __( 'Temporary Files Directory does not exist: %s', self::SLUG ), $temp_files_dir );
-			}
-		}
-
-
-		if ( strlen( get_option( 'permalink_structure' ) ) === 0 ) {
-			$errors['permalink_structure'][] = sprintf( __( "Your site does not have a permalink structure set. You can select one on <a href='%s'>the Permalink Settings page</a>.", self::SLUG ), admin_url( '/options-permalink.php' ) );
-		}
-
-		if ( $this->options->get( 'delivery_method' ) == 'zip' ) {
-			if ( ! extension_loaded('zip') ) {
-				$errors['delivery_method'][] = __( "Your server does not have the PHP zip extension enabled. Please visit <a href='http://www.php.net/manual/en/book.zip.php'>the PHP zip extension page</a> for more information on how to enable it.", self::SLUG );
-			}
-		}
-
-		if ( $this->options->get( 'delivery_method' ) == 'local' ) {
-			$local_dir = $this->options->get( 'local_dir' );
-
-			if ( strlen( $local_dir ) === 0 ) {
-				$errors['delivery_method'][] = __( 'Local Directory cannot be blank', self::SLUG );
-			} else {
-				if ( file_exists( $local_dir ) ) {
-					if ( ! is_writeable( $local_dir ) ) {
-						$errors['delivery_method'][] = sprintf( __( 'Local Directory is not writeable: %s', self::SLUG ), $local_dir );
-					}
-				} else {
-					$errors['delivery_method'][] = sprintf( __( 'Local Directory does not exist: %s', self::SLUG ), $local_dir );
-				}
-			}
-		}
-
-		$additional_urls = sist_string_to_array( $this->options->get( 'additional_urls' ) );
-		foreach ( $additional_urls as $url ) {
-			if ( ! sist_is_local_url( $url  ) ) {
-				$errors['additional_urls'][] = sprintf( __( 'An Additional URL does not start with <code>%s</code>: %s', self::SLUG ),
-				sist_origin_url(),
-				$url );
-			}
-		}
-
-		$additional_files = sist_string_to_array( $this->options->get( 'additional_files' ) );
-		foreach ( $additional_files as $file ) {
-			if ( stripos( $file, get_home_path() ) !== 0 && stripos( $file, WP_PLUGIN_DIR ) !== 0 && stripos( $file, WP_CONTENT_DIR ) !== 0  ) {
-				$errors['additional_urls'][] = sprintf( __( 'An Additional File or Directory is not located within an expected directory: %s<br />It should be in one of these directories (or a subdirectory):<br  /><code>%s</code><br /> <code>%s</code><br /> <code>%s</code>', self::SLUG ),
-				$file,
-				get_home_path(),
-				WP_PLUGIN_DIR,
-				WP_CONTENT_DIR );
-			}
-		}
-
-		return $errors;
 	}
 
 	/**
@@ -469,5 +429,13 @@ class Simply_Static {
 			readfile( path_join( self::$instance->options->get( 'temp_files_dir' ), $filename ) );
 			exit();
 		}
+	}
+
+	/**
+	 * Return whether or not debug mode is on
+	 * @return boolean Debug mode enabled?
+	 */
+	public function debug_on() {
+		return $this->options->get( 'debugging_mode' ) === '1';
 	}
 }

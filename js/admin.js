@@ -75,7 +75,10 @@ jQuery( document ).ready( function( $ ) {
 	}
 
 	// where action is one of 'start', 'continue', 'cancel'
-	function send_action_to_archive_manager( action ) {
+	function send_action_to_archive_manager( action, handle_failure ) {
+		// always handle failures unless told otherwise
+		handle_failure = handle_failure || true;
+
 		var data = {
 			'action': 'generate_static_archive',
 			'perform': action
@@ -83,6 +86,12 @@ jQuery( document ).ready( function( $ ) {
 
 		$.post( window.ajaxurl, data, function( response ) {
 			handle_response_from_archive_manager( response );
+		} ).fail( function( response ) {
+			// Try the request again to pick up the error. If we get yet another
+			// error, don't make another request (infinite loop prevention).
+			if ( handle_failure ) {
+				send_action_to_archive_manager( action, false );
+			}
 		} );
 	}
 
