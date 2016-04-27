@@ -4,7 +4,7 @@ Donate link: http://codeofconduct.co/
 Tags: simply static, html, static, static site, static site generator, static website generator, performance, fast, optimization, availability, scaling, scalability, cdn, security, secure, zip, hardening
 Requires at least: 4.0
 Tested up to: 4.5
-Stable tag: 1.3.5
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -93,6 +93,16 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 2. This is what the Simply Static Generate page looks like after you've generated your static files. We'll show you exactly which files we made a static copy of.
 
 == Changelog ==
+
+= 1.4.0, April 26, 2016 =
+
+* New: French translations. Thanks Pierre!
+* New: Diagnostics page displays pass/fail for everything needed for SS to run correctly
+* New: Auto-adding WP's emoji url to Additional URLs
+* New: If a PHP error is encountered during processing it will be displayed
+* Improvement: If you can edit posts, you can generate a static site
+* Fix: Bad additional URLs could cause an infinite loop during static file generation
+* Fix: Unprocessable pages are now properly removed on subsequent static file runs
 
 = 1.3.5, April 14, 2016 =
 

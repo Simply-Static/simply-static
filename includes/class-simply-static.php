@@ -9,7 +9,7 @@ class Simply_Static {
 	 * Plugin version
 	 * @var string
 	 */
-	const VERSION = '1.3.5';
+	const VERSION = '1.4.0';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
@@ -143,7 +143,7 @@ class Simply_Static {
 				Simply_Static_Page::create_table();
 			}
 
-			if ( version_compare( $version, '1.3.6', '<' ) ) {
+			if ( version_compare( $version, '1.4.0', '<' ) ) {
 				// check for, and add, the WP emoji url if it's missing
 				$emoji_url = includes_url( 'js/wp-emoji-release.min.js' );
 				$additional_urls = $this->options->get( 'additional_urls' );
