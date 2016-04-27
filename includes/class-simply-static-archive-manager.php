@@ -91,6 +91,8 @@ class Simply_Static_Archive_Manager {
 				->set( 'archive_status_messages', array() )
 				->save();
 		}
+
+		register_shutdown_function( array( $this, 'shutdown_handler' ) );
 	}
 
 	/**
@@ -426,7 +428,8 @@ class Simply_Static_Archive_Manager {
 	 */
 	private function error_occurred( $wp_error ) {
 		$this->apply( 'error' );
-		$this->handle_error_state( $wp_error );
+		$message = sprintf( __( "Error: %s", Simply_Static::SLUG ), $wp_error->get_error_message() );
+		$this->save_status_message( $message );
 	}
 
 	/**
@@ -434,11 +437,25 @@ class Simply_Static_Archive_Manager {
 	 * @param  WP_Error $wp_error WP_Error to process
 	 * @return false              Do not do additional processing
 	 */
-	private function handle_error_state( $wp_error ) {
-		$message = sprintf( __( "Error: %s", Simply_Static::SLUG ), $wp_error->get_error_message() );
-		$this->save_status_message( $message );
-
+	private function handle_error_state() {
 		return false;
 	}
 
+	/**
+	 * Shutdown handler for fatal error reporting
+	 * @return void
+	 */
+	public function shutdown_handler() {
+		$error = error_get_last();
+		// only trigger on actual errors, not warnings or notices
+		if ( $error && in_array( $error['type'], array( E_ERROR, E_CORE_ERROR, E_USER_ERROR ) ) ) {
+			$error_message = '(' . $error['type'] . ') ' . $error['message'];
+			$error_message .= ' in <b>' . $error['file'] . '</b>';
+			$error_message .= ' on line <b>' . $error['line'] . '</b>';
+
+			$this->apply( 'error' );
+			$message = sprintf( __( "Error: %s", Simply_Static::SLUG ), $error_message );
+			$this->save_status_message( $message );
+		}
+	}
 }

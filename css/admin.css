@@ -25,6 +25,10 @@
 	padding: 5px;
 }
 
+#sistContainer #activityLog .error-state {
+	color: #dc143c;
+}
+
 #sistContainer .spinner {
 	float: none;
 }
