@@ -104,7 +104,7 @@ class Simply_Static_Archive_Manager {
 			$function_name = 'handle_ajax_' . $action;
 			$this->$function_name();
 		} catch ( Exception $e ) {
-			$this->error_occurred( new WP_Error( 'unexpected_error', __( 'An unknown error has occurred' ) ) );
+			$this->exception_occurred( $e );
 		}
 	}
 
@@ -422,13 +422,19 @@ class Simply_Static_Archive_Manager {
 		return false;
 	}
 
+	private function exception_occurred( $exception ) {
+		$this->apply( 'error' );
+		$message = sprintf( __( "An exception occurred: %s", Simply_Static::SLUG ), $exception->getMessage() );
+		$this->save_status_message( $message );
+	}
+
 	/**
 	 * Change to the error state and immediately process it
 	 * @return void
 	 */
 	private function error_occurred( $wp_error ) {
 		$this->apply( 'error' );
-		$message = sprintf( __( "Error: %s", Simply_Static::SLUG ), $wp_error->get_error_message() );
+		$message = sprintf( __( "An error occurred: %s", Simply_Static::SLUG ), $wp_error->get_error_message() );
 		$this->save_status_message( $message );
 	}
 
