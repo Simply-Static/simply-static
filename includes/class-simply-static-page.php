@@ -37,6 +37,32 @@ class Simply_Static_Page extends Simply_Static_Model {
 	/** @const */
 	protected static $primary_key = 'id';
 
+
+	/**
+	 * Get the number of pages for each group of status codes, e.g. 1xx, 2xx, 3xx
+	 * @return array Assoc. array of status code to number of pages, e.g. '2' => 183
+	 */
+	public static function get_http_status_codes_summary() {
+		global $wpdb;
+
+		$query = 'SELECT LEFT(http_status_code, 1) AS status, COUNT(*) AS count';
+		$query .= ' FROM ' . self::table_name();
+		$query .= ' GROUP BY LEFT(http_status_code, 1)';
+		$query .= ' ORDER BY status';
+
+		$rows = $wpdb->get_results(
+			$query,
+			ARRAY_A
+		);
+
+		$http_codes = array( '1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0 );
+		foreach ( $rows as $row ) {
+			$http_codes[ $row['status'] ] = $row['count'];
+		}
+
+		return $http_codes;
+	}
+
 	/**
 	 * Check if the hash for the content matches the prior hash for the page
 	 * @param  string  $content The content of the page/file

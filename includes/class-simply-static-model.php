@@ -92,7 +92,7 @@ class Simply_Static_Model {
 	 * Returns the name of the table
 	 * @return string The name of the table
 	 */
-	static private function table_name() {
+	static protected function table_name() {
 		global $wpdb;
 
 		return $wpdb->prefix . Simply_Static::SLUG . '_' . static::$table_name;
@@ -102,11 +102,19 @@ class Simply_Static_Model {
 	 * Returns an array of all records in the table
 	 * @return array|null Array of all records, or null if query failure
 	 */
-	public static function all() {
+	public static function all( $limit = null, $offset = null ) {
 		global $wpdb;
 
+		$query = 'SELECT * FROM ' . self::table_name();
+		if ( $limit ) {
+			$query .= ' LIMIT ' . $limit;
+		}
+		if ( $offset ) {
+			$query .= ' OFFSET ' . $offset;
+		}
+
 		$rows = $wpdb->get_results(
-			'SELECT * FROM ' . self::table_name(),
+			$query,
 			ARRAY_A
 		);
 

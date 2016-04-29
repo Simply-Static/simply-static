@@ -1,5 +1,4 @@
 <?php if ( is_array( $this->static_pages ) && count( $this->static_pages ) ) : ?>
-	<?php $http_codes = array( '1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0 ); ?>
 	<?php $num_errors = count( array_filter( $this->static_pages, function($p) { return $p->error_message != false; } ) ); ?>
 
 	<table class='widefat striped'>
@@ -26,14 +25,6 @@
 		?>
 
 		<?php foreach ( $this->static_pages as $static_page ) : ?>
-			<?php
-				$code = $static_page->http_status_code;
-				if ( $code !== null ) {
-					$digit = substr( $static_page->http_status_code, 0, 1 ); // get first digit of error code
-					$http_codes[ $digit ] += 1;
-				}
-			?>
-
 			<tr>
 				<td class='status-code'><?php echo $static_page->http_status_code; ?></td>
 				<td class='url'><a href='<?php echo $static_page->url; ?>'><?php echo $static_page->url; ?></a></td>
@@ -58,11 +49,11 @@
 	</table>
 
 
-	<p><?php _e( '1xx Informational:', Simply_Static::SLUG ); ?> <b><?php echo $http_codes['1']; ?></b> |
-		<?php _e( '2xx Success:', Simply_Static::SLUG ); ?> <b><?php echo $http_codes['2']; ?></b> |
-		<?php _e( '3xx Redirection:', Simply_Static::SLUG ); ?> <b><?php echo $http_codes['3']; ?></b> |
-		<?php _e( '4xx Client Error:', Simply_Static::SLUG ); ?> <b><?php echo $http_codes['4']; ?></b> |
-		<?php _e( '5xx Server Error:', Simply_Static::SLUG ); ?> <b><?php echo $http_codes['5']; ?></b> |
+	<p><?php _e( '1xx Informational:', Simply_Static::SLUG ); ?> <b><?php echo $this->http_status_codes['1']; ?></b> |
+		<?php _e( '2xx Success:', Simply_Static::SLUG ); ?> <b><?php echo $this->http_status_codes['2']; ?></b> |
+		<?php _e( '3xx Redirection:', Simply_Static::SLUG ); ?> <b><?php echo $this->http_status_codes['3']; ?></b> |
+		<?php _e( '4xx Client Error:', Simply_Static::SLUG ); ?> <b><?php echo $this->http_status_codes['4']; ?></b> |
+		<?php _e( '5xx Server Error:', Simply_Static::SLUG ); ?> <b><?php echo $this->http_status_codes['5']; ?></b> |
 		<?php echo sprintf( __( "More information on HTTP status codes is available on <a href='%s'>Wikipedia</a>.", Simply_Static::SLUG ), 'https://en.wikipedia.org/wiki/List_of_HTTP_status_codes' ); ?></p>
 	<hr />
 <?php endif ?>

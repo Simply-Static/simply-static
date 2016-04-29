@@ -39,6 +39,8 @@ jQuery( document ).ready( function( $ ) {
 
 	// -----------------------------------------------------------------------//
 
+	var STATIC_PAGES_PER_PAGE = 100; // max number of pages to show at once
+
 	// display the export and activity log on page load
 	display_export_log();
 	display_activity_log();
@@ -126,7 +128,9 @@ jQuery( document ).ready( function( $ ) {
 
 	function display_export_log() {
 		var data = {
-			'action': 'render_export_log'
+			'action': 'render_export_log',
+			'page': 1,
+			'per_page': STATIC_PAGES_PER_PAGE
 		};
 
 		$('#exportLog').html( "<span class='spinner is-active'></span>" );
