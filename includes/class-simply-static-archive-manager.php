@@ -292,11 +292,16 @@ class Simply_Static_Archive_Manager {
 			}
 		}
 
+		// TODO: Add a way for the user to perform this, optionally, so that we
+		// don't need to do it every time. Then enable the two commented-out
+		// sections below.
+		Simply_Static_Page::delete_where( '1 = ?', 1 );
+
 		// clear out any saved error messages on pages
-		Simply_Static_Page::update_all( 'error_message', null );
+		//Simply_Static_Page::update_all( 'error_message', null );
 
 		// delete pages that we can't process
-		Simply_Static_Page::delete_where( 'http_status_code IS NULL OR http_status_code NOT IN (?)', implode( ',', Simply_Static_Archive_Creator::$processable_status_codes ) );
+		//Simply_Static_Page::delete_where( 'http_status_code IS NULL OR http_status_code NOT IN (?)', implode( ',', Simply_Static_Archive_Creator::$processable_status_codes ) );
 
 		// add origin url and additional urls/files to database
 		Simply_Static_Archive_Creator::add_origin_and_additional_urls_to_db( $this->options->get( 'additional_urls' ) );
