@@ -1,6 +1,10 @@
 <?php if ( is_array( $this->static_pages ) && count( $this->static_pages ) ) : ?>
 	<?php $num_errors = count( array_filter( $this->static_pages, function($p) { return $p->error_message != false; } ) ); ?>
 
+	<div class='tablenav top'>
+		<?php include '_pagination.php'; ?>
+	</div>
+
 	<table class='widefat striped'>
 		<thead>
 			<tr>
@@ -48,6 +52,11 @@
 		</tbody>
 	</table>
 
+	<div class='tablenav bottom'>
+		<?php include '_pagination.php'; ?>
+	</div>
+
+	<hr />
 
 	<p><?php _e( '1xx Informational:', Simply_Static::SLUG ); ?> <b><?php echo $this->http_status_codes['1']; ?></b> |
 		<?php _e( '2xx Success:', Simply_Static::SLUG ); ?> <b><?php echo $this->http_status_codes['2']; ?></b> |
@@ -55,5 +64,5 @@
 		<?php _e( '4xx Client Error:', Simply_Static::SLUG ); ?> <b><?php echo $this->http_status_codes['4']; ?></b> |
 		<?php _e( '5xx Server Error:', Simply_Static::SLUG ); ?> <b><?php echo $this->http_status_codes['5']; ?></b> |
 		<?php echo sprintf( __( "More information on HTTP status codes is available on <a href='%s'>Wikipedia</a>.", Simply_Static::SLUG ), 'https://en.wikipedia.org/wiki/List_of_HTTP_status_codes' ); ?></p>
-	<hr />
+
 <?php endif ?>

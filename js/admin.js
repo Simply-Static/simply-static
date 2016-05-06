@@ -39,7 +39,7 @@ jQuery( document ).ready( function( $ ) {
 
 	// -----------------------------------------------------------------------//
 
-	var STATIC_PAGES_PER_PAGE = 100; // max number of pages to show at once
+	var STATIC_PAGES_PER_PAGE = 50; // max number of pages to show at once
 
 	// display the export and activity log on page load
 	display_export_log();
@@ -151,5 +151,29 @@ jQuery( document ).ready( function( $ ) {
 			$('#activityLog').html( response.html );
 		} );
 	}
+
+	// -- AJAX pagination ----------------------------------------------------//
+	$( '#sistContainer #exportLog' ).on( 'click', 'a.page-numbers', function( e ) {
+		e.preventDefault();
+
+		var url = $( this ).attr( 'href' );
+		var re = /page=(\d+)/;
+		var matches = re.exec( url );
+
+		var page = 1;
+		if ( matches ) {
+			page = matches[1];
+		}
+
+		var data = {
+			'action': 'render_export_log',
+			'page': page,
+			'per_page': STATIC_PAGES_PER_PAGE
+		};
+
+		$.post( window.ajaxurl, data, function( response ) {
+			$('#exportLog').html( response.html );
+		} );
+	} );
 
 } );

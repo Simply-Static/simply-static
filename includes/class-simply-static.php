@@ -305,8 +305,8 @@ class Simply_Static {
 	 */
 	public function render_export_log() {
 		$per_page = $_POST['per_page'];
-		$page = $_POST['page'];
-		$offset = ( intval( $page ) - 1 ) * intval( $per_page );
+		$current_page = $_POST['page'];
+		$offset = ( intval( $current_page ) - 1 ) * intval( $per_page );
 
 		$static_pages = Simply_Static_Page::all( $per_page, $offset );
 		$http_status_codes = Simply_Static_Page::get_http_status_codes_summary();
@@ -317,8 +317,9 @@ class Simply_Static {
 			->set_template( '_export_log' )
 			->assign( 'static_pages', $static_pages )
 			->assign( 'http_status_codes', $http_status_codes )
-			->assign( 'page' , $page )
+			->assign( 'current_page' , $current_page )
 			->assign( 'total_pages', $total_pages )
+			->assign( 'total_static_pages', $total_static_pages )
 			->render_to_string();
 
 		// send json response and die()

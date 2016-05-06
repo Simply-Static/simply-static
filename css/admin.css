@@ -50,6 +50,28 @@
 	display: none;
 }
 
+#sistContainer .tablenav .page-numbers {
+	padding: 6px 4px;
+	font-size: 13px;
+}
+
+#sistContainer .tablenav .page-numbers.prev, #sistContainer .tablenav .page-numbers.next {
+	padding: 3px 4px 6px;
+	font-size: 16px;
+}
+
+#sistContainer .tablenav .page-numbers.current {
+	display: inline-block;
+	min-width: 17px;
+	border: 1px solid #ccc;
+	padding: 6px 4px;
+	background: #e5e5e5;
+	font-size: 13px;
+	line-height: 1;
+	font-weight: 400;
+	text-align: center;
+}
+
 /* Options page */
 
 #sistContainer .tab-pane, tr.delivery-method {
