@@ -17,3 +17,4 @@ require $_tests_dir . '/includes/bootstrap.php';
 // Include helpers
 require_once 'helpers/class-simply-static-url-response-factory.php';
 require_once 'helpers/class-simply-static-url-extractor-factory.php';
+require_once 'helpers/class-simply-static-page-factory.php';

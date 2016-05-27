@@ -92,190 +92,20 @@ class Simply_Static_Model {
 	 * Returns the name of the table
 	 * @return string The name of the table
 	 */
-	static protected function table_name() {
+	public static function table_name() {
 		global $wpdb;
 
 		return $wpdb->prefix . Simply_Static::SLUG . '_' . static::$table_name;
 	}
 
 	/**
-	 * Returns an array of all records in the table
-	 * @return array|null Array of all records, or null if query failure
+	 * Used for finding models matching certain criteria
+	 * @return Simply_Static_Query
 	 */
-	public static function all( $limit = null, $offset = null ) {
-		global $wpdb;
-
-		$query = 'SELECT * FROM ' . self::table_name();
-		if ( $limit ) {
-			$query .= ' LIMIT ' . $limit;
-		}
-		if ( $offset ) {
-			$query .= ' OFFSET ' . $offset;
-		}
-
-		$rows = $wpdb->get_results(
-			$query,
-			ARRAY_A
-		);
-
-		if ( $rows === null ) {
-			return null;
-		} else {
-			$records = array();
-
-			foreach ( $rows as $row ) {
-				$records[] = self::initialize( $row );
-			}
-
-			return $records;
-		}
-	}
-
-	/**
-	 * Returns the number of pages in the table
-	 * @return int Count of the number of pages in the table
-	 */
-	public static function count() {
-		global $wpdb;
-
-		return $wpdb->get_var( 'SELECT COUNT(*) FROM ' .self::table_name() );
-	}
-
-	/**
-	 * Returns the number of pages in the table
-	 * @param  string     $query The SQL query to perform
-	 * @return int Count of the number of pages in the table
-	 */
-	public static function count_where( $query ) {
-		global $wpdb;
-
-		$count = $wpdb->get_var( 'SELECT COUNT(*) FROM ' .self::table_name() . ' WHERE ' . $query );
-
-		return $count;
-	}
-
-	/**
-	 * Delete records matching a where query, replacing ? with $args
-	 * @param  string     $query The SQL query to perform
-	 * @param  array      $args  Arguments to replace ?'s with
-	 * @return array|null        An array of records, or null if failure
-	 */
-	public static function delete_where( $query, $args ) {
-		global $wpdb;
-
-		$where_values = func_get_args();
-		array_shift( $where_values );
-
-		foreach ( $where_values as $value ) {
-			$query = preg_replace( '/\?/', self::value_placeholder( $value ), $query, 1 );
-		}
-
-		$rows = $wpdb->get_results(
-			$wpdb->prepare( 'DELETE FROM ' . self::table_name() . ' WHERE ' . $query, $where_values ),
-			ARRAY_A
-		);
-
-		if ( $rows === null ) {
-			return null;
-		} else {
-			$records = array();
-
-			foreach ( $rows as $row ) {
-				$records[] = self::initialize( $row );
-			}
-
-			return $records;
-		}
-	}
-
-	/**
-	 * Find records matching a where query, replacing ? with $args
-	 * @param  string     $query The SQL query to perform
-	 * @param  array      $args  Arguments to replace ?'s with
-	 * @return array|null        An array of records, or null if failure
-	 */
-	public static function where( $query, $args ) {
-		global $wpdb;
-
-		$where_values = func_get_args();
-		array_shift( $where_values );
-
-		foreach ( $where_values as $value ) {
-			$query = preg_replace( '/\?/', self::value_placeholder( $value ), $query, 1 );
-		}
-
-		$rows = $wpdb->get_results(
-			$wpdb->prepare( 'SELECT * FROM ' . self::table_name() . ' WHERE ' . $query, $where_values ),
-			ARRAY_A
-		);
-
-		if ( $rows === null ) {
-			return null;
-		} else {
-			$records = array();
-
-			foreach ( $rows as $row ) {
-				$records[] = self::initialize( $row );
-			}
-
-			return $records;
-		}
-	}
-
-	/**
-	 * Find and return an the first record matching the column name/value
-	 *
-	 * Example: find_by( 'id', 123 )
-	 * @param  string $column_name The name of the column to search on
-	 * @param  string $value       The value that the column should contain
-	 * @return static|null         An instance of the class, or null
-	 */
-	public static function find_by( $column_name, $value ) {
-		global $wpdb;
-
-		$attributes = $wpdb->get_row(
-			$wpdb->prepare( 'SELECT * FROM ' . self::table_name() . ' WHERE ' . self::where_sql( $column_name, $value ), $value ),
-			ARRAY_A
-		);
-
-		if ( $attributes === null ) {
-			return null;
-		} else {
-			return self::initialize( $attributes );
-		}
-	}
-
-	/**
-	 * Find or initialize the first record with the given column name/value
-	 *
-	 * Finds the first record with the given column name/value, or initializes
-	 * an instance of the model if one is not found.
-	 * @param  string $column_name The name of the column to search on
-	 * @param  string $value       The value that the column should contain
-	 * @return static              An instance of the class (might not exist in db yet)
-	 */
-	public static function find_or_initialize_by( $column_name, $value ) {
-		global $wpdb;
-
-		$obj = self::find_by( $column_name, $value );
-		if ( ! $obj ) {
-			$obj = self::initialize( array( $column_name => $value ) );
-		}
-		return $obj;
-	}
-
-	/**
-	 * Find the first record with the given column name/value, or create it
-	 * @param  string $column_name The name of the column to search on
-	 * @param  string $value       The value that the column should contain
-	 * @return static              An instance of the class (might not exist in db yet)
-	 */
-	public static function find_or_create_by( $column_name, $value ) {
-		$obj = self::find_or_initialize_by( $column_name, $value );
-		if ( ! $obj->exists() ) {
-			$obj->save();
-		}
-		return $obj;
+	public static function query()
+	{
+		$query = new Simply_Static_Query( get_called_class() );
+		return $query;
 	}
 
 	/**
@@ -290,25 +120,6 @@ class Simply_Static_Model {
 		}
 		$obj->attributes( $attributes );
 		return $obj;
-	}
-
-	/**
-	 * Update all records to set the column name equal to the value
-	 * @param  string $column_name The name of the column to search on
-	 * @param  string $value       The value that the column should contain
-	 * @return int|null            The number of rows updated, or null if failure
-	 */
-	public static function update_all( $column_name, $value ) {
-		global $wpdb;
-
-		if ( $value === null ) {
-			$sql = 'UPDATE ' . self::table_name() . ' SET ' . self::update_set_sql( $column_name, $value );
-		} else {
-			$sql = $wpdb->prepare( 'UPDATE ' . self::table_name() . ' SET ' . self::update_set_sql( $column_name, $value ), $value );
-		}
-
-		$rows_updated = $wpdb->query( $sql );
-		return $rows_updated;
 	}
 
 	/**
@@ -378,47 +189,6 @@ class Simply_Static_Model {
 	public function exists() {
 		$primary_key = static::$primary_key;
 		return $this->$primary_key !== null;
-	}
-
-	/**
-	 * Generate a SQL fragment for use in WHERE x=y
-	 * @param  string $column_name The name of the column
-	 * @param  mixed  $value       The value for the column
-	 * @return string              The SQL fragment to be used in WHERE x=y
-	 */
-	public static function where_sql( $column_name, $value ) {
-		$where_sql = ' ' . $column_name . ' ';
-		$where_sql .= ( $value === null ) ? 'IS ' : '= ';
-		$where_sql .= self::value_placeholder( $value );
-		return $where_sql;
-	}
-
-	/**
-	 * Generate a SQL fragment for use in UPDATE queries to SET x=y
-	 * @param  string $column_name The name of the column
-	 * @param  mixed  $value       The value for the column
-	 * @return string              The SQL fragment to be used in SET x=y
-	 */
-	public static function update_set_sql( $column_name, $value ) {
-		$where_sql = ' ' . $column_name . ' = ' . self::value_placeholder( $value );
-		return $where_sql;
-	}
-
-	/**
-	 * Return a placeholder (or NULL) based on the value for use in SQL queries
-	 * @param  mixed $value The value for the SQL query
-	 * @return string       The placeholder (or NULL) to be used in the SQL query
-	 */
-	public static function value_placeholder( $value ) {
-		if ( $value === null ) {
-			return 'NULL';
-		} elseif ( is_float( $value ) ) {
-			return '%f';
-		} elseif ( is_integer( $value ) ) {
-			return '%d';
-		} else {
-			return '%s';
-		}
 	}
 
 	/**

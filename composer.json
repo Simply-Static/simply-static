@@ -4,6 +4,9 @@
         "pclzip/pclzip": "^2.8",
         "pguardiario/phpuri": "dev-master"
     },
+    "require-dev": {
+        "fzaninotto/faker": "^1.6"
+    },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "config": {

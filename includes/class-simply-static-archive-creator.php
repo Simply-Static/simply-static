@@ -53,10 +53,12 @@ class Simply_Static_Archive_Creator {
 	public function fetch_pages() {
 		$batch_size = 10;
 
-		$static_pages = Simply_Static_Page::where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time );
+		$static_pages = Simply_Static_Page::query()
+			->where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time )
+			->find();
 		$pages_remaining = count( $static_pages );
 		$static_pages = array_slice( $static_pages, 0, $batch_size );
-		$total_pages = Simply_Static_Page::count();
+		$total_pages = Simply_Static_Page::query()->count();
 		$pages_processed = $total_pages - $pages_remaining;
 
 		while ( $static_page = array_shift( $static_pages ) ) {
@@ -219,7 +221,8 @@ class Simply_Static_Archive_Creator {
 	 * @return void
 	 */
 	private function set_url_found_on( $static_page, $child_url, $start_time ) {
-		$child_static_page = Simply_Static_Page::find_or_create_by( 'url' , $child_url );
+		$child_static_page = Simply_Static_Page::query()
+			->find_or_create_by( 'url' , $child_url );
 		if ( $child_static_page->found_on_id === null || $child_static_page->updated_at < $start_time ) {
 			$child_static_page->found_on_id = $static_page->id;
 			$child_static_page->save();
@@ -259,10 +262,16 @@ class Simply_Static_Archive_Creator {
 
 		// TODO: also check for recent modification time
 		// last_modified_at > ? AND
-		$static_pages = Simply_Static_Page::where( "file_path IS NOT NULL AND file_path != '' AND ( last_transferred_at < ? OR last_transferred_at IS NULL )", $this->archive_start_time );
+		$static_pages = Simply_Static_Page::query()
+			->where( "file_path IS NOT NULL" )
+			->where( "file_path != ''" )
+			->where( "( last_transferred_at < ? OR last_transferred_at IS NULL )", $this->archive_start_time )
+			->find();
 		$pages_remaining = count( $static_pages );
 		$static_pages = array_slice( $static_pages, 0, $batch_size );
-		$total_pages = Simply_Static_Page::count_where( "file_path IS NOT NULL AND file_path != ''" );
+		$total_pages = Simply_Static_Page::query()
+			->where( "file_path IS NOT NULL AND file_path != ''" )
+			->count();
 		$pages_processed = $total_pages - $pages_remaining;
 
 		while ( $static_page = array_shift( $static_pages ) ) {
@@ -386,7 +395,8 @@ class Simply_Static_Archive_Creator {
 			sist_string_to_array( $additional_urls )
 		) );
 		foreach ( $urls as $url ) {
-			$static_page = Simply_Static_Page::find_or_initialize_by( 'url', $url );
+			$static_page = Simply_Static_Page::query()
+				->find_or_initialize_by( 'url', $url );
 			// setting to 0 for "not found anywhere" since it's either the origin
 			// or something the user specified
 			$static_page->found_on_id = 0;
@@ -408,7 +418,8 @@ class Simply_Static_Archive_Creator {
 			if ( file_exists( $item ) ) {
 				if ( is_file( $item ) ) {
 					$url = self::convert_path_to_url( $item );
-					$static_page = Simply_Static_Page::find_or_create_by( 'url', $url );
+					$static_page = Simply_Static_Page::query()
+						->find_or_create_by( 'url', $url );
 					// setting found_on_id to 0 since this was user-specified
 					$static_page->found_on_id = 0;
 					$static_page->save();
@@ -417,7 +428,8 @@ class Simply_Static_Archive_Creator {
 
 					foreach ( $iterator as $file_name => $file_object ) {
 						$url = self::convert_path_to_url( $file_name );
-						$static_page = Simply_Static_Page::find_or_initialize_by( 'url', $url );
+						$static_page = Simply_Static_Page::query()
+							->find_or_initialize_by( 'url', $url );
 						$static_page->found_on_id = 0;
 						$static_page->save();
 					}

@@ -179,6 +179,7 @@ class Simply_Static {
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-fetcher.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-response.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-archive-creator.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-query.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-model.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-page.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-archive-manager.php';
@@ -308,7 +309,10 @@ class Simply_Static {
 		$current_page = $_POST['page'];
 		$offset = ( intval( $current_page ) - 1 ) * intval( $per_page );
 
-		$static_pages = Simply_Static_Page::all( $per_page, $offset );
+		$static_pages = Simply_Static_Page::query()
+			->limit( $per_page )
+			->offset( $offset )
+			->find();
 		$http_status_codes = Simply_Static_Page::get_http_status_codes_summary();
 		$total_static_pages = array_sum( array_values( $http_status_codes ) );
 		$total_pages = ceil( $total_static_pages / $per_page );

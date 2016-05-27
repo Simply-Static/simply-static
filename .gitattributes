@@ -15,3 +15,4 @@ static-files/* export-ignore
 node_modules export-ignore
 Gruntfile.js export-ignore
 package.json export-ignore
+vendor/fzaninotto/faker export-ignore
