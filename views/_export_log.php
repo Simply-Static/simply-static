@@ -1,4 +1,5 @@
 <?php if ( is_array( $this->static_pages ) && count( $this->static_pages ) ) : ?>
+
 	<?php $num_errors = count( array_filter( $this->static_pages, function($p) { return $p->error_message != false; } ) ); ?>
 
 	<div class='tablenav top'>
@@ -30,7 +31,10 @@
 
 		<?php foreach ( $this->static_pages as $static_page ) : ?>
 			<tr>
-				<td class='status-code'><?php echo $static_page->http_status_code; ?></td>
+				<?php $processable = in_array( $static_page->http_status_code, Simply_Static_Archive_Creator::$processable_status_codes ); ?>
+				<td class='status-code <?php if ( ! $processable ) { echo 'unprocessable'; } ?>'>
+					<?php echo $static_page->http_status_code; ?>
+				</td>
 				<td class='url'><a href='<?php echo $static_page->url; ?>'><?php echo $static_page->url; ?></a></td>
 				<?php $parent_static_page = find_first_match( $this->static_pages, $static_page->found_on_id ); ?>
 				<td class='found-on'>
@@ -55,14 +59,5 @@
 	<div class='tablenav bottom'>
 		<?php include '_pagination.php'; ?>
 	</div>
-
-	<hr />
-
-	<p><?php _e( '1xx Informational:', Simply_Static::SLUG ); ?> <b><?php echo $this->http_status_codes['1']; ?></b> |
-		<?php _e( '2xx Success:', Simply_Static::SLUG ); ?> <b><?php echo $this->http_status_codes['2']; ?></b> |
-		<?php _e( '3xx Redirection:', Simply_Static::SLUG ); ?> <b><?php echo $this->http_status_codes['3']; ?></b> |
-		<?php _e( '4xx Client Error:', Simply_Static::SLUG ); ?> <b><?php echo $this->http_status_codes['4']; ?></b> |
-		<?php _e( '5xx Server Error:', Simply_Static::SLUG ); ?> <b><?php echo $this->http_status_codes['5']; ?></b> |
-		<?php echo sprintf( __( "More information on HTTP status codes is available on <a href='%s'>Wikipedia</a>.", Simply_Static::SLUG ), 'https://en.wikipedia.org/wiki/List_of_HTTP_status_codes' ); ?></p>
 
 <?php endif ?>
