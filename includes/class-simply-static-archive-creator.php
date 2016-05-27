@@ -55,9 +55,11 @@ class Simply_Static_Archive_Creator {
 
 		$static_pages = Simply_Static_Page::query()
 			->where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time )
+			->limit( $batch_size )
 			->find();
-		$pages_remaining = count( $static_pages );
-		$static_pages = array_slice( $static_pages, 0, $batch_size );
+		$pages_remaining = Simply_Static_Page::query()
+			->where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time )
+			->count();
 		$total_pages = Simply_Static_Page::query()->count();
 		$pages_processed = $total_pages - $pages_remaining;
 
