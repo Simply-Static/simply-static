@@ -164,18 +164,20 @@ class Simply_Static_Url_Extractor {
 						$extracted_urls = array();
 						// srcset is a fair bit different from most html
 						// attributes, so it gets it's own processsing
+						$attribute_value = $element->getAttribute( $attribute_name );
 						if ( $attribute_name === 'srcset' ) {
-							$extracted_urls = $this->extract_urls_from_srcset( $element->getAttribute( $attribute_name ) );
+							$extracted_urls = $this->extract_urls_from_srcset( $attribute_value );
 						} else {
-							$extracted_urls[] = $element->getAttribute( $attribute_name );
+							$extracted_urls[] = $attribute_value;
 						}
 
 						foreach ( $extracted_urls as $extracted_url ) {
 							if ( $extracted_url !== '' ) {
 								$absolute_extracted_url = $this->add_to_extracted_urls( $extracted_url );
-								$element->setAttribute( $attribute_name, $absolute_extracted_url );
+								$attribute_value = str_replace( $extracted_url, $absolute_extracted_url, $attribute_value );
 							}
 						}
+						$element->setAttribute( $attribute_name, $attribute_value );
 					}
 				}
 			}
