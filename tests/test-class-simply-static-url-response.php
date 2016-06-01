@@ -51,21 +51,21 @@ class Simply_Static_Url_Response_Test extends WP_UnitTestCase {
 		$response = Simply_Static_Url_Response_Factory::build( 'html', $content, self::URL );
 		$response->replace_urls( $destination_scheme, $destination_host );
 
-		$this->assertEquals( $destination_scheme . '://' . $destination_host, $response->body );
+		$this->assertEquals( $destination_scheme . '://' . $destination_host, $response->get_body() );
 	}
 
 	public function test_extractor_updates_urls_in_html() {
 		$content = "<!DOCTYPE html><html><body><a href='/one.htm'>one</a></body></html>";
 		$response = Simply_Static_Url_Response_Factory::build( 'html', $content, self::URL );
 		$response->extract_urls();
-		$this->assertEquals( "<!DOCTYPE html>\n<html><body><a href=\"http://example.org/one.htm\">one</a></body></html>\n", $response->body );
+		$this->assertEquals( "<!DOCTYPE html>\n<html><body><a href=\"http://example.org/one.htm\">one</a></body></html>\n", $response->get_body() );
 	}
 
 	public function test_extractor_updates_urls_in_css() {
 		$content = "body { background-image: url('/two.gif'); }";
 		$response = Simply_Static_Url_Response_Factory::build( 'css', $content, self::URL );
 		$response->extract_urls();
-		$this->assertEquals( "body { background-image: url('http://example.org/two.gif'); }", $response->body );
+		$this->assertEquals( "body { background-image: url('http://example.org/two.gif'); }", $response->get_body() );
 	}
 
 }

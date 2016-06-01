@@ -20,10 +20,10 @@ class Simply_Static_Url_Response {
 	public $headers = array();
 
 	/**
-	 * The body content of the response
+	 * The file where the body content is stored
 	 * @var string
 	 */
-	public $body = '';
+	public $filename = '';
 
 	/**
 	 * The code from the response, e.g. 200
@@ -44,7 +44,7 @@ class Simply_Static_Url_Response {
 	public function __construct( $url, $response ) {
 		$this->url = $url;
 		$this->headers = $response['headers'];
-		$this->body = $response['body'];
+		$this->filename = $response['filename'];
 		$this->code = $response['response']['code'];
 		$this->message = $response['response']['message'];
 	}
@@ -82,6 +82,14 @@ class Simply_Static_Url_Response {
 	 */
 	public function get_redirect_url() {
 		return isset( $this->headers['location'] ) ? $this->headers['location'] : '';
+	}
+
+	public function get_body() {
+		return file_get_contents( $this->filename );
+	}
+
+	public function save_body( $content ) {
+		return file_put_contents( $this->filename, $content );
 	}
 
 	// /**
@@ -122,10 +130,10 @@ class Simply_Static_Url_Response {
 			$destination_url = $destination_scheme . '://' . $destination_host;
 
 			// replace any instance of the origin url, whether it starts with https://, http://, or //
-			$response_body = preg_replace( '/(https?:)?\/\/' . addcslashes( sist_origin_host(), '/' ) . '/i', $destination_url, $this->body );
+			$response_body = preg_replace( '/(https?:)?\/\/' . addcslashes( sist_origin_host(), '/' ) . '/i', $destination_url, $this->get_body() );
 			// also replace wp_json_encode'd urls, as used by WP's `concatemoji`
 			$response_body = str_replace( addcslashes( sist_origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
-			$this->body = $response_body;
+			$this->save_body( $response_body );
 		}
 	}
 }

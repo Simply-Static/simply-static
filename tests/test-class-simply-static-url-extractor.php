@@ -181,7 +181,7 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 			$response = Simply_Static_Url_Response_Factory::build( 'html', $content_before, self::URL );
 			$extractor = Simply_Static_Url_Extractor_Factory::build_from_response( $response );
 			$extractor->extract_urls();
-			$this->assertContains( $content_after, $response->body );
+			$this->assertContains( $content_after, $response->get_body() );
 
 		}
 

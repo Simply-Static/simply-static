@@ -114,11 +114,11 @@ class Simply_Static_Url_Extractor {
 	 */
 	public function extract_urls() {
 		if ( $this->response->is_html() ) {
-			$this->response->body = $this->extract_urls_from_html();
+			$this->response->save_body( $this->extract_urls_from_html() );
 		}
 
 		if ( $this->response->is_css() ) {
-			$this->response->body = $this->extract_urls_from_css( $this->response->body );
+			$this->response->save_body( $this->extract_urls_from_css( $this->response->get_body() ) );
 		}
 
 		return array_unique( $this->extracted_urls );
@@ -137,9 +137,9 @@ class Simply_Static_Url_Extractor {
 		// mb_convert_encoding is an extension though, so we're checking if it's
 		// available first.
 		if ( function_exists( 'mb_convert_encoding' ) ) {
-			$this->response->body = mb_convert_encoding( $this->response->body, 'HTML-ENTITIES', 'UTF-8' );
+			$this->response->save_body( mb_convert_encoding( $this->response->get_body(), 'HTML-ENTITIES', 'UTF-8' ) );
 		}
-		@$doc->loadHTML( $this->response->body );  // suppress warnings
+		@$doc->loadHTML( $this->response->get_body() );  // suppress warnings
 
 		libxml_use_internal_errors( false );
 		// get all elements on the page

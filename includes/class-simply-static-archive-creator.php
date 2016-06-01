@@ -67,7 +67,8 @@ class Simply_Static_Archive_Creator {
 
 			$current_url = $static_page->url;
 
-			$response = Simply_Static_Url_Fetcher::fetch( $current_url );
+			$filename = $this->get_filename_for_static_page( $static_page );
+			$response = Simply_Static_Url_Fetcher::fetch( $current_url, $filename );
 
 			// If we get a WP_Error then somehow our request failed (e.g. space in URL)
 			if ( is_wp_error( $response ) ) {
@@ -125,21 +126,18 @@ class Simply_Static_Archive_Creator {
 		}
 
 		// Replace the origin URL with the destination URL within the content
+		// TODO: only do this on html or css
 		$response->replace_urls( $this->destination_scheme, $this->destination_host );
 
-		$content = $response->body;
+		$file_path = str_replace( $this->archive_dir, '', $response->filename );
+		$static_page->file_path = $file_path;
+		$sha1 = sha1_file( $response->filename );
 
 		// if the content is identical, move on to the next file
-		if ( $static_page->is_content_identical( $content ) ) {
+		if ( $static_page->is_content_identical( $sha1 ) ) {
 			// continue;
 		} else {
-			$static_page->set_content_hash( $content );
-		}
-
-		// Save the page to our archive
-		$file_path = $this->save_url_to_file( $static_page, $content, $response->is_html() );
-		if ( $file_path ) {
-			$static_page->file_path = $file_path;
+			$static_page->set_content_hash( $sha1 );
 		}
 
 		$static_page->save();
@@ -194,16 +192,18 @@ class Simply_Static_Archive_Creator {
 					->assign( 'redirect_url', $redirect_url )
 					->render_to_string();
 
-				// if the content is identical, move on to the next file
-				if ( $static_page->is_content_identical( $content ) ) {
-					// continue;
-				} else {
-					$static_page->set_content_hash( $content );
+				$filename = $this->save_static_page_content_to_file( $static_page, $content, true );
+				if ( $filename ) {
+					$static_page->file_path = $filename;
 				}
 
-				$file_path = $this->save_url_to_file( $static_page, $content, $response->is_html() );
-				if ( $file_path ) {
-					$static_page->file_path = $file_path;
+				$sha1 = sha1_file( $this->archive_dir . $filename );
+
+				// if the content is identical, move on to the next file
+				if ( $static_page->is_content_identical( $sha1 ) ) {
+					// continue;
+				} else {
+					$static_page->set_content_hash( $sha1 );
 				}
 
 				$static_page->save();
@@ -268,9 +268,9 @@ class Simply_Static_Archive_Creator {
 			->where( "file_path IS NOT NULL" )
 			->where( "file_path != ''" )
 			->where( "( last_transferred_at < ? OR last_transferred_at IS NULL )", $this->archive_start_time )
+			->limit( $batch_size )
 			->find();
 		$pages_remaining = count( $static_pages );
-		$static_pages = array_slice( $static_pages, 0, $batch_size );
 		$total_pages = Simply_Static_Page::query()
 			->where( "file_path IS NOT NULL AND file_path != ''" )
 			->count();
@@ -332,10 +332,50 @@ class Simply_Static_Archive_Creator {
 	 * Save the contents of a page to a file in our archive directory
 	 * @param Simply_Static_Page $static_page The Simply_Static_Page record
 	 * @param string             $content The content of the page we want to save
-	 * @param boolean            $is_html Is this an html page?
 	 * @return string|null                The file path of the saved file
 	 */
-	protected function save_url_to_file( $static_page, $content, $is_html ) {
+	protected function save_static_page_content_to_file( $static_page, $content ) {
+		$relative_filename = $this->create_directories_for_static_page( $static_page );
+
+		if ( $relative_filename ) {
+			$file_path = $this->archive_dir . $relative_filename;
+
+			$write = file_put_contents( $file_path, $content );
+			if ( $write === false ) {
+				$static_page->set_error_message( 'Unable to write temporary file' );
+			} else {
+				return $relative_filename;
+			}
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Retrieve a (full) filename given a Static_Page
+	 * @param Simply_Static_Page $static_page The Simply_Static_Page record
+	 * @return string|null                The file path of the saved file
+	 */
+	protected function get_filename_for_static_page( $static_page ) {
+		$relative_filename = $this->create_directories_for_static_page( $static_page );
+
+		if ( $relative_filename ) {
+			$file_path = $this->archive_dir . $relative_filename;
+			return $file_path;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Given a Static_Page, return a relative filename based on the URL
+	 *
+	 * This will also create directories as needed so that a file could be
+	 * created at the returned file path.
+	 * @param Simply_Static_Page $static_page The Simply_Static_Page
+	 * @return string|null                The file path of the file
+	 */
+	private function create_directories_for_static_page( $static_page ) {
 		$url_parts = parse_url( $static_page->url );
 		// a domain with no trailing slash has no path, so we're giving it one
 		$path = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
@@ -367,18 +407,11 @@ class Simply_Static_Archive_Creator {
 		if ( $create_dir === false ) {
 			$static_page->set_error_message( 'Unable to create temporary directory' );
 		} else {
-			$relative_file_name = $relative_file_dir . $path_info['filename'] . '.' . $path_info['extension'];
+			$relative_filename = $relative_file_dir . $path_info['filename'] . '.' . $path_info['extension'];
 			// check that file doesn't exist OR exists but is writeable
 			// (generally, we'd expect it to never exist)
-			if ( ! file_exists( $relative_file_name ) || is_writable( $relative_file_name ) ) {
-				$file_path = $this->archive_dir . $relative_file_name;
-
-				$write = file_put_contents( $file_path, $content );
-				if ( $write === false ) {
-					$static_page->set_error_message( 'Unable to write temporary file' );
-				} else {
-					return $relative_file_name;
-				}
+			if ( ! file_exists( $relative_filename ) || is_writable( $relative_filename ) ) {
+				return $relative_filename;
 			} else {
 				$static_page->set_error_message( 'Temporary file exists and is unwriteable' );
 			}
@@ -386,6 +419,7 @@ class Simply_Static_Archive_Creator {
 
 		return null;
 	}
+
 
 	/**
 	 * Ensure the Origin URL and user-specified Additional URLs are in the DB
