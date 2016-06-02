@@ -171,11 +171,16 @@ class Simply_Static_Archive_Manager {
 
 	/**
 	 * Add a message to the array of status messages for the job
+	 *
+	 * Providing a unique key for the message is optional. If one isn't
+	 * provided, the state_name will be used. Using the same key more than once
+	 * will overwrite previous messages.
 	 * @param  string $message Message to display about the status of the job
+	 * @param  string $key     Unique key for the message
 	 * @return void
 	 */
-	private function save_status_message( $message ) {
-		$state_name = $this->get_state_name();
+	private function save_status_message( $message, $key = null ) {
+		$state_name = $key ?: $this->get_state_name();
 		$messages = $this->get_status_messages();
 
 		// if the state exists, set the datetime and message
@@ -279,6 +284,9 @@ class Simply_Static_Archive_Manager {
 			->set( 'archive_end_time', null )
 			->save();
 
+		$message = sprintf( __( "%s has started generating static files", Simply_Static::SLUG ), $current_user->user_login );
+		$this->save_status_message( $message, 'initiated_by_user' );
+
 		$message = __( 'Setting up', Simply_Static::SLUG );
 		$this->save_status_message( $message );
 
@@ -373,10 +381,15 @@ class Simply_Static_Archive_Manager {
 				$this->save_status_message( $message );
 			}
 
-
 			if ( is_wp_error( $pages_processed ) ) {
 				return $pages_processed;
 			} else {
+				if ( $pages_processed == $total_pages ) {
+					$destination_url = $this->options->get('destination_scheme' ) . '://' . $this->options->get( 'destination_host' );
+					$message = __( 'Destination URL:', Simply_Static::SLUG ) . ' <a href="' . $destination_url .'" target="_blank">' . $destination_url . '</a>';
+					$this->save_status_message( $message, 'destination_url' );
+				}
+
 				// return true when done (no more pages)
 				return $pages_processed == $total_pages;
 			}

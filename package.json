@@ -1,5 +1,5 @@
 {
-  "name": "simply_static",
+  "name": "simply-static",
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-exec": "~0.4.6",

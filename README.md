@@ -51,7 +51,7 @@ Make sure to install the packages needed by grunt:
 
 ## Using Grunt
 
-Grunt is used to build our simply_static.pot file for translations. You can
+Grunt is used to build our simply-static.pot file for translations. You can
 run it with:
 
     grunt

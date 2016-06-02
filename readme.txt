@@ -4,7 +4,7 @@ Donate link: http://codeofconduct.co/
 Tags: simply static, html, static, static site, static site generator, static website generator, performance, fast, optimization, availability, scaling, scalability, cdn, security, secure, zip, hardening
 Requires at least: 4.0
 Tested up to: 4.5
-Stable tag: 1.4.1
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -93,6 +93,12 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 2. This is what the Simply Static Generate page looks like after you've generated your static files. We'll show you exactly which files we made a static copy of.
 
 == Changelog ==
+
+= 1.5.0, June xx, 2016 =
+
+* Fix: The img srcset attribute now displays all urls (instead of only the last one)
+* Improvement: Less memory usage; less likely to exhaust allowed memory size
+* Improvement: Export log is now paginated / less likely to overwhelm your browser
 
 = 1.4.1, April 28, 2016 =
 

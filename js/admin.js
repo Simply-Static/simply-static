@@ -100,7 +100,9 @@ jQuery( document ).ready( function( $ ) {
 	function handle_response_from_archive_manager( response ) {
 		// loop through the responses and create an .activity div for each one
 		// in #activityLog
-		$('#activityLog').html( response.activity_log_html );
+		var $activityLog = $( '#activityLog' );
+		$activityLog.html( response.activity_log_html )
+			.scrollTop( $activityLog.prop( 'scrollHeight' ) );
 
 		// re-enable and hide all actions
 		$( '#sistContainer .actions input' )
@@ -133,10 +135,11 @@ jQuery( document ).ready( function( $ ) {
 			'per_page': STATIC_PAGES_PER_PAGE
 		};
 
-		$('#exportLog').html( "<span class='spinner is-active'></span>" );
+		var $exportLog = $( '#exportLog' );
+		$exportLog.html( "<span class='spinner is-active'></span>" );
 
 		$.post( window.ajaxurl, data, function( response ) {
-			$('#exportLog').html( response.html );
+			$exportLog.html( response.html );
 		} );
 	}
 
@@ -145,10 +148,12 @@ jQuery( document ).ready( function( $ ) {
 			'action': 'render_activity_log'
 		};
 
-		$('#activityLog').html( "<span class='spinner is-active'></span>" );
+		var $activityLog = $( '#activityLog' );
+		$activityLog.html( "<span class='spinner is-active'></span>" );
 
 		$.post( window.ajaxurl, data, function( response ) {
-			$('#activityLog').html( response.html );
+			$activityLog.html( response.html )
+				.scrollTop( $activityLog.prop( 'scrollHeight' ) );
 		} );
 	}
 
@@ -172,7 +177,7 @@ jQuery( document ).ready( function( $ ) {
 		};
 
 		$.post( window.ajaxurl, data, function( response ) {
-			$('#exportLog').html( response.html );
+			$( '#exportLog' ).html( response.html );
 		} );
 	} );
 

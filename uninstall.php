@@ -9,7 +9,7 @@
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) exit;
 
 // Delete Simply Static's settings
-delete_option( 'simply_static' );
+delete_option( 'simply-static' );
 
 require plugin_dir_path( __FILE__ ) . 'includes/class-simply-static.php';
 require plugin_dir_path( __FILE__ ) . 'includes/class-simply-static-model.php';

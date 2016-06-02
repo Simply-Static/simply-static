@@ -90,12 +90,15 @@ class Simply_Static_Model {
 
 	/**
 	 * Returns the name of the table
+	 *
+	 * Note that MySQL doesn't allow anything other than alphanumerics,
+	 * underscores, and $, so dashes in the slug are replaced with underscores.
 	 * @return string The name of the table
 	 */
 	public static function table_name() {
 		global $wpdb;
 
-		return $wpdb->prefix . Simply_Static::SLUG . '_' . static::$table_name;
+		return $wpdb->prefix . str_replace( '-', '_', Simply_Static::SLUG ) . '_' . static::$table_name;
 	}
 
 	/**

@@ -12,7 +12,7 @@ module.exports = function(grunt) {
 				options: {
 					domainPath: '/languages/',          // Where to save the POT file.
 					mainFile: 'simply-static.php',      // Main project file.
-					potFilename: 'simply_static.pot',   // Name of the POT file.
+					potFilename: 'simply-static.pot',   // Name of the POT file.
 					type: 'wp-plugin',                  // Type of project (wp-plugin or wp-theme).
 					potHeaders: {
 	                    poedit: true,                   // Includes common Poedit headers.
