@@ -98,7 +98,7 @@ class Simply_Static_Model {
 	public static function table_name() {
 		global $wpdb;
 
-		return $wpdb->prefix . str_replace( '-', '_', Simply_Static::SLUG ) . '_' . static::$table_name;
+		return $wpdb->prefix . 'simply_static_' . static::$table_name;
 	}
 
 	/**

@@ -9,11 +9,11 @@
 	<table class='widefat striped'>
 		<thead>
 			<tr>
-				<th><?php _e( 'Code', Simply_Static::SLUG ); ?></th>
-				<th><?php _e( 'URL', Simply_Static::SLUG ); ?></th>
-				<th><?php _e( 'Found on', Simply_Static::SLUG ); ?></th>
+				<th><?php _e( 'Code', 'simply-static' ); ?></th>
+				<th><?php _e( 'URL', 'simply-static' ); ?></th>
+				<th><?php _e( 'Found on', 'simply-static' ); ?></th>
 				<?php if ( $num_errors > 0 ) : ?>
-				<th><?php echo sprintf( __( "Errors (%d)", Simply_Static::SLUG ), $num_errors ); ?></th>
+				<th><?php echo sprintf( __( "Errors (%d)", 'simply-static' ), $num_errors ); ?></th>
 				<?php endif; ?>
 			</tr>
 		</thead>
@@ -47,7 +47,7 @@
 				<?php if ( $num_errors > 0 ) : ?>
 				<td class='error-message'>
 					<?php $msg = $static_page->error_message; if ( isset( $msg ) ) : ?>
-						<?php echo __( $msg, Simply_Static::SLUG ); ?>
+						<?php echo $msg; ?>
 					<?php endif; ?>
 				</td>
 				<?php endif; ?>

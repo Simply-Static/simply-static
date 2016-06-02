@@ -284,10 +284,10 @@ class Simply_Static_Archive_Manager {
 			->set( 'archive_end_time', null )
 			->save();
 
-		$message = sprintf( __( "%s has started generating static files", Simply_Static::SLUG ), $current_user->user_login );
+		$message = sprintf( __( "%s has started generating static files", 'simply-static' ), $current_user->user_login );
 		$this->save_status_message( $message, 'initiated_by_user' );
 
-		$message = __( 'Setting up', Simply_Static::SLUG );
+		$message = __( 'Setting up', 'simply-static' );
 		$this->save_status_message( $message );
 
 		$archive_dir = $this->get_archive_dir();
@@ -335,7 +335,7 @@ class Simply_Static_Archive_Manager {
 
 		list( $pages_processed, $total_pages ) = $archive_creator->fetch_pages();
 
-		$message = sprintf( __( "Fetched %d of %d pages/files", Simply_Static::SLUG ), $pages_processed, $total_pages );
+		$message = sprintf( __( "Fetched %d of %d pages/files", 'simply-static' ), $pages_processed, $total_pages );
 		$this->save_status_message( $message );
 
 		if ( is_wp_error( $pages_processed ) ) {
@@ -364,8 +364,8 @@ class Simply_Static_Archive_Manager {
 			if ( is_wp_error( $download_url ) ) {
 				return $download_url;
 			} else {
-				$message = __( 'ZIP archive created: ', Simply_Static::SLUG );
-				$message .= ' <a href="' . $download_url . '">' . __( 'Click here to download', Simply_Static::SLUG ) . '</a>';
+				$message = __( 'ZIP archive created: ', 'simply-static' );
+				$message .= ' <a href="' . $download_url . '">' . __( 'Click here to download', 'simply-static' ) . '</a>';
 				$this->save_status_message( $message );
 				return true;
 			}
@@ -377,7 +377,7 @@ class Simply_Static_Archive_Manager {
 			list( $pages_processed, $total_pages ) = $archive_creator->copy_static_files( $local_dir );
 
 			if ( $pages_processed !== 0 ) {
-				$message = sprintf( __( "Copied %d of %d files", Simply_Static::SLUG ), $pages_processed, $total_pages );
+				$message = sprintf( __( "Copied %d of %d files", 'simply-static' ), $pages_processed, $total_pages );
 				$this->save_status_message( $message );
 			}
 
@@ -386,7 +386,7 @@ class Simply_Static_Archive_Manager {
 			} else {
 				if ( $pages_processed == $total_pages ) {
 					$destination_url = $this->options->get('destination_scheme' ) . '://' . $this->options->get( 'destination_host' );
-					$message = __( 'Destination URL:', Simply_Static::SLUG ) . ' <a href="' . $destination_url .'" target="_blank">' . $destination_url . '</a>';
+					$message = __( 'Destination URL:', 'simply-static' ) . ' <a href="' . $destination_url .'" target="_blank">' . $destination_url . '</a>';
 					$this->save_status_message( $message, 'destination_url' );
 				}
 
@@ -401,7 +401,7 @@ class Simply_Static_Archive_Manager {
 	 * @return true Continue on to next step
 	 */
 	private function handle_wrapup_state() {
-		$this->save_status_message( __( 'Wrapping up', Simply_Static::SLUG ) );
+		$this->save_status_message( __( 'Wrapping up', 'simply-static' ) );
 
 		if ( $this->options->get( 'delete_temp_files' ) === '1' ) {
 			$archive_creator = new Simply_Static_Archive_Creator(
@@ -428,7 +428,7 @@ class Simply_Static_Archive_Manager {
 		$time_string = gmdate( "H:i:s", $duration );
 
 		$this->options->set( 'archive_end_time', $end_time );
-		$this->save_status_message( sprintf( __( 'Done! Finished in %s', Simply_Static::SLUG ), $time_string ) );
+		$this->save_status_message( sprintf( __( 'Done! Finished in %s', 'simply-static' ), $time_string ) );
 
 		return true;
 	}
@@ -438,14 +438,14 @@ class Simply_Static_Archive_Manager {
 	 * @return false Do not do additional processing
 	 */
 	private function handle_cancelled_state() {
-		$this->save_status_message( __( 'Cancelled', Simply_Static::SLUG ) );
+		$this->save_status_message( __( 'Cancelled', 'simply-static' ) );
 
 		return false;
 	}
 
 	private function exception_occurred( $exception ) {
 		$this->apply( 'error' );
-		$message = sprintf( __( "An exception occurred: %s", Simply_Static::SLUG ), $exception->getMessage() );
+		$message = sprintf( __( "An exception occurred: %s", 'simply-static' ), $exception->getMessage() );
 		$this->save_status_message( $message );
 	}
 
@@ -455,7 +455,7 @@ class Simply_Static_Archive_Manager {
 	 */
 	private function error_occurred( $wp_error ) {
 		$this->apply( 'error' );
-		$message = sprintf( __( "An error occurred: %s", Simply_Static::SLUG ), $wp_error->get_error_message() );
+		$message = sprintf( __( "An error occurred: %s", 'simply-static' ), $wp_error->get_error_message() );
 		$this->save_status_message( $message );
 	}
 
@@ -481,7 +481,7 @@ class Simply_Static_Archive_Manager {
 			$error_message .= ' on line <b>' . $error['line'] . '</b>';
 
 			$this->apply( 'error' );
-			$message = sprintf( __( "Error: %s", Simply_Static::SLUG ), $error_message );
+			$message = sprintf( __( "Error: %s", 'simply-static' ), $error_message );
 			$this->save_status_message( $message );
 		}
 	}

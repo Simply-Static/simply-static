@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Simply Static 1.5.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simply-static\n"
-"POT-Creation-Date: 2016-06-02 15:46:23+00:00\n"
+"POT-Creation-Date: 2016-06-02 16:18:13+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -162,7 +162,7 @@ msgid "Checking if MySQL user has <code>DROP</code> privilege"
 msgstr ""
 
 #: includes/class-simply-static-diagnostic.php:227
-msgid "PHP version >= PHP %s"
+msgid "Checking if PHP version >= %s"
 msgstr ""
 
 #: includes/class-simply-static-diagnostic.php:236
@@ -311,6 +311,10 @@ msgstr ""
 
 #: views/redirect.php:4
 msgid "Redirecting..."
+msgstr ""
+
+#: views/redirect.php:14
+msgid "You are being redirected to %s"
 msgstr ""
 
 #: views/settings.php:7

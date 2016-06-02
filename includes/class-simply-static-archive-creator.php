@@ -246,7 +246,7 @@ class Simply_Static_Archive_Creator {
 		}
 
 		if ( $zip_archive->create( $files, PCLZIP_OPT_REMOVE_PATH, $this->archive_dir ) === 0 ) {
-			return new WP_Error( 'create_zip_failed', __( 'Unable to create ZIP archive', Simply_Static::SLUG ) );
+			return new WP_Error( 'create_zip_failed', __( 'Unable to create ZIP archive', 'simply-static' ) );
 		}
 
 		$download_url = get_admin_url( null, 'admin.php' ) . '?' . Simply_Static::SLUG . '_zip_download=' . basename( $zip_filename );
@@ -315,14 +315,14 @@ class Simply_Static_Archive_Creator {
 		foreach ( $recursive_iterator as $item ) {
 			$success = $item->isDir() ? rmdir( $item ) : unlink( $item );
 			if ( ! $success ) {
-				return new WP_Error( 'cannot_delete_file_or_dir', sprintf( __( "Could not delete temporary file or directory: %s", Simply_Static::SLUG ), $item ) );
+				return new WP_Error( 'cannot_delete_file_or_dir', sprintf( __( "Could not delete temporary file or directory: %s", 'simply-static' ), $item ) );
 			}
 		}
 
 		// must make sure to delete the original directory at the end
 		$success = rmdir( $this->archive_dir );
 		if ( ! $success ) {
-			return new WP_Error( 'cannot_delete_file_or_dir', sprintf( __( "Could not delete temporary file or directory: %s", Simply_Static::SLUG ), $item ) );
+			return new WP_Error( 'cannot_delete_file_or_dir', sprintf( __( "Could not delete temporary file or directory: %s", 'simply-static' ), $item ) );
 		}
 
 		return true;

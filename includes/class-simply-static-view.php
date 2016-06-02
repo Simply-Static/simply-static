@@ -129,13 +129,13 @@ class Simply_Static_View {
 
 		// must include a template
 		if ( ! is_readable( $this->template ) ) {
-			return new WP_Error( 'invalid_template', sprintf( __( "Can't find view template: %s", Simply_Static::SLUG ), $this->template ) );
+			return new WP_Error( 'invalid_template', sprintf( __( "Can't find view template: %s", 'simply-static' ), $this->template ) );
 		}
 
 		// layouts are optional. if no layout provided, use the template by itself.
 		if ( $this->layout ) {
 			if ( ! is_readable( $this->layout ) ) {
-				return new WP_Error( 'invalid_layout', sprintf( __( "Can't find view layout: %s", Simply_Static::SLUG ), $this->layout ) );
+				return new WP_Error( 'invalid_layout', sprintf( __( "Can't find view layout: %s", 'simply-static' ), $this->layout ) );
 			} else {
 				// the layout should include the template
 				return $this->layout;
