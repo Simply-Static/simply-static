@@ -94,7 +94,7 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 
 == Changelog ==
 
-= 1.5.0, June xx, 2016 =
+= 1.5.0, June 02, 2016 =
 
 * Fix: The img srcset attribute now displays all urls (instead of only the last one)
 * Improvement: Less memory usage; less likely to exhaust allowed memory size
