@@ -16,3 +16,4 @@ node_modules export-ignore
 Gruntfile.js export-ignore
 package.json export-ignore
 vendor/fzaninotto export-ignore
+vendor/composer/autoload_static.php export-ignore
