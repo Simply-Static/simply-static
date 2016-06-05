@@ -159,7 +159,14 @@ class Simply_Static {
 			if ( version_compare( $version, '1.4.0', '<' ) ) {
 				$this->options
 					->set( 'debugging_mode', '' );
-				}
+			}
+
+			if ( version_compare( $version, '1.5.2', '<' ) ) {
+				$scheme = $this->options->get( 'destination_scheme' );
+				$scheme = $scheme . '://';
+				$this->options->set( 'destination_scheme', $scheme );
+				$this->options->set( 'save_for_offline_access', '0' );
+			}
 		}
 
 		// always update the version and save
@@ -373,6 +380,7 @@ class Simply_Static {
 			->assign( 'delivery_method', $this->options->get( 'delivery_method' ) )
 			->assign( 'local_dir', $this->options->get( 'local_dir' ) )
 			->assign( 'delete_temp_files', $this->options->get( 'delete_temp_files' ) )
+			->assign( 'save_for_offline_access', $this->options->get( 'save_for_offline_access' ) )
 			->render();
 	}
 
@@ -398,15 +406,26 @@ class Simply_Static {
 	 * @return void
 	 */
 	public function save_options() {
+		$save_for_offline_access = filter_input( INPUT_POST, 'save_for_offline_access' );
+
+		if ( $save_for_offline_access == '1' ) {
+			$destination_scheme = '';
+			$destination_host = '.';
+		} else {
+			$destination_scheme = filter_input( INPUT_POST, 'destination_scheme' );
+			$destination_host = untrailingslashit( filter_input( INPUT_POST, 'destination_host', FILTER_SANITIZE_URL ) );
+		}
+
 		$this->options
-			->set( 'destination_scheme', filter_input( INPUT_POST, 'destination_scheme' ) )
-			->set( 'destination_host', untrailingslashit( filter_input( INPUT_POST, 'destination_host', FILTER_SANITIZE_URL ) ) )
+			->set( 'destination_scheme', $destination_scheme )
+			->set( 'destination_host', $destination_host )
 			->set( 'temp_files_dir', sist_trailingslashit_unless_blank( filter_input( INPUT_POST, 'temp_files_dir' ) ) )
 			->set( 'additional_urls', filter_input( INPUT_POST, 'additional_urls' ) )
 			->set( 'additional_files', filter_input( INPUT_POST, 'additional_files' ) )
 			->set( 'delivery_method', filter_input( INPUT_POST, 'delivery_method' ) )
 			->set( 'local_dir', sist_trailingslashit_unless_blank( filter_input( INPUT_POST, 'local_dir' ) ) )
 			->set( 'delete_temp_files', filter_input( INPUT_POST, 'delete_temp_files' ) )
+			->set( 'save_for_offline_access', $save_for_offline_access )
 			->save();
 	}
 

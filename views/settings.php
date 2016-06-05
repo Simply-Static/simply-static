@@ -28,7 +28,7 @@
 							</th>
 							<td>
 								<select id='originScheme' name='origin_scheme' disabled>
-									<option value='<?php echo $this->origin_scheme; ?>'><?php echo $this->origin_scheme; ?>://</option>
+									<option value='<?php echo $this->origin_scheme; ?>'><?php echo $this->origin_scheme; ?></option>
 								</select>
 								<input aria-describedby='originHostHelpBlock' type='text' id='originHost' name='origin_host' value='<?php echo esc_attr( $this->origin_host ) ?>' size='50' disabled />
 								<p id='originHostHelpBlock' class='help-block'><?php echo sprintf( __( "This is the URL of your WordPress installation. You can edit the URL on <a href='%s'>the General Settings page</a>.", 'simply-static' ), admin_url( '/options-general.php' ) ); ?></p>
@@ -40,11 +40,24 @@
 							</th>
 							<td>
 								<select id='destinationScheme' name='destination_scheme'>
-									<option value='http' <?php sist_selected_if( $this->destination_scheme == 'http' ) ?>>http://</option>
-									<option value='https' <?php sist_selected_if( $this->destination_scheme == 'https' ) ?>>https://</option>
+									<?php foreach ( array( 'http://', 'https://', '//' ) as $scheme ) : ?>
+									<option value='<?php echo $scheme; ?>' <?php sist_selected_if( $this->destination_scheme == $scheme ) ?>><?php echo $scheme; ?></option>
+									<?php endforeach; ?>
 								</select>
 								<input aria-describedby='destinationHostHelpBlock' type='text' id='destinationHost' name='destination_host' value='<?php echo esc_attr( $this->destination_host ) ?>' size='50' />
 								<p id='destinationHostHelpBlock' class='help-block'><?php _e( "This is the URL where your static site will live. When generating your static site, all links to the Origin URL will be replaced with the Destination URL.", 'simply-static' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th></th>
+							<td>
+								<label>
+									<input aria-describedby='saveForOfflineAccessHelpBlock' name='save_for_offline_access' id='saveForOfflineAccess' value='1' type='checkbox' <?php if ( $this->save_for_offline_access == '1' ) { echo 'checked'; } ?> />
+									<?php _e( "Save for offline access", 'simply-static' ); ?>
+								</label>
+								<p id='saveForOfflineAccessHelpBlock' class='help-block'>
+									<?php _e( "Enable this checkbox to export a static site for offline access. All URLs will be converted to relative URLs and you can browse the site locally on your own computer.", 'simply-static' ); ?>
+								</p>
 							</td>
 						</tr>
 						<tr>

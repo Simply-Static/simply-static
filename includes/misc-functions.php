@@ -10,7 +10,7 @@
 * @return string http or https
 */
 function sist_origin_scheme() {
-	return is_ssl() ? 'https' : 'http';
+	return is_ssl() ? 'https://' : 'http://';
 }
 
 /**

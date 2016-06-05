@@ -39,6 +39,36 @@ jQuery( document ).ready( function( $ ) {
 
 	// -----------------------------------------------------------------------//
 
+	// save for offline access:
+	$( '#sistContainer #saveForOfflineAccess' ).change( function() {
+		var checked = $( this ).prop( 'checked' );
+
+		if ( checked == '1' ) {
+			$( '#destinationHost' )
+				.val('')
+				.prop( 'disabled', true );
+			$( '#destinationScheme' )
+				.prop( 'disabled', true )
+			$( '<option/>', {
+					value: '',
+					text: ''
+				} )
+				.appendTo( $( '#destinationScheme' ) )
+				.prop( 'selected', 'selected' );
+		} else {
+			$( '#destinationHost' )
+				.prop( 'disabled', false );
+			$( '#destinationScheme' )
+				.prop( 'disabled', false )
+				.find( 'option[value=""]' ).remove();
+		}
+	} );
+
+	// pretend the user selected a value
+	$( '#sistContainer #saveForOfflineAccess' ).change();
+
+	// -----------------------------------------------------------------------//
+
 	var STATIC_PAGES_PER_PAGE = 50; // max number of pages to show at once
 
 	// display the export and activity log on page load

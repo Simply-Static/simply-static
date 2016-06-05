@@ -127,7 +127,7 @@ class Simply_Static_Url_Response {
 			the fix for wp_json_encode.
 		*/
 		if ( $this->is_html() || $this->is_css() ) {
-			$destination_url = $destination_scheme . '://' . $destination_host;
+			$destination_url = $destination_scheme . $destination_host;
 
 			// replace any instance of the origin url, whether it starts with https://, http://, or //
 			$response_body = preg_replace( '/(https?:)?\/\/' . addcslashes( sist_origin_host(), '/' ) . '/i', $destination_url, $this->get_body() );
