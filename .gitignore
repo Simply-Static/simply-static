@@ -6,3 +6,6 @@ static-files/*
 
 # These aren't needed by Simply Static itself, so we're ignoring them.
 node_modules
+
+# Not including stuff from composer
+vendor

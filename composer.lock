@@ -4,71 +4,9 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "0b1a25c02506a45a70e73f1eb4133a0f",
-    "content-hash": "cb4f58e26e2c9b6c2f0b2d52bcd08b32",
-    "packages": [
-        {
-            "name": "pclzip/pclzip",
-            "version": "2.8.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/ivanlanin/pclzip.git",
-                "reference": "19dd1de9d3f5fc4d7d70175b4c344dee329f45fd"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/ivanlanin/pclzip/zipball/19dd1de9d3f5fc4d7d70175b4c344dee329f45fd",
-                "reference": "19dd1de9d3f5fc4d7d70175b4c344dee329f45fd",
-                "shasum": ""
-            },
-            "type": "library",
-            "autoload": {
-                "classmap": [
-                    "pclzip.lib.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "LGPL-2.1"
-            ],
-            "authors": [
-                {
-                    "name": "Vincent Blavet"
-                }
-            ],
-            "description": "A PHP library that offers compression and extraction functions for Zip formatted archives",
-            "homepage": "http://www.phpconcept.net/pclzip",
-            "keywords": [
-                "php",
-                "zip"
-            ],
-            "time": "2014-06-05 11:42:24"
-        },
-        {
-            "name": "pguardiario/phpuri",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/monkeysuffrage/phpuri.git",
-                "reference": "55ed0a6a0dbc2399f0037821652fd681bd87d3fb"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/monkeysuffrage/phpuri/zipball/55ed0a6a0dbc2399f0037821652fd681bd87d3fb",
-                "reference": "55ed0a6a0dbc2399f0037821652fd681bd87d3fb",
-                "shasum": ""
-            },
-            "type": "project",
-            "autoload": {
-                "files": [
-                    "phpuri.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "description": "A php library for converting relative urls to absolute.",
-            "time": "2015-05-27 22:49:30"
-        }
-    ],
+    "hash": "704acbb3d79c709e1266568f9b5bc247",
+    "content-hash": "46c5d9bce37877dc2ba7d72dbdd57f21",
+    "packages": [],
     "packages-dev": [
         {
             "name": "fzaninotto/faker",
@@ -121,9 +59,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "pguardiario/phpuri": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": [],

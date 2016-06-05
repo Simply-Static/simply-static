@@ -6,10 +6,6 @@ namespace Composer\Autoload;
 
 class ComposerStaticInitebf35c101871669baf317b8e26f5cd67
 {
-    public static $files = array (
-        '5b154887902198b16314243c6e0e3e19' => __DIR__ . '/..' . '/pguardiario/phpuri/phpuri.php',
-    );
-
     public static $prefixLengthsPsr4 = array (
         'F' => 
         array (
@@ -24,16 +20,11 @@ class ComposerStaticInitebf35c101871669baf317b8e26f5cd67
         ),
     );
 
-    public static $classMap = array (
-        'PclZip' => __DIR__ . '/..' . '/pclzip/pclzip/pclzip.lib.php',
-    );
-
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInitebf35c101871669baf317b8e26f5cd67::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInitebf35c101871669baf317b8e26f5cd67::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitebf35c101871669baf317b8e26f5cd67::$classMap;
 
         }, null, ClassLoader::class);
     }

@@ -14,6 +14,9 @@ tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
 require $_tests_dir . '/includes/bootstrap.php';
 
+# include Faker
+require plugin_dir_path( dirname( __FILE__ ) ) . 'vendor/autoload.php'; // 3rd-party libs
+
 // Include helpers
 require_once 'helpers/class-simply-static-url-response-factory.php';
 require_once 'helpers/class-simply-static-url-extractor-factory.php';

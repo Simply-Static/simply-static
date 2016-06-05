@@ -1,8 +1,6 @@
 {
     "name": "code-of-conduct/simply-static",
     "require": {
-        "pclzip/pclzip": "^2.8",
-        "pguardiario/phpuri": "dev-master"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.6"
