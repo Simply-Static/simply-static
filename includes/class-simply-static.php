@@ -9,7 +9,7 @@ class Simply_Static {
 	 * Plugin version
 	 * @var string
 	 */
-	const VERSION = '1.5.1';
+	const VERSION = '1.6.0';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
@@ -175,6 +175,7 @@ class Simply_Static {
 	private function includes() {
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/pclzip.lib.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/phpuri.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/PhpSimple/HtmlDomParser.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-options.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-view.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-extractor.php';

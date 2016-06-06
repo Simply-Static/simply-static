@@ -19,7 +19,7 @@ class Simply_Static_Url_Extractor {
 	 */
 
 	/** @const */
-	protected static $match_elements = array(
+	protected static $match_tags = array(
 		// HTML
 		'a'            => array( 'href', 'urn' ),
 		'base'         => array( 'href' ),
@@ -124,67 +124,83 @@ class Simply_Static_Url_Extractor {
 		return array_unique( $this->extracted_urls );
 	}
 
+
 	/**
-	 * Loops through all elements in the DOM to pull out URLs
-	 * @return string The HTML with all URLs made absolute
+	 * Extract URLs and convert URLs to absolute URLs for each tag
+	 *
+	 * The tag is passed by reference, so it's updated directly and nothing is
+	 * returned from this function.
+	 * @param  simple_html_dom_node $tag        SHDP dom node
+	 * @param  string               $tag_name   name of the tag
+	 * @param  array                $attributes array of attribute notes
+	 * @return void
 	 */
-	private function extract_urls_from_html() {
-		$doc = new DOMDocument();
-		// ensuring we don't throw visible errors during html loading
-		libxml_use_internal_errors( true );
+	private function extract_urls_and_update_tag( &$tag, $tag_name, $attributes ) {
+		if ( $tag_name === 'style' ) {
+			$updated_css = $this->extract_urls_from_css( $tag->innertext );
+			$tag->innertext = $updated_css;
+		} else {
+			if ( isset( $tag->style ) ) {
+				$updated_css = $this->extract_urls_from_css( $tag->style );
+				$tag->style = $updated_css;
+			}
 
-		// DOMDocument doesn't handle encoding correctly and garbles the output.
-		// mb_convert_encoding is an extension though, so we're checking if it's
-		// available first.
-		if ( function_exists( 'mb_convert_encoding' ) ) {
-			$this->response->save_body( mb_convert_encoding( $this->response->get_body(), 'HTML-ENTITIES', 'UTF-8' ) );
-		}
-		@$doc->loadHTML( $this->response->get_body() );  // suppress warnings
+			foreach ( $attributes as $attribute_name ) {
+				if ( isset( $tag->$attribute_name ) ) {
+					$extracted_urls = array();
+					$attribute_value = $tag->$attribute_name;
 
-		libxml_use_internal_errors( false );
-		// get all elements on the page
-		$elements = $doc->getElementsByTagName( '*' );
-		foreach ( $elements as $element ) {
-			$tag_name = $element->tagName;
-
-			if ( $tag_name === 'style' ) {
-				$updated_css = $this->extract_urls_from_css( $element->nodeValue );
-				$element->nodeValue = $updated_css;
-			} else {
-				$style_attr_value = $element->getAttribute( 'style' );
-				if ( $style_attr_value !== '' ) {
-					$updated_css = $this->extract_urls_from_css( $style_attr_value );
-					$element->setAttribute( 'style', $updated_css );
-				}
-
-				if ( array_key_exists( $tag_name, self::$match_elements ) ) {
-					$match_attributes = self::$match_elements[ $tag_name ];
-					foreach ( $match_attributes as $attribute_name ) {
-
-						$extracted_urls = array();
-						// srcset is a fair bit different from most html
-						// attributes, so it gets it's own processsing
-						$attribute_value = $element->getAttribute( $attribute_name );
-						if ( $attribute_name === 'srcset' ) {
-							$extracted_urls = $this->extract_urls_from_srcset( $attribute_value );
-						} else {
-							$extracted_urls[] = $attribute_value;
-						}
-
-						foreach ( $extracted_urls as $extracted_url ) {
-							if ( $extracted_url !== '' ) {
-								$absolute_extracted_url = $this->add_to_extracted_urls( $extracted_url );
-								$attribute_value = str_replace( $extracted_url, $absolute_extracted_url, $attribute_value );
-							}
-						}
-						$element->setAttribute( $attribute_name, $attribute_value );
+					// srcset is a fair bit different from most html
+					// attributes, so it gets it's own processsing
+					if ( $attribute_name === 'srcset' ) {
+						$extracted_urls = $this->extract_urls_from_srcset( $attribute_value );
+					} else {
+						$extracted_urls[] = $attribute_value;
 					}
+
+					foreach ( $extracted_urls as $extracted_url ) {
+						if ( $extracted_url !== '' ) {
+							$absolute_extracted_url = $this->add_to_extracted_urls( $extracted_url );
+							$attribute_value = str_replace( $extracted_url, $absolute_extracted_url, $attribute_value );
+						}
+					}
+					$tag->$attribute_name = $attribute_value;
 				}
 			}
 		}
+	}
 
-		// update the response body with updated links
-		return $doc->saveHTML();
+	/**
+	 * Loop through elements of interest in the DOM to pull out URLs
+	 *
+	 * There are specific html tags and -- more precisely -- attributes that
+	 * we're looking for. We loop through tags with attributes we care about,
+	 * which the attributes for URLs, extract and update any URLs we find, and
+	 * then return the updated HTML.
+	 * @return string The HTML with all URLs made absolute
+	 */
+	private function extract_urls_from_html() {
+		$html_string = $this->response->get_body();
+
+		$dom = Sunra\PhpSimple\HtmlDomParser::str_get_html(
+			$html_string,
+			$lowercase = true,
+			$forceTagsClosed = true,
+			$target_charset = DEFAULT_TARGET_CHARSET,
+			$stripRN = false,
+			$defaultBRText = DEFAULT_BR_TEXT,
+			$defaultSpanText = DEFAULT_SPAN_TEXT
+		);
+
+		foreach ( self::$match_tags as $tag_name => $attributes ) {
+			$tags = $dom->find( $tag_name );
+
+			foreach ( $tags as $tag ) {
+				$this->extract_urls_and_update_tag( $tag, $tag_name, $attributes );
+			}
+		}
+
+		return $dom->save();
 	}
 
 	private function extract_urls_from_srcset( $srcset ) {
