@@ -78,7 +78,7 @@ class Simply_Static_Diagnostic {
 			$this->results[ $title ] = array();
 			foreach ( $tests as $test ) {
 				$param = isset( $test['param'] ) ? $test['param'] : null;
-				$result = $this->$test['function']( $param );
+				$result = $this->{$test['function']}( $param );
 
 				if ( ! isset( $result['message'] ) ) {
 					$result['message'] = $result['test'] ? __( 'OK', 'simply-static' ) : __( 'FAIL', 'simply-static' );
