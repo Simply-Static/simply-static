@@ -135,36 +135,31 @@ class Simply_Static_Url_Extractor {
 	 * @return void
 	 */
 	private function extract_urls_and_update_tag( &$tag, $tag_name, $attributes ) {
-		if ( $tag_name === 'style' ) {
-			$updated_css = $this->extract_urls_from_css( $tag->innertext );
-			$tag->innertext = $updated_css;
-		} else {
-			if ( isset( $tag->style ) ) {
-				$updated_css = $this->extract_urls_from_css( $tag->style );
-				$tag->style = $updated_css;
-			}
+		if ( isset( $tag->style ) ) {
+			$updated_css = $this->extract_urls_from_css( $tag->style );
+			$tag->style = $updated_css;
+		}
 
-			foreach ( $attributes as $attribute_name ) {
-				if ( isset( $tag->$attribute_name ) ) {
-					$extracted_urls = array();
-					$attribute_value = $tag->$attribute_name;
+		foreach ( $attributes as $attribute_name ) {
+			if ( isset( $tag->$attribute_name ) ) {
+				$extracted_urls = array();
+				$attribute_value = $tag->$attribute_name;
 
-					// srcset is a fair bit different from most html
-					// attributes, so it gets it's own processsing
-					if ( $attribute_name === 'srcset' ) {
-						$extracted_urls = $this->extract_urls_from_srcset( $attribute_value );
-					} else {
-						$extracted_urls[] = $attribute_value;
-					}
-
-					foreach ( $extracted_urls as $extracted_url ) {
-						if ( $extracted_url !== '' ) {
-							$absolute_extracted_url = $this->add_to_extracted_urls( $extracted_url );
-							$attribute_value = str_replace( $extracted_url, $absolute_extracted_url, $attribute_value );
-						}
-					}
-					$tag->$attribute_name = $attribute_value;
+				// srcset is a fair bit different from most html
+				// attributes, so it gets it's own processsing
+				if ( $attribute_name === 'srcset' ) {
+					$extracted_urls = $this->extract_urls_from_srcset( $attribute_value );
+				} else {
+					$extracted_urls[] = $attribute_value;
 				}
+
+				foreach ( $extracted_urls as $extracted_url ) {
+					if ( $extracted_url !== '' ) {
+						$absolute_extracted_url = $this->add_to_extracted_urls( $extracted_url );
+						$attribute_value = str_replace( $extracted_url, $absolute_extracted_url, $attribute_value );
+					}
+				}
+				$tag->$attribute_name = $attribute_value;
 			}
 		}
 	}
@@ -191,12 +186,20 @@ class Simply_Static_Url_Extractor {
 			$defaultSpanText = DEFAULT_SPAN_TEXT
 		);
 
+		// handle tags with attributes
 		foreach ( self::$match_tags as $tag_name => $attributes ) {
 			$tags = $dom->find( $tag_name );
 
 			foreach ( $tags as $tag ) {
 				$this->extract_urls_and_update_tag( $tag, $tag_name, $attributes );
 			}
+		}
+
+		// handle 'style' tag differently, since we need to parse the content
+		$tags = $dom->find( 'style' );
+		foreach ( $tags as $tag ) {
+			$updated_css = $this->extract_urls_from_css( $tag->innertext );
+			$tag->innertext = $updated_css;
 		}
 
 		return $dom->save();
