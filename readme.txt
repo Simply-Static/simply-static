@@ -94,10 +94,11 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 
 == Changelog ==
 
-= 1.6.0, June 06, 2016 =
+= 1.6.0, June 07, 2016 =
 
 * Improvement: The DomDocument PHP extension is no longer required (replaced by SimpleHtmlDomParser)
 * Fix: No longer creating empty html attributes
+* Fix: No longer throwing the 'Function name must be a string' error in diagnostics. Thanks andrew-s!
 
 = 1.5.1, June 05, 2016 =
 
