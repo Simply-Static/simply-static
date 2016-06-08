@@ -6,7 +6,6 @@
  * Note that in addition to extracting URLs this class also makes modifications
  * to the Simply_Static_Url_Response that is passed into it: URLs in the body of
  * the response are updated to be absolute URLs.
- *
  * @package Simply_Static
  */
 class Simply_Static_Url_Extractor {

@@ -1,8 +1,7 @@
 <?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
- * Simply Static URL fetcher class
- *
+ * Simply Static URL manager class
  * @package Simply_Static
  */
 class Simply_Static_Archive_Manager {

@@ -22,24 +22,31 @@ class Simply_Static_Url_Fetcher {
 			return new WP_Error( 'remote_url', sprintf( __( "Attempting to fetch remote URL: %s", 'simply-static' ), $url ) );
 		}
 
+		$temp_filename = $filename . '.tmp';
+
 		$response = wp_remote_get( $url, array(
 			'timeout' => self::TIMEOUT,
 			'sslverify' => false, // not verifying SSL because all calls are local
 			'redirection' => 0, // disable redirection
 			'blocking' => true, // do not execute code until this call is complete
 			'stream' => true, // stream body content to a file
-			'filename' => $filename
+			'filename' => $temp_filename
 		) );
-
-		// Don't save a file for anything that isn't a 200 response
-		if ( $response['response']['code'] !== 200 ) {
-			unlink($filename);
-			$response['filename'] = null;
-		}
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		} else {
+
+			// If we got a 200, make the file permanent
+			if ( $response['response']['code'] == 200 ) {
+				rename( $temp_filename, $filename );
+				$response['filename'] = $filename;
+			} else {
+				// Not a 200? Delete the file
+				unlink( $temp_filename );
+				$response['filename'] = null;
+			}
+
 			return new Simply_Static_Url_Response( $url, $response );
 		}
 	}
