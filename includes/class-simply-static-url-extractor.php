@@ -202,6 +202,11 @@ class Simply_Static_Url_Extractor {
 		return $dom->save();
 	}
 
+	/**
+	 * Extract URLs from the srcset attribute
+	 * @param  string $srcset Value of the srcset attribute
+	 * @return array  Array of extracted URLs
+	 */
 	private function extract_urls_from_srcset( $srcset ) {
 		$extracted_urls = array();
 
