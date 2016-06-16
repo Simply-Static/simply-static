@@ -185,10 +185,16 @@ class Simply_Static_Url_Extractor {
 			$defaultBRText = DEFAULT_BR_TEXT,
 			$defaultSpanText = DEFAULT_SPAN_TEXT
 		);
-
-		// handle tags with attributes
-		foreach ( self::$match_tags as $tag_name => $attributes ) {
-			$tags = $dom->find( $tag_name );
+		//check dom is not null or boolean
+		if($dom == '' || is_bool($dom)){
+			
+			return '';
+		
+		}else{
+			// handle tags with attributes
+			foreach ( self::$match_tags as $tag_name => $attributes ) {
+			
+				$tags = $dom->find($tag_name);
 
 			foreach ( $tags as $tag ) {
 				$this->extract_urls_and_update_tag( $tag, $tag_name, $attributes );
@@ -196,13 +202,17 @@ class Simply_Static_Url_Extractor {
 		}
 
 		// handle 'style' tag differently, since we need to parse the content
-		$tags = $dom->find( 'style' );
+				$tags = $dom->find( 'style' );
+
 		foreach ( $tags as $tag ) {
 			$updated_css = $this->extract_urls_from_css( $tag->innertext );
 			$tag->innertext = $updated_css;
-		}
-
-		return $dom->save();
+			}
+			
+			return $dom->save();
+			
+		}	
+		
 	}
 
 	/**
