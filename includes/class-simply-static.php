@@ -9,7 +9,7 @@ class Simply_Static {
 	 * Plugin version
 	 * @var string
 	 */
-	const VERSION = '1.6.3';
+	const VERSION = '1.7.0';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
@@ -161,7 +161,7 @@ class Simply_Static {
 					->set( 'debugging_mode', '' );
 			}
 
-			if ( version_compare( $version, '1.5.2', '<' ) ) {
+			if ( version_compare( $version, '1.7.0', '<' ) ) {
 				$scheme = $this->options->get( 'destination_scheme' );
 				$scheme = $scheme . '://';
 				$this->options->set( 'destination_scheme', $scheme );

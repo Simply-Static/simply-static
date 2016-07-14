@@ -332,7 +332,8 @@ class Simply_Static_Archive_Manager {
 			$this->get_start_time()
 		);
 
-		list( $pages_processed, $total_pages ) = $archive_creator->fetch_pages();
+		$save_for_offline_access = ( $this->options->get( 'save_for_offline_access' ) == '1' );
+		list( $pages_processed, $total_pages ) = $archive_creator->fetch_pages( $save_for_offline_access );
 
 		$message = sprintf( __( "Fetched %d of %d pages/files", 'simply-static' ), $pages_processed, $total_pages );
 		$this->save_status_message( $message );

@@ -107,10 +107,11 @@ class Simply_Static_Url_Response {
 
 	/**
 	 * Extracts the list of unique URLs
+	 * @param  boolean $save_for_offline_access Are we saving files for offline access?
 	 * @return array
 	 */
-	public function extract_urls() {
-		$extractor = new Simply_Static_Url_Extractor( $this );
+	public function extract_urls( $save_for_offline_access ) {
+		$extractor = new Simply_Static_Url_Extractor( $this, $save_for_offline_access );
 		return $extractor->extract_urls();
 	}
 

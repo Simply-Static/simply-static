@@ -56,7 +56,7 @@
 									<?php _e( "Save for offline access", 'simply-static' ); ?>
 								</label>
 								<p id='saveForOfflineAccessHelpBlock' class='help-block'>
-									<?php _e( "Enable this checkbox to export a static site for offline access. All URLs will be converted to relative URLs and you can browse the site locally on your own computer.", 'simply-static' ); ?>
+									<?php _e( "Export a static site for offline access. All URLs will be converted to relative URLs and you can browse the site locally on your own computer.", 'simply-static' ); ?>
 								</p>
 							</td>
 						</tr>

@@ -109,7 +109,7 @@ function sist_relative_to_absolute_url( $extracted_url, $page_url ) {
 
 		// if this is a local URL, add the protocol to the URL
 		if ( stripos( $extracted_url, '//' . sist_origin_host() ) === 0 ) {
-			$extracted_url = substr_replace( $extracted_url, sist_origin_scheme() . '://', 0, 2 );
+			$extracted_url = substr_replace( $extracted_url, sist_origin_scheme(), 0, 2 );
 		}
 
 		return $extracted_url;
@@ -120,9 +120,7 @@ function sist_relative_to_absolute_url( $extracted_url, $page_url ) {
 
 	// parse_url can sometimes return false; bail if it does
 	if ( $parsed_extracted_url === false ) {
-
 		return null;
-
 	}
 
 	if ( isset( $parsed_extracted_url['host'] ) ) {
@@ -149,6 +147,69 @@ function sist_relative_to_absolute_url( $extracted_url, $page_url ) {
 	}
 }
 
+
+/*
+	You've got two URLs:
+		extracted url: http://www.wp-latest.dev/wp-content/themes/twentyfifteen/js/functions.js?ver=20150330
+		           or: http://www.wp-latest.dev/2012/01/03/template-comments/
+		           or: http://www.wp-latest.dev/2012/02/05/
+		 current page: http://www.wp-latest.dev/2012/01/
+
+		You'll want to strip the protocol/domain off of both:
+		extracted url: /wp-content/themes/twentyfifteen/js/functions.js?ver=20150330
+		           or: /2012/01/03/template-comments/
+		           or: /2012/02/05/
+		 current page: /2012/01/
+
+		extracted url: /2012/
+		 current page: /2012/02/05/
+		   result url: ./../../
+
+		extracted url: /2012/02/05/
+		 current page: /2012/05/10/
+		   result url: ./../../02/05/
+
+		   extracted url: /2012/02/05/
+   		    current page: /2012/
+   		      result url: ./02/05/
+
+		Starting with the current page, see if the path is a stripos==0 match for the extracted url
+		If it is, remove the matching portion and add a ./ to $extracted_path and you're done
+			eventually we should always hit a slash and exit
+		If it is not, remove a directory (furthest slash to the one before it) and try again
+			each removed directory is replaced with a '../' in the result
+
+ */
+
+function sist_create_relative_path( $extracted_path, $page_path, $iterations = 0 ) {
+	// $pattern = '/([^\/]*\/)[^\/]*$/';
+	// $new_page_path = preg_replace( $pattern, '', $page_path );
+	// if ( $page_path == $new_page_path ) {
+	// 	// no more substitutions can be done, we're done here
+	// 	// contruct and return a url
+	// } else {
+	// 	sist_create_relative_path( $extracted_path, $new_page_path, ++$iterations );
+	// }
+
+	// error_log( '$extracted_path: ' . $extracted_path );
+	// error_log( '$page_path: ' . $page_path );
+	// error_log( ( strpos( $extracted_path, $page_path ) === 0 ) ? 'true' : 'false' );
+
+	// We're done if we get a match between the path of the page and the extracted URL
+	// OR if there are no more slashes to remove
+	if ( strpos( $page_path, '/' ) === false || strpos( $extracted_path, $page_path ) === 0 ) {
+		$extracted_path = substr( $extracted_path, strlen( $page_path ) );
+		$new_path = './' . str_repeat( '../', $iterations ) . $extracted_path;
+		error_log( '$new_path: ' . $new_path );
+		return $new_path;
+	} else {
+		// match last slash and 0+ non-slash characters before it
+		$pattern = '/([^\/]*\/)[^\/]*$/';
+		$new_page_path = preg_replace( $pattern, '', $page_path );
+		return sist_create_relative_path( $extracted_path, $new_page_path, ++$iterations );
+	}
+}
+
 /**
  * Check if URL starts with same URL as WordPress installation
  *
@@ -158,6 +219,17 @@ function sist_relative_to_absolute_url( $extracted_url, $page_url ) {
  */
 function sist_is_local_url( $url ) {
 	return ( stripos( sist_strip_protocol_from_url( $url ), sist_origin_host() ) === 0 );
+}
+
+/**
+ * Get the path from a local URL, removing the protocol and host
+ * @param  string  $url URL to strip protocol/host from
+ * @return string       URL sans protocol/host
+ */
+function sist_get_path_from_local_url( $url ) {
+	$url = sist_strip_protocol_from_url( $url );
+	$url = str_replace( sist_origin_host(), '', $url );
+	return $url;
 }
 
 /**
@@ -184,13 +256,13 @@ function sist_string_to_array( $textarea ) {
 }
 
 /**
- * Remove the http/https protocol from a URL
+ * Remove the //, http://, https:// protocols from a URL
  *
  * @param  string $url URL to remove protocol from
  * @return string      URL sans http/https protocol
  */
 function sist_strip_protocol_from_url( $url ) {
-	$pattern = '/^https?:\/\//';
+	$pattern = '/^(https?:)?\/\//';
 	return preg_replace( $pattern, '', $url );
 }
 
@@ -214,7 +286,7 @@ function sist_formatted_datetime() {
 }
 
 /**
- * Similar to PHP's pathinfo(), but designed with URLs in mind (instead of directories)
+ * Similar to PHP's pathinfo(), but designed with URL paths in mind (instead of directories)
  *
  * Example:
  *   $info = sist_url_path_info( '/manual/en/function.pathinfo.php?test=true' );
@@ -223,7 +295,7 @@ function sist_formatted_datetime() {
  *     $info['extension'] === 'php'
  *     $info['filename']  === 'function.pathinfo'
  * @param  string $path The URL path
- * @return [type]       [description]
+ * @return array        Array containing info on the parts of the path
  */
 function sist_url_path_info( $path ) {
 	$info = array(
@@ -233,13 +305,14 @@ function sist_url_path_info( $path ) {
 		'extension' => ''
 	);
 
-	// remove anything in the path after '#' or '?'
-	foreach ( array( '#', '?' ) as $character ) {
-		$char_location = strpos( $path, $character );
-		if ( $char_location !== false ) {
-			$path = substr( $path, 0, $char_location );
-		}
-	}
+	// // remove anything in the path after '#' or '?'
+	// foreach ( array( '#', '?' ) as $character ) {
+	// 	$char_location = strpos( $path, $character );
+	// 	if ( $char_location !== false ) {
+	// 		$path = substr( $path, 0, $char_location );
+	// 	}
+	// }
+	$path = sist_remove_params_and_fragment( $path );
 
 	// everything after the last slash is the filename
 	$last_slash_location = strrpos( $path, '/' );

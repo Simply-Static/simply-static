@@ -48,9 +48,10 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * Fetch and save pages for the static archive
+	 * @param  boolean $save_for_offline_access Are we saving files for offline access?
 	 * @return array ( # pages processed, # pages remaining )
 	 */
-	public function fetch_pages() {
+	public function fetch_pages( $save_for_offline_access ) {
 		$batch_size = 10;
 
 		$static_pages = Simply_Static_Page::query()
@@ -94,7 +95,7 @@ class Simply_Static_Archive_Creator {
 				continue;
 			}
 
-			$this->handle_200_response( $static_page, $response );
+			$this->handle_200_response( $static_page, $response, $save_for_offline_access );
 		}
 
 		return array( $pages_processed, $total_pages );
@@ -115,11 +116,12 @@ class Simply_Static_Archive_Creator {
 	 * Process the response for a 200 response (success)
 	 * @param  Simply_Static_Page         $static_page Record to update
 	 * @param  Simply_Static_Url_Response $response    URL response to process
+	 * @param  boolean                    $save_for_offline_access Are we saving files for offline access?
 	 * @return void
 	 */
-	private function handle_200_response( $static_page, $response ) {
+	private function handle_200_response( $static_page, $response, $save_for_offline_access ) {
 		// Fetch all URLs from the page and add them to the queue...
-		$urls = $response->extract_urls();
+		$urls = $response->extract_urls( $save_for_offline_access );
 
 		foreach ( $urls as $url ) {
 			$this->set_url_found_on( $static_page, $url, $this->archive_start_time );

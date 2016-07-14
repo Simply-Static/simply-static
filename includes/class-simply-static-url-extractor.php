@@ -86,6 +86,12 @@ class Simply_Static_Url_Extractor {
 	protected $response;
 
 	/**
+	 * Are we saving files for offline access?
+	 * @var boolean
+	 */
+	protected $save_for_offline_access;
+
+	/**
 	 * The url of the site
 	 * @var array
 	 */
@@ -93,10 +99,12 @@ class Simply_Static_Url_Extractor {
 
 	/**
 	 * Constructor
-	 * @param string response URL Response object
+	 * @param string  $response                URL Response object
+	 * @param boolean $save_for_offline_access Are we saving files for offline access?
 	 */
-	public function __construct( $response ) {
+	public function __construct( $response, $save_for_offline_access ) {
 		$this->response = $response;
+		$this->save_for_offline_access = $save_for_offline_access;
 	}
 
 	/**
@@ -290,12 +298,38 @@ class Simply_Static_Url_Extractor {
 	 * @return string The URL, converted to an absolute URL
 	 */
 	private function add_to_extracted_urls( $extracted_url ) {
-		$absolute_url = sist_relative_to_absolute_url( $extracted_url, $this->response->url );
+		$url = sist_relative_to_absolute_url( $extracted_url, $this->response->url );
 
-		if ( $absolute_url && sist_is_local_url( $absolute_url ) ) {
-			$this->extracted_urls[] = sist_remove_params_and_fragment( $absolute_url );
+		// error_log( $absolute_url . ' -- ' . $this->response->url );
+		// error_log( sist_is_local_url( $absolute_url ) );
+		// error_log( $this->save_for_offline_access );
+
+		if ( $url && sist_is_local_url( $url ) ) {
+			$this->extracted_urls[] = sist_remove_params_and_fragment( $url );
+
+			if ( $this->save_for_offline_access ) {
+				// modify path of absolute url
+
+				$page_path = sist_get_path_from_local_url( $this->response->url );
+				$extracted_path = sist_get_path_from_local_url( $url );
+
+				$path = sist_create_relative_path( $extracted_path, $page_path );
+
+				$path_info = sist_url_path_info( $url );
+				if ( $path_info['extension'] === '' ) {
+					// If there's no extension, we need to add a /index.html,
+					// and do so before any params or fragments.
+					$clean_path = sist_remove_params_and_fragment( $path );
+					$fragment = substr( $path, strlen( $clean_path ) );
+
+					$path = trailingslashit( $clean_path );
+					$path .= 'index.html' . $fragment;
+				}
+
+				$url = $path;
+			}
 		}
 
-		return $absolute_url;
+		return $url;
 	}
 }
