@@ -186,10 +186,10 @@ class Simply_Static_Url_Extractor {
 			$defaultSpanText = DEFAULT_SPAN_TEXT
 		);
 
-		// return an empty string if dom is blank or boolean (unparseable)
+		// return the original html string if dom is blank or boolean (unparseable)
 		if ( $dom == '' || is_bool( $dom ) ) {
 
-			return '';
+			return $html_string;
 
 		} else {
 			// handle tags with attributes
