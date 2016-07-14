@@ -185,34 +185,35 @@ class Simply_Static_Url_Extractor {
 			$defaultBRText = DEFAULT_BR_TEXT,
 			$defaultSpanText = DEFAULT_SPAN_TEXT
 		);
-		//check dom is not null or boolean
-		if($dom == '' || is_bool($dom)){
-			
+
+		// return an empty string if dom is blank or boolean (unparseable)
+		if ( $dom == '' || is_bool( $dom ) ) {
+
 			return '';
-		
-		}else{
+
+		} else {
 			// handle tags with attributes
 			foreach ( self::$match_tags as $tag_name => $attributes ) {
-			
-				$tags = $dom->find($tag_name);
+
+				$tags = $dom->find( $tag_name );
+
+				foreach ( $tags as $tag ) {
+					$this->extract_urls_and_update_tag( $tag, $tag_name, $attributes );
+				}
+			}
+
+			// handle 'style' tag differently, since we need to parse the content
+			$tags = $dom->find( 'style' );
 
 			foreach ( $tags as $tag ) {
-				$this->extract_urls_and_update_tag( $tag, $tag_name, $attributes );
+				$updated_css = $this->extract_urls_from_css( $tag->innertext );
+				$tag->innertext = $updated_css;
 			}
+
+			return $dom->save();
+
 		}
 
-		// handle 'style' tag differently, since we need to parse the content
-				$tags = $dom->find( 'style' );
-
-		foreach ( $tags as $tag ) {
-			$updated_css = $this->extract_urls_from_css( $tag->innertext );
-			$tag->innertext = $updated_css;
-			}
-			
-			return $dom->save();
-			
-		}	
-		
 	}
 
 	/**
