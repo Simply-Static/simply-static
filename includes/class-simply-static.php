@@ -437,14 +437,31 @@ class Simply_Static {
 	 * @return null
 	 */
 	public function download_file() {
-		if ( isset( $_GET[ self::SLUG . '_zip_download' ] ) ) {
-			$filename = $_GET[ self::SLUG . '_zip_download' ];
+		$file_name = isset( $_GET[ self::SLUG . '_zip_download' ] ) ? $_GET[ self::SLUG . '_zip_download' ] : null;
+		if ( $file_name ) {
+			// Force user to be logged in
+			if ( ! is_user_logged_in() ) {
+				return;
+			}
+
+			// Don't allow path traversal
+			if ( strpos( $file_name, '../' ) !== false ) {
+				exit( 'Invalid Request' );
+			}
+
+			// File must exist
+			$file_path = path_join( self::$instance->options->get( 'temp_files_dir' ), $file_name );
+			if ( ! file_exists( $file_path ) ) {
+				exit( 'Files does not exist' );
+			}
+
+			// Send file
 			header( 'Content-Description: File Transfer' );
-			header( 'Content-Disposition: attachment; filename=' . $filename );
+			header( 'Content-Disposition: attachment; filename=' . $file_name );
 			header( 'Content-Type: application/zip, application/octet-stream; charset=' . get_option( 'blog_charset' ), true );
 			header( 'Pragma: no-cache' );
 			header( 'Expires: 0' );
-			readfile( path_join( self::$instance->options->get( 'temp_files_dir' ), $filename ) );
+			readfile( $file_path );
 			exit();
 		}
 	}
