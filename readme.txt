@@ -4,7 +4,7 @@ Donate link: http://codeofconduct.co/
 Tags: simply static, html, static, static site, static site generator, static website generator, performance, fast, optimization, availability, scaling, scalability, cdn, security, secure, zip, hardening
 Requires at least: 4.0
 Tested up to: 4.6
-Stable tag: 1.6.2
+Stable tag: 1.6.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -93,6 +93,12 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 2. This is what the Simply Static Generate page looks like after you've generated your static files. We'll show you exactly which files we made a static copy of.
 
 == Changelog ==
+
+= 1.6.3, September 23, 2016 =
+
+* Fixed a security vulnerability in relation to zip downloads (thanks Bas!)
+* Fixed SQL diagnostic checks for wildcard permission grants (thanks Jon!)
+* Marked plugin as being compatible with WordPress 4.6
 
 = 1.6.2, July 14, 2016 =
 
