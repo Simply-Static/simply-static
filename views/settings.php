@@ -27,37 +27,65 @@
 								<label for='originHost'><?php _e( "Origin URL", 'simply-static' );?></label>
 							</th>
 							<td>
-								<select id='originScheme' name='origin_scheme' disabled>
+								<select id='originScheme' class='scheme-entry' name='origin_scheme' disabled>
 									<option value='<?php echo $this->origin_scheme; ?>'><?php echo $this->origin_scheme; ?></option>
-								</select>
-								<input aria-describedby='originHostHelpBlock' type='text' id='originHost' name='origin_host' value='<?php echo esc_attr( $this->origin_host ) ?>' size='50' disabled />
-								<p id='originHostHelpBlock' class='help-block'><?php echo sprintf( __( "This is the URL of your WordPress installation. You can edit the URL on <a href='%s'>the General Settings page</a>.", 'simply-static' ), admin_url( '/options-general.php' ) ); ?></p>
+								</select><!--
+							 --><input aria-describedby='originHostHelpBlock' type='text' id='originHost' class='host-entry' name='origin_host' value='<?php echo esc_attr( $this->origin_host ) ?>' size='50' disabled />
+								<p id='originHostHelpBlock' class='help-block'><?php echo sprintf( __( "This is the URL of your WordPress site. You can edit the URL on <a href='%s'>the General Settings page</a>.", 'simply-static' ), admin_url( '/options-general.php' ) ); ?></p>
 							</td>
 						</tr>
 						<tr>
 							<th>
-								<label for='destinationHost'><?php _e( "Destination URL", 'simply-static' );?></label>
+								<label><?php _e( "Destination URL", 'simply-static' );?></label>
 							</th>
 							<td>
-								<select id='destinationScheme' name='destination_scheme'>
-									<?php foreach ( array( 'http://', 'https://', '//' ) as $scheme ) : ?>
-									<option value='<?php echo $scheme; ?>' <?php sist_selected_if( $this->destination_scheme == $scheme ) ?>><?php echo $scheme; ?></option>
-									<?php endforeach; ?>
-								</select>
-								<input aria-describedby='destinationHostHelpBlock' type='text' id='destinationHost' name='destination_host' value='<?php echo esc_attr( $this->destination_host ) ?>' size='50' />
-								<p id='destinationHostHelpBlock' class='help-block'><?php _e( "This is the URL where your static site will live. When generating your static site, all links to the Origin URL will be replaced with the Destination URL.", 'simply-static' ); ?></p>
+								<p><?php _e( "When exporting your static site, any links to your WordPress site will be replaced by one of the following: absolute URLs (at a domain of your choice), relative URLs, or URLs contructed for offline use.", 'simply-static' ); ?></p>
 							</td>
 						</tr>
 						<tr>
 							<th></th>
-							<td>
-								<label>
-									<input aria-describedby='saveForOfflineAccessHelpBlock' name='save_for_offline_access' id='saveForOfflineAccess' value='1' type='checkbox' <?php if ( $this->save_for_offline_access == '1' ) { echo 'checked'; } ?> />
-									<?php _e( "Save for offline access", 'simply-static' ); ?>
-								</label>
-								<p id='saveForOfflineAccessHelpBlock' class='help-block'>
-									<?php _e( "Export a static site for offline access. All URLs will be converted to relative URLs and you can browse the site locally on your own computer.", 'simply-static' ); ?>
-								</p>
+							<td class='url-dest-option'>
+								<span>
+									<input type="radio" name="destination_type" value="absolute" <?php if ( $this->destination_type == 'absolute' ) { echo 'checked'; } ?>>
+								</span>
+								<span>
+									<p><label><?php _e( "Use absolute URLs", 'simply-static' );?></label></p>
+									<select id='destinationScheme' class='scheme-entry' name='destination_scheme'>
+										<?php foreach ( array( 'http://', 'https://', '//' ) as $scheme ) : ?>
+										<option value='<?php echo $scheme; ?>' <?php sist_selected_if( $this->destination_scheme == $scheme ) ?>><?php echo $scheme; ?></option>
+										<?php endforeach; ?>
+									</select><!--
+								 --><input aria-describedby='destinationHostHelpBlock' type='text' id='destinationHost' class='host-entry' name='destination_host' placeholder='<?php _e( "www.your-static-site.com", 'simply-static' ); ?>' value='<?php echo esc_attr( $this->destination_host ) ?>' size='50' />
+									<p id='destinationHostHelpBlock' class='help-block'><?php _e( "Convert all URLs for your WordPress site to absolute URLs at the domain specified above.", 'simply-static' ); ?></p>
+								</span>
+							</td>
+						</tr>
+						<tr>
+							<th></th>
+							<td class='url-dest-option'>
+								<span>
+									<input type="radio" name="destination_type" value="relative" <?php if ( $this->destination_type == 'relative' ) { echo 'checked'; } ?>>
+								</span>
+								<span>
+									<p><label><?php _e( "Use relative URLs", 'simply-static' );?></label></p>
+									<p id='saveForOfflineAccessHelpBlock' class='help-block'>
+										<?php _e( "Convert all URLs for your WordPress site to relative URLs that will work at any domain.", 'simply-static' ); ?>
+									</p>
+								</span>
+							</td>
+						</tr>
+						<tr>
+							<th></th>
+							<td class='url-dest-option'>
+								<span>
+									<input type="radio" name="destination_type" value="offline" <?php if ( $this->destination_type == 'offline' ) { echo 'checked'; } ?>>
+								</span>
+								<span>
+									<p><label><?php _e( "Save for offline use", 'simply-static' ); ?></label></p>
+									<p id='saveForOfflineAccessHelpBlock' class='help-block'>
+										<?php _e( "Convert all URLs for your WordPress site so that you can browse the site locally on your own computer without hosting it on a web server.", 'simply-static' ); ?>
+									</p>
+								</span>
 							</td>
 						</tr>
 						<tr>

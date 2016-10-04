@@ -105,6 +105,47 @@
 	color: #737373;
 }
 
+#sistContainer .url-dest-option {
+	border: 1px solid #f1f1f1;
+	display: inline-block;
+	cursor: pointer;
+}
+
+#sistContainer .scheme-entry {
+	height: 28px;
+	margin-right: 0;
+	vertical-align: bottom;
+	border-right: 0;
+}
+
+#sistContainer .host-entry {
+	height: 28px;
+	width: 300px;
+	margin-left: 0;
+	padding: 2px 5px;
+	vertical-align: bottom;
+
+}
+
+#sistContainer .url-dest-option:hover {
+	background-color: #ececec;
+	border: 1px solid #ddd;
+}
+
+#sistContainer .url-dest-option.active {
+	background-color: #e5e5e5;
+	border: 1px solid #ccc;
+}
+
+#sistContainer .url-dest-option > span {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+#sistContainer .url-dest-option > span:first-child {
+	padding-right: 10px;
+}
+
 /* Diagnostics page */
 
 #sistContainer #diagnosticsPage table.striped {

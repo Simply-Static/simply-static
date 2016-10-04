@@ -48,7 +48,7 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * Fetch and save pages for the static archive
-	 * @param  boolean $save_for_offline_access Are we saving files for offline access?
+	 * @param  boolean $save_for_offline_access Are we saving files for offline use?
 	 * @return array ( # pages processed, # pages remaining )
 	 */
 	public function fetch_pages( $save_for_offline_access ) {
@@ -116,7 +116,7 @@ class Simply_Static_Archive_Creator {
 	 * Process the response for a 200 response (success)
 	 * @param  Simply_Static_Page         $static_page Record to update
 	 * @param  Simply_Static_Url_Response $response    URL response to process
-	 * @param  boolean                    $save_for_offline_access Are we saving files for offline access?
+	 * @param  boolean                    $save_for_offline_access Are we saving files for offline use?
 	 * @return void
 	 */
 	private function handle_200_response( $static_page, $response, $save_for_offline_access ) {

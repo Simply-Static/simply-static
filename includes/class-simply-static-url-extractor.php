@@ -86,7 +86,7 @@ class Simply_Static_Url_Extractor {
 	protected $response;
 
 	/**
-	 * Are we saving files for offline access?
+	 * Are we saving files for offline use?
 	 * @var boolean
 	 */
 	protected $save_for_offline_access;
@@ -100,7 +100,7 @@ class Simply_Static_Url_Extractor {
 	/**
 	 * Constructor
 	 * @param string  $response                URL Response object
-	 * @param boolean $save_for_offline_access Are we saving files for offline access?
+	 * @param boolean $save_for_offline_access Are we saving files for offline use?
 	 */
 	public function __construct( $response, $save_for_offline_access ) {
 		$this->response = $response;

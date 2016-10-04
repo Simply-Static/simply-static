@@ -16,9 +16,7 @@ class Simply_Static_Diagnostic {
 	);
 
 	protected $description = array(
-		'URLs' => array(
-			array( 'function' => 'is_destination_host_a_valid_url' )
-		),
+		'URLs' => array(),
 		'Filesystem' => array(
 			array( 'function' => 'is_temp_files_dir_readable' ),
 			array( 'function' => 'is_temp_files_dir_writeable' )
@@ -51,8 +49,13 @@ class Simply_Static_Diagnostic {
 	public function __construct( $options ) {
 		$this->options = $options;
 
+		if ( $this->options->get( 'destination_type' ) == 'absolute' ) {
+			$this->description['URLs'][] = array(
+				'function' => 'is_destination_host_a_valid_url'
+			);
+		}
+
 		if ( $this->options->get( 'delivery_method' ) == 'local' ) {
-			$local_dir = $this->options->get( 'local_dir' );
 			$this->description['Filesystem'][] = array(
 				'function' => 'is_local_dir_writeable'
 			);

@@ -39,33 +39,63 @@ jQuery( document ).ready( function( $ ) {
 
 	// -----------------------------------------------------------------------//
 
-	// save for offline access:
-	$( '#sistContainer #saveForOfflineAccess' ).change( function() {
-		var checked = $( this ).prop( 'checked' );
+	$( 'td.url-dest-option' ).click( function() {
+		destination_type_change( $( this ) );
+	} );
 
-		if ( checked == '1' ) {
+	$( '#sistContainer input[type=radio][name=destination_type]' ).change( function() {
+		destination_type_change( $( this ).closest( 'td.url-dest-option' ) );
+	} );
+
+	// pretend the user selected a value on page load
+	$( '#sistContainer input[type=radio][name=destination_type]:checked' ).change();
+
+	function destination_type_change( $this ) {
+		$( 'td.url-dest-option' ).removeClass( 'active' );
+		$this.addClass( 'active' );
+		var $radio = $this.find( 'input[type=radio][name=destination_type]' );
+		$radio.prop( 'checked', true );
+
+		if ( $radio.val() != 'absolute' ) {
 			$( '#destinationHost' )
 				.val('')
 				.prop( 'disabled', true );
 			$( '#destinationScheme' )
 				.prop( 'disabled', true )
-			$( '<option/>', {
-					value: '',
-					text: ''
-				} )
-				.appendTo( $( '#destinationScheme' ) )
-				.prop( 'selected', 'selected' );
 		} else {
 			$( '#destinationHost' )
 				.prop( 'disabled', false );
 			$( '#destinationScheme' )
-				.prop( 'disabled', false )
-				.find( 'option[value=""]' ).remove();
+				.prop( 'disabled', false );
 		}
-	} );
-
-	// pretend the user selected a value
-	$( '#sistContainer #saveForOfflineAccess' ).change();
+	}
+	// // save for offline use:
+	// $( '#sistContainer #saveForOfflineAccess' ).change( function() {
+	// 	var checked = $( this ).prop( 'checked' );
+	//
+	// 	if ( checked == '1' ) {
+	// 		$( '#destinationHost' )
+	// 			.val('')
+	// 			.prop( 'disabled', true );
+	// 		$( '#destinationScheme' )
+	// 			.prop( 'disabled', true )
+	// 		$( '<option/>', {
+	// 				value: '',
+	// 				text: ''
+	// 			} )
+	// 			.appendTo( $( '#destinationScheme' ) )
+	// 			.prop( 'selected', 'selected' );
+	// 	} else {
+	// 		$( '#destinationHost' )
+	// 			.prop( 'disabled', false );
+	// 		$( '#destinationScheme' )
+	// 			.prop( 'disabled', false )
+	// 			.find( 'option[value=""]' ).remove();
+	// 	}
+	// } );
+	//
+	// // pretend the user selected a value
+	// $( '#sistContainer #saveForOfflineAccess' ).change();
 
 	// -----------------------------------------------------------------------//
 
