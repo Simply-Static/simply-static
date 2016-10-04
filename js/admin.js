@@ -40,20 +40,20 @@ jQuery( document ).ready( function( $ ) {
 	// -----------------------------------------------------------------------//
 
 	$( 'td.url-dest-option' ).click( function() {
-		destination_type_change( $( this ) );
+		destination_url_type_change( $( this ) );
 	} );
 
-	$( '#sistContainer input[type=radio][name=destination_type]' ).change( function() {
-		destination_type_change( $( this ).closest( 'td.url-dest-option' ) );
+	$( '#sistContainer input[type=radio][name=destination_url_type]' ).change( function() {
+		destination_url_type_change( $( this ).closest( 'td.url-dest-option' ) );
 	} );
 
 	// pretend the user selected a value on page load
-	$( '#sistContainer input[type=radio][name=destination_type]:checked' ).change();
+	$( '#sistContainer input[type=radio][name=destination_url_type]:checked' ).change();
 
-	function destination_type_change( $this ) {
+	function destination_url_type_change( $this ) {
 		$( 'td.url-dest-option' ).removeClass( 'active' );
 		$this.addClass( 'active' );
-		var $radio = $this.find( 'input[type=radio][name=destination_type]' );
+		var $radio = $this.find( 'input[type=radio][name=destination_url_type]' );
 		$radio.prop( 'checked', true );
 
 		if ( $radio.val() != 'absolute' ) {

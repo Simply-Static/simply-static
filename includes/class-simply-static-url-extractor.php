@@ -86,10 +86,10 @@ class Simply_Static_Url_Extractor {
 	protected $response;
 
 	/**
-	 * Are we saving files for offline use?
+	 * Are we saving destination URL as absolute, relative, or for offline use?
 	 * @var boolean
 	 */
-	protected $save_for_offline_access;
+	protected $destination_url_type;
 
 	/**
 	 * The url of the site
@@ -99,16 +99,16 @@ class Simply_Static_Url_Extractor {
 
 	/**
 	 * Constructor
-	 * @param string  $response                URL Response object
-	 * @param boolean $save_for_offline_access Are we saving files for offline use?
+	 * @param string  $response             URL Response object
+	 * @param boolean $destination_url_type Absolute/relative/offline URLs?
 	 */
-	public function __construct( $response, $save_for_offline_access ) {
+	public function __construct( $response, $destination_url_type ) {
 		$this->response = $response;
-		$this->save_for_offline_access = $save_for_offline_access;
+		$this->destination_url_type = $destination_url_type;
 	}
 
 	/**
-	 * Extracts URLs from the response
+	 * Extracts URLs from the response and update them based on the dest. type
 	 *
 	 * Returns a list of unique URLs from the body of the response. It only
 	 * extracts URLs from the same domain, either absolute urls or relative urls
@@ -119,7 +119,7 @@ class Simply_Static_Url_Extractor {
 	 *
 	 * @return array $urls
 	 */
-	public function extract_urls() {
+	public function extract_and_update_urls() {
 		if ( $this->response->is_html() ) {
 			$this->response->save_body( $this->extract_urls_from_html() );
 		}
@@ -300,19 +300,15 @@ class Simply_Static_Url_Extractor {
 	private function add_to_extracted_urls( $extracted_url ) {
 		$url = sist_relative_to_absolute_url( $extracted_url, $this->response->url );
 
-		// error_log( $absolute_url . ' -- ' . $this->response->url );
-		// error_log( sist_is_local_url( $absolute_url ) );
-		// error_log( $this->save_for_offline_access );
-
 		if ( $url && sist_is_local_url( $url ) ) {
 			$this->extracted_urls[] = sist_remove_params_and_fragment( $url );
 
-			if ( $this->save_for_offline_access ) {
-				// modify path of absolute url
-
+			if ( $this->destination_url_type == 'offline' ) {
+				// remove the scheme/host from the url
 				$page_path = sist_get_path_from_local_url( $this->response->url );
 				$extracted_path = sist_get_path_from_local_url( $url );
 
+				// create a path from one page to the other
 				$path = sist_create_relative_path( $extracted_path, $page_path );
 
 				$path_info = sist_url_path_info( $url );

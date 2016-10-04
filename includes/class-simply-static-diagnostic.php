@@ -49,7 +49,7 @@ class Simply_Static_Diagnostic {
 	public function __construct( $options ) {
 		$this->options = $options;
 
-		if ( $this->options->get( 'destination_type' ) == 'absolute' ) {
+		if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
 			$this->description['URLs'][] = array(
 				'function' => 'is_destination_host_a_valid_url'
 			);

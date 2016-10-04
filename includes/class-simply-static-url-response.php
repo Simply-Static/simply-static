@@ -106,17 +106,7 @@ class Simply_Static_Url_Response {
 	// }
 
 	/**
-	 * Extracts the list of unique URLs
-	 * @param  boolean $save_for_offline_access Are we saving files for offline use?
-	 * @return array
-	 */
-	public function extract_urls( $save_for_offline_access ) {
-		$extractor = new Simply_Static_Url_Extractor( $this, $save_for_offline_access );
-		return $extractor->extract_urls();
-	}
-
-	/**
-	 * Replaces origin URL with desintation URL in response body
+	 * Replaces origin URL with destination URL in response body
 	 * @param string $destination_scheme The protocol for the destination URL
 	 * @param string $destination_host   The host for the destination URL
 	 * @return void
@@ -125,7 +115,7 @@ class Simply_Static_Url_Response {
 		/* TODO: Might want to eventually rope this into extract_urls_from_html/
 		 	extract_urls_from_css so that we're only doing preg_replace/
 			str_replace once. Only reason I'm not doing that now is because of
-			the fix for wp_json_encode.
+			the fix for wp_json_encode / concatemoji.
 		*/
 		if ( $this->is_html() || $this->is_css() ) {
 			$destination_url = $destination_scheme . $destination_host;

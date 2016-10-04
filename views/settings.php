@@ -46,7 +46,7 @@
 							<th></th>
 							<td class='url-dest-option'>
 								<span>
-									<input type="radio" name="destination_type" value="absolute" <?php if ( $this->destination_type == 'absolute' ) { echo 'checked'; } ?>>
+									<input type="radio" name="destination_url_type" value="absolute" <?php if ( $this->destination_url_type == 'absolute' ) { echo 'checked'; } ?>>
 								</span>
 								<span>
 									<p><label><?php _e( "Use absolute URLs", 'simply-static' );?></label></p>
@@ -64,7 +64,7 @@
 							<th></th>
 							<td class='url-dest-option'>
 								<span>
-									<input type="radio" name="destination_type" value="relative" <?php if ( $this->destination_type == 'relative' ) { echo 'checked'; } ?>>
+									<input type="radio" name="destination_url_type" value="relative" <?php if ( $this->destination_url_type == 'relative' ) { echo 'checked'; } ?>>
 								</span>
 								<span>
 									<p><label><?php _e( "Use relative URLs", 'simply-static' );?></label></p>
@@ -78,7 +78,7 @@
 							<th></th>
 							<td class='url-dest-option'>
 								<span>
-									<input type="radio" name="destination_type" value="offline" <?php if ( $this->destination_type == 'offline' ) { echo 'checked'; } ?>>
+									<input type="radio" name="destination_url_type" value="offline" <?php if ( $this->destination_url_type == 'offline' ) { echo 'checked'; } ?>>
 								</span>
 								<span>
 									<p><label><?php _e( "Save for offline use", 'simply-static' ); ?></label></p>

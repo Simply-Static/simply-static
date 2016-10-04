@@ -48,10 +48,10 @@ class Simply_Static_Archive_Creator {
 
 	/**
 	 * Fetch and save pages for the static archive
-	 * @param  boolean $save_for_offline_access Are we saving files for offline use?
-	 * @return array ( # pages processed, # pages remaining )
+	 * @param  boolean $destination_url_type Absolute/relative/offline URLs?
+	 * @return array                         ( # pages processed, # pages remaining )
 	 */
-	public function fetch_pages( $save_for_offline_access ) {
+	public function fetch_pages( $destination_url_type ) {
 		$batch_size = 10;
 
 		$static_pages = Simply_Static_Page::query()
@@ -95,7 +95,7 @@ class Simply_Static_Archive_Creator {
 				continue;
 			}
 
-			$this->handle_200_response( $static_page, $response, $save_for_offline_access );
+			$this->handle_200_response( $static_page, $response, $destination_url_type );
 		}
 
 		return array( $pages_processed, $total_pages );
@@ -116,19 +116,19 @@ class Simply_Static_Archive_Creator {
 	 * Process the response for a 200 response (success)
 	 * @param  Simply_Static_Page         $static_page Record to update
 	 * @param  Simply_Static_Url_Response $response    URL response to process
-	 * @param  boolean                    $save_for_offline_access Are we saving files for offline use?
+	 * @param  boolean                    $destination_url_type Absolute/relative/offline URLs?
 	 * @return void
 	 */
-	private function handle_200_response( $static_page, $response, $save_for_offline_access ) {
+	private function handle_200_response( $static_page, $response, $destination_url_type ) {
 		// Fetch all URLs from the page and add them to the queue...
-		$urls = $response->extract_urls( $save_for_offline_access );
+		$extractor = new Simply_Static_Url_Extractor( $response, $destination_url_type );
+		$urls = $extractor->extract_and_update_urls();
 
 		foreach ( $urls as $url ) {
 			$this->set_url_found_on( $static_page, $url, $this->archive_start_time );
 		}
 
 		// Replace the origin URL with the destination URL within the content
-		// TODO: only do this on html or css
 		$response->replace_urls( $this->destination_scheme, $this->destination_host );
 
 		$file_path = str_replace( $this->archive_dir, '', $response->filename );
