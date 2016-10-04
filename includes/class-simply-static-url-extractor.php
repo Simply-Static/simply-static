@@ -313,7 +313,7 @@ class Simply_Static_Url_Extractor {
 				$extracted_path = sist_get_path_from_local_url( $url );
 
 				// create a path from one page to the other
-				$path = sist_create_relative_path( $extracted_path, $page_path );
+				$path = sist_create_offline_path( $extracted_path, $page_path );
 
 				$path_info = sist_url_path_info( $url );
 				if ( $path_info['extension'] === '' ) {

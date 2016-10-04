@@ -123,6 +123,13 @@ function sist_relative_to_absolute_url( $extracted_url, $page_url ) {
 		return null;
 	}
 
+	// if no path, check for an ending slash; if there isn't one, add one
+	if ( ! isset( $parsed_extracted_url['path'] ) ) {
+		$clean_url = sist_remove_params_and_fragment( $extracted_url );
+		$fragment = substr( $extracted_url, strlen( $clean_url ) );
+		$extracted_url = trailingslashit( $clean_url ) . $fragment;
+	}
+
 	if ( isset( $parsed_extracted_url['host'] ) ) {
 
 		return $extracted_url;
@@ -181,14 +188,14 @@ function sist_relative_to_absolute_url( $extracted_url, $page_url ) {
 
  */
 
-function sist_create_relative_path( $extracted_path, $page_path, $iterations = 0 ) {
+function sist_create_offline_path( $extracted_path, $page_path, $iterations = 0 ) {
 	// $pattern = '/([^\/]*\/)[^\/]*$/';
 	// $new_page_path = preg_replace( $pattern, '', $page_path );
 	// if ( $page_path == $new_page_path ) {
 	// 	// no more substitutions can be done, we're done here
 	// 	// contruct and return a url
 	// } else {
-	// 	sist_create_relative_path( $extracted_path, $new_page_path, ++$iterations );
+	// 	sist_create_offline_path( $extracted_path, $new_page_path, ++$iterations );
 	// }
 
 	// error_log( '$extracted_path: ' . $extracted_path );
@@ -197,15 +204,16 @@ function sist_create_relative_path( $extracted_path, $page_path, $iterations = 0
 
 	// We're done if we get a match between the path of the page and the extracted URL
 	// OR if there are no more slashes to remove
+
 	if ( strpos( $page_path, '/' ) === false || strpos( $extracted_path, $page_path ) === 0 ) {
 		$extracted_path = substr( $extracted_path, strlen( $page_path ) );
-		$new_path = './' . str_repeat( '../', $iterations ) . $extracted_path;
+		$new_path = '.' . str_repeat( '/..', $iterations-1 ) . sist_add_leading_slash( $extracted_path );
 		return $new_path;
 	} else {
 		// match last slash and 0+ non-slash characters before it
-		$pattern = '/([^\/]*\/)[^\/]*$/';
-		$new_page_path = preg_replace( $pattern, '', $page_path );
-		return sist_create_relative_path( $extracted_path, $new_page_path, ++$iterations );
+		$pattern = '/(.*)\/[^\/]*$/';
+		$new_page_path = preg_replace( $pattern, '$1', $page_path );
+		return sist_create_offline_path	( $extracted_path, $new_page_path, ++$iterations );
 	}
 }
 
@@ -371,4 +379,12 @@ function sist_add_leading_directory_separator( $path ) {
  */
 function sist_remove_leading_directory_separator( $path ) {
 	return ltrim( $path, DIRECTORY_SEPARATOR );
+}
+
+function sist_add_leading_slash( $path ) {
+	return '/' . sist_remove_leading_slash( $path );
+}
+
+function sist_remove_leading_slash( $path ) {
+	return ltrim( $path, '/' );
 }

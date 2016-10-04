@@ -79,7 +79,7 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 				=> self::DOMAIN . '/14',
 			// absolute url with fragment only
 			"<a href='" . self::DOMAIN . "#section15'>15</a>"
-				=> self::DOMAIN,
+				=> self::DOMAIN . '/',
 			// absolute url with path and fragment
 			"<a href='" . self::DOMAIN . "/test#section16'>16</a>"
 				=> self::DOMAIN . '/test',
@@ -110,12 +110,11 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 	/**
 	 * Testing that URL extraction alters content in predictable ways
 	 */
-	public function test_extract_urls_content_preservation() {
+	public function test_extract_urls_content_preservation_for_absolute_and_relative_urls() {
 
 		$destination_url_types = array(
 		    'absolute' => self::DOMAIN,
-		    'relative' => '',
-		    'offline' => './..'
+		    'relative' => ''
 		);
 
 		$content_before_and_after = array(
@@ -159,15 +158,15 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 			// non-standard casing
 			'<A HRef="/THIRTEEN.htm">13</a>'
 				=> '<a href="%s/THIRTEEN.htm">13</a>',
-			// // absolute url
-			// '<a href="' . self::DOMAIN . '/14">14</a>'
-			// 	=> '<a href="%s/14">14</a>',
+			// absolute url
+			'<a href="' . self::DOMAIN . '/14">14</a>'
+				=> '<a href="%s/14">14</a>',
 			// absolute url with fragment only
-			// '<a href="' . self::DOMAIN . '#section15">15</a>'
-			// 	=> '<a href="%s#section15">15</a>',
+			'<a href="' . self::DOMAIN . '#section15">15</a>'
+				=> '<a href="%s/#section15">15</a>',
 			// absolute url with path and fragment
-			// '<a href="' . self::DOMAIN . '/test#section16">16</a>'
-			// 	=> '<a href="%s/test#section16">16</a>',
+			'<a href="' . self::DOMAIN . '/test#section16">16</a>'
+				=> '<a href="%s/test#section16">16</a>',
 			// absolute url with path
 			'<a href="' . self::DOMAIN . '/test/17.htm">17</a>'
 				=> '<a href="%s/test/17.htm">17</a>',
@@ -194,6 +193,99 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 			}
 
 		}
+
+	}
+
+	/**
+	 * Testing that URL extraction alters content in predictable ways
+	 */
+	public function test_extract_urls_content_preservation_for_offline_access() {
+
+		$content_before_and_after = array(
+			// basic relative url
+			'<a href="one.htm">one</a>'
+				=> '<a href="./one.htm">one</a>',
+			// extra spacing around href attribute
+			'<a href="    /two.htm  ">two</a>'
+				=> '<a href="./../two.htm">two</a>',
+			// no quotes around href attribute
+			'<a href=three.htm>three</a>'
+				=> '<a href=./three.htm>three</a>',
+			// support for ../ links
+			'<a href="../four.htm">four</a>'
+				=> '<a href="./../four.htm">four</a>',
+			// support for ./ links
+			'<a href=./five.htm>five</a>'
+				=> '<a href=./five.htm>five</a>',
+			// extra spacing between href name and value
+			'<a href = six.htm>six</a>'
+				=> '<a href = ./six.htm>six</a>',
+			// space in url
+			'<a href="file seven.pdf">seven</a>'
+				=> '<a href="./file seven.pdf">seven</a>',
+			// This fails: (http dom library only returns 'file')
+			// // space in url and no quotes
+			// '<a href=file eight.pdf>eight</a>'
+			// 	=> '<a href=%s/blog/file eight.pdf>eight</a>',
+			//	multiple attributes with no spacing
+			'<a href=nine.htm test=test>nine</a>'
+				=> '<a href=./nine.htm test=test>nine</a>',
+			// relative url with path
+			'<a href="/path/ten.htm">ten</a>'
+				=> '<a href="./../path/ten.htm">ten</a>',
+			// query params get striped out
+			'<a href="/11.htm?test=true">11</a>'
+				=> '<a href="./../11.htm?test=true">11</a>',
+			// fragments get striped out
+			'<a href="/12.htm#test">12</a>'
+				=> '<a href="./../12.htm#test">12</a>',
+			// non-standard casing
+			'<A HRef="/THIRTEEN.htm">13</a>'
+				=> '<a href="./../THIRTEEN.htm">13</a>',
+			// absolute url
+			'<a href="' . self::DOMAIN . '/14">14</a>'
+				=> '<a href="./../14/index.html">14</a>',
+			// absolute url with fragment only
+			'<a href="' . self::DOMAIN . '#section15">15</a>'
+				=> '<a href="./../index.html#section15">15</a>',
+			// absolute url with path and fragment
+			'<a href="' . self::DOMAIN . '/test#section16">16</a>'
+				=> '<a href="./../test/index.html#section16">16</a>',
+			// absolute url with path
+			'<a href="' . self::DOMAIN . '/test/17.htm">17</a>'
+				=> '<a href="./../test/17.htm">17</a>',
+			// external url
+			'<a href="http://www.external.com/18.htm">18</a>'
+				=> '<a href="http://www.external.com/18.htm">18</a>',
+			// protocol-less URL
+			'<a href="//example.org/19.htm">19</a>'
+				=> '<a href="./../19.htm">19</a>',
+			// href's with just a hash
+			'<a href="#dontlinkmebro">20</a>'
+				=> '<a href="#dontlinkmebro">20</a>',
+			// offline urls: same level
+			'<a href="/blog/my-second-post">21</a>'
+				=> '<a href="./my-second-post/index.html">21</a>',
+			// offline urls: up a level
+			'<a href="/blog/third/my-third-post">22</a>'
+				=> '<a href="./third/my-third-post/index.html">22</a>',
+			// offline urls: down a level
+			'<a href="/my-fourth-post">23</a>'
+				=> '<a href="./../my-fourth-post/index.html">23</a>',
+			// offline urls: sibling
+			'<a href="/fifth/my-fifth-post">24</a>'
+				=> '<a href="./../fifth/my-fifth-post/index.html">24</a>',
+		);
+
+		foreach ( $content_before_and_after as $content_before => $content_after ) {
+
+			$response = Simply_Static_Url_Response_Factory::build( 'html', $content_before, self::URL );
+			$extractor = Simply_Static_Url_Extractor_Factory::build_from_response( $response, 'offline' );
+			$extractor->extract_and_update_urls();
+			$this->assertContains( $content_after, $response->get_body() );
+
+		}
+
 
 	}
 
