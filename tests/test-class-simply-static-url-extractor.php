@@ -17,7 +17,7 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 	/**
 	 * Helper function for creating extractors
 	 */
-	public function build_extractor( $content_type, $body, $url = self::URL ) {
+	public function build_absolute_url_extractor( $content_type, $body, $url = self::URL ) {
 		return Simply_Static_Url_Extractor_Factory::build( $content_type, $body, $url );
 	}
 
@@ -99,8 +99,8 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 
 		foreach ( $content_and_urls as $content => $url ) {
 
-			$extractor = $this->build_extractor( 'html', $content );
-			$extracted_url = current( $extractor->extract_urls() );
+			$extractor = $this->build_absolute_url_extractor( 'html', $content );
+			$extracted_url = current( $extractor->extract_and_update_urls() );
 			$this->assertEquals( $url, $extracted_url );
 
 		}
@@ -179,7 +179,7 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 
 			$response = Simply_Static_Url_Response_Factory::build( 'html', $content_before, self::URL );
 			$extractor = Simply_Static_Url_Extractor_Factory::build_from_response( $response );
-			$extractor->extract_urls();
+			$extractor->extract_and_update_urls();
 			$this->assertContains( $content_after, $response->get_body() );
 
 		}
@@ -208,8 +208,8 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 
 		foreach ( $content_and_urls as $content => $url ) {
 
-			$extractor = $this->build_extractor( 'html', $content );
-			$extracted_url = current( $extractor->extract_urls() );
+			$extractor = $this->build_absolute_url_extractor( 'html', $content );
+			$extracted_url = current( $extractor->extract_and_update_urls() );
 			$this->assertEquals( $url, $extracted_url );
 
 		}
@@ -240,8 +240,8 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 
 		foreach ( $content_and_urls as $content => $urls ) {
 
-			$extractor = $this->build_extractor( 'html', $content );
-			$extracted_urls = $extractor->extract_urls();
+			$extractor = $this->build_absolute_url_extractor( 'html', $content );
+			$extracted_urls = $extractor->extract_and_update_urls();
 
 			foreach ( $urls as $url ) {
 				$this->assertTrue( in_array( $url, $extracted_urls ) );
@@ -272,8 +272,8 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 
 		foreach ( $content_and_urls as $content => $urls ) {
 
-			$extractor = $this->build_extractor( 'html', $content );
-			$extracted_urls = $extractor->extract_urls();
+			$extractor = $this->build_absolute_url_extractor( 'html', $content );
+			$extracted_urls = $extractor->extract_and_update_urls();
 
 			foreach ( $urls as $url ) {
 				$this->assertTrue( in_array( $url, $extracted_urls ) );
@@ -302,8 +302,8 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 
 	// 	foreach ( $content_and_urls as $content => $urls ) {
 
-	// 		$extractor = $this->build_extractor( 'html', $content );
-	// 		$extracted_urls = $extractor->extract_urls();
+	// 		$extractor = $this->build_absolute_url_extractor( 'html', $content );
+	// 		$extracted_urls = $extractor->extract_and_update_urls();
 
 	// 		foreach ( $extracted_urls as $extracted_url ) {
 	// 			$this->assertTrue( in_array( $extracted_url, $urls ) );
@@ -331,8 +331,8 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 
 		foreach ( $content_and_urls as $content => $url ) {
 
-			$extractor = $this->build_extractor( 'html', $content );
-			$extracted_url = current( $extractor->extract_urls() );
+			$extractor = $this->build_absolute_url_extractor( 'html', $content );
+			$extracted_url = current( $extractor->extract_and_update_urls() );
 			$this->assertEquals( $url, $extracted_url );
 
 		}
@@ -353,8 +353,8 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 
 		foreach ( $content_and_urls as $content => $url ) {
 
-			$extractor = $this->build_extractor( 'html', $content );
-			$extracted_url = current( $extractor->extract_urls() );
+			$extractor = $this->build_absolute_url_extractor( 'html', $content );
+			$extracted_url = current( $extractor->extract_and_update_urls() );
 			$this->assertEquals( $url, $extracted_url );
 
 		}
@@ -389,8 +389,8 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 
 		foreach ( $content_and_urls as $content => $url ) {
 
-			$extractor = $this->build_extractor( 'css', $content );
-			$extracted_url = current( $extractor->extract_urls() );
+			$extractor = $this->build_absolute_url_extractor( 'css', $content );
+			$extracted_url = current( $extractor->extract_and_update_urls() );
 			$this->assertEquals( $url, $extracted_url );
 
 		}
