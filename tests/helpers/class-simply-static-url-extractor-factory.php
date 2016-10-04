@@ -8,13 +8,13 @@
  */
 class Simply_Static_Url_Extractor_Factory extends WP_UnitTestCase {
 
-	public static function build( $content_type, $body, $url ) {
+	public static function build( $content_type, $body, $destination_url_type, $url ) {
 		$response = Simply_Static_Url_Response_Factory::build( $content_type, $body, $url );
 
-		return new Simply_Static_Url_Extractor( $response, 'absolute' );
+		return new Simply_Static_Url_Extractor( $response, $destination_url_type );
 	}
 
-	public static function build_from_response( $response ) {
-		return new Simply_Static_Url_Extractor( $response, 'absolute' );
+	public static function build_from_response( $response, $destination_url_type ) {
+		return new Simply_Static_Url_Extractor( $response, $destination_url_type );
 	}
 }

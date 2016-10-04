@@ -102,7 +102,7 @@ class Simply_Static_Url_Extractor {
 	 * @param string  $response             URL Response object
 	 * @param boolean $destination_url_type Absolute/relative/offline URLs?
 	 */
-	public function __construct( $response, $destination_url_type ) {
+	public function __construct( Simply_Static_Url_Response $response, $destination_url_type ) {
 		$this->response = $response;
 		$this->destination_url_type = $destination_url_type;
 	}
@@ -303,7 +303,11 @@ class Simply_Static_Url_Extractor {
 		if ( $url && sist_is_local_url( $url ) ) {
 			$this->extracted_urls[] = sist_remove_params_and_fragment( $url );
 
-			if ( $this->destination_url_type == 'offline' ) {
+			if ( $this->destination_url_type == 'relative' ) {
+
+				$url = sist_get_path_from_local_url( $url );
+
+			} else if ( $this->destination_url_type == 'offline' ) {
 				// remove the scheme/host from the url
 				$page_path = sist_get_path_from_local_url( $this->response->url );
 				$extracted_path = sist_get_path_from_local_url( $url );

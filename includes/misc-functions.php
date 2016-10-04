@@ -200,7 +200,6 @@ function sist_create_relative_path( $extracted_path, $page_path, $iterations = 0
 	if ( strpos( $page_path, '/' ) === false || strpos( $extracted_path, $page_path ) === 0 ) {
 		$extracted_path = substr( $extracted_path, strlen( $page_path ) );
 		$new_path = './' . str_repeat( '../', $iterations ) . $extracted_path;
-		error_log( '$new_path: ' . $new_path );
 		return $new_path;
 	} else {
 		// match last slash and 0+ non-slash characters before it
