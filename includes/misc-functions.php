@@ -154,64 +154,35 @@ function sist_relative_to_absolute_url( $extracted_url, $page_url ) {
 	}
 }
 
-
-/*
-	You've got two URLs:
-		extracted url: http://www.wp-latest.dev/wp-content/themes/twentyfifteen/js/functions.js?ver=20150330
-		           or: http://www.wp-latest.dev/2012/01/03/template-comments/
-		           or: http://www.wp-latest.dev/2012/02/05/
-		 current page: http://www.wp-latest.dev/2012/01/
-
-		You'll want to strip the protocol/domain off of both:
-		extracted url: /wp-content/themes/twentyfifteen/js/functions.js?ver=20150330
-		           or: /2012/01/03/template-comments/
-		           or: /2012/02/05/
-		 current page: /2012/01/
-
-		extracted url: /2012/
-		 current page: /2012/02/05/
-		   result url: ./../../
-
-		extracted url: /2012/02/05/
-		 current page: /2012/05/10/
-		   result url: ./../../02/05/
-
-		   extracted url: /2012/02/05/
-   		    current page: /2012/
-   		      result url: ./02/05/
-
-		Starting with the current page, see if the path is a stripos==0 match for the extracted url
-		If it is, remove the matching portion and add a ./ to $extracted_path and you're done
-			eventually we should always hit a slash and exit
-		If it is not, remove a directory (furthest slash to the one before it) and try again
-			each removed directory is replaced with a '../' in the result
-
- */
-
+ /**
+  * Recursively create a path from one page to another
+  *
+  * Takes a path (e.g. /blog/foobar/) extracted from a page (e.g. /blog/page/3/)
+  * and returns a path to get to the extracted page from the current page
+  * (e.g. ./../../foobar/index.html). Since this is for offline use, the path
+  * return will include a /index.html if the extracted path doesn't contain
+  * an extension.
+  *
+  * The function recursively calls itself, cutting off sections of the page path
+  * until the base matches the extracted path or it runs out of parts to remove,
+  * then it builds out the path to the extracted page.
+  *
+  * @param  string      $extracted_path Relative or absolute URL extracted from page
+  * @param  string      $page_path      URL of page
+  * @param  int         $iterations     Number of times the page path has been chopped
+  * @return string|null                 Absolute URL, or null
+  */
 function sist_create_offline_path( $extracted_path, $page_path, $iterations = 0 ) {
-	// $pattern = '/([^\/]*\/)[^\/]*$/';
-	// $new_page_path = preg_replace( $pattern, '', $page_path );
-	// if ( $page_path == $new_page_path ) {
-	// 	// no more substitutions can be done, we're done here
-	// 	// contruct and return a url
-	// } else {
-	// 	sist_create_offline_path( $extracted_path, $new_page_path, ++$iterations );
-	// }
-
-	// error_log( '$extracted_path: ' . $extracted_path );
-	// error_log( '$page_path: ' . $page_path );
-	// error_log( ( strpos( $extracted_path, $page_path ) === 0 ) ? 'true' : 'false' );
-
 	// We're done if we get a match between the path of the page and the extracted URL
 	// OR if there are no more slashes to remove
-
 	if ( strpos( $page_path, '/' ) === false || strpos( $extracted_path, $page_path ) === 0 ) {
 		$extracted_path = substr( $extracted_path, strlen( $page_path ) );
 		$new_path = '.' . str_repeat( '/..', $iterations-1 ) . sist_add_leading_slash( $extracted_path );
 		return $new_path;
 	} else {
-		// match last slash and 0+ non-slash characters before it
+		// match everything before the last slash
 		$pattern = '/(.*)\/[^\/]*$/';
+		// remove the last slash and anything after it
 		$new_page_path = preg_replace( $pattern, '$1', $page_path );
 		return sist_create_offline_path	( $extracted_path, $new_page_path, ++$iterations );
 	}
@@ -381,10 +352,18 @@ function sist_remove_leading_directory_separator( $path ) {
 	return ltrim( $path, DIRECTORY_SEPARATOR );
 }
 
+/**
+ * Add a slash to the beginning of a path
+ * @param string $path URL path to add leading slash to
+ */
 function sist_add_leading_slash( $path ) {
 	return '/' . sist_remove_leading_slash( $path );
 }
 
+/**
+ * Remove a slash from the beginning of a path
+ * @param string $path URL path to remove leading slash from
+ */
 function sist_remove_leading_slash( $path ) {
 	return ltrim( $path, '/' );
 }
