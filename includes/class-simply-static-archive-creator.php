@@ -51,7 +51,7 @@ class Simply_Static_Archive_Creator {
 	 * @param  boolean $destination_url_type Absolute/relative/offline URLs?
 	 * @return array                         ( # pages processed, # pages remaining )
 	 */
-	public function fetch_pages( $destination_url_type ) {
+	public function fetch_pages( $destination_url_type, $relative_path ) {
 		$batch_size = 10;
 
 		$static_pages = Simply_Static_Page::query()
@@ -95,7 +95,7 @@ class Simply_Static_Archive_Creator {
 				continue;
 			}
 
-			$this->handle_200_response( $static_page, $response, $destination_url_type );
+			$this->handle_200_response( $static_page, $response, $destination_url_type, $relative_path );
 		}
 
 		return array( $pages_processed, $total_pages );
@@ -119,9 +119,9 @@ class Simply_Static_Archive_Creator {
 	 * @param  boolean                    $destination_url_type Absolute/relative/offline URLs?
 	 * @return void
 	 */
-	private function handle_200_response( $static_page, $response, $destination_url_type ) {
+	private function handle_200_response( $static_page, $response, $destination_url_type, $relative_path ) {
 		// Fetch all URLs from the page and add them to the queue...
-		$extractor = new Simply_Static_Url_Extractor( $response, $destination_url_type );
+		$extractor = new Simply_Static_Url_Extractor( $response, $destination_url_type, $relative_path );
 		$urls = $extractor->extract_and_update_urls();
 
 		foreach ( $urls as $url ) {

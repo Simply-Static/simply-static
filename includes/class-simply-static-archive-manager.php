@@ -333,7 +333,8 @@ class Simply_Static_Archive_Manager {
 		);
 
 		$destination_url_type = $this->options->get( 'destination_url_type' );
-		list( $pages_processed, $total_pages ) = $archive_creator->fetch_pages( $destination_url_type );
+		$relative_path = $this->options->get( 'relative_path' );
+		list( $pages_processed, $total_pages ) = $archive_creator->fetch_pages( $destination_url_type, $relative_path );
 
 		$message = sprintf( __( "Fetched %d of %d pages/files", 'simply-static' ), $pages_processed, $total_pages );
 		$this->save_status_message( $message );
@@ -385,9 +386,11 @@ class Simply_Static_Archive_Manager {
 				return $pages_processed;
 			} else {
 				if ( $pages_processed == $total_pages ) {
-					$destination_url = $this->options->get( 'destination_scheme' ) . $this->options->get( 'destination_host' );
-					$message = __( 'Destination URL:', 'simply-static' ) . ' <a href="' . $destination_url .'" target="_blank">' . $destination_url . '</a>';
-					$this->save_status_message( $message, 'destination_url' );
+					if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
+						$destination_url = $this->options->get( 'destination_scheme' ) . $this->options->get( 'destination_host' );
+						$message = __( 'Destination URL:', 'simply-static' ) . ' <a href="' . $destination_url .'" target="_blank">' . $destination_url . '</a>';
+						$this->save_status_message( $message, 'destination_url' );
+					}
 				}
 
 				// return true when done (no more pages)

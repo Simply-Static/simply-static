@@ -165,8 +165,10 @@ class Simply_Static {
 				$scheme = $this->options->get( 'destination_scheme' );
 				$scheme = $scheme . '://';
 				$this->options->set( 'destination_scheme', $scheme );
+				$this->options->set( 'relative_path', '/' );
 
-				if ( $this->options->get( 'destination_host' ) == sist_origin_host() ) {
+				$host = $this->options->get( 'destination_host' );
+				if ( $host == sist_origin_host() ) {
 					$this->options->set( 'destination_url_type', 'relative' );
 				} else {
 					$this->options->set( 'destination_url_type', 'absolute' );
@@ -386,6 +388,7 @@ class Simply_Static {
 			->assign( 'local_dir', $this->options->get( 'local_dir' ) )
 			->assign( 'delete_temp_files', $this->options->get( 'delete_temp_files' ) )
 			->assign( 'destination_url_type', $this->options->get( 'destination_url_type' ) )
+			->assign( 'relative_path', $this->options->get( 'relative_path' ) )
 			->render();
 	}
 
@@ -412,7 +415,6 @@ class Simply_Static {
 	 */
 	public function save_options() {
 		$destination_url_type = filter_input( INPUT_POST, 'destination_url_type' );
-		error_log( $destination_url_type );
 
 		if ( $destination_url_type == 'offline' ) {
 			$destination_scheme = '';
@@ -425,6 +427,9 @@ class Simply_Static {
 			$destination_host = untrailingslashit( filter_input( INPUT_POST, 'destination_host', FILTER_SANITIZE_URL ) );
 		}
 
+		$relative_path = filter_input( INPUT_POST, 'relative_path' );
+		$relative_path = untrailingslashit( sist_add_leading_slash( $relative_path ) );
+
 		$this->options
 			->set( 'destination_scheme', $destination_scheme )
 			->set( 'destination_host', $destination_host )
@@ -435,6 +440,7 @@ class Simply_Static {
 			->set( 'local_dir', sist_trailingslashit_unless_blank( filter_input( INPUT_POST, 'local_dir' ) ) )
 			->set( 'delete_temp_files', filter_input( INPUT_POST, 'delete_temp_files' ) )
 			->set( 'destination_url_type', $destination_url_type )
+			->set( 'relative_path', $relative_path )
 			->save();
 	}
 

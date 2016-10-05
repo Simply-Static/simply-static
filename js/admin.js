@@ -56,46 +56,28 @@ jQuery( document ).ready( function( $ ) {
 		var $radio = $this.find( 'input[type=radio][name=destination_url_type]' );
 		$radio.prop( 'checked', true );
 
-		if ( $radio.val() != 'absolute' ) {
+		if ( $radio.val() == 'absolute' ) {
+			$( '#destinationHost' )
+				.prop( 'disabled', false );
+			$( '#destinationScheme' )
+				.prop( 'disabled', false );
+		} else {
 			$( '#destinationHost' )
 				.val('')
 				.prop( 'disabled', true );
 			$( '#destinationScheme' )
 				.prop( 'disabled', true )
+		}
+
+		if ( $radio.val() == 'relative' ) {
+			$( '#relativePath' )
+				.prop( 'disabled', false );
 		} else {
-			$( '#destinationHost' )
-				.prop( 'disabled', false );
-			$( '#destinationScheme' )
-				.prop( 'disabled', false );
+			$( '#relativePath' )
+				.val('')
+				.prop( 'disabled', true );
 		}
 	}
-	// // save for offline use:
-	// $( '#sistContainer #saveForOfflineAccess' ).change( function() {
-	// 	var checked = $( this ).prop( 'checked' );
-	//
-	// 	if ( checked == '1' ) {
-	// 		$( '#destinationHost' )
-	// 			.val('')
-	// 			.prop( 'disabled', true );
-	// 		$( '#destinationScheme' )
-	// 			.prop( 'disabled', true )
-	// 		$( '<option/>', {
-	// 				value: '',
-	// 				text: ''
-	// 			} )
-	// 			.appendTo( $( '#destinationScheme' ) )
-	// 			.prop( 'selected', 'selected' );
-	// 	} else {
-	// 		$( '#destinationHost' )
-	// 			.prop( 'disabled', false );
-	// 		$( '#destinationScheme' )
-	// 			.prop( 'disabled', false )
-	// 			.find( 'option[value=""]' ).remove();
-	// 	}
-	// } );
-	//
-	// // pretend the user selected a value
-	// $( '#sistContainer #saveForOfflineAccess' ).change();
 
 	// -----------------------------------------------------------------------//
 

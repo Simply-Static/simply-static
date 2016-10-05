@@ -24,22 +24,10 @@
 					<tbody>
 						<tr>
 							<th>
-								<label for='originHost'><?php _e( "Origin URL", 'simply-static' );?></label>
+								<label><?php _e( "Destination URLs", 'simply-static' );?></label>
 							</th>
 							<td>
-								<select id='originScheme' class='scheme-entry' name='origin_scheme' disabled>
-									<option value='<?php echo $this->origin_scheme; ?>'><?php echo $this->origin_scheme; ?></option>
-								</select><!--
-							 --><input aria-describedby='originHostHelpBlock' type='text' id='originHost' class='host-entry' name='origin_host' value='<?php echo esc_attr( $this->origin_host ) ?>' size='50' disabled />
-								<p id='originHostHelpBlock' class='help-block'><?php echo sprintf( __( "This is the URL of your WordPress site. You can edit the URL on <a href='%s'>the General Settings page</a>.", 'simply-static' ), admin_url( '/options-general.php' ) ); ?></p>
-							</td>
-						</tr>
-						<tr>
-							<th>
-								<label><?php _e( "Destination URL", 'simply-static' );?></label>
-							</th>
-							<td>
-								<p><?php _e( "When exporting your static site, any links to your WordPress site will be replaced by one of the following: absolute URLs (at a domain of your choice), relative URLs, or URLs contructed for offline use.", 'simply-static' ); ?></p>
+								<p><?php _e( "When exporting your static site, any links to your WordPress site will be replaced by one of the following: absolute URLs, relative URLs, or URLs contructed for offline use:", 'simply-static' ); ?></p>
 							</td>
 						</tr>
 						<tr>
@@ -55,8 +43,8 @@
 										<option value='<?php echo $scheme; ?>' <?php sist_selected_if( $this->destination_scheme == $scheme ) ?>><?php echo $scheme; ?></option>
 										<?php endforeach; ?>
 									</select><!--
-								 --><input aria-describedby='destinationHostHelpBlock' type='text' id='destinationHost' class='host-entry' name='destination_host' placeholder='<?php _e( "www.your-static-site.com", 'simply-static' ); ?>' value='<?php echo esc_attr( $this->destination_host ) ?>' size='50' />
-									<p id='destinationHostHelpBlock' class='help-block'><?php _e( "Convert all URLs for your WordPress site to absolute URLs at the domain specified above.", 'simply-static' ); ?></p>
+								 --><input aria-describedby='destinationHostHelpBlock' type='text' id='destinationHost' class='host-entry' name='destination_host' placeholder='<?php _e( "www.example.com", 'simply-static' ); ?>' value='<?php echo trailingslashit( esc_attr( $this->destination_host ) ) ?>' size='50' />
+									<p id='destinationHostHelpBlock' class='help-block'><?php _e( "Convert all URLs for your WordPress site to absolute URLs at the domain and path specified above.", 'simply-static' ); ?></p>
 								</span>
 							</td>
 						</tr>
@@ -68,8 +56,10 @@
 								</span>
 								<span>
 									<p><label><?php _e( "Use relative URLs", 'simply-static' );?></label></p>
-									<p id='saveForOfflineAccessHelpBlock' class='help-block'>
-										<?php _e( "Convert all URLs for your WordPress site to relative URLs that will work at any domain.", 'simply-static' ); ?>
+									<input aria-describedby='relativePathHelpBlock' type='text' id='relativePath' name='relative_path' placeholder='/' value='<?php echo trailingslashit( esc_attr( $this->relative_path ) ) ?>' size='50' />
+									<p id='relativePathHelpBlock' class='help-block'>
+										<?php _e( "Convert all URLs for your WordPress site to relative URLs that will work at any domain. Optionally provide a path if you intend to place the files in a subdirectory.", 'simply-static' ); ?><br />
+										<?php echo sprintf( __( "Example: enter <code>/path/</code> above if you wanted to serve your files at <code>www.example.com<b>/path/</b></code>", 'simply-static' ), $example_local_dir ); ?>
 									</p>
 								</span>
 							</td>
@@ -82,7 +72,7 @@
 								</span>
 								<span>
 									<p><label><?php _e( "Save for offline use", 'simply-static' ); ?></label></p>
-									<p id='saveForOfflineAccessHelpBlock' class='help-block'>
+									<p class='help-block'>
 										<?php _e( "Convert all URLs for your WordPress site so that you can browse the site locally on your own computer without hosting it on a web server.", 'simply-static' ); ?>
 									</p>
 								</span>

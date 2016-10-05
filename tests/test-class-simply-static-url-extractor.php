@@ -17,8 +17,8 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 	/**
 	 * Helper function for creating extractors
 	 */
-	public function build_extractor( $content_type, $body, $destination_url_type = 'absolute', $url = self::URL ) {
-		return Simply_Static_Url_Extractor_Factory::build( $content_type, $body, $destination_url_type, $url );
+	public function build_extractor( $content_type, $body, $destination_url_type = 'absolute', $url = self::URL, $relative_path = '/' ) {
+		return Simply_Static_Url_Extractor_Factory::build( $content_type, $body, $destination_url_type, $url, $relative_path );
 	}
 
 	/**

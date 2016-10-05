@@ -87,9 +87,15 @@ class Simply_Static_Url_Extractor {
 
 	/**
 	 * Are we saving destination URL as absolute, relative, or for offline use?
-	 * @var boolean
+	 * @var string
 	 */
 	protected $destination_url_type;
+
+	/**
+	 * Base relative path to use for generating relative URLs
+	 * @var string
+	 */
+	protected $relative_path;
 
 	/**
 	 * The url of the site
@@ -102,9 +108,10 @@ class Simply_Static_Url_Extractor {
 	 * @param string  $response             URL Response object
 	 * @param boolean $destination_url_type Absolute/relative/offline URLs?
 	 */
-	public function __construct( Simply_Static_Url_Response $response, $destination_url_type ) {
+	public function __construct( Simply_Static_Url_Response $response, $destination_url_type, $relative_path ) {
 		$this->response = $response;
 		$this->destination_url_type = $destination_url_type;
+		$this->relative_path = $relative_path;
 	}
 
 	/**
@@ -295,7 +302,7 @@ class Simply_Static_Url_Extractor {
 	 * added to the array.
 	 *
 	 * @return string The URL that should be added to the list of extracted URLs
-	 * @return string The URL, converted to an absolute URL
+	 * @return string The URL, converted to an absolute/relative/offline URL
 	 */
 	private function add_to_extracted_urls( $extracted_url ) {
 		$url = sist_relative_to_absolute_url( $extracted_url, $this->response->url );
@@ -306,6 +313,7 @@ class Simply_Static_Url_Extractor {
 			if ( $this->destination_url_type == 'relative' ) {
 
 				$url = sist_get_path_from_local_url( $url );
+				$url = $this->relative_path . $url;
 
 			} else if ( $this->destination_url_type == 'offline' ) {
 				// remove the scheme/host from the url
