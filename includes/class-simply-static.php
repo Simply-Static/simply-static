@@ -165,7 +165,7 @@ class Simply_Static {
 				$scheme = $this->options->get( 'destination_scheme' );
 				$scheme = $scheme . '://';
 				$this->options->set( 'destination_scheme', $scheme );
-				$this->options->set( 'relative_path', '/' );
+				$this->options->set( 'relative_path', '' );
 
 				$host = $this->options->get( 'destination_host' );
 				if ( $host == sist_origin_host() ) {
