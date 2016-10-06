@@ -105,12 +105,6 @@
 	color: #737373;
 }
 
-#sistContainer .url-dest-option {
-	border: 1px solid #f1f1f1;
-	display: inline-block;
-	cursor: pointer;
-}
-
 #sistContainer .scheme-entry {
 	height: 28px;
 	margin-right: 0;
@@ -124,7 +118,13 @@
 	margin-left: 0;
 	padding: 2px 5px;
 	vertical-align: bottom;
+}
 
+#sistContainer .url-dest-option {
+	border: 1px solid #f1f1f1;
+	display: table;
+	cursor: pointer;
+	width: 100%;
 }
 
 #sistContainer .url-dest-option:hover {
@@ -140,10 +140,11 @@
 #sistContainer .url-dest-option > span {
 	display: table-cell;
 	vertical-align: middle;
+	padding: 15px 9px;
 }
 
 #sistContainer .url-dest-option > span:first-child {
-	padding-right: 10px;
+	width: 10px;
 }
 
 /* Diagnostics page */

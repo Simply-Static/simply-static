@@ -43,8 +43,8 @@
 										<option value='<?php echo $scheme; ?>' <?php sist_selected_if( $this->destination_scheme == $scheme ) ?>><?php echo $scheme; ?></option>
 										<?php endforeach; ?>
 									</select><!--
-								 --><input aria-describedby='destinationHostHelpBlock' type='text' id='destinationHost' class='host-entry' name='destination_host' placeholder='<?php _e( "www.example.com", 'simply-static' ); ?>' value='<?php echo trailingslashit( esc_attr( $this->destination_host ) ) ?>' size='50' />
-									<p id='destinationHostHelpBlock' class='help-block'><?php _e( "Convert all URLs for your WordPress site to absolute URLs at the domain and path specified above.", 'simply-static' ); ?></p>
+								 --><input aria-describedby='destinationHostHelpBlock' type='text' id='destinationHost' class='host-entry' name='destination_host' placeholder='<?php _e( "www.example.com/", 'simply-static' ); ?>' value='<?php echo trailingslashit( esc_attr( $this->destination_host ) ) ?>' size='50' />
+									<p id='destinationHostHelpBlock' class='help-block'><?php _e( "Convert all URLs for your WordPress site to absolute URLs at the domain specified above.", 'simply-static' ); ?></p>
 								</span>
 							</td>
 						</tr>
@@ -57,10 +57,10 @@
 								<span>
 									<p><label><?php _e( "Use relative URLs", 'simply-static' );?></label></p>
 									<input aria-describedby='relativePathHelpBlock' type='text' id='relativePath' name='relative_path' placeholder='/' value='<?php echo trailingslashit( esc_attr( $this->relative_path ) ) ?>' size='50' />
-									<p id='relativePathHelpBlock' class='help-block'>
-										<?php _e( "Convert all URLs for your WordPress site to relative URLs that will work at any domain. Optionally provide a path if you intend to place the files in a subdirectory.", 'simply-static' ); ?><br />
-										<?php echo sprintf( __( "Example: enter <code>/path/</code> above if you wanted to serve your files at <code>www.example.com<b>/path/</b></code>", 'simply-static' ), $example_local_dir ); ?>
-									</p>
+									<div id='relativePathHelpBlock' class='help-block'>
+										<p><?php _e( "Convert all URLs for your WordPress site to relative URLs that will work at any domain. Optionally specify a path above if you intend to place the files in a subdirectory.", 'simply-static' ); ?></p>
+										<p><?php echo sprintf( __( "Example: enter <code>/path/</code> above if you wanted to serve your files at <code>www.example.com<b>/path/</b></code>", 'simply-static' ), $example_local_dir ); ?></p>
+									</div>
 								</span>
 							</td>
 						</tr>
@@ -91,7 +91,7 @@
 						<tr class='delivery-method zip'>
 							<th></th>
 							<td>
-								<p><?php _e( "Saving your static files to a ZIP archive is Simply Static's default delivery method. After generating your static files you will be prompted to download the ZIP archive.", 'simply-static' ); ?></p>
+								<p><?php _e( "Saving your static files to a ZIP archive is Simply Static's default delivery method. After generating your static files you will be provided with a link to download the ZIP archive.", 'simply-static' ); ?></p>
 							</td>
 						</tr>
 						<tr class='delivery-method local'>
@@ -107,8 +107,10 @@
 							<td>
 								<?php $example_local_dir = trailingslashit( untrailingslashit( get_home_path() ) . '_static' ); ?>
 								<input aria-describedby='localDirHelpBlock' type='text' id='localDir' name='local_dir' value='<?php echo esc_attr( $this->local_dir ) ?>' class='widefat' />
-								<p id='localDirHelpBlock' class='help-block'><?php _e( "This is the directory where your static files will be saved. The directory must exist and be writeable by the webserver.", 'simply-static' ); ?><br />
-								<?php echo sprintf( __( "Example: <code>%s</code>", 'simply-static' ), $example_local_dir ); ?></p>
+								<div id='localDirHelpBlock' class='help-block'>
+									<p><?php _e( "This is the directory where your static files will be saved. The directory must exist and be writeable by the webserver.", 'simply-static' ); ?></p>
+									<p><?php echo sprintf( __( "Example: <code>%s</code>", 'simply-static' ), $example_local_dir ); ?></p>
+								</div>
 							</td>
 						</tr>
 						<tr>
@@ -134,8 +136,10 @@
 							<td>
 								<?php $example_temp_files_dir = trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' );?>
 								<input aria-describedby='tempFilesDirHelpBlock' type='text' id='tempFilesDir' name='temp_files_dir' value='<?php echo esc_attr( $this->temp_files_dir ) ?>' class='widefat' />
-								<p id='tempFilesDirHelpBlock' class='help-block'><?php _e( "Your static files (and ZIP archives, if generated) are temporarily saved to this directory. This directory must exist and be writeable.", 'simply-static' ); ?><br />
-								<?php echo sprintf( __( "Default: <code>%s</code>", 'simply-static' ), $example_temp_files_dir ); ?></p>
+								<div id='tempFilesDirHelpBlock' class='help-block'>
+									<p><?php _e( "Your static files (and ZIP archives, if generated) are temporarily saved to this directory. This directory must exist and be writeable.", 'simply-static' ); ?></p>
+									<p><?php echo sprintf( __( "Default: <code>%s</code>", 'simply-static' ), $example_temp_files_dir ); ?></p>
+								</div>
 							</td>
 						</tr>
 						<tr>
@@ -156,12 +160,12 @@
 							</th>
 							<td>
 								<textarea aria-describedby='additionalUrlsHelpBlock' class='widefat' name='additional_urls' id='additionalUrls' rows='5' cols='10'><?php echo esc_html( $this->additional_urls ) ?></textarea>
-								<p id='additionalUrlsHelpBlock' class='help-block'>
-									<?php echo sprintf( __( "Simply Static will create a static copy of any page it can find a link to, starting at %s. If you want to create static copies of pages or files that <em>aren't</em> linked to, add the URLs here (one per line).", 'simply-static' ), sist_origin_url() ); ?><br />
-									<?php echo sprintf( __( "Examples: <code>%s</code> or <code>%s</code>", 'simply-static' ),
+								<div id='additionalUrlsHelpBlock' class='help-block'>
+									<p><?php echo sprintf( __( "Simply Static will create a static copy of any page it can find a link to, starting at %s. If you want to create static copies of pages or files that <em>aren't</em> linked to, add the URLs here (one per line).", 'simply-static' ), sist_origin_url() ); ?></p>
+									<p><?php echo sprintf( __( "Examples: <code>%s</code> or <code>%s</code>", 'simply-static' ),
 									sist_origin_url() . __( "/hidden-page", 'simply-static' ),
-									sist_origin_url() . __( "/images/secret.jpg", 'simply-static' ) ); ?>
-								</p>
+									sist_origin_url() . __( "/images/secret.jpg", 'simply-static' ) ); ?></p>
+								</div>
 							</td>
 						</tr>
 						<tr>
@@ -170,12 +174,12 @@
 							</th>
 							<td>
 								<textarea aria-describedby='additionalFilesHelpBlock' class='widefat' name='additional_files' id='additionalFiles' rows='5' cols='10'><?php echo esc_html( $this->additional_files ) ?></textarea>
-								<p id='additionalFilesHelpBlock' class='help-block'>
-									<?php _e( "Sometimes you may want to include additional files (such as files referenced via AJAX) or directories. Add the paths to those files or directories here (one per line).", 'simply-static' ); ?><br />
-									<?php echo sprintf( __( "Examples: <code>%s</code> or <code>%s</code>", 'simply-static' ),
+								<div id='additionalFilesHelpBlock' class='help-block'>
+									<p><?php _e( "Sometimes you may want to include additional files (such as files referenced via AJAX) or directories. Add the paths to those files or directories here (one per line).", 'simply-static' ); ?></p>
+									<p><?php echo sprintf( __( "Examples: <code>%s</code> or <code>%s</code>", 'simply-static' ),
 									get_home_path() .  __( "additional-directory", 'simply-static' ),
-									trailingslashit( WP_CONTENT_DIR ) .  __( "fancy.pdf", 'simply-static' ) ); ?>
-								</p>
+									trailingslashit( WP_CONTENT_DIR ) .  __( "fancy.pdf", 'simply-static' ) ); ?></p>
+								</div>
 							</td>
 						</tr>
 						<tr>
