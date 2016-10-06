@@ -4,7 +4,7 @@ Donate link: http://codeofconduct.co/
 Tags: simply static, html, static, static site, static site generator, static website generator, performance, fast, optimization, availability, scaling, scalability, cdn, security, secure, zip, hardening
 Requires at least: 4.0
 Tested up to: 4.6
-Stable tag: 1.6.3
+Stable tag: 1.7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -94,19 +94,24 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 
 == Changelog ==
 
+= 1.7.0, October 06, 2016 =
+
+* New: Destination URLs can now begin with // (in addition to http:// & https://)
+* New: You can now use relative URLs (instead of absolute URLs) for the static site
+* New: Now able to export a static site for use offline
+
 = 1.6.3, September 23, 2016 =
 
-* Fixed a security vulnerability in relation to zip downloads (thanks Bas!)
-* Fixed SQL diagnostic checks for wildcard permission grants (thanks Jon!)
-* Marked plugin as being compatible with WordPress 4.6
+* Fix: Eliminated a security vulnerability in relation to zip downloads (thanks Bas!)
+* Fix: SQL diagnostic checks now work with wildcard permission grants (thanks Jon!)
 
 = 1.6.2, July 14, 2016 =
 
-* Made a slight modification to the prior fix
+* Fix: Made a slight modification to the prior fix
 
 = 1.6.1, July 14, 2016 =
 
-* Fix for "Call to a member function find() on a non-object" error. Thanks jwatkins0101!
+* Fix: No more "Call to a member function find() on a non-object" error. Thanks jwatkins0101!
 
 = 1.6.0, June 07, 2016 =
 
