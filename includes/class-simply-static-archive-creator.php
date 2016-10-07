@@ -238,8 +238,10 @@ class Simply_Static_Archive_Creator {
 	 * @return string|WP_Error $temporary_zip The path to the archive zip file
 	 */
 	public function create_zip() {
+		require_once( ABSPATH . 'wp-admin/includes/class-pclzip.php' );
+
 		$zip_filename = untrailingslashit( $this->archive_dir ) . '.zip';
-		$zip_archive = new PclZip($zip_filename);
+		$zip_archive = new PclZip( $zip_filename );
 
 		$files = array();
 		$iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $this->archive_dir, RecursiveDirectoryIterator::SKIP_DOTS ) );
