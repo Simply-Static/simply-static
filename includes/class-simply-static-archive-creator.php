@@ -157,6 +157,9 @@ class Simply_Static_Archive_Creator {
 		$current_url = $static_page->url;
 		$redirect_url = $response->get_redirect_url();
 
+		// convert our potentially relative URL to an absolute URL
+		$redirect_url = sist_relative_to_absolute_url( $redirect_url, $current_url );
+
 		// WP likes to 301 redirect `/path` to `/path/` -- we want to
 		// check for this and just add the trailing slashed version
 		if ( $redirect_url === trailingslashit( $current_url ) ) {
@@ -173,9 +176,6 @@ class Simply_Static_Archive_Creator {
 			$this->set_url_found_on( $static_page, $redirect_url, $this->archive_start_time );
 
 		} else {
-
-			// convert our potentially relative URL to an absolute URL
-			$redirect_url = sist_relative_to_absolute_url( $redirect_url, $current_url );
 
 			if ( $redirect_url ) {
 
