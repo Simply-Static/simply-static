@@ -156,14 +156,14 @@
 						</tr>
 						<tr>
 							<th>
-								<label for='additionalUrls'><?php _e( "Additional URLs", 'simply-static' );?></label>
+								<label for='additionalUrls'><?php _e( "Additional URLs", 'simply-static' ); ?></label>
 							</th>
 							<td>
-								<textarea aria-describedby='additionalUrlsHelpBlock' class='widefat' name='additional_urls' id='additionalUrls' rows='5' cols='10'><?php echo esc_html( $this->additional_urls ) ?></textarea>
+								<textarea aria-describedby='additionalUrlsHelpBlock' class='widefat' name='additional_urls' id='additionalUrls' rows='5' cols='10'><?php echo $this->additional_urls; ?></textarea>
 								<div id='additionalUrlsHelpBlock' class='help-block'>
-									<p><?php echo sprintf( __( "Simply Static will create a static copy of any page it can find a link to, starting at %s. If you want to create static copies of pages or files that <em>aren't</em> linked to, add the URLs here (one per line).", 'simply-static' ), sist_origin_url() ); ?></p>
+									<p><?php echo sprintf( __( "Simply Static will create a static copy of any page it can find a link to, starting at %s. If you want to create static copies of pages or files that <em>aren't</em> linked to, add the URLs here (one per line).", 'simply-static' ), trailingslashit( sist_origin_url() ) ); ?></p>
 									<p><?php echo sprintf( __( "Examples: <code>%s</code> or <code>%s</code>", 'simply-static' ),
-									sist_origin_url() . __( "/hidden-page", 'simply-static' ),
+									sist_origin_url() . __( "/hidden-page/", 'simply-static' ),
 									sist_origin_url() . __( "/images/secret.jpg", 'simply-static' ) ); ?></p>
 								</div>
 							</td>
@@ -173,11 +173,11 @@
 								<label for='additionalFiles'><?php _e( "Additional Files and Directories", 'simply-static' );?></label>
 							</th>
 							<td>
-								<textarea aria-describedby='additionalFilesHelpBlock' class='widefat' name='additional_files' id='additionalFiles' rows='5' cols='10'><?php echo esc_html( $this->additional_files ) ?></textarea>
+								<textarea aria-describedby='additionalFilesHelpBlock' class='widefat' name='additional_files' id='additionalFiles' rows='5' cols='10'><?php echo $this->additional_files; ?></textarea>
 								<div id='additionalFilesHelpBlock' class='help-block'>
 									<p><?php _e( "Sometimes you may want to include additional files (such as files referenced via AJAX) or directories. Add the paths to those files or directories here (one per line).", 'simply-static' ); ?></p>
 									<p><?php echo sprintf( __( "Examples: <code>%s</code> or <code>%s</code>", 'simply-static' ),
-									get_home_path() .  __( "additional-directory", 'simply-static' ),
+									get_home_path() .  __( "additional-directory/", 'simply-static' ),
 									trailingslashit( WP_CONTENT_DIR ) .  __( "fancy.pdf", 'simply-static' ) ); ?></p>
 								</div>
 							</td>

@@ -9,7 +9,7 @@ class Simply_Static {
 	 * Plugin version
 	 * @var string
 	 */
-	const VERSION = '1.7.0';
+	const VERSION = '1.7.1';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
@@ -151,7 +151,7 @@ class Simply_Static {
 				$urls_array = sist_string_to_array( $additional_urls );
 
 				if ( ! in_array( $emoji_url, $urls_array ) ) {
-					$additional_urls = $emoji_url . "\n" . $additional_urls;
+					$additional_urls = $additional_urls . "\n"  . $emoji_url;
 					$this->options->set( 'additional_urls', $additional_urls );
 				}
 			}
@@ -174,6 +174,24 @@ class Simply_Static {
 					$this->options->set( 'destination_url_type', 'absolute' );
 				}
 			}
+
+			if ( version_compare( $version, '1.7.1', '<' ) ) {
+				// check for, and add, the WP uploads dir if it's missing
+				$upload_dir = wp_upload_dir();
+				if ( isset( $upload_dir['basedir'] ) ) {
+
+					$upload_dir = trailingslashit( $upload_dir['basedir'] );
+
+					$additional_files = $this->options->get( 'additional_files' );
+					$files_array = sist_string_to_array( $additional_files );
+
+					if ( ! in_array( $upload_dir, $files_array ) ) {
+						$additional_files = $additional_files . "\n" . $upload_dir;
+						$this->options->set( 'additional_files', $additional_files );
+					}
+				}
+			}
+
 		}
 
 		// always update the version and save
@@ -466,7 +484,8 @@ class Simply_Static {
 	 * @return string                Value of the POST variable
 	 */
 	public function fetch_post_value( $variable_name ) {
-		return sanitize_text_field( filter_input( INPUT_POST, $variable_name ) );
+		// using explode/implode to keep linebreaks in text areas
+		return implode( "\n", array_map( 'sanitize_text_field', explode( "\n", $_POST[ $variable_name ] ) ) );
 	}
 
 	/**
