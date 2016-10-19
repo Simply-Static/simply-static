@@ -124,6 +124,7 @@ jQuery( document ).ready( function( $ ) {
 		handle_failure = handle_failure || true;
 
 		var data = {
+			'_ajax_nonce': $('#_wpnonce').val(),
 			'action': 'generate_static_archive',
 			'perform': action
 		};
@@ -172,6 +173,7 @@ jQuery( document ).ready( function( $ ) {
 
 	function display_export_log() {
 		var data = {
+			'_ajax_nonce': $('#_wpnonce').val(),
 			'action': 'render_export_log',
 			'page': 1,
 			'per_page': STATIC_PAGES_PER_PAGE
@@ -187,6 +189,7 @@ jQuery( document ).ready( function( $ ) {
 
 	function display_activity_log() {
 		var data = {
+			'_ajax_nonce': $('#_wpnonce').val(),
 			'action': 'render_activity_log'
 		};
 
@@ -213,6 +216,7 @@ jQuery( document ).ready( function( $ ) {
 		}
 
 		var data = {
+			'_ajax_nonce': $('#_wpnonce').val(),
 			'action': 'render_export_log',
 			'page': page,
 			'per_page': STATIC_PAGES_PER_PAGE

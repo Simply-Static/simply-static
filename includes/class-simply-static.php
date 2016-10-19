@@ -276,6 +276,11 @@ class Simply_Static {
 	 * @return void
 	 */
 	function generate_static_archive() {
+		check_ajax_referer( 'simply-static_generate' );
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			die( __( 'Not permitted', 'simply-static' ) );
+		}
+
 		$action = $_POST['perform'];
 
 		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
@@ -303,6 +308,11 @@ class Simply_Static {
 	 * @return void
 	 */
 	public function render_activity_log() {
+		check_ajax_referer( 'simply-static_generate' );
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			die( __( 'Not permitted', 'simply-static' ) );
+		}
+
 		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
 
 		$content = $this->view
@@ -321,6 +331,11 @@ class Simply_Static {
 	 * @return void
 	 */
 	public function render_export_log() {
+		check_ajax_referer( 'simply-static_generate' );
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			die( __( 'Not permitted', 'simply-static' ) );
+		}
+
 		$per_page = $_POST['per_page'];
 		$current_page = $_POST['page'];
 		$offset = ( intval( $current_page ) - 1 ) * intval( $per_page );
@@ -413,7 +428,9 @@ class Simply_Static {
 	 * @return void
 	 */
 	public function save_options() {
-		$destination_url_type = filter_input( INPUT_POST, 'destination_url_type' );
+		check_admin_referer( 'simply-static_settings' );
+
+		$destination_url_type = $this->fetch_post_value( 'destination_url_type' );
 
 		if ( $destination_url_type == 'offline' ) {
 			$destination_scheme = '';
@@ -422,25 +439,34 @@ class Simply_Static {
 			$destination_scheme = '';
 			$destination_host = '';
 		} else {
-			$destination_scheme = filter_input( INPUT_POST, 'destination_scheme' );
-			$destination_host = untrailingslashit( filter_input( INPUT_POST, 'destination_host', FILTER_SANITIZE_URL ) );
+			$destination_scheme = $this->fetch_post_value( 'destination_scheme' );
+			$destination_host = untrailingslashit( $this->fetch_post_value( 'destination_host' ) );
 		}
 
-		$relative_path = filter_input( INPUT_POST, 'relative_path' );
+		$relative_path = $this->fetch_post_value( 'relative_path' );
 		$relative_path = untrailingslashit( sist_add_leading_slash( $relative_path ) );
 
 		$this->options
 			->set( 'destination_scheme', $destination_scheme )
 			->set( 'destination_host', $destination_host )
-			->set( 'temp_files_dir', sist_trailingslashit_unless_blank( filter_input( INPUT_POST, 'temp_files_dir' ) ) )
-			->set( 'additional_urls', filter_input( INPUT_POST, 'additional_urls' ) )
-			->set( 'additional_files', filter_input( INPUT_POST, 'additional_files' ) )
-			->set( 'delivery_method', filter_input( INPUT_POST, 'delivery_method' ) )
-			->set( 'local_dir', sist_trailingslashit_unless_blank( filter_input( INPUT_POST, 'local_dir' ) ) )
-			->set( 'delete_temp_files', filter_input( INPUT_POST, 'delete_temp_files' ) )
+			->set( 'temp_files_dir', sist_trailingslashit_unless_blank( $this->fetch_post_value( 'temp_files_dir' ) ) )
+			->set( 'additional_urls', $this->fetch_post_value( 'additional_urls' ) )
+			->set( 'additional_files', $this->fetch_post_value( 'additional_files' ) )
+			->set( 'delivery_method', $this->fetch_post_value( 'delivery_method' ) )
+			->set( 'local_dir', sist_trailingslashit_unless_blank( $this->fetch_post_value( 'local_dir' ) ) )
+			->set( 'delete_temp_files', $this->fetch_post_value( 'delete_temp_files' ) )
 			->set( 'destination_url_type', $destination_url_type )
 			->set( 'relative_path', $relative_path )
 			->save();
+	}
+
+	/**
+	 * Fetch a POST variable by name and sanitize it
+	 * @param  string $variable_name Name of the POST variable to fetch
+	 * @return string                Value of the POST variable
+	 */
+	public function fetch_post_value( $variable_name ) {
+		return sanitize_text_field( filter_input( INPUT_POST, $variable_name ) );
 	}
 
 	/**
@@ -448,8 +474,10 @@ class Simply_Static {
 	 * @return void
 	 */
 	public function save_diagnostics() {
+		check_admin_referer( 'simply-static_diagnostics' );
+
 		$this->options
-			->set( 'debugging_mode', filter_input( INPUT_POST, 'debugging_mode' ) )
+			->set( 'debugging_mode', $this->fetch_post_value( 'debugging_mode' ) )
 			->save();
 	}
 
@@ -472,9 +500,8 @@ class Simply_Static {
 	public function download_file() {
 		$file_name = isset( $_GET[ self::SLUG . '_zip_download' ] ) ? $_GET[ self::SLUG . '_zip_download' ] : null;
 		if ( $file_name ) {
-			// Force user to be logged in
-			if ( ! is_user_logged_in() ) {
-				return;
+			if ( ! current_user_can( 'edit_posts' ) ) {
+				die( __( 'Not permitted', 'simply-static' ) );
 			}
 
 			// Don't allow path traversal

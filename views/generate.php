@@ -8,8 +8,7 @@
 
 <div class='wrap' id='generatePage'>
 
-	<?php wp_nonce_field( Simply_Static::SLUG ) ?>
-	<input type='hidden' name='_generate' value='1' />
+	<?php wp_nonce_field( 'simply-static_generate' ) ?>
 
 	<div class='actions'>
 		<input id='generate' class='button button-primary button-hero <?php if ( ! $this->archive_generation_ready_to_start ) { echo 'hide'; } ?>' type='submit' name='generate' value='<?php _e( "Generate Static Files", 'simply-static' ); ?>' />

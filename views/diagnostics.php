@@ -32,7 +32,7 @@
 
 	<!-- <form id='optionsForm' method='post' action=''>
 
-		<?php // wp_nonce_field( Simply_Static::SLUG ) ?>
+		<?php // wp_nonce_field( 'simply-static_diagnostics' ) ?>
 		<input type='hidden' name='_diagnostics' value='1' />
 
 		<table class='form-table'>
