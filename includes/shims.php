@@ -13,7 +13,7 @@ if ( ! function_exists( 'mb_detect_encoding' ) ) {
 	 */
 	function mb_detect_encoding($str, $encoding_list = INF, $strict = false)
 	{
-		if (INF === $encoding_list) $encoding_list = self::$encoding_list;
+		if (INF === $encoding_list) $encoding_list = array('ASCII', 'UTF-8');
 		else
 		{
 			if (! is_array($encoding_list)) $encoding_list = array_map('trim', explode(',', $encoding_list));
