@@ -39,6 +39,12 @@ class Simply_Static {
 	protected $view = null;
 
 	/**
+	 * Are we in the plugin?
+	 * @var boolean
+	 */
+	protected $in_plugin = false;
+
+	/**
 	 * Disable usage of "new"
 	 * @return void
 	 */
@@ -68,6 +74,9 @@ class Simply_Static {
 			self::$instance->options = new Simply_Static_Options( self::SLUG );
 			self::$instance->view = new Simply_Static_View();
 
+			$page = $_GET['page'];
+			self::$instance->in_plugin = strpos( $page, self::SLUG ) === 0;
+
 			// Check for pending file download
 			add_action( 'plugins_loaded', array( self::$instance, 'download_file' ) );
 			// Load the text domain for i18n
@@ -82,6 +91,9 @@ class Simply_Static {
 			add_action( 'wp_ajax_generate_static_archive', array( self::$instance, 'generate_static_archive' ) );
 			add_action( 'wp_ajax_render_export_log', array( self::$instance, 'render_export_log' ) );
 			add_action( 'wp_ajax_render_activity_log', array( self::$instance, 'render_activity_log' ) );
+
+			add_filter( 'admin_footer_text', array( self::$instance, 'filter_admin_footer_text' ) );
+			add_filter( 'update_footer', array( self::$instance, 'filter_update_footer' ), 15 );
 
 			self::$instance->activate();
 		}
@@ -511,6 +523,42 @@ class Simply_Static {
 			false,
 			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
 		);
+	}
+
+	/**
+	 * Display support text in footer when on plugin page
+	 *
+	 * @return string
+	 */
+	public function filter_admin_footer_text( $text ) {
+		if ( ! self::$instance->in_plugin ) {
+			return $text;
+		}
+
+		$contact_support = '<a target="_blank" href="https://wordpress.org/support/plugin/simply-static#new-post">'
+			. __( 'Contact Support', 'simply-static' ) . '</a> | ';
+		$add_your_rating = str_replace(
+				'[stars]',
+				'<a target="_blank" href="https://wordpress.org/support/plugin/simply-static/reviews/#new-post" >&#9733;&#9733;&#9733;&#9733;&#9733;</a>',
+				__( 'Enjoying Simply Static? Add your [stars] on wordpress.org.', 'simply-static' )
+			);
+
+		return $contact_support . $add_your_rating;
+	}
+
+	/**
+	 * Display plugin version in footer when on plugin page
+	 *
+	 * @return string
+	 */
+	public function filter_update_footer( $text ) {
+		if ( ! self::$instance->in_plugin ) {
+			return $text;
+		}
+
+		$version = __( 'Simply Static Version' ) . ': <a title="' . __( 'View what changed in this version', 'simply-static' ) . '" href="https://wordpress.org/plugins/simply-static/changelog/">' . self::VERSION . '</a>';
+
+		return $version;
 	}
 
 	/**
