@@ -43,7 +43,7 @@
 										<option value='<?php echo $scheme; ?>' <?php sist_selected_if( $this->destination_scheme == $scheme ) ?>><?php echo $scheme; ?></option>
 										<?php endforeach; ?>
 									</select><!--
-								 --><input aria-describedby='destinationHostHelpBlock' type='text' id='destinationHost' class='host-entry' name='destination_host' placeholder='<?php _e( "www.example.com/", 'simply-static' ); ?>' value='<?php echo trailingslashit( $this->destination_host ) ?>' size='50' />
+								 --><input aria-describedby='destinationHostHelpBlock' type='text' id='destinationHost' class='host-entry' name='destination_host' placeholder='<?php _e( "www.example.com/", 'simply-static' ); ?>' value='<?php echo trailingslashit( esc_attr( $this->destination_host ) ); ?>' size='50' />
 									<p id='destinationHostHelpBlock' class='help-block'><?php _e( "Convert all URLs for your WordPress site to absolute URLs at the domain specified above.", 'simply-static' ); ?></p>
 								</span>
 							</td>
@@ -56,7 +56,7 @@
 								</span>
 								<span>
 									<p><label><?php _e( "Use relative URLs", 'simply-static' );?></label></p>
-									<input aria-describedby='relativePathHelpBlock' type='text' id='relativePath' name='relative_path' placeholder='/' value='<?php echo trailingslashit( $this->relative_path ) ?>' size='50' />
+									<input aria-describedby='relativePathHelpBlock' type='text' id='relativePath' name='relative_path' placeholder='/' value='<?php echo trailingslashit( esc_attr( $this->relative_path ) ); ?>' size='50' />
 									<div id='relativePathHelpBlock' class='help-block'>
 										<p><?php _e( "Convert all URLs for your WordPress site to relative URLs that will work at any domain. Optionally specify a path above if you intend to place the files in a subdirectory.", 'simply-static' ); ?></p>
 										<p><?php echo sprintf( __( "Example: enter <code>/path/</code> above if you wanted to serve your files at <code>www.example.com<b>/path/</b></code>", 'simply-static' ), $example_local_dir ); ?></p>
@@ -106,7 +106,7 @@
 							</th>
 							<td>
 								<?php $example_local_dir = trailingslashit( untrailingslashit( get_home_path() ) . '_static' ); ?>
-								<input aria-describedby='localDirHelpBlock' type='text' id='localDir' name='local_dir' value='<?php echo  $this->local_dir ?>' class='widefat' />
+								<input aria-describedby='localDirHelpBlock' type='text' id='localDir' name='local_dir' value='<?php echo esc_attr( $this->local_dir ); ?>' class='widefat' />
 								<div id='localDirHelpBlock' class='help-block'>
 									<p><?php _e( "This is the directory where your static files will be saved. The directory must exist and be writeable by the webserver.", 'simply-static' ); ?></p>
 									<p><?php echo sprintf( __( "Example: <code>%s</code>", 'simply-static' ), $example_local_dir ); ?></p>
@@ -135,7 +135,7 @@
 							</th>
 							<td>
 								<?php $example_temp_files_dir = trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' );?>
-								<input aria-describedby='tempFilesDirHelpBlock' type='text' id='tempFilesDir' name='temp_files_dir' value='<?php echo $this->temp_files_dir ?>' class='widefat' />
+								<input aria-describedby='tempFilesDirHelpBlock' type='text' id='tempFilesDir' name='temp_files_dir' value='<?php echo esc_attr( $this->temp_files_dir ) ?>' class='widefat' />
 								<div id='tempFilesDirHelpBlock' class='help-block'>
 									<p><?php _e( "Your static files (and ZIP archives, if generated) are temporarily saved to this directory. This directory must exist and be writeable.", 'simply-static' ); ?></p>
 									<p><?php echo sprintf( __( "Default: <code>%s</code>", 'simply-static' ), $example_temp_files_dir ); ?></p>
@@ -159,7 +159,7 @@
 								<label for='additionalUrls'><?php _e( "Additional URLs", 'simply-static' ); ?></label>
 							</th>
 							<td>
-								<textarea aria-describedby='additionalUrlsHelpBlock' class='widefat' name='additional_urls' id='additionalUrls' rows='5' cols='10'><?php echo $this->additional_urls; ?></textarea>
+								<textarea aria-describedby='additionalUrlsHelpBlock' class='widefat' name='additional_urls' id='additionalUrls' rows='5' cols='10'><?php echo esc_textarea( $this->additional_urls ); ?></textarea>
 								<div id='additionalUrlsHelpBlock' class='help-block'>
 									<p><?php echo sprintf( __( "Simply Static will create a static copy of any page it can find a link to, starting at %s. If you want to create static copies of pages or files that <em>aren't</em> linked to, add the URLs here (one per line).", 'simply-static' ), trailingslashit( sist_origin_url() ) ); ?></p>
 									<p><?php echo sprintf( __( "Examples: <code>%s</code> or <code>%s</code>", 'simply-static' ),
@@ -173,7 +173,7 @@
 								<label for='additionalFiles'><?php _e( "Additional Files and Directories", 'simply-static' );?></label>
 							</th>
 							<td>
-								<textarea aria-describedby='additionalFilesHelpBlock' class='widefat' name='additional_files' id='additionalFiles' rows='5' cols='10'><?php echo $this->additional_files; ?></textarea>
+								<textarea aria-describedby='additionalFilesHelpBlock' class='widefat' name='additional_files' id='additionalFiles' rows='5' cols='10'><?php echo esc_textarea( $this->additional_files ); ?></textarea>
 								<div id='additionalFilesHelpBlock' class='help-block'>
 									<p><?php _e( "Sometimes you may want to include additional files (such as files referenced via AJAX) or directories. Add the paths to those files or directories here (one per line).", 'simply-static' ); ?></p>
 									<p><?php echo sprintf( __( "Examples: <code>%s</code> or <code>%s</code>", 'simply-static' ),
