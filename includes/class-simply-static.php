@@ -205,6 +205,7 @@ class Simply_Static {
 	 * @return void
 	 */
 	private function includes() {
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/shims.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/phpuri.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/PhpSimple/HtmlDomParser.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-options.php';
