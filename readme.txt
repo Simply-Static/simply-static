@@ -94,6 +94,17 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 
 == Changelog ==
 
+= 1.7.1, October 21, 2016 =
+
+* New: Auto-adding wp-content/uploads as a directory to include files from
+* New: Usage of the mbstring PHP extension is now optional
+* New: Added links for support, rating, and changelog in the footer
+* Fix: Added protection for cross-site request forgery
+* Fix: Now sanitizing all user inputs
+* Fix: Locking down generation of static files to users with proper permissions
+* Fix: The check for trailing slash redirection now works with relative URLs
+* Fix: "Cannot redeclare class PclZip" error should no longer occur
+
 = 1.7.0, October 06, 2016 =
 
 * New: Destination URLs can now begin with // (in addition to http:// & https://)

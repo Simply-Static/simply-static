@@ -191,7 +191,6 @@ class Simply_Static {
 				// check for, and add, the WP uploads dir if it's missing
 				$upload_dir = wp_upload_dir();
 				if ( isset( $upload_dir['basedir'] ) ) {
-
 					$upload_dir = trailingslashit( $upload_dir['basedir'] );
 
 					$additional_files = $this->options->get( 'additional_files' );
