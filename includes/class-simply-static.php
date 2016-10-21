@@ -74,7 +74,7 @@ class Simply_Static {
 			self::$instance->options = new Simply_Static_Options( self::SLUG );
 			self::$instance->view = new Simply_Static_View();
 
-			$page = $_GET['page'];
+			$page = isset( $_GET['page'] ) ? $_GET['page'] : '';
 			self::$instance->in_plugin = strpos( $page, self::SLUG ) === 0;
 
 			// Check for pending file download
