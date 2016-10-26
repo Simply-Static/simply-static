@@ -497,7 +497,7 @@ class Simply_Static {
 	 */
 	public function fetch_post_value( $variable_name ) {
 		// using explode/implode to keep linebreaks in text areas
-		return implode( "\n", array_map( 'sanitize_text_field', explode( "\n", $_POST[ $variable_name ] ) ) );
+		return implode( "\n", array_map( 'sanitize_text_field', explode( "\n", filter_input( INPUT_POST, $variable_name ) ) ) );
 	}
 
 	/**
