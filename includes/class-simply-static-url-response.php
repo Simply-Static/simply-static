@@ -74,6 +74,14 @@ class Simply_Static_Url_Response {
 	}
 
 	/**
+	 * Checks if content type is xml
+	 * @return bool
+	 */
+	public function is_xml() {
+		return stripos( $this->get_content_type(), 'xml' ) !== false;
+	}
+
+	/**
 	 * Checks for a location header (redirection URL)
 	 *
 	 * Returns an empty string if it doesn't find one.

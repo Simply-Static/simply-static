@@ -135,6 +135,10 @@ class Simply_Static_Url_Extractor {
 			$this->response->save_body( $this->extract_urls_from_css( $this->response->get_body() ) );
 		}
 
+		if ( $this->response->is_xml() ) {
+			$this->response->save_body( $this->extract_urls_from_xml() );
+		}
+
 		return array_unique( $this->extracted_urls );
 	}
 
@@ -260,7 +264,7 @@ class Simply_Static_Url_Extractor {
 	 * or both.
 	 *
 	 * @param  string $text The CSS to extract URLs from
-	 * @return string The CSS with all URLs made absolute
+	 * @return string The CSS with all URLs converted
 	 */
 	private function extract_urls_from_css( $text ) {
 		$patterns = array( "/url\(\s*[\"']?([^)\"']+)/", // url()
@@ -277,7 +281,7 @@ class Simply_Static_Url_Extractor {
 	 * callback function for preg_replace in extract_urls_from_css
 	 *
 	 * Takes the match, extracts the URL, adds it to the list of URLs, converts
-	 * the URL to an absolute URL.
+	 * the URL to a destination URL.
 	 *
 	 * @param  array $matches Array of preg_replace matches
 	 * @return string An updated string for the text that was originally matched
@@ -292,6 +296,39 @@ class Simply_Static_Url_Extractor {
 		}
 
 		return $full_match;
+	}
+
+	/**
+	 * Use regex to extract URLs from XML docs (e.g. /feed/)
+	 * @return string The XML with all of the URLs converted
+	 */
+	private function extract_urls_from_xml() {
+		$xml_string = $this->response->get_body();
+		// match anything starting with http/s plus all following characters
+		// except: [space] " ' <
+		$pattern = "/https?:\/\/[^\s\"'<]+/";
+		$text = preg_replace_callback( $pattern, array( $this, 'xml_matches' ), $xml_string );
+
+		return $text;
+	}
+
+	/**
+	 * Callback function for preg_replace in extract_urls_from_xml
+	 *
+	 * Takes the match, adds it to the list of URLs, converts the URL to a
+	 * destination URL.
+	 *
+	 * @param  array $matches Array of regex matches found in the XML doc
+	 * @return string         The extracted, converted URL
+	 */
+	private function xml_matches( $matches ) {
+		$extracted_url = $matches[0];
+
+		if ( isset( $extracted_url ) && $extracted_url !== '' ) {
+			$absolute_extracted_url = $this->add_to_extracted_urls( $extracted_url );
+		}
+
+		return $absolute_extracted_url;
 	}
 
 	/**
