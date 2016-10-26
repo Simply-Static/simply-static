@@ -59,7 +59,7 @@
 									<input aria-describedby='relativePathHelpBlock' type='text' id='relativePath' name='relative_path' placeholder='/' value='<?php echo trailingslashit( esc_attr( $this->relative_path ) ); ?>' size='50' />
 									<div id='relativePathHelpBlock' class='help-block'>
 										<p><?php _e( "Convert all URLs for your WordPress site to relative URLs that will work at any domain. Optionally specify a path above if you intend to place the files in a subdirectory.", 'simply-static' ); ?></p>
-										<p><?php echo sprintf( __( "Example: enter <code>/path/</code> above if you wanted to serve your files at <code>www.example.com<b>/path/</b></code>", 'simply-static' ), $example_local_dir ); ?></p>
+										<p><?php _e( "Example: enter <code>/path/</code> above if you wanted to serve your files at <code>www.example.com<b>/path/</b></code>", 'simply-static' ) ); ?></p>
 									</div>
 								</span>
 							</td>

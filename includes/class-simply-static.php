@@ -9,7 +9,7 @@ class Simply_Static {
 	 * Plugin version
 	 * @var string
 	 */
-	const VERSION = '1.7.1';
+	const VERSION = '1.7.2';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
@@ -201,6 +201,11 @@ class Simply_Static {
 						$this->options->set( 'additional_files', $additional_files );
 					}
 				}
+			}
+
+			if ( version_compare( $version, '1.7.2', '<' ) ) {
+				// version 1.3 added a database table for tracking urls/progress
+				Simply_Static_Page::create_table();
 			}
 
 		}

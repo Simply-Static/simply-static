@@ -16,6 +16,7 @@ class Simply_Static_Page extends Simply_Static_Model {
 		'url'                 => 'VARCHAR(255) NOT NULL',
 		'file_path'           => 'VARCHAR(255) NULL',
 		'http_status_code'    => 'SMALLINT(20) NULL',
+		'content_type'        => 'VARCHAR(255) NULL',
 		'content_hash'        => 'BINARY(20) NULL',
 		'error_message'       => 'VARCHAR(255) NULL',
 		'last_checked_at'     => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
@@ -92,5 +93,9 @@ class Simply_Static_Page extends Simply_Static_Model {
 		if ( ! $this->error_message ) {
 			$this->error_message = $message;
 		}
+	}
+
+	public function is_type( $content_type ) {
+		return stripos( $this->content_type, $content_type ) !== false;
 	}
 }

@@ -66,50 +66,28 @@ class Simply_Static_Archive_Creator {
 
 		while ( $static_page = array_shift( $static_pages ) ) {
 
-			$current_url = $static_page->url;
+			// $filename = $this->get_filename_for_static_page( $static_page );
+			$success = Simply_Static_Url_Fetcher::fetch( $static_page, $this->archive_dir );
 
-			$filename = $this->get_filename_for_static_page( $static_page );
-			$response = Simply_Static_Url_Fetcher::fetch( $current_url, $filename );
-
-			// If we get a WP_Error then somehow our request failed (e.g. space in URL)
-			if ( is_wp_error( $response ) ) {
-				$this->handle_fetch_error( $static_page );
+			if ( ! $success ) {
 				continue;
 			}
 
-			$data = array(
-				'http_status_code' => $response->code
-			);
-			$static_page->http_status_code = $response->code;
-			$static_page->last_checked_at = sist_formatted_datetime();
-			$static_page->save();
-
 			// If we get a 30x redirect...
-			if ( in_array( $response->code, array( 301, 302, 303, 307, 308 ) ) ) {
-				$this->handle_30x_redirect( $static_page, $response );
+			if ( in_array( $static_page->http_status_code, array( 301, 302, 303, 307, 308 ) ) ) {
+				$this->handle_30x_redirect( $static_page );
 				continue;
 			}
 
 			// Not a 200 for the response code? Move on.
-			if ( $response->code != 200 ) {
+			if ( $static_page->http_status_code != 200 ) {
 				continue;
 			}
 
-			$this->handle_200_response( $static_page, $response, $destination_url_type, $relative_path );
+			$this->handle_200_response( $static_page, $destination_url_type, $relative_path );
 		}
 
 		return array( $pages_processed, $total_pages );
-	}
-
-	/**
-	 * Process the response for a 200 response (success)
-	 * @param  Simply_Static_Page         $static_page Record to update
-	 * @return void
-	 */
-	private function handle_fetch_error( $static_page ) {
-		$static_page->http_status_code = null;
-		$static_page->last_checked_at = sist_formatted_datetime();
-		$static_page->save();
 	}
 
 	/**
@@ -194,7 +172,7 @@ class Simply_Static_Archive_Creator {
 					->assign( 'redirect_url', $redirect_url )
 					->render_to_string();
 
-				$filename = $this->save_static_page_content_to_file( $static_page, $content, true );
+				$filename = $this->save_static_page_content_to_file( $static_page, $content );
 				if ( $filename ) {
 					$static_page->file_path = $filename;
 				}
@@ -354,76 +332,6 @@ class Simply_Static_Archive_Creator {
 			return null;
 		}
 	}
-
-	/**
-	 * Retrieve a (full) filename given a Static_Page
-	 * @param Simply_Static_Page $static_page The Simply_Static_Page record
-	 * @return string|null                The file path of the saved file
-	 */
-	protected function get_filename_for_static_page( $static_page ) {
-		$relative_filename = $this->create_directories_for_static_page( $static_page );
-
-		if ( $relative_filename ) {
-			$file_path = $this->archive_dir . $relative_filename;
-			return $file_path;
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * Given a Static_Page, return a relative filename based on the URL
-	 *
-	 * This will also create directories as needed so that a file could be
-	 * created at the returned file path.
-	 * @param Simply_Static_Page $static_page The Simply_Static_Page
-	 * @return string|null                The file path of the file
-	 */
-	private function create_directories_for_static_page( $static_page ) {
-		$url_parts = parse_url( $static_page->url );
-		// a domain with no trailing slash has no path, so we're giving it one
-		$path = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
-
-		$origin_path_length = strlen( parse_url( sist_origin_url(), PHP_URL_PATH ) );
-		if ( $origin_path_length > 1 ) { // prevents removal of '/'
-			$path = substr( $path, $origin_path_length );
-		}
-
-		$path_info = sist_url_path_info( $path );
-
-		$relative_file_dir = $path_info['dirname'];
-		$relative_file_dir = sist_remove_leading_directory_separator( $relative_file_dir );
-
-		// If there's no extension, we're going to create a directory with the
-		// filename and place an index.html file in there.
-		if ( $path_info['extension'] === '' ) {
-			if ( $path_info['filename'] !== '' ) {
-				// the filename would be blank for the root url, in that
-				// instance we don't want to add an extra slash
-				$relative_file_dir .= $path_info['filename'];
-				$relative_file_dir = sist_add_trailing_directory_separator( $relative_file_dir );
-			}
-			$path_info['filename'] = 'index';
-			$path_info['extension'] = 'html';
-		}
-
-		$create_dir = wp_mkdir_p( $this->archive_dir . $relative_file_dir );
-		if ( $create_dir === false ) {
-			$static_page->set_error_message( 'Unable to create temporary directory' );
-		} else {
-			$relative_filename = $relative_file_dir . $path_info['filename'] . '.' . $path_info['extension'];
-			// check that file doesn't exist OR exists but is writeable
-			// (generally, we'd expect it to never exist)
-			if ( ! file_exists( $relative_filename ) || is_writable( $relative_filename ) ) {
-				return $relative_filename;
-			} else {
-				$static_page->set_error_message( 'Temporary file exists and is unwriteable' );
-			}
-		}
-
-		return null;
-	}
-
 
 	/**
 	 * Ensure the Origin URL and user-specified Additional URLs are in the DB
