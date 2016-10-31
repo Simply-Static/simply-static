@@ -71,7 +71,7 @@ class Simply_Static {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 			self::$instance->includes();
-			self::$instance->options = new Simply_Static_Options( self::SLUG );
+			self::$instance->options = Simply_Static_Options::instance();
 			self::$instance->view = new Simply_Static_View();
 
 			$page = isset( $_GET['page'] ) ? $_GET['page'] : '';
@@ -102,17 +102,6 @@ class Simply_Static {
 	}
 
 	/**
-	 * Initialize singleton instance
-	 * @param string $bootstrap_file
-	 * @return Simply_Static
-	 */
-	public static function init( $bootstrap_file )
-	{
-		$instance = self::instance();
-		return $instance;
-	}
-
-	/**
 	 * Create settings and setup database
 	 * @return void
 	 */
@@ -129,7 +118,7 @@ class Simply_Static {
 				delete_option( 'simply_static' );
 
 				// update Simply_Static_Options again to pull in updated data
-				$this->options = new Simply_Static_Options( self::SLUG );
+				$this->options = new Simply_Static_Options();
 			} else { // never installed
 				$this->options
 					->set( 'destination_scheme', sist_origin_scheme() )
@@ -153,7 +142,7 @@ class Simply_Static {
 
 			if ( version_compare( $version, '1.3.3', '<' ) ) {
 				// version 1.3 added a database table for tracking urls/progress
-				Simply_Static_Page::create_table();
+				Simply_Static_Page::create_or_update_table();
 			}
 
 			if ( version_compare( $version, '1.4.0', '<' ) ) {
@@ -205,7 +194,7 @@ class Simply_Static {
 
 			if ( version_compare( $version, '1.7.2', '<' ) ) {
 				// version 1.3 added a database table for tracking urls/progress
-				Simply_Static_Page::create_table();
+				Simply_Static_Page::create_or_update_table();
 			}
 
 		}
@@ -228,7 +217,6 @@ class Simply_Static {
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-view.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-extractor.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-fetcher.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-response.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-archive-creator.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-query.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-model.php';
@@ -318,7 +306,7 @@ class Simply_Static {
 
 		$action = $_POST['perform'];
 
-		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
+		$archive_manager = new Simply_Static_Archive_Manager();
 
 		$archive_manager->perform( $action );
 
@@ -348,7 +336,7 @@ class Simply_Static {
 			die( __( 'Not permitted', 'simply-static' ) );
 		}
 
-		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
+		$archive_manager = new Simply_Static_Archive_Manager();
 
 		$content = $this->view
 			->set_template( '_activity_log' )
@@ -403,7 +391,7 @@ class Simply_Static {
 	 * @return void
 	 */
 	public function display_generate_page() {
-		$archive_manager = new Simply_Static_Archive_Manager( $this->options );
+		$archive_manager = new Simply_Static_Archive_Manager();
 
 		$this->view
 			->set_layout( 'admin' )
@@ -448,7 +436,7 @@ class Simply_Static {
 			$this->view->add_flash( 'updated', $message );
 		}
 
-		$diagnostic = new Simply_Static_Diagnostic( $this->options );
+		$diagnostic = new Simply_Static_Diagnostic();
 		$results = $diagnostic->results;
 
 		$this->view

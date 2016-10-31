@@ -195,7 +195,7 @@ class Simply_Static_Model {
 	}
 
 	/**
-	 * Create the table for the model
+	 * Create or update the table for the model
 	 *
 	 * Uses the static::$table_name and loops through all of the columns in
 	 * static::$columns and the indexes in static::$indexes to create a SQL
@@ -204,7 +204,7 @@ class Simply_Static_Model {
 	 * http://wordpress.stackexchange.com/questions/78667/dbdelta-alter-table-syntax
 	 * @return void
 	 */
-	public static function create_table() {
+	public static function create_or_update_table() {
 		global $wpdb;
 
 		$charset_collate = $wpdb->get_charset_collate();

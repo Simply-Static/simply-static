@@ -10,7 +10,7 @@ class Simply_Static_Test extends WP_UnitTestCase {
 	private static $class_instance;
 
 	public static function setUpBeforeClass() {
-		self::$class_instance = Simply_Static::init( __FILE__ );
+		self::$class_instance = Simply_Static::instance();
 	}
 
 	/**

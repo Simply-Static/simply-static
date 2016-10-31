@@ -38,16 +38,17 @@ class Simply_Static_Diagnostic {
 		)
 	);
 
+	// TODO
 	public $results = array();
 
 	/**
-	 * Stores options for the archive manager using Simply_Static_Options
+	 * An instance of the options structure containing all options for this plugin
 	 * @var Simply_Static_Options
 	 */
 	protected $options = null;
 
-	public function __construct( $options ) {
-		$this->options = $options;
+	public function __construct() {
+		$this->options = Simply_Static_Options::instance();
 
 		if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
 			$this->description['URLs'][] = array(

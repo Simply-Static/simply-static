@@ -13,7 +13,8 @@ class Simply_Static_Page extends Simply_Static_Model {
 	protected static $columns = array(
 		'id'                  => 'BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT',
 		'found_on_id'         => 'BIGINT(20) UNSIGNED NULL',
-		'url'                 => 'VARCHAR(255) NOT NULL',
+		'url'                 => 'TEXT NOT NULL',
+		'redirect_url'        => 'TEXT NULL',
 		'file_path'           => 'VARCHAR(255) NULL',
 		'http_status_code'    => 'SMALLINT(20) NULL',
 		'content_type'        => 'VARCHAR(255) NULL',
@@ -37,7 +38,6 @@ class Simply_Static_Page extends Simply_Static_Model {
 
 	/** @const */
 	protected static $primary_key = 'id';
-
 
 	/**
 	 * Get the number of pages for each group of status codes, e.g. 1xx, 2xx, 3xx

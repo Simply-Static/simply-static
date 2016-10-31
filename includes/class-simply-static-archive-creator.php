@@ -12,22 +12,16 @@ class Simply_Static_Archive_Creator {
 	);
 
 	/**
+	 * An instance of the options structure containing all options for this plugin
+	 * @var Simply_Static_Options
+	 */
+	protected $options = null;
+
+	/**
 	 * The path to the temporary archive directory
 	 * @var string
 	 */
 	protected $archive_dir = null;
-
-	/**
-	 * The protocol used for the destination URL
-	 * @var string
-	 */
-	protected $destination_scheme = null;
-
-	/**
-	 * The host for the destination URL
-	 * @var string
-	 */
-	protected $destination_host = null;
 
 	/**
 	 * The datetime string for when we started the archive generation process
@@ -39,19 +33,17 @@ class Simply_Static_Archive_Creator {
 	 * Constructor
 	 * @param string $url URI resource
 	 */
-	public function __construct( $destination_scheme, $destination_host, $archive_dir, $archive_start_time ) {
-		$this->destination_scheme = $destination_scheme;
-		$this->destination_host = $destination_host;
-		$this->archive_dir = $archive_dir;
-		$this->archive_start_time = $archive_start_time;
+	public function __construct() {
+		$this->options = Simply_Static_Options::instance();
+		$this->archive_dir = $this->options->get_archive_dir();
+		$this->archive_start_time = $this->options->get( 'archive_start_time' );
 	}
 
 	/**
 	 * Fetch and save pages for the static archive
-	 * @param  boolean $destination_url_type Absolute/relative/offline URLs?
 	 * @return array                         ( # pages processed, # pages remaining )
 	 */
-	public function fetch_pages( $destination_url_type, $relative_path ) {
+	public function fetch_pages() {
 		$batch_size = 10;
 
 		$static_pages = Simply_Static_Page::query()
@@ -67,7 +59,7 @@ class Simply_Static_Archive_Creator {
 		while ( $static_page = array_shift( $static_pages ) ) {
 
 			// $filename = $this->get_filename_for_static_page( $static_page );
-			$success = Simply_Static_Url_Fetcher::fetch( $static_page, $this->archive_dir );
+			$success = Simply_Static_Url_Fetcher::instance()->fetch( $static_page, $this->archive_dir );
 
 			if ( ! $success ) {
 				continue;
@@ -84,7 +76,7 @@ class Simply_Static_Archive_Creator {
 				continue;
 			}
 
-			$this->handle_200_response( $static_page, $destination_url_type, $relative_path );
+			$this->handle_200_response( $static_page );
 		}
 
 		return array( $pages_processed, $total_pages );
@@ -93,13 +85,11 @@ class Simply_Static_Archive_Creator {
 	/**
 	 * Process the response for a 200 response (success)
 	 * @param  Simply_Static_Page         $static_page Record to update
-	 * @param  Simply_Static_Url_Response $response    URL response to process
-	 * @param  boolean                    $destination_url_type Absolute/relative/offline URLs?
 	 * @return void
 	 */
-	private function handle_200_response( $static_page, $response, $destination_url_type, $relative_path ) {
+	private function handle_200_response( $static_page ) {
 		// Fetch all URLs from the page and add them to the queue...
-		$extractor = new Simply_Static_Url_Extractor( $response, $destination_url_type, $relative_path );
+		$extractor = new Simply_Static_Url_Extractor( $static_page );
 		$urls = $extractor->extract_and_update_urls();
 
 		foreach ( $urls as $url ) {
@@ -107,11 +97,11 @@ class Simply_Static_Archive_Creator {
 		}
 
 		// Replace the origin URL with the destination URL within the content
-		$response->replace_urls( $this->destination_scheme, $this->destination_host );
+		$extractor->replace_urls();
 
-		$file_path = str_replace( $this->archive_dir, '', $response->filename );
+		$sha1 = sha1_file( $static_page->file_path );
+		$file_path = str_replace( $this->archive_dir, '', $static_page->file_path );
 		$static_page->file_path = $file_path;
-		$sha1 = sha1_file( $response->filename );
 
 		// if the content is identical, move on to the next file
 		if ( $static_page->is_content_identical( $sha1 ) ) {
@@ -126,14 +116,13 @@ class Simply_Static_Archive_Creator {
 	/**
 	 * Process the response to a 30x redirection
 	 * @param  Simply_Static_Page         $static_page Record to update
-	 * @param  Simply_Static_Url_Response $response    URL response to process
 	 * @return void
 	 */
-	private function handle_30x_redirect( $static_page, $response ) {
+	private function handle_30x_redirect( $static_page ) {
 		$origin_url = sist_origin_url();
-		$destination_url = $this->destination_scheme . $this->destination_host;
+		$destination_url = $this->options->get( 'destination_scheme' ) . $this->options->get( 'destination_host' );
 		$current_url = $static_page->url;
-		$redirect_url = $response->get_redirect_url();
+		$redirect_url = $static_page->redirect_url;
 
 		// convert our potentially relative URL to an absolute URL
 		$redirect_url = sist_relative_to_absolute_url( $redirect_url, $current_url );

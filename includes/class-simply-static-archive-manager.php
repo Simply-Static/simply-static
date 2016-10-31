@@ -80,8 +80,8 @@ class Simply_Static_Archive_Manager {
 	 * Performs initializion of the options structure
 	 * @param string $option_key The options key name
 	 */
-	public function __construct( $options ) {
-		$this->options = $options;
+	public function __construct() {
+		$this->options = Simply_Static_Options::instance();
 
 		// Set the initial archive state to 'idle'
 		if ( $this->options->get( 'archive_state_name' ) === null ) {
@@ -214,22 +214,6 @@ class Simply_Static_Archive_Manager {
 	}
 
 	/**
-	 * Get the current path to the temp static archive directory
-	 * @return string The path to the temp static archive directory
-	 */
-	private function get_archive_dir() {
-		return sist_add_trailing_directory_separator( $this->options->get( 'temp_files_dir' ) . $this->options->get( 'archive_name' )  );
-	}
-
-	/**
-	 * Get the datetime that archive creation started
-	 * @return string Starting datetime for archive creation
-	 */
-	private function get_start_time() {
-		return $this->options->get( 'archive_start_time' );
-	}
-
-	/**
 	 * Are we done building the static archive?
 	 * @return boolean Return true if we're done building the archive, false otherwise
 	 */
@@ -289,7 +273,7 @@ class Simply_Static_Archive_Manager {
 		$message = __( 'Setting up', 'simply-static' );
 		$this->save_status_message( $message );
 
-		$archive_dir = $this->get_archive_dir();
+		$archive_dir = $this->options->get_archive_dir();
 
 		// create temp archive directory
 		if ( ! file_exists( $archive_dir ) ) {
@@ -325,12 +309,7 @@ class Simply_Static_Archive_Manager {
 	 * @return boolean|WP_Error true if done processing, false if more processing, WP_Error if problem
 	 */
 	private function handle_fetching_state() {
-		$archive_creator = new Simply_Static_Archive_Creator(
-			$this->options->get( 'destination_scheme' ),
-			$this->options->get( 'destination_host' ),
-			$this->get_archive_dir(),
-			$this->get_start_time()
-		);
+		$archive_creator = new Simply_Static_Archive_Creator();
 
 		$destination_url_type = $this->options->get( 'destination_url_type' );
 		$relative_path = $this->options->get( 'relative_path' );
@@ -352,12 +331,7 @@ class Simply_Static_Archive_Manager {
 	 * @return boolean|WP_Error true if done processing, false if more processing, WP_Error if problem
 	 */
 	private function handle_transferring_state() {
-		$archive_creator = new Simply_Static_Archive_Creator(
-			$this->options->get( 'destination_scheme' ),
-			$this->options->get( 'destination_host' ),
-			$this->get_archive_dir(),
-			$this->get_start_time()
-		);
+		$archive_creator = new Simply_Static_Archive_Creator();
 
 		if ( $this->options->get( 'delivery_method' ) == 'zip' ) {
 
@@ -407,12 +381,7 @@ class Simply_Static_Archive_Manager {
 		$this->save_status_message( __( 'Wrapping up', 'simply-static' ) );
 
 		if ( $this->options->get( 'delete_temp_files' ) === '1' ) {
-			$archive_creator = new Simply_Static_Archive_Creator(
-				$this->options->get( 'destination_scheme' ),
-				$this->options->get( 'destination_host' ),
-				$this->get_archive_dir(),
-				$this->get_start_time()
-			);
+			$archive_creator = new Simply_Static_Archive_Creator();
 
 			$deleted_successfully = $archive_creator->delete_temp_static_files();
 		}
@@ -426,7 +395,7 @@ class Simply_Static_Archive_Manager {
 	 */
 	private function handle_finished_state() {
 		$end_time = sist_formatted_datetime();
-		$start_time = $this->get_start_time();
+		$start_time = $this->options->get( 'archive_start_time' );
 		$duration = strtotime( $end_time ) - strtotime( $start_time );
 		$time_string = gmdate( "H:i:s", $duration );
 

@@ -80,22 +80,16 @@ class Simply_Static_Url_Extractor {
 	// );
 
 	/**
-	 * The URL request response
-	 * @var Simply_Static_Url_Response
+	 * The static page to extract URLs from
+	 * @var Simply_Static_Page
 	 */
-	protected $response;
+	protected $static_page;
 
 	/**
-	 * Are we saving destination URL as absolute, relative, or for offline use?
-	 * @var string
+	 * An instance of the options structure containing all options for this plugin
+	 * @var Simply_Static_Options
 	 */
-	protected $destination_url_type;
-
-	/**
-	 * Base relative path to use for generating relative URLs
-	 * @var string
-	 */
-	protected $relative_path;
+	protected $options = null;
 
 	/**
 	 * The url of the site
@@ -105,19 +99,25 @@ class Simply_Static_Url_Extractor {
 
 	/**
 	 * Constructor
-	 * @param string  $response             URL Response object
-	 * @param boolean $destination_url_type Absolute/relative/offline URLs?
+	 * @param string  $static_page          Simply_Static_Page to extract URLs from
 	 */
-	public function __construct( Simply_Static_Url_Response $response, $destination_url_type, $relative_path ) {
-		$this->response = $response;
-		$this->destination_url_type = $destination_url_type;
-		$this->relative_path = $relative_path;
+	public function __construct( $static_page ) {
+		$this->static_page = $static_page;
+		$this->options = Simply_Static_Options::instance();
+	}
+
+	public function get_body() {
+		return file_get_contents( $this->options->get_archive_dir() . $this->static_page->file_path );
+	}
+
+	public function save_body( $content ) {
+		return file_put_contents( $this->options->get_archive_dir() . $this->static_page->file_path, $content );
 	}
 
 	/**
-	 * Extracts URLs from the response and update them based on the dest. type
+	 * Extracts URLs from the static_page and update them based on the dest. type
 	 *
-	 * Returns a list of unique URLs from the body of the response. It only
+	 * Returns a list of unique URLs from the body of the static_page. It only
 	 * extracts URLs from the same domain, either absolute urls or relative urls
 	 * that are then converted to absolute urls.
 	 *
@@ -127,43 +127,41 @@ class Simply_Static_Url_Extractor {
 	 * @return array $urls
 	 */
 	public function extract_and_update_urls() {
-		if ( $this->response->is_html() ) {
-			$this->response->save_body( $this->extract_urls_from_html() );
+		if ( $this->static_page->is_type( 'html' ) ) {
+			$this->save_body( $this->extract_urls_from_html() );
 		}
 
-		if ( $this->response->is_css() ) {
-			$this->response->save_body( $this->extract_urls_from_css( $this->response->get_body() ) );
+		if ( $this->static_page->is_type( 'css' ) ) {
+			$this->save_body( $this->extract_urls_from_css( $this->get_body() ) );
 		}
 
-		if ( $this->response->is_xml() ) {
-			$this->response->save_body( $this->extract_urls_from_xml() );
+		if ( $this->static_page->is_type( 'xml' ) ) {
+			$this->save_body( $this->extract_urls_from_xml() );
 		}
 
 		return array_unique( $this->extracted_urls );
 	}
 
-	// /**
-	//  * Replaces origin URL with destination URL in response body
-	//  * @param string $destination_scheme The protocol for the destination URL
-	//  * @param string $destination_host   The host for the destination URL
-	//  * @return void
-	//  */
-	// public function replace_urls( $destination_scheme, $destination_host ) {
-	// 	/* TODO: Might want to eventually rope this into extract_urls_from_html/
-	// 	 	extract_urls_from_css so that we're only doing preg_replace/
-	// 		str_replace once. Only reason I'm not doing that now is because of
-	// 		the fix for wp_json_encode / concatemoji.
-	// 	*/
-	// 	if ( $this->is_html() || $this->is_css() ) {
-	// 		$destination_url = $destination_scheme . $destination_host;
-	//
-	// 		// replace any instance of the origin url, whether it starts with https://, http://, or //
-	// 		$response_body = preg_replace( '/(https?:)?\/\/' . addcslashes( sist_origin_host(), '/' ) . '/i', $destination_url, $this->get_body() );
-	// 		// also replace wp_json_encode'd urls, as used by WP's `concatemoji`
-	// 		$response_body = str_replace( addcslashes( sist_origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
-	// 		$this->save_body( $response_body );
-	// 	}
-	// }
+	/**
+	 * Replaces origin URL with destination URL in response body
+	 * @return void
+	 */
+	public function replace_urls() {
+		/* TODO: Might want to eventually rope this into extract_urls_from_html/
+		 	extract_urls_from_css so that we're only doing preg_replace/
+			str_replace once. Only reason I'm not doing that now is because of
+			the fix for wp_json_encode / concatemoji.
+		*/
+		if ( $this->static_page->is_type( 'html' ) || $this->static_page->is_type( 'css' ) ) {
+			$destination_url = $this->options->get( 'destination_scheme' ) . $this->options->get( '$destination_host' );
+
+			// replace any instance of the origin url, whether it starts with https://, http://, or //
+			$response_body = preg_replace( '/(https?:)?\/\/' . addcslashes( sist_origin_host(), '/' ) . '/i', $destination_url, $this->get_body() );
+			// also replace wp_json_encode'd urls, as used by WP's `concatemoji`
+			$response_body = str_replace( addcslashes( sist_origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
+			$this->save_body( $response_body );
+		}
+	}
 
 	/**
 	 * Extract URLs and convert URLs to absolute URLs for each tag
@@ -215,7 +213,7 @@ class Simply_Static_Url_Extractor {
 	 * @return string The HTML with all URLs made absolute
 	 */
 	private function extract_urls_from_html() {
-		$html_string = $this->response->get_body();
+		$html_string = $this->get_body();
 
 		$dom = Sunra\PhpSimple\HtmlDomParser::str_get_html(
 			$html_string,
@@ -252,9 +250,7 @@ class Simply_Static_Url_Extractor {
 			}
 
 			return $dom->save();
-
 		}
-
 	}
 
 	/**
@@ -325,7 +321,7 @@ class Simply_Static_Url_Extractor {
 	 * @return string The XML with all of the URLs converted
 	 */
 	private function extract_urls_from_xml() {
-		$xml_string = $this->response->get_body();
+		$xml_string = $this->get_body();
 		// match anything starting with http/s plus all following characters
 		// except: [space] " ' <
 		$pattern = "/https?:\/\/[^\s\"'<]+/";
@@ -364,19 +360,19 @@ class Simply_Static_Url_Extractor {
 	 * @return string The URL, converted to an absolute/relative/offline URL
 	 */
 	private function add_to_extracted_urls( $extracted_url ) {
-		$url = sist_relative_to_absolute_url( $extracted_url, $this->response->url );
+		$url = sist_relative_to_absolute_url( $extracted_url, $this->static_page->url );
 
 		if ( $url && sist_is_local_url( $url ) ) {
 			$this->extracted_urls[] = sist_remove_params_and_fragment( $url );
 
-			if ( $this->destination_url_type == 'relative' ) {
+			if ( $this->options->get( 'destination_url_type' ) == 'relative' ) {
 
 				$url = sist_get_path_from_local_url( $url );
-				$url = $this->relative_path . $url;
+				$url = $this->options->get( 'relative_path' ) . $url;
 
-			} else if ( $this->destination_url_type == 'offline' ) {
+			} else if ( $this->options->get( 'destination_url_type' ) == 'offline' ) {
 				// remove the scheme/host from the url
-				$page_path = sist_get_path_from_local_url( $this->response->url );
+				$page_path = sist_get_path_from_local_url( $this->static_page->url );
 				$extracted_path = sist_get_path_from_local_url( $url );
 
 				// create a path from one page to the other

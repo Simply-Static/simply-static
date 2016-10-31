@@ -6,30 +6,53 @@
  */
 class Simply_Static_Options {
 	/**
+	 * Singleton instance
+	 * @var Simply_Static_Options
+	 */
+	protected static $instance = null;
+
+	/**
 	 * Options array
 	 * @var array
 	 */
 	protected $options = array();
 
 	/**
-	 * Defines options record in the wp_options table
-	 * @var string
+	 * Disable usage of "new"
+	 * @return void
 	 */
-	protected $option_key = null;
+	protected function __construct() {}
 
 	/**
-	 * Performs initializion of the options structure
-	 * @param string $option_key The options key name
+	 * Disable cloning of the class
+	 * @return void
 	 */
-	public function __construct( $option_key ) {
-		$options = get_option( $option_key );
+	protected function __clone() {}
 
-		if ( false === $options ) {
-			$options = array();
+	/**
+	 * Disable unserializing of the class
+	 * @return void
+	 */
+	public function __wakeup() {}
+
+	/**
+	 * Return an instance of Simply_Static_Options
+	 * @return Simply_Static
+	 */
+	public static function instance()
+	{
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+
+			$options = get_option( Simply_Static::SLUG );
+			if ( false === $options ) {
+				$options = array();
+			}
+
+			self::$instance->options = $options;
 		}
 
-		$this->options = $options;
-		$this->option_key = $option_key;
+		return self::$instance;
 	}
 
 	/**
@@ -53,10 +76,18 @@ class Simply_Static_Options {
 	}
 
 	/**
-	 * Saves the internal options data to the wp_options table using the stored $option_key value as the key
+	 * Saves the internal options data to the wp_options table
 	 * @return boolean
 	 */
 	public function save() {
-		return update_option( $this->option_key, $this->options );
+		return update_option( Simply_Static::SLUG, $this->options );
+	}
+
+	/**
+	 * Get the current path to the temp static archive directory
+	 * @return string The path to the temp static archive directory
+	 */
+	public function get_archive_dir() {
+		return sist_add_trailing_directory_separator( $this->get( 'temp_files_dir' ) . $this->get( 'archive_name' )  );
 	}
 }
