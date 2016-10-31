@@ -8,13 +8,20 @@
  */
 class Simply_Static_Url_Extractor_Factory extends WP_UnitTestCase {
 
-	public static function build( $content_type, $body, $destination_url_type, $url, $relative_path = '' ) {
-		$response = Simply_Static_Url_Response_Factory::build( $content_type, $body, $url );
+	public static function build( $content_type, $body, $url ) {
+		$page = Simply_Static_Page_Factory::create();
 
-		return new Simply_Static_Url_Extractor( $response, $destination_url_type, $relative_path );
+		$options = Simply_Static_Options::instance();
+
+		file_put_contents( $options->get_archive_dir() . $page->file_path, $body );
+		$page->content_type = 'text/' . $content_type . '; charset=UTF-8';
+		$page->url = $url;
+		$page->save();
+
+		return new Simply_Static_Url_Extractor( $page );
 	}
 
-	public static function build_from_response( $response, $destination_url_type, $relative_path = '' ) {
-		return new Simply_Static_Url_Extractor( $response, $destination_url_type, $relative_path );
+	public static function build_from_static_page( $page ) {
+		return new Simply_Static_Url_Extractor( $page );
 	}
 }

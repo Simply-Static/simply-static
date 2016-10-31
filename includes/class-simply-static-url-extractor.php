@@ -139,6 +139,10 @@ class Simply_Static_Url_Extractor {
 			$this->save_body( $this->extract_urls_from_xml() );
 		}
 
+		if ( $this->static_page->is_type( 'html' ) || $this->static_page->is_type( 'css' )|| $this->static_page->is_type( 'xml' ) ) {
+			$this->replace_urls();
+		}
+
 		return array_unique( $this->extracted_urls );
 	}
 
@@ -152,15 +156,14 @@ class Simply_Static_Url_Extractor {
 			str_replace once. Only reason I'm not doing that now is because of
 			the fix for wp_json_encode / concatemoji.
 		*/
-		if ( $this->static_page->is_type( 'html' ) || $this->static_page->is_type( 'css' ) ) {
-			$destination_url = $this->options->get( 'destination_scheme' ) . $this->options->get( '$destination_host' );
+		$destination_url = $this->options->get( 'destination_scheme' ) . $this->options->get( 'destination_host' );
 
-			// replace any instance of the origin url, whether it starts with https://, http://, or //
-			$response_body = preg_replace( '/(https?:)?\/\/' . addcslashes( sist_origin_host(), '/' ) . '/i', $destination_url, $this->get_body() );
-			// also replace wp_json_encode'd urls, as used by WP's `concatemoji`
-			$response_body = str_replace( addcslashes( sist_origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
-			$this->save_body( $response_body );
-		}
+		// replace any instance of the origin url, whether it starts with https://, http://, or //
+		$response_body = preg_replace( '/(https?:)?\/\/' . addcslashes( sist_origin_host(), '/' ) . '/i', $destination_url, $this->get_body() );
+		// also replace wp_json_encode'd urls, as used by WP's `concatemoji`
+		$response_body = str_replace( addcslashes( sist_origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
+		$this->save_body( $response_body );
+
 	}
 
 	/**

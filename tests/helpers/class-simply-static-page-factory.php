@@ -17,6 +17,7 @@ class Simply_Static_Page_Factory extends WP_UnitTestCase {
 			'url' => self::DOMAIN . '/' . $faker->slug,
 			'file_path' => $faker->word . '.html',
 			'http_status_code' => 200,
+			'content_type' => '',
 			'content_hash' => sha1( $faker->paragraph(), true ),
 			'last_checked_at' => sist_formatted_datetime(),
 			'last_modified_at' => sist_formatted_datetime(),

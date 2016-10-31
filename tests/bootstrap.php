@@ -17,7 +17,15 @@ require $_tests_dir . '/includes/bootstrap.php';
 # include Faker
 require plugin_dir_path( dirname( __FILE__ ) ) . 'vendor/autoload.php'; // 3rd-party libs
 
+// setting some initial options for testing
+$options = Simply_Static_Options::instance();
+$options
+	->set( 'destination_url_type', 'absolute' )
+	->set( 'destination_scheme',   'http://' )
+	->set( 'destination_host',     'example.org' )
+	->set( 'temp_files_dir',       get_temp_dir() )
+	->save();
+
 // Include helpers
-require_once 'helpers/class-simply-static-url-response-factory.php';
 require_once 'helpers/class-simply-static-url-extractor-factory.php';
 require_once 'helpers/class-simply-static-page-factory.php';

@@ -17,8 +17,8 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 	/**
 	 * Helper function for creating extractors
 	 */
-	public function build_extractor( $content_type, $body, $destination_url_type = 'absolute', $url = self::URL, $relative_path = '/' ) {
-		return Simply_Static_Url_Extractor_Factory::build( $content_type, $body, $destination_url_type, $url, $relative_path );
+	public function build_extractor( $content_type, $body, $url = self::URL ) {
+		return Simply_Static_Url_Extractor_Factory::build( $content_type, $body, $url );
 	}
 
 	/**
@@ -35,45 +35,45 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 
 		$content_and_urls = array(
 			// basic relative url
-			"<a href='/one.htm'>one</a>"
-				=> self::DOMAIN . '/one.htm',
+			"<a href='/one.html'>one</a>"
+				=> self::DOMAIN . '/one.html',
 			// extra spacing around href attribute
-			"<a href='    /two.htm  '>two</a>"
-				=> self::DOMAIN . '/two.htm',
+			"<a href='    /two.html  '>two</a>"
+				=> self::DOMAIN . '/two.html',
 			// no quotes around href attribute
-			"<a href=three.htm>three</a>"
-				=> self::DOMAIN . '/blog/three.htm',
+			"<a href=three.html>three</a>"
+				=> self::DOMAIN . '/blog/three.html',
 			// support for ../ links
-			'<a href="../four.htm">four</a>'
-				=> self::DOMAIN . '/four.htm',
+			'<a href="../four.html">four</a>'
+				=> self::DOMAIN . '/four.html',
 			// support for ./ links
-			'<a href=./five.htm>five</a>'
-				=> self::DOMAIN . '/blog/five.htm',
+			'<a href=./five.html>five</a>'
+				=> self::DOMAIN . '/blog/five.html',
 			// extra spacing between href name and value
-			'<a href = six.htm>six</a>'
-				=> self::DOMAIN . '/blog/six.htm',
+			'<a href = six.html>six</a>'
+				=> self::DOMAIN . '/blog/six.html',
 			// space in url
-			"<a href='file seven.pdf'>seven</a>"
-				=> self::DOMAIN . '/blog/file seven.pdf',
+			"<a href='file seven.xml'>seven</a>"
+				=> self::DOMAIN . '/blog/file seven.xml',
 			// This fails: (http dom library only returns 'file')
 			// space in url and no quotes
 			//'<a href=file eight.pdf>eight</a>'
 			//	=> self::DOMAIN . '/blog/file eight.pdf'
 			//	multiple attributes with no spacing
-			'<a href=nine.htm test=test>nine</a>'
-				=> self::DOMAIN . '/blog/nine.htm',
+			'<a href=nine.html test=test>nine</a>'
+				=> self::DOMAIN . '/blog/nine.html',
 			// relative url with path
-			"<a href='/path/ten.htm'>ten</a>"
-				=> self::DOMAIN . '/path/ten.htm',
+			"<a href='/path/ten.html'>ten</a>"
+				=> self::DOMAIN . '/path/ten.html',
 			// query params get striped out
-			"<a href='/11.htm?test=true'>11</a>"
-				=> self::DOMAIN . '/11.htm',
+			"<a href='/11.html?test=true'>11</a>"
+				=> self::DOMAIN . '/11.html',
 			// fragments get striped out
-			"<a href='/12.htm#test'>12</a>"
-				=> self::DOMAIN . '/12.htm',
+			"<a href='/12.html#test'>12</a>"
+				=> self::DOMAIN . '/12.html',
 			// non-standard casing
-			"<A HRef='/THIRTEEN.htm'>13</a>"
-				=> self::DOMAIN . '/THIRTEEN.htm',
+			"<A HRef='/THIRTEEN.html'>13</a>"
+				=> self::DOMAIN . '/THIRTEEN.html',
 			// absolute url
 			"<a href='" . self::DOMAIN . "/14'>14</a>"
 				=> self::DOMAIN . '/14',
@@ -84,14 +84,14 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 			"<a href='" . self::DOMAIN . "/test#section16'>16</a>"
 				=> self::DOMAIN . '/test',
 			// absolute url with path
-			"<a href='" . self::DOMAIN . "/test/17.htm'>17</a>"
-				=> self::DOMAIN . '/test/17.htm',
+			"<a href='" . self::DOMAIN . "/test/17.html'>17</a>"
+				=> self::DOMAIN . '/test/17.html',
 			// external urls don't get included
 			"<a href='http://www.external.com/18.htm'>18</a>"
 				=> false,
 			// protocol-less URLs
-			"<a href='//example.org/19.htm'>19</a>"
-				=> self::DOMAIN . '/19.htm',
+			"<a href='//example.org/19.html'>19</a>"
+				=> self::DOMAIN . '/19.html',
 			// href's with just a hash
 			"<a href='#dontlinkmebro'>20</a>"
 				=> false
@@ -181,14 +181,18 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 				=> '<a href="#dontlinkmebro">20</a>'
 		);
 
+
 		foreach ( $content_before_and_after as $content_before => $content_after ) {
 
 			foreach ( $destination_url_types as $type => $prefix ) {
 
-				$response = Simply_Static_Url_Response_Factory::build( 'html', $content_before, self::URL );
-				$extractor = Simply_Static_Url_Extractor_Factory::build_from_response( $response, $type );
+				$options = Simply_Static_Options::instance();
+				$options->set( 'destination_url_type', $type );
+				$options->save();
+
+				$extractor = Simply_Static_Url_Extractor_Factory::build( 'html', $content_before, self::URL );
 				$extractor->extract_and_update_urls();
-				$this->assertContains( sprintf( $content_after, $prefix ), $response->get_body() );
+				$this->assertContains( sprintf( $content_after, $prefix ), $extractor->get_body() );
 
 			}
 
@@ -279,10 +283,13 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 
 		foreach ( $content_before_and_after as $content_before => $content_after ) {
 
-			$response = Simply_Static_Url_Response_Factory::build( 'html', $content_before, self::URL );
-			$extractor = Simply_Static_Url_Extractor_Factory::build_from_response( $response, 'offline' );
+			$options = Simply_Static_Options::instance();
+			$options->set( 'destination_url_type', 'offline' );
+			$options->save();
+
+			$extractor = Simply_Static_Url_Extractor_Factory::build( 'html', $content_before, self::URL );
 			$extractor->extract_and_update_urls();
-			$this->assertContains( $content_after, $response->get_body() );
+			$this->assertContains( $content_after, $extractor->get_body() );
 
 		}
 
