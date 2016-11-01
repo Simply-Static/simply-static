@@ -51,7 +51,7 @@ class Simply_Static_Archive_Manager {
 			'type' => 'normal',
 			'transitions' => array(
 				'next' => 'idle',
-				'cancel' => 'cancel',
+				'cancel' => 'cancelled',
 				'error' => 'error'
 			)
 		),
