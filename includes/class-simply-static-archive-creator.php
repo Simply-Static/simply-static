@@ -378,11 +378,11 @@ class Simply_Static_Archive_Creator {
 	private static function convert_path_to_url( $path ) {
 		$url = $path;
 		if ( stripos( $path, WP_PLUGIN_DIR ) === 0 ) {
-			$url = str_replace( WP_PLUGIN_DIR, trailingslashit(WP_PLUGIN_URL ), $path );
+			$url = str_replace( WP_PLUGIN_DIR, WP_PLUGIN_URL, $path );
 		} elseif ( stripos( $path, WP_CONTENT_DIR ) === 0 ) {
-			$url = str_replace( WP_CONTENT_DIR, trailingslashit( WP_CONTENT_URL ), $path );
+			$url = str_replace( WP_CONTENT_DIR, WP_CONTENT_URL, $path );
 		} elseif ( stripos( $path, get_home_path() ) === 0 ) {
-			$url = str_replace( get_home_path(), trailingslashit( sist_origin_url() ), $path );
+			$url = str_replace( get_home_path(), sist_origin_url(), $path );
 		}
 		return $url;
 	}
