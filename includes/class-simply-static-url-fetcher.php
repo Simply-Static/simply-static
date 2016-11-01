@@ -18,12 +18,6 @@ class Simply_Static_Url_Fetcher {
 	protected static $instance = null;
 
 	/**
-	 * Static page that we're fetching the URL for
-	 * @var Simply_Static_Page
-	 */
-	protected $static_page = null;
-
-	/**
 	 * Directory to save the body of the URL to
 	 * @var string
 	 */
@@ -48,13 +42,14 @@ class Simply_Static_Url_Fetcher {
 	public function __wakeup() {}
 
 	/**
-	 * Return an instance of Simply_Static_Options
+	 * Return an instance of Simply_Static_Url_Fetcher
 	 * @return Simply_Static
 	 */
 	public static function instance()
 	{
 		if ( null === self::$instance ) {
 			self::$instance = new self();
+			self::$instance->archive_dir = Simply_Static_Options::instance()->get_archive_dir();
 		}
 
 		return self::$instance;
@@ -63,13 +58,9 @@ class Simply_Static_Url_Fetcher {
     /**
 	 * Fetch the URL and return a WP_Error if we get one, otherwise a Response class.
 	 * @param Simply_Static_Page $static_page URL to fetch
-	 * @param string             $archive_dir Archive directory to save page to
 	 * @return boolean                        Was the fetch successful?
 	 */
-	public function fetch( Simply_Static_Page $static_page, $archive_dir ) {
-		$this->static_page = $static_page;
-		$this->archive_dir = $archive_dir;
-
+	public function fetch( Simply_Static_Page $static_page ) {
 		$url = $static_page->url;
 
 		// Don't process URLs that don't match the URL of this WordPress installation
@@ -101,12 +92,12 @@ class Simply_Static_Url_Fetcher {
 
 			$relative_filename = null;
 			if ( $static_page->http_status_code == 200 ) {
-				$relative_filename = $this->get_filename_for_static_page();
+				$relative_filename = $this->create_directories_for_static_page( $static_page );
 			}
 
 			if ( $relative_filename ) {
 				$static_page->file_path = $relative_filename;
-				$file_path = $archive_dir . $relative_filename;
+				$file_path = $this->archive_dir . $relative_filename;
 				rename( $temp_filename, $file_path );
 			} else {
 				unlink( $temp_filename );
@@ -119,31 +110,16 @@ class Simply_Static_Url_Fetcher {
 	}
 
 	/**
-	 * Retrieve a (full) filename given a Static_Page
-	 * @param Simply_Static_Page $static_page The Simply_Static_Page record
-	 * @return string|null                The file path of the saved file
-	 */
-	private function get_filename_for_static_page() {
-		$relative_filename = $this->create_directories_for_static_page();
-
-		if ( $relative_filename ) {
-			return $relative_filename;
-		} else {
-			return null;
-		}
-	}
-
-	/**
 	 * Given a Static_Page, return a relative filename based on the URL
 	 *
 	 * This will also create directories as needed so that a file could be
 	 * created at the returned file path.
 	 *
 	 * @param Simply_Static_Page $static_page The Simply_Static_Page
-	 * @return string|null                The file path of the file
+	 * @return string|null                The relative file path of the file
 	 */
-	private function create_directories_for_static_page() {
-		$url_parts = parse_url( $this->static_page->url );
+	public function create_directories_for_static_page( $static_page ) {
+		$url_parts = parse_url( $static_page->url );
 		// a domain with no trailing slash has no path, so we're giving it one
 		$path = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
 
@@ -167,7 +143,7 @@ class Simply_Static_Url_Fetcher {
 				$relative_file_dir = sist_add_trailing_directory_separator( $relative_file_dir );
 			}
 			$path_info['filename'] = 'index';
-			if ( $this->static_page->is_type( 'xml' ) ) {
+			if ( $static_page->is_type( 'xml' ) ) {
 				$path_info['extension'] = 'xml';
 			} else {
 				$path_info['extension'] = 'html';
@@ -176,7 +152,7 @@ class Simply_Static_Url_Fetcher {
 
 		$create_dir = wp_mkdir_p( $this->archive_dir . $relative_file_dir );
 		if ( $create_dir === false ) {
-			$this->static_page->set_error_message( 'Unable to create temporary directory' );
+			$static_page->set_error_message( 'Unable to create temporary directory' );
 		} else {
 			$relative_filename = $relative_file_dir . $path_info['filename'] . '.' . $path_info['extension'];
 			// check that file doesn't exist OR exists but is writeable
@@ -184,7 +160,7 @@ class Simply_Static_Url_Fetcher {
 			if ( ! file_exists( $relative_filename ) || is_writable( $relative_filename ) ) {
 				return $relative_filename;
 			} else {
-				$this->static_page->set_error_message( 'Temporary file exists and is unwriteable' );
+				$static_page->set_error_message( 'Temporary file exists and is unwriteable' );
 			}
 		}
 

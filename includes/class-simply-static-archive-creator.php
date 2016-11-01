@@ -96,12 +96,7 @@ class Simply_Static_Archive_Creator {
 			$this->set_url_found_on( $static_page, $url, $this->archive_start_time );
 		}
 
-		// Replace the origin URL with the destination URL within the content
-		$extractor->replace_urls();
-
-		$sha1 = sha1_file( $static_page->file_path );
-		$file_path = str_replace( $this->archive_dir, '', $static_page->file_path );
-		$static_page->file_path = $file_path;
+		$sha1 = sha1_file( $this->archive_dir . $static_page->file_path );
 
 		// if the content is identical, move on to the next file
 		if ( $static_page->is_content_identical( $sha1 ) ) {
@@ -306,7 +301,7 @@ class Simply_Static_Archive_Creator {
 	 * @return string|null                The file path of the saved file
 	 */
 	protected function save_static_page_content_to_file( $static_page, $content ) {
-		$relative_filename = $this->create_directories_for_static_page( $static_page );
+		$relative_filename = Simply_Static_Url_Fetcher::instance()->create_directories_for_static_page( $static_page );
 
 		if ( $relative_filename ) {
 			$file_path = $this->archive_dir . $relative_filename;
