@@ -4,7 +4,7 @@ Donate link: http://codeofconduct.co/
 Tags: simply static, html, static, static site, static site generator, static website generator, performance, fast, optimization, availability, scaling, scalability, cdn, security, secure, zip, hardening
 Requires at least: 4.0
 Tested up to: 4.6
-Stable tag: 1.7.1
+Stable tag: 1.8.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -93,6 +93,13 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 2. This is what the Simply Static Generate page looks like after you've generated your static files. We'll show you exactly which files we made a static copy of.
 
 == Changelog ==
+
+= 1.8.0, November 01, 2016 =
+
+* Fix: XML pages (e.g. /feed/) now generate index.xml files
+* Fix: XML pages now replace URLs properly
+* Fix: No longer adding extra backslashes (\) to directories with backslashes
+* Fix: No longer adding extra slashes (/) on user-specified additional directories
 
 = 1.7.1, October 21, 2016 =
 
@@ -242,4 +249,8 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 
 == Upgrade Notice ==
 
-n/a
+= 1.7.1 =
+This version fixes several minor security bugs. We recommend upgrading as soon as possible.
+
+= 1.6.3 =
+This version fixes a major security vulnerability. Please upgrade immediately.
