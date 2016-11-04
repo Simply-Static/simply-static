@@ -128,42 +128,59 @@ class Simply_Static_Url_Extractor {
 	 */
 	public function extract_and_update_urls() {
 		if ( $this->static_page->is_type( 'html' ) ) {
-			$this->save_body( $this->extract_urls_from_html() );
+			$this->save_body( $this->extract_and_replace_urls_in_html() );
 		}
 
 		if ( $this->static_page->is_type( 'css' ) ) {
-			$this->save_body( $this->extract_urls_from_css( $this->get_body() ) );
+			$this->save_body( $this->extract_and_replace_urls_in_css( $this->get_body() ) );
 		}
 
 		if ( $this->static_page->is_type( 'xml' ) ) {
-			$this->save_body( $this->extract_urls_from_xml() );
+			$this->save_body( $this->extract_and_replace_urls_in_xml() );
 		}
 
-		if ( $this->static_page->is_type( 'html' ) || $this->static_page->is_type( 'css' )|| $this->static_page->is_type( 'xml' ) ) {
-			$this->replace_urls();
-		}
+		// failsafe URL replacement
+		$this->replace_urls();
 
 		return array_unique( $this->extracted_urls );
 	}
 
 	/**
 	 * Replaces origin URL with destination URL in response body
+	 *
+	 * This is a function of last resort for URL replacement. Ideally it was
+	 * already done in one of the extract_and_replace_urls_in_x functions. This
+	 * catches instances of WordPress URLs and replaces them with the
+	 * destinaton_url. This generally works fine for absolute and relative URL
+	 * generation. It'll produce sub-optimal results for offline URLs, in that
+	 * it's only replacing the host and not adjusting the path according to the
+	 * current page. The point of this is more to remove any traces of the
+	 * WordPress URL than anything else.
+	 *
 	 * @return void
 	 */
 	public function replace_urls() {
-		/* TODO: Might want to eventually rope this into extract_urls_from_html/
-		 	extract_urls_from_css so that we're only doing preg_replace/
-			str_replace once. Only reason I'm not doing that now is because of
-			the fix for wp_json_encode / concatemoji.
-		*/
-		$destination_url = $this->options->get( 'destination_scheme' ) . $this->options->get( 'destination_host' );
+		/*
+			TODO:
+			Can we get it to work with offline URLs via preg_replace_callback
+			+ convert_url? To do that we'd need to grab the entire URL. Ideally
+			that would also work with escaped URLs / inside of JavaScript. And
+			even more ideally, we'd only have a single preg_replace.
+		 */
+
+		$destination_url = $this->options->get_destination_url();
+		$response_body = $this->get_body();
 
 		// replace any instance of the origin url, whether it starts with https://, http://, or //
-		$response_body = preg_replace( '/(https?:)?\/\/' . addcslashes( sist_origin_host(), '/' ) . '/i', $destination_url, $this->get_body() );
-		// also replace wp_json_encode'd urls, as used by WP's `concatemoji`
+		$response_body = preg_replace( '/(https?:)?\/\/' . addcslashes( sist_origin_host(), '/' ) . '/i', $destination_url, $response_body );
+		// replace wp_json_encode'd urls, as used by WP's `concatemoji`
+		// e.g. {"concatemoji":"http:\/\/www.example.org\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.6.1"}
 		$response_body = str_replace( addcslashes( sist_origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
-		$this->save_body( $response_body );
+		// replace encoded URLs, as found in query params
+		// e.g. http://example.org/wp-json/oembed/1.0/embed?url=http%3A%2F%2Fexample%2Fcurrent%2Fpage%2F"
+		$response_body = preg_replace( '/(https?%3A)?%2F%2F' . addcslashes( urlencode( sist_origin_host() ), '.' ) . '/i', urlencode( $destination_url ), $response_body );
 
+		$this->save_body( $response_body );
 	}
 
 	/**
@@ -178,7 +195,7 @@ class Simply_Static_Url_Extractor {
 	 */
 	private function extract_urls_and_update_tag( &$tag, $tag_name, $attributes ) {
 		if ( isset( $tag->style ) ) {
-			$updated_css = $this->extract_urls_from_css( $tag->style );
+			$updated_css = $this->extract_and_replace_urls_in_css( $tag->style );
 			$tag->style = $updated_css;
 		}
 
@@ -197,8 +214,8 @@ class Simply_Static_Url_Extractor {
 
 				foreach ( $extracted_urls as $extracted_url ) {
 					if ( $extracted_url !== '' ) {
-						$absolute_extracted_url = $this->add_to_extracted_urls( $extracted_url );
-						$attribute_value = str_replace( $extracted_url, $absolute_extracted_url, $attribute_value );
+						$updated_extracted_url = $this->add_to_extracted_urls( $extracted_url );
+						$attribute_value = str_replace( $extracted_url, $updated_extracted_url, $attribute_value );
 					}
 				}
 				$tag->$attribute_name = $attribute_value;
@@ -215,7 +232,7 @@ class Simply_Static_Url_Extractor {
 	 * then return the updated HTML.
 	 * @return string The HTML with all URLs made absolute
 	 */
-	private function extract_urls_from_html() {
+	private function extract_and_replace_urls_in_html() {
 		$html_string = $this->get_body();
 
 		$dom = Sunra\PhpSimple\HtmlDomParser::str_get_html(
@@ -231,6 +248,7 @@ class Simply_Static_Url_Extractor {
 		// return the original html string if dom is blank or boolean (unparseable)
 		if ( $dom == '' || is_bool( $dom ) ) {
 
+			error_log( 'unparseable!' );
 			return $html_string;
 
 		} else {
@@ -248,7 +266,7 @@ class Simply_Static_Url_Extractor {
 			$tags = $dom->find( 'style' );
 
 			foreach ( $tags as $tag ) {
-				$updated_css = $this->extract_urls_from_css( $tag->innertext );
+				$updated_css = $this->extract_and_replace_urls_in_css( $tag->innertext );
 				$tag->innertext = $updated_css;
 			}
 
@@ -287,7 +305,7 @@ class Simply_Static_Url_Extractor {
 	 * @param  string $text The CSS to extract URLs from
 	 * @return string The CSS with all URLs converted
 	 */
-	private function extract_urls_from_css( $text ) {
+	private function extract_and_replace_urls_in_css( $text ) {
 		$patterns = array( "/url\(\s*[\"']?([^)\"']+)/", // url()
 		            "/@import\s+[\"']([^\"']+)/" ); // @import w/o url()
 
@@ -299,7 +317,7 @@ class Simply_Static_Url_Extractor {
 	}
 
 	/**
-	 * callback function for preg_replace in extract_urls_from_css
+	 * callback function for preg_replace in extract_and_replace_urls_in_css
 	 *
 	 * Takes the match, extracts the URL, adds it to the list of URLs, converts
 	 * the URL to a destination URL.
@@ -312,8 +330,8 @@ class Simply_Static_Url_Extractor {
 		$extracted_url = $matches[1];
 
 		if ( isset( $extracted_url ) && $extracted_url !== '' ) {
-			$absolute_extracted_url = $this->add_to_extracted_urls( $extracted_url );
-			$full_match = str_ireplace( $extracted_url, $absolute_extracted_url, $full_match );
+			$updated_extracted_url = $this->add_to_extracted_urls( $extracted_url );
+			$full_match = str_ireplace( $extracted_url, $updated_extracted_url, $full_match );
 		}
 
 		return $full_match;
@@ -323,7 +341,7 @@ class Simply_Static_Url_Extractor {
 	 * Use regex to extract URLs from XML docs (e.g. /feed/)
 	 * @return string The XML with all of the URLs converted
 	 */
-	private function extract_urls_from_xml() {
+	private function extract_and_replace_urls_in_xml() {
 		$xml_string = $this->get_body();
 		// match anything starting with http/s plus all following characters
 		// except: [space] " ' <
@@ -334,7 +352,7 @@ class Simply_Static_Url_Extractor {
 	}
 
 	/**
-	 * Callback function for preg_replace in extract_urls_from_xml
+	 * Callback function for preg_replace in extract_and_replace_urls_in_xml
 	 *
 	 * Takes the match, adds it to the list of URLs, converts the URL to a
 	 * destination URL.
@@ -346,18 +364,23 @@ class Simply_Static_Url_Extractor {
 		$extracted_url = $matches[0];
 
 		if ( isset( $extracted_url ) && $extracted_url !== '' ) {
-			$absolute_extracted_url = $this->add_to_extracted_urls( $extracted_url );
+			$updated_extracted_url = $this->add_to_extracted_urls( $extracted_url );
 		}
 
-		return $absolute_extracted_url;
+		return $updated_extracted_url;
 	}
 
 	/**
-	 * Add an extracted URL (relative or absolute) to the extracted URLs array
+	 * Add a URL to the extracted URLs array and convert to absolute/relative/offline
 	 *
-	 * Absolute URLs are only added if the scheme/host matches the site it was
-	 * extracted from. Relative URLs are converted to absolute URLs before being
-	 * added to the array.
+	 * URLs are first converted to absolute URLs. Then they're checked to see if
+	 * they are local URLs; if they are, they're added to the extracted URLs
+	 * queue.
+	 *
+	 * If the destination URL type requested was absolute, the WordPress scheme/
+	 * host is swapped for the destination scheme/host. If the destination URL
+	 * type is relative/offline, the URL is converted to that format. Then the
+	 * URL is returned.
 	 *
 	 * @return string The URL that should be added to the list of extracted URLs
 	 * @return string The URL, converted to an absolute/relative/offline URL
@@ -366,36 +389,92 @@ class Simply_Static_Url_Extractor {
 		$url = sist_relative_to_absolute_url( $extracted_url, $this->static_page->url );
 
 		if ( $url && sist_is_local_url( $url ) ) {
+			// add to extracted urls queue
 			$this->extracted_urls[] = sist_remove_params_and_fragment( $url );
 
-			if ( $this->options->get( 'destination_url_type' ) == 'relative' ) {
-
-				$url = sist_get_path_from_local_url( $url );
-				$url = $this->options->get( 'relative_path' ) . $url;
-
-			} else if ( $this->options->get( 'destination_url_type' ) == 'offline' ) {
-				// remove the scheme/host from the url
-				$page_path = sist_get_path_from_local_url( $this->static_page->url );
-				$extracted_path = sist_get_path_from_local_url( $url );
-
-				// create a path from one page to the other
-				$path = sist_create_offline_path( $extracted_path, $page_path );
-
-				$path_info = sist_url_path_info( $url );
-				if ( $path_info['extension'] === '' ) {
-					// If there's no extension, we need to add a /index.html,
-					// and do so before any params or fragments.
-					$clean_path = sist_remove_params_and_fragment( $path );
-					$fragment = substr( $path, strlen( $clean_path ) );
-
-					$path = trailingslashit( $clean_path );
-					$path .= 'index.html' . $fragment;
-				}
-
-				$url = $path;
-			}
+			$url = $this->convert_url( $url );
 		}
 
 		return $url;
+	}
+
+	/**
+	 * Convert URL to absolute URL at desired host or to a relative or offline URL
+	 * @param  string $url Absolute URL to convert
+	 * @return string      Converted URL
+	 */
+	private function convert_url( $url ) {
+		if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
+			$url = $this->convert_absolute_url( $url );
+		} else if ( $this->options->get( 'destination_url_type' ) == 'relative' ) {
+			$url = $this->convert_relative_url( $url );
+		} else if ( $this->options->get( 'destination_url_type' ) == 'offline' ) {
+			$url = $this->convert_offline_url( $url );
+		}
+
+		return $url;
+	}
+
+	/**
+	 * Convert a WordPress URL to a URL at the destination scheme/host
+	 * @param  string $url Absolute URL to convert
+	 * @return string      URL at destination scheme/host
+	 */
+	private function convert_absolute_url( $url ) {
+		$destination_url = $this->options->get_destination_url();
+		$url = sist_strip_protocol_from_url( $url );
+		$url = str_replace( sist_origin_host(), $destination_url, $url );
+
+		return $url;
+	}
+
+	/**
+	 * Convert a WordPress URL to a relative path
+	 * @param  string $url Absolute URL to convert
+	 * @return string      Relative path for the URL
+	 */
+	private function convert_relative_url( $url ) {
+		$url = sist_get_path_from_local_url( $url );
+		$url = $this->options->get( 'relative_path' ) . $url;
+
+		return $url;
+	}
+
+	/**
+	 * Convert a WordPress URL to a path for offline usage
+	 *
+	 * This function compares current page's URL to the provided URL and
+	 * creates a path for getting from one page to the other. It also attaches
+	 * /index.html onto the end of any path that isn't a file, before any
+	 * fragments or params.
+	 *
+	 * Example:
+	 *   static_page->url: http://static-site.dev/2013/01/11/page-a/
+	 *               $url: http://static-site.dev/2013/01/10/page-b/
+	 *               path: ./../../10/page-b/index.html
+	 *
+	 * @param  string $url Absolute URL to convert
+	 * @return string      Converted path
+	 */
+	private function convert_offline_url( $url ) {
+		// remove the scheme/host from the url
+		$page_path = sist_get_path_from_local_url( $this->static_page->url );
+		$extracted_path = sist_get_path_from_local_url( $url );
+
+		// create a path from one page to the other
+		$path = sist_create_offline_path( $extracted_path, $page_path );
+
+		$path_info = sist_url_path_info( $url );
+		if ( $path_info['extension'] === '' ) {
+			// If there's no extension, we need to add a /index.html,
+			// and do so before any params or fragments.
+			$clean_path = sist_remove_params_and_fragment( $path );
+			$fragment = substr( $path, strlen( $clean_path ) );
+
+			$path = trailingslashit( $clean_path );
+			$path .= 'index.html' . $fragment;
+		}
+
+		return $path;
 	}
 }

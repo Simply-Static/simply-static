@@ -177,7 +177,8 @@ function sist_create_offline_path( $extracted_path, $page_path, $iterations = 0 
 	// OR if there are no more slashes to remove
 	if ( strpos( $page_path, '/' ) === false || strpos( $extracted_path, $page_path ) === 0 ) {
 		$extracted_path = substr( $extracted_path, strlen( $page_path ) );
-		$new_path = '.' . str_repeat( '/..', $iterations-1 ) . sist_add_leading_slash( $extracted_path );
+		$iterations = ( $iterations == 0 ) ? 0 : $iterations - 1;
+		$new_path = '.' . str_repeat( '/..', $iterations ) . sist_add_leading_slash( $extracted_path );
 		return $new_path;
 	} else {
 		// match everything before the last slash

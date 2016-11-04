@@ -115,7 +115,7 @@ class Simply_Static_Archive_Creator {
 	 */
 	private function handle_30x_redirect( $static_page ) {
 		$origin_url = sist_origin_url();
-		$destination_url = $this->options->get( 'destination_scheme' ) . $this->options->get( 'destination_host' );
+		$destination_url = $this->options->get_destination_url();
 		$current_url = $static_page->url;
 		$redirect_url = $static_page->redirect_url;
 

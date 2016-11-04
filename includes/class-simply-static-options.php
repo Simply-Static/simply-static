@@ -90,4 +90,12 @@ class Simply_Static_Options {
 	public function get_archive_dir() {
 		return sist_add_trailing_directory_separator( $this->get( 'temp_files_dir' ) . $this->get( 'archive_name' )  );
 	}
+
+	/**
+	 * Get the destination URL (scheme + host)
+	 * @return string The destination URL
+	 */
+	public function get_destination_url() {
+		return $this->get( 'destination_scheme' ) . $this->get( 'destination_host' );
+	}
 }
