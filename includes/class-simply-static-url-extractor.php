@@ -140,7 +140,9 @@ class Simply_Static_Url_Extractor {
 		}
 
 		// failsafe URL replacement
-		$this->replace_urls();
+		if ( $this->static_page->is_type( 'html' ) || $this->static_page->is_type( 'css' ) || $this->static_page->is_type( 'xml' ) ) {
+			$this->replace_urls();
+		}
 
 		return array_unique( $this->extracted_urls );
 	}

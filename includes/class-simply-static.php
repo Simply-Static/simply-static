@@ -9,7 +9,7 @@ class Simply_Static {
 	 * Plugin version
 	 * @var string
 	 */
-	const VERSION = '1.8.0';
+	const VERSION = '1.8.1';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
@@ -131,6 +131,11 @@ class Simply_Static {
 			}
 		}
 
+		// sync the database on any install/upgrade/downgrade
+		if ( version_compare( $version, self::VERSION, '!=' ) ) {
+			Simply_Static_Page::create_or_update_table();
+		}
+
 		// perform migrations if our saved version # doesn't match the current version
 		if ( version_compare( $version, self::VERSION, '<' ) ) {
 
@@ -138,11 +143,6 @@ class Simply_Static {
 			if ( version_compare( $version, '1.2.0', '<' ) ) {
 				$this->options
 					->set( 'additional_files', '' );
-			}
-
-			if ( version_compare( $version, '1.3.3', '<' ) ) {
-				// version 1.3 added a database table for tracking urls/progress
-				Simply_Static_Page::create_or_update_table();
 			}
 
 			if ( version_compare( $version, '1.4.0', '<' ) ) {
@@ -191,12 +191,6 @@ class Simply_Static {
 					}
 				}
 			}
-
-			if ( version_compare( $version, '1.8.0', '<' ) ) {
-				// version 1.3 added a database table for tracking urls/progress
-				Simply_Static_Page::create_or_update_table();
-			}
-
 		}
 
 		// always update the version and save

@@ -9,7 +9,7 @@ class Simply_Static_Url_Fetcher {
 	 * Timeout for fetching URLs
 	 * @var string
 	 */
-	const TIMEOUT = 300;
+	const TIMEOUT = 30;
 
 	/**
 	 * Singleton instance
