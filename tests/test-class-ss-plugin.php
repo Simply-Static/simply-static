@@ -6,7 +6,7 @@ namespace Simply_Static;
  */
 class Test extends \WP_UnitTestCase {
 
-    /**
+	/**
 	 * @var Simply_Static
 	 */
 	private static $class_instance;

@@ -3,7 +3,7 @@ namespace Simply_Static;
 
 // Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit;
 }
 
 /**
@@ -61,7 +61,7 @@ class Url_Fetcher {
 		return self::$instance;
 	}
 
-    /**
+	/**
 	 * Fetch the URL and return a \WP_Error if we get one, otherwise a Response class.
 	 * @param Simply_Static\Page $static_page URL to fetch
 	 * @return boolean                        Was the fetch successful?

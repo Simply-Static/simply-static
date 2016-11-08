@@ -3,7 +3,7 @@ namespace Simply_Static;
 
 // Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit;
 }
 
 /**
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Diagnostic {
 
 	/** @const */
-    protected static $min_version = array(
+	protected static $min_version = array(
 		'php' => '5.3.0',
 		'curl' => '7.15.0'
 	);

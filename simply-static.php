@@ -1,6 +1,7 @@
-<?php // Exit if accessed directly
+<?php
+// Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit;
 }
 
 /**

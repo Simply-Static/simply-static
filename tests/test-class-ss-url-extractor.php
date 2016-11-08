@@ -115,8 +115,8 @@ class Url_Extractor_Test extends \WP_UnitTestCase {
 	public function test_extract_urls_content_preservation_for_absolute_and_relative_urls() {
 
 		$destination_url_types = array(
-		    'absolute' => self::DOMAIN,
-		    'relative' => ''
+			'absolute' => self::DOMAIN,
+			'relative' => ''
 		);
 
 		$content_before_and_after = array(
