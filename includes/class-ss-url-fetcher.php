@@ -1,10 +1,16 @@
-<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+<?php
+namespace Simply_Static;
+
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 /**
  * Simply Static URL fetcher class
  * @package Simply_Static
  */
-class Simply_Static_Url_Fetcher {
+class Url_Fetcher {
 	/**
 	 * Timeout for fetching URLs
 	 * @var string
@@ -13,7 +19,7 @@ class Simply_Static_Url_Fetcher {
 
 	/**
 	 * Singleton instance
-	 * @var Simply_Static_Options
+	 * @var Simply_Static\Options
 	 */
 	protected static $instance = null;
 
@@ -42,30 +48,30 @@ class Simply_Static_Url_Fetcher {
 	public function __wakeup() {}
 
 	/**
-	 * Return an instance of Simply_Static_Url_Fetcher
+	 * Return an instance of Simply_Static\Url_Fetcher
 	 * @return Simply_Static
 	 */
 	public static function instance()
 	{
 		if ( null === self::$instance ) {
 			self::$instance = new self();
-			self::$instance->archive_dir = Simply_Static_Options::instance()->get_archive_dir();
+			self::$instance->archive_dir = Options::instance()->get_archive_dir();
 		}
 
 		return self::$instance;
 	}
 
     /**
-	 * Fetch the URL and return a WP_Error if we get one, otherwise a Response class.
-	 * @param Simply_Static_Page $static_page URL to fetch
+	 * Fetch the URL and return a \WP_Error if we get one, otherwise a Response class.
+	 * @param Simply_Static\Page $static_page URL to fetch
 	 * @return boolean                        Was the fetch successful?
 	 */
-	public function fetch( Simply_Static_Page $static_page ) {
+	public function fetch( Page $static_page ) {
 		$url = $static_page->url;
 
 		// Don't process URLs that don't match the URL of this WordPress installation
 		if ( ! sist_is_local_url( $url ) ) {
-			return new WP_Error( 'remote_url', sprintf( __( "Attempting to fetch remote URL: %s", 'simply-static' ), $url ) );
+			return new \WP_Error( 'remote_url', sprintf( __( "Attempting to fetch remote URL: %s", 'simply-static' ), $url ) );
 		}
 
 		$temp_filename = wp_tempnam();
@@ -115,7 +121,7 @@ class Simply_Static_Url_Fetcher {
 	 * This will also create directories as needed so that a file could be
 	 * created at the returned file path.
 	 *
-	 * @param Simply_Static_Page $static_page The Simply_Static_Page
+	 * @param Simply_Static\Page $static_page The Simply_Static\Page
 	 * @return string|null                The relative file path of the file
 	 */
 	public function create_directories_for_static_page( $static_page ) {

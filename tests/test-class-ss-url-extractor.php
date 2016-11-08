@@ -1,8 +1,10 @@
 <?php
+namespace Simply_Static;
+
 /**
  * @package Simply_Static\Unit_tests
  */
-class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
+class Url_Extractor_Test extends \WP_UnitTestCase {
 
 	/**
 	 * Set the test domain
@@ -18,7 +20,7 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 	 * Helper function for creating extractors
 	 */
 	public function build_extractor( $content_type, $body, $url = self::URL ) {
-		return Simply_Static_Url_Extractor_Factory::build( $content_type, $body, $url );
+		return Url_Extractor_Factory::build( $content_type, $body, $url );
 	}
 
 	/**
@@ -186,11 +188,11 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 
 			foreach ( $destination_url_types as $type => $prefix ) {
 
-				$options = Simply_Static_Options::instance();
+				$options = Options::instance();
 				$options->set( 'destination_url_type', $type );
 				$options->save();
 
-				$extractor = Simply_Static_Url_Extractor_Factory::build( 'html', $content_before, self::URL );
+				$extractor = Url_Extractor_Factory::build( 'html', $content_before, self::URL );
 				$extractor->extract_and_update_urls();
 				$this->assertContains( sprintf( $content_after, $prefix ), $extractor->get_body() );
 
@@ -283,11 +285,11 @@ class Simply_Static_Url_Extractor_Test extends WP_UnitTestCase {
 
 		foreach ( $content_before_and_after as $content_before => $content_after ) {
 
-			$options = Simply_Static_Options::instance();
+			$options = Options::instance();
 			$options->set( 'destination_url_type', 'offline' );
 			$options->save();
 
-			$extractor = Simply_Static_Url_Extractor_Factory::build( 'html', $content_before, self::URL );
+			$extractor = Url_Extractor_Factory::build( 'html', $content_before, self::URL );
 			$extractor->extract_and_update_urls();
 			$this->assertContains( $content_after, $extractor->get_body() );
 

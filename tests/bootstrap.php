@@ -1,5 +1,4 @@
 <?php
-
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
 if ( ! $_tests_dir ) {
 	$_tests_dir = '/tmp/wordpress-tests-lib';
@@ -18,7 +17,7 @@ require $_tests_dir . '/includes/bootstrap.php';
 require plugin_dir_path( dirname( __FILE__ ) ) . 'vendor/autoload.php'; // 3rd-party libs
 
 // setting some initial options for testing
-$options = Simply_Static_Options::instance();
+$options = Simply_Static\Options::instance();
 $options
 	->set( 'destination_url_type', 'absolute' )
 	->set( 'destination_scheme',   'http://' )
@@ -27,5 +26,5 @@ $options
 	->save();
 
 // Include helpers
-require_once 'helpers/class-simply-static-url-extractor-factory.php';
-require_once 'helpers/class-simply-static-page-factory.php';
+require_once 'helpers/class-ss-url-extractor-factory.php';
+require_once 'helpers/class-ss-page-factory.php';

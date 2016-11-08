@@ -1,4 +1,6 @@
 <?php
+namespace Simply_Static;
+
 /**
  * @package Simply_Static\Unit_tests
  */
@@ -6,12 +8,12 @@
 /**
  * Returns a faked Page
  */
-class Simply_Static_Page_Factory extends WP_UnitTestCase {
+class Page_Factory extends \WP_UnitTestCase {
 
 	const DOMAIN = 'http://example.org';
 
 	public static function create( $attrs = array() ) {
-		$faker = Faker\Factory::create();
+		$faker = \Faker\Factory::create();
 
 		$attributes = array(
 			'url' => self::DOMAIN . '/' . $faker->slug,
@@ -28,7 +30,7 @@ class Simply_Static_Page_Factory extends WP_UnitTestCase {
 		// merge in any provided attributes
 		$attributes = array_merge( $attributes, $attrs );
 
-		$page = Simply_Static_Page::initialize( $attributes );
+		$page = Page::initialize( $attributes );
 		$page->save();
 		return $page;
 	}

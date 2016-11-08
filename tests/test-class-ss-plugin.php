@@ -1,8 +1,10 @@
 <?php
+namespace Simply_Static;
+
 /**
  * @package Simply_Static\Unit_tests
  */
-class Simply_Static_Test extends WP_UnitTestCase {
+class Test extends \WP_UnitTestCase {
 
     /**
 	 * @var Simply_Static
@@ -10,7 +12,7 @@ class Simply_Static_Test extends WP_UnitTestCase {
 	private static $class_instance;
 
 	public static function setUpBeforeClass() {
-		self::$class_instance = Simply_Static::instance();
+		self::$class_instance = Plugin::instance();
 	}
 
 	/**

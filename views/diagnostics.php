@@ -1,10 +1,8 @@
 <?php
-/**
- * @package Simply_Static
- */
+namespace Simply_Static;
 ?>
 
-<h1><?php _e( 'Simply Static &rsaquo; Diagnostics', Simply_Static::SLUG ); ?></h1>
+<h1><?php _e( 'Simply Static &rsaquo; Diagnostics', Plugin::SLUG ); ?></h1>
 
 <div class='wrap' id='diagnosticsPage'>
 
@@ -42,10 +40,10 @@
 					<td>
 						<label>
 							<input aria-describedby='enableDebuggingHelpBlock' name='debugging_mode' id='debuggingMode' value='1' type='checkbox' <?php // if ( $this->debugging_mode == '1' ) { echo 'checked'; } ?> />
-							<?php // _e( "Enable debugging mode", Simply_Static::SLUG ); ?>
+							<?php // _e( "Enable debugging mode", Plugin::SLUG ); ?>
 						</label>
 						<p id='enableDebuggingHelpBlock' class='help-block'>
-							<?php // _e( "This will enable verbose logging in Simply Static.", Simply_Static::SLUG ); ?>
+							<?php // _e( "This will enable verbose logging in Simply Static.", Plugin::SLUG ); ?>
 						</p>
 					</td>
 				</tr>

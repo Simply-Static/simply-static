@@ -1,13 +1,19 @@
-<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+<?php
+namespace Simply_Static;
+
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 /**
  * Simply Static options class
  * @package Simply_Static
  */
-class Simply_Static_Options {
+class Options {
 	/**
 	 * Singleton instance
-	 * @var Simply_Static_Options
+	 * @var Simply_Static\Options
 	 */
 	protected static $instance = null;
 
@@ -36,7 +42,7 @@ class Simply_Static_Options {
 	public function __wakeup() {}
 
 	/**
-	 * Return an instance of Simply_Static_Options
+	 * Return an instance of Simply_Static\Options
 	 * @return Simply_Static
 	 */
 	public static function instance()
@@ -44,7 +50,7 @@ class Simply_Static_Options {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 
-			$options = get_option( Simply_Static::SLUG );
+			$options = get_option( Plugin::SLUG );
 			if ( false === $options ) {
 				$options = array();
 			}
@@ -59,7 +65,7 @@ class Simply_Static_Options {
 	 * Updates the option identified by $name with the value provided in $value
 	 * @param string $name The option name
 	 * @param mixed $value The option value
-	 * @return Simply_Static_Options
+	 * @return Simply_Static\Options
 	 */
 	public function set( $name, $value ) {
 		$this->options[ $name ] = $value;
@@ -80,7 +86,7 @@ class Simply_Static_Options {
 	 * @return boolean
 	 */
 	public function save() {
-		return update_option( Simply_Static::SLUG, $this->options );
+		return update_option( Plugin::SLUG, $this->options );
 	}
 
 	/**

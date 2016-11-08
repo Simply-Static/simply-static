@@ -1,10 +1,16 @@
-<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+<?php
+namespace Simply_Static;
+
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 /**
  * Simply Static Page class, for tracking the status of pages / static files
  * @package Simply_Static
  */
-class Simply_Static_Page extends Simply_Static_Model {
+class Page extends Model {
 
 	/** @const */
 	protected static $table_name = 'pages';

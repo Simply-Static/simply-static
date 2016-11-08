@@ -1,4 +1,10 @@
-<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+<?php
+namespace Simply_Static;
+
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 /**
  * Simply Static Model class
@@ -7,7 +13,7 @@
  * updating records.
  * @package Simply_Static
  */
-class Simply_Static_Model {
+class Model {
 
 	/**
 	 * The name of the table (prefixed with the name of the plugin)
@@ -62,7 +68,7 @@ class Simply_Static_Model {
 	 */
 	public function __get( $field_name ) {
 		if ( ! array_key_exists( $field_name, $this->data ) ) {
-			throw new Exception( 'Undefined variable for ' . get_called_class() );
+			throw new \Exception( 'Undefined variable for ' . get_called_class() );
 		} else {
 			return $this->data[ $field_name ];
 		}
@@ -79,7 +85,7 @@ class Simply_Static_Model {
 	 */
 	public function __set( $field_name, $field_value ) {
 		if ( ! array_key_exists( $field_name, static::$columns ) ) {
-			throw new Exception( 'Column doesn\'t exist for ' . get_called_class() );
+			throw new \Exception( 'Column doesn\'t exist for ' . get_called_class() );
 		} else {
 			if ( ! array_key_exists( $field_name, $this->data ) || $this->data[ $field_name ] !== $field_value ) {
 				$this->changed = true;
@@ -103,11 +109,11 @@ class Simply_Static_Model {
 
 	/**
 	 * Used for finding models matching certain criteria
-	 * @return Simply_Static_Query
+	 * @return Simply_Static\Query
 	 */
 	public static function query()
 	{
-		$query = new Simply_Static_Query( get_called_class() );
+		$query = new Query( get_called_class() );
 		return $query;
 	}
 

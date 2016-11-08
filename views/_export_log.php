@@ -1,4 +1,7 @@
-<?php if ( is_array( $this->static_pages ) && count( $this->static_pages ) ) : ?>
+<?php
+namespace Simply_Static;
+
+if ( is_array( $this->static_pages ) && count( $this->static_pages ) ) : ?>
 
 	<?php $num_errors = count( array_filter( $this->static_pages, function($p) { return $p->error_message != false; } ) ); ?>
 
@@ -31,7 +34,7 @@
 
 		<?php foreach ( $this->static_pages as $static_page ) : ?>
 			<tr>
-				<?php $processable = in_array( $static_page->http_status_code, Simply_Static_Archive_Creator::$processable_status_codes ); ?>
+				<?php $processable = in_array( $static_page->http_status_code, Archive_Creator::$processable_status_codes ); ?>
 				<td class='status-code <?php if ( ! $processable ) { echo 'unprocessable'; } ?>'>
 					<?php echo $static_page->http_status_code; ?>
 				</td>

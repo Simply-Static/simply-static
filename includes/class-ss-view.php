@@ -1,10 +1,16 @@
-<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+<?php
+namespace Simply_Static;
+
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 /**
  * Simply Static view class
  * @package Simply_Static
  */
-class Simply_Static_View {
+class View {
 
 	/**
 	 * Base directory for views
@@ -58,7 +64,7 @@ class Simply_Static_View {
 	/**
 	 * Sets a layout that will be used later in render() method
 	 * @param string $template The template filename, without extension
-	 * @return Simply_Static_View
+	 * @return Simply_Static\View
 	 */
 	public function set_layout( $layout ) {
 		$this->layout = trailingslashit( $this->path ) . 'layouts/' . $layout . self::EXTENSION;
@@ -69,7 +75,7 @@ class Simply_Static_View {
 	/**
 	 * Sets a template that will be used later in render() method
 	 * @param string $template The template filename, without extension
-	 * @return Simply_Static_View
+	 * @return Simply_Static\View
 	 */
 	public function set_template( $template ) {
 		$this->template = trailingslashit( $this->path ) . $template . self::EXTENSION;
@@ -91,7 +97,7 @@ class Simply_Static_View {
 	* Updates the view variable identified by $name with the value provided in $value
 	* @param string $name The variable name
 	* @param mixed  $value The variable value
-	* @return Simply_Static_View
+	* @return Simply_Static\View
 	*/
 	public function __set( $name, $value ) {
 		$this->variables[ $name ] = $value;
@@ -102,7 +108,7 @@ class Simply_Static_View {
 	 * Updates the view variable identified by $name with the value provided in $value
 	 * @param string $name The variable name
 	 * @param mixed $value The variable value
-	 * @return Simply_Static_View
+	 * @return Simply_Static\View
 	 */
 	public function assign( $name, $value ) {
 		return $this->__set( $name, $value );
@@ -123,19 +129,19 @@ class Simply_Static_View {
 	 *
 	 * Checks to make sure that the file exists and is readable.
 	 *
-	 * @return string|WP_Error
+	 * @return string|\WP_Error
 	 */
 	private function get_renderable_file() {
 
 		// must include a template
 		if ( ! is_readable( $this->template ) ) {
-			return new WP_Error( 'invalid_template', sprintf( __( "Can't find view template: %s", 'simply-static' ), $this->template ) );
+			return new \WP_Error( 'invalid_template', sprintf( __( "Can't find view template: %s", 'simply-static' ), $this->template ) );
 		}
 
 		// layouts are optional. if no layout provided, use the template by itself.
 		if ( $this->layout ) {
 			if ( ! is_readable( $this->layout ) ) {
-				return new WP_Error( 'invalid_layout', sprintf( __( "Can't find view layout: %s", 'simply-static' ), $this->layout ) );
+				return new \WP_Error( 'invalid_layout', sprintf( __( "Can't find view layout: %s", 'simply-static' ), $this->layout ) );
 			} else {
 				// the layout should include the template
 				return $this->layout;
@@ -149,7 +155,7 @@ class Simply_Static_View {
 	/**
 	 * Renders the view script.
 	 *
-	 * @return Simply_Static_View|WP_Error
+	 * @return Simply_Static\View|\WP_Error
 	 */
 	public function render() {
 
@@ -167,7 +173,7 @@ class Simply_Static_View {
 	/**
 	 * Returns the view as a string.
 	 *
-	 * @return string|WP_Error
+	 * @return string|\WP_Error
 	 */
 	public function render_to_string() {
 

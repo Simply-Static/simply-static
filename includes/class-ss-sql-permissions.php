@@ -1,4 +1,10 @@
-<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+<?php
+namespace Simply_Static;
+
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 /**
  * Simply Static SQL Privilege Checker
@@ -6,11 +12,11 @@
  * Checks to ensure that the MySQL has permissions needed for Simply Static.
  * @package Simply_Static
  */
-class Simply_Static_Sql_Permissions {
+class Sql_Permissions {
 
 	/**
 	 * Singleton instance
-	 * @var Simply_Static_Sql_Permissions
+	 * @var Simply_Static\Sql_Permissions
 	 */
 	protected static $instance = null;
 
@@ -47,8 +53,8 @@ class Simply_Static_Sql_Permissions {
 	public function __wakeup() {}
 
 	/**
-	 * Return an instance of Simply_Static_Sql_Permissions
-	 * @return Simply_Static_Sql_Permissions
+	 * Return an instance of Simply_Static\Sql_Permissions
+	 * @return Simply_Static\Sql_Permissions
 	 */
 	public static function instance() {
 		if ( null === self::$instance ) {

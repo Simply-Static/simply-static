@@ -1,4 +1,7 @@
-<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+<?php // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 /**
  * Plugin Name:       Simply Static
@@ -25,6 +28,6 @@ if ( ! defined( 'SIST_BASENAME' ) ) {
 	define( 'SIST_BASENAME', plugin_basename( SIST_FILE ) );
 }
 
-require plugin_dir_path( __FILE__ ) . 'includes/class-simply-static.php';
+require plugin_dir_path( __FILE__ ) . 'includes/class-ss-plugin.php';
 
-Simply_Static::instance();
+Simply_Static\Plugin::instance();

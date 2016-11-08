@@ -1,14 +1,20 @@
-<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+<?php
+namespace Simply_Static;
+
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 /**
  * Simply Static URL extractor class
  *
  * Note that in addition to extracting URLs this class also makes modifications
- * to the Simply_Static_Url_Response that is passed into it: URLs in the body of
+ * to the Simply_Static\Url_Response that is passed into it: URLs in the body of
  * the response are updated to be absolute URLs.
  * @package Simply_Static
  */
-class Simply_Static_Url_Extractor {
+class Url_Extractor {
 
 	/**
 	 * The following pages were incredibly helpful:
@@ -81,13 +87,13 @@ class Simply_Static_Url_Extractor {
 
 	/**
 	 * The static page to extract URLs from
-	 * @var Simply_Static_Page
+	 * @var Simply_Static\Page
 	 */
 	protected $static_page;
 
 	/**
 	 * An instance of the options structure containing all options for this plugin
-	 * @var Simply_Static_Options
+	 * @var Simply_Static\Options
 	 */
 	protected $options = null;
 
@@ -99,11 +105,11 @@ class Simply_Static_Url_Extractor {
 
 	/**
 	 * Constructor
-	 * @param string  $static_page          Simply_Static_Page to extract URLs from
+	 * @param string  $static_page          Simply_Static\Page to extract URLs from
 	 */
 	public function __construct( $static_page ) {
 		$this->static_page = $static_page;
-		$this->options = Simply_Static_Options::instance();
+		$this->options = Options::instance();
 	}
 
 	public function get_body() {
@@ -237,7 +243,7 @@ class Simply_Static_Url_Extractor {
 	private function extract_and_replace_urls_in_html() {
 		$html_string = $this->get_body();
 
-		$dom = Sunra\PhpSimple\HtmlDomParser::str_get_html(
+		$dom = \Sunra\PhpSimple\HtmlDomParser::str_get_html(
 			$html_string,
 			$lowercase = true,
 			$forceTagsClosed = true,

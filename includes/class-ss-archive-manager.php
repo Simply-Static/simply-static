@@ -1,10 +1,16 @@
-<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+<?php
+namespace Simply_Static;
+
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 /**
  * Simply Static URL manager class
  * @package Simply_Static
  */
-class Simply_Static_Archive_Manager {
+class Archive_Manager {
 
 	/** @const */
 	private static $states = array(
@@ -71,8 +77,8 @@ class Simply_Static_Archive_Manager {
 	);
 
 	/**
-	 * Stores options for the archive manager using Simply_Static_Options
-	 * @var Simply_Static_Options
+	 * Stores options for the archive manager using Simply_Static\Options
+	 * @var Simply_Static\Options
 	 */
 	protected $options = null;
 
@@ -81,7 +87,7 @@ class Simply_Static_Archive_Manager {
 	 * @param string $option_key The options key name
 	 */
 	public function __construct() {
-		$this->options = Simply_Static_Options::instance();
+		$this->options = Options::instance();
 
 		// Set the initial archive state to 'idle'
 		if ( $this->options->get( 'archive_state_name' ) === null ) {
@@ -102,7 +108,7 @@ class Simply_Static_Archive_Manager {
 		try {
 			$function_name = 'handle_ajax_' . $action;
 			$this->$function_name();
-		} catch ( Exception $e ) {
+		} catch ( \Exception $e ) {
 			$this->exception_occurred( $e );
 		}
 	}
@@ -113,8 +119,8 @@ class Simply_Static_Archive_Manager {
 	 * Check the $result, if it's...
 	 * - true = state completed successfully (move to next state)
 	 * - false = state not yet done (stay in same state)
-	 * - WP_Error = something failed (set error state)
-	 * @param boolean|WP_Error $result The result of processing from Archive_Creator
+	 * - \WP_Error = something failed (set error state)
+	 * @param boolean|\WP_Error $result The result of processing from Archive_Creator
 	 * @return void
 	 */
 	private function next_or_error( $result ) {
@@ -137,7 +143,7 @@ class Simply_Static_Archive_Manager {
 			$this->next_or_error( $this->handle_setup_state() );
 		} else {
 			// unknown action or transition to wrong state
-			$this->error_occurred( new WP_Error( 'invalid_state_transition' ) );
+			$this->error_occurred( new \WP_Error( 'invalid_state_transition' ) );
 		}
 	}
 
@@ -250,13 +256,13 @@ class Simply_Static_Archive_Manager {
 
 	/**
 	 * Do processing for the 'setup' state
-	 * @return true|WP_Error Returns true if successful or WP_Error if there's a problem
+	 * @return true|\WP_Error Returns true if successful or \WP_Error if there's a problem
 	 */
 	private function handle_setup_state() {
 		global $blog_id;
 
 		$current_user = wp_get_current_user();
-		$archive_name = join( '-', array( Simply_Static::SLUG, $blog_id, time(), $current_user->user_login ) );
+		$archive_name = join( '-', array( Plugin::SLUG, $blog_id, time(), $current_user->user_login ) );
 
 		$this->options
 			->set( 'archive_status_messages', array() )
@@ -279,37 +285,37 @@ class Simply_Static_Archive_Manager {
 		if ( ! file_exists( $archive_dir ) ) {
 			$create_dir = wp_mkdir_p( $archive_dir );
 			if ( $create_dir === false ) {
-				return new WP_Error( 'cannot_create_archive_dir' );
+				return new \WP_Error( 'cannot_create_archive_dir' );
 			}
 		}
 
 		// TODO: Add a way for the user to perform this, optionally, so that we
 		// don't need to do it every time. Then enable the two commented-out
 		// sections below.
-		Simply_Static_Page::query()->delete_all();
+		Page::query()->delete_all();
 
 		// clear out any saved error messages on pages
-		//Simply_Static_Page::query()
+		//Page::query()
 		// ->update_all( 'error_message', null );
 
 		// delete pages that we can't process
-		//Simply_Static_Page::query()
-		// ->where( 'http_status_code IS NULL OR http_status_code NOT IN (?)', implode( ',', Simply_Static_Archive_Creator::$processable_status_codes ) )
+		//Page::query()
+		// ->where( 'http_status_code IS NULL OR http_status_code NOT IN (?)', implode( ',', Archive_Creator::$processable_status_codes ) )
 		// ->delete_all();
 
 		// add origin url and additional urls/files to database
-		Simply_Static_Archive_Creator::add_origin_and_additional_urls_to_db( $this->options->get( 'additional_urls' ) );
-		Simply_Static_Archive_Creator::add_additional_files_to_db( $this->options->get( 'additional_files' ) );
+		Archive_Creator::add_origin_and_additional_urls_to_db( $this->options->get( 'additional_urls' ) );
+		Archive_Creator::add_additional_files_to_db( $this->options->get( 'additional_files' ) );
 
 		return true;
 	}
 
 	/**
 	 * Do processing for the 'fetching' state
-	 * @return boolean|WP_Error true if done processing, false if more processing, WP_Error if problem
+	 * @return boolean|\WP_Error true if done processing, false if more processing, \WP_Error if problem
 	 */
 	private function handle_fetching_state() {
-		$archive_creator = new Simply_Static_Archive_Creator();
+		$archive_creator = new Archive_Creator();
 
 		$destination_url_type = $this->options->get( 'destination_url_type' );
 		$relative_path = $this->options->get( 'relative_path' );
@@ -328,10 +334,10 @@ class Simply_Static_Archive_Manager {
 
 	/**
 	 * Do processing for the 'transferring' state
-	 * @return boolean|WP_Error true if done processing, false if more processing, WP_Error if problem
+	 * @return boolean|\WP_Error true if done processing, false if more processing, \WP_Error if problem
 	 */
 	private function handle_transferring_state() {
-		$archive_creator = new Simply_Static_Archive_Creator();
+		$archive_creator = new Archive_Creator();
 
 		if ( $this->options->get( 'delivery_method' ) == 'zip' ) {
 
@@ -381,7 +387,7 @@ class Simply_Static_Archive_Manager {
 		$this->save_status_message( __( 'Wrapping up', 'simply-static' ) );
 
 		if ( $this->options->get( 'delete_temp_files' ) === '1' ) {
-			$archive_creator = new Simply_Static_Archive_Creator();
+			$archive_creator = new Archive_Creator();
 
 			$deleted_successfully = $archive_creator->delete_temp_static_files();
 		}
@@ -433,7 +439,7 @@ class Simply_Static_Archive_Manager {
 
 	/**
 	 * Do processing for the 'error' state
-	 * @param  WP_Error $wp_error WP_Error to process
+	 * @param  \WP_Error $wp_error \WP_Error to process
 	 * @return false              Do not do additional processing
 	 */
 	private function handle_error_state() {

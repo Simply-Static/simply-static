@@ -1,4 +1,10 @@
-<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+<?php
+namespace Simply_Static;
+
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 /**
  * Simply Static Diagnostic class
@@ -7,7 +13,7 @@
  * minimum requirements.
  * @package Simply_Static
  */
-class Simply_Static_Diagnostic {
+class Diagnostic {
 
 	/** @const */
     protected static $min_version = array(
@@ -43,12 +49,12 @@ class Simply_Static_Diagnostic {
 
 	/**
 	 * An instance of the options structure containing all options for this plugin
-	 * @var Simply_Static_Options
+	 * @var Simply_Static\Options
 	 */
 	protected $options = null;
 
 	public function __construct() {
-		$this->options = Simply_Static_Options::instance();
+		$this->options = Options::instance();
 
 		if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
 			$this->description['URLs'][] = array(
@@ -183,7 +189,7 @@ class Simply_Static_Diagnostic {
 		$label = __( 'Checking if MySQL user has <code>DELETE</code> privilege', 'simply-static' );
 		return array(
 			'label' => $label,
-			'test' => Simply_Static_Sql_Permissions::instance()->can( 'delete' )
+			'test' => Sql_Permissions::instance()->can( 'delete' )
 		);
 	}
 
@@ -191,7 +197,7 @@ class Simply_Static_Diagnostic {
 		$label = __( 'Checking if MySQL user has <code>INSERT</code> privilege', 'simply-static' );
 		return array(
 			'label' => $label,
-			'test' => Simply_Static_Sql_Permissions::instance()->can( 'insert' )
+			'test' => Sql_Permissions::instance()->can( 'insert' )
 		);
 	}
 
@@ -199,7 +205,7 @@ class Simply_Static_Diagnostic {
 		$label = __( 'Checking if MySQL user has <code>SELECT</code> privilege', 'simply-static' );
 		return array(
 			'label' => $label,
-			'test' => Simply_Static_Sql_Permissions::instance()->can( 'select' )
+			'test' => Sql_Permissions::instance()->can( 'select' )
 		);
 	}
 
@@ -207,7 +213,7 @@ class Simply_Static_Diagnostic {
 		$label = __( 'Checking if MySQL user has <code>CREATE</code> privilege', 'simply-static' );
 		return array(
 			'label' => $label,
-			'test' => Simply_Static_Sql_Permissions::instance()->can( 'create' )
+			'test' => Sql_Permissions::instance()->can( 'create' )
 		);
 	}
 
@@ -215,7 +221,7 @@ class Simply_Static_Diagnostic {
 		$label = __( 'Checking if MySQL user has <code>ALTER</code> privilege', 'simply-static' );
 		return array(
 			'label' => $label,
-			'test' => Simply_Static_Sql_Permissions::instance()->can( 'alter' )
+			'test' => Sql_Permissions::instance()->can( 'alter' )
 		);
 	}
 
@@ -223,7 +229,7 @@ class Simply_Static_Diagnostic {
 		$label = __( 'Checking if MySQL user has <code>DROP</code> privilege', 'simply-static' );
 		return array(
 			'label' => $label,
-			'test' => Simply_Static_Sql_Permissions::instance()->can( 'drop' )
+			'test' => Sql_Permissions::instance()->can( 'drop' )
 		);
 	}
 

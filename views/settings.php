@@ -1,7 +1,5 @@
 <?php
-/**
- * @package Simply_Static
- */
+namespace Simply_Static;
 ?>
 
 <h1><?php _e( 'Simply Static &rsaquo; Settings', 'simply-static' ); ?></h1>

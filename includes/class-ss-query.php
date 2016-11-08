@@ -1,4 +1,10 @@
-<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+<?php
+namespace Simply_Static;
+
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 /**
  * Simply Static Query class
@@ -6,9 +12,9 @@
  * Used for creating queries for the WordPress database
  * @package Simply_Static
  */
-class Simply_Static_Query {
+class Query {
 	/**
-	 * @var Simply_Static_Model
+	 * @var Simply_Static\Model
 	 */
 	protected $model;
 
@@ -35,7 +41,7 @@ class Simply_Static_Query {
 	protected $order = null;
 
 	/**
-	 * @param Simply_Static_Model $model
+	 * @param Simply_Static\Model $model
 	 */
 	public function __construct( $model ) {
 		$this->model = $model;
@@ -172,7 +178,7 @@ class Simply_Static_Query {
 	 */
 	public function update_all( $arg ) {
 		if ( func_num_args() > 1 ) {
-			throw new Exception( "Too many arguments passed" );
+			throw new \Exception( "Too many arguments passed" );
 		}
 
 		global $wpdb;
@@ -225,7 +231,7 @@ class Simply_Static_Query {
 	 */
 	public function offset( $offset ) {
 		if ( $this->limit === null ) {
-			throw new Exception( "Cannot offset without limit" );
+			throw new \Exception( "Cannot offset without limit" );
 		}
 
 		$this->offset = $offset;
@@ -273,7 +279,7 @@ class Simply_Static_Query {
 				// pass the string as-is to our "where" array
 				$this->where[] = $arg;
 			} else {
-				throw new Exception( "One argument provided and it was not a string or array" );
+				throw new \Exception( "One argument provided and it was not a string or array" );
 			}
 		} else if ( func_num_args() > 1 ) {
 			$where_values = func_get_args();
@@ -282,7 +288,7 @@ class Simply_Static_Query {
 			if ( is_string( $condition ) ) {
 				// check that the number of args and ?'s matches
 				if ( substr_count( $condition, '?' ) != sizeof( $where_values ) ) {
-					throw new Exception( "Number of arguments does not match number of placeholders (?'s)" );
+					throw new \Exception( "Number of arguments does not match number of placeholders (?'s)" );
 				} else {
 					// create a condition to add to the "where" array
 					foreach ( $where_values as $value ) {
@@ -292,10 +298,10 @@ class Simply_Static_Query {
 					$this->where[] = $condition;
 				}
 			} else {
-				throw new Exception( "Multiple arguments provided but first arg was not a string" );
+				throw new \Exception( "Multiple arguments provided but first arg was not a string" );
 			}
 		} else {
-			throw new Exception( "No arguments provided" );
+			throw new \Exception( "No arguments provided" );
 		}
 
 		return $this;
@@ -346,7 +352,7 @@ class Simply_Static_Query {
 			// pass the string as-is to our "where" array
 			$values .= $arg . ' ';
 		} else {
-			throw new Exception( "Argument provided was not a string or array" );
+			throw new \Exception( "Argument provided was not a string or array" );
 		}
 
 		return $this->compose_query( 'UPDATE ', $values );

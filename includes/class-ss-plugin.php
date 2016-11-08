@@ -1,10 +1,16 @@
-<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+<?php
+namespace Simply_Static;
+
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 /**
  * The core plugin class
  * @package Simply_Static
  */
-class Simply_Static {
+class Plugin {
 	/**
 	 * Plugin version
 	 * @var string
@@ -28,13 +34,13 @@ class Simply_Static {
 
 	/**
 	 * An instance of the options structure containing all options for this plugin
-	 * @var Simply_Static_Options
+	 * @var Simply_Static\Options
 	 */
 	protected $options = null;
 
 	/**
 	 * View object
-	 * @var Simply_Static_View
+	 * @var Simply_Static\View
 	 */
 	protected $view = null;
 
@@ -71,8 +77,8 @@ class Simply_Static {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 			self::$instance->includes();
-			self::$instance->options = Simply_Static_Options::instance();
-			self::$instance->view = new Simply_Static_View();
+			self::$instance->options = Options::instance();
+			self::$instance->view = new View();
 
 			$page = isset( $_GET['page'] ) ? $_GET['page'] : '';
 			self::$instance->in_plugin = strpos( $page, self::SLUG ) === 0;
@@ -117,8 +123,8 @@ class Simply_Static {
 				update_option( 'simply-static', $old_ss_options );
 				delete_option( 'simply_static' );
 
-				// update Simply_Static_Options again to pull in updated data
-				$this->options = new Simply_Static_Options();
+				// update Simply_Static\Options again to pull in updated data
+				$this->options = new Options();
 			} else { // never installed
 				$this->options
 					->set( 'destination_scheme', sist_origin_scheme() )
@@ -133,7 +139,7 @@ class Simply_Static {
 
 		// sync the database on any install/upgrade/downgrade
 		if ( version_compare( $version, self::VERSION, '!=' ) ) {
-			Simply_Static_Page::create_or_update_table();
+			Page::create_or_update_table();
 		}
 
 		// perform migrations if our saved version # doesn't match the current version
@@ -207,17 +213,17 @@ class Simply_Static {
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/shims.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/phpuri.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/PhpSimple/HtmlDomParser.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-options.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-view.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-extractor.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-url-fetcher.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-archive-creator.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-query.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-model.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-page.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-archive-manager.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-diagnostic.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-simply-static-sql-permissions.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-options.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-view.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-url-extractor.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-url-fetcher.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-archive-creator.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-query.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-model.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-page.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-archive-manager.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-diagnostic.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-sql-permissions.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/misc-functions.php';
 	}
 
@@ -300,7 +306,7 @@ class Simply_Static {
 
 		$action = $_POST['perform'];
 
-		$archive_manager = new Simply_Static_Archive_Manager();
+		$archive_manager = new Archive_Manager();
 
 		$archive_manager->perform( $action );
 
@@ -330,7 +336,7 @@ class Simply_Static {
 			die( __( 'Not permitted', 'simply-static' ) );
 		}
 
-		$archive_manager = new Simply_Static_Archive_Manager();
+		$archive_manager = new Archive_Manager();
 
 		$content = $this->view
 			->set_template( '_activity_log' )
@@ -357,11 +363,11 @@ class Simply_Static {
 		$current_page = $_POST['page'];
 		$offset = ( intval( $current_page ) - 1 ) * intval( $per_page );
 
-		$static_pages = Simply_Static_Page::query()
+		$static_pages = Page::query()
 			->limit( $per_page )
 			->offset( $offset )
 			->find();
-		$http_status_codes = Simply_Static_Page::get_http_status_codes_summary();
+		$http_status_codes = Page::get_http_status_codes_summary();
 		$total_static_pages = array_sum( array_values( $http_status_codes ) );
 		$total_pages = ceil( $total_static_pages / $per_page );
 
@@ -385,7 +391,7 @@ class Simply_Static {
 	 * @return void
 	 */
 	public function display_generate_page() {
-		$archive_manager = new Simply_Static_Archive_Manager();
+		$archive_manager = new Archive_Manager();
 
 		$this->view
 			->set_layout( 'admin' )
@@ -430,7 +436,7 @@ class Simply_Static {
 			$this->view->add_flash( 'updated', $message );
 		}
 
-		$diagnostic = new Simply_Static_Diagnostic();
+		$diagnostic = new Diagnostic();
 		$results = $diagnostic->results;
 
 		$this->view

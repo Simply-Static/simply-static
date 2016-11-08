@@ -1,7 +1,5 @@
 <?php
-/**
- * @package Simply_Static
- */
+namespace Simply_Static;
 ?>
 
 <?php foreach ( $this->flashes as $flash ) : ?>
