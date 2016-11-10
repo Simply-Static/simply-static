@@ -11,7 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Checks to ensure that the user's server and WP installation meet a set of
  * minimum requirements.
- * @package Simply_Static
  */
 class Diagnostic {
 

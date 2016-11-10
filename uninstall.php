@@ -1,8 +1,6 @@
 <?php
 /**
  * Uninstall Simply Static
- *
- * @package Simply_Static
  */
 
 // exit if accessed directly

@@ -1,9 +1,6 @@
 <?php
 namespace Simply_Static;
 
-/**
- * @package Simply_Static\Unit_tests
- */
 class Query_Test extends \WP_UnitTestCase {
 
 	/**

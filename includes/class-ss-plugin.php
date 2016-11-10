@@ -8,7 +8,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * The core plugin class
- * @package Simply_Static
  */
 class Plugin {
 	/**
@@ -45,6 +44,12 @@ class Plugin {
 	protected $view = null;
 
 	/**
+	 * Archive creation process
+	 * @var Simply_Static\Archive_Creation_Job
+	 */
+	protected $archive_creation_job = null;
+
+	/**
 	 * Are we in the plugin?
 	 * @var boolean
 	 */
@@ -79,6 +84,7 @@ class Plugin {
 			self::$instance->includes();
 			self::$instance->options = Options::instance();
 			self::$instance->view = new View();
+			self::$instance->archive_creation_job = new Archive_Creation_Job();
 
 			$page = isset( $_GET['page'] ) ? $_GET['page'] : '';
 			self::$instance->in_plugin = strpos( $page, self::SLUG ) === 0;
@@ -213,15 +219,21 @@ class Plugin {
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/shims.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/phpuri.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/PhpSimple/HtmlDomParser.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/wp-background-processing/wp-background-processing.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-options.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-view.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-url-extractor.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-url-fetcher.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-archive-creator.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-archive-creation-job.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-task.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-setup-task.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-fetch-urls-task.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-transfer-files-locally-task.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-create-zip-archive.php';
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-wrapup-task.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-query.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-model.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-page.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-archive-manager.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-diagnostic.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-sql-permissions.php';
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/misc-functions.php';
@@ -304,25 +316,33 @@ class Plugin {
 			die( __( 'Not permitted', 'simply-static' ) );
 		}
 
-		$action = $_POST['perform'];
+		// $action = $_POST['perform'];
+		//
+		// $archive_manager = new Archive_Manager();
+		//
+		// $archive_manager->perform( $action );
+		//
+		// $state_name = $archive_manager->get_state_name();
+		// $done = $archive_manager->has_finished();
 
-		$archive_manager = new Archive_Manager();
-
-		$archive_manager->perform( $action );
-
-		$state_name = $archive_manager->get_state_name();
-		$done = $archive_manager->has_finished();
+		$this->archive_creation_job->start();
+		// for($x = 0; $x <= 5; $x++) {
+		// 	$process->push_to_queue( 'setup' );
+		// }
+		//
+		// $process->save()
+		// 		->dispatch();
 
 		$activity_log_html = $this->view
 			->set_template( '_activity_log' )
-			->assign( 'status_messages', $archive_manager->get_status_messages() )
+			->assign( 'status_messages', $this->options->get( 'archive_status_messages' ) )
 			->render_to_string();
 
 		// send json response and die()
 		wp_send_json( array(
-			'state_name' => $state_name,
+			'state_name' => 'setup',
 			'activity_log_html' => $activity_log_html,
-			'done' => $done
+			'done' => true // $done
 		) );
 	}
 
@@ -336,11 +356,11 @@ class Plugin {
 			die( __( 'Not permitted', 'simply-static' ) );
 		}
 
-		$archive_manager = new Archive_Manager();
+		// $archive_manager = new Archive_Manager();
 
 		$content = $this->view
 			->set_template( '_activity_log' )
-			->assign( 'status_messages', $archive_manager->get_status_messages() )
+			->assign( 'status_messages', $this->options->get( 'archive_status_messages' ) )
 			->render_to_string();
 
 		// send json response and die()
@@ -391,12 +411,12 @@ class Plugin {
 	 * @return void
 	 */
 	public function display_generate_page() {
-		$archive_manager = new Archive_Manager();
+		// $archive_manager = new Archive_Manager();
 
 		$this->view
 			->set_layout( 'admin' )
 			->set_template( 'generate' )
-			->assign( 'archive_generation_ready_to_start', $archive_manager->has_finished() )
+			->assign( 'archive_generation_ready_to_start', true ) //$archive_manager->has_finished() )
 			->render();
 	}
 

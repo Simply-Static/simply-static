@@ -8,9 +8,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Simply Static Page class, for tracking the status of pages / static files
- * @package Simply_Static
  */
 class Page extends Model {
+
+	/** @const */
+	public static $processable_status_codes = array(
+		200, 301, 302, 303, 307, 308
+	);
 
 	/** @const */
 	protected static $table_name = 'pages';

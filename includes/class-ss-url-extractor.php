@@ -12,7 +12,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Note that in addition to extracting URLs this class also makes modifications
  * to the Simply_Static\Url_Response that is passed into it: URLs in the body of
  * the response are updated to be absolute URLs.
- * @package Simply_Static
  */
 class Url_Extractor {
 
@@ -255,10 +254,7 @@ class Url_Extractor {
 
 		// return the original html string if dom is blank or boolean (unparseable)
 		if ( $dom == '' || is_bool( $dom ) ) {
-
-			error_log( 'unparseable!' );
 			return $html_string;
-
 		} else {
 			// handle tags with attributes
 			foreach ( self::$match_tags as $tag_name => $attributes ) {

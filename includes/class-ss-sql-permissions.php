@@ -10,7 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Simply Static SQL Privilege Checker
  *
  * Checks to ensure that the MySQL has permissions needed for Simply Static.
- * @package Simply_Static
  */
 class Sql_Permissions {
 

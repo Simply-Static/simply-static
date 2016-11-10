@@ -1,9 +1,6 @@
 <?php
 namespace Simply_Static;
 
-/**
- * @package Simply_Static\Unit_tests
- */
 class Url_Extractor_Test extends \WP_UnitTestCase {
 
 	/**

@@ -8,7 +8,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Simply Static options class
- * @package Simply_Static
  */
 class Options {
 	/**

@@ -1,11 +1,10 @@
 <?php // Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; 
+	exit;
 }
 
 /**
  * Miscellaneous functions for use across the plugin
- * @package Simply_Static
  */
 
 /**

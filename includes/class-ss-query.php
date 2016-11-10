@@ -10,7 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Simply Static Query class
  *
  * Used for creating queries for the WordPress database
- * @package Simply_Static
  */
 class Query {
 	/**
@@ -100,7 +99,7 @@ class Query {
 	}
 
 	/**
-	 * Find and return an the first record matching the column name/value
+	 * Find and return the first record matching the column name/value
 	 *
 	 * Example: find_by( 'id', 123 )
 	 * @param  string $column_name The name of the column to search on

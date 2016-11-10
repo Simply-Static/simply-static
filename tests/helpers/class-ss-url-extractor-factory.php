@@ -2,10 +2,6 @@
 namespace Simply_Static;
 
 /**
- * @package Simply_Static\Unit_tests
- */
-
-/**
  * Returns a faked URL Extractor
  */
 class Url_Extractor_Factory extends \WP_UnitTestCase {

@@ -8,7 +8,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Simply Static view class
- * @package Simply_Static
  */
 class View {
 

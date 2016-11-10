@@ -2,10 +2,6 @@
 namespace Simply_Static;
 
 /**
- * @package Simply_Static\Unit_tests
- */
-
-/**
  * Returns a faked Page
  */
 class Page_Factory extends \WP_UnitTestCase {

@@ -11,7 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Represents a single database table with accessors for finding, creating, and
  * updating records.
- * @package Simply_Static
  */
 class Model {
 

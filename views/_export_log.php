@@ -34,7 +34,7 @@ if ( is_array( $this->static_pages ) && count( $this->static_pages ) ) : ?>
 
 		<?php foreach ( $this->static_pages as $static_page ) : ?>
 			<tr>
-				<?php $processable = in_array( $static_page->http_status_code, Archive_Creator::$processable_status_codes ); ?>
+				<?php $processable = in_array( $static_page->http_status_code, Page::$processable_status_codes ); ?>
 				<td class='status-code <?php if ( ! $processable ) { echo 'unprocessable'; } ?>'>
 					<?php echo $static_page->http_status_code; ?>
 				</td>

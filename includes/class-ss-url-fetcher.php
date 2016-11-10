@@ -8,7 +8,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Simply Static URL fetcher class
- * @package Simply_Static
  */
 class Url_Fetcher {
 	/**

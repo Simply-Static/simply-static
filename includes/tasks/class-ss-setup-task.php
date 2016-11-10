@@ -1,0 +1,136 @@
+<?php
+namespace Simply_Static;
+
+class Setup_Task extends Task {
+
+	/**
+	 * @var string
+	 */
+	protected $action = 'setup';
+
+	/**
+	 * Do the initial setup for generating a static archive
+	 * @return boolean true this always completes in one run, so returns true
+	 */
+	public function perform() {
+		global $blog_id;
+
+		$current_user = wp_get_current_user();
+		$archive_name = join( '-', array( Plugin::SLUG, $blog_id, time(), $current_user->user_login ) );
+
+		$this->options
+			->set( 'archive_status_messages', array() )
+			->set( 'archive_name', $archive_name )
+			->set( 'archive_creator_id', $current_user->ID )
+			->set( 'archive_blog_id', $blog_id )
+			->set( 'archive_start_time', sist_formatted_datetime() )
+			->set( 'archive_end_time', null )
+			->save();
+
+		$message = sprintf( __( "%s has started generating static files", 'simply-static' ), $current_user->user_login );
+		$this->save_status_message( $message, 'initiated_by_user' );
+
+		$message = __( 'Setting up', 'simply-static' );
+		$this->save_status_message( $message );
+
+		$archive_dir = $this->options->get_archive_dir();
+
+		// create temp archive directory
+		if ( ! file_exists( $archive_dir ) ) {
+			$create_dir = wp_mkdir_p( $archive_dir );
+			if ( $create_dir === false ) {
+				return new \WP_Error( 'cannot_create_archive_dir' );
+			}
+		}
+
+		// TODO: Add a way for the user to perform this, optionally, so that we
+		// don't need to do it every time. Then enable the two commented-out
+		// sections below.
+		Page::query()->delete_all();
+
+		// clear out any saved error messages on pages
+		//Page::query()
+		// ->update_all( 'error_message', null );
+
+		// delete pages that we can't process
+		//Page::query()
+		// ->where( 'http_status_code IS NULL OR http_status_code NOT IN (?)', implode( ',', Page::$processable_status_codes ) )
+		// ->delete_all();
+
+		// add origin url and additional urls/files to database
+		self::add_origin_and_additional_urls_to_db( $this->options->get( 'additional_urls' ) );
+		self::add_additional_files_to_db( $this->options->get( 'additional_files' ) );
+
+		return true;
+	}
+
+	/**
+	 * Ensure the Origin URL and user-specified Additional URLs are in the DB
+	 * @return void
+	 */
+	public static function add_origin_and_additional_urls_to_db( $additional_urls ) {
+		$urls = array_unique( array_merge(
+			array( trailingslashit( sist_origin_url() ) ),
+			sist_string_to_array( $additional_urls )
+		) );
+		foreach ( $urls as $url ) {
+			$static_page = Page::query()
+				->find_or_initialize_by( 'url', $url );
+			// setting to 0 for "not found anywhere" since it's either the origin
+			// or something the user specified
+			$static_page->found_on_id = 0;
+			$static_page->save();
+		}
+	}
+
+	/**
+	 * Convert Additional Files/Directories to URLs and add them to the database
+	 * @return void
+	 */
+	public static function add_additional_files_to_db( $additional_files ) {
+		// Convert additional files to URLs and add to queue
+		foreach ( sist_string_to_array( $additional_files ) as $item ) {
+
+			// If item is a file, convert to url and insert into database.
+			// If item is a directory, recursively iterate and grab all files,
+			// and for each file, convert to url and insert into database.
+			if ( file_exists( $item ) ) {
+				if ( is_file( $item ) ) {
+					$url = self::convert_path_to_url( $item );
+					$static_page = Page::query()
+						->find_or_create_by( 'url', $url );
+					// setting found_on_id to 0 since this was user-specified
+					$static_page->found_on_id = 0;
+					$static_page->save();
+				} else {
+					$iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $item, \RecursiveDirectoryIterator::SKIP_DOTS ) );
+
+					foreach ( $iterator as $file_name => $file_object ) {
+						$url = self::convert_path_to_url( $file_name );
+						$static_page = Page::query()
+							->find_or_initialize_by( 'url', $url );
+						$static_page->found_on_id = 0;
+						$static_page->save();
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Convert a directory path into a valid WordPress URL
+	 * @param  string $path The path to a directory or a file
+	 * @return string       The WordPress URL for the given path
+	 */
+	private static function convert_path_to_url( $path ) {
+		$url = $path;
+		if ( stripos( $path, WP_PLUGIN_DIR ) === 0 ) {
+			$url = str_replace( WP_PLUGIN_DIR, WP_PLUGIN_URL, $path );
+		} elseif ( stripos( $path, WP_CONTENT_DIR ) === 0 ) {
+			$url = str_replace( WP_CONTENT_DIR, WP_CONTENT_URL, $path );
+		} elseif ( stripos( $path, get_home_path() ) === 0 ) {
+			$url = str_replace( get_home_path(), sist_origin_url(), $path );
+		}
+		return $url;
+	}
+}
