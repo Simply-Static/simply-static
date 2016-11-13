@@ -18,7 +18,7 @@ class Url_Fetcher {
 
 	/**
 	 * Singleton instance
-	 * @var Simply_Static\Options
+	 * @var Simply_Static\Url_Fetcher
 	 */
 	protected static $instance = null;
 

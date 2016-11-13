@@ -156,8 +156,9 @@ class Url_Extractor {
 	 * Replaces origin URL with destination URL in response body
 	 *
 	 * This is a function of last resort for URL replacement. Ideally it was
-	 * already done in one of the extract_and_replace_urls_in_x functions. This
-	 * catches instances of WordPress URLs and replaces them with the
+	 * already done in one of the extract_and_replace_urls_in_x functions.
+	 *
+	 * This catches instances of WordPress URLs and replaces them with the
 	 * destinaton_url. This generally works fine for absolute and relative URL
 	 * generation. It'll produce sub-optimal results for offline URLs, in that
 	 * it's only replacing the host and not adjusting the path according to the

@@ -81,6 +81,28 @@ class Options {
 	}
 
 	/**
+	 * Destroy an option
+	 * @param string $name The option name to destroy
+	 * @return boolean true if the key existed, false if it didn't
+	 */
+	public function destroy( $name ) {
+		if ( array_key_exists( $name, $this->options ) ) {
+			unset( $this->options[ $name] );
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Returns all options as an array
+	 * @return array
+	 */
+	public function get_as_array() {
+		return $this->options;
+	}
+
+	/**
 	 * Saves the internal options data to the wp_options table
 	 * @return boolean
 	 */

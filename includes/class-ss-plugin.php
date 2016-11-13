@@ -107,108 +107,10 @@ class Plugin {
 			add_filter( 'admin_footer_text', array( self::$instance, 'filter_admin_footer_text' ) );
 			add_filter( 'update_footer', array( self::$instance, 'filter_update_footer' ), 15 );
 
-			self::$instance->activate();
+			Upgrade_Handler::instance()->run();
 		}
 
 		return self::$instance;
-	}
-
-	/**
-	 * Create settings and setup database
-	 * @return void
-	 */
-	private function activate() {
-		$version = $this->options->get( 'version' );
-
-		// Never installed or options key changed
-		if ( null === $version ) {
-			// checking for legacy options key
-			$old_ss_options = get_option( 'simply_static' );
-
-			if ( $old_ss_options ) { // options key changed
-				update_option( 'simply-static', $old_ss_options );
-				delete_option( 'simply_static' );
-
-				// update Simply_Static\Options again to pull in updated data
-				$this->options = new Options();
-			} else { // never installed
-				$this->options
-					->set( 'destination_scheme', sist_origin_scheme() )
-					->set( 'destination_host', sist_origin_host() )
-					->set( 'temp_files_dir', trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' ) )
-					->set( 'additional_urls', '' )
-					->set( 'delivery_method', 'zip' )
-					->set( 'local_dir', '' )
-					->set( 'delete_temp_files', '1' );
-			}
-		}
-
-		// sync the database on any install/upgrade/downgrade
-		if ( version_compare( $version, self::VERSION, '!=' ) ) {
-			Page::create_or_update_table();
-		}
-
-		// perform migrations if our saved version # doesn't match the current version
-		if ( version_compare( $version, self::VERSION, '<' ) ) {
-
-			// version 1.2 introduced the ability to specify additional files
-			if ( version_compare( $version, '1.2.0', '<' ) ) {
-				$this->options
-					->set( 'additional_files', '' );
-			}
-
-			if ( version_compare( $version, '1.4.0', '<' ) ) {
-				// check for, and add, the WP emoji url if it's missing
-				$emoji_url = includes_url( 'js/wp-emoji-release.min.js' );
-				$additional_urls = $this->options->get( 'additional_urls' );
-				$urls_array = sist_string_to_array( $additional_urls );
-
-				if ( ! in_array( $emoji_url, $urls_array ) ) {
-					$additional_urls = $additional_urls . "\n"  . $emoji_url;
-					$this->options->set( 'additional_urls', $additional_urls );
-				}
-			}
-
-			if ( version_compare( $version, '1.4.0', '<' ) ) {
-				$this->options
-					->set( 'debugging_mode', '' );
-			}
-
-			if ( version_compare( $version, '1.7.0', '<' ) ) {
-				$scheme = $this->options->get( 'destination_scheme' );
-				$scheme = $scheme . '://';
-				$this->options->set( 'destination_scheme', $scheme );
-				$this->options->set( 'relative_path', '' );
-
-				$host = $this->options->get( 'destination_host' );
-				if ( $host == sist_origin_host() ) {
-					$this->options->set( 'destination_url_type', 'relative' );
-				} else {
-					$this->options->set( 'destination_url_type', 'absolute' );
-				}
-			}
-
-			if ( version_compare( $version, '1.7.1', '<' ) ) {
-				// check for, and add, the WP uploads dir if it's missing
-				$upload_dir = wp_upload_dir();
-				if ( isset( $upload_dir['basedir'] ) ) {
-					$upload_dir = trailingslashit( $upload_dir['basedir'] );
-
-					$additional_files = $this->options->get( 'additional_files' );
-					$files_array = sist_string_to_array( $additional_files );
-
-					if ( ! in_array( $upload_dir, $files_array ) ) {
-						$additional_files = $additional_files . "\n" . $upload_dir;
-						$this->options->set( 'additional_files', $additional_files );
-					}
-				}
-			}
-		}
-
-		// always update the version and save
-		$this->options
-			->set( 'version', self::VERSION )
-			->save();
 	}
 
 	/**
@@ -236,6 +138,7 @@ class Plugin {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-page.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-diagnostic.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-sql-permissions.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-upgrade-handler.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/misc-functions.php';
 	}
 
