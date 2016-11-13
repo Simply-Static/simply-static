@@ -6,7 +6,7 @@ class Setup_Task extends Task {
 	/**
 	 * @var string
 	 */
-	protected $action = 'setup';
+	protected static $task_name = 'setup';
 
 	/**
 	 * Do the initial setup for generating a static archive

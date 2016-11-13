@@ -6,7 +6,7 @@ class Fetch_Urls_Task extends Task {
 	/**
 	 * @var string
 	 */
-	protected $action = 'fetch_urls';
+	protected static $task_name = 'fetch_urls';
 
 	/**
 	 * Constructor
@@ -60,6 +60,9 @@ class Fetch_Urls_Task extends Task {
 
 			$this->handle_200_response( $static_page );
 		}
+
+		$message = sprintf( __( "Fetched %d of %d pages/files", 'simply-static' ), $pages_processed, $total_pages );
+		$this->save_status_message( $message );
 
 		// if we haven't processed any additional pages, we're done
 		return $pages_remaining == 0;

@@ -6,7 +6,7 @@ class Wrapup_Task extends Task {
 	/**
 	 * @var string
 	 */
-	protected $action = 'wrapup';
+	protected static $task_name = 'wrapup';
 
 	public function perform() {
 		$this->save_status_message( __( 'Wrapping up', 'simply-static' ) );

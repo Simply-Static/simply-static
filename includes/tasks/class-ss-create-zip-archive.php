@@ -8,7 +8,7 @@ class Create_Zip_Archive_Task extends Task {
 	/**
 	 * @var string
 	 */
-	protected $action = 'create_zip_archive';
+	protected static $task_name = 'create_zip_archive';
 
 	public function perform() {
 		$download_url = $this->create_zip();

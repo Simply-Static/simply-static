@@ -6,7 +6,7 @@ class Transfer_Files_Locally_Task extends Task {
 	/**
 	 * @var string
 	 */
-	protected $action = 'transfer_files_locally';
+	protected static $task_name = 'transfer_files_locally';
 
 	public function perform() {
 		$local_dir = $this->options->get( 'local_dir' );

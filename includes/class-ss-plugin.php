@@ -216,27 +216,27 @@ class Plugin {
 	 * @return void
 	 */
 	private function includes() {
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/shims.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/phpuri.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/PhpSimple/HtmlDomParser.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/wp-background-processing/wp-background-processing.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-options.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-view.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-url-extractor.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-url-fetcher.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-archive-creation-job.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-task.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-setup-task.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-fetch-urls-task.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-transfer-files-locally-task.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-create-zip-archive.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-wrapup-task.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-query.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-model.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-page.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-diagnostic.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-sql-permissions.php';
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/misc-functions.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/shims.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/phpuri.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/PhpSimple/HtmlDomParser.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/wp-background-processing/wp-background-processing.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-options.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-view.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-url-extractor.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-url-fetcher.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-archive-creation-job.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-task.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-setup-task.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-fetch-urls-task.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-transfer-files-locally-task.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-create-zip-archive.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-wrapup-task.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-query.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-model.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-page.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-diagnostic.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-sql-permissions.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/misc-functions.php';
 	}
 
 	/**
@@ -326,12 +326,6 @@ class Plugin {
 		// $done = $archive_manager->has_finished();
 
 		$this->archive_creation_job->start();
-		// for($x = 0; $x <= 5; $x++) {
-		// 	$process->push_to_queue( 'setup' );
-		// }
-		//
-		// $process->save()
-		// 		->dispatch();
 
 		$activity_log_html = $this->view
 			->set_template( '_activity_log' )

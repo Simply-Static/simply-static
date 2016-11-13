@@ -136,6 +136,8 @@ class Archive_Creation_Job extends \WP_Background_Process {
 		$task_name = $key ?: $this->current_task;
 		$messages = Options::instance()->get( 'archive_status_messages' );
 
+		error_log( $task_name . ': ' . $message );
+
 		// if the state exists, set the datetime and message
 		if ( ! array_key_exists( $task_name, $messages ) ) {
 			$messages[ $task_name ] = array(

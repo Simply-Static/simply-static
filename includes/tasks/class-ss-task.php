@@ -7,7 +7,7 @@ abstract class Task {
 	 * Task name
 	 * @var string
 	 */
-	protected $task_name = 'task';
+	protected static $task_name = 'task';
 
 	/**
 	 * An instance of the options structure containing all options for this plugin
@@ -33,8 +33,10 @@ abstract class Task {
 	 * @return void
 	 */
 	protected function save_status_message( $message, $key = null ) {
-		$task_name = $key ?: $this->task_name;
+		$task_name = $key ?: static::$task_name;
 		$messages = $this->options->get( 'archive_status_messages' );
+
+		error_log( $task_name . ': ' . $message );
 
 		// if the state exists, set the datetime and message
 		if ( ! array_key_exists( $task_name, $messages ) ) {
