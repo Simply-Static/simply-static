@@ -67,7 +67,13 @@ class Upgrade_Handler {
 				'local_dir' => '',
 				'delete_temp_files' => '1',
 				'relative_path' => '',
-				'destination_url_type' => 'relative'
+				'destination_url_type' => 'relative',
+				'archive_current_task' => null,
+				'archive_status_messages' => array(),
+				'archive_name' => null,
+				'archive_start_time' => null,
+				'archive_end_time' => null,
+
 			);
 		}
 

@@ -11,10 +11,6 @@ namespace Simply_Static;
 	<div class='actions'>
 		<input id='generate' class='button button-primary button-hero <?php if ( ! $this->archive_generation_ready_to_start ) { echo 'hide'; } ?>' type='submit' name='generate' value='<?php _e( "Generate Static Files", 'simply-static' ); ?>' />
 
-		<input id='pause' class='button button-hero hide' type='submit' name='pause' value='<?php _e( "Pause", 'simply-static' ); ?>' />
-
-		<input id='resume' class='button button-primary button-hero <?php if ( $this->archive_generation_ready_to_start ) { echo 'hide'; } ?>' type='submit' name='resume' value='<?php _e( "Resume", 'simply-static' ); ?>' />
-
 		<input id='cancel' class='button button-cancel button-hero <?php if ( $this->archive_generation_ready_to_start ) { echo 'hide'; } ?>' type='submit' name='cancel' value='<?php _e( "Cancel", 'simply-static' ); ?>' />
 
 		<span class='spinner'></span>

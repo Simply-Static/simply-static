@@ -50,10 +50,10 @@ class Plugin {
 	protected $archive_creation_job = null;
 
 	/**
-	 * Are we in the plugin?
-	 * @var boolean
+	 * Current page name
+	 * @var string
 	 */
-	protected $in_plugin = false;
+	protected $current_page = '';
 
 	/**
 	 * Disable usage of "new"
@@ -87,7 +87,7 @@ class Plugin {
 			self::$instance->archive_creation_job = new Archive_Creation_Job();
 
 			$page = isset( $_GET['page'] ) ? $_GET['page'] : '';
-			self::$instance->in_plugin = strpos( $page, self::SLUG ) === 0;
+			self::$instance->current_page = $page;
 
 			// Check for pending file download
 			add_action( 'plugins_loaded', array( self::$instance, 'download_file' ) );
@@ -100,7 +100,7 @@ class Plugin {
 			// Add the options page and menu item.
 			add_action( 'admin_menu', array( self::$instance, 'add_plugin_admin_menu' ), 2 );
 			// Handle AJAX requests
-			add_action( 'wp_ajax_generate_static_archive', array( self::$instance, 'generate_static_archive' ) );
+			add_action( 'wp_ajax_static_archive_action', array( self::$instance, 'static_archive_action' ) );
 			add_action( 'wp_ajax_render_export_log', array( self::$instance, 'render_export_log' ) );
 			add_action( 'wp_ajax_render_activity_log', array( self::$instance, 'render_activity_log' ) );
 
@@ -134,8 +134,8 @@ class Plugin {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-create-zip-archive.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-wrapup-task.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-query.php';
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-model.php';
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-page.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/models/class-ss-model.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/models/class-ss-page.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-diagnostic.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-sql-permissions.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-upgrade-handler.php';
@@ -156,8 +156,14 @@ class Plugin {
 	 * @return void
 	 */
 	public function enqueue_admin_scripts() {
-		// Plugin admin CSS. Tack on plugin version.
-		wp_enqueue_script( self::SLUG . '-admin-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'js/admin.js', array(), self::VERSION );
+		// Plugin admin JS. Tack on plugin version.
+		if ( $this->current_page === 'simply-static' ) {
+			wp_enqueue_script( self::SLUG . '-generate-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'js/admin-generate.js', array(), self::VERSION );
+		}
+
+		if ( $this->current_page === 'simply-static_settings' ) {
+			wp_enqueue_script( self::SLUG . '-settings-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'js/admin-settings.js', array(), self::VERSION );
+		}
 	}
 
 	/**
@@ -205,30 +211,33 @@ class Plugin {
 	}
 
 	/**
-	 * Handle requests for generating a static archive and send a response via ajax
-	 *
-	 * Expects a POST param called 'perform' which is one of: start, continue,
-	 * cancel. Those actions are passed along to the Archive Manager which will
-	 * dole out small portions of work to the Archive Creator, slowly building
-	 * out a static archive over repeated requests.
+	 * Handle requests for creating a static archive and send a response via ajax
 	 * @return void
 	 */
-	function generate_static_archive() {
+	function static_archive_action() {
 		check_ajax_referer( 'simply-static_generate' );
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			die( __( 'Not permitted', 'simply-static' ) );
 		}
 
-		// $action = $_POST['perform'];
-		//
-		// $archive_manager = new Archive_Manager();
-		//
-		// $archive_manager->perform( $action );
-		//
-		// $state_name = $archive_manager->get_state_name();
-		// $done = $archive_manager->has_finished();
+		$action = $_POST['perform'];
 
-		$this->archive_creation_job->start();
+		if ( $action === 'start' ) {
+			$this->archive_creation_job->start();
+		} else if ( $action === 'cancel' ) {
+			$this->archive_creation_job->cancel();
+		}
+
+		$this->send_json_response_for_static_archive();
+	}
+
+	/**
+	 * Render json+html for response to static archive creation
+	 * @return void
+	 */
+	function send_json_response_for_static_archive() {
+		$done = $this->archive_creation_job->has_finished();
+		$current_task = $this->archive_creation_job->get_current_task();
 
 		$activity_log_html = $this->view
 			->set_template( '_activity_log' )
@@ -237,9 +246,9 @@ class Plugin {
 
 		// send json response and die()
 		wp_send_json( array(
-			'state_name' => 'setup',
+			'state_name' => $current_task,
 			'activity_log_html' => $activity_log_html,
-			'done' => true // $done
+			'done' => $done // $done
 		) );
 	}
 
@@ -440,7 +449,7 @@ class Plugin {
 	 * @return string
 	 */
 	public function filter_admin_footer_text( $text ) {
-		if ( ! self::$instance->in_plugin ) {
+		if ( ! self::$instance->in_plugin() ) {
 			return $text;
 		}
 
@@ -461,7 +470,7 @@ class Plugin {
 	 * @return string
 	 */
 	public function filter_update_footer( $text ) {
-		if ( ! self::$instance->in_plugin ) {
+		if ( ! self::$instance->in_plugin() ) {
 			return $text;
 		}
 
@@ -501,6 +510,14 @@ class Plugin {
 			readfile( $file_path );
 			exit();
 		}
+	}
+
+	/**
+	 * Are we currently within the plugin?
+	 * @return boolean true if we're within the plugin, false otherwise
+	 */
+	public function in_plugin() {
+		return strpos( $this->current_page, self::SLUG ) === 0;
 	}
 
 	/**

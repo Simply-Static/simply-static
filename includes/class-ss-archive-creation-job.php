@@ -39,17 +39,32 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 */
 	public function __construct() {
 		register_shutdown_function( array( $this, 'shutdown_handler' ) );
+		$this->current_task = Options::instance()->get( 'archive_current_task' );
 		parent::__construct();
 	}
 
 	/**
 	 * Helper method for starting the Archive_Creation_Job
-	 * @return void
+	 * @return boolean true if we were able to successfully start generating an archive
 	 */
 	public function start() {
-		$this->push_to_queue( 'setup' )
-			 ->save()
-			 ->dispatch();
+		if ( $this->has_finished() ) {
+			$first_task = self::$task_list[0];
+
+			Options::instance()
+				->set( 'archive_current_task', $first_task )
+				->save();
+
+			$this->push_to_queue( $first_task )
+				 ->save()
+				 ->dispatch();
+
+			return true;
+		} else {
+			// looks like we're in the middle of creating an archive...
+			return false;
+		}
+
 	}
 
 	/**
@@ -58,7 +73,11 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 * @return false|string       task name to process, or false if done
 	 */
 	protected function task( $task_name ) {
-		$this->current_task = $task_name;
+		$this->set_current_task( $task_name );
+
+		if ( in_array( $this->current_task, array( 'done', 'error', 'cancelled' ) ) ) {
+			return false;
+		}
 
 		error_log( '$task_name: ' . $task_name );
 
@@ -101,10 +120,38 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	}
 
 	/**
-	 * Complete
+	 * This is run at the end of the job, after task() has returned false
 	 */
 	protected function complete() {
+		$this->set_current_task( 'done' );
 		parent::complete();
+	}
+
+	public function cancel() {
+		$this->set_current_task( 'cancelled' );
+	}
+
+	/**
+	 * Has the job finished?
+	 * @return boolean True if the job is done, false if it's still running
+	 */
+	public function has_finished() {
+		return in_array( $this->current_task, array( 'done', 'error', 'cancelled' ) );
+	}
+
+	/**
+	 * Return the current task
+	 * @return string The current task
+	 */
+	public function get_current_task() {
+		return $this->current_task;
+	}
+
+	protected function set_current_task( $task_name ) {
+		$this->current_task = $task_name;
+		Options::instance()
+			->set( 'archive_current_task', $task_name )
+			->save();
 	}
 
 	/**
@@ -154,9 +201,9 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	}
 
 	private function exception_occurred( $exception ) {
-		$this->apply( 'error' );
+		$this->complete();
 		$message = sprintf( __( "An exception occurred: %s", 'simply-static' ), $exception->getMessage() );
-		$this->save_status_message( $message );
+		$this->save_status_message( $message, 'error' );
 	}
 
 	/**
@@ -164,9 +211,9 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 * @return void
 	 */
 	private function error_occurred( $wp_error ) {
-		$this->apply( 'error' );
+		$this->complete();
 		$message = sprintf( __( "An error occurred: %s", 'simply-static' ), $wp_error->get_error_message() );
-		$this->save_status_message( $message );
+		$this->save_status_message( $message, 'error' );
 	}
 
 	/**

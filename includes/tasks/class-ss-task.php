@@ -20,6 +20,9 @@ abstract class Task {
 	 */
 	public function __construct() {
 		$this->options = Options::instance();
+		$this->options
+			->set( 'archive_current_task', static::$task_name )
+			->save();
 	}
 
 	/**

@@ -15,20 +15,14 @@ class Setup_Task extends Task {
 	public function perform() {
 		global $blog_id;
 
-		$current_user = wp_get_current_user();
-		$archive_name = join( '-', array( Plugin::SLUG, $blog_id, time(), $current_user->user_login ) );
+		$archive_name = join( '-', array( Plugin::SLUG, $blog_id, time() ) );
 
 		$this->options
 			->set( 'archive_status_messages', array() )
 			->set( 'archive_name', $archive_name )
-			->set( 'archive_creator_id', $current_user->ID )
-			->set( 'archive_blog_id', $blog_id )
 			->set( 'archive_start_time', sist_formatted_datetime() )
 			->set( 'archive_end_time', null )
 			->save();
-
-		$message = sprintf( __( "%s has started generating static files", 'simply-static' ), $current_user->user_login );
-		$this->save_status_message( $message, 'initiated_by_user' );
 
 		$message = __( 'Setting up', 'simply-static' );
 		$this->save_status_message( $message );
