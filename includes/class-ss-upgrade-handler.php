@@ -68,7 +68,6 @@ class Upgrade_Handler {
 				'delete_temp_files' => '1',
 				'relative_path' => '',
 				'destination_url_type' => 'relative',
-				'archive_current_task' => null,
 				'archive_status_messages' => array(),
 				'archive_name' => null,
 				'archive_start_time' => null,
@@ -86,10 +85,13 @@ class Upgrade_Handler {
 	 * @return void
 	 */
 	public function run() {
+		$save_changes = false;
 		$version = $this->options->get( 'version' );
 
 		// Never installed or options key changed
 		if ( null === $version ) {
+			$save_changes = true;
+
 			// checking for legacy options key
 			$old_ss_options = get_option( 'simply_static' );
 
@@ -104,6 +106,8 @@ class Upgrade_Handler {
 
 		// sync the database on any install/upgrade/downgrade
 		if ( version_compare( $version, Plugin::VERSION, '!=' ) ) {
+			$save_changes = true;
+
 			Page::create_or_update_table();
 			$this->set_default_options();
 
@@ -156,10 +160,12 @@ class Upgrade_Handler {
 			$this->remove_old_options();
 		}
 
-		// always update the version and save
-		$this->options
-			->set( 'version', Plugin::VERSION )
-			->save();
+		if ( $save_changes ) {
+			// always update the version and save
+			$this->options
+				->set( 'version', Plugin::VERSION )
+				->save();
+		}
 	}
 
 	/**

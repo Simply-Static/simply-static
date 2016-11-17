@@ -9,19 +9,10 @@ class Wrapup_Task extends Task {
 	protected static $task_name = 'wrapup';
 
 	public function perform() {
-		$this->save_status_message( __( 'Wrapping up', 'simply-static' ) );
-
 		if ( $this->options->get( 'delete_temp_files' ) === '1' ) {
+			$this->save_status_message( __( 'Wrapping up', 'simply-static' ) );
 			$deleted_successfully = $this->delete_temp_static_files();
 		}
-
-		$end_time = sist_formatted_datetime();
-		$start_time = $this->options->get( 'archive_start_time' );
-		$duration = strtotime( $end_time ) - strtotime( $start_time );
-		$time_string = gmdate( "H:i:s", $duration );
-
-		$this->options->set( 'archive_end_time', $end_time );
-		$this->save_status_message( sprintf( __( 'Done! Finished in %s', 'simply-static' ), $time_string ) );
 
 		return true;
 	}

@@ -20,9 +20,6 @@ abstract class Task {
 	 */
 	public function __construct() {
 		$this->options = Options::instance();
-		$this->options
-			->set( 'archive_current_task', static::$task_name )
-			->save();
 	}
 
 	/**
@@ -39,8 +36,6 @@ abstract class Task {
 		$task_name = $key ?: static::$task_name;
 		$messages = $this->options->get( 'archive_status_messages' );
 
-		error_log( $task_name . ': ' . $message );
-
 		// if the state exists, set the datetime and message
 		if ( ! array_key_exists( $task_name, $messages ) ) {
 			$messages[ $task_name ] = array(
@@ -50,6 +45,8 @@ abstract class Task {
 		} else { // otherwise just update the message
 			$messages[ $task_name ]['message'] = $message;
 		}
+
+		error_log( $task_name . ' : ' . $message );
 
 		$this->options
 			->set( 'archive_status_messages', $messages )

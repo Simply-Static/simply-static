@@ -33,7 +33,6 @@ jQuery( document ).ready( function( $ ) {
 		var action = 'ping';
 		if ( next_action != null ) {
 			action = next_action;
-			next_action = null;
 		}
 
 		var data = {
@@ -53,24 +52,28 @@ jQuery( document ).ready( function( $ ) {
 		var $activityLog = $( '#activityLog' );
 		$activityLog.html( response.activity_log_html )
 			.scrollTop( $activityLog.prop( 'scrollHeight' ) );
-
-		// re-enable and hide all actions
-		$( '#sistContainer .actions input' )
-			.removeAttr( 'disabled' )
-			.addClass( 'hide' );
-
 		if ( response.done == true && done == false ) {
 			display_export_log();
 		}
 
 		done = response.done;
 
-		if ( response.done == true ) {
-			// remove spinner and show #generate
-			$( '#sistContainer .actions .spinner' ).removeClass( 'is-active' );
-			$( '#sistContainer #generate' ).removeClass( 'hide' );
+		// only adjust the button/spinner state when
+		if ( response.action != next_action ) {
+			// re-enable and hide all actions
+			$( '#sistContainer .actions input' )
+				.removeAttr( 'disabled' )
+				.addClass( 'hide' );
+
+			if ( done == true ) {
+				// remove spinner and show #generate
+				$( '#sistContainer .actions .spinner' ).removeClass( 'is-active' );
+				$( '#sistContainer #generate' ).removeClass( 'hide' );
+			} else {
+				$( '#sistContainer #cancel' ).removeClass( 'hide' );
+			}
 		} else {
-			$( '#sistContainer #cancel' ).removeClass( 'hide' );
+			next_action = null;
 		}
 	}
 

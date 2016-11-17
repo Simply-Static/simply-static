@@ -13,17 +13,6 @@ class Setup_Task extends Task {
 	 * @return boolean true this always completes in one run, so returns true
 	 */
 	public function perform() {
-		global $blog_id;
-
-		$archive_name = join( '-', array( Plugin::SLUG, $blog_id, time() ) );
-
-		$this->options
-			->set( 'archive_status_messages', array() )
-			->set( 'archive_name', $archive_name )
-			->set( 'archive_start_time', sist_formatted_datetime() )
-			->set( 'archive_end_time', null )
-			->save();
-
 		$message = __( 'Setting up', 'simply-static' );
 		$this->save_status_message( $message );
 

@@ -133,6 +133,7 @@ class Plugin {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-transfer-files-locally-task.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-create-zip-archive.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-wrapup-task.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/tasks/class-ss-cancel-task.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-query.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/models/class-ss-model.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/models/class-ss-page.php';
@@ -228,15 +229,15 @@ class Plugin {
 			$this->archive_creation_job->cancel();
 		}
 
-		$this->send_json_response_for_static_archive();
+		$this->send_json_response_for_static_archive( $action );
 	}
 
 	/**
 	 * Render json+html for response to static archive creation
 	 * @return void
 	 */
-	function send_json_response_for_static_archive() {
-		$done = $this->archive_creation_job->has_finished();
+	function send_json_response_for_static_archive( $action ) {
+		$done = $this->archive_creation_job->is_process_running() === false;
 		$current_task = $this->archive_creation_job->get_current_task();
 
 		$activity_log_html = $this->view
@@ -246,7 +247,7 @@ class Plugin {
 
 		// send json response and die()
 		wp_send_json( array(
-			'state_name' => $current_task,
+			'action' => $action,
 			'activity_log_html' => $activity_log_html,
 			'done' => $done // $done
 		) );
@@ -317,12 +318,12 @@ class Plugin {
 	 * @return void
 	 */
 	public function display_generate_page() {
-		// $archive_manager = new Archive_Manager();
+		$done = $this->archive_creation_job->is_process_running() === false;
 
 		$this->view
 			->set_layout( 'admin' )
 			->set_template( 'generate' )
-			->assign( 'archive_generation_ready_to_start', true ) //$archive_manager->has_finished() )
+			->assign( 'archive_generation_done', $done )
 			->render();
 	}
 
