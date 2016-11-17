@@ -17,18 +17,23 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Domain Path:       /languages
  */
 
-if ( ! defined( 'SIST_FILE' ) ) {
-	define( 'SIST_FILE', __FILE__ );
+/**
+ * Check that we're using at least version 5.3 of PHP
+ */
+if ( version_compare( PHP_VERSION, '5.3', '<' ) ) {
+	if ( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
+		if ( ! is_plugin_active( plugin_basename( __FILE__ ) ) ) {
+			$message = __( '<b>Simply Static</b> requires PHP 5.3 or higher, and the plugin has now deactivated itself.', 'simply-static' ) .
+				'<br />' .
+				__( 'Contact your hosting company or your system administrator and ask for an upgrade to version 5.3 of PHP.', 'simply-static' );
+			printf( "<p style='color: #444; font-size: 13px; line-height: 1.5; font-family: -apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Oxygen-Sans,Ubuntu,Cantarell,\"Helvetica Neue\",sans-serif'>%s</p>", $message );
+			exit();
+		}
+
+		deactivate_plugins( __FILE__ );
+	}
+} else {
+	require plugin_dir_path( __FILE__ ) . 'includes/class-ss-plugin.php';
+
+	Simply_Static\Plugin::instance();
 }
-
-if ( ! defined( 'SIST_PATH' ) ) {
-	define( 'SIST_PATH', plugin_dir_path( SIST_FILE ) );
-}
-
-if ( ! defined( 'SIST_BASENAME' ) ) {
-	define( 'SIST_BASENAME', plugin_basename( SIST_FILE ) );
-}
-
-require plugin_dir_path( __FILE__ ) . 'includes/class-ss-plugin.php';
-
-Simply_Static\Plugin::instance();
