@@ -63,6 +63,7 @@ class Upgrade_Handler {
 				'destination_host' => sist_origin_host(),
 				'temp_files_dir' => trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' ),
 				'additional_urls' => '',
+				'additional_files' => '',
 				'delivery_method' => 'zip',
 				'local_dir' => '',
 				'delete_temp_files' => '1',
@@ -129,8 +130,10 @@ class Upgrade_Handler {
 
 				if ( version_compare( $version, '1.7.0', '<' ) ) {
 					$scheme = $this->options->get( 'destination_scheme' );
-					$scheme = $scheme . '://';
-					$this->options->set( 'destination_scheme', $scheme );
+					if ( strpos( $scheme, '://' ) === false ) {
+						$scheme = $scheme . '://';
+						$this->options->set( 'destination_scheme', $scheme );
+					}
 
 					$host = $this->options->get( 'destination_host' );
 					if ( $host == sist_origin_host() ) {
@@ -161,7 +164,7 @@ class Upgrade_Handler {
 		}
 
 		if ( $save_changes ) {
-			// always update the version and save
+			// update the version and save options
 			$this->options
 				->set( 'version', Plugin::VERSION )
 				->save();
@@ -173,7 +176,7 @@ class Upgrade_Handler {
 	 * @return void
 	 */
 	protected function set_default_options() {
-		foreach ( $default_options as $option_key => $option_value ) {
+		foreach ( $this->default_options as $option_key => $option_value ) {
 			if ( $this->options->get( $option_key ) === null ) {
 				$this->options->set( $option_key, $option_value );
 			}
@@ -188,7 +191,7 @@ class Upgrade_Handler {
 		$all_options = $this->options->get_as_array();
 
 		foreach ( $all_options as $option_key => $option_value ) {
-			if ( ! array_key_exists( $option_key, $default_options ) ) {
+			if ( ! array_key_exists( $option_key, $this->default_options ) ) {
 				$this->options->destroy( $option_key );
 			}
 		}
