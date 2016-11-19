@@ -1,5 +1,6 @@
 'use strict';
 jQuery( document ).ready( function( $ ) {
+	var REFRESH_EVERY_X_SECONDS = 5;
 	var STATIC_PAGES_PER_PAGE = 50; // max number of pages to show at once
 	var done = true;
 	var next_action = null;
@@ -10,7 +11,7 @@ jQuery( document ).ready( function( $ ) {
 
 	setInterval( function() {
 		send_action_to_archive_manager();
-	}, 2000 );
+	}, REFRESH_EVERY_X_SECONDS * 1000 );
 
 	$( '#sistContainer #generate' ).click( function( e ) {
 		$( '#sistContainer #activityLog' ).html('');
