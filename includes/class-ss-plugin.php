@@ -358,9 +358,7 @@ class Plugin {
 
 	public function display_diagnostics_page() {
 		if ( isset( $_POST['_diagnostics'] ) ) {
-			$this->save_diagnostics();
-			$message = __( 'Settings saved.', self::SLUG );
-			$this->view->add_flash( 'updated', $message );
+			$this->reset_plugin();
 		}
 
 		$diagnostic = new Diagnostic();
@@ -411,6 +409,28 @@ class Plugin {
 	}
 
 	/**
+	 * Reset the plugin back to its original state
+	 * @return void
+	 */
+	public function reset_plugin() {
+		check_admin_referer( 'simply-static_diagnostics' );
+
+		if ( $this->fetch_post_value( 'reset_plugin' ) !== '' ) {
+			// Delete Simply Static's settings
+			delete_option( 'simply-static' );
+			// Drop the Pages table
+			Page::drop_table();
+
+			$message = __( 'Plugin reset complete.', self::SLUG );
+			$this->view->add_flash( 'updated', $message );
+		}
+
+		// $this->options
+		// 	->set( 'debugging_mode', $this->fetch_post_value( 'debugging_mode' ) )
+		// 	->save();
+	}
+
+	/**
 	 * Fetch a POST variable by name and sanitize it
 	 * @param  string $variable_name Name of the POST variable to fetch
 	 * @return string                Value of the POST variable
@@ -420,17 +440,6 @@ class Plugin {
 		return implode( "\n", array_map( 'sanitize_text_field', explode( "\n", filter_input( INPUT_POST, $variable_name ) ) ) );
 	}
 
-	/**
-	 * Save the options from the options page
-	 * @return void
-	 */
-	public function save_diagnostics() {
-		check_admin_referer( 'simply-static_diagnostics' );
-
-		$this->options
-			->set( 'debugging_mode', $this->fetch_post_value( 'debugging_mode' ) )
-			->save();
-	}
 
 	/**
 	 * Loads the plugin language files

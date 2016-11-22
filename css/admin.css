@@ -55,6 +55,17 @@
 	display: none;
 }
 
+#sistContainer .button.button-destroy {
+	color: #fff;
+    background-color: #c9302c;
+    border-color: #ac2925;
+}
+
+#sistContainer .button.button-destroy:hover {
+	background-color: #d9534f;
+	border-color: #d43f3a;
+}
+
 #sistContainer .tablenav .page-numbers {
 	padding: 6px 4px;
 	font-size: 13px;

@@ -33,7 +33,7 @@ if ( version_compare( PHP_VERSION, '5.3', '<' ) ) {
 		deactivate_plugins( __FILE__ );
 	}
 } else {
-	require plugin_dir_path( __FILE__ ) . 'includes/class-ss-plugin.php';
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-ss-plugin.php';
 
 	Simply_Static\Plugin::instance();
 }
