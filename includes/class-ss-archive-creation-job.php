@@ -14,20 +14,12 @@ require_once( ABSPATH . 'wp-admin/includes/admin.php' );
  */
 class Archive_Creation_Job extends \WP_Background_Process {
 
-	/** @const */
-	public static $task_list = array(
-		'setup',
-		'fetch_urls',
-		'transfer_files_locally',
-		//'create_zip_archive',
-		'wrapup'
-	);
 
 	/**
 	 * The name of the job/action
 	 * @var string
 	 */
-	protected $action = 'archive_creation_process';
+	protected $action = 'archive_creation_job';
 
 	/**
 	 * The name of the task currently being processed
@@ -42,12 +34,19 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	protected $options = null;
 
 	/**
+	 * Array containing the list of tasks to process
+	 * @var array
+	 */
+	protected $task_list = array();
+
+	/**
 	 * Performs initializion of the options structure
 	 * @param string $option_key The options key name
 	 */
 	public function __construct() {
 		register_shutdown_function( array( $this, 'shutdown_handler' ) );
 		$this->options = Options::instance();
+		$this->task_list = apply_filters( 'simplystatic.archive_creation_job.task_list', array(), $this->options->get( 'delivery_method' ) );
 		parent::__construct();
 	}
 
@@ -59,7 +58,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 		if ( $this->is_job_done() ) {
 			global $blog_id;
 
-			$first_task = self::$task_list[0];
+			$first_task = $this->task_list[0];
 			$archive_name = join( '-', array( Plugin::SLUG, $blog_id, time() ) );
 
 			$this->options
@@ -216,16 +215,16 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 */
 	protected function find_next_task() {
 		$task_name = $this->get_current_task();
-		$index = array_search( $task_name, self::$task_list );
+		$index = array_search( $task_name, $this->task_list );
 		if ( $index === false ) {
 			return null;
 		}
 
 		$index += 1;
-		if ( ( $index ) >= count( self::$task_list ) ) {
+		if ( ( $index ) >= count( $this->task_list ) ) {
 			return null;
 		} else {
-			return self::$task_list[ $index ];
+			return $this->task_list[ $index ];
 		}
 	}
 

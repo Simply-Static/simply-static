@@ -82,12 +82,6 @@ class Plugin {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 			self::$instance->includes();
-			self::$instance->options = Options::instance();
-			self::$instance->view = new View();
-			self::$instance->archive_creation_job = new Archive_Creation_Job();
-
-			$page = isset( $_GET['page'] ) ? $_GET['page'] : '';
-			self::$instance->current_page = $page;
 
 			// Check for pending file download
 			add_action( 'plugins_loaded', array( self::$instance, 'download_file' ) );
@@ -104,8 +98,17 @@ class Plugin {
 			add_action( 'wp_ajax_render_export_log', array( self::$instance, 'render_export_log' ) );
 			add_action( 'wp_ajax_render_activity_log', array( self::$instance, 'render_activity_log' ) );
 
-			add_filter( 'admin_footer_text', array( self::$instance, 'filter_admin_footer_text' ) );
+			add_filter( 'admin_footer_text', array( self::$instance, 'filter_admin_footer_text' ), 15 );
 			add_filter( 'update_footer', array( self::$instance, 'filter_update_footer' ), 15 );
+
+			add_filter( 'simplystatic.archive_creation_job.task_list', array( self::$instance, 'filter_task_list' ), 10, 2 );
+
+			self::$instance->options = Options::instance();
+			self::$instance->view = new View();
+			self::$instance->archive_creation_job = new Archive_Creation_Job();
+
+			$page = isset( $_GET['page'] ) ? $_GET['page'] : '';
+			self::$instance->current_page = $page;
 
 			Upgrade_Handler::instance()->run();
 		}
@@ -484,9 +487,27 @@ class Plugin {
 			return $text;
 		}
 
-		$version = __( 'Simply Static Version' ) . ': <a title="' . __( 'View what changed in this version', 'simply-static' ) . '" href="https://wordpress.org/plugins/simply-static/changelog/">' . self::VERSION . '</a>';
+		$version_text = __( 'Simply Static Version' ) . ': <a title="' . __( 'View what changed in this version', 'simply-static' ) . '" href="https://wordpress.org/plugins/simply-static/changelog/">' . self::VERSION . '</a>';
 
-		return $version;
+		return $version_text;
+	}
+
+	/**
+	 * Return the task list for the Archive Creation Job to process
+	 * @param  array  $task_list       The list of tasks to process
+	 * @param  string $delivery_method The method of delivering static files
+	 * @return array                   The list of tasks to process
+	 */
+	public function filter_task_list( $task_list, $delivery_method ) {
+		array_push( $task_list, 'setup', 'fetch_urls' );
+		if ( $delivery_method === 'zip' ) {
+			array_push( $task_list, 'create_zip_archive' );
+		} else if ( $delivery_method === 'local' ) {
+			array_push( $task_list, 'transfer_files_locally' );
+		}
+		array_push( $task_list, 'wrapup' );
+
+		return $task_list;
 	}
 
 	/**
