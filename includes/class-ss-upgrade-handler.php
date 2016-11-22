@@ -80,7 +80,6 @@ class Upgrade_Handler {
 		return self::$instance;
 	}
 
-
 	/**
 	 * Create settings and setup database
 	 * @return void

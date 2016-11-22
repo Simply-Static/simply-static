@@ -24,14 +24,22 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	);
 
 	/**
-	* @var string
+	 * The name of the job/action
+	 * @var string
 	 */
 	protected $action = 'archive_creation_process';
 
 	/**
-	* @var string
+	 * The name of the task currently being processed
+	 * @var string
 	 */
 	protected $current_task = null;
+
+	/**
+	 * An instance of the options structure containing all options for this plugin
+	 * @var Simply_Static\Options
+	 */
+	protected $options = null;
 
 	/**
 	 * Performs initializion of the options structure
@@ -39,6 +47,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 */
 	public function __construct() {
 		register_shutdown_function( array( $this, 'shutdown_handler' ) );
+		$this->options = Options::instance();
 		parent::__construct();
 	}
 
@@ -53,7 +62,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 			$first_task = self::$task_list[0];
 			$archive_name = join( '-', array( Plugin::SLUG, $blog_id, time() ) );
 
-			Options::instance()
+			$this->options
 				->set( 'archive_status_messages', array() )
 				->set( 'archive_name', $archive_name )
 				->set( 'archive_start_time', sist_formatted_datetime() )
@@ -135,11 +144,11 @@ class Archive_Creation_Job extends \WP_Background_Process {
 		$this->set_current_task( 'done' );
 
 		$end_time = sist_formatted_datetime();
-		$start_time = Options::instance()->get( 'archive_start_time' );
+		$start_time = $this->options->get( 'archive_start_time' );
 		$duration = strtotime( $end_time ) - strtotime( $start_time );
 		$time_string = gmdate( "H:i:s", $duration );
 
-		Options::instance()->set( 'archive_end_time', $end_time );
+		$this->options->set( 'archive_end_time', $end_time );
 
 		$this->save_status_message( sprintf( __( 'Done! Finished in %s', 'simply-static' ), $time_string ) );
 		parent::complete();
@@ -151,26 +160,25 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 * @return void
 	 */
 	public function cancel() {
-		error_log( ' $this->is_queue_empty(): ' .  ( $this->is_queue_empty() ? 'true' : 'false' ) );
-		error_log( ' $this->is_process_running(): ' . ( $this->is_process_running() ? 'true' : 'false' ) );
+		if ( ! $this->is_job_done() ) {
+			if ( ! $this->is_queue_empty() ) {
+				// overwrite whatever the current task is with the cancel task
+				$batch = $this->get_batch();
+				$batch->data = array( 'cancel' );
+				$this->update( $batch->key, $batch->data );
+			} else {
+				// generally the queue shouldn't be empty when we get a request to
+				// cancel, but if we do, add a cancel task and start processing it.
+				// that should get the job back into a state where it can be
+				// started again.
+				$this->push_to_queue( 'cancel' )
+					->save()
+					->dispatch();
+			}
 
-		if ( ! $this->is_queue_empty() ) {
-			// overwrite whatever the current task is with the cancel task
-			$batch = $this->get_batch();
-			$batch->data = array( 'cancel' );
-			$this->update( $batch->key, $batch->data );
-		} else {
-			// generally the queue shouldn't be empty when we get a request to
-			// cancel, but if we do, add a cancel task and start processing it.
-			// that should get the job back into a state where it can be
-			// started again.
-			$this->push_to_queue( 'cancel' )
-				->save()
-				->dispatch();
-		}
-
-		if ( ! $this->is_process_running() ) {
-			$this->dispatch();
+			if ( ! $this->is_process_running() ) {
+				$this->dispatch();
+			}
 		}
 	}
 
@@ -179,7 +187,11 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 * @return boolean True if done, false if not
 	 */
 	public function is_job_done() {
-		return Options::instance()->get( 'archive_end_time' ) != null;
+		$start_time = $this->options->get( 'archive_start_time' );
+		$end_time = $this->options->get( 'archive_end_time' );
+		// we're done if the start and end time are null (never run) or if
+		// the start and end times are both set
+		return ( $start_time == null && $end_time == null ) || ( $start_time != null && $end_time != null);
 	}
 
 	/**
@@ -230,7 +242,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 */
 	protected function save_status_message( $message, $key = null ) {
 		$task_name = $key ?: $this->get_current_task();
-		$messages = Options::instance()->get( 'archive_status_messages' );
+		$messages = $this->options->get( 'archive_status_messages' );
 
 		// if the state exists, set the datetime and message
 		if ( ! array_key_exists( $task_name, $messages ) ) {
@@ -242,7 +254,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 			$messages[ $task_name ]['message'] = $message;
 		}
 
-		Options::instance()
+		$this->options
 			->set( 'archive_status_messages', $messages )
 			->save();
 	}
