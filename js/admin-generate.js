@@ -3,15 +3,12 @@ jQuery( document ).ready( function( $ ) {
 	var REFRESH_EVERY_X_SECONDS = 5;
 	var STATIC_PAGES_PER_PAGE = 50; // max number of pages to show at once
 	var done = true;
-	var next_action = null;
+	var refreshTimer = null;
 
 	// display the export and activity log on page load
 	display_export_log();
 	display_activity_log();
-
-	setInterval( function() {
-		send_action_to_archive_manager();
-	}, REFRESH_EVERY_X_SECONDS * 1000 );
+	initiate_action();
 
 	$( '#sistContainer #generate' ).click( function( e ) {
 		$( '#sistContainer #activityLog' ).html('');
@@ -24,18 +21,27 @@ jQuery( document ).ready( function( $ ) {
 
 	// disable all actions and show spinner
 	function initiate_action( action ) {
-		$( '#sistContainer .actions input' ).attr( 'disabled', 'disabled' );
-		$( '#sistContainer .actions .spinner' ).addClass( 'is-active' );
-		next_action = action;
+		if ( action == null ) {
+			action = 'ping';
+		} else {
+			$( '#sistContainer .actions input' ).attr( 'disabled', 'disabled' );
+			$( '#sistContainer .actions .spinner' ).addClass( 'is-active' );
+		}
+
+		// cancel existing timer
+		if ( refreshTimer != null ) {
+			clearInterval( refreshTimer );
+		}
+		// send action now
+		send_action_to_archive_manager( action );
+		// set loop for pinging server
+		refreshTimer = setInterval( function() {
+			send_action_to_archive_manager( 'ping' );
+		}, REFRESH_EVERY_X_SECONDS * 1000 );
 	}
 
 	// where action is one of 'start', 'continue', 'cancel'
-	function send_action_to_archive_manager() {
-		var action = 'ping';
-		if ( next_action != null ) {
-			action = next_action;
-		}
-
+	function send_action_to_archive_manager( action ) {
 		var data = {
 			'_ajax_nonce': $('#_wpnonce').val(),
 			'action': 'static_archive_action',
@@ -59,8 +65,11 @@ jQuery( document ).ready( function( $ ) {
 
 		done = response.done;
 
-		// only adjust the button/spinner state when
-		if ( response.action != next_action ) {
+		console.log( response );
+
+		// only adjust the button/spinner state on a 'ping'
+		// (ensures that the job has had time to process the action)
+		if ( response.action == 'ping' ) {
 			// re-enable and hide all actions
 			$( '#sistContainer .actions input' )
 				.removeAttr( 'disabled' )
@@ -73,8 +82,6 @@ jQuery( document ).ready( function( $ ) {
 			} else {
 				$( '#sistContainer #cancel' ).removeClass( 'hide' );
 			}
-		} else {
-			next_action = null;
 		}
 	}
 

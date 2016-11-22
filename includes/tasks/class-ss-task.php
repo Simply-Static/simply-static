@@ -46,7 +46,7 @@ abstract class Task {
 			$messages[ $task_name ]['message'] = $message;
 		}
 
-		error_log( $task_name . ' : ' . $message );
+		// error_log( $task_name . ' : ' . $message );
 
 		$this->options
 			->set( 'archive_status_messages', $messages )

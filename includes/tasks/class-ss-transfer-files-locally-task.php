@@ -8,6 +8,11 @@ class Transfer_Files_Locally_Task extends Task {
 	 */
 	protected static $task_name = 'transfer_files_locally';
 
+
+	/**
+	 * Copy a batch of files from the temp dir to the destination dir
+	 * @return boolean|WP_Error true if done, false if not done, WP_Error if error
+	 */
 	public function perform() {
 		$local_dir = $this->options->get( 'local_dir' );
 

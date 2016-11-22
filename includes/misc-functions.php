@@ -195,6 +195,7 @@ function sist_create_offline_path( $extracted_path, $page_path, $iterations = 0 
  * Check if URL starts with same URL as WordPress installation
  *
  * Both http and https are assumed to be the same domain.
+ *
  * @param  string  $url URL to check
  * @return boolean      true if URL is local, false otherwise
  */
@@ -238,7 +239,6 @@ function sist_string_to_array( $textarea ) {
 
 /**
  * Remove the //, http://, https:// protocols from a URL
- *
  * @param  string $url URL to remove protocol from
  * @return string      URL sans http/https protocol
  */
@@ -249,7 +249,6 @@ function sist_strip_protocol_from_url( $url ) {
 
 /**
  * Remove index.html/index.php from a URL
- *
  * @param  string $url URL to remove index file from
  * @return string      URL sans index file
  */
@@ -286,13 +285,6 @@ function sist_url_path_info( $path ) {
 		'extension' => ''
 	);
 
-	// // remove anything in the path after '#' or '?'
-	// foreach ( array( '#', '?' ) as $character ) {
-	// 	$char_location = strpos( $path, $character );
-	// 	if ( $char_location !== false ) {
-	// 		$path = substr( $path, 0, $char_location );
-	// 	}
-	// }
 	$path = sist_remove_params_and_fragment( $path );
 
 	// everything after the last slash is the filename

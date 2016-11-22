@@ -47,7 +47,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 * @return boolean true if we were able to successfully start generating an archive
 	 */
 	public function start() {
-		if ( ! $this->is_process_running() ) {
+		if ( $this->is_job_done() ) {
 			global $blog_id;
 
 			$first_task = self::$task_list[0];
@@ -69,11 +69,17 @@ class Archive_Creation_Job extends \WP_Background_Process {
 			// looks like we're in the middle of creating an archive...
 			return false;
 		}
-
 	}
 
 	/**
 	 * Perform the task at hand
+	 *
+	 * The way Archive_Creation_Job works is by taking a task name, performing
+	 * that task, and then either (a) returnning the current task name to
+	 * continue processing it (e.g. fetch more urls), (b) returning the next
+	 * task name if we're done with the current one, or (c) returning false if
+	 * we're done with our job, which then runs complete().
+	 *
 	 * @param string        $task Task name to process
 	 * @return false|string       task name to process, or false if done
 	 */
@@ -93,6 +99,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 
 		$task = new $class_name();
 
+		// attempt to perform the task
 		try {
 			$is_done = $task->perform();
 		} catch ( \Exception $e ) {
@@ -104,7 +111,8 @@ class Archive_Creation_Job extends \WP_Background_Process {
 			// we've hit an error, time to quit
 			return false;
 		} else if ( $is_done === true ) {
-			$next_task = $this->find_next_task( $task_name );
+			// finished current task, try to find the next one
+			$next_task = $this->find_next_task();
 			if ( $next_task === null ) {
 				// we're done; returning false to remove item from queue
 				return false;
@@ -122,6 +130,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 
 	/**
 	 * This is run at the end of the job, after task() has returned false
+	 * @return void
 	 */
 	protected function complete() {
 		$this->set_current_task( 'done' );
@@ -137,20 +146,34 @@ class Archive_Creation_Job extends \WP_Background_Process {
 		parent::complete();
 	}
 
+
+	/**
+	 * Cancel the currently running job
+	 * @return void
+	 */
 	public function cancel() {
 		if ( ! $this->is_queue_empty() ) {
+			// overwrite whatever the current task is with the cancel task
 			$batch = $this->get_batch();
 			$batch->data = array( 'cancel' );
 			$this->update( $batch->key, $batch->data );
+		} else {
+			// generally the queue shouldn't be empty when we get a request to
+			// cancel, but if we do, add a cancel task and start processing it.
+			// that should get the job back into a state where it can be
+			// started again.
+			$this->push_to_queue( 'cancel' )
+				->save()
+				->dispatch();
 		}
 	}
 
 	/**
-	 * Is the job running?
-	 * @return boolean True if running, false if not
+	 * Is the job done?
+	 * @return boolean True if done, false if not
 	 */
-	public function is_process_running() {
-		return parent::is_process_running();
+	public function is_job_done() {
+		return Options::instance()->get( 'archive_end_time' ) != null;
 	}
 
 	/**
@@ -161,16 +184,20 @@ class Archive_Creation_Job extends \WP_Background_Process {
 		return $this->current_task;
 	}
 
+	/**
+	 * Set the current task name
+	 * @param stroing $task_name The name of the current task
+	 */
 	protected function set_current_task( $task_name ) {
 		$this->current_task = $task_name;
 	}
 
 	/**
 	 * Find the next task on our task list
-	 * @param  string $task_name The name of the current task
 	 * @return string|null       The name of the next task, or null if none
 	 */
-	protected function find_next_task( $task_name ) {
+	protected function find_next_task() {
+		$task_name = $this->get_current_task();
 		$index = array_search( $task_name, self::$task_list );
 		if ( $index === false ) {
 			return null;
@@ -190,6 +217,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 * Providing a unique key for the message is optional. If one isn't
 	 * provided, the state_name will be used. Using the same key more than once
 	 * will overwrite previous messages.
+	 *
 	 * @param  string $message Message to display about the status of the job
 	 * @param  string $key     Unique key for the message
 	 * @return void
@@ -213,30 +241,34 @@ class Archive_Creation_Job extends \WP_Background_Process {
 			->save();
 	}
 
-	private function exception_occurred( $exception ) {
-		$this->complete();
+	/**
+	 * Add a status message about the exception and cancel the job
+	 * @param  Exception $exception The exception that occurred
+	 * @return void
+	 */
+	protected function exception_occurred( $exception ) {
 		$message = sprintf( __( "An exception occurred: %s", 'simply-static' ), $exception->getMessage() );
 		$this->save_status_message( $message, 'error' );
+		$this->cancel();
 	}
 
 	/**
-	 * Change to the error state and immediately process it
+	 * Add a status message about the error and cancel the job
+	 * @param  WP_Error $wp_error The error that occurred
 	 * @return void
 	 */
-	private function error_occurred( $wp_error ) {
-		$this->complete();
+	protected function error_occurred( $wp_error ) {
 		$message = sprintf( __( "An error occurred: %s", 'simply-static' ), $wp_error->get_error_message() );
 		$this->save_status_message( $message, 'error' );
+		$this->cancel();
 	}
 
 	/**
 	 * Shutdown handler for fatal error reporting
-	 *
-	 * Note: this function must be public in order to function properly.
-	 *
 	 * @return void
 	 */
 	public function shutdown_handler() {
+		// Note: this function must be public in order to function properly.
 		$error = error_get_last();
 		// only trigger on actual errors, not warnings or notices
 		if ( $error && in_array( $error['type'], array( E_ERROR, E_CORE_ERROR, E_USER_ERROR ) ) ) {

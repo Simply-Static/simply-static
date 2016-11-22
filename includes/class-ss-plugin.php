@@ -237,7 +237,7 @@ class Plugin {
 	 * @return void
 	 */
 	function send_json_response_for_static_archive( $action ) {
-		$done = $this->archive_creation_job->is_process_running() === false;
+		$done = $this->archive_creation_job->is_job_done();
 		$current_task = $this->archive_creation_job->get_current_task();
 
 		$activity_log_html = $this->view
@@ -318,7 +318,7 @@ class Plugin {
 	 * @return void
 	 */
 	public function display_generate_page() {
-		$done = $this->archive_creation_job->is_process_running() === false;
+		$done = $this->archive_creation_job->is_job_done();
 
 		$this->view
 			->set_layout( 'admin' )

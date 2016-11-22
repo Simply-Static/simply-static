@@ -19,7 +19,7 @@ class Wrapup_Task extends Task {
 
 	/**
 	 * Delete temporary, generated static files
-	 * @return true|\WP_Error True on success, \WP_Error otherwise
+	 * @return true|\WP_Error True on success, WP_Error otherwise
 	 */
 	public function delete_temp_static_files() {
 		$archive_dir = $this->options->get_archive_dir();
