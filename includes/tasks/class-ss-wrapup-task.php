@@ -24,21 +24,23 @@ class Wrapup_Task extends Task {
 	public function delete_temp_static_files() {
 		$archive_dir = $this->options->get_archive_dir();
 
-		$directory_iterator = new \RecursiveDirectoryIterator( $archive_dir, \FilesystemIterator::SKIP_DOTS );
-		$recursive_iterator = new \RecursiveIteratorIterator( $directory_iterator, \RecursiveIteratorIterator::CHILD_FIRST );
+		if ( file_exists( $archive_dir ) ) {
+			$directory_iterator = new \RecursiveDirectoryIterator( $archive_dir, \FilesystemIterator::SKIP_DOTS );
+			$recursive_iterator = new \RecursiveIteratorIterator( $directory_iterator, \RecursiveIteratorIterator::CHILD_FIRST );
 
-		// recurse through the entire directory and delete all files / subdirectories
-		foreach ( $recursive_iterator as $item ) {
-			$success = $item->isDir() ? rmdir( $item ) : unlink( $item );
+			// recurse through the entire directory and delete all files / subdirectories
+			foreach ( $recursive_iterator as $item ) {
+				$success = $item->isDir() ? rmdir( $item ) : unlink( $item );
+				if ( ! $success ) {
+					return new \WP_Error( 'cannot_delete_file_or_dir', sprintf( __( "Could not delete temporary file or directory: %s", 'simply-static' ), $item ) );
+				}
+			}
+
+			// must make sure to delete the original directory at the end
+			$success = rmdir( $archive_dir );
 			if ( ! $success ) {
 				return new \WP_Error( 'cannot_delete_file_or_dir', sprintf( __( "Could not delete temporary file or directory: %s", 'simply-static' ), $item ) );
 			}
-		}
-
-		// must make sure to delete the original directory at the end
-		$success = rmdir( $archive_dir );
-		if ( ! $success ) {
-			return new \WP_Error( 'cannot_delete_file_or_dir', sprintf( __( "Could not delete temporary file or directory: %s", 'simply-static' ), $item ) );
 		}
 
 		return true;

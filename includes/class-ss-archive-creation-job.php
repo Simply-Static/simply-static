@@ -6,8 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once( ABSPATH . 'wp-load.php' );
-require_once( ABSPATH . 'wp-admin/admin-functions.php' );
+// require_once( ABSPATH . 'wp-load.php' );
+require_once( ABSPATH . 'wp-admin/includes/admin.php' );
 
 /**
  * Simply Static archive manager class
@@ -103,13 +103,12 @@ class Archive_Creation_Job extends \WP_Background_Process {
 		try {
 			$is_done = $task->perform();
 		} catch ( \Exception $e ) {
-			$this->exception_occurred( $e );
+			return $this->exception_occurred( $e );
 		}
 
 		if ( is_wp_error( $is_done ) ) {
-			$this->error_occurred( $is_done );
 			// we've hit an error, time to quit
-			return false;
+			return $this->error_occurred( $is_done );
 		} else if ( $is_done === true ) {
 			// finished current task, try to find the next one
 			$next_task = $this->find_next_task();
@@ -152,6 +151,9 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 * @return void
 	 */
 	public function cancel() {
+		error_log( ' $this->is_queue_empty(): ' .  ( $this->is_queue_empty() ? 'true' : 'false' ) );
+		error_log( ' $this->is_process_running(): ' . ( $this->is_process_running() ? 'true' : 'false' ) );
+
 		if ( ! $this->is_queue_empty() ) {
 			// overwrite whatever the current task is with the cancel task
 			$batch = $this->get_batch();
@@ -165,6 +167,10 @@ class Archive_Creation_Job extends \WP_Background_Process {
 			$this->push_to_queue( 'cancel' )
 				->save()
 				->dispatch();
+		}
+
+		if ( ! $this->is_process_running() ) {
+			$this->dispatch();
 		}
 	}
 
@@ -249,7 +255,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	protected function exception_occurred( $exception ) {
 		$message = sprintf( __( "An exception occurred: %s", 'simply-static' ), $exception->getMessage() );
 		$this->save_status_message( $message, 'error' );
-		$this->cancel();
+		return 'cancel';
 	}
 
 	/**
@@ -260,7 +266,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	protected function error_occurred( $wp_error ) {
 		$message = sprintf( __( "An error occurred: %s", 'simply-static' ), $wp_error->get_error_message() );
 		$this->save_status_message( $message, 'error' );
-		$this->cancel();
+		return 'cancel';
 	}
 
 	/**
