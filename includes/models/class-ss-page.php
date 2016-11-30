@@ -75,6 +75,14 @@ class Page extends Model {
 	}
 
 	/**
+	 * Return the static page that this page belongs to (if any)
+	 * @return Page The parent Page
+	 */
+	public function parent_static_page() {
+		return self::query()->find_by( 'id', $this->found_on_id );
+	}
+
+	/**
 	 * Check if the hash for the content matches the prior hash for the page
 	 * @param  string  $content The content of the page/file
 	 * @return boolean          Is the hash a match?

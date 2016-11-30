@@ -22,16 +22,6 @@ if ( is_array( $this->static_pages ) && count( $this->static_pages ) ) : ?>
 		</thead>
 		<tbody>
 
-		<?php
-			function find_first_match( $static_pages, $id ) {
-				foreach ( $static_pages as $static_page ) {
-					if ( $static_page->id === $id ) {
-						return $static_page;
-					}
-				}
-			}
-		?>
-
 		<?php foreach ( $this->static_pages as $static_page ) : ?>
 			<tr>
 				<?php $processable = in_array( $static_page->http_status_code, Page::$processable_status_codes ); ?>
@@ -39,8 +29,8 @@ if ( is_array( $this->static_pages ) && count( $this->static_pages ) ) : ?>
 					<?php echo $static_page->http_status_code; ?>
 				</td>
 				<td class='url'><a href='<?php echo $static_page->url; ?>'><?php echo $static_page->url; ?></a></td>
-				<?php $parent_static_page = find_first_match( $this->static_pages, $static_page->found_on_id ); ?>
 				<td class='found-on'>
+					<?php $parent_static_page = $static_page->parent_static_page(); ?>
 					<?php if ( $parent_static_page ): ?>
 						<a href='<?php echo $parent_static_page->url; ?>'><?php echo $parent_static_page->url; ?></a>
 					<?php else: ?>
