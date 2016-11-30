@@ -100,13 +100,13 @@ class Fetch_Urls_Task extends Task {
 	 * @return void
 	 */
 	protected function handle_30x_redirect( $static_page ) {
-		$origin_url = sist_origin_url();
+		$origin_url = Util::origin_url();
 		$destination_url = $this->options->get_destination_url();
 		$current_url = $static_page->url;
 		$redirect_url = $static_page->redirect_url;
 
 		// convert our potentially relative URL to an absolute URL
-		$redirect_url = sist_relative_to_absolute_url( $redirect_url, $current_url );
+		$redirect_url = Util::relative_to_absolute_url( $redirect_url, $current_url );
 
 		// WP likes to 301 redirect `/path` to `/path/` -- we want to
 		// check for this and just add the trailing slashed version
@@ -118,8 +118,8 @@ class Fetch_Urls_Task extends Task {
 		// http to https. Instead just add the new url to the queue.
 		// TODO: Make this less horrible.
 		} else if (
-		sist_strip_index_filenames_from_url( sist_remove_params_and_fragment( sist_strip_protocol_from_url( $redirect_url ) ) ) ===
-		sist_strip_index_filenames_from_url( sist_remove_params_and_fragment( sist_strip_protocol_from_url( $current_url ) ) ) ) {
+		Util::strip_index_filenames_from_url( Util::remove_params_and_fragment( Util::strip_protocol_from_url( $redirect_url ) ) ) ===
+		Util::strip_index_filenames_from_url( Util::remove_params_and_fragment( Util::strip_protocol_from_url( $current_url ) ) ) ) {
 
 			$this->set_url_found_on( $static_page, $redirect_url, $this->archive_start_time );
 
@@ -128,7 +128,7 @@ class Fetch_Urls_Task extends Task {
 			if ( $redirect_url ) {
 
 				// check if this is a local URL
-				if ( sist_is_local_url( $redirect_url ) ) {
+				if ( Util::is_local_url( $redirect_url ) ) {
 
 					$this->set_url_found_on( $static_page, $redirect_url, $this->archive_start_time );
 					// and update the URL

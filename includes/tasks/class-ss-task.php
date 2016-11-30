@@ -36,17 +36,7 @@ abstract class Task {
 		$task_name = $key ?: static::$task_name;
 		$messages = $this->options->get( 'archive_status_messages' );
 
-		// if the state exists, set the datetime and message
-		if ( ! array_key_exists( $task_name, $messages ) ) {
-			$messages[ $task_name ] = array(
-				'message' => $message,
-				'datetime' => sist_formatted_datetime()
-			);
-		} else { // otherwise just update the message
-			$messages[ $task_name ]['message'] = $message;
-		}
-
-		// error_log( $task_name . ' : ' . $message );
+		$messages = Util::add_archive_status_message( $messages, $task_name, $message );
 
 		$this->options
 			->set( 'archive_status_messages', $messages )

@@ -155,9 +155,9 @@ class Model {
 
 		// autoset created_at/updated_at upon save
 		if ( $this->created_at === null ) {
-			$this->created_at = sist_formatted_datetime();
+			$this->created_at = Util::formatted_datetime();
 		}
-		$this->updated_at = sist_formatted_datetime();
+		$this->updated_at = Util::formatted_datetime();
 
 		// remove null data
 		$fields = array_filter( $this->data, function($v) { return $v !== null; } );

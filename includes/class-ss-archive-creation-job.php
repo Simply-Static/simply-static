@@ -64,7 +64,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 			$this->options
 				->set( 'archive_status_messages', array() )
 				->set( 'archive_name', $archive_name )
-				->set( 'archive_start_time', sist_formatted_datetime() )
+				->set( 'archive_start_time', Util::formatted_datetime() )
 				->set( 'archive_end_time', null )
 				->save();
 
@@ -142,7 +142,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	protected function complete() {
 		$this->set_current_task( 'done' );
 
-		$end_time = sist_formatted_datetime();
+		$end_time = Util::formatted_datetime();
 		$start_time = $this->options->get( 'archive_start_time' );
 		$duration = strtotime( $end_time ) - strtotime( $start_time );
 		$time_string = gmdate( "H:i:s", $duration );
@@ -243,15 +243,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 		$task_name = $key ?: $this->get_current_task();
 		$messages = $this->options->get( 'archive_status_messages' );
 
-		// if the state exists, set the datetime and message
-		if ( ! array_key_exists( $task_name, $messages ) ) {
-			$messages[ $task_name ] = array(
-				'message' => $message,
-				'datetime' => sist_formatted_datetime()
-			);
-		} else { // otherwise just update the message
-			$messages[ $task_name ]['message'] = $message;
-		}
+		$messages = Util::add_archive_status_message( $messages, $task_name, $message );
 
 		$this->options
 			->set( 'archive_status_messages', $messages )

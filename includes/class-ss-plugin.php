@@ -143,7 +143,7 @@ class Plugin {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-diagnostic.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-sql-permissions.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-upgrade-handler.php';
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/misc-functions.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ss-util.php';
 	}
 
 	/**
@@ -344,8 +344,8 @@ class Plugin {
 		$this->view
 			->set_layout( 'admin' )
 			->set_template( 'settings' )
-			->assign( 'origin_scheme', sist_origin_scheme() )
-			->assign( 'origin_host', sist_origin_host() )
+			->assign( 'origin_scheme', Util::origin_scheme() )
+			->assign( 'origin_host', Util::origin_host() )
 			->assign( 'destination_scheme', $this->options->get( 'destination_scheme' ) )
 			->assign( 'destination_host', $this->options->get( 'destination_host' ) )
 			->assign( 'temp_files_dir', $this->options->get( 'temp_files_dir' ) )
@@ -395,16 +395,16 @@ class Plugin {
 		}
 
 		$relative_path = $this->fetch_post_value( 'relative_path' );
-		$relative_path = untrailingslashit( sist_add_leading_slash( $relative_path ) );
+		$relative_path = untrailingslashit( Util::add_leading_slash( $relative_path ) );
 
 		$this->options
 			->set( 'destination_scheme', $destination_scheme )
 			->set( 'destination_host', $destination_host )
-			->set( 'temp_files_dir', sist_trailingslashit_unless_blank( $this->fetch_post_value( 'temp_files_dir' ) ) )
+			->set( 'temp_files_dir', Util::trailingslashit_unless_blank( $this->fetch_post_value( 'temp_files_dir' ) ) )
 			->set( 'additional_urls', $this->fetch_post_value( 'additional_urls' ) )
 			->set( 'additional_files', $this->fetch_post_value( 'additional_files' ) )
 			->set( 'delivery_method', $this->fetch_post_value( 'delivery_method' ) )
-			->set( 'local_dir', sist_trailingslashit_unless_blank( $this->fetch_post_value( 'local_dir' ) ) )
+			->set( 'local_dir', Util::trailingslashit_unless_blank( $this->fetch_post_value( 'local_dir' ) ) )
 			->set( 'delete_temp_files', $this->fetch_post_value( 'delete_temp_files' ) )
 			->set( 'destination_url_type', $destination_url_type )
 			->set( 'relative_path', $relative_path )

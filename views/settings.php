@@ -38,7 +38,7 @@ namespace Simply_Static;
 									<p><label><?php _e( "Use absolute URLs", 'simply-static' );?></label></p>
 									<select id='destinationScheme' class='scheme-entry' name='destination_scheme'>
 										<?php foreach ( array( 'http://', 'https://', '//' ) as $scheme ) : ?>
-										<option value='<?php echo $scheme; ?>' <?php sist_selected_if( $this->destination_scheme == $scheme ) ?>><?php echo $scheme; ?></option>
+										<option value='<?php echo $scheme; ?>' <?php Util::selected_if( $this->destination_scheme == $scheme ) ?>><?php echo $scheme; ?></option>
 										<?php endforeach; ?>
 									</select><!--
 								 --><input aria-describedby='destinationHostHelpBlock' type='text' id='destinationHost' class='host-entry' name='destination_host' placeholder='<?php _e( "www.example.com/", 'simply-static' ); ?>' value='<?php echo trailingslashit( esc_attr( $this->destination_host ) ); ?>' size='50' />
@@ -81,8 +81,8 @@ namespace Simply_Static;
 								<label for='deliveryMethod'><?php _e( "Delivery Method", 'simply-static' ); ?></label></th>
 							<td>
 								<select name='delivery_method' id='deliveryMethod'>
-									<option value='zip' <?php sist_selected_if( $this->delivery_method == 'zip' ) ?>><?php _e( "ZIP Archive", 'simply-static' ); ?></option>
-									<option value='local' <?php sist_selected_if( $this->delivery_method == 'local' ) ?>><?php _e( "Local Directory", 'simply-static' ); ?></option>
+									<option value='zip' <?php Util::selected_if( $this->delivery_method == 'zip' ) ?>><?php _e( "ZIP Archive", 'simply-static' ); ?></option>
+									<option value='local' <?php Util::selected_if( $this->delivery_method == 'local' ) ?>><?php _e( "Local Directory", 'simply-static' ); ?></option>
 								</select>
 							</td>
 						</tr>
@@ -159,10 +159,10 @@ namespace Simply_Static;
 							<td>
 								<textarea aria-describedby='additionalUrlsHelpBlock' class='widefat' name='additional_urls' id='additionalUrls' rows='5' cols='10'><?php echo esc_textarea( $this->additional_urls ); ?></textarea>
 								<div id='additionalUrlsHelpBlock' class='help-block'>
-									<p><?php echo sprintf( __( "Simply Static will create a static copy of any page it can find a link to, starting at %s. If you want to create static copies of pages or files that <em>aren't</em> linked to, add the URLs here (one per line).", 'simply-static' ), trailingslashit( sist_origin_url() ) ); ?></p>
+									<p><?php echo sprintf( __( "Simply Static will create a static copy of any page it can find a link to, starting at %s. If you want to create static copies of pages or files that <em>aren't</em> linked to, add the URLs here (one per line).", 'simply-static' ), trailingslashit( Util::origin_url() ) ); ?></p>
 									<p><?php echo sprintf( __( "Examples: <code>%s</code> or <code>%s</code>", 'simply-static' ),
-									sist_origin_url() . __( "/hidden-page/", 'simply-static' ),
-									sist_origin_url() . __( "/images/secret.jpg", 'simply-static' ) ); ?></p>
+									Util::origin_url() . __( "/hidden-page/", 'simply-static' ),
+									Util::origin_url() . __( "/images/secret.jpg", 'simply-static' ) ); ?></p>
 								</div>
 							</td>
 						</tr>

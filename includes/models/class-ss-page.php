@@ -97,7 +97,7 @@ class Page extends Model {
 	 */
 	public function set_content_hash( $sha1 ) {
 		$this->content_hash = $sha1;
-		$this->last_modified_at = sist_formatted_datetime();
+		$this->last_modified_at = Util::formatted_datetime();
 	}
 
 	/**

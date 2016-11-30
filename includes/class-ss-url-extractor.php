@@ -180,13 +180,13 @@ class Url_Extractor {
 		$response_body = $this->get_body();
 
 		// replace any instance of the origin url, whether it starts with https://, http://, or //
-		$response_body = preg_replace( '/(https?:)?\/\/' . addcslashes( sist_origin_host(), '/' ) . '/i', $destination_url, $response_body );
+		$response_body = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $destination_url, $response_body );
 		// replace wp_json_encode'd urls, as used by WP's `concatemoji`
 		// e.g. {"concatemoji":"http:\/\/www.example.org\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.6.1"}
-		$response_body = str_replace( addcslashes( sist_origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
+		$response_body = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
 		// replace encoded URLs, as found in query params
 		// e.g. http://example.org/wp-json/oembed/1.0/embed?url=http%3A%2F%2Fexample%2Fcurrent%2Fpage%2F"
-		$response_body = preg_replace( '/(https?%3A)?%2F%2F' . addcslashes( urlencode( sist_origin_host() ), '.' ) . '/i', urlencode( $destination_url ), $response_body );
+		$response_body = preg_replace( '/(https?%3A)?%2F%2F' . addcslashes( urlencode( Util::origin_host() ), '.' ) . '/i', urlencode( $destination_url ), $response_body );
 
 		$this->save_body( $response_body );
 	}
@@ -391,11 +391,11 @@ class Url_Extractor {
 	 * @return string The URL, converted to an absolute/relative/offline URL
 	 */
 	private function add_to_extracted_urls( $extracted_url ) {
-		$url = sist_relative_to_absolute_url( $extracted_url, $this->static_page->url );
+		$url = Util::relative_to_absolute_url( $extracted_url, $this->static_page->url );
 
-		if ( $url && sist_is_local_url( $url ) ) {
+		if ( $url && Util::is_local_url( $url ) ) {
 			// add to extracted urls queue
-			$this->extracted_urls[] = sist_remove_params_and_fragment( $url );
+			$this->extracted_urls[] = Util::remove_params_and_fragment( $url );
 
 			$url = $this->convert_url( $url );
 		}
@@ -427,8 +427,8 @@ class Url_Extractor {
 	 */
 	private function convert_absolute_url( $url ) {
 		$destination_url = $this->options->get_destination_url();
-		$url = sist_strip_protocol_from_url( $url );
-		$url = str_replace( sist_origin_host(), $destination_url, $url );
+		$url = Util::strip_protocol_from_url( $url );
+		$url = str_replace( Util::origin_host(), $destination_url, $url );
 
 		return $url;
 	}
@@ -439,7 +439,7 @@ class Url_Extractor {
 	 * @return string      Relative path for the URL
 	 */
 	private function convert_relative_url( $url ) {
-		$url = sist_get_path_from_local_url( $url );
+		$url = Util::get_path_from_local_url( $url );
 		$url = $this->options->get( 'relative_path' ) . $url;
 
 		return $url;
@@ -463,17 +463,17 @@ class Url_Extractor {
 	 */
 	private function convert_offline_url( $url ) {
 		// remove the scheme/host from the url
-		$page_path = sist_get_path_from_local_url( $this->static_page->url );
-		$extracted_path = sist_get_path_from_local_url( $url );
+		$page_path = Util::get_path_from_local_url( $this->static_page->url );
+		$extracted_path = Util::get_path_from_local_url( $url );
 
 		// create a path from one page to the other
-		$path = sist_create_offline_path( $extracted_path, $page_path );
+		$path = Util::create_offline_path( $extracted_path, $page_path );
 
-		$path_info = sist_url_path_info( $url );
+		$path_info = Util::url_path_info( $url );
 		if ( $path_info['extension'] === '' ) {
 			// If there's no extension, we need to add a /index.html,
 			// and do so before any params or fragments.
-			$clean_path = sist_remove_params_and_fragment( $path );
+			$clean_path = Util::remove_params_and_fragment( $path );
 			$fragment = substr( $path, strlen( $clean_path ) );
 
 			$path = trailingslashit( $clean_path );

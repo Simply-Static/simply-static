@@ -69,7 +69,7 @@ class Url_Fetcher {
 		$url = $static_page->url;
 
 		// Don't process URLs that don't match the URL of this WordPress installation
-		if ( ! sist_is_local_url( $url ) ) {
+		if ( ! Util::is_local_url( $url ) ) {
 			return new \WP_Error( 'remote_url', sprintf( __( "Attempting to fetch remote URL: %s", 'simply-static' ), $url ) );
 		}
 
@@ -86,13 +86,13 @@ class Url_Fetcher {
 
 		if ( is_wp_error( $response ) ) {
 			$static_page->http_status_code = null;
-			$static_page->last_checked_at = sist_formatted_datetime();
+			$static_page->last_checked_at = Util::formatted_datetime();
 			$static_page->save();
 			return false;
 		} else {
 			$static_page->http_status_code = $response['response']['code'];
 			$static_page->content_type = $response['headers']['content-type'];
-			$static_page->last_checked_at = sist_formatted_datetime();
+			$static_page->last_checked_at = Util::formatted_datetime();
 			$static_page->redirect_url = isset( $response['headers']['location'] ) ? $response['headers']['location'] : null;
 
 			$relative_filename = null;
@@ -128,15 +128,15 @@ class Url_Fetcher {
 		// a domain with no trailing slash has no path, so we're giving it one
 		$path = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
 
-		$origin_path_length = strlen( parse_url( sist_origin_url(), PHP_URL_PATH ) );
+		$origin_path_length = strlen( parse_url( Util::origin_url(), PHP_URL_PATH ) );
 		if ( $origin_path_length > 1 ) { // prevents removal of '/'
 			$path = substr( $path, $origin_path_length );
 		}
 
-		$path_info = sist_url_path_info( $path );
+		$path_info = Util::url_path_info( $path );
 
 		$relative_file_dir = $path_info['dirname'];
-		$relative_file_dir = sist_remove_leading_directory_separator( $relative_file_dir );
+		$relative_file_dir = Util::remove_leading_directory_separator( $relative_file_dir );
 
 		// If there's no extension, we're going to create a directory with the
 		// filename and place an index.html/xml file in there.
@@ -145,7 +145,7 @@ class Url_Fetcher {
 				// the filename would be blank for the root url, in that
 				// instance we don't want to add an extra slash
 				$relative_file_dir .= $path_info['filename'];
-				$relative_file_dir = sist_add_trailing_directory_separator( $relative_file_dir );
+				$relative_file_dir = Util::add_trailing_directory_separator( $relative_file_dir );
 			}
 			$path_info['filename'] = 'index';
 			if ( $static_page->is_type( 'xml' ) ) {

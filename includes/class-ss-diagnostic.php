@@ -67,7 +67,7 @@ class Diagnostic {
 			);
 		}
 
-		$additional_urls = sist_string_to_array( $this->options->get( 'additional_urls' ) );
+		$additional_urls = Util::string_to_array( $this->options->get( 'additional_urls' ) );
 		foreach ( $additional_urls as $url ) {
 			$this->description['URLs'][] = array(
 				'function' => 'is_additional_url_valid',
@@ -75,7 +75,7 @@ class Diagnostic {
 			);
 		}
 
-		$additional_files = sist_string_to_array( $this->options->get( 'additional_files' ) );
+		$additional_files = Util::string_to_array( $this->options->get( 'additional_files' ) );
 		foreach ( $additional_files as $file ) {
 			$this->description['Filesystem'][] = array(
 				'function' => 'is_additional_file_valid',
@@ -114,7 +114,7 @@ class Diagnostic {
 		if ( filter_var( $url, FILTER_VALIDATE_URL ) === false ) {
 			$test = false;
 			$message = __( 'Not a valid URL', 'simply-static' );
-		} else if ( ! sist_is_local_url( $url ) ) {
+		} else if ( ! Util::is_local_url( $url ) ) {
 			$test = false;
 			$message = __( 'Not a local URL', 'simply-static' );
 		} else {

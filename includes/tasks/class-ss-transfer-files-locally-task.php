@@ -65,7 +65,7 @@ class Transfer_Files_Locally_Task extends Task {
 		$pages_processed = $total_pages - $pages_remaining;
 
 		while ( $static_page = array_shift( $static_pages ) ) {
-			$path_info = sist_url_path_info( $static_page->file_path );
+			$path_info = Util::url_path_info( $static_page->file_path );
 			$create_dir = wp_mkdir_p( $destination_dir . $path_info['dirname'] );
 			if ( $create_dir === false ) {
 				$static_page->set_error_message( 'Unable to create destination directory' );
@@ -84,7 +84,7 @@ class Transfer_Files_Locally_Task extends Task {
 				}
 			}
 
-			$static_page->last_transferred_at = sist_formatted_datetime();
+			$static_page->last_transferred_at = Util::formatted_datetime();
 			$static_page->save();
 		}
 

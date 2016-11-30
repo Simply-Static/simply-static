@@ -17,11 +17,11 @@ class Page_Factory extends \WP_UnitTestCase {
 			'http_status_code' => 200,
 			'content_type' => '',
 			'content_hash' => sha1( $faker->paragraph(), true ),
-			'last_checked_at' => sist_formatted_datetime(),
-			'last_modified_at' => sist_formatted_datetime(),
-			'last_transferred_at' => sist_formatted_datetime(),
-			'created_at' => sist_formatted_datetime(),
-			'updated_at' => sist_formatted_datetime()
+			'last_checked_at' => Util::formatted_datetime(),
+			'last_modified_at' => Util::formatted_datetime(),
+			'last_transferred_at' => Util::formatted_datetime(),
+			'created_at' => Util::formatted_datetime(),
+			'updated_at' => Util::formatted_datetime()
 		);
 		// merge in any provided attributes
 		$attributes = array_merge( $attributes, $attrs );

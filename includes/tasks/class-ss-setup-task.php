@@ -53,8 +53,8 @@ class Setup_Task extends Task {
 	 */
 	public static function add_origin_and_additional_urls_to_db( $additional_urls ) {
 		$urls = array_unique( array_merge(
-			array( trailingslashit( sist_origin_url() ) ),
-			sist_string_to_array( $additional_urls )
+			array( trailingslashit( Util::origin_url() ) ),
+			Util::string_to_array( $additional_urls )
 		) );
 		foreach ( $urls as $url ) {
 			$static_page = Page::query()
@@ -72,7 +72,7 @@ class Setup_Task extends Task {
 	 */
 	public static function add_additional_files_to_db( $additional_files ) {
 		// Convert additional files to URLs and add to queue
-		foreach ( sist_string_to_array( $additional_files ) as $item ) {
+		foreach ( Util::string_to_array( $additional_files ) as $item ) {
 
 			// If item is a file, convert to url and insert into database.
 			// If item is a directory, recursively iterate and grab all files,
@@ -112,7 +112,7 @@ class Setup_Task extends Task {
 		} elseif ( stripos( $path, WP_CONTENT_DIR ) === 0 ) {
 			$url = str_replace( WP_CONTENT_DIR, WP_CONTENT_URL, $path );
 		} elseif ( stripos( $path, get_home_path() ) === 0 ) {
-			$url = str_replace( get_home_path(), sist_origin_url(), $path );
+			$url = str_replace( get_home_path(), Util::origin_url(), $path );
 		}
 		return $url;
 	}

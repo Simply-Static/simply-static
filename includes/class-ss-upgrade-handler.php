@@ -59,8 +59,8 @@ class Upgrade_Handler {
 			self::$instance->options = Options::instance();
 
 			self::$instance->default_options = array(
-				'destination_scheme' => sist_origin_scheme(),
-				'destination_host' => sist_origin_host(),
+				'destination_scheme' => Util::origin_scheme(),
+				'destination_host' => Util::origin_host(),
 				'temp_files_dir' => trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' ),
 				'additional_urls' => '',
 				'additional_files' => '',
@@ -119,7 +119,7 @@ class Upgrade_Handler {
 					// check for, and add, the WP emoji url if it's missing
 					$emoji_url = includes_url( 'js/wp-emoji-release.min.js' );
 					$additional_urls = $this->options->get( 'additional_urls' );
-					$urls_array = sist_string_to_array( $additional_urls );
+					$urls_array = Util::string_to_array( $additional_urls );
 
 					if ( ! in_array( $emoji_url, $urls_array ) ) {
 						$additional_urls = $additional_urls . "\n"  . $emoji_url;
@@ -135,7 +135,7 @@ class Upgrade_Handler {
 					}
 
 					$host = $this->options->get( 'destination_host' );
-					if ( $host == sist_origin_host() ) {
+					if ( $host == Util::origin_host() ) {
 						$this->options->set( 'destination_url_type', 'relative' );
 					} else {
 						$this->options->set( 'destination_url_type', 'absolute' );
@@ -149,7 +149,7 @@ class Upgrade_Handler {
 						$upload_dir = trailingslashit( $upload_dir['basedir'] );
 
 						$additional_files = $this->options->get( 'additional_files' );
-						$files_array = sist_string_to_array( $additional_files );
+						$files_array = Util::string_to_array( $additional_files );
 
 						if ( ! in_array( $upload_dir, $files_array ) ) {
 							$additional_files = $additional_files . "\n" . $upload_dir;
