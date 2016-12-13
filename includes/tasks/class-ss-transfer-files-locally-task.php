@@ -60,7 +60,8 @@ class Transfer_Files_Locally_Task extends Task {
 			->find();
 		$pages_remaining = count( $static_pages );
 		$total_pages = Page::query()
-			->where( "file_path IS NOT NULL AND file_path != ''" )
+			->where( "file_path IS NOT NULL" )
+			->where( "file_path != ''" )
 			->count();
 		$pages_processed = $total_pages - $pages_remaining;
 

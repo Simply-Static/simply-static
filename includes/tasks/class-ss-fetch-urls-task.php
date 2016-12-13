@@ -47,9 +47,18 @@ class Fetch_Urls_Task extends Task {
 				continue;
 			}
 
+			$excludable = $this->find_excludable( $static_page );
+			if ( $excludable !== false ) {
+				$save_file = ! $excludable['do_not_save'];
+				$save_urls = ! $excludable['do_not_follow'];
+			} else {
+				$save_file = true;
+				$save_urls = true;
+			}
+
 			// If we get a 30x redirect...
 			if ( in_array( $static_page->http_status_code, array( 301, 302, 303, 307, 308 ) ) ) {
-				$this->handle_30x_redirect( $static_page );
+				$this->handle_30x_redirect( $static_page, $save_file, $save_urls );
 				continue;
 			}
 
@@ -58,7 +67,7 @@ class Fetch_Urls_Task extends Task {
 				continue;
 			}
 
-			$this->handle_200_response( $static_page );
+			$this->handle_200_response( $static_page, $save_file, $save_urls );
 		}
 
 		$message = sprintf( __( "Fetched %d of %d pages/files", 'simply-static' ), $pages_processed, $total_pages );
@@ -70,25 +79,40 @@ class Fetch_Urls_Task extends Task {
 
 	/**
 	 * Process the response for a 200 response (success)
-	 * @param  Simply_Static\Page         $static_page Record to update
+	 * @param  Simply_Static\Page $static_page Record to update
+	 * @param  boolean            $save_file   Save a static copy of the page?
+	 * @param  boolean            $save_urls   Save found URLs to database?
 	 * @return void
 	 */
-	protected function handle_200_response( $static_page ) {
-		// Fetch all URLs from the page and add them to the queue...
-		$extractor = new Url_Extractor( $static_page );
-		$urls = $extractor->extract_and_update_urls();
-
-		foreach ( $urls as $url ) {
-			$this->set_url_found_on( $static_page, $url );
+	protected function handle_200_response( $static_page, $save_file, $save_urls ) {
+		if ( $save_file || $save_urls ) {
+			// Fetch all URLs from the page and add them to the queue...
+			$extractor = new Url_Extractor( $static_page );
+			$urls = $extractor->extract_and_update_urls();
 		}
 
-		$sha1 = sha1_file( $this->archive_dir . $static_page->file_path );
-
-		// if the content is identical, move on to the next file
-		if ( $static_page->is_content_identical( $sha1 ) ) {
-			// continue;
+		if ( $save_urls ) {
+			foreach ( $urls as $url ) {
+				$this->set_url_found_on( $static_page, $url );
+			}
 		} else {
-			$static_page->set_content_hash( $sha1 );
+			$static_page->set_error_message( __( "Do not follow", 'simply-static' ) );
+		}
+
+		$file = $this->archive_dir . $static_page->file_path;
+		if ( $save_file ) {
+			$sha1 = sha1_file( $file );
+
+			// if the content is identical, move on to the next file
+			if ( $static_page->is_content_identical( $sha1 ) ) {
+				// continue;
+			} else {
+				$static_page->set_content_hash( $sha1 );
+			}
+		} else {
+			unlink( $file ); // delete saved file
+			$static_page->file_path = null;
+			$static_page->set_error_message( __( "Do not save", 'simply-static' ) );
 		}
 
 		$static_page->save();
@@ -97,9 +121,11 @@ class Fetch_Urls_Task extends Task {
 	/**
 	 * Process the response to a 30x redirection
 	 * @param  Simply_Static\Page         $static_page Record to update
+	 * @param  boolean            $save_file   Save a static copy of the page?
+	 * @param  boolean            $save_urls   Save redirect URL to database?
 	 * @return void
 	 */
-	protected function handle_30x_redirect( $static_page ) {
+	protected function handle_30x_redirect( $static_page, $save_file, $save_urls ) {
 		$origin_url = Util::origin_url();
 		$destination_url = $this->options->get_destination_url();
 		$current_url = $static_page->url;
@@ -130,35 +156,56 @@ class Fetch_Urls_Task extends Task {
 				// check if this is a local URL
 				if ( Util::is_local_url( $redirect_url ) ) {
 
-					$this->set_url_found_on( $static_page, $redirect_url );
+					if ( $save_urls ) {
+						$this->set_url_found_on( $static_page, $redirect_url );
+					} else {
+						$static_page->set_error_message( __( "Do not follow", 'simply-static' ) );
+					}
 					// and update the URL
 					$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
 
 				}
 
-				$view = new View();
+				if ( $save_file ) {
+					$view = new View();
 
-				$content = $view->set_template( 'redirect' )
-					->assign( 'redirect_url', $redirect_url )
-					->render_to_string();
+					$content = $view->set_template( 'redirect' )
+						->assign( 'redirect_url', $redirect_url )
+						->render_to_string();
 
-				$filename = $this->save_static_page_content_to_file( $static_page, $content );
-				if ( $filename ) {
-					$static_page->file_path = $filename;
-				}
+					$filename = $this->save_static_page_content_to_file( $static_page, $content );
+					if ( $filename ) {
+						$static_page->file_path = $filename;
+					}
 
-				$sha1 = sha1_file( $this->archive_dir . $filename );
+					$sha1 = sha1_file( $this->archive_dir . $filename );
 
-				// if the content is identical, move on to the next file
-				if ( $static_page->is_content_identical( $sha1 ) ) {
-					// continue;
+					// if the content is identical, move on to the next file
+					if ( $static_page->is_content_identical( $sha1 ) ) {
+						// continue;
+					} else {
+						$static_page->set_content_hash( $sha1 );
+					}
 				} else {
-					$static_page->set_content_hash( $sha1 );
+					$static_page->set_error_message( __( "Do not save", 'simply-static' ) );
 				}
 
 				$static_page->save();
 			}
 		}
+	}
+
+	protected function find_excludable( $static_page ) {
+		$url = $static_page->url;
+		$excludables = array();
+		foreach ( $this->options->get( 'urls_to_exclude') as $excludable ) {
+			$regex = '/' . preg_quote( $excludable['url'], '/' ) .  '/';
+			$result = preg_match( $regex, $url );
+			if ( $result === 1 ) {
+				return $excludable;
+			}
+		}
+		return false;
 	}
 
 	/**

@@ -108,7 +108,9 @@ class Page extends Model {
 	 * @param string $message The error message
 	 */
 	public function set_error_message( $message ) {
-		if ( ! $this->error_message ) {
+		if ( $this->error_message ) {
+			$this->error_message = $this->error_message . '; ' . $message;
+		} else {
 			$this->error_message = $message;
 		}
 	}

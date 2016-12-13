@@ -402,7 +402,7 @@ class Plugin {
 		$excludables = array();
 		$urls_to_exclude = $this->fetch_post_array_value( 'url_to_exclude' );
 		$do_not_saves = $this->fetch_post_array_value( 'do_not_save' );
-		$do_not_follows = $this->fetch_post_array_value( 'do_not_save' );
+		$do_not_follows = $this->fetch_post_array_value( 'do_not_follow' );
 
 		for ( $i = 0; $i < sizeof( $urls_to_exclude ); $i++ ) {
 			$url = trim( $urls_to_exclude[ $i ] );
