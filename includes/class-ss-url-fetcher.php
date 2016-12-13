@@ -68,9 +68,15 @@ class Url_Fetcher {
 	public function fetch( Page $static_page ) {
 		$url = $static_page->url;
 
+		$static_page->last_checked_at = Util::formatted_datetime();
+
 		// Don't process URLs that don't match the URL of this WordPress installation
 		if ( ! Util::is_local_url( $url ) ) {
-			return new \WP_Error( 'remote_url', sprintf( __( "Attempting to fetch remote URL: %s", 'simply-static' ), $url ) );
+			$static_page->http_status_code = null;
+			$message = sprintf( __( "An error occurred: %s", 'simply-static' ), __( "Attempted to fetch a remote URL", 'simply-static' ) );
+			$static_page->set_error_message( $message );
+			$static_page->save();
+			return false;
 		}
 
 		$temp_filename = wp_tempnam();
@@ -84,15 +90,16 @@ class Url_Fetcher {
 			'filename' => $temp_filename
 		) );
 
+
 		if ( is_wp_error( $response ) ) {
 			$static_page->http_status_code = null;
-			$static_page->last_checked_at = Util::formatted_datetime();
+			$message = sprintf( __( "An error occurred: %s", 'simply-static' ), $response->get_error_message() );
+			$static_page->set_error_message( $message );
 			$static_page->save();
 			return false;
 		} else {
 			$static_page->http_status_code = $response['response']['code'];
 			$static_page->content_type = $response['headers']['content-type'];
-			$static_page->last_checked_at = Util::formatted_datetime();
 			$static_page->redirect_url = isset( $response['headers']['location'] ) ? $response['headers']['location'] : null;
 
 			$relative_filename = null;

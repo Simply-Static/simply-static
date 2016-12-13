@@ -41,7 +41,7 @@ class Fetch_Urls_Task extends Task {
 			// run query again when process is complete()?
 
 			// $filename = $this->get_filename_for_static_page( $static_page );
-			$success = Url_Fetcher::instance()->fetch( $static_page, $this->archive_dir );
+			$success = Url_Fetcher::instance()->fetch( $static_page );
 
 			if ( ! $success ) {
 				continue;
@@ -79,7 +79,7 @@ class Fetch_Urls_Task extends Task {
 		$urls = $extractor->extract_and_update_urls();
 
 		foreach ( $urls as $url ) {
-			$this->set_url_found_on( $static_page, $url, $this->archive_start_time );
+			$this->set_url_found_on( $static_page, $url );
 		}
 
 		$sha1 = sha1_file( $this->archive_dir . $static_page->file_path );
@@ -112,7 +112,7 @@ class Fetch_Urls_Task extends Task {
 		// check for this and just add the trailing slashed version
 		if ( $redirect_url === trailingslashit( $current_url ) ) {
 
-			$this->set_url_found_on( $static_page, $redirect_url, $this->archive_start_time );
+			$this->set_url_found_on( $static_page, $redirect_url );
 
 		// Don't create a redirect page if it's just a redirect from
 		// http to https. Instead just add the new url to the queue.
@@ -121,7 +121,7 @@ class Fetch_Urls_Task extends Task {
 		Util::strip_index_filenames_from_url( Util::remove_params_and_fragment( Util::strip_protocol_from_url( $redirect_url ) ) ) ===
 		Util::strip_index_filenames_from_url( Util::remove_params_and_fragment( Util::strip_protocol_from_url( $current_url ) ) ) ) {
 
-			$this->set_url_found_on( $static_page, $redirect_url, $this->archive_start_time );
+			$this->set_url_found_on( $static_page, $redirect_url );
 
 		} else {
 
@@ -130,7 +130,7 @@ class Fetch_Urls_Task extends Task {
 				// check if this is a local URL
 				if ( Util::is_local_url( $redirect_url ) ) {
 
-					$this->set_url_found_on( $static_page, $redirect_url, $this->archive_start_time );
+					$this->set_url_found_on( $static_page, $redirect_url );
 					// and update the URL
 					$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
 
@@ -172,10 +172,9 @@ class Fetch_Urls_Task extends Task {
 	 * @param string             $start_time  Static generation start time
 	 * @return void
 	 */
-	protected function set_url_found_on( $static_page, $child_url, $start_time ) {
-		$child_static_page = Page::query()
-			->find_or_create_by( 'url' , $child_url );
-		if ( $child_static_page->found_on_id === null || $child_static_page->updated_at < $start_time ) {
+	protected function set_url_found_on( $static_page, $child_url ) {
+		$child_static_page = Page::query()->find_or_create_by( 'url' , $child_url );
+		if ( $child_static_page->found_on_id === null || $child_static_page->updated_at < $this->archive_start_time ) {
 			$child_static_page->found_on_id = $static_page->id;
 			$child_static_page->save();
 		}
