@@ -64,6 +64,7 @@ class Upgrade_Handler {
 				'temp_files_dir' => trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' ),
 				'additional_urls' => '',
 				'additional_files' => '',
+				'urls_to_exclude' => array(),
 				'delivery_method' => 'zip',
 				'local_dir' => '',
 				'delete_temp_files' => '1',
@@ -72,8 +73,7 @@ class Upgrade_Handler {
 				'archive_status_messages' => array(),
 				'archive_name' => null,
 				'archive_start_time' => null,
-				'archive_end_time' => null,
-
+				'archive_end_time' => null
 			);
 		}
 

@@ -351,6 +351,7 @@ class Plugin {
 			->assign( 'temp_files_dir', $this->options->get( 'temp_files_dir' ) )
 			->assign( 'additional_urls', $this->options->get( 'additional_urls' ) )
 			->assign( 'additional_files', $this->options->get( 'additional_files' ) )
+			->assign( 'urls_to_exclude', $this->options->get( 'urls_to_exclude' ) )
 			->assign( 'delivery_method', $this->options->get( 'delivery_method' ) )
 			->assign( 'local_dir', $this->options->get( 'local_dir' ) )
 			->assign( 'delete_temp_files', $this->options->get( 'delete_temp_files' ) )
@@ -381,6 +382,8 @@ class Plugin {
 	public function save_options() {
 		check_admin_referer( 'simply-static_settings' );
 
+		// Set destination url type / scheme / host
+
 		$destination_url_type = $this->fetch_post_value( 'destination_url_type' );
 
 		if ( $destination_url_type == 'offline' ) {
@@ -394,8 +397,30 @@ class Plugin {
 			$destination_host = untrailingslashit( $this->fetch_post_value( 'destination_host' ) );
 		}
 
+		// Set URLs to exclude
+
+		$excludables = array();
+		$urls_to_exclude = $this->fetch_post_array_value( 'url_to_exclude' );
+		$do_not_saves = $this->fetch_post_array_value( 'do_not_save' );
+		$do_not_follows = $this->fetch_post_array_value( 'do_not_save' );
+
+		for ( $i = 0; $i < sizeof( $urls_to_exclude ); $i++ ) {
+			$url = trim( $urls_to_exclude[ $i ] );
+			if ( $url !== '' ) {
+				array_push( $excludables, array(
+					'url' => $url,
+					'do_not_save' => $do_not_saves[ $i ],
+					'do_not_follow' => $do_not_follows[ $i ],
+				) );
+			}
+		}
+
+		// Set relative path
+
 		$relative_path = $this->fetch_post_value( 'relative_path' );
 		$relative_path = untrailingslashit( Util::add_leading_slash( $relative_path ) );
+
+		// Save settings
 
 		$this->options
 			->set( 'destination_scheme', $destination_scheme )
@@ -403,12 +428,33 @@ class Plugin {
 			->set( 'temp_files_dir', Util::trailingslashit_unless_blank( $this->fetch_post_value( 'temp_files_dir' ) ) )
 			->set( 'additional_urls', $this->fetch_post_value( 'additional_urls' ) )
 			->set( 'additional_files', $this->fetch_post_value( 'additional_files' ) )
+			->set( 'urls_to_exclude', $excludables )
 			->set( 'delivery_method', $this->fetch_post_value( 'delivery_method' ) )
 			->set( 'local_dir', Util::trailingslashit_unless_blank( $this->fetch_post_value( 'local_dir' ) ) )
 			->set( 'delete_temp_files', $this->fetch_post_value( 'delete_temp_files' ) )
 			->set( 'destination_url_type', $destination_url_type )
 			->set( 'relative_path', $relative_path )
 			->save();
+	}
+
+	/**
+	 * Fetch a POST variable by name and sanitize it
+	 * @param  string $variable_name Name of the POST variable to fetch
+	 * @return string                Value of the POST variable
+	 */
+	public function fetch_post_value( $variable_name ) {
+		$input = filter_input( INPUT_POST, $variable_name );
+		// using explode/implode to keep linebreaks in text areas
+		return implode( "\n", array_map( 'sanitize_text_field', explode( "\n", $input ) ) );
+	}
+
+	/**
+	 * Fetch a POST array variable by name and sanitize it
+	 * @param  string $variable_name Name of the POST variable to fetch
+	 * @return string                Value of the POST variable
+	 */
+	public function fetch_post_array_value( $variable_name) {
+		return filter_input( INPUT_POST, $variable_name, FILTER_DEFAULT, FILTER_REQUIRE_ARRAY );
 	}
 
 	/**
@@ -432,17 +478,6 @@ class Plugin {
 		// 	->set( 'debugging_mode', $this->fetch_post_value( 'debugging_mode' ) )
 		// 	->save();
 	}
-
-	/**
-	 * Fetch a POST variable by name and sanitize it
-	 * @param  string $variable_name Name of the POST variable to fetch
-	 * @return string                Value of the POST variable
-	 */
-	public function fetch_post_value( $variable_name ) {
-		// using explode/implode to keep linebreaks in text areas
-		return implode( "\n", array_map( 'sanitize_text_field', explode( "\n", filter_input( INPUT_POST, $variable_name ) ) ) );
-	}
-
 
 	/**
 	 * Loads the plugin language files

@@ -52,6 +52,14 @@ class Util {
 	}
 
 	/**
+	 * Echo the checked value for an input tag if the statement is true.
+	 * @return null
+	 */
+	public static function checked_if( $statement ) {
+		echo ( $statement == true ? 'checked="checked"' : '' );
+	}
+
+	/**
 	 * Truncate if a string exceeds a certain length (30 chars by default)
 	 * @return string
 	 */

@@ -93,7 +93,7 @@
 	line-height: 1.4em;
 }
 
-/* Options page */
+/* Settings page */
 
 #sistContainer .tab-pane, tr.delivery-method {
 	display: none;
@@ -156,6 +156,15 @@
 
 #sistContainer .url-dest-option > span:first-child {
 	width: 10px;
+}
+
+#sistContainer #excludableUrlRowTemplate {
+	display: none;
+}
+
+#sistContainer .excludable-url-row input[type='checkbox'],
+#sistContainer .excludable-url-row .button {
+	margin-left: 10px;
 }
 
 /* Diagnostics page */

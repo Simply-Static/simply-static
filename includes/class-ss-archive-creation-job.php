@@ -14,7 +14,6 @@ require_once( ABSPATH . 'wp-admin/includes/admin.php' );
  */
 class Archive_Creation_Job extends \WP_Background_Process {
 
-
 	/**
 	 * The name of the job/action
 	 * @var string

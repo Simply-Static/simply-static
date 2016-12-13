@@ -13,6 +13,7 @@ namespace Simply_Static;
 
 			<h2 id='sistTabs' class='nav-tab-wrapper'>
 				<a class='nav-tab' id='general-tab' href='#tab-general'><?php _e( 'General', 'simply-static' ); ?></a>
+				<a class='nav-tab' id='include-exclude-tab' href='#tab-include-exclude'><?php _e( 'Include/Exclude', 'simply-static' ); ?></a>
 				<a class='nav-tab' id='advanced-tab' href='#tab-advanced'><?php _e( 'Advanced', 'simply-static' ); ?></a>
 			</h2>
 
@@ -32,7 +33,7 @@ namespace Simply_Static;
 							<th></th>
 							<td class='url-dest-option'>
 								<span>
-									<input type="radio" name="destination_url_type" value="absolute" <?php if ( $this->destination_url_type == 'absolute' ) { echo 'checked'; } ?>>
+									<input type="radio" name="destination_url_type" value="absolute" <?php Util::checked_if( $this->destination_url_type == 'absolute' ); ?>>
 								</span>
 								<span>
 									<p><label><?php _e( "Use absolute URLs", 'simply-static' );?></label></p>
@@ -50,7 +51,7 @@ namespace Simply_Static;
 							<th></th>
 							<td class='url-dest-option'>
 								<span>
-									<input type="radio" name="destination_url_type" value="relative" <?php if ( $this->destination_url_type == 'relative' ) { echo 'checked'; } ?>>
+									<input type="radio" name="destination_url_type" value="relative" <?php Util::checked_if( $this->destination_url_type == 'relative' ); ?>>
 								</span>
 								<span>
 									<p><label><?php _e( "Use relative URLs", 'simply-static' );?></label></p>
@@ -66,7 +67,7 @@ namespace Simply_Static;
 							<th></th>
 							<td class='url-dest-option'>
 								<span>
-									<input type="radio" name="destination_url_type" value="offline" <?php if ( $this->destination_url_type == 'offline' ) { echo 'checked'; } ?>>
+									<input type="radio" name="destination_url_type" value="offline" <?php Util::checked_if( $this->destination_url_type == 'offline' ); ?>>
 								</span>
 								<span>
 									<p><label><?php _e( "Save for offline use", 'simply-static' ); ?></label></p>
@@ -123,35 +124,10 @@ namespace Simply_Static;
 				</table>
 			</div>
 
-			<div id='advanced' class='tab-pane'>
+			<div id='include-exclude' class='tab-pane'>
 
 				<table class='form-table'>
 					<tbody>
-						<tr>
-							<th>
-								<label for='tempFilesDir'><?php _e( "Temporary Files Directory", 'simply-static' );?></label>
-							</th>
-							<td>
-								<?php $example_temp_files_dir = trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' );?>
-								<input aria-describedby='tempFilesDirHelpBlock' type='text' id='tempFilesDir' name='temp_files_dir' value='<?php echo esc_attr( $this->temp_files_dir ) ?>' class='widefat' />
-								<div id='tempFilesDirHelpBlock' class='help-block'>
-									<p><?php _e( "Your static files (and ZIP archives, if generated) are temporarily saved to this directory. This directory must exist and be writeable.", 'simply-static' ); ?></p>
-									<p><?php echo sprintf( __( "Default: <code>%s</code>", 'simply-static' ), $example_temp_files_dir ); ?></p>
-								</div>
-							</td>
-						</tr>
-						<tr>
-							<th></th>
-							<td>
-								<label>
-									<input aria-describedby='deleteTempFilesHelpBlock' name='delete_temp_files' id='deleteTempFiles' value='1' type='checkbox' <?php if ( $this->delete_temp_files == '1' ) { echo 'checked'; } ?> />
-									<?php _e( "Delete temporary files", 'simply-static' ); ?>
-								</label>
-								<p id='deleteTempFilesHelpBlock' class='help-block'>
-									<?php _e( "Static files are temporarily saved to the directory above before being copied to their destination. These files can be deleted after the copy process, or you can keep them as a backup.", 'simply-static' ); ?>
-								</p>
-							</td>
-						</tr>
 						<tr>
 							<th>
 								<label for='additionalUrls'><?php _e( "Additional URLs", 'simply-static' ); ?></label>
@@ -178,6 +154,92 @@ namespace Simply_Static;
 									get_home_path() .  __( "additional-directory/", 'simply-static' ),
 									trailingslashit( WP_CONTENT_DIR ) .  __( "fancy.pdf", 'simply-static' ) ); ?></p>
 								</div>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<label for='excludeUrls'><?php _e( "URLs to Exclude", 'simply-static' );?></label>
+							</th>
+							<td>
+								<?php
+									$urls_to_exclude = $this->urls_to_exclude;
+									array_unshift( $urls_to_exclude, array(
+										'url' => '',
+										'do_not_save' => '1',
+										'do_not_follow' => '1'
+									) );
+								?>
+								<div id="excludableUrlRows">
+								<?php foreach ( $urls_to_exclude as $index => $url_to_exclude ) : ?>
+									<div class='excludable-url-row' <?php if ( $index === 0 ) echo "id='excludableUrlRowTemplate'"; ?>>
+										<input type='text' name='url_to_exclude[]' value='<?php echo esc_attr( $url_to_exclude['url'] ); ?>' size='40' />
+
+										<label>
+											<input name='do_not_save[]' value='1' type='checkbox' <?php Util::checked_if( $url_to_exclude['do_not_save'] == '1' ); ?> />
+											<?php _e( "Do not save", 'simply-static' ); ?>
+										</label>
+
+										<label>
+											<input name='do_not_follow[]' value='1' type='checkbox' <?php Util::checked_if( $url_to_exclude['do_not_follow'] == '1' ); ?> />
+											<?php _e( "Do not follow", 'simply-static' ); ?>
+										</label>
+
+										<input class='button remove-excludable-url-row' type='button' name='remove' value='<?php _e( "Remove", 'simply-static' );?>' />
+									</div>
+								<?php endforeach; ?>
+								</div>
+
+								<!-- <textarea aria-describedby='excludeUrlsHelpBlock' class='hidden' name='exclude_urls' id='excludeUrls' rows='5' cols='10'><?php echo esc_textarea( $this->exclude_urls ); ?></textarea> -->
+
+								<div>
+									<input class='button' type='button' name='add_url_to_exclude' id="AddUrlToExclude" value='<?php _e( "Add URL to Exclude", 'simply-static' );?>' />
+								</div>
+
+								<div id='excludeUrlsHelpBlock' class='help-block'>
+										<p><?php  _e( "Helper text", 'simply-static' ); ?></p>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<th></th>
+							<td>
+								<p class='submit'>
+									<input class='button button-primary' type='submit' name='save' value='<?php _e( "Save Changes", 'simply-static' );?>' />
+								</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+
+			</div>
+
+			<div id='advanced' class='tab-pane'>
+
+				<table class='form-table'>
+					<tbody>
+						<tr>
+							<th>
+								<label for='tempFilesDir'><?php _e( "Temporary Files Directory", 'simply-static' );?></label>
+							</th>
+							<td>
+								<?php $example_temp_files_dir = trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' );?>
+								<input aria-describedby='tempFilesDirHelpBlock' type='text' id='tempFilesDir' name='temp_files_dir' value='<?php echo esc_attr( $this->temp_files_dir ) ?>' class='widefat' />
+								<div id='tempFilesDirHelpBlock' class='help-block'>
+									<p><?php _e( "Your static files (and ZIP archives, if generated) are temporarily saved to this directory. This directory must exist and be writeable.", 'simply-static' ); ?></p>
+									<p><?php echo sprintf( __( "Default: <code>%s</code>", 'simply-static' ), $example_temp_files_dir ); ?></p>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<th></th>
+							<td>
+								<label>
+									<input aria-describedby='deleteTempFilesHelpBlock' name='delete_temp_files' id='deleteTempFiles' value='1' type='checkbox' <?php Util::checked_if( $this->delete_temp_files == '1' ); ?> />
+									<?php _e( "Delete temporary files", 'simply-static' ); ?>
+								</label>
+								<p id='deleteTempFilesHelpBlock' class='help-block'>
+									<?php _e( "Static files are temporarily saved to the directory above before being copied to their destination. These files can be deleted after the copy process, or you can keep them as a backup.", 'simply-static' ); ?>
+								</p>
 							</td>
 						</tr>
 						<tr>

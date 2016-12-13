@@ -77,4 +77,17 @@ jQuery( document ).ready( function( $ ) {
 				.prop( 'disabled', true );
 		}
 	}
+
+	// -----------------------------------------------------------------------//
+
+	$( '#AddUrlToExclude' ).click( function() {
+		var $last_row = $( '.excludable-url-row' ).last();
+		var $clone_row = $( '#excludableUrlRowTemplate' ).clone().removeAttr( 'id' );
+		$clone_row.insertAfter( $last_row );
+	} );
+
+	$( '#excludableUrlRows' ).on( 'click', '.remove-excludable-url-row', function() {
+		var $row = $( this ).closest( '.excludable-url-row' );
+		$row.remove();
+	} );
 } );
