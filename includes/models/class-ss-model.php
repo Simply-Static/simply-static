@@ -56,7 +56,7 @@ class Model {
 	 * Track if this record has had changed made to it
 	 * @var boolean
 	 */
-	private $changed = false;
+	private $dirty_fields = array();
 
 	/**
 	 * Retrieve the value of a field for the model
@@ -87,7 +87,7 @@ class Model {
 			throw new \Exception( 'Column doesn\'t exist for ' . get_called_class() );
 		} else {
 			if ( ! array_key_exists( $field_name, $this->data ) || $this->data[ $field_name ] !== $field_value ) {
-				$this->changed = true;
+				array_push( $this->dirty_fields, $field_name );
 			}
 			return $this->data[ $field_name ] = $field_value;
 		}
@@ -124,7 +124,7 @@ class Model {
 	public static function initialize( $attributes ) {
 		$obj = new static();
 		foreach ( array_keys( static::$columns ) as $column ) {
-			$obj->$column = null;
+			$obj->data[ $column ] = null;
 		}
 		$obj->attributes( $attributes );
 		return $obj;
@@ -159,17 +159,15 @@ class Model {
 		}
 		$this->updated_at = Util::formatted_datetime();
 
-		// remove null data
-		$fields = array_filter( $this->data, function($v) { return $v !== null; } );
-
 		// If we haven't changed anything, don't bother updating the DB, and
 		// return that saving was successful.
-		if ( $this->changed === false ) {
+		if ( empty( $this->dirty_fields ) ) {
 			return true;
 		} else {
-			// otherwise, we're going to save this record, so mark that we're
-			// not changed anymore.
-			$this->changed = false;
+			// otherwise, create a new array with just the fields we're updating,
+			// then set the dirty fields back to empty
+			$fields = array_intersect_key( $this->data, array_flip( $this->dirty_fields ) );
+			$this->dirty_fields = array();
 		}
 
 		if ( $this->exists() ) {
