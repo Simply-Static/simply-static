@@ -198,8 +198,10 @@ class Fetch_Urls_Task extends Task {
 	protected function find_excludable( $static_page ) {
 		$url = $static_page->url;
 		$excludables = array();
-		foreach ( $this->options->get( 'urls_to_exclude') as $excludable ) {
-			$regex = '/' . preg_quote( $excludable['url'], '/' ) .  '/';
+		foreach ( $this->options->get( 'urls_to_exclude' ) as $excludable ) {
+			// using | as the delimiter for regex instead of the traditional /
+			// because | won't show up in a path (it would have to be url-encoded)
+			$regex = '|' . $excludable['url'] .  '|';
 			$result = preg_match( $regex, $url );
 			if ( $result === 1 ) {
 				return $excludable;
