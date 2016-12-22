@@ -172,15 +172,15 @@ namespace Simply_Static;
 								<div id="excludableUrlRows">
 								<?php foreach ( $urls_to_exclude as $index => $url_to_exclude ) : ?>
 									<div class='excludable-url-row' <?php if ( $index === 0 ) echo "id='excludableUrlRowTemplate'"; ?>>
-										<input type='text' name='url_to_exclude[]' value='<?php echo esc_attr( $url_to_exclude['url'] ); ?>' size='40' />
+										<input type='text' name='excludable[<?php echo $index; ?>][url]' value='<?php echo esc_attr( $url_to_exclude['url'] ); ?>' size='40' />
 
 										<label>
-											<input name='do_not_save[]' value='1' type='checkbox' <?php Util::checked_if( $url_to_exclude['do_not_save'] == '1' ); ?> />
+											<input name='excludable[<?php echo $index; ?>][do_not_save]' value='1' type='checkbox' <?php Util::checked_if( $url_to_exclude['do_not_save'] == '1' ); ?> />
 											<?php _e( "Do not save", 'simply-static' ); ?>
 										</label>
 
 										<label>
-											<input name='do_not_follow[]' value='1' type='checkbox' <?php Util::checked_if( $url_to_exclude['do_not_follow'] == '1' ); ?> />
+											<input name='excludable[<?php echo $index; ?>][do_not_follow]' value='1' type='checkbox' <?php Util::checked_if( $url_to_exclude['do_not_follow'] == '1' ); ?> />
 											<?php _e( "Do not follow", 'simply-static' ); ?>
 										</label>
 
@@ -188,8 +188,6 @@ namespace Simply_Static;
 									</div>
 								<?php endforeach; ?>
 								</div>
-
-								<!-- <textarea aria-describedby='excludeUrlsHelpBlock' class='hidden' name='exclude_urls' id='excludeUrls' rows='5' cols='10'><?php echo esc_textarea( $this->exclude_urls ); ?></textarea> -->
 
 								<div>
 									<input class='button' type='button' name='add_url_to_exclude' id="AddUrlToExclude" value='<?php _e( "Add URL to Exclude", 'simply-static' );?>' />

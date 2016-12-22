@@ -15,6 +15,7 @@ if ( is_array( $this->static_pages ) && count( $this->static_pages ) ) : ?>
 				<th><?php _e( 'Code', 'simply-static' ); ?></th>
 				<th><?php _e( 'URL', 'simply-static' ); ?></th>
 				<th><?php _e( 'Found on', 'simply-static' ); ?></th>
+				<th><?php _e( 'Notes', 'simply-static' ); ?></th>
 				<?php if ( $num_errors > 0 ) : ?>
 				<th><?php echo sprintf( __( "Errors (%d)", 'simply-static' ), $num_errors ); ?></th>
 				<?php endif; ?>
@@ -37,11 +38,12 @@ if ( is_array( $this->static_pages ) && count( $this->static_pages ) ) : ?>
 						&mdash;
 					<?php endif; ?>
 				</td>
+				<td class='status-message'>
+					<?php echo $static_page->status_message; ?>
+				</td>
 				<?php if ( $num_errors > 0 ) : ?>
 				<td class='error-message'>
-					<?php $msg = $static_page->error_message; if ( isset( $msg ) ) : ?>
-						<?php echo $msg; ?>
-					<?php endif; ?>
+					<?php echo $static_page->error_message; ?>
 				</td>
 				<?php endif; ?>
 			</tr>

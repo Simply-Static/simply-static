@@ -83,6 +83,11 @@ jQuery( document ).ready( function( $ ) {
 	$( '#AddUrlToExclude' ).click( function() {
 		var $last_row = $( '.excludable-url-row' ).last();
 		var $clone_row = $( '#excludableUrlRowTemplate' ).clone().removeAttr( 'id' );
+
+		var timestamp = new Date().getTime();
+		var regex = /excludable\[0\]/g;
+
+		$clone_row.html( $clone_row.html().replace( regex, 'excludable[' + timestamp + ']' ) );
 		$clone_row.insertAfter( $last_row );
 	} );
 

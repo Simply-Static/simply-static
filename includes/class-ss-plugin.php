@@ -399,36 +399,34 @@ class Plugin {
 
 		// Set URLs to exclude
 
-		$excludables = array();
-		$urls_to_exclude = $this->fetch_post_array_value( 'url_to_exclude' );
-		$do_not_saves = $this->fetch_post_array_value( 'do_not_save' );
-		$do_not_follows = $this->fetch_post_array_value( 'do_not_follow' );
+		$urls_to_exclude = array();
+		$excludables = $this->fetch_post_array_value( 'excludable' );
 
-		for ( $i = 0; $i < sizeof( $urls_to_exclude ); $i++ ) {
-			$url = trim( $urls_to_exclude[ $i ] );
+		foreach ( $excludables as $excludable ) {
+			$url = trim( $excludable['url'] );
+			// excluding the template row (always has a blank url) and any rows
+			// that the user didn't fill in
 			if ( $url !== '' ) {
-				array_push( $excludables, array(
+				array_push( $urls_to_exclude, array(
 					'url' => $url,
-					'do_not_save' => $do_not_saves[ $i ],
-					'do_not_follow' => $do_not_follows[ $i ],
+					'do_not_save' => $excludable['do_not_save'],
+					'do_not_follow' => $excludable['do_not_follow'],
 				) );
 			}
 		}
 
 		// Set relative path
-
 		$relative_path = $this->fetch_post_value( 'relative_path' );
 		$relative_path = untrailingslashit( Util::add_leading_slash( $relative_path ) );
 
 		// Save settings
-
 		$this->options
 			->set( 'destination_scheme', $destination_scheme )
 			->set( 'destination_host', $destination_host )
 			->set( 'temp_files_dir', Util::trailingslashit_unless_blank( $this->fetch_post_value( 'temp_files_dir' ) ) )
 			->set( 'additional_urls', $this->fetch_post_value( 'additional_urls' ) )
 			->set( 'additional_files', $this->fetch_post_value( 'additional_files' ) )
-			->set( 'urls_to_exclude', $excludables )
+			->set( 'urls_to_exclude', $urls_to_exclude )
 			->set( 'delivery_method', $this->fetch_post_value( 'delivery_method' ) )
 			->set( 'local_dir', Util::trailingslashit_unless_blank( $this->fetch_post_value( 'local_dir' ) ) )
 			->set( 'delete_temp_files', $this->fetch_post_value( 'delete_temp_files' ) )

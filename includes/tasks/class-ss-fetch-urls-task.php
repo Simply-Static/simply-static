@@ -37,23 +37,28 @@ class Fetch_Urls_Task extends Task {
 
 		while ( $static_page = array_shift( $static_pages ) ) {
 
-			// TODO: Add page IDs to a queue that fetches pages
-			// run query again when process is complete()?
-
-			// $filename = $this->get_filename_for_static_page( $static_page );
-			$success = Url_Fetcher::instance()->fetch( $static_page );
-
-			if ( ! $success ) {
-				continue;
-			}
-
 			$excludable = $this->find_excludable( $static_page );
 			if ( $excludable !== false ) {
-				$save_file = ! $excludable['do_not_save'];
-				$save_urls = ! $excludable['do_not_follow'];
+				$save_file = $excludable['do_not_save'] !== '1';
+				$save_urls = $excludable['do_not_follow'] !== '1';
 			} else {
 				$save_file = true;
 				$save_urls = true;
+			}
+
+			// If we're not saving a copy of the page or following URLs on that
+			// page, then we don't need to bother fetching it.
+			if ( $save_file === false && $save_urls === false ) {
+				$static_page->last_checked_at = Util::formatted_datetime();
+				$static_page->set_status_message( __( "Do not save or follow", 'simply-static' ) );
+				$static_page->save();
+				continue;
+			} else {
+				$success = Url_Fetcher::instance()->fetch( $static_page );
+			}
+
+			if ( ! $success ) {
+				continue;
 			}
 
 			// If we get a 30x redirect...
@@ -96,7 +101,7 @@ class Fetch_Urls_Task extends Task {
 				$this->set_url_found_on( $static_page, $url );
 			}
 		} else {
-			$static_page->set_error_message( __( "Do not follow", 'simply-static' ) );
+			$static_page->set_status_message( __( "Do not follow", 'simply-static' ) );
 		}
 
 		$file = $this->archive_dir . $static_page->file_path;
@@ -112,7 +117,7 @@ class Fetch_Urls_Task extends Task {
 		} else {
 			unlink( $file ); // delete saved file
 			$static_page->file_path = null;
-			$static_page->set_error_message( __( "Do not save", 'simply-static' ) );
+			$static_page->set_status_message( __( "Do not save", 'simply-static' ) );
 		}
 
 		$static_page->save();
@@ -159,7 +164,7 @@ class Fetch_Urls_Task extends Task {
 					if ( $save_urls ) {
 						$this->set_url_found_on( $static_page, $redirect_url );
 					} else {
-						$static_page->set_error_message( __( "Do not follow", 'simply-static' ) );
+						$static_page->set_status_message( __( "Do not follow", 'simply-static' ) );
 					}
 					// and update the URL
 					$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
@@ -187,7 +192,7 @@ class Fetch_Urls_Task extends Task {
 						$static_page->set_content_hash( $sha1 );
 					}
 				} else {
-					$static_page->set_error_message( __( "Do not save", 'simply-static' ) );
+					$static_page->set_status_message( __( "Do not save", 'simply-static' ) );
 				}
 
 				$static_page->save();

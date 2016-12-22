@@ -30,6 +30,7 @@ class Page extends Model {
 		'content_type'        => 'VARCHAR(255) NULL',
 		'content_hash'        => 'BINARY(20) NULL',
 		'error_message'       => 'VARCHAR(255) NULL',
+		'status_message'      => 'VARCHAR(255) NULL',
 		'last_checked_at'     => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
 		'last_modified_at'    => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
 		'last_transferred_at' => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
@@ -101,10 +102,10 @@ class Page extends Model {
 	}
 
 	/**
-	 * Set an error message if an error message hasn't already been set
+	 * Set an error message
 	 *
-	 * This ensures that we only display the first error message encountered
-	 * instead of the last.
+	 * An error indicates that something bad happened when fetching the page, or
+	 * saving the page, or during some other activity related to the page.
 	 * @param string $message The error message
 	 */
 	public function set_error_message( $message ) {
@@ -112,6 +113,21 @@ class Page extends Model {
 			$this->error_message = $this->error_message . '; ' . $message;
 		} else {
 			$this->error_message = $message;
+		}
+	}
+
+	/**
+	 * Set a status message
+	 *
+	 * A status message is used to indicate things that happened to the page
+	 * that weren't errors, such as not following links or not saving the page.
+	 * @param string $message The status message
+	 */
+	public function set_status_message( $message ) {
+		if ( $this->status_message ) {
+			$this->status_message = $this->status_message . '; ' . $message;
+		} else {
+			$this->status_message = $message;
 		}
 	}
 
