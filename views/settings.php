@@ -194,7 +194,12 @@ namespace Simply_Static;
 								</div>
 
 								<div id='excludeUrlsHelpBlock' class='help-block'>
-										<p><?php  _e( "Helper text", 'simply-static' ); ?></p>
+										<p><?php  _e( "In this section you can specify URLs, or parts of a URL, to exclude from Simply Static's processing. You may also use regex to specify a pattern to match.", 'simply-static' ); ?></p>
+										<p><?php  _e( "<b>Do not save</b>: do not save a static copy of the page/file", 'simply-static' ); ?> &mdash; <?php  _e( "<b>Do not follow</b>: do not use this page to find additional URLs for processing", 'simply-static' ); ?></p>
+										<p><?php echo sprintf( __( "Example: <code>%s</code> would exclude <code>%s</code> and other files containing <code>%s</code> from processing", 'simply-static' ),
+										__( ".jpg", 'simply-static' ),
+										Util::origin_url() . __( "/wp-content/uploads/image.jpg", 'simply-static' ),
+										__( ".jpg", 'simply-static' ) ); ?></p>
 								</div>
 							</td>
 						</tr>
