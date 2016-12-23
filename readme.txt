@@ -3,7 +3,7 @@ Contributors: codeofconduct
 Donate link: http://codeofconduct.co/
 Tags: simply static, html, static, static site, static site generator, static website generator, performance, fast, optimization, availability, scaling, scalability, cdn, security, secure, zip, hardening
 Requires at least: 4.0
-Tested up to: 4.6
+Tested up to: 4.7
 Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
