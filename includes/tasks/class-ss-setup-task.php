@@ -52,16 +52,18 @@ class Setup_Task extends Task {
 	 * @return void
 	 */
 	public static function add_origin_and_additional_urls_to_db( $additional_urls ) {
-		$urls = array_unique( array_merge(
-			array( trailingslashit( Util::origin_url() ) ),
-			Util::string_to_array( $additional_urls )
-		) );
+		$static_page = Page::query()->find_or_initialize_by( 'url', trailingslashit( Util::origin_url() ) );
+		$static_page->set_status_message( __( "Origin URL", 'simply-static' ) );
+		$static_page->found_on_id = 0;
+		$static_page->save();
+
+		$urls = array_unique( Util::string_to_array( $additional_urls ) );
 		foreach ( $urls as $url ) {
 			if ( Util::is_local_url( $url ) ) {
-				$static_page = Page::query()
-					->find_or_initialize_by( 'url', $url );
+				$static_page = Page::query()->find_or_initialize_by( 'url', $url );
 				// setting to 0 for "not found anywhere" since it's either the origin
 				// or something the user specified
+				$static_page->set_status_message( __( "Additional URL", 'simply-static' ) );
 				$static_page->found_on_id = 0;
 				$static_page->save();
 			}
@@ -92,8 +94,8 @@ class Setup_Task extends Task {
 
 					foreach ( $iterator as $file_name => $file_object ) {
 						$url = self::convert_path_to_url( $file_name );
-						$static_page = Page::query()
-							->find_or_initialize_by( 'url', $url );
+						$static_page = Page::query()->find_or_initialize_by( 'url', $url );
+						$static_page->set_status_message( __( "Additional File/Dir", 'simply-static' ) );
 						$static_page->found_on_id = 0;
 						$static_page->save();
 					}

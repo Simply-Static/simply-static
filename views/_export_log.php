@@ -14,7 +14,6 @@ if ( is_array( $this->static_pages ) && count( $this->static_pages ) ) : ?>
 			<tr>
 				<th><?php _e( 'Code', 'simply-static' ); ?></th>
 				<th><?php _e( 'URL', 'simply-static' ); ?></th>
-				<th><?php _e( 'Found on', 'simply-static' ); ?></th>
 				<th><?php _e( 'Notes', 'simply-static' ); ?></th>
 				<?php if ( $num_errors > 0 ) : ?>
 				<th><?php echo sprintf( __( "Errors (%d)", 'simply-static' ), $num_errors ); ?></th>
@@ -30,16 +29,20 @@ if ( is_array( $this->static_pages ) && count( $this->static_pages ) ) : ?>
 					<?php echo $static_page->http_status_code; ?>
 				</td>
 				<td class='url'><a href='<?php echo $static_page->url; ?>'><?php echo $static_page->url; ?></a></td>
-				<td class='found-on'>
-					<?php $parent_static_page = $static_page->parent_static_page(); ?>
-					<?php if ( $parent_static_page ): ?>
-						<a href='<?php echo $parent_static_page->url; ?>'><?php echo $parent_static_page->url; ?></a>
-					<?php else: ?>
-						&mdash;
-					<?php endif; ?>
-				</td>
 				<td class='status-message'>
-					<?php echo $static_page->status_message; ?>
+					<?php
+						$msg = '';
+						$parent_static_page = $static_page->parent_static_page();
+						if ( $parent_static_page ) {
+							$display_url = Util::get_path_from_local_url( $parent_static_page->url );
+							$msg .= "<a href='" . $parent_static_page->url . "'>" .sprintf( __( 'Found on %s', 'simply-static' ), $display_url ). "</a>";
+						}
+						if ( $msg !== '' && $static_page->status_message ) {
+							$msg .= '; ';
+						}
+						$msg .= $static_page->status_message;
+						echo $msg;
+					?>
 				</td>
 				<?php if ( $num_errors > 0 ) : ?>
 				<td class='error-message'>
