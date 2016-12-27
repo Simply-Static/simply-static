@@ -52,7 +52,9 @@ class Setup_Task extends Task {
 	 * @return void
 	 */
 	public static function add_origin_and_additional_urls_to_db( $additional_urls ) {
-		$static_page = Page::query()->find_or_initialize_by( 'url', trailingslashit( Util::origin_url() ) );
+		$origin_url = trailingslashit( Util::origin_url() );
+		Util::debug_log( 'Adding origin URL to queue: ' . $origin_url );
+		$static_page = Page::query()->find_or_initialize_by( 'url', $origin_url );
 		$static_page->set_status_message( __( "Origin URL", 'simply-static' ) );
 		$static_page->found_on_id = 0;
 		$static_page->save();
@@ -60,6 +62,7 @@ class Setup_Task extends Task {
 		$urls = array_unique( Util::string_to_array( $additional_urls ) );
 		foreach ( $urls as $url ) {
 			if ( Util::is_local_url( $url ) ) {
+				Util::debug_log( 'Adding additional URL to queue: ' . $url );
 				$static_page = Page::query()->find_or_initialize_by( 'url', $url );
 				// setting to 0 for "not found anywhere" since it's either the origin
 				// or something the user specified
@@ -84,22 +87,27 @@ class Setup_Task extends Task {
 			if ( file_exists( $item ) ) {
 				if ( is_file( $item ) ) {
 					$url = self::convert_path_to_url( $item );
+					Util::debug_log( "File " . $item . ' exists; adding to queue as: ' . $url );
 					$static_page = Page::query()
 						->find_or_create_by( 'url', $url );
 					// setting found_on_id to 0 since this was user-specified
 					$static_page->found_on_id = 0;
 					$static_page->save();
 				} else {
+					Util::debug_log( "Adding files from directory: " . $item );
 					$iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $item, \RecursiveDirectoryIterator::SKIP_DOTS ) );
 
 					foreach ( $iterator as $file_name => $file_object ) {
 						$url = self::convert_path_to_url( $file_name );
+						Util::debug_log( "Adding file " . $file_name . ' to queue as: ' . $url );
 						$static_page = Page::query()->find_or_initialize_by( 'url', $url );
 						$static_page->set_status_message( __( "Additional File/Dir", 'simply-static' ) );
 						$static_page->found_on_id = 0;
 						$static_page->save();
 					}
 				}
+			} else {
+				Util::debug_log( "File doesn't exist: " . $item );
 			}
 		}
 	}

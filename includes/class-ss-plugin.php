@@ -227,8 +227,11 @@ class Plugin {
 		$action = $_POST['perform'];
 
 		if ( $action === 'start' ) {
+			Util::create_empty_debug_log();
+			Util::debug_log( "Received request to start generating a static archive" );
 			$this->archive_creation_job->start();
 		} else if ( $action === 'cancel' ) {
+			Util::debug_log( "Received request to cancel static archive generation" );
 			$this->archive_creation_job->cancel();
 		}
 

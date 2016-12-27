@@ -1,6 +1,6 @@
 'use strict';
 jQuery( document ).ready( function( $ ) {
-	var REFRESH_EVERY_X_SECONDS = 5;
+	var REFRESH_EVERY_X_SECONDS = 2;
 	var STATIC_PAGES_PER_PAGE = 50; // max number of pages to show at once
 	var done = true;
 	var refreshTimer = null;
@@ -64,8 +64,6 @@ jQuery( document ).ready( function( $ ) {
 		}
 
 		done = response.done;
-
-		console.log( response );
 
 		// only adjust the button/spinner state on a 'ping'
 		// (ensures that the job has had time to process the action)

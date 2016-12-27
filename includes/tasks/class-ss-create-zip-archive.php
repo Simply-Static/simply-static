@@ -32,12 +32,14 @@ class Create_Zip_Archive_Task extends Task {
 		$zip_filename = untrailingslashit( $archive_dir ) . '.zip';
 		$zip_archive = new \PclZip( $zip_filename );
 
+		Util::debug_log( "Fetching list of files to include in zip" );
 		$files = array();
 		$iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $archive_dir, \RecursiveDirectoryIterator::SKIP_DOTS ) );
 		foreach ( $iterator as $file_name => $file_object ) {
 			$files[] = realpath( $file_name );
 		}
 
+		Util::debug_log( "Creating zip archive" );
 		if ( $zip_archive->create( $files, PCLZIP_OPT_REMOVE_PATH, $archive_dir ) === 0 ) {
 			return new \WP_Error( 'create_zip_failed', __( 'Unable to create ZIP archive', 'simply-static' ) );
 		}

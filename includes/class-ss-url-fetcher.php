@@ -72,6 +72,7 @@ class Url_Fetcher {
 
 		// Don't process URLs that don't match the URL of this WordPress installation
 		if ( ! Util::is_local_url( $url ) ) {
+			Util::debug_log( "Not fetching URL because it is not a local URL" );
 			$static_page->http_status_code = null;
 			$message = sprintf( __( "An error occurred: %s", 'simply-static' ), __( "Attempted to fetch a remote URL", 'simply-static' ) );
 			$static_page->set_error_message( $message );
@@ -81,6 +82,7 @@ class Url_Fetcher {
 
 		$temp_filename = wp_tempnam();
 
+		Util::debug_log( "Fetching URL and saving it to: " . $temp_filename );
 		$response = wp_remote_get( $url, array(
 			'timeout' => self::TIMEOUT,
 			'sslverify' => false, // not verifying SSL because all calls are local
@@ -90,8 +92,12 @@ class Url_Fetcher {
 			'filename' => $temp_filename
 		) );
 
+		$filesize = filesize( $temp_filename );
+		Util::debug_log( "Filesize: " . $filesize . ' bytes' );
 
 		if ( is_wp_error( $response ) ) {
+			Util::debug_log( "We encountered an error when fetching: " . $response->get_error_message() );
+			Util::debug_log( $response );
 			$static_page->http_status_code = null;
 			$message = sprintf( __( "An error occurred: %s", 'simply-static' ), $response->get_error_message() );
 			$static_page->set_error_message( $message );
@@ -102,16 +108,26 @@ class Url_Fetcher {
 			$static_page->content_type = $response['headers']['content-type'];
 			$static_page->redirect_url = isset( $response['headers']['location'] ) ? $response['headers']['location'] : null;
 
+			Util::debug_log( "http_status_code: " . $static_page->http_status_code . " | content_type: " . $static_page->content_type  );
+
 			$relative_filename = null;
 			if ( $static_page->http_status_code == 200 ) {
+				// pclzip doesn't like 0 byte files (fread error), so we're
+				// going to fix that by putting a single space into the file
+				if ( $filesize === 0 ) {
+					file_put_contents( $temp_filename, ' ' );
+				}
+
 				$relative_filename = $this->create_directories_for_static_page( $static_page );
 			}
 
-			if ( $relative_filename ) {
+			if ( $relative_filename !== null ) {
 				$static_page->file_path = $relative_filename;
 				$file_path = $this->archive_dir . $relative_filename;
+				Util::debug_log( "Renaming temp file" );
 				rename( $temp_filename, $file_path );
 			} else {
+				Util::debug_log( "We weren't able to establish a filename; deleting temp file" );
 				unlink( $temp_filename );
 			}
 
@@ -164,15 +180,19 @@ class Url_Fetcher {
 
 		$create_dir = wp_mkdir_p( $this->archive_dir . $relative_file_dir );
 		if ( $create_dir === false ) {
+			Util::debug_log( "Unable to create temporary directory: " . $this->archive_dir . $relative_file_dir );
 			$static_page->set_error_message( 'Unable to create temporary directory' );
 		} else {
 			$relative_filename = $relative_file_dir . $path_info['filename'] . '.' . $path_info['extension'];
+			Util::debug_log( "New filename for static page: " . $relative_filename );
+
 			// check that file doesn't exist OR exists but is writeable
 			// (generally, we'd expect it to never exist)
 			if ( ! file_exists( $relative_filename ) || is_writable( $relative_filename ) ) {
 				return $relative_filename;
 			} else {
-				$static_page->set_error_message( 'Temporary file exists and is unwriteable' );
+				Util::debug_log( "File exists and is unwriteable" );
+				$static_page->set_error_message( 'File exists and is unwriteable' );
 			}
 		}
 

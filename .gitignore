@@ -9,3 +9,6 @@ node_modules
 
 # Not including stuff from composer
 vendor
+
+# Don't keep the debug log
+debug.txt

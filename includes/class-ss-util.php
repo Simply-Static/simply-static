@@ -77,14 +77,78 @@ class Util {
 
 	/**
 	 * Dump an object to error_log
-	 * @return string
+	 * @param mixed $object Object to dump to the error log
+	 * @return void
 	 */
 	public static function error_log( $object = null ) {
+		$contents = self::get_contents_from_object( $object );
+		error_log( $contents );
+	}
+
+	/**
+	 * Create and clear out the debug log
+	 * @return void
+	 */
+	public static function create_empty_debug_log() {
+		$debug_file = self::get_debug_log_filename();
+
+		$fh = fopen( $debug_file, 'w' );
+		fclose( $fh );
+	}
+
+	/**
+	 * Save an object/string to the debug log
+	 * @param mixed $object Object to save to the debug log
+	 * @return void
+	 */
+	public static function debug_log( $object = null ) {
+		$debug_file = self::get_debug_log_filename();
+
+		// add timestamp and newline
+		$message = '[' . date( 'Y-m-d H:i:s' ) . '] ';
+
+		$trace = debug_backtrace();
+		if ( isset( $trace[0]['file'] ) ) {
+			$file = basename( $trace[0]['file'] );
+			if ( isset( $trace[0]['line'] ) ) {
+				$file .= ':' . $trace[0]['line'];
+			}
+			$message .= '[' . $file . '] ';
+		}
+
+		$contents = self::get_contents_from_object( $object );
+
+		// get message onto a single line
+		$contents = preg_replace( "/\r|\n/", "", $contents );
+
+		$message .= $contents . "\n";
+
+		error_log( $message, 3, $debug_file );
+	}
+
+	/**
+	 * Return the filename for the debug log
+	 * @return string Filename for the debug log
+	 */
+	private static function get_debug_log_filename() {
+		return plugin_dir_path( dirname( __FILE__ ) ) . 'debug.txt';
+	}
+
+	/**
+	 * Get contents of an object as a string
+	 * @param  mixed  $object Object to get string for
+	 * @return string         String containing the contents of the object
+	 */
+	private static function get_contents_from_object( $object ) {
+		if ( is_string( $object ) ) {
+			return $object;
+		}
+
 		ob_start();
 		var_dump( $object );
 		$contents = ob_get_contents();
 		ob_end_clean();
-		error_log( $contents );
+		return $contents;
 	}
 
 	/**

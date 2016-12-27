@@ -11,7 +11,7 @@ class Transfer_Files_Locally_Task extends Task {
 
 	/**
 	 * Copy a batch of files from the temp dir to the destination dir
-	 * @return boolean|WP_Error true if done, false if not done, WP_Error if error
+	 * @return boolean true if done, false if not done
 	 */
 	public function perform() {
 		$local_dir = $this->options->get( 'local_dir' );
@@ -23,20 +23,17 @@ class Transfer_Files_Locally_Task extends Task {
 			$this->save_status_message( $message );
 		}
 
-		if ( is_wp_error( $pages_processed ) ) {
-			return $pages_processed;
-		} else {
-			if ( $pages_processed == $total_pages ) {
-				if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
-					$destination_url = trailingslashit( $this->options->get_destination_url() );
-					$message = __( 'Destination URL:', 'simply-static' ) . ' <a href="' . $destination_url .'" target="_blank">' . $destination_url . '</a>';
-					$this->save_status_message( $message, 'destination_url' );
-				}
+		if ( $pages_processed >= $total_pages ) {
+			if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
+				$destination_url = trailingslashit( $this->options->get_destination_url() );
+				$message = __( 'Destination URL:', 'simply-static' ) . ' <a href="' . $destination_url .'" target="_blank">' . $destination_url . '</a>';
+				$this->save_status_message( $message, 'destination_url' );
 			}
-
-			// return true when done (no more pages)
-			return $pages_processed >= $total_pages;
 		}
+
+		// return true when done (no more pages)
+		return $pages_processed >= $total_pages;
+
 	}
 
 	/**
@@ -64,11 +61,13 @@ class Transfer_Files_Locally_Task extends Task {
 			->where( "file_path != ''" )
 			->count();
 		$pages_processed = $total_pages - $pages_remaining;
+		Util::debug_log( "Total pages: " . $total_pages . '; Pages remaining: ' . $pages_remaining );
 
 		while ( $static_page = array_shift( $static_pages ) ) {
 			$path_info = Util::url_path_info( $static_page->file_path );
 			$create_dir = wp_mkdir_p( $destination_dir . $path_info['dirname'] );
 			if ( $create_dir === false ) {
+				Util::debug_log( "Cannot create directory: " . $destination_dir . $path_info['dirname'] );
 				$static_page->set_error_message( 'Unable to create destination directory' );
 			} else {
 				$origin_file_path = $archive_dir . $static_page->file_path;
@@ -78,9 +77,11 @@ class Transfer_Files_Locally_Task extends Task {
 				if ( ! file_exists( $destination_file_path ) || is_writable( $destination_file_path ) ) {
 					$copy = copy( $origin_file_path, $destination_file_path );
 					if ( $copy === false ) {
+						Util::debug_log( "Cannot copy " . $origin_file_path .  " to " . $destination_file_path );
 						$static_page->set_error_message( 'Unable to copy file to destination' );
 					}
 				} else {
+					Util::debug_log( "File exists and is unwriteable: " . $destination_file_path );
 					$static_page->set_error_message( 'Destination file exists and is unwriteable' );
 				}
 			}
