@@ -35,31 +35,28 @@ namespace Simply_Static;
 		<?php wp_nonce_field( 'simply-static_diagnostics' ) ?>
 		<input type='hidden' name='_diagnostics' value='1' />
 
-		<input id='reset_plugin' class='button button-destroy button-hero' type='submit' name='reset_plugin' value='<?php _e( "Reset Plugin", 'simply-static' ); ?>' />
-		<p id='resetPluginHelpBlock' class='help-block'>
-			<?php _e( "This will reset Simply Static back to the same state as when it was first installed.", 'simply-static' ); ?>
-		</p>
-
 		<table class='form-table'>
 			<tbody>
 				<tr>
-					<th></th>
-					<td>
-
-					</td>
-				</tr>
-				<!-- <tr>
-					<th><?php _e( "Debugging Options", 'simply-static' ); ?></th>
+					<th><?php _e( "Debugging Mode", 'simply-static' ); ?></th>
 					<td>
 						<label>
-							<input aria-describedby='enableDebuggingHelpBlock' name='debugging_mode' id='debuggingMode' value='1' type='checkbox' <?php // if ( $this->debugging_mode == '1' ) { echo 'checked'; } ?> />
+							<input aria-describedby='enableDebuggingHelpBlock' name='debugging_mode' id='debuggingMode' value='1' type='checkbox' <?php Util::checked_if( $this->debugging_mode === '1' ); ?> />
 							<?php _e( "Enable debugging mode", 'simply-static' ); ?>
 						</label>
 						<p id='enableDebuggingHelpBlock' class='help-block'>
-							<?php _e( "This will enable verbose logging in Simply Static.", 'simply-static' ); ?>
+							<?php _e( "When enabled, a log file will be created when generating static files.", 'simply-static' ); ?>
 						</p>
 					</td>
-				</tr> -->
+				</tr>
+				<tr>
+					<th></th>
+					<td>
+						<p class='submit'>
+							<input class='button button-primary' type='submit' name='save' value='<?php _e( "Save Changes", 'simply-static' );?>' />
+						</p>
+					</td>
+				</tr>
 			</tbody>
 		</table>
 

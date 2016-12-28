@@ -93,11 +93,13 @@ class Plugin {
 			add_action( 'admin_enqueue_scripts', array( self::$instance, 'enqueue_admin_scripts' ) );
 			// Add the options page and menu item.
 			add_action( 'admin_menu', array( self::$instance, 'add_plugin_admin_menu' ), 2 );
+
 			// Handle AJAX requests
 			add_action( 'wp_ajax_static_archive_action', array( self::$instance, 'static_archive_action' ) );
 			add_action( 'wp_ajax_render_export_log', array( self::$instance, 'render_export_log' ) );
 			add_action( 'wp_ajax_render_activity_log', array( self::$instance, 'render_activity_log' ) );
 
+			// Filters
 			add_filter( 'admin_footer_text', array( self::$instance, 'filter_admin_footer_text' ), 15 );
 			add_filter( 'update_footer', array( self::$instance, 'filter_update_footer' ), 15 );
 
@@ -110,7 +112,7 @@ class Plugin {
 			$page = isset( $_GET['page'] ) ? $_GET['page'] : '';
 			self::$instance->current_page = $page;
 
-			Upgrade_Handler::instance()->run();
+			Upgrade_Handler::run();
 		}
 
 		return self::$instance;
@@ -178,8 +180,8 @@ class Plugin {
 
 		// Add main menu item
 		add_menu_page(
-			__( 'Simply Static', self::SLUG ),
-			__( 'Simply Static', self::SLUG ),
+			__( 'Simply Static', 'simply-static' ),
+			__( 'Simply Static', 'simply-static' ),
 			'edit_posts',
 			self::SLUG,
 			array( self::$instance, 'display_generate_page' ),
@@ -188,8 +190,8 @@ class Plugin {
 
 		add_submenu_page(
 			self::SLUG,
-			__( 'Generate Static Site', self::SLUG ),
-			__( 'Generate', self::SLUG ),
+			__( 'Generate Static Site', 'simply-static' ),
+			__( 'Generate', 'simply-static' ),
 			'edit_posts',
 			self::SLUG,
 			array( self::$instance, 'display_generate_page' )
@@ -197,8 +199,8 @@ class Plugin {
 
 		add_submenu_page(
 			self::SLUG,
-			__( 'Simply Static Settings', self::SLUG ),
-			__( 'Settings', self::SLUG ),
+			__( 'Simply Static Settings', 'simply-static' ),
+			__( 'Settings', 'simply-static' ),
 			'manage_options',
 			self::SLUG . '_settings',
 			array( self::$instance, 'display_settings_page' )
@@ -206,8 +208,8 @@ class Plugin {
 
 		add_submenu_page(
 			self::SLUG,
-			__( 'Simply Static Diagnostics', self::SLUG ),
-			__( 'Diagnostics', self::SLUG ),
+			__( 'Simply Static Diagnostics', 'simply-static' ),
+			__( 'Diagnostics', 'simply-static' ),
 			'manage_options',
 			self::SLUG . '_diagnostics',
 			array( self::$instance, 'display_diagnostics_page' )
@@ -227,7 +229,7 @@ class Plugin {
 		$action = $_POST['perform'];
 
 		if ( $action === 'start' ) {
-			Util::create_empty_debug_log();
+			Util::delete_debug_log();
 			Util::debug_log( "Received request to start generating a static archive" );
 			$this->archive_creation_job->start();
 		} else if ( $action === 'cancel' ) {
@@ -340,8 +342,8 @@ class Plugin {
 	public function display_settings_page() {
 		if ( isset( $_POST['_settings'] ) ) {
 			$this->save_options();
-			$message = __( 'Settings saved.', self::SLUG );
-			$this->view->add_flash( 'updated', $message );
+		} else if ( isset( $_POST['_reset'] ) ) {
+			$this->reset_plugin();
 		}
 
 		$this->view
@@ -363,21 +365,6 @@ class Plugin {
 			->render();
 	}
 
-	public function display_diagnostics_page() {
-		if ( isset( $_POST['_diagnostics'] ) ) {
-			$this->reset_plugin();
-		}
-
-		$diagnostic = new Diagnostic();
-		$results = $diagnostic->results;
-
-		$this->view
-			->set_layout( 'admin' )
-			->set_template( 'diagnostics' )
-			->assign( 'results', $results )
-			->render();
-	}
-
 	/**
 	 * Save the options from the options page
 	 * @return void
@@ -386,7 +373,6 @@ class Plugin {
 		check_admin_referer( 'simply-static_settings' );
 
 		// Set destination url type / scheme / host
-
 		$destination_url_type = $this->fetch_post_value( 'destination_url_type' );
 
 		if ( $destination_url_type == 'offline' ) {
@@ -401,7 +387,6 @@ class Plugin {
 		}
 
 		// Set URLs to exclude
-
 		$urls_to_exclude = array();
 		$excludables = $this->fetch_post_array_value( 'excludable' );
 
@@ -436,6 +421,45 @@ class Plugin {
 			->set( 'destination_url_type', $destination_url_type )
 			->set( 'relative_path', $relative_path )
 			->save();
+
+		$message = __( 'Your changes have been saved.', 'simply-static' );
+		$this->view->add_flash( 'updated', $message );
+	}
+
+	/**
+	 * Render the diagnostics page
+	 * @return void
+	 */
+	public function display_diagnostics_page() {
+		if ( isset( $_POST['_diagnostics'] ) ) {
+			$this->save_diagnostics_options();
+		}
+
+		$diagnostic = new Diagnostic();
+		$results = $diagnostic->results;
+
+		$this->view
+			->set_layout( 'admin' )
+			->set_template( 'diagnostics' )
+			->assign( 'debugging_mode', $this->options->get( 'debugging_mode' ) )
+			->assign( 'results', $results )
+			->render();
+	}
+
+	/**
+	 * Save the options from the diagnostics page
+	 * @return void
+	 */
+	public function save_diagnostics_options() {
+		check_admin_referer( 'simply-static_diagnostics' );
+
+		// Save settings
+		$this->options
+			->set( 'debugging_mode', $this->fetch_post_value( 'debugging_mode' ) )
+			->save();
+
+		$message = __( 'Your changes have been saved.', 'simply-static' );
+		$this->view->add_flash( 'updated', $message );
 	}
 
 	/**
@@ -463,21 +487,19 @@ class Plugin {
 	 * @return void
 	 */
 	public function reset_plugin() {
-		check_admin_referer( 'simply-static_diagnostics' );
+		check_admin_referer( 'simply-static_reset' );
 
-		if ( $this->fetch_post_value( 'reset_plugin' ) !== '' ) {
-			// Delete Simply Static's settings
-			delete_option( 'simply-static' );
-			// Drop the Pages table
-			Page::drop_table();
+		// Delete Simply Static's settings
+		delete_option( 'simply-static' );
+		// Drop the Pages table
+		Page::drop_table();
+		// Set up a new instance of Options
+		$this->options = Options::reinstance();
+		// Set up default options and re-create the Pages table
+		Upgrade_Handler::run();
 
-			$message = __( 'Plugin reset complete.', self::SLUG );
-			$this->view->add_flash( 'updated', $message );
-		}
-
-		// $this->options
-		// 	->set( 'debugging_mode', $this->fetch_post_value( 'debugging_mode' ) )
-		// 	->save();
+		$message = __( 'Plugin reset complete.', 'simply-static' );
+		$this->view->add_flash( 'updated', $message );
 	}
 
 	/**

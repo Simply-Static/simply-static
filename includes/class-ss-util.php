@@ -86,14 +86,14 @@ class Util {
 	}
 
 	/**
-	 * Create and clear out the debug log
+	 * Delete the debug log
 	 * @return void
 	 */
-	public static function create_empty_debug_log() {
+	public static function delete_debug_log() {
 		$debug_file = self::get_debug_log_filename();
-
-		$fh = fopen( $debug_file, 'w' );
-		fclose( $fh );
+		if ( file_exists( $debug_file ) ) {
+			unlink( $debug_file );
+		}
 	}
 
 	/**
@@ -102,6 +102,11 @@ class Util {
 	 * @return void
 	 */
 	public static function debug_log( $object = null ) {
+		$options = Options::instance();
+		if ( $options->get( 'debugging_mode' ) !== '1' ) {
+			return;
+		}
+
 		$debug_file = self::get_debug_log_filename();
 
 		// add timestamp and newline

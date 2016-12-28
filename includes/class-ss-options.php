@@ -61,6 +61,15 @@ class Options {
 	}
 
 	/**
+	 * Return a fresh instance of Simply_Static\Options
+	 * @return Simply_Static
+	 */
+	public static function reinstance() {
+		self::$instance = null;
+		return self::instance();
+	}
+
+	/**
 	 * Updates the option identified by $name with the value provided in $value
 	 * @param string $name The option name
 	 * @param mixed $value The option value
