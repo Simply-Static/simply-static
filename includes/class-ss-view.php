@@ -115,6 +115,9 @@ class View {
 
 	/**
 	 * Add a flash message to be displayed at the top of the page
+	 *
+	 * Available types: 'updated' (green), 'error' (red), 'notice' (no color)
+	 *
 	 * @param string $type The type of message to be displayed
 	 * @param string $message The message to be displayed
 	 * @return void

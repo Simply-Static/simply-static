@@ -92,7 +92,7 @@ class Url_Fetcher {
 			'filename' => $temp_filename
 		) );
 
-		$filesize = filesize( $temp_filename );
+		$filesize = file_exists( $temp_filename ) ? filesize( $temp_filename ) : 0;
 		Util::debug_log( "Filesize: " . $filesize . ' bytes' );
 
 		if ( is_wp_error( $response ) ) {

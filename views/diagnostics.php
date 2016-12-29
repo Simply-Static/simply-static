@@ -30,7 +30,7 @@ namespace Simply_Static;
 
 	<h3 style='margin-top: 50px;'><?php _e( "Debugging Options", 'simply-static' ); ?></h3>
 
-	<form id='optionsForm' method='post' action=''>
+	<form id='diagnosticsForm' method='post' action=''>
 
 		<?php wp_nonce_field( 'simply-static_diagnostics' ) ?>
 		<input type='hidden' name='_diagnostics' value='1' />
@@ -62,22 +62,38 @@ namespace Simply_Static;
 
 	</form>
 
-	<h3 style='margin-top: 50px;'><?php _e( "Send Report by Email", 'simply-static' ); ?></h3>
+	<form id='emailDebugLogForm' method='post' action=''>
 
-	<table class='form-table'>
-		<tbody>
-			<tr>
-				<th></th>
-				<td>
-					<?php if ( $this->debug_file_exists ) : ?>
-						<p><?php echo sprintf( __( "You have created <a href='%s'>a debug log</a>.", 'simply-static' ), $this->debug_file_url ); ?></p>
-					<?php else : ?>
-						<p><?php _e( "You have not created a debug log yet.", 'simply-static' ); ?></p>
-					<?php endif; ?>
-				</td>
-			</tr>
-		</tbody>
-	</table>
+		<?php wp_nonce_field( 'simply-static_email_debug_log' ) ?>
+		<input type='hidden' name='_email_debug_log' value='1' />
+
+		<table class='form-table'>
+			<tbody>
+				<tr>
+					<th><?php _e( "View Debug Log", 'simply-static' ); ?></th>
+					<td>
+						<?php if ( $this->debug_file_exists ) : ?>
+							<p><?php echo sprintf( __( "You have created <a href='%s'>a debug log</a>.", 'simply-static' ), $this->debug_file_url ); ?></p>
+						<?php else : ?>
+							<p><?php _e( "You have not created a debug log yet.", 'simply-static' ); ?></p>
+						<?php endif; ?>
+					</td>
+				</tr>
+				<tr>
+					<th><?php _e( "Send Debug Log by Email", 'simply-static' ); ?></th>
+					<td>
+						<?php if ( $this->debug_file_exists ) : ?>
+							<input type="email" name="email_address" id="emailAddress" value="support@simplystatic.co" />
+							<input class="button" type="submit" id="sendEmail" value="<?php _e( "Send", 'simply-static' );?>"/>
+						<?php else : ?>
+							<p><?php _e( "You have not created a debug log yet.", 'simply-static' ); ?></p>
+						<?php endif; ?>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+	</form>
 
 </div>
 <!-- .wrap -->

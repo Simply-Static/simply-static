@@ -100,6 +100,7 @@ class Plugin {
 			add_action( 'wp_ajax_render_activity_log', array( self::$instance, 'render_activity_log' ) );
 
 			// Filters
+			add_filter( 'wp_mail_content_type', array( self::$instance, 'filter_wp_mail_content_type' ) );
 			add_filter( 'admin_footer_text', array( self::$instance, 'filter_admin_footer_text' ), 15 );
 			add_filter( 'update_footer', array( self::$instance, 'filter_update_footer' ), 15 );
 
@@ -433,6 +434,8 @@ class Plugin {
 	public function display_diagnostics_page() {
 		if ( isset( $_POST['_diagnostics'] ) ) {
 			$this->save_diagnostics_options();
+		} else if ( isset( $_POST['_email_debug_log'] ) ) {
+			$this->email_debug_log();
 		}
 
 		$debug_file = Util::get_debug_log_filename();
@@ -466,6 +469,46 @@ class Plugin {
 
 		$message = __( 'Your changes have been saved.', 'simply-static' );
 		$this->view->add_flash( 'updated', $message );
+	}
+
+	/**
+	 * Send the debug log to the desired email address
+	 * @return void
+	 */
+	public function email_debug_log() {
+		check_admin_referer( 'simply-static_email_debug_log' );
+
+		$debug_file = Util::get_debug_log_filename();
+		if ( file_exists( $debug_file ) ) {
+			$email = $this->fetch_post_value( 'email_address' );
+
+			$zip_filename = $debug_file . '.zip';
+			$zip_archive = new \PclZip( $zip_filename );
+
+			if ( $zip_archive->create( $debug_file ) === 0 ) {
+				$message = __( 'Unable to create a ZIP of the debug log.', 'simply-static' );
+				$this->view->add_flash( 'error', $message );
+			} else {
+				$content = '';
+
+				ob_start();
+				phpinfo();
+				$phpinfo = ob_get_contents();
+				ob_get_clean();
+
+				$content .= $phpinfo;
+
+				if ( wp_mail( $email, 'Simply Static Debug Log', $content, '', $zip_filename ) === true ) {
+					$message = sprintf( __( 'Debug log successfully sent to: %s', 'simply-static' ), $email );
+					$this->view->add_flash( 'updated', $message );
+				} else {
+					$message = __( 'We encountered an error when attempting to send out the debug log.', 'simply-static' );
+					$this->view->add_flash( 'error', $message );
+				}
+
+				unlink( $zip_filename );
+			}
+		}
 	}
 
 	/**
@@ -521,8 +564,15 @@ class Plugin {
 	}
 
 	/**
+	 * Set wp_mail to send out html emails
+	 * @return string
+	 */
+	function filter_wp_mail_content_type() {
+	    return 'text/html';
+	}
+
+	/**
 	 * Display support text in footer when on plugin page
-	 *
 	 * @return string
 	 */
 	public function filter_admin_footer_text( $text ) {
@@ -543,7 +593,6 @@ class Plugin {
 
 	/**
 	 * Display plugin version in footer when on plugin page
-	 *
 	 * @return string
 	 */
 	public function filter_update_footer( $text ) {
