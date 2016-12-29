@@ -128,6 +128,7 @@ class Util {
 
 		$message .= $contents . "\n";
 
+		// log the message to the debug file instead of the usual error_log location
 		error_log( $message, 3, $debug_file );
 	}
 
@@ -135,7 +136,7 @@ class Util {
 	 * Return the filename for the debug log
 	 * @return string Filename for the debug log
 	 */
-	private static function get_debug_log_filename() {
+	public static function get_debug_log_filename() {
 		return plugin_dir_path( dirname( __FILE__ ) ) . 'debug.txt';
 	}
 
@@ -144,7 +145,7 @@ class Util {
 	 * @param  mixed  $object Object to get string for
 	 * @return string         String containing the contents of the object
 	 */
-	private static function get_contents_from_object( $object ) {
+	protected static function get_contents_from_object( $object ) {
 		if ( is_string( $object ) ) {
 			return $object;
 		}

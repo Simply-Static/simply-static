@@ -45,7 +45,7 @@ namespace Simply_Static;
 							<?php _e( "Enable debugging mode", 'simply-static' ); ?>
 						</label>
 						<p id='enableDebuggingHelpBlock' class='help-block'>
-							<?php _e( "When enabled, a log file will be created when generating static files.", 'simply-static' ); ?>
+							<?php _e( "When enabled, a debug log will be created when generating static files.", 'simply-static' ); ?>
 						</p>
 					</td>
 				</tr>
@@ -61,6 +61,23 @@ namespace Simply_Static;
 		</table>
 
 	</form>
+
+	<h3 style='margin-top: 50px;'><?php _e( "Send Report by Email", 'simply-static' ); ?></h3>
+
+	<table class='form-table'>
+		<tbody>
+			<tr>
+				<th></th>
+				<td>
+					<?php if ( $this->debug_file_exists ) : ?>
+						<p><?php echo sprintf( __( "You have created <a href='%s'>a debug log</a>.", 'simply-static' ), $this->debug_file_url ); ?></p>
+					<?php else : ?>
+						<p><?php _e( "You have not created a debug log yet.", 'simply-static' ); ?></p>
+					<?php endif; ?>
+				</td>
+			</tr>
+		</tbody>
+	</table>
 
 </div>
 <!-- .wrap -->

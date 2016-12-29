@@ -435,6 +435,10 @@ class Plugin {
 			$this->save_diagnostics_options();
 		}
 
+		$debug_file = Util::get_debug_log_filename();
+		$debug_file_exists = file_exists( $debug_file );
+		$debug_file_url = plugin_dir_url( dirname( __FILE__ ) ) . basename( $debug_file );
+
 		$diagnostic = new Diagnostic();
 		$results = $diagnostic->results;
 
@@ -442,6 +446,8 @@ class Plugin {
 			->set_layout( 'admin' )
 			->set_template( 'diagnostics' )
 			->assign( 'debugging_mode', $this->options->get( 'debugging_mode' ) )
+			->assign( 'debug_file_exists', $debug_file_exists )
+			->assign( 'debug_file_url', $debug_file_url )
 			->assign( 'results', $results )
 			->render();
 	}

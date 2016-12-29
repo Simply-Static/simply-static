@@ -103,8 +103,6 @@ class Archive_Creation_Job extends \WP_Background_Process {
 
 		Util::debug_log( "Current task: " . $task_name );
 
-		// error_log( '$task_name: ' . $task_name );
-
 		// convert 'an_example' to 'An_Example_Task'
 		$class_name = 'Simply_Static\\' . ucwords( $task_name ) . '_Task';
 
