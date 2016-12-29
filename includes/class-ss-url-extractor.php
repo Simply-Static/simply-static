@@ -29,6 +29,7 @@ class Url_Extractor {
 		'base'         => array( 'href' ),
 		'form'         => array( 'action', 'data' ),
 		'img'          => array( 'src', 'usemap', 'longdesc', 'dynsrc', 'lowsrc', 'srcset' ),
+		'amp-img'      => array( 'src', 'srcset' ),
 		'link'         => array( 'href' ),
 
 		'applet'       => array( 'code', 'codebase', 'archive', 'object' ),
