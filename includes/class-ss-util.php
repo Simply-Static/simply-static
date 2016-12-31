@@ -256,7 +256,7 @@ class Util {
 	  * @param  int         $iterations     Number of times the page path has been chopped
 	  * @return string|null                 Absolute URL, or null
 	  */
-	function create_offline_path( $extracted_path, $page_path, $iterations = 0 ) {
+	public static function create_offline_path( $extracted_path, $page_path, $iterations = 0 ) {
 		// We're done if we get a match between the path of the page and the extracted URL
 		// OR if there are no more slashes to remove
 		if ( strpos( $page_path, '/' ) === false || strpos( $extracted_path, $page_path ) === 0 ) {
