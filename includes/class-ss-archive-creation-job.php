@@ -43,11 +43,14 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 * @param string $option_key The options key name
 	 */
 	public function __construct() {
-		register_shutdown_function( array( $this, 'shutdown_handler' ) );
-		set_error_handler( array( $this, 'error_handler' ) );
-
 		$this->options = Options::instance();
 		$this->task_list = apply_filters( 'simplystatic.archive_creation_job.task_list', array(), $this->options->get( 'delivery_method' ) );
+
+		if ( ! $this->is_job_done() ) {
+			register_shutdown_function( array( $this, 'shutdown_handler' ) );
+			set_error_handler( array( $this, 'error_handler' ) );
+		}
+
 		parent::__construct();
 	}
 
