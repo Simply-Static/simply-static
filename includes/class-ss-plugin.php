@@ -482,7 +482,7 @@ class Plugin {
 			$zip_filename = $debug_file . '.zip';
 			$zip_archive = new \PclZip( $zip_filename );
 
-			if ( $zip_archive->create( $debug_file ) === 0 ) {
+			if ( $zip_archive->create( $debug_file, PCLZIP_OPT_REMOVE_ALL_PATH ) === 0 ) {
 				$message = __( 'Unable to create a ZIP of the debug log.', 'simply-static' );
 				$this->view->add_flash( 'error', $message );
 			} else {
