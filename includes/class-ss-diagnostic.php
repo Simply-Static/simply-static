@@ -20,6 +20,10 @@ class Diagnostic {
 		'curl' => '7.15.0'
 	);
 
+	/**
+	 * Assoc. array of categories, and then functions to check
+	 * @var array
+	 */
 	protected $description = array(
 		'URLs' => array(),
 		'Filesystem' => array(
@@ -43,7 +47,10 @@ class Diagnostic {
 		)
 	);
 
-	// TODO
+	/**
+	 * Assoc. array of results of the diagnostic check
+	 * @var array
+	 */
 	public $results = array();
 
 	/**

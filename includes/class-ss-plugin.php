@@ -486,14 +486,9 @@ class Plugin {
 				$message = __( 'Unable to create a ZIP of the debug log.', 'simply-static' );
 				$this->view->add_flash( 'error', $message );
 			} else {
-				$content = '';
+				$content = $this->get_content_for_debug_email();
 
-				ob_start();
-				phpinfo();
-				$phpinfo = ob_get_contents();
-				ob_get_clean();
-
-				$content .= $phpinfo;
+				// file_put_contents( $debug_file . '.html', $content );
 
 				if ( wp_mail( $email, 'Simply Static Debug Log', $content, '', $zip_filename ) === true ) {
 					$message = sprintf( __( 'Debug log successfully sent to: %s', 'simply-static' ), $email );
@@ -506,6 +501,51 @@ class Plugin {
 				unlink( $zip_filename );
 			}
 		}
+	}
+
+	/**
+	 * Generate the HTML content needed for the debug email
+	 * @return string HTML content for the debug email
+	 */
+	protected function get_content_for_debug_email() {
+		$content = "<div class='center'>";
+
+		$content .= "<table>"
+			. "<tr><td><b>URL:</b></td><td>"            . get_bloginfo( 'url' )             . "</td></tr>"
+			. "<tr><td><b>WP URL:</b></td><td>"         . get_bloginfo( 'wpurl' )           . "</td></tr>"
+			. "<tr><td><b>Plugin Version:</b></td><td>" . Plugin::VERSION                   . "</td></tr>"
+			. "<tr><td><b>WP Version:</b></td><td>"     . get_bloginfo( 'version' )         . "</td></tr>"
+			. "<tr><td><b>Multisite:</b></td><td>"      . ( is_multisite() ? 'yes' : 'no' ) . "</td></tr>"
+			. "<tr><td><b>Admin Email:</b></td><td>"    . get_bloginfo( 'admin_email' )     . "</td></tr>"
+			. "</table><br /><br />";
+
+		$diagnostic = new Diagnostic();
+		$results = $diagnostic->results;
+
+		foreach ( $results as $title => $tests ) {
+			$content .= "<table class='widefat striped'><thead><tr><th colspan='2'>" . $title . "</th></tr></thead><tbody>";
+			foreach ( $tests as $result ) {
+				$content .= "<tr><td class='label'>" . $result['label'] . "</td>";
+				if ( $result['test'] ) {
+					$content .= "<td class='test success'>" . $result['message'] . "</td>";
+				} else {
+					$content .= "<td class='test error'>" . $result['message'] . "</td>";
+				}
+				$content .= "</tr>";
+				}
+			$content .= "</tbody></table>";
+		}
+
+		$content .= "<br /><br /></div>";
+
+		ob_start();
+		phpinfo();
+		$phpinfo = ob_get_contents();
+		ob_get_clean();
+
+		$content .= $phpinfo;
+
+		return $content;
 	}
 
 	/**
