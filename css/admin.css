@@ -177,12 +177,9 @@
 	width: 75%;
 }
 
-#sistContainer #diagnosticsPage td.test {
+#sistContainer #diagnosticsPage td.test.success, #sistContainer #diagnosticsPage td.enabled {
 	font-weight: bold;
 	width: 25%;
-}
-
-#sistContainer #diagnosticsPage td.test.success {
 	color: #008000;
 }
 
@@ -190,7 +187,9 @@
 	content: "\2713  ";
 }
 
-#sistContainer #diagnosticsPage td.test.error {
+#sistContainer #diagnosticsPage td.test.error, #sistContainer #diagnosticsPage td.disabled {
+	font-weight: bold;
+	width: 25%;
 	color: #dc143c;
 }
 

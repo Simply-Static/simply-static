@@ -152,7 +152,7 @@ class Plugin {
 	 */
 	public function enqueue_admin_styles() {
 		// Plugin admin CSS. Tack on plugin version.
-		wp_enqueue_style( self::SLUG . '-admin-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'css/admin.css', array(), self::VERSION );
+		wp_enqueue_style( self::SLUG . '-admin-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'css/admin.css?1', array(), self::VERSION );
 	}
 
 	/**
@@ -442,6 +442,12 @@ class Plugin {
 		$diagnostic = new Diagnostic();
 		$results = $diagnostic->results;
 
+		$themes = wp_get_themes();
+		$current_theme = wp_get_theme();
+		$current_theme_name = $current_theme->name;
+
+		$plugins = get_plugins();
+
 		$this->view
 			->set_layout( 'admin' )
 			->set_template( 'diagnostics' )
@@ -449,6 +455,9 @@ class Plugin {
 			->assign( 'debug_file_exists', $debug_file_exists )
 			->assign( 'debug_file_url', $debug_file_url )
 			->assign( 'results', $results )
+			->assign( 'themes', $themes )
+			->assign( 'current_theme_name', $current_theme_name )
+			->assign( 'plugins', $plugins )
 			->render();
 	}
 
@@ -517,7 +526,7 @@ class Plugin {
 			. "<tr><td><b>WP Version:</b></td><td>"     . get_bloginfo( 'version' )         . "</td></tr>"
 			. "<tr><td><b>Multisite:</b></td><td>"      . ( is_multisite() ? 'yes' : 'no' ) . "</td></tr>"
 			. "<tr><td><b>Admin Email:</b></td><td>"    . get_bloginfo( 'admin_email' )     . "</td></tr>"
-			. "</table><br /><br />";
+			. "</table><br />";
 
 		$diagnostic = new Diagnostic();
 		$results = $diagnostic->results;
@@ -533,8 +542,44 @@ class Plugin {
 				}
 				$content .= "</tr>";
 				}
-			$content .= "</tbody></table>";
+			$content .= "</tbody></table><br />";
 		}
+
+		$themes = wp_get_themes();
+		$current_theme = wp_get_theme();
+		$current_theme_name = $current_theme->name;
+
+		$content .= "<table width='600'><thead><tr><th>Theme Name</th><th>Theme URL</th><th>Version</th><th>Enabled</th></tr></thead><tbody>";
+		foreach ( $themes as $theme ) {
+			$content .= "<tr>";
+			$content .= "<td width='20%'>" . $theme->get( 'Name') . "</td>";
+			$content .= "<td width='60%'><a href='" . $theme->get( 'ThemeURI') . "'>" . $theme->get( 'ThemeURI') . "</a></td>";
+			$content .= "<td width='10%'>" . $theme->get( 'Version') . "</td>";
+			if ( $theme->get( 'Name') === $current_theme_name ) {
+				$content .= "<td width='10%' style='color: #008000; font-weight: bold;'>Yes</td>";
+			} else {
+				$content .= "<td width='10%' style='color: #dc143c; font-weight: bold;'>No</td>";
+			}
+			$content .= "</tr>";
+		}
+		$content .= "</tbody></table><br />";
+
+		$plugins = get_plugins();
+
+		$content .= "<table width='600'><thead><tr><th>Plugin Name</th><th>Plugin URL</th><th>Version</th><th>Enabled</th></tr></thead><tbody>";
+		foreach ( $plugins as $plugin_path => $plugin_data ) {
+			$content .= "<tr>";
+			$content .= "<td width='20%'>" . $plugin_data[ 'Name' ] . "</td>";
+			$content .= "<td width='60%'><a href='" . $plugin_data[ 'PluginURI' ] . "'>" . $plugin_data[ 'PluginURI' ] . "</a></td>";
+			$content .= "<td width='10%'>" . $plugin_data[ 'Version' ] . "</td>";
+			if ( is_plugin_active( $plugin_path ) ) {
+				$content .= "<td width='10%' style='color: #008000; font-weight: bold;'>Yes</td>";
+			} else {
+				$content .= "<td width='10%' style='color: #dc143c; font-weight: bold;'>No</td>";
+			}
+			$content .= "</tr>";
+		}
+		$content .= "</tbody></table><br />";
 
 		$content .= "<br /><br /></div>";
 

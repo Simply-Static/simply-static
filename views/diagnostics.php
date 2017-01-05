@@ -28,6 +28,56 @@ namespace Simply_Static;
 		</table>
 	<?php endforeach; ?>
 
+	<table class='widefat striped'>
+		<thead>
+			<tr>
+				<th><?php _e( "Theme Name", 'simply-static' ); ?></th>
+				<th><?php _e( "Theme URL", 'simply-static' ); ?></th>
+				<th><?php _e( "Version", 'simply-static' ); ?></th>
+				<th><?php _e( "Enabled", 'simply-static' ); ?></th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php foreach ( $this->themes as $theme ) : ?>
+				<tr>
+					<td width='20%'><?php echo $theme->get( 'Name'); ?></td>
+					<td width='60%'><a href='<?php echo $theme->get( 'ThemeURI'); ?>'><?php echo $theme->get( 'ThemeURI'); ?></a></td>
+					<td width='10%'><?php echo $theme->get( 'Version'); ?></td>
+					<?php if ( $theme->get( 'Name') === $this->current_theme_name ) : ?>
+						<td width='10%' class='enabled'><?php _e( "Yes", 'simply-static' ) ?></td>
+					<?php else : ?>
+						<td width='10%' class='disabled'><?php _e( "No", 'simply-static' ) ?></td>
+					<?php endif; ?>
+				</tr>
+			<?php endforeach; ?>
+		</tbody>
+	</table>
+
+	<table class='widefat striped'>
+		<thead>
+			<tr>
+				<th><?php _e( "Plugin Name", 'simply-static' ); ?></th>
+				<th><?php _e( "Plugin URL", 'simply-static' ); ?></th>
+				<th><?php _e( "Version", 'simply-static' ); ?></th>
+				<th><?php _e( "Enabled", 'simply-static' ); ?></th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php foreach ( $this->plugins as $plugin_path => $plugin_data ) : ?>
+				<tr>
+					<td width='20%'><?php echo $plugin_data[ 'Name' ]; ?></td>
+					<td width='60%'><a href='<?php echo $plugin_data[ 'PluginURI' ]; ?>'><?php echo $plugin_data[ 'PluginURI' ]; ?></a></td>
+					<td width='10%'><?php echo $plugin_data[ 'Version' ]; ?></td>
+					<?php if ( is_plugin_active( $plugin_path ) ) : ?>
+						<td width='10%' class='enabled'><?php _e( "Yes", 'simply-static' ) ?></td>
+					<?php else : ?>
+						<td width='10%' class='disabled'><?php _e( "No", 'simply-static' ) ?></td>
+					<?php endif; ?>
+				</tr>
+			<?php endforeach; ?>
+		</tbody>
+	</table>
+
 	<h3 style='margin-top: 50px;'><?php _e( "Debugging Options", 'simply-static' ); ?></h3>
 
 	<form id='diagnosticsForm' method='post' action=''>
