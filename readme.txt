@@ -97,9 +97,20 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 
 == Changelog ==
 
-= 2.0.0, January 01, 2017 =
+= 2.0.0, January 05, 2017 =
 
-* TODO
+* New: New logo/icon (thanks Hajo!)
+* New: Generate static files without having to stay on the Generate page (a job runs in the background)
+* New: Added the ability to specify URLs (or parts of URLs) to exclude from static file generation
+* New: Added a debugging mode with the ability to create/email a debug log
+* New: Added the ability to reset the plugin settings back to their defaults
+* New: Future versions will be able to downgrade to 2.0.0 (by overwriting files) without errors
+* New: Friendly error message if trying to use Simply Static with PHP < 5.3
+* New: Added support for Accelerated Mobile Pages HTML attributes
+* Fix: URLs containing the WP URL as a query param will rewrite the param with the new URL
+* Fix: Non-WP URLs in the Additional URLs section no longer cause Simply Static to hang
+* Fix: Zip creation will no longer throw errors when trying to process 0 byte files
+* Fix: Additional errors will be caught and displayed when generating static files
 
 = 1.8.0, November 01, 2016 =
 
