@@ -510,7 +510,7 @@ class Plugin {
 	protected function get_content_for_debug_email() {
 		$content = "<div class='center'>";
 
-		$content .= "<table>"
+		$content .= "<table width='600'>"
 			. "<tr><td><b>URL:</b></td><td>"            . get_bloginfo( 'url' )             . "</td></tr>"
 			. "<tr><td><b>WP URL:</b></td><td>"         . get_bloginfo( 'wpurl' )           . "</td></tr>"
 			. "<tr><td><b>Plugin Version:</b></td><td>" . Plugin::VERSION                   . "</td></tr>"
@@ -523,13 +523,13 @@ class Plugin {
 		$results = $diagnostic->results;
 
 		foreach ( $results as $title => $tests ) {
-			$content .= "<table class='widefat striped'><thead><tr><th colspan='2'>" . $title . "</th></tr></thead><tbody>";
+			$content .= "<table width='600'><thead><tr><th colspan='2'>" . $title . "</th></tr></thead><tbody>";
 			foreach ( $tests as $result ) {
-				$content .= "<tr><td class='label'>" . $result['label'] . "</td>";
+				$content .= "<tr><td>" . $result['label'] . "</td>";
 				if ( $result['test'] ) {
-					$content .= "<td class='test success'>" . $result['message'] . "</td>";
+					$content .= "<td style='color: #008000; font-weight: bold;'>" . $result['message'] . "</td>";
 				} else {
-					$content .= "<td class='test error'>" . $result['message'] . "</td>";
+					$content .= "<td style='color: #dc143c; font-weight: bold;'>" . $result['message'] . "</td>";
 				}
 				$content .= "</tr>";
 				}
