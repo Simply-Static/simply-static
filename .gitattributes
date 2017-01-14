@@ -16,3 +16,6 @@ node_modules export-ignore
 Gruntfile.js export-ignore
 package.json export-ignore
 vendor export-ignore
+debug.txt export-ignore
+debug.txt.zip export-ignore
+debug.txt.html export-ignore

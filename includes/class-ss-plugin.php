@@ -581,6 +581,11 @@ class Plugin {
 		}
 		$content .= "</tbody></table><br />";
 
+		$content .= "<table width='600'><thead><tr><th>Settings</th></tr></thead><tbody><tr><td><pre>";
+		$options = get_option( Plugin::SLUG );
+		$content .= print_r( $options, true );
+		$content .= "</pre></td></tr></tbody></table><br />";
+
 		$content .= "<br /><br /></div>";
 
 		ob_start();
