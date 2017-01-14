@@ -152,7 +152,7 @@ class Plugin {
 	 */
 	public function enqueue_admin_styles() {
 		// Plugin admin CSS. Tack on plugin version.
-		wp_enqueue_style( self::SLUG . '-admin-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'css/admin.css?1', array(), self::VERSION );
+		wp_enqueue_style( self::SLUG . '-admin-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'css/admin.css', array(), self::VERSION );
 	}
 
 	/**

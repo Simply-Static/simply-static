@@ -187,10 +187,14 @@
 	content: "\2713  ";
 }
 
-#sistContainer #diagnosticsPage td.test.error, #sistContainer #diagnosticsPage td.disabled {
+#sistContainer #diagnosticsPage td.test.error {
 	font-weight: bold;
 	width: 25%;
 	color: #dc143c;
+}
+
+#sistContainer #diagnosticsPage td.disabled {
+	width: 25%;
 }
 
 #sistContainer #diagnosticsPage td.test.error::before {

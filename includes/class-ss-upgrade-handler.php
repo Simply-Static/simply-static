@@ -52,7 +52,7 @@ class Upgrade_Handler {
 		self::$default_options = array(
 			'destination_scheme' => Util::origin_scheme(),
 			'destination_host' => Util::origin_host(),
-			'temp_files_dir' => trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' ),
+			'temp_files_dir' => trailingslashit( trailingslashit( get_temp_dir() ) . 'static-files' ),
 			'additional_urls' => '',
 			'additional_files' => '',
 			'urls_to_exclude' => array(),
@@ -64,7 +64,8 @@ class Upgrade_Handler {
 			'archive_status_messages' => array(),
 			'archive_name' => null,
 			'archive_start_time' => null,
-			'archive_end_time' => null
+			'archive_end_time' => null,
+			'debugging_mode' => '0'
 		);
 
 		$save_changes = false;
@@ -84,6 +85,8 @@ class Upgrade_Handler {
 				// update Simply_Static\Options again to pull in updated data
 				self::$options = new Options();
 			}
+
+			wp_mkdir_p( self::$default_options['temp_files_dir'] );
 		}
 
 		// sync the database on any install/upgrade/downgrade
@@ -137,6 +140,15 @@ class Upgrade_Handler {
 							$additional_files = $additional_files . "\n" . $upload_dir;
 							self::$options->set( 'additional_files', $additional_files );
 						}
+					}
+				}
+
+				if ( version_compare( $version, '2.0.0', '<' ) ) {
+					error_log( $version );
+					$old_tmp_dir = trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' );
+					if ( self::$options->get( 'temp_files_dir' ) === $old_tmp_dir ) {
+						self::$options->set( 'temp_files_dir', self::$default_options['temp_files_dir'] );
+						wp_mkdir_p( self::$default_options['temp_files_dir'] );
 					}
 				}
 			}
