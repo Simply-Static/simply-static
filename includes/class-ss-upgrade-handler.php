@@ -144,7 +144,6 @@ class Upgrade_Handler {
 				}
 
 				if ( version_compare( $version, '2.0.0', '<' ) ) {
-					error_log( $version );
 					$old_tmp_dir = trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' );
 					if ( self::$options->get( 'temp_files_dir' ) === $old_tmp_dir ) {
 						self::$options->set( 'temp_files_dir', self::$default_options['temp_files_dir'] );
