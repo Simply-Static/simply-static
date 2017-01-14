@@ -1,9 +1,5 @@
 .DS_Store
 
-# keep the static-files directory but ignore anything in it, except the .keep file
-static-files/*
-!static-files/.keep
-
 # These aren't needed by Simply Static itself, so we're ignoring them.
 node_modules
 
