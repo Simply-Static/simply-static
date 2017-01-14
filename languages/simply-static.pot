@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Simply Static 2.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simply-static\n"
-"POT-Creation-Date: 2017-01-05 07:06:52+00:00\n"
+"POT-Creation-Date: 2017-01-14 06:11:14+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -155,7 +155,7 @@ msgid "Diagnostics"
 msgstr ""
 
 #: includes/class-ss-plugin.php:224 includes/class-ss-plugin.php:269
-#: includes/class-ss-plugin.php:292 includes/class-ss-plugin.php:716
+#: includes/class-ss-plugin.php:292 includes/class-ss-plugin.php:721
 msgid "Not permitted"
 msgstr ""
 
@@ -175,23 +175,23 @@ msgstr ""
 msgid "We encountered an error when attempting to send out the debug log."
 msgstr ""
 
-#: includes/class-ss-plugin.php:632
+#: includes/class-ss-plugin.php:637
 msgid "Plugin reset complete."
 msgstr ""
 
-#: includes/class-ss-plugin.php:666
+#: includes/class-ss-plugin.php:671
 msgid "Contact Support"
 msgstr ""
 
-#: includes/class-ss-plugin.php:670
+#: includes/class-ss-plugin.php:675
 msgid "Enjoying Simply Static? Add your [stars] on wordpress.org."
 msgstr ""
 
-#: includes/class-ss-plugin.php:685
+#: includes/class-ss-plugin.php:690
 msgid "Simply Static Version"
 msgstr ""
 
-#: includes/class-ss-plugin.php:685
+#: includes/class-ss-plugin.php:690
 msgid "View what changed in this version"
 msgstr ""
 
