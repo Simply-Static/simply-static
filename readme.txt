@@ -111,6 +111,7 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 * Fix: Non-WP URLs in the Additional URLs section no longer cause Simply Static to hang
 * Fix: Zip creation will no longer throw errors when trying to process 0 byte files
 * Fix: Fixed an issue that could cause Simply Static to not remove all files when uninstalling
+* Fix: Local directories are now always chmod'd to 0755 so that they're readable
 * Fix: Additional errors will be caught and displayed when generating static files
 
 = 1.8.0, November 01, 2016 =
