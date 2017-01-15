@@ -14,7 +14,7 @@ class Plugin {
 	 * Plugin version
 	 * @var string
 	 */
-	const VERSION = '2.0.0';
+	const VERSION = '2.0.1';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
@@ -528,6 +528,11 @@ class Plugin {
 			. "<tr><td><b>Admin Email:</b></td><td>"    . get_bloginfo( 'admin_email' )     . "</td></tr>"
 			. "</table><br />";
 
+		$content .= "<table width='600'><thead><tr><th>Settings</th></tr></thead><tbody><tr><td><pre>";
+		$options = get_option( Plugin::SLUG );
+		$content .= print_r( $options, true );
+		$content .= "</pre></td></tr></tbody></table><br />";
+
 		$diagnostic = new Diagnostic();
 		$results = $diagnostic->results;
 
@@ -580,11 +585,6 @@ class Plugin {
 			$content .= "</tr>";
 		}
 		$content .= "</tbody></table><br />";
-
-		$content .= "<table width='600'><thead><tr><th>Settings</th></tr></thead><tbody><tr><td><pre>";
-		$options = get_option( Plugin::SLUG );
-		$content .= print_r( $options, true );
-		$content .= "</pre></td></tr></tbody></table><br />";
 
 		$content .= "<br /><br /></div>";
 

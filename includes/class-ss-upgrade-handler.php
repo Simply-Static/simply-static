@@ -85,8 +85,6 @@ class Upgrade_Handler {
 				// update Simply_Static\Options again to pull in updated data
 				self::$options = new Options();
 			}
-
-			wp_mkdir_p( self::$default_options['temp_files_dir'] );
 		}
 
 		// sync the database on any install/upgrade/downgrade
