@@ -48,7 +48,6 @@ class Archive_Creation_Job extends \WP_Background_Process {
 
 		if ( ! $this->is_job_done() ) {
 			register_shutdown_function( array( $this, 'shutdown_handler' ) );
-			set_error_handler( array( $this, 'error_handler' ) );
 		}
 
 		parent::__construct();
@@ -303,27 +302,6 @@ class Archive_Creation_Job extends \WP_Background_Process {
 		$message = sprintf( __( "An error occurred: %s", 'simply-static' ), $wp_error->get_error_message() );
 		$this->save_status_message( $message, 'error' );
 		return 'cancel';
-	}
-
-	/**
-	 * Error handler for catchable error reporting
-	 * @return bool
-	 */
-	public function error_handler( $errno, $errstr ) {
-		$message = sprintf( __( "An error occurred: %s", 'simply-static' ), $errstr );
-		Util::debug_log( $message );
-		$this->save_status_message( $message, 'error' );
-
-		$this->clear_scheduled_event();
-		$this->unlock_process();
-		$this->cancel_process();
-
-		$end_time = Util::formatted_datetime();
-		$this->options
-			->set( 'archive_end_time', $end_time )
-			->save();
-
-		return false;
 	}
 
 	/**
