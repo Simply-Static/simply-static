@@ -20,6 +20,7 @@ class Setup_Task extends Task {
 
 		// create temp archive directory
 		if ( ! file_exists( $archive_dir ) ) {
+			Util::debug_log( 'Creating archive directory: ' . $archive_dir );
 			$create_dir = wp_mkdir_p( $archive_dir );
 			if ( $create_dir === false ) {
 				return new \WP_Error( 'cannot_create_archive_dir' );

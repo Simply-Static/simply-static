@@ -31,7 +31,8 @@ class Diagnostic {
 			array( 'function' => 'is_temp_files_dir_writeable' )
 		),
 		'WordPress' => array(
-			array( 'function' => 'is_permalink_structure_set' )
+			array( 'function' => 'is_permalink_structure_set' ),
+			array( 'function' => 'can_wp_make_requests_to_itself' )
 		),
 		'MySQL' => array(
 			array( 'function' => 'user_can_delete' ),
@@ -161,6 +162,40 @@ class Diagnostic {
 		return array(
 			'label' => $label,
 			'test' => strlen( get_option( 'permalink_structure' ) ) !== 0
+		);
+	}
+
+	public function can_wp_make_requests_to_itself() {
+		$ip_address = $_SERVER['SERVER_ADDR'];
+		$label = sprintf( __( "Checking if WordPress can make requests to itself from <code>%s</code>", 'simply-static' ), $ip_address );
+
+		$url = Util::origin_url();
+		$response = wp_remote_get( $url, array(
+			'timeout' => Url_Fetcher::TIMEOUT,
+			'sslverify' => false, // not verifying SSL because all calls are local
+			'redirection' => 0, // disable redirection
+			'blocking' => true, // do not execute code until this call is complete
+			'stream' => true // stream body content to a file
+		) );
+
+		if ( is_wp_error( $response ) ) {
+			$test = false;
+			$message = null;
+		} else {
+			$code = $response['response']['code'];
+			if ( in_array( $code, Page::$processable_status_codes ) ) {
+				$test = true;
+				$message = $code;
+			} else {
+				$test = false;
+				$message = sprintf( __( "Try whitelisting the ip address", 'simply-static' ), $ip_address );
+			}
+		}
+
+		return array(
+			'label' => $label,
+			'test' => $test,
+			'message' => $message
 		);
 	}
 

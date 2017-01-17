@@ -6,7 +6,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// require_once( ABSPATH . 'wp-load.php' );
 require_once( ABSPATH . 'wp-admin/includes/admin.php' );
 
 /**
