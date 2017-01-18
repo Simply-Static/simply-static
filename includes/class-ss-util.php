@@ -16,7 +16,8 @@ class Util {
 	* @return string http or https
 	*/
 	public static function origin_scheme() {
-		return is_ssl() ? 'https://' : 'http://';
+		$pattern = '/:\/\/.*/';
+		return preg_replace( $pattern, '', self::origin_url() );
 	}
 
 	/**
