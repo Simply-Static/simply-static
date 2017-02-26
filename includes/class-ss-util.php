@@ -194,7 +194,7 @@ class Util {
 
 			// if this is a local URL, add the protocol to the URL
 			if ( stripos( $extracted_url, '//' . self::origin_host() ) === 0 ) {
-				$extracted_url = substr_replace( $extracted_url, self::origin_scheme(), 0, 2 );
+				$extracted_url = self::origin_scheme() . ':' . $extracted_url;
 			}
 
 			return $extracted_url;
