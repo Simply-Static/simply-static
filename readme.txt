@@ -4,7 +4,7 @@ Donate link: http://simplystatic.co/
 Tags: simply static, html, static, static site, static site generator, static website generator, performance, fast, optimization, availability, scaling, scalability, cdn, security, secure, zip, hardening
 Requires at least: 4.0
 Tested up to: 4.7
-Stable tag: 2.0.2
+Stable tag: 2.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,7 +16,7 @@ Simply Static is a static site generator for WordPress that helps you create a s
 
 = Security =
 
-WordPress is used by one in four websites[1]. That makes it a prime target for hackers. There are a lot of ways that your site can be compromised, but two-thirds of all hacks are caused by vulnerabilities in WordPress plugins, themes, and core files[2].
+WordPress is used by [one in four websites](http://venturebeat.com/2015/11/08/wordpress-now-powers-25-of-the-web/). That makes it a prime target for hackers. There are a lot of ways that your site can be compromised, but two-thirds of all hacks are caused by [vulnerabilities in WordPress plugins, themes, and core files](https://www.wordfence.com/blog/2016/03/attackers-gain-access-wordpress-sites/).
 
 Keeping WordPress secure requires constant vigilance. Exploits are being found for WordPress themes and plugins every day. Even WordPress itself has critical vulnerabilities from time to time. If you don’t stay on top of updates, your site *will* get hacked. It’s just a matter of when.
 
@@ -32,8 +32,13 @@ With Simply Static, you’re creating a static copy of all of your WordPress pag
 
 Depending on the complexity of your site, theme, and plugins, using a static site can easily increase the performance of your site by 10x.
 
-[1] http://venturebeat.com/2015/11/08/wordpress-now-powers-25-of-the-web/
-[2] https://www.wordfence.com/blog/2016/03/attackers-gain-access-wordpress-sites/
+= Other Similar Plugins =
+
+In the event that Simply Static doesn't meet your needs, give this plugin a try:
+
+- [WP Static HTML Output](https://wordpress.org/plugins/static-html-output-plugin/)
+
+It's updated regularly and the author is responsive to support requests.
 
 == Installation ==
 
@@ -96,6 +101,10 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 3. On the Include/Exclude page, you can select additional URLs, files, or directories to include in your static site. And you can also choose URLs (or URL patterns) to exclude from your static site.
 
 == Changelog ==
+
+= 2.0.3, March 16, 2017 =
+
+* Fix: Protocol-relative URLs now work again
 
 = 2.0.2, January 18, 2017 =
 
