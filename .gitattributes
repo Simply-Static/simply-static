@@ -11,6 +11,7 @@ composer.lock export-ignore
 phpunit.xml export-ignore
 README.md export-ignore
 TESTING.md export-ignore
+static-files/* export-ignore
 node_modules export-ignore
 Gruntfile.js export-ignore
 package.json export-ignore
