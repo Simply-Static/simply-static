@@ -52,7 +52,7 @@ class Upgrade_Handler {
 		self::$default_options = array(
 			'destination_scheme' => Util::origin_scheme(),
 			'destination_host' => Util::origin_host(),
-			'temp_files_dir' => trailingslashit( trailingslashit( get_temp_dir() ) . 'static-files' ),
+			'temp_files_dir' => trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' ),
 			'additional_urls' => '',
 			'additional_files' => '',
 			'urls_to_exclude' => array(),
@@ -141,11 +141,11 @@ class Upgrade_Handler {
 					}
 				}
 
-				if ( version_compare( $version, '2.0.0', '<' ) ) {
-					$old_tmp_dir = trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' );
+				// setting the temp dir back to the one within /simply-static/
+				if ( version_compare( $version, '2.0.4', '<' ) ) {
+					$old_tmp_dir = trailingslashit( trailingslashit( get_temp_dir() ) . 'static-files' );
 					if ( self::$options->get( 'temp_files_dir' ) === $old_tmp_dir ) {
 						self::$options->set( 'temp_files_dir', self::$default_options['temp_files_dir'] );
-						wp_mkdir_p( self::$default_options['temp_files_dir'] );
 					}
 				}
 			}

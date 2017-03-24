@@ -8,8 +8,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Plugin Name:       Simply Static
  * Plugin URI:        http://codeofconduct.co/simply-static
  * Description:       Produces a static HTML version of your WordPress install and adjusts URLs accordingly.
- * Version:           2.0.3
- * Author:            Code of Conduct
+ * Version:           2.0.4
+ * Author:            Code of Conduct LLC
  * Author URI:        http://codeofconduct.co/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt

@@ -222,7 +222,7 @@ namespace Simply_Static;
 							<label for='tempFilesDir'><?php _e( "Temporary Files Directory", 'simply-static' );?></label>
 						</th>
 						<td>
-							<?php $example_temp_files_dir = trailingslashit( trailingslashit( get_temp_dir() ) . 'static-files' ); ?>
+							<?php $example_temp_files_dir = trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' ); ?>
 							<input aria-describedby='tempFilesDirHelpBlock' type='text' id='tempFilesDir' name='temp_files_dir' value='<?php echo esc_attr( $this->temp_files_dir ) ?>' class='widefat' />
 							<div id='tempFilesDirHelpBlock' class='help-block'>
 								<p><?php _e( "Your static files (and ZIP archives, if generated) are temporarily saved to this directory. This directory must exist and be writeable.", 'simply-static' ); ?></p>
