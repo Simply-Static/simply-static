@@ -14,7 +14,7 @@ class Plugin {
 	 * Plugin version
 	 * @var string
 	 */
-	const VERSION = '2.0.4';
+	const VERSION = '2.0.5';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
@@ -736,6 +736,7 @@ class Plugin {
 			header( 'Content-Description: File Transfer' );
 			header( 'Content-Disposition: attachment; filename=' . $file_name );
 			header( 'Content-Type: application/zip, application/octet-stream; charset=' . get_option( 'blog_charset' ), true );
+			header( 'Content-Length: ' . filesize( $file_path ) );
 			header( 'Pragma: no-cache' );
 			header( 'Expires: 0' );
 			readfile( $file_path );
