@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Plugin Name:       Simply Static
  * Plugin URI:        http://codeofconduct.co/simply-static
  * Description:       Produces a static HTML version of your WordPress install and adjusts URLs accordingly.
- * Version:           2.0.5
+ * Version:           2.0.6
  * Author:            Code of Conduct LLC
  * Author URI:        http://codeofconduct.co/
  * License:           GPL-2.0+
@@ -33,7 +33,7 @@ if ( version_compare( PHP_VERSION, '5.3', '<' ) ) {
 		deactivate_plugins( __FILE__ );
 	}
 } else {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-ss-plugin.php';
-
-	Simply_Static\Plugin::instance();
+	// Loading up Simply Static in a separate file so that there's nothing to
+	// trigger a PHP error in this file (e.g. by using namespacing)
+	require_once plugin_dir_path( __FILE__ ) . 'includes/load.php';
 }
