@@ -104,7 +104,7 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 
 = 2.0.7, April 7, 2017 =
 
-* Fix: Non-latin characters should no longer get converted to HTML entities
+* Fix: Non-latin characters should no longer get converted to HTML entities (thanks xi80r6!)
 
 = 2.0.6, April 4, 2017 =
 
