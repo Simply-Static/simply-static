@@ -105,17 +105,36 @@ class Url_Extractor {
 
 	/**
 	 * Constructor
-	 * @param string  $static_page          Simply_Static\Page to extract URLs from
+	 * @param string  $static_page Simply_Static\Page to extract URLs from
 	 */
 	public function __construct( $static_page ) {
 		$this->static_page = $static_page;
 		$this->options = Options::instance();
 	}
 
+	/**
+	 * Fetch the content from our file
+	 * @return string
+	 */
 	public function get_body() {
-		return file_get_contents( $this->options->get_archive_dir() . $this->static_page->file_path );
+		// Setting the stream context to prevent an issue where non-latin
+		// characters get converted to html codes like #1234; inappropriately
+		// http://stackoverflow.com/questions/5600371/file-get-contents-converts-utf-8-to-iso-8859-1
+		$opts = array(
+			'http' => array(
+				'header' => "Accept-Charset: UTF-8"
+			)
+		);
+		$context = stream_context_create( $opts );
+		$path = $this->options->get_archive_dir() . $this->static_page->file_path;
+		return file_get_contents( $path, false, $context );
 	}
 
+	/**
+	 * Save a string back to our file (e.g. after having updated URLs)
+	 * @param  string    $static_page Simply_Static\Page to extract URLs from
+	 * @return int|false
+	 */
 	public function save_body( $content ) {
 		return file_put_contents( $this->options->get_archive_dir() . $this->static_page->file_path, $content );
 	}
@@ -130,7 +149,7 @@ class Url_Extractor {
 	 * Note that no validation is performed on whether the URLs would actually
 	 * return a 200/OK response.
 	 *
-	 * @return array $urls
+	 * @return array
 	 */
 	public function extract_and_update_urls() {
 		if ( $this->static_page->is_type( 'html' ) ) {

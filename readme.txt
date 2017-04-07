@@ -4,7 +4,7 @@ Donate link: http://simplystatic.co/
 Tags: simply static, html, static, static site, static site generator, static website generator, performance, fast, optimization, availability, scaling, scalability, cdn, security, secure, zip, hardening
 Requires at least: 4.0
 Tested up to: 4.7
-Stable tag: 2.0.6
+Stable tag: 2.0.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -101,6 +101,10 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 3. On the Include/Exclude page, you can select additional URLs, files, or directories to include in your static site. And you can also choose URLs (or URL patterns) to exclude from your static site.
 
 == Changelog ==
+
+= 2.0.7, April 7, 2017 =
+
+* Fix: Non-latin characters should no longer get converted to HTML entities
 
 = 2.0.6, April 4, 2017 =
 

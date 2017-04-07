@@ -14,7 +14,7 @@ class Plugin {
 	 * Plugin version
 	 * @var string
 	 */
-	const VERSION = '2.0.6';
+	const VERSION = '2.0.7';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
