@@ -166,7 +166,7 @@ class Diagnostic {
 	}
 
 	public function can_wp_make_requests_to_itself() {
-		$ip_address = $_SERVER['SERVER_ADDR'];
+		$ip_address = getHostByName( getHostName() );
 		$label = sprintf( __( "Checking if WordPress can make requests to itself from <code>%s</code>", 'simply-static' ), $ip_address );
 
 		$url = Util::origin_url();

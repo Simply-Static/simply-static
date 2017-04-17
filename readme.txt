@@ -1,7 +1,7 @@
 === Simply Static ===
 Contributors: codeofconduct
 Donate link: http://simplystatic.co/
-Tags: simply static, html, static, static site, static site generator, static website generator, performance, fast, optimization, availability, scaling, scalability, cdn, security, secure, zip, hardening
+Tags: html, static website generator, static site, secure, fast
 Requires at least: 4.0
 Tested up to: 4.7
 Stable tag: 2.0.7

@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Plugin Name:       Simply Static
- * Plugin URI:        http://codeofconduct.co/simply-static
+ * Plugin URI:        http://simplystatic.co/
  * Description:       Produces a static HTML version of your WordPress install and adjusts URLs accordingly.
  * Version:           2.0.7
  * Author:            Code of Conduct LLC
