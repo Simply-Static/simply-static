@@ -1,0 +1,44 @@
+---
+- name: install apache
+  apt: name={{ item }} state=present
+  with_items:
+    - apache2
+    - apache2-dev
+
+- name: configure ports.conf for apache sites
+  template: src=ports.conf.j2 dest={{ apache_conf_dir }}/ports.conf
+
+- name: install snakeoil crt
+  copy:
+    src: snakeoil.crt
+    dest: /etc/ssl/certs/snakeoil.crt
+
+- name: install snakeoil key
+  copy:
+    src: snakeoil.key
+    dest: /etc/ssl/private/snakeoil.key
+
+- name: enable rewrite module
+  apache2_module:
+    state: present
+    name: rewrite
+
+- name: enable headers module
+  apache2_module:
+    state: present
+    name: headers
+
+- name: enable ssl module
+  apache2_module:
+    state: present
+    name: ssl
+
+- name: disable default site
+  file: path=/etc/apache2/sites-enabled/000-default.conf state=absent
+
+- name: configure wordpress apache sites
+  template: src=wordpress.conf.j2 dest={{ apache_conf_dir }}/sites-enabled/{{ item.name }}.conf
+  with_items: '{{ wordpress_sites }}'
+
+- name: restart apache
+  service: "name=apache2 state=restarted"

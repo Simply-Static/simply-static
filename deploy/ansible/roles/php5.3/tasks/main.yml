@@ -1,0 +1,48 @@
+---
+- name: install pre-reqs
+  apt: name={{ item }} state=present
+  with_items:
+    - build-essential
+    - libxml2-dev
+    - bzip2 # needed to unzip php zip
+
+- name: check if php is installed
+  command: php --version
+  ignore_errors: yes
+  register: php_check
+
+- name: download php archive file
+  get_url:
+    url: http://in1.php.net/distributions/php-5.3.29.tar.bz2
+    dest: /tmp/php.tar.bz2
+  when: "'failed' in php_check or php_check.stdout.find('5.3.29') == -1"
+
+- name: unzip php archive file
+  unarchive:
+    src: /tmp/php.tar.bz2
+    dest: /tmp
+  when: "'failed' in php_check or php_check.stdout.find('5.3.29') == -1"
+
+- name: configure php
+  command: ./configure
+  args:
+    chdir: /tmp/php-5.3.29/
+  when: "'failed' in php_check or php_check.stdout.find('5.3.29') == -1"
+
+- name: make php
+  command: make
+  args:
+    chdir: /tmp/php-5.3.29/
+  when: "'failed' in php_check or php_check.stdout.find('5.3.29') == -1"
+
+# - name: test php
+#   command: make test
+#   args:
+#     chdir: /tmp/php-5.3.29/
+#   when: "'failed' in php_check or php_check.stdout.find('5.3.29') == -1"
+
+- name: install php
+  command: make install
+  args:
+    chdir: /tmp/php-5.3.29/
+  when: "'failed' in php_check or php_check.stdout.find('5.3.29') == -1"

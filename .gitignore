@@ -14,3 +14,7 @@ vendor
 debug.txt
 debug.txt.zip
 debug.txt.html
+
+# vagrant
+.vagrant
+*.retry

@@ -19,3 +19,5 @@ vendor export-ignore
 debug.txt export-ignore
 debug.txt.zip export-ignore
 debug.txt.html export-ignore
+Vagrantfile export-ignore
+deploy export-ignore

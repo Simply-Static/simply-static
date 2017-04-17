@@ -1,0 +1,44 @@
+---
+- name: Download WordPress
+  get_url:
+    url: https://wordpress.org/latest.tar.gz
+    dest: /tmp/wordpress.tar.gz
+    validate_certs: no
+
+- file:
+    path: "/var/www/{{ item.directory }}"
+    state: directory
+  with_items: '{{ wordpress_sites }}'
+
+- name: Extract WordPress
+  unarchive:
+    src: /tmp/wordpress.tar.gz
+    dest: "/var/www/{{ item.directory }}"
+  with_items: '{{ wordpress_sites }}'
+
+- name: Copy sample config file
+  command: "mv /var/www/{{ item.directory }}/wp-config-sample.php /var/www/{{ item.directory }}/wp-config.php"
+  args:
+    creates: "/var/www/{{ item.directory }}/wp-config.php"
+  with_items: '{{ wordpress_sites }}'
+
+- name: Update WordPress config database name
+  lineinfile:
+    dest: "/var/www/{{ item.directory }}/wp-config.php"
+    regexp: "define\\('DB_NAME', '(.)+'\\);"
+    line: "define('DB_NAME', '{{ item.database_name }}');"
+  with_items: '{{ wordpress_sites }}'
+
+- name: Update WordPress config database username
+  lineinfile:
+    dest: "/var/www/{{ item.directory }}/wp-config.php"
+    regexp: "define\\('DB_USER', '(.)+'\\);"
+    line: "define('DB_USER', '{{ wp_db_username }}');"
+  with_items: '{{ wordpress_sites }}'
+
+- name: Update WordPress config database password
+  lineinfile:
+    dest: "/var/www/{{ item.directory }}/wp-config.php"
+    regexp: "define\\('DB_PASSWORD', '(.)+'\\);"
+    line: "define('DB_PASSWORD', '{{ wp_db_password }}');"
+  with_items: '{{ wordpress_sites }}'
