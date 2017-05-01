@@ -1,8 +1,8 @@
 <VirtualHost *:{{ item.port }}>
   ServerName {{ item.name }}
 
-  DocumentRoot {{ apache_root_dir }}/{{ item.directory }}
-  <Directory {{ apache_root_dir }}/{{ item.directory }}>
+  DocumentRoot {{ apache_root_dir }}/{{ item.name }}
+  <Directory {{ apache_root_dir }}/{{ item.name }}>
     Options Indexes FollowSymLinks MultiViews
     AllowOverride All
     Order allow,deny

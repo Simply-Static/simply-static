@@ -3,7 +3,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.synced_folder ".", "/vagrant"
 
-  config.vm.synced_folder ".", "/var/www/wordpress/wp-content/plugins/simply-static", owner: 'www-data', group: 'www-data'
+  config.vm.synced_folder ".", "/var/www/wordpress.dev/wp-content/plugins/simply-static", owner: 'www-data', group: 'www-data'
 
   config.vm.provider :virtualbox do |v|
       # This setting makes it so that network access from inside the vagrant guest

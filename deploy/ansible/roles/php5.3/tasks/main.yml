@@ -24,7 +24,7 @@
   when: "'failed' in php_check or php_check.stdout.find('5.3.29') == -1"
 
 - name: configure php
-  command: ./configure
+  command: ./configure --enable-maintainer-zts --with-mysql
   args:
     chdir: /tmp/php-5.3.29/
   when: "'failed' in php_check or php_check.stdout.find('5.3.29') == -1"

@@ -26,17 +26,17 @@
 - name: create databases
   mysql_db: name={{ item.database_name }} state=present login_user={{ mysql_root_username }} login_password={{ mysql_root_password }}
   with_items: '{{ wordpress_sites }}'
-  register: create_databases.changed
+  register: create_databases
 
 - name: setup mysql users for localhost
   mysql_user: name={{ wp_db_username }} password={{ wp_db_password }} host='localhost' priv={{ item.database_name }}.*:ALL state=present login_user={{ wp_db_username }} login_password={{ wp_db_password }}
   with_items: '{{ wordpress_sites }}'
   when: create_databases.changed
 
-- name: setup mysql users for %
-  mysql_user: name={{ wp_db_username }} password={{ wp_db_password }} host='%' priv={{ item.database_name }}.*:ALL state=present login_user={{ wp_db_username }} login_password={{ wp_db_password }}
-  with_items: '{{ wordpress_sites }}'
-  when: create_databases.changed
+# - name: setup mysql users for %
+#   mysql_user: name={{ wp_db_username }} password={{ wp_db_password }} host='%' priv={{ item.database_name }}.*:ALL state=present login_user={{ wp_db_username }} login_password={{ wp_db_password }}
+#   with_items: '{{ wordpress_sites }}'
+#   when: create_databases.changed
 
 - name: restart mysql
   service: "name=mysql state=restarted"
