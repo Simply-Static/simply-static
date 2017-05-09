@@ -170,25 +170,22 @@ class Diagnostic {
 		$label = sprintf( __( "Checking if WordPress can make requests to itself from <code>%s</code>", 'simply-static' ), $ip_address );
 
 		$url = Util::origin_url();
-		$response = wp_remote_get( $url, array(
-			'timeout' => Url_Fetcher::TIMEOUT,
-			'sslverify' => false, // not verifying SSL because all calls are local
-			'redirection' => 0, // disable redirection
-			'blocking' => true, // do not execute code until this call is complete
-			'stream' => true // stream body content to a file
-		) );
+		$response = Url_Fetcher::remote_get( $url );
 
 		if ( is_wp_error( $response ) ) {
 			$test = false;
 			$message = null;
 		} else {
 			$code = $response['response']['code'];
-			if ( in_array( $code, Page::$processable_status_codes ) ) {
+			if ( $code == 200 ) {
 				$test = true;
 				$message = $code;
+			} else if ( in_array( $code, Page::$processable_status_codes ) ) {
+				$test = false;
+				$message = sprintf( __( "Received a %s response. This might indicate a problem.", 'simply-static' ), $code );
 			} else {
 				$test = false;
-				$message = sprintf( __( "Try whitelisting the ip address", 'simply-static' ), $ip_address );
+				$message = sprintf( __( "Received a %s response.", 'simply-static' ), $code );;
 			}
 		}
 

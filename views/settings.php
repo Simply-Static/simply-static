@@ -215,6 +215,8 @@ namespace Simply_Static;
 		</div>
 
 		<div id='advanced' class='tab-pane'>
+			<h2 class="title"><?php _e( "Temporary Files", 'simply-static' ); ?></h2>
+			<p><?php _e( "Your static files are temporarily saved to a directory before being copied to their destination or creating a ZIP.", 'simply-static' ); ?></p>
 			<table class='form-table'>
 				<tbody>
 					<tr>
@@ -225,23 +227,64 @@ namespace Simply_Static;
 							<?php $example_temp_files_dir = trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' ); ?>
 							<input aria-describedby='tempFilesDirHelpBlock' type='text' id='tempFilesDir' name='temp_files_dir' value='<?php echo esc_attr( $this->temp_files_dir ) ?>' class='widefat' />
 							<div id='tempFilesDirHelpBlock' class='help-block'>
-								<p><?php _e( "Your static files (and ZIP archives, if generated) are temporarily saved to this directory. This directory must exist and be writeable.", 'simply-static' ); ?></p>
+								<p><?php _e( "Specify the directory to save your temporary files. This directory must exist and be writeable.", 'simply-static' ); ?></p>
 								<p><?php echo sprintf( __( "Default: <code>%s</code>", 'simply-static' ), $example_temp_files_dir ); ?></p>
 							</div>
 						</td>
 					</tr>
 					<tr>
-						<th></th>
+						<th>
+							<label><?php _e( "Delete Temporary Files", 'simply-static' ); ?></label>
+						</th>
 						<td>
 							<label>
 								<input aria-describedby='deleteTempFilesHelpBlock' name='delete_temp_files' id='deleteTempFiles' value='1' type='checkbox' <?php Util::checked_if( $this->delete_temp_files === '1' ); ?> />
-								<?php _e( "Delete temporary files", 'simply-static' ); ?>
+								<?php _e( "Delete temporary files at the end of the job", 'simply-static' ); ?>
 							</label>
-							<p id='deleteTempFilesHelpBlock' class='help-block'>
-								<?php _e( "Static files are temporarily saved to the directory above before being copied to their destination. These files can be deleted after the copy process, or you can keep them as a backup.", 'simply-static' ); ?>
-							</p>
 						</td>
 					</tr>
+				</tbody>
+			</table>
+
+			<h2 class="title"><?php _e( "HTTP Basic Authentication", 'simply-static' ); ?></h2>
+			<p><?php _e( "If you've secured WordPress with HTTP Basic Auth you can specify the username and password to use below.", 'simply-static' ); ?></p>
+			<?php if ( $this->http_basic_auth_digest != null ) : ?>
+			<table class='form-table' id='basicAuthSet'>
+				<tbody>
+					<tr>
+						<th>
+							<label><?php _e( "Basic Auth", 'simply-static' ); ?></label>
+						</th>
+						<td>
+							<p id='basicAuthCredentialsSaved'><?php _e( "Your basic auth credentials have been saved. To disable basic auth or set a new username/password, <a href='#'>click here</a>.", 'simply-static' ); ?></p>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<?php endif; ?>
+			<table class='form-table <?php if ( $this->http_basic_auth_digest != null ) echo 'hide' ?>' id='basicAuthUserPass'>
+				<tbody>
+					<tr>
+						<th>
+							<label for='basicAuthUsername'><?php _e( "Basic Auth Username", 'simply-static' ); ?></label>
+						</th>
+						<td>
+							<input type='text' id='basicAuthUsername' name='basic_auth_username' value='' <?php if ( $this->http_basic_auth_digest != null ) echo 'disabled' ?> />
+						</td>
+					</tr>
+					<tr>
+						<th>
+							<label for='basicAuthPassword'><?php _e( "Basic Auth Password", 'simply-static' ); ?></label>
+						</th>
+						<td>
+							<input type='text' id='basicAuthPassword' name='basic_auth_password' value='' <?php if ( $this->http_basic_auth_digest != null ) echo 'disabled' ?> />
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<table class='form-table'>
+				<tbody>
 					<tr>
 						<th></th>
 						<td>
@@ -253,7 +296,6 @@ namespace Simply_Static;
 				</tbody>
 			</table>
 		</div>
-
 	</form>
 
 	<form id='resetForm' method='post' action=''>

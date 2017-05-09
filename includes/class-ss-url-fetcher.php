@@ -83,14 +83,7 @@ class Url_Fetcher {
 		$temp_filename = wp_tempnam();
 
 		Util::debug_log( "Fetching URL and saving it to: " . $temp_filename );
-		$response = wp_remote_get( $url, array(
-			'timeout' => self::TIMEOUT,
-			'sslverify' => false, // not verifying SSL because all calls are local
-			'redirection' => 0, // disable redirection
-			'blocking' => true, // do not execute code until this call is complete
-			'stream' => true, // stream body content to a file
-			'filename' => $temp_filename
-		) );
+		$response = self::remote_get( $url, $temp_filename );
 
 		$filesize = file_exists( $temp_filename ) ? filesize( $temp_filename ) : 0;
 		Util::debug_log( "Filesize: " . $filesize . ' bytes' );
@@ -197,6 +190,30 @@ class Url_Fetcher {
 		}
 
 		return null;
+	}
+
+	public static function remote_get( $url, $filename = null ) {
+		$basic_auth_digest = Options::instance()->get( 'http_basic_auth_digest' );
+
+		$args = array(
+			'timeout'     => self::TIMEOUT,
+			'sslverify'   => apply_filters( 'https_local_ssl_verify', false ),
+			'cookies'     => $_COOKIE,
+			'redirection' => 0, // disable redirection
+			'blocking'    => true // do not execute code until this call is complete
+		);
+
+		if ( $filename ) {
+			$args['stream'] = true; // stream body content to a file
+			$args['filename'] = $filename;
+		}
+
+		if ( $basic_auth_digest ) {
+			$args['headers'] = array( 'Authorization' => 'Basic ' . $basic_auth_digest );
+		}
+
+		$response = wp_remote_get( $url, $args );
+		return $response;
 	}
 
 }

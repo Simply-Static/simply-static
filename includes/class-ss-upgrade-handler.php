@@ -65,7 +65,8 @@ class Upgrade_Handler {
 			'archive_name' => null,
 			'archive_start_time' => null,
 			'archive_end_time' => null,
-			'debugging_mode' => '0'
+			'debugging_mode' => '0',
+			'http_basic_auth_digest' => null,
 		);
 
 		$save_changes = false;

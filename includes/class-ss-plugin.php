@@ -100,7 +100,7 @@ class Plugin {
 			add_filter( 'wp_mail_content_type', array( self::$instance, 'filter_wp_mail_content_type' ) );
 			add_filter( 'admin_footer_text', array( self::$instance, 'filter_admin_footer_text' ), 15 );
 			add_filter( 'update_footer', array( self::$instance, 'filter_update_footer' ), 15 );
-
+			add_filter( 'http_request_args', array( self::$instance, 'wpbp_http_request_args' ), 10, 2 );
 			add_filter( 'simplystatic.archive_creation_job.task_list', array( self::$instance, 'filter_task_list' ), 10, 2 );
 
 			self::$instance->options = Options::instance();
@@ -167,7 +167,7 @@ class Plugin {
 		}
 
 		if ( $this->current_page === 'simply-static_settings' ) {
-			wp_enqueue_script( self::SLUG . '-settings-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'js/admin-settings.js', array(), self::VERSION );
+			wp_enqueue_script( self::SLUG . '-settings-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'js/admin-settings.js?1', array(), self::VERSION );
 		}
 	}
 
@@ -361,6 +361,7 @@ class Plugin {
 			->assign( 'delete_temp_files', $this->options->get( 'delete_temp_files' ) )
 			->assign( 'destination_url_type', $this->options->get( 'destination_url_type' ) )
 			->assign( 'relative_path', $this->options->get( 'relative_path' ) )
+			->assign( 'http_basic_auth_digest', $this->options->get( 'http_basic_auth_digest' ) )
 			->render();
 	}
 
@@ -405,6 +406,22 @@ class Plugin {
 		// Set relative path
 		$relative_path = $this->fetch_post_value( 'relative_path' );
 		$relative_path = untrailingslashit( Util::add_leading_slash( $relative_path ) );
+
+		// Set basic auth
+		// Checking $_POST array to see if fields exist. The fields are disabled
+		// if the digest is set, but fetch_post_value() would still return them
+		// as empty strings.
+		if ( isset( $_POST['basic_auth_username'] ) && isset( $_POST['basic_auth_password'] ) ) {
+			$basic_auth_user = trim( $this->fetch_post_value( 'basic_auth_username' ) );
+			$basic_auth_pass = trim( $this->fetch_post_value( 'basic_auth_password' ) );
+
+			if ( $basic_auth_user != '' && $basic_auth_pass != '' ) {
+				$http_basic_auth_digest = base64_encode( $basic_auth_user . ':' . $basic_auth_pass );
+			} else {
+				$http_basic_auth_digest = null;
+			}
+			$this->options->set( 'http_basic_auth_digest', $http_basic_auth_digest );
+		}
 
 		// Save settings
 		$this->options
@@ -657,6 +674,17 @@ class Plugin {
 	 */
 	function filter_wp_mail_content_type() {
 	    return 'text/html';
+	}
+
+	/**
+	 * Set HTTP Basic Auth for wp-background-processing
+	 */
+	function wpbp_http_request_args( $r, $url ) {
+		$digest = self::$instance->options->get( 'http_basic_auth_digest' );
+		if ( $digest ) {
+			$r['headers']['Authorization'] = 'Basic ' . $digest;
+		}
+		return $r;
 	}
 
 	/**

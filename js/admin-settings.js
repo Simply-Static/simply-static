@@ -24,7 +24,7 @@ jQuery( document ).ready( function( $ ) {
 	// pretend the user clicked on the active tab
 	$( '#sistContainer .nav-tab-active' ).click();
 
-	// -----------------------------------------------------------------------//
+	// ---------------------------------------------------------------------- //
 
 	// delivery method selection:
 	$( '#sistContainer #deliveryMethod' ).change( function() {
@@ -36,7 +36,7 @@ jQuery( document ).ready( function( $ ) {
 	// pretend the user selected a value
 	$( '#sistContainer #deliveryMethod' ).change();
 
-	// -----------------------------------------------------------------------//
+	// ---------------------------------------------------------------------- //
 
 	$( 'td.url-dest-option' ).click( function() {
 		destination_url_type_change( $( this ) );
@@ -78,7 +78,7 @@ jQuery( document ).ready( function( $ ) {
 		}
 	}
 
-	// -----------------------------------------------------------------------//
+	// ---------------------------------------------------------------------- //
 
 	$( '#AddUrlToExclude' ).click( function() {
 		var $last_row = $( '.excludable-url-row' ).last();
@@ -95,4 +95,12 @@ jQuery( document ).ready( function( $ ) {
 		var $row = $( this ).closest( '.excludable-url-row' );
 		$row.remove();
 	} );
+
+	// ---------------------------------------------------------------------- //
+
+	$( '#basicAuthCredentialsSaved > a' ).click( function(e) {
+		e.preventDefault();
+		$( '#basicAuthSet' ).addClass( 'hide' );
+		$( '#basicAuthUserPass').removeClass( 'hide' ).find( 'input' ).prop( 'disabled', false );
+	});
 } );
