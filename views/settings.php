@@ -174,11 +174,13 @@ namespace Simply_Static;
 									<input type='text' name='excludable[<?php echo $index; ?>][url]' value='<?php echo esc_attr( $url_to_exclude['url'] ); ?>' size='40' />
 
 									<label>
+										<input name='excludable[<?php echo $index; ?>][do_not_save]' value='0' type='hidden' />
 										<input name='excludable[<?php echo $index; ?>][do_not_save]' value='1' type='checkbox' <?php Util::checked_if( $url_to_exclude['do_not_save'] === '1' ); ?> />
 										<?php _e( "Do not save", 'simply-static' ); ?>
 									</label>
 
 									<label>
+										<input name='excludable[<?php echo $index; ?>][do_not_follow]' value='0' type='hidden' />
 										<input name='excludable[<?php echo $index; ?>][do_not_follow]' value='1' type='checkbox' <?php Util::checked_if( $url_to_exclude['do_not_follow'] === '1' ); ?> />
 										<?php _e( "Do not follow", 'simply-static' ); ?>
 									</label>
@@ -238,6 +240,7 @@ namespace Simply_Static;
 						</th>
 						<td>
 							<label>
+								<input name='delete_temp_files' value='0' type='hidden' />
 								<input aria-describedby='deleteTempFilesHelpBlock' name='delete_temp_files' id='deleteTempFiles' value='1' type='checkbox' <?php Util::checked_if( $this->delete_temp_files === '1' ); ?> />
 								<?php _e( "Delete temporary files at the end of the job", 'simply-static' ); ?>
 							</label>

@@ -198,7 +198,6 @@ class Url_Fetcher {
 		$args = array(
 			'timeout'     => self::TIMEOUT,
 			'sslverify'   => apply_filters( 'https_local_ssl_verify', false ),
-			'cookies'     => $_COOKIE,
 			'redirection' => 0, // disable redirection
 			'blocking'    => true // do not execute code until this call is complete
 		);
