@@ -1,6 +1,6 @@
 ---
 wordpress_sites:
-  - { 'name' : 'wordpress.dev', 'port' : '80', database_name: 'wordpress' }
+  - { 'name' : 'wordpress.local', 'port' : '80', database_name: 'wordpress' }
 
 env: development
 

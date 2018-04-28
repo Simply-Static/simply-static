@@ -3,7 +3,6 @@
   get_url:
     url: https://wordpress.org/latest.tar.gz
     dest: /tmp/wordpress.tar.gz
-    validate_certs: no
 
 - file:
     path: "/var/www/{{ item.name }}"

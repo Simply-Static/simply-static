@@ -3,7 +3,7 @@
   apt: name={{ item }} state=present
   with_items:
     - apache2
-    - apache2-dev
+    - libapache2-mod-php5
 
 - name: configure ports.conf for apache sites
   template: src=ports.conf.j2 dest={{ apache_conf_dir }}/ports.conf
@@ -18,23 +18,16 @@
     src: snakeoil.key
     dest: /etc/ssl/private/snakeoil.key
 
-- name: enable rewrite module
-  apache2_module:
-    state: present
-    name: rewrite
+- command: a2enmod rewrite
 
-- name: enable headers module
-  apache2_module:
-    state: present
-    name: headers
+- command: a2enmod headers
 
-- name: enable ssl module
-  apache2_module:
-    state: present
-    name: ssl
+- command: a2enmod ssl
+
+- command: a2enmod php5
 
 - name: disable default site
-  file: path=/etc/apache2/sites-enabled/000-default.conf state=absent
+  file: path=/etc/apache2/sites-enabled/000-default state=absent
 
 - name: configure wordpress apache sites
   template: src=wordpress.conf.j2 dest={{ apache_conf_dir }}/sites-enabled/{{ item.name }}.conf

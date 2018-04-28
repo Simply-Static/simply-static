@@ -1,3 +1,0 @@
-- hosts: dbservers
-  roles:
-    - { role: mysql, tags: [ 'mysql' ] }

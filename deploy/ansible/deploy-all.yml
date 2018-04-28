@@ -1,6 +1,7 @@
 - hosts: webservers
   roles:
     - { role: misc_packages, tags: [ 'misc_packages', 'miscellaneous_packages' ] }
+    - { role: mysql, tags: [ 'mysql' ] }
     - { role: php5.3, tags: [ 'php', 'php53', 'php5.3' ] }
     - { role: wordpress, tags: [ 'wordpress', 'wp' ] }
     - { role: apache, tags: [ 'apache' ] }

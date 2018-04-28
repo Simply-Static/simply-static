@@ -5,6 +5,7 @@
     - python-mysqldb # required for ansible to interact with mysql
     - mysql-server-5.5 # the mysql server
     - mysql-client-core-5.5 # mysql client
+    - libmysqlclient-dev # needed for header files for php
 
 - name: allow mysql to be accessed from other servers
   lineinfile: dest=/etc/mysql/my.cnf backrefs=yes regexp="^bind-address.*127.0.0.1" line="bind-address = 0.0.0.0"

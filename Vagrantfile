@@ -1,9 +1,7 @@
 Vagrant.configure("2") do |config|
-  config.vm.box = 'ubuntu/trusty64' # 14.04
+  config.vm.box = "bento/ubuntu-12.04"
 
-  config.vm.synced_folder ".", "/vagrant"
-
-  config.vm.synced_folder ".", "/var/www/wordpress.dev/wp-content/plugins/simply-static", owner: 'www-data', group: 'www-data'
+  config.vm.synced_folder "simply-static", "/var/www/wordpress.local/wp-content/plugins/simply-static", owner: 'www-data', group: 'www-data'
 
   config.vm.provider :virtualbox do |v|
       # This setting makes it so that network access from inside the vagrant guest
@@ -14,7 +12,7 @@ Vagrant.configure("2") do |config|
       v.cpus = 1
   end
 
-  config.vm.hostname = 'wordpress.dev'
+  config.vm.hostname = 'simplystatic.local'
   config.hostsupdater.remove_on_suspend = true
 
   # Assign this VM to a host-only network IP, allowing you to access it

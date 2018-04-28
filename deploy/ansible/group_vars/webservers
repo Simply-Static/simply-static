@@ -1,2 +1,2 @@
 ---
-application_root: "/var/www/wordpress.dev/wp-content/plugins/simply-static"
+application_root: "/var/www/wordpress.local/wp-content/plugins/simply-static"
