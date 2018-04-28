@@ -1,8 +1,8 @@
 .DS_Store
 
 # keep the static-files directory but ignore anything in it, except the .keep file
-static-files/*
-!static-files/.keep
+simply-static/static-files/*
+!simply-static/static-files/.keep
 
 # These aren't needed by Simply Static itself, so we're ignoring them.
 node_modules
@@ -11,9 +11,9 @@ node_modules
 vendor
 
 # Don't keep the debug log
-debug.txt
-debug.txt.zip
-debug.txt.html
+simply-static/debug.txt
+simply-static/debug.txt.zip
+simply-static/debug.txt.html
 
 # vagrant
 .vagrant
