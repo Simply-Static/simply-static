@@ -5,7 +5,9 @@ configuration = YAML::load(File.read("#{File.dirname(__FILE__)}/deploy/ansible/g
 Vagrant.configure("2") do |config|
   config.vm.box = "bento/ubuntu-12.04"
 
-  config.vm.synced_folder "simply-static", "/var/www/wordpress.local/wp-content/plugins/simply-static", owner: 'www-data', group: 'www-data'
+  configuration['wordpress_sites'].each do |site|
+    config.vm.synced_folder "simply-static", "/var/www/#{site['host']}/wp-content/plugins/simply-static", owner: 'www-data', group: 'www-data'
+  end
 
   config.vm.provider :virtualbox do |v|
       # This setting makes it so that network access from inside the vagrant guest
