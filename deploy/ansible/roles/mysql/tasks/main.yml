@@ -7,37 +7,41 @@
     - mysql-client-core-5.5 # mysql client
     - libmysqlclient-dev # needed for header files for php
 
-- name: allow mysql to be accessed from other servers
-  lineinfile: dest=/etc/mysql/my.cnf backrefs=yes regexp="^bind-address.*127.0.0.1" line="bind-address = 0.0.0.0"
+- name: create my.cnf for logging in as root
+  template:
+    src: 'my.cnf.j2'
+    dest: '/root/.my.cnf'
+    mode: 0600
 
-- name: update mysql root password for all root accounts
+- name: update mysql root password for root user
   mysql_user:
-    name: "{{ mysql_root_username }}"
-    host: "{{ item }}"
-    password: "{{ mysql_root_password }}"
-    login_user: "{{ mysql_root_username }}"
-    login_password: "{{ mysql_root_password }}"
+    name: '{{ mysql_root_username }}'
+    password: '{{ mysql_root_password }}'
     check_implicit_admin: yes
-    priv: "*.*:ALL,GRANT"
-  with_items:
-    - 127.0.0.1
-    - ::1
-    - localhost
+    state: present
+
+- name: allow mysql to be accessed from other servers
+  lineinfile: dest=/etc/mysql/my.cnf backrefs=yes regexp='^bind-address.*127.0.0.1' line='bind-address = 0.0.0.0'
 
 - name: create databases
-  mysql_db: name={{ item.database_name }} state=present login_user={{ mysql_root_username }} login_password={{ mysql_root_password }}
+  mysql_db:
+    name: '{{ item.database_name }}'
+    state: present
+    login_user: '{{ mysql_root_username }}'
+    login_password: '{{ mysql_root_password }}'
   with_items: '{{ wordpress_sites }}'
   register: create_databases
 
 - name: setup mysql users for localhost
-  mysql_user: name={{ wp_db_username }} password={{ wp_db_password }} host='localhost' priv={{ item.database_name }}.*:ALL state=present login_user={{ wp_db_username }} login_password={{ wp_db_password }}
+  mysql_user:
+    name: '{{ wp_db_username }}'
+    password: '{{ wp_db_password }}'
+    priv: '{{ item.database_name }}.*:ALL'
+    state: present
   with_items: '{{ wordpress_sites }}'
-  when: create_databases.changed
-
-# - name: setup mysql users for %
-#   mysql_user: name={{ wp_db_username }} password={{ wp_db_password }} host='%' priv={{ item.database_name }}.*:ALL state=present login_user={{ wp_db_username }} login_password={{ wp_db_password }}
-#   with_items: '{{ wordpress_sites }}'
-#   when: create_databases.changed
+  # when: create_databases.changed
 
 - name: restart mysql
-  service: "name=mysql state=restarted"
+  service:
+    name: 'mysql'
+    state: restarted

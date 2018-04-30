@@ -1,0 +1,18 @@
+---
+wordpress_sites:
+  - host: wp-latest.local
+    port: 80
+    database_name: wp_latest
+    wp_download_url: https://wordpress.org/latest.tar.gz
+  - host: wp-4.local
+    port: 80
+    database_name: wp_4
+    wp_download_url: https://wordpress.org/wordpress-4.0.23.tar.gz
+
+env: development
+
+mysql_root_username: root
+mysql_root_password: r0und@b0ut
+
+wp_db_username: wordpress
+wp_db_password: development

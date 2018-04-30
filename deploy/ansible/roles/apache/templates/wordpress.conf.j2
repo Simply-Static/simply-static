@@ -1,17 +1,17 @@
 <VirtualHost *:{{ item.port }}>
-  ServerName {{ item.name }}
+  ServerName {{ item.host }}
 
-  DocumentRoot {{ apache_root_dir }}/{{ item.name }}
-  <Directory {{ apache_root_dir }}/{{ item.name }}>
+  DocumentRoot {{ apache_root_dir }}/{{ item.host }}
+  <Directory {{ apache_root_dir }}/{{ item.host }}>
     Options Indexes FollowSymLinks MultiViews
     AllowOverride All
     Order allow,deny
     Allow from all
   </Directory>
 
-  ErrorLog {{ apache_log_dir }}/{{ item.name }}.error.log
+  ErrorLog {{ apache_log_dir }}/{{ item.host }}.error.log
   LogLevel warn
-  CustomLog {{ apache_log_dir }}/{{ item.name }}.access.log combined
+  CustomLog {{ apache_log_dir }}/{{ item.host }}.access.log combined
   ServerSignature Off
 
   {% if item.port == '443' %}

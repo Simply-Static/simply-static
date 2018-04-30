@@ -30,8 +30,8 @@
   file: path=/etc/apache2/sites-enabled/000-default state=absent
 
 - name: configure wordpress apache sites
-  template: src=wordpress.conf.j2 dest={{ apache_conf_dir }}/sites-enabled/{{ item.name }}.conf
+  template: src=wordpress.conf.j2 dest={{ apache_conf_dir }}/sites-enabled/{{ item.host }}.conf
   with_items: '{{ wordpress_sites }}'
 
 - name: restart apache
-  service: "name=apache2 state=restarted"
+  service: 'name=apache2 state=restarted'

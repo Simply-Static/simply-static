@@ -1,3 +1,7 @@
+require 'yaml'
+
+configuration = YAML::load(File.read("#{File.dirname(__FILE__)}/deploy/ansible/group_vars/development.yml"))
+
 Vagrant.configure("2") do |config|
   config.vm.box = "bento/ubuntu-12.04"
 
@@ -12,7 +16,8 @@ Vagrant.configure("2") do |config|
       v.cpus = 1
   end
 
-  config.vm.hostname = 'simplystatic.local'
+  config.vm.hostname = 'wordpress-development.local'
+  config.hostsupdater.aliases = configuration['wordpress_sites'].collect{|s| s['host']}
   config.hostsupdater.remove_on_suspend = true
 
   # Assign this VM to a host-only network IP, allowing you to access it

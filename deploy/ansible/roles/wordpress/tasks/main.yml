@@ -1,46 +1,55 @@
 ---
+- name: Create www directories
+  file:
+    path: '/var/www/{{ item.host }}'
+    state: directory
+  with_items: '{{ wordpress_sites }}'
+
 - name: Download WordPress
   get_url:
     url: https://wordpress.org/latest.tar.gz
-    dest: /tmp/wordpress.tar.gz
+    dest: '/tmp/{{ item.host }}.tar.gz'
+  with_items: '{{ wordpress_sites }}'
 
-- file:
-    path: "/var/www/{{ item.name }}"
+- name: Create extraction directories
+  file:
+    path: '/tmp/{{ item.host }}'
     state: directory
   with_items: '{{ wordpress_sites }}'
 
 - name: Extract WordPress
   unarchive:
-    src: /tmp/wordpress.tar.gz
-    dest: "/tmp"
+    src: '/tmp/{{ item.host }}.tar.gz'
+    dest: '/tmp/{{ item.host }}'
+  with_items: '{{ wordpress_sites }}'
 
 - name: Copy WordPress files
-  command: "cp -R /tmp/wordpress/. /var/www/{{ item.name }}"
+  command: 'cp -R /tmp/{{ item.host }}/wordpress/. /var/www/{{ item.host }}'
   with_items: '{{ wordpress_sites }}'
 
 - name: Copy sample config file
-  command: "mv /var/www/{{ item.name }}/wp-config-sample.php /var/www/{{ item.name }}/wp-config.php"
+  command: 'mv /var/www/{{ item.host }}/wp-config-sample.php /var/www/{{ item.host }}/wp-config.php'
   args:
-    creates: "/var/www/{{ item.name }}/wp-config.php"
+    creates: '/var/www/{{ item.host }}/wp-config.php'
   with_items: '{{ wordpress_sites }}'
 
 - name: Update WordPress config database name
   lineinfile:
-    dest: "/var/www/{{ item.name }}/wp-config.php"
+    dest: '/var/www/{{ item.host }}/wp-config.php'
     regexp: "define\\('DB_NAME', '(.)+'\\);"
     line: "define('DB_NAME', '{{ item.database_name }}');"
   with_items: '{{ wordpress_sites }}'
 
 - name: Update WordPress config database username
   lineinfile:
-    dest: "/var/www/{{ item.name }}/wp-config.php"
+    dest: '/var/www/{{ item.host }}/wp-config.php'
     regexp: "define\\('DB_USER', '(.)+'\\);"
     line: "define('DB_USER', '{{ wp_db_username }}');"
   with_items: '{{ wordpress_sites }}'
 
 - name: Update WordPress config database password
   lineinfile:
-    dest: "/var/www/{{ item.name }}/wp-config.php"
+    dest: '/var/www/{{ item.host }}/wp-config.php'
     regexp: "define\\('DB_PASSWORD', '(.)+'\\);"
     line: "define('DB_PASSWORD', '{{ wp_db_password }}');"
   with_items: '{{ wordpress_sites }}'
