@@ -1,12 +1,16 @@
 ---
 - name: install apache
-  apt: name={{ item }} state=present
+  apt:
+    name: '{{ item }}'
+    state: present
   with_items:
     - apache2
     - libapache2-mod-php5
 
 - name: configure ports.conf for apache sites
-  template: src=ports.conf.j2 dest={{ apache_conf_dir }}/ports.conf
+  template:
+    src: ports.conf.j2
+    dest: '{{ apache_conf_dir }}/ports.conf'
 
 - name: install snakeoil crt
   copy:
@@ -27,10 +31,21 @@
 - command: a2enmod php5
 
 - name: disable default site
-  file: path=/etc/apache2/sites-enabled/000-default state=absent
+  file:
+    path: /etc/apache2/sites-enabled/000-default
+    state: absent
 
 - name: configure wordpress apache sites
-  template: src=wordpress.conf.j2 dest={{ apache_conf_dir }}/sites-enabled/{{ item.host }}.conf
+  template:
+    src: wordpress.conf.j2
+    dest: '{{ apache_conf_dir }}/sites-available/{{ item.host }}.conf'
+  with_items: '{{ wordpress_sites }}'
+
+- name: enable wordpress apache sites
+  file:
+    src: '{{ apache_conf_dir }}/sites-available/{{ item.host }}.conf'
+    dest: '{{ apache_conf_dir }}/sites-enabled/{{ item.host }}.conf'
+    state: link
   with_items: '{{ wordpress_sites }}'
 
 - name: restart apache

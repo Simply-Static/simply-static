@@ -44,7 +44,7 @@
   lineinfile:
     dest: '/var/www/{{ item.host }}/wp-config.php'
     regexp: "define\\('DB_USER', '(.)+'\\);"
-    line: "define('DB_USER', '{{ wp_db_username }}');"
+    line: "define('DB_USER', '{{ item.database_name }}');"
   with_items: '{{ wordpress_sites }}'
 
 - name: Update WordPress config database password

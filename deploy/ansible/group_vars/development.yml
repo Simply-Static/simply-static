@@ -14,5 +14,4 @@ env: development
 mysql_root_username: root
 mysql_root_password: r0und@b0ut
 
-wp_db_username: wordpress
 wp_db_password: development
