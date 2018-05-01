@@ -33,6 +33,15 @@
     creates: '/var/www/{{ item.host }}/wp-config.php'
   with_items: '{{ wordpress_sites }}'
 
+- name: Update ownership of WordPress files
+  file:
+    path: '/var/www/{{ item.host }}'
+    recurse: yes
+    state: directory
+    owner: '{{ apache_user }}'
+    group: '{{ apache_group }}'
+  with_items: '{{ wordpress_sites }}'
+
 - name: Update WordPress config database name
   lineinfile:
     dest: '/var/www/{{ item.host }}/wp-config.php'
