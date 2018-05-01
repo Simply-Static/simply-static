@@ -33,6 +33,28 @@
     creates: '/var/www/{{ item.host }}/wp-config.php'
   with_items: '{{ wordpress_sites }}'
 
+# This is a tarball of content from the uploads directory that would normally
+# get populated after importing content from the Theme Unit Test
+# https://codex.wordpress.org/Theme_Unit_Test
+# https://raw.githubusercontent.com/WPTRT/theme-unit-test/master/themeunittestdata.wordpress.xml
+- name: Download files for uploads directory
+  get_url:
+    url: https://drive.google.com/uc?id=1rMvj7XhHJr23NqA0tech6RTsqL3g-ptV&export=download
+    dest: /tmp/wordpress-uploads.tar.gz
+
+- file:
+    path: /tmp/wordpress-uploads
+    state: directory
+
+- name: Extract uploads
+  unarchive:
+    src: /tmp/wordpress-uploads.tar.gz
+    dest: /tmp/wordpress-uploads
+
+- name: Copy files into uploads directory
+  command: 'cp -R /tmp/wordpress-uploads/uploads/. /var/www/{{ item.host }}/wp-content/uploads'
+  with_items: '{{ wordpress_sites }}'
+
 - name: Update ownership of WordPress files
   file:
     path: '/var/www/{{ item.host }}'
