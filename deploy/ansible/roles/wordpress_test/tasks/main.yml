@@ -1,0 +1,20 @@
+---
+- name: Install wp-cli
+  get_url:
+    url: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    dest: /usr/local/bin/wp
+    mode: 0755
+
+- name: Install phpunit
+  get_url:
+    url: https://phar.phpunit.de/phpunit-4.8.phar
+    dest: /usr/local/bin/phpunit
+    mode: 0755
+
+- name: Generate plugin test files
+  command: wp scaffold plugin-tests {{ plugin_slug }} --ci={{ ci_provider }}
+  args:
+    chdir: '/var/www/{{ wordpress_sites[0].host }}'
+    creates: '/var/www/{{ wordpress_sites[0].host }}/wp-content/plugins/{{ plugin_slug }}/tests/bootstrap.php'
+  become: yes
+  become_user: '{{ apache_user }}'

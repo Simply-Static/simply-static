@@ -1,4 +1,6 @@
 ---
+plugin_slug: simply-static
+
 wordpress_sites:
   - host: wp-latest.local
     port: 80
@@ -15,3 +17,5 @@ mysql_root_username: root
 mysql_root_password: r0und@b0ut
 
 wp_db_password: development
+
+ci_provider: gitlab

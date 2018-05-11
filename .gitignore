@@ -20,4 +20,4 @@ simply-static/debug.txt.html
 *.retry
 
 # don't store the copy of the svn repo
-svn-wordpress-org/*
+svn-wordpress-org

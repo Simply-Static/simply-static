@@ -4,4 +4,5 @@
     - { role: mysql, tags: [ 'mysql' ] }
     - { role: php5.3, tags: [ 'php', 'php53', 'php5.3' ] }
     - { role: wordpress, tags: [ 'wordpress', 'wp' ] }
+    - { role: wordpress_test, tags: [ 'wordpress_test', 'test' ] }
     - { role: apache, tags: [ 'apache' ] }

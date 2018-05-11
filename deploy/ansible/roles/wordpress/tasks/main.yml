@@ -1,4 +1,9 @@
 ---
+- name: install packages
+  apt: name={{ item }} state=present
+  with_items:
+    - subversion
+
 - name: Create www directories
   file:
     path: '/var/www/{{ item.host }}'
