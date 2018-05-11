@@ -39,6 +39,14 @@
   with_items: '{{ wordpress_sites }}'
   when: create_databases.changed
 
+- name: setup mysql user for test database
+  mysql_user:
+    name: '{{ wp_test_database }}'
+    password: '{{ wp_db_password }}'
+    priv: '{{ wp_test_database }}.*:ALL'
+    state: present
+  when: create_databases.changed
+
 - name: restart mysql
   service:
     name: 'mysql'

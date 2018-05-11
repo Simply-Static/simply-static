@@ -10,11 +10,41 @@
     url: https://phar.phpunit.de/phpunit-4.8.phar
     dest: /usr/local/bin/phpunit
     mode: 0755
+    validate_certs: no
 
-- name: Generate plugin test files
-  command: wp scaffold plugin-tests {{ plugin_slug }} --ci={{ ci_provider }}
+# - name: Generate plugin test files
+#   command: wp scaffold plugin-tests {{ plugin_slug }} --ci={{ ci_provider }}
+#   args:
+#     chdir: '/var/www/{{ wordpress_sites[0].host }}'
+#     creates: '/var/www/{{ wordpress_sites[0].host }}/wp-content/plugins/{{ plugin_slug }}/tests/bootstrap.php'
+#   become: yes
+#   become_user: '{{ apache_user }}'
+
+- name: Ensure test database is absent
+  mysql_db:
+    name: '{{ wp_test_database }}'
+    state: absent
+
+- name: Initialize the testing environment
+  command: bin/install-wp-tests.sh {{ wp_test_database }} {{ wp_test_database }} {{ wp_db_password }} 127.0.0.1 latest
   args:
-    chdir: '/var/www/{{ wordpress_sites[0].host }}'
-    creates: '/var/www/{{ wordpress_sites[0].host }}/wp-content/plugins/{{ plugin_slug }}/tests/bootstrap.php'
+    chdir: '/var/www/{{ wordpress_sites[0].host }}/wp-content/plugins/{{ plugin_slug }}'
   become: yes
-  become_user: '{{ apache_user }}'
+  become_user: vagrant
+
+- name: Create phpunit.sh script
+  template:
+    src: phpunit.sh.j2
+    dest: '/home/vagrant/test.sh'
+    mode: 0755
+  become: yes
+  become_user: vagrant
+
+# - name: Run phpunit
+#   command: phpunit
+#   args:
+#     chdir: '/var/www/{{ wordpress_sites[0].host }}/wp-content/plugins/{{ plugin_slug }}'
+#   register: phpunit_result
+
+# - debug:
+#     var: phpunit_result

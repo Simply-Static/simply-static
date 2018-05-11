@@ -18,4 +18,6 @@ mysql_root_password: r0und@b0ut
 
 wp_db_password: development
 
+wp_test_database: wordpress_test
+
 ci_provider: gitlab
