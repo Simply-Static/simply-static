@@ -1,5 +1,5 @@
 === Simply Static ===
-Contributors: codeofconduct
+Contributors: simplystatic
 Tags: html, static website generator, static site, secure, fast
 Requires at least: 4.0
 Tested up to: 4.9

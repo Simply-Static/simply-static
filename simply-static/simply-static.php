@@ -9,8 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Plugin URI:        http://simplystatic.co/
  * Description:       Produces a static HTML version of your WordPress install and adjusts URLs accordingly.
  * Version:           2.1.0
- * Author:            Code of Conduct LLC
- * Author URI:        http://codeofconduct.co/
+ * Author:            Simply Static
+ * Author URI:        http://simplystatic.co/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       simply-static
