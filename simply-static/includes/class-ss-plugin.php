@@ -697,7 +697,7 @@ class Plugin {
 		}
 
 		$contact_support = '<a target="_blank" href="https://wordpress.org/support/plugin/simply-static#new-post">'
-			. __( 'Contact Support', 'simply-static' ) . '</a> | ';
+			. __( 'Support Forum', 'simply-static' ) . '</a> | ';
 		$add_your_rating = str_replace(
 				'[stars]',
 				'<a target="_blank" href="https://wordpress.org/support/plugin/simply-static/reviews/#new-post" >&#9733;&#9733;&#9733;&#9733;&#9733;</a>',

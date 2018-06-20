@@ -6,7 +6,9 @@ Vagrant.configure("2") do |config|
   config.vm.box = "bento/ubuntu-12.04"
 
   configuration['wordpress_sites'].each do |site|
-    config.vm.synced_folder "simply-static", "/var/www/#{site['host']}/wp-content/plugins/simply-static", owner: 'www-data', group: 'www-data'
+    if site['symlink_plugin_dir'] != false
+      config.vm.synced_folder "simply-static", "/var/www/#{site['host']}/wp-content/plugins/simply-static", owner: 'www-data', group: 'www-data'
+    end
   end
 
   config.vm.provider :virtualbox do |v|

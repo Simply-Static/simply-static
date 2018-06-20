@@ -6,10 +6,17 @@ wordpress_sites:
     port: 80
     database_name: wp_latest
     wp_download_url: https://wordpress.org/latest.tar.gz
+    symlink_plugin_dir: true
   - host: wp-4.local
     port: 80
     database_name: wp_4
     wp_download_url: https://wordpress.org/wordpress-4.0.23.tar.gz
+    symlink_plugin_dir: true
+  - host: wp-clean.local
+    port: 80
+    database_name: wp_clean
+    wp_download_url: https://wordpress.org/latest.tar.gz
+    symlink_plugin_dir: false
 
 env: development
 
