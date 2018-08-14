@@ -15,6 +15,9 @@ if [ "" == "$PKG_OK" ]; then
     pip install ansible
 fi
 
+# add vagrant user to www-data group
+usermod -a -G www-data vagrant
+
 cd $ANSIBLE_DIR
 printf " "
 printf "############ RUNNING ANSIBLE SCRIPTS ############"

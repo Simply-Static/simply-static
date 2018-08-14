@@ -186,11 +186,11 @@ class Model {
 	}
 
 	/**
-	 * Check if the model exists in the database
+	 * Check if the record exists in the database
 	 *
-	 * Technically this is checking whether the model has its primary key set.
+	 * Technically this is checking whether the record has its primary key set.
 	 * If it is set, we assume the record exists in the database.
-	 * @return boolean Does this model exist in the db?
+	 * @return boolean Does this record exist in the db?
 	 */
 	public function exists() {
 		$primary_key = static::$primary_key;
@@ -238,5 +238,16 @@ class Model {
 		global $wpdb;
 
 		$wpdb->query( 'DROP TABLE IF EXISTS ' . self::table_name() );
+	}
+
+	/**
+	 * Check if the table exists in the MySQL db
+	 * @return boolean Has this table been created?
+	 */
+	public static function table_exists() {
+		global $wpdb;
+
+		$result = $wpdb->query( 'SELECT 1 FROM ' . self::table_name() );
+		return $result !== false;
 	}
 }

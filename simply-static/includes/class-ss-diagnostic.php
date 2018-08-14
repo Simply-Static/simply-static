@@ -35,6 +35,7 @@ class Diagnostic {
 			array( 'function' => 'can_wp_make_requests_to_itself' )
 		),
 		'MySQL' => array(
+			array( 'function' => 'table_created' ),
 			array( 'function' => 'user_can_delete' ),
 			array( 'function' => 'user_can_insert' ),
 			array( 'function' => 'user_can_select' ),
@@ -220,6 +221,16 @@ class Diagnostic {
 		return array(
 			'label' => $label,
 			'test' => is_writable( $local_dir )
+		);
+	}
+
+	public function table_created() {
+		$table_name = Page::table_name();
+		$label = __( 'Checking if the MySQL table <code>' . $table_name . '</code> exists', 'simply-static' );
+		$exists = Page::table_exists();
+		return array(
+			'label' => $label,
+			'test' => $exists
 		);
 	}
 

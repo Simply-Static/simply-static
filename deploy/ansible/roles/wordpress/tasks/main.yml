@@ -8,6 +8,7 @@
   file:
     path: '/var/www/{{ item.host }}'
     state: directory
+    mode: 0775
   with_items: '{{ wordpress_sites }}'
 
 - name: Download WordPress
@@ -44,7 +45,7 @@
 # https://raw.githubusercontent.com/WPTRT/theme-unit-test/master/themeunittestdata.wordpress.xml
 - name: Download files for uploads directory
   get_url:
-    url: https://drive.google.com/uc?id=1rMvj7XhHJr23NqA0tech6RTsqL3g-ptV&export=download
+    url: https://dl.dropbox.com/s/ei2fkoydp1qg0zl/uploads.tar.gz?dl=0
     dest: /tmp/wordpress-uploads.tar.gz
 
 - file:

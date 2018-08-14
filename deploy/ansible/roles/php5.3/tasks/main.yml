@@ -4,4 +4,5 @@
   with_items:
     - build-essential
     - php5
+    - php5-curl # curl support needed for Simply Static
     - php5-mysql
