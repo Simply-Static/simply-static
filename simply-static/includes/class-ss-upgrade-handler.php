@@ -67,6 +67,7 @@ class Upgrade_Handler {
 			'archive_end_time' => null,
 			'debugging_mode' => '0',
 			'http_basic_auth_digest' => null,
+			'system_status_issue' => false
 		);
 
 		$save_changes = false;
@@ -158,6 +159,13 @@ class Upgrade_Handler {
 			// update the version and save options
 			self::$options
 				->set( 'version', Plugin::VERSION )
+				->save();
+
+			// run a diagnostic check for new installs & updates
+			$diagnostic = new Diagnostic();
+			$success = $diagnostic->success;
+			self::$options
+				->set( 'system_status_issue', ( ! $success ) )
 				->save();
 		}
 	}

@@ -327,6 +327,13 @@ class Plugin {
 	public function display_generate_page() {
 		$done = $this->archive_creation_job->is_job_done();
 
+		$issue = $this->options->get( 'system_status_issue' );
+		if ( $issue ) {
+			$url = get_admin_url( null, 'admin.php' ) . '?page=' . Plugin::SLUG . '_diagnostics';
+			$message = sprintf( __( "An issue was detected that may prevent Simply Static from working properly. Please check <a href='%s'>the Diagnostics page</a>.", 'simply-static' ), $url );
+			$this->view->add_flash( 'error', $message );
+		}
+
 		$this->view
 			->set_layout( 'admin' )
 			->set_template( 'generate' )
@@ -458,7 +465,9 @@ class Plugin {
 		$debug_file_url = plugin_dir_url( dirname( __FILE__ ) ) . basename( $debug_file );
 
 		$diagnostic = new Diagnostic();
-		$results = $diagnostic->results;
+		$this->options
+			->set( 'system_status_issue', ( $diagnostic->success !== true ) )
+			->save();
 
 		$themes = wp_get_themes();
 		$current_theme = wp_get_theme();
@@ -472,7 +481,7 @@ class Plugin {
 			->assign( 'debugging_mode', $this->options->get( 'debugging_mode' ) )
 			->assign( 'debug_file_exists', $debug_file_exists )
 			->assign( 'debug_file_url', $debug_file_url )
-			->assign( 'results', $results )
+			->assign( 'results', $diagnostic->results )
 			->assign( 'themes', $themes )
 			->assign( 'current_theme_name', $current_theme_name )
 			->assign( 'plugins', $plugins )
@@ -558,7 +567,7 @@ class Plugin {
 			$content .= "<table width='600'><thead><tr><th colspan='2'>" . $title . "</th></tr></thead><tbody>";
 			foreach ( $tests as $result ) {
 				$content .= "<tr><td>" . $result['label'] . "</td>";
-				if ( $result['test'] ) {
+				if ( $result['success'] ) {
 					$content .= "<td style='color: #008000; font-weight: bold;'>" . $result['message'] . "</td>";
 				} else {
 					$content .= "<td style='color: #dc143c; font-weight: bold;'>" . $result['message'] . "</td>";

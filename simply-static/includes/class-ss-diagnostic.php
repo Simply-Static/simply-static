@@ -56,6 +56,12 @@ class Diagnostic {
 	public $results = array();
 
 	/**
+	 * Did all of the tests pass?
+	 * @var boolean
+	 */
+	public $success = true;
+
+	/**
 	 * An instance of the options structure containing all options for this plugin
 	 * @var Simply_Static\Options
 	 */
@@ -92,14 +98,15 @@ class Diagnostic {
 			);
 		}
 
-		foreach ( $this->description as $title => $tests ) {
+		foreach ( $this->description as $title => $checks ) {
 			$this->results[ $title ] = array();
-			foreach ( $tests as $test ) {
-				$param = isset( $test['param'] ) ? $test['param'] : null;
-				$result = $this->{$test['function']}( $param );
+			foreach ( $checks as $check ) {
+				$param = isset( $check['param'] ) ? $check['param'] : null;
+				$result = $this->{$check['function']}( $param );
 
 				if ( ! isset( $result['message'] ) ) {
-					$result['message'] = $result['test'] ? __( 'OK', 'simply-static' ) : __( 'FAIL', 'simply-static' );
+					$result['message'] = $result['success'] ? __( 'OK', 'simply-static' ) : __( 'FAIL', 'simply-static' );
+					$this->success = $this->success && $result['success'];
 				}
 
 				$this->results[ $title ][] = $result;
@@ -114,26 +121,26 @@ class Diagnostic {
 		$label = sprintf( __( 'Checking if Destination URL <code>%s</code> is valid', 'simply-static' ), $destination_url );
 		return array(
 			'label' => $label,
-			'test' => filter_var( $destination_url, FILTER_VALIDATE_URL ) !== false
+			'success' => filter_var( $destination_url, FILTER_VALIDATE_URL ) !== false
 		);
 	}
 
 	public function is_additional_url_valid( $url ) {
 		$label = sprintf( __( 'Checking if Additional URL <code>%s</code> is valid', 'simply-static' ), $url );
 		if ( filter_var( $url, FILTER_VALIDATE_URL ) === false ) {
-			$test = false;
+			$success = false;
 			$message = __( 'Not a valid URL', 'simply-static' );
 		} else if ( ! Util::is_local_url( $url ) ) {
-			$test = false;
+			$success = false;
 			$message = __( 'Not a local URL', 'simply-static' );
 		} else {
-			$test = true;
+			$success = true;
 			$message = null;
 		}
 
 		return array(
 			'label' => $label,
-			'test' => $test,
+			'success' => $success,
 			'message' => $message
 		);
 	}
@@ -141,19 +148,19 @@ class Diagnostic {
 	public function is_additional_file_valid( $file ) {
 		$label = sprintf( __( 'Checking if Additional File/Dir <code>%s</code> is valid', 'simply-static' ), $file );
 		if ( stripos( $file, get_home_path() ) !== 0 && stripos( $file, WP_PLUGIN_DIR ) !== 0 && stripos( $file, WP_CONTENT_DIR ) !== 0 ) {
-			$test = false;
+			$success = false;
 			$message = __( 'Not a valid path', 'simply-static' );
 		} else if ( ! is_readable( $file ) ) {
-			$test = false;
+			$success = false;
 			$message = __( 'Not readable', 'simply-static' );;
 		} else {
-			$test = true;
+			$success = true;
 			$message = null;
 		}
 
 		return array(
 			'label' => $label,
-			'test' => $test,
+			'success' => $success,
 			'message' => $message
 		);
 	}
@@ -162,7 +169,7 @@ class Diagnostic {
 		$label = __( 'Checking if WordPress permalink structure is set', 'simply-static' );
 		return array(
 			'label' => $label,
-			'test' => strlen( get_option( 'permalink_structure' ) ) !== 0
+			'success' => strlen( get_option( 'permalink_structure' ) ) !== 0
 		);
 	}
 
@@ -174,25 +181,25 @@ class Diagnostic {
 		$response = Url_Fetcher::remote_get( $url );
 
 		if ( is_wp_error( $response ) ) {
-			$test = false;
+			$success = false;
 			$message = null;
 		} else {
 			$code = $response['response']['code'];
 			if ( $code == 200 ) {
-				$test = true;
+				$success = true;
 				$message = $code;
 			} else if ( in_array( $code, Page::$processable_status_codes ) ) {
-				$test = false;
+				$success = false;
 				$message = sprintf( __( "Received a %s response. This might indicate a problem.", 'simply-static' ), $code );
 			} else {
-				$test = false;
+				$success = false;
 				$message = sprintf( __( "Received a %s response.", 'simply-static' ), $code );;
 			}
 		}
 
 		return array(
 			'label' => $label,
-			'test' => $test,
+			'success' => $success,
 			'message' => $message
 		);
 	}
@@ -202,7 +209,7 @@ class Diagnostic {
 		$label = sprintf( __( "Checking if web server can read from Temp Files Directory: <code>%s</code>", 'simply-static' ), $temp_files_dir );
 		return array(
 			'label' => $label,
-			'test' => is_readable( $temp_files_dir )
+			'success' => is_readable( $temp_files_dir )
 		);
 	}
 
@@ -211,7 +218,7 @@ class Diagnostic {
 		$label = sprintf( __( "Checking if web server can write to Temp Files Directory: <code>%s</code>", 'simply-static' ), $temp_files_dir );
 		return array(
 			'label' => $label,
-			'test' => is_writable( $temp_files_dir )
+			'success' => is_writable( $temp_files_dir )
 		);
 	}
 
@@ -220,7 +227,7 @@ class Diagnostic {
 		$label = sprintf( __( "Checking if web server can write to Local Directory: <code>%s</code>", 'simply-static' ), $local_dir );
 		return array(
 			'label' => $label,
-			'test' => is_writable( $local_dir )
+			'success' => is_writable( $local_dir )
 		);
 	}
 
@@ -230,7 +237,7 @@ class Diagnostic {
 		$exists = Page::table_exists();
 		return array(
 			'label' => $label,
-			'test' => $exists
+			'success' => $exists
 		);
 	}
 
@@ -238,7 +245,7 @@ class Diagnostic {
 		$label = __( 'Checking if MySQL user has <code>DELETE</code> privilege', 'simply-static' );
 		return array(
 			'label' => $label,
-			'test' => Sql_Permissions::instance()->can( 'delete' )
+			'success' => Sql_Permissions::instance()->can( 'delete' )
 		);
 	}
 
@@ -246,7 +253,7 @@ class Diagnostic {
 		$label = __( 'Checking if MySQL user has <code>INSERT</code> privilege', 'simply-static' );
 		return array(
 			'label' => $label,
-			'test' => Sql_Permissions::instance()->can( 'insert' )
+			'success' => Sql_Permissions::instance()->can( 'insert' )
 		);
 	}
 
@@ -254,7 +261,7 @@ class Diagnostic {
 		$label = __( 'Checking if MySQL user has <code>SELECT</code> privilege', 'simply-static' );
 		return array(
 			'label' => $label,
-			'test' => Sql_Permissions::instance()->can( 'select' )
+			'success' => Sql_Permissions::instance()->can( 'select' )
 		);
 	}
 
@@ -262,7 +269,7 @@ class Diagnostic {
 		$label = __( 'Checking if MySQL user has <code>CREATE</code> privilege', 'simply-static' );
 		return array(
 			'label' => $label,
-			'test' => Sql_Permissions::instance()->can( 'create' )
+			'success' => Sql_Permissions::instance()->can( 'create' )
 		);
 	}
 
@@ -270,7 +277,7 @@ class Diagnostic {
 		$label = __( 'Checking if MySQL user has <code>ALTER</code> privilege', 'simply-static' );
 		return array(
 			'label' => $label,
-			'test' => Sql_Permissions::instance()->can( 'alter' )
+			'success' => Sql_Permissions::instance()->can( 'alter' )
 		);
 	}
 
@@ -278,7 +285,7 @@ class Diagnostic {
 		$label = __( 'Checking if MySQL user has <code>DROP</code> privilege', 'simply-static' );
 		return array(
 			'label' => $label,
-			'test' => Sql_Permissions::instance()->can( 'drop' )
+			'success' => Sql_Permissions::instance()->can( 'drop' )
 		);
 	}
 
@@ -286,7 +293,7 @@ class Diagnostic {
 		$label = sprintf( __( 'Checking if PHP version >= %s', 'simply-static' ), self::$min_version['php'] );
 		return array(
 			'label' => $label,
-			'test' => version_compare( phpversion(), self::$min_version['php'], '>=' ),
+			'success' => version_compare( phpversion(), self::$min_version['php'], '>=' ),
 			'message'  => phpversion(),
 		);
 	}
@@ -296,16 +303,16 @@ class Diagnostic {
 
 		if ( is_callable( 'curl_version' ) ) {
 			$version = curl_version();
-			$test = version_compare( $version['version'], self::$min_version['curl'], '>=' );
+			$success = version_compare( $version['version'], self::$min_version['curl'], '>=' );
 			$message = $version['version'];
 		} else {
-			$test = false;
+			$success = false;
 			$message = null;
 		}
 
 		return array(
 			'label' => $label,
-			'test' => $test,
+			'success' => $success,
 			'message'  => $message,
 		);
 	}

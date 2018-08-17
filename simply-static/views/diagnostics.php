@@ -17,7 +17,7 @@ namespace Simply_Static;
 				<?php foreach ( $tests as $result ) : ?>
 					<tr>
 						<td class='label'><?php echo $result['label'] ?></td>
-						<?php if ( $result['test'] ) : ?>
+						<?php if ( $result['success'] ) : ?>
 							<td class='test success'><?php echo $result['message'] ?></td>
 						<?php else : ?>
 							<td class='test error'><?php echo $result['message'] ?></td>
