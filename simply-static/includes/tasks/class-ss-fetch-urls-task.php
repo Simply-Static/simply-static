@@ -25,6 +25,14 @@ class Fetch_Urls_Task extends Task {
 	public function perform() {
 		$batch_size = 10;
 
+		$total_pages = Page::query()->count();
+		if ( $total_pages === null ) {
+			// Something has gone terribly wrong; abort!
+			global $wpdb;
+			$message = sprintf( __( "A query to the Simply Static table failed: %s", 'simply-static' ), $wpdb->last_error );
+			return new \WP_Error( 'unable_to_fetch_total_pages', $message );
+		}
+
 		$static_pages = Page::query()
 			->where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time )
 			->limit( $batch_size )
@@ -32,7 +40,6 @@ class Fetch_Urls_Task extends Task {
 		$pages_remaining = Page::query()
 			->where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time )
 			->count();
-		$total_pages = Page::query()->count();
 		$pages_processed = $total_pages - $pages_remaining;
 		Util::debug_log( "Total pages: " . $total_pages . '; Pages remaining: ' . $pages_remaining );
 

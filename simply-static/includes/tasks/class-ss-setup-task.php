@@ -23,7 +23,7 @@ class Setup_Task extends Task {
 			Util::debug_log( 'Creating archive directory: ' . $archive_dir );
 			$create_dir = wp_mkdir_p( $archive_dir );
 			if ( $create_dir === false ) {
-				return new \WP_Error( 'cannot_create_archive_dir' );
+				return new \WP_Error( 'cannot_create_archive_dir', __( 'Unable to create the archive directory', 'simply-static' ) );
 			}
 		}
 
