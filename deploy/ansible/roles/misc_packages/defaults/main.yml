@@ -1,6 +1,0 @@
----
-miscellaneous_packages:
-  # for cloning/pulling from git repos
-  - { 'name' : 'git' }
-  # for keeping time synchronized with Ubuntu's NTP server
-  - { 'name' : 'ntp' }

@@ -1,4 +1,0 @@
----
-- name: install miscellaneous packages
-  apt: name={{item.name}} state=present force=yes
-  with_items: '{{ miscellaneous_packages }}'

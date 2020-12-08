@@ -1,6 +1,0 @@
-apache_root_dir: '/var/www'
-apache_conf_dir: '/etc/apache2'
-apache_log_dir: '/var/log/apache2'
-
-apache_user: 'www-data'
-apache_group: '{{ apache_user }}'
