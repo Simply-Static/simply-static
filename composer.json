@@ -2,9 +2,7 @@
     "name": "code-of-conduct/simply-static",
     "require": {
     },
-    "require-dev": {
-        "fzaninotto/faker": "^1.6"
-    },
+    "require-dev": {},
     "minimum-stability": "dev",
     "prefer-stable": true,
     "config": {
