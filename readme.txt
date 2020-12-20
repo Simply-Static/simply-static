@@ -1,5 +1,5 @@
 === Simply Static ===
-Contributors: simplystatic
+Contributors: patrickposner
 Tags: html, static website generator, static site, secure, fast
 Requires at least: 4.0
 Tested up to: 4.9
@@ -30,14 +30,6 @@ Every time you visit a WordPress page it needs to perform database queries to fe
 With Simply Static, you’re creating a static copy of all of your WordPress pages. That time to create each page is incurred once, when Simply Static runs. When someone visits your static site they can instantly receive the page because Simply Static already did the work of creating it.
 
 Depending on the complexity of your site, theme, and plugins, using a static site can easily increase the performance of your site by 10x.
-
-= Other Similar Plugins =
-
-In the event that Simply Static doesn't meet your needs, give this plugin a try:
-
-- [WP Static HTML Output](https://wordpress.org/plugins/static-html-output-plugin/)
-
-It's updated regularly and the author is responsive to support requests.
 
 == Installation ==
 
@@ -100,6 +92,13 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 3. On the Include/Exclude page, you can select additional URLs, files, or directories to include in your static site. And you can also choose URLs (or URL patterns) to exclude from your static site.
 
 == Changelog ==
+
+= 2.1.1, December 20, 2020 =
+
+* fixed PHP Dom parser for later PHP versions
+* removed PHP faker due to end of development
+* little color modifications in admin areas
+* new plugin header and readme
 
 = 2.1.0, May 12, 2017 =
 

@@ -6,11 +6,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Plugin Name:       Simply Static
- * Plugin URI:        http://simplystatic.co/
- * Description:       Creates a static HTML copy of your WordPress site.
- * Version:           2.1.0
- * Author:            Simply Static
- * Author URI:        http://simplystatic.co/
+ * Plugin URI:        https://patrickposner.dev
+ * Description:       A static site generator to create fast and secure static versions of your WordPress website.
+ * Version:           2.1.1
+ * Author:            Patrick Posner
+ * Author URI:        https://patrickposner.dev
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       simply-static
