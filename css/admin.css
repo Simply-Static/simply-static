@@ -5,7 +5,7 @@
 #sistContainer #sistContent {
 	width: 100%;
 	float: left;
-	max-width: calc( 100% - 300px );
+	max-width: 100%;
 }
 
 #sistContainer #sistSidebar {
@@ -17,12 +17,17 @@
 
 #sistContainer #activityLog {
 	border: 1px solid #000;
-	background-color: #EFF;
+	background-color: #FFF;
 	color: #000;
 	display: block;
 	height: 100px;
 	overflow: auto;
 	padding: 5px;
+}
+
+#sistContainer #generate {
+    background: #6804cc;
+    border: none;
 }
 
 #sistContainer #activityLog .error-state {
