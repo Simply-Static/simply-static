@@ -97,7 +97,6 @@ class Plugin {
 			add_action( 'wp_ajax_render_activity_log', array( self::$instance, 'render_activity_log' ) );
 
 			// Filters
-			add_filter( 'wp_mail_content_type', array( self::$instance, 'filter_wp_mail_content_type' ) );
 			add_filter( 'admin_footer_text', array( self::$instance, 'filter_admin_footer_text' ), 15 );
 			add_filter( 'update_footer', array( self::$instance, 'filter_update_footer' ), 15 );
 			add_filter( 'http_request_args', array( self::$instance, 'wpbp_http_request_args' ), 10, 2 );
@@ -122,29 +121,27 @@ class Plugin {
 	 */
 	private function includes() {
 		$path = plugin_dir_path( dirname( __FILE__ ) );
-		require_once $path . 'includes/shims.php';
-		require_once $path . 'includes/libraries/phpuri.php';
-		require_once $path . 'includes/libraries/PhpSimple/HtmlDomParser.php';
-		require_once $path . 'includes/libraries/wp-background-processing/wp-background-processing.php';
-		require_once $path . 'includes/class-ss-options.php';
-		require_once $path . 'includes/class-ss-view.php';
-		require_once $path . 'includes/class-ss-url-extractor.php';
-		require_once $path . 'includes/class-ss-url-fetcher.php';
-		require_once $path . 'includes/class-ss-archive-creation-job.php';
-		require_once $path . 'includes/tasks/class-ss-task.php';
-		require_once $path . 'includes/tasks/class-ss-setup-task.php';
-		require_once $path . 'includes/tasks/class-ss-fetch-urls-task.php';
-		require_once $path . 'includes/tasks/class-ss-transfer-files-locally-task.php';
-		require_once $path . 'includes/tasks/class-ss-create-zip-archive.php';
-		require_once $path . 'includes/tasks/class-ss-wrapup-task.php';
-		require_once $path . 'includes/tasks/class-ss-cancel-task.php';
-		require_once $path . 'includes/class-ss-query.php';
-		require_once $path . 'includes/models/class-ss-model.php';
-		require_once $path . 'includes/models/class-ss-page.php';
-		require_once $path . 'includes/class-ss-diagnostic.php';
-		require_once $path . 'includes/class-ss-sql-permissions.php';
-		require_once $path . 'includes/class-ss-upgrade-handler.php';
-		require_once $path . 'includes/class-ss-util.php';
+		require_once $path . 'src/shims.php';
+		require_once $path . 'src/class-ss-phpuri.php';
+		require_once $path . 'src/class-ss-options.php';
+		require_once $path . 'src/class-ss-view.php';
+		require_once $path . 'src/class-ss-url-extractor.php';
+		require_once $path . 'src/class-ss-url-fetcher.php';
+		require_once $path . 'src/class-ss-archive-creation-job.php';
+		require_once $path . 'src/tasks/class-ss-task.php';
+		require_once $path . 'src/tasks/class-ss-setup-task.php';
+		require_once $path . 'src/tasks/class-ss-fetch-urls-task.php';
+		require_once $path . 'src/tasks/class-ss-transfer-files-locally-task.php';
+		require_once $path . 'src/tasks/class-ss-create-zip-archive.php';
+		require_once $path . 'src/tasks/class-ss-wrapup-task.php';
+		require_once $path . 'src/tasks/class-ss-cancel-task.php';
+		require_once $path . 'src/class-ss-query.php';
+		require_once $path . 'src/models/class-ss-model.php';
+		require_once $path . 'src/models/class-ss-page.php';
+		require_once $path . 'src/class-ss-diagnostic.php';
+		require_once $path . 'src/class-ss-sql-permissions.php';
+		require_once $path . 'src/class-ss-upgrade-handler.php';
+		require_once $path . 'src/class-ss-util.php';
 	}
 
 	/**
@@ -184,7 +181,7 @@ class Plugin {
 			'edit_posts',
 			self::SLUG,
 			array( self::$instance, 'display_generate_page' ),
-			'dashicons-media-text'
+			'dashicons-text-page'
 		);
 
 		add_submenu_page(
@@ -327,13 +324,6 @@ class Plugin {
 	public function display_generate_page() {
 		$done = $this->archive_creation_job->is_job_done();
 
-		$issue = $this->options->get( 'system_status_issue' );
-		if ( $issue ) {
-			$url = get_admin_url( null, 'admin.php' ) . '?page=' . Plugin::SLUG . '_diagnostics';
-			$message = sprintf( __( "An issue was detected that may prevent Simply Static from working properly. Please check <a href='%s'>the Diagnostics page</a>.", 'simply-static' ), $url );
-			$this->view->add_flash( 'error', $message );
-		}
-
 		$this->view
 			->set_layout( 'admin' )
 			->set_template( 'generate' )
@@ -465,9 +455,7 @@ class Plugin {
 		$debug_file_url = plugin_dir_url( dirname( __FILE__ ) ) . basename( $debug_file );
 
 		$diagnostic = new Diagnostic();
-		$this->options
-			->set( 'system_status_issue', ( $diagnostic->success !== true ) )
-			->save();
+		$results = $diagnostic->results;
 
 		$themes = wp_get_themes();
 		$current_theme = wp_get_theme();
@@ -481,7 +469,7 @@ class Plugin {
 			->assign( 'debugging_mode', $this->options->get( 'debugging_mode' ) )
 			->assign( 'debug_file_exists', $debug_file_exists )
 			->assign( 'debug_file_url', $debug_file_url )
-			->assign( 'results', $diagnostic->results )
+			->assign( 'results', $results )
 			->assign( 'themes', $themes )
 			->assign( 'current_theme_name', $current_theme_name )
 			->assign( 'plugins', $plugins )
@@ -567,7 +555,7 @@ class Plugin {
 			$content .= "<table width='600'><thead><tr><th colspan='2'>" . $title . "</th></tr></thead><tbody>";
 			foreach ( $tests as $result ) {
 				$content .= "<tr><td>" . $result['label'] . "</td>";
-				if ( $result['success'] ) {
+				if ( $result['test'] ) {
 					$content .= "<td style='color: #008000; font-weight: bold;'>" . $result['message'] . "</td>";
 				} else {
 					$content .= "<td style='color: #dc143c; font-weight: bold;'>" . $result['message'] . "</td>";
@@ -706,7 +694,7 @@ class Plugin {
 		}
 
 		$contact_support = '<a target="_blank" href="https://wordpress.org/support/plugin/simply-static#new-post">'
-			. __( 'Support Forum', 'simply-static' ) . '</a> | ';
+			. __( 'Contact Support', 'simply-static' ) . '</a> | ';
 		$add_your_rating = str_replace(
 				'[stars]',
 				'<a target="_blank" href="https://wordpress.org/support/plugin/simply-static/reviews/#new-post" >&#9733;&#9733;&#9733;&#9733;&#9733;</a>',

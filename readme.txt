@@ -4,7 +4,7 @@ Tags: html, static website generator, static site, secure, fast
 Requires at least: 5.4
 Tested up to: 5.6
 Requires PHP: 5.6
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -93,6 +93,14 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 3. On the Include/Exclude page, you can select additional URLs, files, or directories to include in your static site. And you can also choose URLs (or URL patterns) to exclude from your static site.
 
 == Changelog ==
+
+= 2.1.2, January 10, 2021 =
+
+* added composer support
+* updated dependencies
+* more fail-safe bootup
+* added sorting by status code
+* removed wp_mail_content_type filter
 
 = 2.1.1, December 20, 2020 =
 
