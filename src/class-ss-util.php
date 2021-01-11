@@ -232,7 +232,7 @@ class Util {
 			$fragment = isset( $parsed_extracted_url['fragment'] ) ? '#' . $parsed_extracted_url['fragment'] : '';
 
 			// turn our relative url into an absolute url
-			$extracted_url = \phpUri::parse( $page_url )->join( $path . $query . $fragment );
+			$extracted_url = PhpUri::parse( $page_url )->join( $path . $query . $fragment );
 
 			return $extracted_url;
 

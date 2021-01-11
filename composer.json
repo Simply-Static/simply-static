@@ -3,7 +3,7 @@
     "description": "A simple WordPress static site generator",
     "type": "wordpress-plugin",
     "require": {
-        "sunra/php-simple-html-dom-parser": "1.5.2",
+        "simplehtmldom/simplehtmldom": "^2.0-RC2",
         "a5hleyrich/wp-background-processing": "^1.0.2"
     },
     "license": "gpl",

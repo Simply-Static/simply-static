@@ -263,7 +263,7 @@ class Url_Extractor {
 	private function extract_and_replace_urls_in_html() {
 		$html_string = $this->get_body();
 
-		$dom = \Sunra\PhpSimple\HtmlDomParser::str_get_html(
+		$dom = HtmlDomParser::str_get_html(
 			$html_string,
 			$lowercase = true,
 			$forceTagsClosed = true,

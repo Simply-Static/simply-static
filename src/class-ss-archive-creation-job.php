@@ -117,15 +117,12 @@ class Archive_Creation_Job extends \WP_Background_Process {
 
 		// attempt to perform the task
 		try {
-			Util::debug_log( "Performing task: " . $task_name );
-			$is_done = $task->perform();
-		} catch ( \Error $e ) {
-			Util::debug_log( "Caught an error" );
-			return $this->error_occurred( $e );
-		} catch ( \Exception $e ) {
-			Util::debug_log( "Caught an exception" );
-			return $this->exception_occurred( $e );
-		}
+            Util::debug_log( 'Performing task: ' . $task_name );
+            $is_done = $task->perform();
+        } catch ( SimplerStaticException $e ) {
+            Util::debug_log( 'Caught an exception' );
+            return $this->exception_occurred( $e );
+        }
 
 		if ( is_wp_error( $is_done ) ) {
 			// we've hit an error, time to quit
