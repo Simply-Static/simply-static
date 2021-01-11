@@ -298,6 +298,7 @@ class Plugin {
 		$static_pages = Page::query()
 			->limit( $per_page )
 			->offset( $offset )
+			->order( 'http_status_code' )
 			->find();
 		$http_status_codes = Page::get_http_status_codes_summary();
 		$total_static_pages = array_sum( array_values( $http_status_codes ) );
