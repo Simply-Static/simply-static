@@ -1,23 +1,24 @@
 {
-    "name": "patrickposner/simply-static",
-    "description": "A simple WordPress static site generator",
-    "type": "wordpress-plugin",
-    "require": {
-        "simplehtmldom/simplehtmldom": "^2.0-RC2",
-        "a5hleyrich/wp-background-processing": "^1.0.2"
-    },
-    "license": "gpl",
-    "authors": [
-      {
-        "name": "Patrick Posner",
-        "email": "hello@patrickposner.de"
-      }
-    ],
-    "support": {
-        "issues": "https://github.com/patrickposner/simply-static/issues",
-        "source": "https://github.com/patrickposner/simply-static/"
-    },
-    "require-dev": {
-        "bamarni/composer-bin-plugin": "^1.4"
+  "name": "patrickposner/simply-static",
+  "description": "A simple WordPress static site generator",
+  "type": "wordpress-plugin",
+  "require": {
+      "voku/simple_html_dom": "^4.7.28",
+      "a5hleyrich/wp-background-processing": "^1.0.2",
+      "voku/portable-utf8": "^5.4"
+  },
+  "license": "gpl",
+  "authors": [
+    {
+      "name": "Patrick Posner",
+      "email": "hello@patrickposner.de"
     }
+  ],
+  "support": {
+      "issues": "https://github.com/patrickposner/simply-static/issues",
+      "source": "https://github.com/patrickposner/simply-static/"
+  },
+  "require-dev": {
+      "bamarni/composer-bin-plugin": "^1.4"
+  }
 }

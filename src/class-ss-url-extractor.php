@@ -1,6 +1,8 @@
 <?php
 namespace Simply_Static;
 
+use voku\helper\HtmlDomParser;
+
 // Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -263,15 +265,7 @@ class Url_Extractor {
 	private function extract_and_replace_urls_in_html() {
 		$html_string = $this->get_body();
 
-		$dom = HtmlDomParser::str_get_html(
-			$html_string,
-			$lowercase = true,
-			$forceTagsClosed = true,
-			$target_charset = 'DEFAULT_TARGET_CHARSET',
-			$stripRN = false,
-			$defaultBRText = 'DEFAULT_BR_TEXT',
-			$defaultSpanText = 'DEFAULT_SPAN_TEXT'
-		);
+		$dom = HtmlDomParser::str_get_html( $html_string );
 
 		// return the original html string if dom is blank or boolean (unparseable)
 		if ( $dom == '' || is_bool( $dom ) ) {
