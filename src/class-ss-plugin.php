@@ -121,7 +121,6 @@ class Plugin {
 	 */
 	private function includes() {
 		$path = plugin_dir_path( dirname( __FILE__ ) );
-		require_once $path . 'src/shims.php';
 		require_once $path . 'src/class-ss-phpuri.php';
 		require_once $path . 'src/class-ss-html-dom.php';
 		require_once $path . 'src/class-ss-options.php';
