@@ -267,10 +267,10 @@ class Url_Extractor {
 			$html_string,
 			$lowercase = true,
 			$forceTagsClosed = true,
-			$target_charset = DEFAULT_TARGET_CHARSET,
+			$target_charset = 'DEFAULT_TARGET_CHARSET',
 			$stripRN = false,
-			$defaultBRText = DEFAULT_BR_TEXT,
-			$defaultSpanText = DEFAULT_SPAN_TEXT
+			$defaultBRText = 'DEFAULT_BR_TEXT',
+			$defaultSpanText = 'DEFAULT_SPAN_TEXT'
 		);
 
 		// return the original html string if dom is blank or boolean (unparseable)
