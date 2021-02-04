@@ -392,13 +392,28 @@ class Plugin {
 			// excluding the template row (always has a blank url) and any rows
 			// that the user didn't fill in
 			if ( $url !== '' ) {
-				array_push( $urls_to_exclude, array(
-					'url' => $url,
-					'do_not_save' => $excludable['do_not_save'],
+				$urls_to_exclude[ $url ] = array(
+					'url'           => $url,
+					'do_not_save'   => $excludable['do_not_save'],
 					'do_not_follow' => $excludable['do_not_follow'],
-				) );
+				);
 			}
 		}
+
+		$system_excludables = array(
+			site_url() . DIRECTORY_SEPARATOR . 'wp-json' => array(
+				'url'           => site_url() . DIRECTORY_SEPARATOR . 'wp-json',
+				'do_not_save'   => '1',
+				'do_not_follow' => '1',
+			),
+			site_url() . DIRECTORY_SEPARATOR . 'wp-login.php' => array(
+				'url'           => site_url() . DIRECTORY_SEPARATOR . 'wp-login.php',
+				'do_not_save'   => '1',
+				'do_not_follow' => '1',
+			),
+		);
+
+		$urls_to_exclude = array_merge( $system_excludables, $urls_to_exclude );
 
 		// Set relative path
 		$relative_path = $this->fetch_post_value( 'relative_path' );
