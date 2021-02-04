@@ -94,13 +94,16 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 
 == Changelog ==
 
-= 2.1.2, January 10, 2021 =
+= 2.1.2, February 04, 2021 =
 
 * added composer support
 * updated dependencies
 * more fail-safe bootup
 * added sorting by status code
 * removed wp_mail_content_type filter
+* fixed PHP notices for PHP 7.4 support
+* new class to handle simplehtmldom functions
++ improved doc blocks for models and tasks
 
 = 2.1.1, December 20, 2020 =
 
