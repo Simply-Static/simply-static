@@ -110,6 +110,25 @@ class Plugin {
 			self::$instance->current_page = $page;
 
 			Upgrade_Handler::run();
+
+			// Exclude pages if not set.
+			$urls_to_exclude = self::$instance->options->get( 'urls_to_exclude' );
+
+			if ( ! isset( $urls_to_exclude ) || empty( $urls_to_exclude ) ) {
+				$urls_to_exclude = array(
+					site_url() . DIRECTORY_SEPARATOR . 'wp-json' => array(
+						'url'           => site_url() . DIRECTORY_SEPARATOR . 'wp-json',
+						'do_not_save'   => '1',
+						'do_not_follow' => '1',
+					),
+					site_url() . DIRECTORY_SEPARATOR . 'wp-login.php' => array(
+						'url'           => site_url() . DIRECTORY_SEPARATOR . 'wp-login.php',
+						'do_not_save'   => '1',
+						'do_not_follow' => '1',
+					),
+				);
+				self::$instance->options->set( 'urls_to_exclude', $urls_to_exclude );
+			}
 		}
 
 		return self::$instance;
@@ -413,7 +432,11 @@ class Plugin {
 			),
 		);
 
-		$urls_to_exclude = array_merge( $system_excludables, $urls_to_exclude );
+		if ( isset( $urls_to_exclude ) && ! empty( $urls_to_exclude ) ) {
+			$urls_to_exclude = array_merge( $system_excludables, $urls_to_exclude );
+		} else {
+			$urls_to_exclude = $system_excludables;
+		}
 
 		// Set relative path
 		$relative_path = $this->fetch_post_value( 'relative_path' );
