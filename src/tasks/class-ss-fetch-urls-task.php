@@ -1,9 +1,14 @@
 <?php
 namespace Simply_Static;
 
+/**
+ * Class which handles fetch url task.
+ */
 class Fetch_Urls_Task extends Task {
 
 	/**
+	 * Task name.
+	 *
 	 * @var string
 	 */
 	protected static $task_name = 'fetch_urls';
@@ -14,13 +19,14 @@ class Fetch_Urls_Task extends Task {
 	public function __construct() {
 		parent::__construct();
 
-		$this->archive_dir = $this->options->get_archive_dir();
+		$this->archive_dir        = $this->options->get_archive_dir();
 		$this->archive_start_time = $this->options->get( 'archive_start_time' );
 	}
 
 	/**
 	 * Fetch and save pages for the static archive
-	 * @return boolean|WP_Error true if done, false if not done, WP_Error if error
+	 *
+	 * @return boolean|WP_Error true if done, false if not done, WP_Error if error.
 	 */
 	public function perform() {
 		$batch_size = 10;
@@ -83,15 +89,16 @@ class Fetch_Urls_Task extends Task {
 		$message = sprintf( __( "Fetched %d of %d pages/files", 'simply-static' ), $pages_processed, $total_pages );
 		$this->save_status_message( $message );
 
-		// if we haven't processed any additional pages, we're done
+		// if we haven't processed any additional pages, we're done.
 		return $pages_remaining == 0;
 	}
 
 	/**
 	 * Process the response for a 200 response (success)
-	 * @param  Simply_Static\Page $static_page Record to update
-	 * @param  boolean            $save_file   Save a static copy of the page?
-	 * @param  boolean            $follow_urls Save found URLs to database?
+	 *
+	 * @param  Simply_Static\Page $static_page Record to update.
+	 * @param  boolean            $save_file   Save a static copy of the page.
+	 * @param  boolean            $follow_urls Save found URLs to database.
 	 * @return void
 	 */
 	protected function handle_200_response( $static_page, $save_file, $follow_urls ) {
@@ -217,9 +224,16 @@ class Fetch_Urls_Task extends Task {
 		}
 	}
 
+	/**
+	 * Find executeable.
+	 *
+	 * @param object $static_page current page.
+	 * @return bool
+	 */
 	protected function find_excludable( $static_page ) {
-		$url = $static_page->url;
+		$url         = $static_page->url;
 		$excludables = array();
+
 		foreach ( $this->options->get( 'urls_to_exclude' ) as $excludable ) {
 			// using | as the delimiter for regex instead of the traditional /
 			// because | won't show up in a path (it would have to be url-encoded)
@@ -238,9 +252,10 @@ class Fetch_Urls_Task extends Task {
 	 * Given a URL, find the associated Simply_Static\Page, and then set the ID
 	 * for which page it was found on if the ID isn't yet set or if the record
 	 * hasn't been updated in this instance of static generation yet.
-	 * @param Simply_Static\Page $static_page The record for the parent page
-	 * @param string             $child_url   The URL of the child page
-	 * @param string             $start_time  Static generation start time
+	 *
+	 * @param Simply_Static\Page $static_page The record for the parent page.
+	 * @param string             $child_url   The URL of the child page.
+	 * @param string             $start_time  Static generation start time.
 	 * @return void
 	 */
 	protected function set_url_found_on( $static_page, $child_url ) {
@@ -253,9 +268,10 @@ class Fetch_Urls_Task extends Task {
 
 	/**
 	 * Save the contents of a page to a file in our archive directory
-	 * @param Simply_Static\Page $static_page The Simply_Static\Page record
-	 * @param string             $content The content of the page we want to save
-	 * @return string|null                The file path of the saved file
+	 *
+	 * @param Simply_Static\Page $static_page The Simply_Static\Page record.
+	 * @param string             $content The content of the page we want to save.
+	 * @return string|null                The file path of the saved file.
 	 */
 	protected function save_static_page_content_to_file( $static_page, $content ) {
 		$relative_filename = Url_Fetcher::instance()->create_directories_for_static_page( $static_page );

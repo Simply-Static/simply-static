@@ -1,16 +1,21 @@
 <?php
 namespace Simply_Static;
 
+/**
+ * Class which handles task abstraction.
+ */
 abstract class Task {
 
 	/**
 	 * Task name
+	 *
 	 * @var string
 	 */
 	protected static $task_name = 'task';
 
 	/**
-	 * An instance of the options structure containing all options for this plugin
+	 * An instance of the options structure containing all options for this plugin.
+	 *
 	 * @var Simply_Static\Options
 	 */
 	protected $options = null;
@@ -28,8 +33,9 @@ abstract class Task {
 	 * Providing a unique key for the message is optional. If one isn't
 	 * provided, the state_name will be used. Using the same key more than once
 	 * will overwrite previous messages.
-	 * @param  string $message Message to display about the status of the job
-	 * @param  string $key     Unique key for the message
+	 *
+	 * @param  string $message Message to display about the status of the job.
+	 * @param  string $key     Unique key for the message.
 	 * @return void
 	 */
 	protected function save_status_message( $message, $key = null ) {

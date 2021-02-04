@@ -1,7 +1,7 @@
 <?php
 namespace Simply_Static;
 
-// Exit if accessed directly
+// Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -11,15 +11,25 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Page extends Model {
 
-	/** @const */
-	public static $processable_status_codes = array(
-		200, 301, 302, 303, 307, 308
-	);
+	/**
+	 * Protected status codes.
+	 *
+	 * @var array
+	 */
+	public static $processable_status_codes = array( 200, 301, 302, 303, 307, 308 );
 
-	/** @const */
+	/**
+	 * Database table name.
+	 *
+	 * @var string
+	 */
 	protected static $table_name = 'pages';
 
-	/** @const */
+	/**
+	 * Table columns.
+	 *
+	 * @var array
+	 */
 	protected static $columns = array(
 		'id'                  => 'BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT',
 		'found_on_id'         => 'BIGINT(20) UNSIGNED NULL',
@@ -38,7 +48,11 @@ class Page extends Model {
 		'updated_at'          => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'"
 	);
 
-	/** @const */
+	/**
+	 * Indexes for columns.
+	 *
+	 * @var array
+	 */
 	protected static $indexes = array(
 		'PRIMARY KEY  (id)',
 		'KEY url (url)',
@@ -47,11 +61,16 @@ class Page extends Model {
 		'KEY last_transferred_at (last_transferred_at)'
 	);
 
-	/** @const */
+	/**
+	 * Primary key.
+	 *
+	 * @var string
+	 */
 	protected static $primary_key = 'id';
 
 	/**
 	 * Get the number of pages for each group of status codes, e.g. 1xx, 2xx, 3xx
+	 *
 	 * @return array Assoc. array of status code to number of pages, e.g. '2' => 183
 	 */
 	public static function get_http_status_codes_summary() {
@@ -62,10 +81,7 @@ class Page extends Model {
 		$query .= ' GROUP BY LEFT(http_status_code, 1)';
 		$query .= ' ORDER BY status';
 
-		$rows = $wpdb->get_results(
-			$query,
-			ARRAY_A
-		);
+		$rows = $wpdb->get_results( $query, ARRAY_A );
 
 		$http_codes = array( '1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0 );
 		foreach ( $rows as $row ) {
@@ -77,6 +93,7 @@ class Page extends Model {
 
 	/**
 	 * Return the static page that this page belongs to (if any)
+	 *
 	 * @return Page The parent Page
 	 */
 	public function parent_static_page() {
@@ -85,7 +102,8 @@ class Page extends Model {
 
 	/**
 	 * Check if the hash for the content matches the prior hash for the page
-	 * @param  string  $content The content of the page/file
+	 *
+	 * @param string $sha1 The content of the page/file.
 	 * @return boolean          Is the hash a match?
 	 */
 	public function is_content_identical( $sha1 ) {
@@ -94,7 +112,8 @@ class Page extends Model {
 
 	/**
 	 * Set the hash for the content and update the last_modified_at value
-	 * @param string $content The content of the page/file
+	 *
+	 * @param string $sha1 The content of the page/file.
 	 */
 	public function set_content_hash( $sha1 ) {
 		$this->content_hash = $sha1;
@@ -106,7 +125,8 @@ class Page extends Model {
 	 *
 	 * An error indicates that something bad happened when fetching the page, or
 	 * saving the page, or during some other activity related to the page.
-	 * @param string $message The error message
+	 *
+	 * @param string $message The error message.
 	 */
 	public function set_error_message( $message ) {
 		if ( $this->error_message ) {
@@ -121,7 +141,8 @@ class Page extends Model {
 	 *
 	 * A status message is used to indicate things that happened to the page
 	 * that weren't errors, such as not following links or not saving the page.
-	 * @param string $message The status message
+	 *
+	 * @param string $message The status message.
 	 */
 	public function set_status_message( $message ) {
 		if ( $this->status_message ) {
@@ -131,6 +152,12 @@ class Page extends Model {
 		}
 	}
 
+	/**
+	 * Check the content type.
+	 *
+	 * @param  string $content_type given content type.
+	 * @return boolean
+	 */
 	public function is_type( $content_type ) {
 		return stripos( $this->content_type, $content_type ) !== false;
 	}

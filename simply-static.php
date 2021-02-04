@@ -23,7 +23,7 @@ define( 'SIMPLY_STATIC_PATH', plugin_dir_path( __FILE__ ) );
 if ( version_compare( PHP_VERSION, '5.6', '<' ) ) {
 	if ( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
 		if ( ! is_plugin_active( plugin_basename( __FILE__ ) ) ) {
-			echo( "<p>'<b>Simply Static</b> requires PHP 5.3 or higher</p>" );
+			echo( "<p>'<b>Simply Static</b> requires PHP 5.6 or higher</p>" );
 			exit();
 		}
 

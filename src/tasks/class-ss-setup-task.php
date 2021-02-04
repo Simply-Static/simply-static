@@ -1,16 +1,22 @@
 <?php
 namespace Simply_Static;
 
+/**
+ * Class to handle setup task.
+ */
 class Setup_Task extends Task {
 
 	/**
+	 * Task name.
+	 *
 	 * @var string
 	 */
 	protected static $task_name = 'setup';
 
 	/**
 	 * Do the initial setup for generating a static archive
-	 * @return boolean true this always completes in one run, so returns true
+	 *
+	 * @return boolean true this always completes in one run, so returns true.
 	 */
 	public function perform() {
 		$message = __( 'Setting up', 'simply-static' );
@@ -18,7 +24,7 @@ class Setup_Task extends Task {
 
 		$archive_dir = $this->options->get_archive_dir();
 
-		// create temp archive directory
+		// create temp archive directory.
 		if ( ! file_exists( $archive_dir ) ) {
 			Util::debug_log( 'Creating archive directory: ' . $archive_dir );
 			$create_dir = wp_mkdir_p( $archive_dir );
@@ -41,7 +47,7 @@ class Setup_Task extends Task {
 		// ->where( 'http_status_code IS NULL OR http_status_code NOT IN (?)', implode( ',', Page::$processable_status_codes ) )
 		// ->delete_all();
 
-		// add origin url and additional urls/files to database
+		// add origin url and additional urls/files to database.
 		self::add_origin_and_additional_urls_to_db( $this->options->get( 'additional_urls' ) );
 		self::add_additional_files_to_db( $this->options->get( 'additional_files' ) );
 
@@ -49,7 +55,9 @@ class Setup_Task extends Task {
 	}
 
 	/**
-	 * Ensure the Origin URL and user-specified Additional URLs are in the DB
+	 * Ensure the Origin URL and user-specified Additional URLs are in the DB.
+	 *
+	 * @param  array $additional_urls array of additional urls.
 	 * @return void
 	 */
 	public static function add_origin_and_additional_urls_to_db( $additional_urls ) {
@@ -75,7 +83,9 @@ class Setup_Task extends Task {
 	}
 
 	/**
-	 * Convert Additional Files/Directories to URLs and add them to the database
+	 * Convert Additional Files/Directories to URLs and add them to the database.
+	 *
+	 * @param  array $additional_files array of additional files.
 	 * @return void
 	 */
 	public static function add_additional_files_to_db( $additional_files ) {
@@ -116,8 +126,9 @@ class Setup_Task extends Task {
 
 	/**
 	 * Convert a directory path into a valid WordPress URL
-	 * @param  string $path The path to a directory or a file
-	 * @return string       The WordPress URL for the given path
+	 *
+	 * @param  string $path The path to a directory or a file.
+	 * @return string       The WordPress URL for the given path.
 	 */
 	private static function convert_path_to_url( $path ) {
 		$url = $path;

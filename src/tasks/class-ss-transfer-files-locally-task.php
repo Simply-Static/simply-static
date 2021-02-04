@@ -1,9 +1,14 @@
 <?php
 namespace Simply_Static;
 
+/**
+ * Class which handles transfer files task.
+ */
 class Transfer_Files_Locally_Task extends Task {
 
 	/**
+	 * Task name.
+	 *
 	 * @var string
 	 */
 	protected static $task_name = 'transfer_files_locally';
@@ -11,7 +16,8 @@ class Transfer_Files_Locally_Task extends Task {
 
 	/**
 	 * Copy a batch of files from the temp dir to the destination dir
-	 * @return boolean true if done, false if not done
+	 *
+	 * @return boolean true if done, false if not done.
 	 */
 	public function perform() {
 		$local_dir = $this->options->get( 'local_dir' );
@@ -31,16 +37,17 @@ class Transfer_Files_Locally_Task extends Task {
 			}
 		}
 
-		// return true when done (no more pages)
+		// return true when done (no more pages).
 		return $pages_processed >= $total_pages;
 
 	}
 
 	/**
-	* Copy temporary static files to a local directory
-	* @param  string $destination_dir The directory to put the files
-	* @return array (# pages processed, # pages remaining)
-	*/
+	 * Copy temporary static files to a local directory.
+	 *
+	 * @param string $destination_dir The directory to put the files..
+	 * @return array
+	 */
 	public function copy_static_files( $destination_dir ) {
 		$batch_size = 100;
 

@@ -1,13 +1,23 @@
 <?php
 namespace Simply_Static;
 
+/**
+ * Class which handles wrap up task.
+ */
 class Wrapup_Task extends Task {
 
 	/**
+	 * Task name.
+	 *
 	 * @var string
 	 */
 	protected static $task_name = 'wrapup';
 
+	/**
+	 * Perform the task.
+	 *
+	 * @return bool
+	 */
 	public function perform() {
 		if ( $this->options->get( 'delete_temp_files' ) === '1' ) {
 			Util::debug_log( "Deleting temporary files" );
@@ -21,8 +31,9 @@ class Wrapup_Task extends Task {
 	}
 
 	/**
-	 * Delete temporary, generated static files
-	 * @return true|\WP_Error True on success, WP_Error otherwise
+	 * Delete temporary, generated static files.
+	 *
+	 * @return true|\WP_Error True on success, WP_Error otherwise.
 	 */
 	public function delete_temp_static_files() {
 		$archive_dir = $this->options->get_archive_dir();

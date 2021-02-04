@@ -3,10 +3,12 @@
  * Uninstall Simply Static
  */
 
-// exit if accessed directly
-if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) exit;
+// exit if accessed directly.
+if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
+	exit;
+}
 
-// Delete Simply Static's settings
+// Delete Simply Static's settings.
 delete_option( 'simply-static' );
 
 require_once plugin_dir_path( __FILE__ ) . 'src/class-ss-plugin.php';

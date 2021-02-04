@@ -1,7 +1,7 @@
 <?php
 namespace Simply_Static;
 
-// Exit if accessed directly
+// Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -16,6 +16,7 @@ class Model {
 
 	/**
 	 * The name of the table (prefixed with the name of the plugin)
+	 *
 	 * @var string
 	 */
 	protected static $table_name = null;
@@ -34,26 +35,28 @@ class Model {
 	 *
 	 * In the format of 'index_name' => 'index_def', e.g.
 	 *     'url' => 'url'
+	 *
 	 * @var array
 	 */
 	protected static $indexes = array();
 
 	/**
 	 * The name of the primary key for the model
+	 *
 	 * @var string
 	 */
 	protected static $primary_key = null;
 
-	/**************************************************************************/
-
 	/**
 	 * The stored data for this instance of the model.
+	 *
 	 * @var array
 	 */
 	private $data = array();
 
 	/**
 	 * Track if this record has had changed made to it
+	 *
 	 * @var boolean
 	 */
 	private $dirty_fields = array();
@@ -62,8 +65,9 @@ class Model {
 	 * Retrieve the value of a field for the model
 	 *
 	 * Returns an exception if you try to retrieve a field that isn't set.
-	 * @param  string $field_name The name of the field to retrieve
-	 * @return mixed              The value for the field
+	 *
+	 * @param  string $field_name The name of the field to retrieve.
+	 * @return mixed              The value for the field.
 	 */
 	public function __get( $field_name ) {
 		if ( ! array_key_exists( $field_name, $this->data ) ) {
@@ -78,9 +82,10 @@ class Model {
 	 *
 	 * Returns an exception if you try to set a field that isn't one of the
 	 * model's columns.
-	 * @param string $field_name  The name of the field to set
-	 * @param mixed  $field_value The value for the field
-	 * @return mixed              The value of the field that was set
+	 *
+	 * @param string $field_name  The name of the field to set.
+	 * @param mixed  $field_value The value for the field.
+	 * @return mixed              The value of the field that was set.
 	 */
 	public function __set( $field_name, $field_value ) {
 		if ( ! array_key_exists( $field_name, static::$columns ) ) {
@@ -98,6 +103,7 @@ class Model {
 	 *
 	 * Note that MySQL doesn't allow anything other than alphanumerics,
 	 * underscores, and $, so dashes in the slug are replaced with underscores.
+	 *
 	 * @return string The name of the table
 	 */
 	public static function table_name() {
@@ -108,18 +114,19 @@ class Model {
 
 	/**
 	 * Used for finding models matching certain criteria
-	 * @return Simply_Static\Query
+	 *
+	 * @return Simply_Static\Query string of query to execute.
 	 */
-	public static function query()
-	{
+	public static function query() {
 		$query = new Query( get_called_class() );
 		return $query;
 	}
 
 	/**
 	 * Initialize an instance of the class and set its attributes
-	 * @param  array $attributes Array of attributes to set for the class
-	 * @return static            An instance of the class
+	 *
+	 * @param  array $attributes Array of attributes to set for the class.
+	 * @return static            An instance of the class.
 	 */
 	public static function initialize( $attributes ) {
 		$obj = new static();
@@ -132,8 +139,9 @@ class Model {
 
 	/**
 	 * Set the attributes of the model
-	 * @param  array $attributes Array of attributes to set
-	 * @return static            An instance of the class
+	 *
+	 * @param  array $attributes Array of attributes to set.
+	 * @return static            An instance of the class.
 	 */
 	public function attributes( $attributes ) {
 		foreach ( $attributes as $name => $value ) {
@@ -147,8 +155,9 @@ class Model {
 	 *
 	 * If the model is new a record gets created in the database, otherwise the
 	 * existing record gets updated.
-	 * @param  array $attributes Array of attributes to set
-	 * @return boolean           An instance of the class
+	 *
+	 * @param  array $attributes Array of attributes to set.
+	 * @return boolean           An instance of the class.
 	 */
 	public function save() {
 		global $wpdb;
@@ -190,6 +199,7 @@ class Model {
 	 *
 	 * Technically this is checking whether the model has its primary key set.
 	 * If it is set, we assume the record exists in the database.
+	 *
 	 * @return boolean Does this model exist in the db?
 	 */
 	public function exists() {
@@ -232,6 +242,7 @@ class Model {
 
 	/**
 	 * Drop the table for the model
+	 *
 	 * @return void
 	 */
 	public static function drop_table() {
