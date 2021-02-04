@@ -102,8 +102,10 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 * added sorting by status code
 * removed wp_mail_content_type filter
 * fixed PHP notices for PHP 7.4 support
-* new class to handle simplehtmldom functions
+* new composer package for simplehtmldom with Symfony Finder
 + improved doc blocks for models and tasks
+* auto exclude wp-json and wp-login.php from export
+* trailingslash / untrailingslash check pages
 
 = 2.1.1, December 20, 2020 =
 

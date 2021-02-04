@@ -161,8 +161,7 @@ class Fetch_Urls_Task extends Task {
 		if ( $redirect_url ) {
 			// WP likes to 301 redirect `/path` to `/path/` -- we want to
 			// check for this and just add the trailing slashed version
-			if ( $redirect_url === trailingslashit( $current_url ) ) {
-
+			if ( $redirect_url === trailingslashit( $current_url ) || untrailingslashit($redirect_url) === untrailingslashit($current_url) ) {
 				Util::debug_log( "This is a redirect to a trailing slashed version of the same page; adding new URL to the queue" );
 				$this->set_url_found_on( $static_page, $redirect_url );
 
