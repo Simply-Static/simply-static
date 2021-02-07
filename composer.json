@@ -17,8 +17,5 @@
   "support": {
       "issues": "https://github.com/patrickposner/simply-static/issues",
       "source": "https://github.com/patrickposner/simply-static/"
-  },
-  "require-dev": {
-      "bamarni/composer-bin-plugin": "^1.4"
   }
 }
