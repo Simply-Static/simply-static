@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Plugin Name:       Simply Static
  * Plugin URI:        https://patrickposner.dev
  * Description:       A static site generator to create fast and secure static versions of your WordPress website.
- * Version:           2.1.2
+ * Version:           2.1.2.1
  * Author:            Patrick Posner
  * Author URI:        https://patrickposner.dev
  * License:           GPL-2.0+
@@ -20,15 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'SIMPLY_STATIC_PATH', plugin_dir_path( __FILE__ ) );
 
 // Check PHP version.
-if ( version_compare( PHP_VERSION, '5.6', '<' ) ) {
-	if ( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
-		if ( ! is_plugin_active( plugin_basename( __FILE__ ) ) ) {
-			echo( "<p>'<b>Simply Static</b> requires PHP 5.6 or higher</p>" );
-			exit();
-		}
-
-		deactivate_plugins( __FILE__ );
-	}
+if ( version_compare( PHP_VERSION, '7.2.5', '<' ) ) {
+	deactivate_plugins( plugin_basename( __FILE__ ) );
+	wp_die( esc_html__( 'Simply Static requires PHP 7.2.5 or higher.', 'simply-static' ), 'Plugin dependency check', array( 'back_link' => true ) );
 }
 
 // localize.
