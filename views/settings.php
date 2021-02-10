@@ -9,6 +9,7 @@ namespace Simply_Static;
 	<h2 id='sistTabs' class='nav-tab-wrapper'>
 		<a class='nav-tab' id='general-tab' href='#tab-general'><?php _e( 'General', 'simply-static' ); ?></a>
 		<a class='nav-tab' id='include-exclude-tab' href='#tab-include-exclude'><?php _e( 'Include/Exclude', 'simply-static' ); ?></a>
+		<?php do_action( 'simply_static_settings_view_tab' ); ?>
 		<a class='nav-tab' id='advanced-tab' href='#tab-advanced'><?php _e( 'Advanced', 'simply-static' ); ?></a>
 		<a class='nav-tab' id='reset-settings-tab' href='#tab-reset-settings'><?php _e( 'Reset', 'simply-static' ); ?></a>
 	</h2>
@@ -215,7 +216,7 @@ namespace Simply_Static;
 				</tbody>
 			</table>
 		</div>
-
+		<?php do_action( 'simply_static_settings_view_form' ); ?>
 		<div id='advanced' class='tab-pane'>
 			<h2 class="title"><?php _e( "Temporary Files", 'simply-static' ); ?></h2>
 			<p><?php _e( "Your static files are temporarily saved to a directory before being copied to their destination or creating a ZIP.", 'simply-static' ); ?></p>
@@ -325,5 +326,4 @@ namespace Simply_Static;
 		</div>
 
 	</form>
-
 </div>

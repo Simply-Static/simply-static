@@ -458,20 +458,29 @@ class Plugin {
 			$this->options->set( 'http_basic_auth_digest', $http_basic_auth_digest );
 		}
 
-		// Save settings
-		$this->options
-			->set( 'destination_scheme', $destination_scheme )
-			->set( 'destination_host', $destination_host )
-			->set( 'temp_files_dir', Util::trailingslashit_unless_blank( $this->fetch_post_value( 'temp_files_dir' ) ) )
-			->set( 'additional_urls', $this->fetch_post_value( 'additional_urls' ) )
-			->set( 'additional_files', $this->fetch_post_value( 'additional_files' ) )
-			->set( 'urls_to_exclude', $urls_to_exclude )
-			->set( 'delivery_method', $this->fetch_post_value( 'delivery_method' ) )
-			->set( 'local_dir', Util::trailingslashit_unless_blank( $this->fetch_post_value( 'local_dir' ) ) )
-			->set( 'delete_temp_files', $this->fetch_post_value( 'delete_temp_files' ) )
-			->set( 'destination_url_type', $destination_url_type )
-			->set( 'relative_path', $relative_path )
-			->save();
+		// Save settings.
+		$options = apply_filters(
+			'simply_static_options',
+			array(
+				'destination_scheme'   => $destination_scheme,
+				'destination_host'     => $destination_host,
+				'temp_files_dir'       => Util::trailingslashit_unless_blank( $this->fetch_post_value( 'temp_files_dir' ) ),
+				'additional_urls'      => $this->fetch_post_value( 'additional_urls' ),
+				'additional_files'     => $this->fetch_post_value( 'additional_files' ),
+				'urls_to_exclude'      => $urls_to_exclude,
+				'delivery_method'      => $this->fetch_post_value( 'delivery_method' ),
+				'local_dir'            => Util::trailingslashit_unless_blank( $this->fetch_post_value( 'local_dir' ) ),
+				'delete_temp_files'    => $this->fetch_post_value( 'delete_temp_files' ),
+				'destination_url_type' => $destination_url_type,
+				'relative_path'        => $relative_path,
+			)
+		);
+
+		foreach ( $options as $key => $value ) {
+			$this->options->set( $key, $value );
+		}
+
+		$this->options->save();
 
 		$message = __( 'Your changes have been saved.', 'simply-static' );
 		$this->view->add_flash( 'updated', $message );
