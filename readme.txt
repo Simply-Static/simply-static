@@ -4,7 +4,7 @@ Tags: html, static website generator, static site, secure, fast
 Requires at least: 5.4
 Tested up to: 5.6
 Requires PHP: 7.2.5
-Stable tag: 2.1.2.1
+Stable tag: 2.1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -93,6 +93,13 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 3. On the Include/Exclude page, you can select additional URLs, files, or directories to include in your static site. And you can also choose URLs (or URL patterns) to exclude from your static site.
 
 == Changelog ==
+
+= 2.1.3 =
+
+* dispatch execution to cron for larger exports
+* fixed download URL for zip files
+* added support for custom head tags added in wp_head hook
+
 
 = 2.1.2.1, February 04, 2021 =
 
