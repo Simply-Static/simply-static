@@ -39,8 +39,21 @@ class Create_Zip_Archive_Task extends Task {
 	 * @return string|WP_Error $temporary_zip The path to the archive zip file.
 	 */
 	public function create_zip() {
-		$archive_dir = $this->options->get_archive_dir();
+		$temp_dir = $this->options->get( 'temp_files_dir' );
 
+		// check if temp directory is empty, if not delete old zip files.
+		$temp_dir_empty = ! ( new \FilesystemIterator( $temp_dir ) )->valid();
+
+		if ( ! $temp_dir_empty ) {
+			foreach ( new \DirectoryIterator( $temp_dir ) as $file ) {
+				if ( ! $file->isDir() ) {
+					unlink( $file->getPathname() );
+				}
+			}
+		}
+
+		// Now we are creating a new zip file.
+		$archive_dir  = $this->options->get_archive_dir();
 		$zip_filename = untrailingslashit( $archive_dir ) . '.zip';
 		$zip_archive  = new \PclZip( $zip_filename );
 
