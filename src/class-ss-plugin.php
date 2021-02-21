@@ -80,8 +80,6 @@ class Plugin {
 			self::$instance = new self();
 			self::$instance->includes();
 
-			// Check for pending file download
-			add_action( 'plugins_loaded', array( self::$instance, 'download_file' ) );
 			// Load the text domain for i18n
 			add_action( 'plugins_loaded', array( self::$instance, 'load_textdomain' ) );
 			// Enqueue admin styles
@@ -781,40 +779,6 @@ class Plugin {
 		array_push( $task_list, 'wrapup' );
 
 		return $task_list;
-	}
-
-	/**
-	 * Check for a pending file download; prompt user to download file
-	 * @return null
-	 */
-	public function download_file() {
-		$file_name = isset( $_GET[ self::SLUG . '_zip_download' ] ) ? $_GET[ self::SLUG . '_zip_download' ] : null;
-		if ( $file_name ) {
-			if ( ! current_user_can( 'edit_posts' ) ) {
-				die( __( 'Not permitted', 'simply-static' ) );
-			}
-
-			// Don't allow path traversal
-			if ( strpos( $file_name, '../' ) !== false ) {
-				exit( 'Invalid Request' );
-			}
-
-			// File must exist
-			$file_path = path_join( self::$instance->options->get( 'temp_files_dir' ), $file_name );
-			if ( ! file_exists( $file_path ) ) {
-				exit( 'Files does not exist' );
-			}
-
-			// Send file
-			header( 'Content-Description: File Transfer' );
-			header( 'Content-Disposition: attachment; filename=' . $file_name );
-			header( 'Content-Type: application/zip, application/octet-stream; charset=' . get_option( 'blog_charset' ), true );
-			header( 'Content-Length: ' . filesize( $file_path ) );
-			header( 'Pragma: no-cache' );
-			header( 'Expires: 0' );
-			readfile( $file_path );
-			exit();
-		}
 	}
 
 	/**
