@@ -94,6 +94,9 @@ class Plugin {
 			add_action( 'wp_ajax_render_export_log', array( self::$instance, 'render_export_log' ) );
 			add_action( 'wp_ajax_render_activity_log', array( self::$instance, 'render_activity_log' ) );
 
+			// Instead of using ajax, activate export log file and run with cron.
+			add_action( 'simply_static_site_export_cron', array( self::$instance, 'run_static_export_with_cron' ) );
+
 			// Filters
 			add_filter( 'admin_footer_text', array( self::$instance, 'filter_admin_footer_text' ), 15 );
 			add_filter( 'update_footer', array( self::$instance, 'filter_update_footer' ), 15 );
@@ -228,6 +231,13 @@ class Plugin {
 		);
 	}
 
+	function run_static_export_with_cron() {
+		Util::delete_debug_log();
+		Util::debug_log( "Received request to start generating a static archive" );
+		$this->archive_creation_job->start();
+	}
+
+
 	/**
 	 * Handle requests for creating a static archive and send a response via ajax
 	 * @return void
@@ -243,7 +253,9 @@ class Plugin {
 		if ( $action === 'start' ) {
 			Util::delete_debug_log();
 			Util::debug_log( "Received request to start generating a static archive" );
-			$this->archive_creation_job->start();
+			if ( ! wp_next_scheduled( 'simply_static_site_export_cron' ) ) {
+				wp_schedule_single_event( time(), 'simply_static_site_export_cron' );
+			}
 		} else if ( $action === 'cancel' ) {
 			Util::debug_log( "Received request to cancel static archive generation" );
 			$this->archive_creation_job->cancel();
