@@ -231,9 +231,12 @@ class Plugin {
 		);
 	}
 
-	function run_static_export_with_cron() {
-		Util::delete_debug_log();
-		Util::debug_log( "Received request to start generating a static archive" );
+	/**
+	 * Handle archive job with cron.
+	 *
+	 * @return void
+	 */
+	public function run_static_export_with_cron() {
 		$this->archive_creation_job->start();
 	}
 
@@ -242,7 +245,7 @@ class Plugin {
 	 * Handle requests for creating a static archive and send a response via ajax
 	 * @return void
 	 */
-	function static_archive_action() {
+	public function static_archive_action() {
 		check_ajax_referer( 'simply-static_generate' );
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			die( __( 'Not permitted', 'simply-static' ) );
@@ -268,7 +271,7 @@ class Plugin {
 	 * Render json+html for response to static archive creation
 	 * @return void
 	 */
-	function send_json_response_for_static_archive( $action ) {
+	public function send_json_response_for_static_archive( $action ) {
 		$done = $this->archive_creation_job->is_job_done();
 		$current_task = $this->archive_creation_job->get_current_task();
 
@@ -726,14 +729,14 @@ class Plugin {
 	 * Set wp_mail to send out html emails
 	 * @return string
 	 */
-	function filter_wp_mail_content_type() {
+	public function filter_wp_mail_content_type() {
 	    return 'text/html';
 	}
 
 	/**
 	 * Set HTTP Basic Auth for wp-background-processing
 	 */
-	function wpbp_http_request_args( $r, $url ) {
+	public function wpbp_http_request_args( $r, $url ) {
 		$digest = self::$instance->options->get( 'http_basic_auth_digest' );
 		if ( $digest ) {
 			$r['headers']['Authorization'] = 'Basic ' . $digest;
