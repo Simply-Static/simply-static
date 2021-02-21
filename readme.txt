@@ -99,7 +99,8 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 * dispatch execution to cron for larger exports
 * fixed download URL for zip files
 * added support for custom head tags added in wp_head hook
-
+* parsing Rankmath sitemap if added to additional files
+* removing uploads folder from additional files setting
 
 = 2.1.2.1, February 04, 2021 =
 

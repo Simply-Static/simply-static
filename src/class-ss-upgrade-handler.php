@@ -126,22 +126,6 @@ class Upgrade_Handler {
 					}
 				}
 
-				if ( version_compare( $version, '1.7.1', '<' ) ) {
-					// check for, and add, the WP uploads dir if it's missing
-					$upload_dir = wp_upload_dir();
-					if ( isset( $upload_dir['basedir'] ) ) {
-						$upload_dir = trailingslashit( $upload_dir['basedir'] );
-
-						$additional_files = self::$options->get( 'additional_files' );
-						$files_array = Util::string_to_array( $additional_files );
-
-						if ( ! in_array( $upload_dir, $files_array ) ) {
-							$additional_files = $additional_files . "\n" . $upload_dir;
-							self::$options->set( 'additional_files', $additional_files );
-						}
-					}
-				}
-
 				// setting the temp dir back to the one within /simply-static/
 				if ( version_compare( $version, '2.0.4', '<' ) ) {
 					$old_tmp_dir = trailingslashit( trailingslashit( get_temp_dir() ) . 'static-files' );
