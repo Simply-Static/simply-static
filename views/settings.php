@@ -85,6 +85,7 @@ namespace Simply_Static;
 							<select name='delivery_method' id='deliveryMethod'>
 								<option value='zip' <?php Util::selected_if( $this->delivery_method === 'zip' ) ?>><?php _e( "ZIP Archive", 'simply-static' ); ?></option>
 								<option value='local' <?php Util::selected_if( $this->delivery_method === 'local' ) ?>><?php _e( "Local Directory", 'simply-static' ); ?></option>
+								<?php do_action( 'simply_static_delivery_methods' ); ?>
 							</select>
 						</td>
 					</tr>

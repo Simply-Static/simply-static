@@ -106,6 +106,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 
 		// convert 'an_example' to 'An_Example_Task'
 		$class_name = 'Simply_Static\\' . ucwords( $task_name ) . '_Task';
+		$class_name = apply_filters( 'simply_static_class_name', $class_name, $task_name );
 
 		// this shouldn't ever happen, but just in case...
 		if ( ! class_exists( $class_name ) ) {
