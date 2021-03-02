@@ -19,13 +19,9 @@ class Wrapup_Task extends Task {
 	 * @return bool
 	 */
 	public function perform() {
-		if ( $this->options->get( 'delete_temp_files' ) === '1' ) {
-			Util::debug_log( "Deleting temporary files" );
-			$this->save_status_message( __( 'Wrapping up', 'simply-static' ) );
-			$deleted_successfully = $this->delete_temp_static_files();
-		} else {
-			Util::debug_log( "Keeping temporary files" );
-		}
+		Util::debug_log( "Deleting temporary files" );
+		$this->save_status_message( __( 'Wrapping up', 'simply-static' ) );
+		$deleted_successfully = $this->delete_temp_static_files();
 
 		return true;
 	}

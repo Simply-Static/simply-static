@@ -58,7 +58,6 @@ class Upgrade_Handler {
 			'urls_to_exclude' => array(),
 			'delivery_method' => 'zip',
 			'local_dir' => '',
-			'delete_temp_files' => '1',
 			'relative_path' => '',
 			'destination_url_type' => 'relative',
 			'archive_status_messages' => array(),

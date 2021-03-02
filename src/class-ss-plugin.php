@@ -387,7 +387,6 @@ class Plugin {
 			->assign( 'urls_to_exclude', $this->options->get( 'urls_to_exclude' ) )
 			->assign( 'delivery_method', $this->options->get( 'delivery_method' ) )
 			->assign( 'local_dir', $this->options->get( 'local_dir' ) )
-			->assign( 'delete_temp_files', $this->options->get( 'delete_temp_files' ) )
 			->assign( 'destination_url_type', $this->options->get( 'destination_url_type' ) )
 			->assign( 'relative_path', $this->options->get( 'relative_path' ) )
 			->assign( 'http_basic_auth_digest', $this->options->get( 'http_basic_auth_digest' ) )
@@ -483,7 +482,6 @@ class Plugin {
 				'urls_to_exclude'      => $urls_to_exclude,
 				'delivery_method'      => $this->fetch_post_value( 'delivery_method' ),
 				'local_dir'            => Util::trailingslashit_unless_blank( $this->fetch_post_value( 'local_dir' ) ),
-				'delete_temp_files'    => $this->fetch_post_value( 'delete_temp_files' ),
 				'destination_url_type' => $destination_url_type,
 				'relative_path'        => $relative_path,
 			)

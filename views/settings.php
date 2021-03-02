@@ -236,18 +236,6 @@ namespace Simply_Static;
 							</div>
 						</td>
 					</tr>
-					<tr>
-						<th>
-							<label><?php _e( "Delete Temporary Files", 'simply-static' ); ?></label>
-						</th>
-						<td>
-							<label>
-								<input name='delete_temp_files' value='0' type='hidden' />
-								<input aria-describedby='deleteTempFilesHelpBlock' name='delete_temp_files' id='deleteTempFiles' value='1' type='checkbox' <?php Util::checked_if( $this->delete_temp_files === '1' ); ?> />
-								<?php _e( "Delete temporary files at the end of the job", 'simply-static' ); ?>
-							</label>
-						</td>
-					</tr>
 				</tbody>
 			</table>
 
