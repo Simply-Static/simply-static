@@ -89,6 +89,7 @@ namespace Simply_Static;
 							</select>
 						</td>
 					</tr>
+					<?php do_action( 'simply_static_delivery_method_description' ); ?>
 					<tr class='delivery-method zip'>
 						<th></th>
 						<td>
