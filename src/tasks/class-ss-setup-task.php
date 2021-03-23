@@ -22,6 +22,9 @@ class Setup_Task extends Task {
 		$message = __( 'Setting up', 'simply-static' );
 		$this->save_status_message( $message );
 
+		// Delete files in temp dir.
+		$this->delete_temp_static_files();
+
 		$archive_dir = $this->options->get_archive_dir();
 
 		// create temp archive directory.
@@ -36,7 +39,7 @@ class Setup_Task extends Task {
 		// TODO: Add a way for the user to perform this, optionally, so that we
 		// don't need to do it every time. Then enable the two commented-out
 		// sections below.
-		Page::query()->delete_all();
+		//Page::query()->delete_all();
 
 		// clear out any saved error messages on pages
 		//Page::query()
@@ -140,5 +143,34 @@ class Setup_Task extends Task {
 			$url = str_replace( untrailingslashit( get_home_path() ), Util::origin_url(), $path );
 		}
 		return $url;
+	}
+
+	/**
+	 * Delete temporary, generated static files.
+	 *
+	 * @return true|\WP_Error True on success, WP_Error otherwise.
+	 */
+	public function delete_temp_static_files() {
+		$options = Options::instance();
+		$dir     = $options->get( 'temp_files_dir' );
+
+		if ( false === file_exists( $dir ) ) {
+			return false;
+		}
+
+		$files = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $dir, \RecursiveDirectoryIterator::SKIP_DOTS ), \RecursiveIteratorIterator::CHILD_FIRST );
+
+		foreach ( $files as $fileinfo ) {
+			if ( $fileinfo->isDir() ) {
+				if ( false === rmdir( $fileinfo->getRealPath() ) ) {
+					return false;
+				}
+			} else {
+				if ( false === unlink( $fileinfo->getRealPath() ) ) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 }
