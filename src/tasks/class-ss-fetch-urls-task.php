@@ -31,14 +31,25 @@ class Fetch_Urls_Task extends Task {
 	public function perform() {
 		$batch_size = apply_filters( 'simply_static_fetch_urls_batch_size', 10 );
 
-		$static_pages = Page::query()
+		$static_pages = apply_filters(
+			'ss_static_pages',
+			Page::query()
 			->where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time )
 			->limit( $batch_size )
-			->find();
-		$pages_remaining = Page::query()
+			->find(),
+			$this->archive_start_time,
+		);
+
+		$pages_remaining = apply_filters(
+			'ss_remaining_pages',
+			Page::query()
 			->where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time )
-			->count();
-		$total_pages = Page::query()->count();
+			->count(),
+			$this->archive_start_time,
+		);
+
+		$total_pages = apply_filters( 'ss_total_pages', Page::query()->count() );
+
 		$pages_processed = $total_pages - $pages_remaining;
 		Util::debug_log( "Total pages: " . $total_pages . '; Pages remaining: ' . $pages_remaining );
 
