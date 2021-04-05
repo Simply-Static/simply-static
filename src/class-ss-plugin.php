@@ -321,18 +321,22 @@ class Plugin {
 			die( __( 'Not permitted', 'simply-static' ) );
 		}
 
-		$per_page = $_POST['per_page'];
+		$per_page     = $_POST['per_page'];
 		$current_page = $_POST['page'];
-		$offset = ( intval( $current_page ) - 1 ) * intval( $per_page );
+		$offset       = ( intval( $current_page ) - 1 ) * intval( $per_page );
 
-		$static_pages = Page::query()
+		$static_pages = apply_filters(
+			'ss_total_pages_log',
+			Page::query()
 			->limit( $per_page )
 			->offset( $offset )
 			->order( 'http_status_code' )
-			->find();
-		$http_status_codes = Page::get_http_status_codes_summary();
+			->find(),
+		);
+
+		$http_status_codes  = Page::get_http_status_codes_summary();
 		$total_static_pages = array_sum( array_values( $http_status_codes ) );
-		$total_pages = ceil( $total_static_pages / $per_page );
+		$total_pages        = ceil( $total_static_pages / $per_page );
 
 		$content = $this->view
 			->set_template( '_export_log' )
