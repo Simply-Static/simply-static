@@ -39,19 +39,25 @@ class Setup_Task extends Task {
 		// TODO: Add a way for the user to perform this, optionally, so that we
 		// don't need to do it every time. Then enable the two commented-out
 		// sections below.
-		//Page::query()->delete_all();
+		$options = get_option( 'simply-static' );
+
+		if ( empty( $options['use-build'] ) ) {
+			Page::query()->delete_all();
+		}
 
 		// clear out any saved error messages on pages
 		//Page::query()
-		// ->update_all( 'error_message', null );
+		//->update_all( 'error_message', null );
 
 		// delete pages that we can't process
 		//Page::query()
-		// ->where( 'http_status_code IS NULL OR http_status_code NOT IN (?)', implode( ',', Page::$processable_status_codes ) )
-		// ->delete_all();
+		//->where( 'http_status_code IS NULL OR http_status_code NOT IN (?)', implode( ',', Page::$processable_status_codes ) )
+		//->delete_all();
 
 		// add origin url and additional urls/files to database.
-		self::add_origin_and_additional_urls_to_db( $this->options->get( 'additional_urls' ) );
+		$additional_urls = apply_filters( 'ss_additional_urls', $this->options->get( 'additional_urls' ) );
+
+		self::add_origin_and_additional_urls_to_db( $additional_urls );
 		self::add_additional_files_to_db( $this->options->get( 'additional_files' ) );
 
 		return true;
