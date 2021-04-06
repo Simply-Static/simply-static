@@ -481,27 +481,4 @@ class Util {
 		);
 		return esc_url_raw( $url );
 	}
-
-	/**
-	 * Get a post/term id by slug.
-	 *
-	 * @param  string $slug given slug of the URL.
-	 * @return int
-	 */
-	public static function get_id_by_slug( $slug ) {
-		global $wpdb;
-
-		// Supported post types.
-		$post_types = get_post_types( array( 'public' => true, 'exclude_from_search' => false ), 'names' );
-
-		// Now we are checking if we can match a post type.
-		foreach ( $post_types as $post_type ) {
-			$id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_name = %s AND post_type= %s AND post_status = 'publish'", $slug, $post_type ) );
-
-			if ( $id ) {
-				return intval( $id );
-			}
-		}
-	}
-
 }

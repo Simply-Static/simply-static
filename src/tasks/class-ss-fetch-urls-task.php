@@ -124,7 +124,6 @@ class Fetch_Urls_Task extends Task {
 			Util::debug_log( "Adding " . sizeof( $urls ) . " URLs to the queue" );
 			foreach ( $urls as $url ) {
 				$this->set_url_found_on( $static_page, $url );
-				$static_page->set_object_id( $static_page->url );
 			}
 		} else {
 			Util::debug_log( "Not following URLs from this page" );
@@ -273,7 +272,6 @@ class Fetch_Urls_Task extends Task {
 		$child_static_page = Page::query()->find_or_create_by( 'url' , $child_url );
 		if ( $child_static_page->found_on_id === null || $child_static_page->updated_at < $this->archive_start_time ) {
 			$child_static_page->found_on_id = $static_page->id;
-			$child_static_page->set_object_id( $child_static_page->url );
 			$child_static_page->save();
 		}
 	}

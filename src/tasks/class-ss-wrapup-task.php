@@ -25,6 +25,8 @@ class Wrapup_Task extends Task {
 		// Unschedule cron first.
 		wp_clear_scheduled_hook( 'simply_static_site_export_cron' );
 
+		do_action( 'ss_after_cleanup' );
+
 		return true;
 	}
 }

@@ -131,7 +131,6 @@ class Plugin {
 				self::$instance->options->set( 'urls_to_exclude', $urls_to_exclude );
 			}
 		}
-
 		return self::$instance;
 	}
 

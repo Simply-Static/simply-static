@@ -32,7 +32,7 @@ class Page extends Model {
 	 */
 	protected static $columns = array(
 		'id'                  => 'BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT',
-		'object_id'           => 'BIGINT(20) UNSIGNED NULL',
+		'build_id'            => 'BIGINT(20) UNSIGNED NULL',
 		'found_on_id'         => 'BIGINT(20) UNSIGNED NULL',
 		'url'                 => 'VARCHAR(255) NOT NULL',
 		'redirect_url'        => 'TEXT NULL',
@@ -151,18 +151,6 @@ class Page extends Model {
 		} else {
 			$this->status_message = $message;
 		}
-	}
-
-	/**
-	 * Set post id if available
-	 *
-	 * @param string $url URL to check for post id.
-	 */
-	public function set_object_id( $url ) {
-		$slug = basename( $url );
-		$id   = Util::get_id_by_slug( $slug );
-
-		$this->object_id = $id;
 	}
 
 	/**
