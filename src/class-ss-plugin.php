@@ -255,8 +255,14 @@ class Plugin {
 		if ( $action === 'start' ) {
 			Util::delete_debug_log();
 			Util::debug_log( "Received request to start generating a static archive" );
-			if ( ! wp_next_scheduled( 'simply_static_site_export_cron' ) ) {
-				wp_schedule_single_event( time(), 'simply_static_site_export_cron' );
+
+			if ( DISABLE_WP_CRON !== true ) {
+				if ( ! wp_next_scheduled( 'simply_static_site_export_cron' ) ) {
+					wp_schedule_single_event( time(), 'simply_static_site_export_cron' );
+				}
+			} else {
+				// Cron is unavaiable.
+				$this->archive_creation_job->start();
 			}
 		} else if ( $action === 'cancel' ) {
 			Util::debug_log( "Received request to cancel static archive generation" );
