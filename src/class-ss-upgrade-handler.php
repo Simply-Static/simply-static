@@ -98,18 +98,6 @@ class Upgrade_Handler {
 			// the current version
 			if ( version_compare( $version, Plugin::VERSION, '<' ) ) {
 
-				if ( version_compare( $version, '1.4.0', '<' ) ) {
-					// check for, and add, the WP emoji url if it's missing
-					$emoji_url = includes_url( 'js/wp-emoji-release.min.js' );
-					$additional_urls = self::$options->get( 'additional_urls' );
-					$urls_array = Util::string_to_array( $additional_urls );
-
-					if ( ! in_array( $emoji_url, $urls_array ) ) {
-						$additional_urls = $additional_urls . "\n"  . $emoji_url;
-						self::$options->set( 'additional_urls', $additional_urls );
-					}
-				}
-
 				if ( version_compare( $version, '1.7.0', '<' ) ) {
 					$scheme = self::$options->get( 'destination_scheme' );
 					if ( strpos( $scheme, '://' ) === false ) {
