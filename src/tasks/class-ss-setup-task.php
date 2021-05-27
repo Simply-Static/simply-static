@@ -39,9 +39,10 @@ class Setup_Task extends Task {
 		// TODO: Add a way for the user to perform this, optionally, so that we
 		// don't need to do it every time. Then enable the two commented-out
 		// sections below.
-		$options = get_option( 'simply-static' );
+		$use_single = get_option( 'simply-static-use-single' );
+		$use_build  = get_option( 'simply-static-use-build' );
 
-		if ( empty( $options['use-build'] ) && empty( $options['use-single'] ) ) {
+		if ( empty( $use_build ) && empty( $use_single ) ) {
 			Page::query()->delete_all();
 		}
 
