@@ -33,6 +33,7 @@ class Page extends Model {
 	protected static $columns = array(
 		'id'                  => 'BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT',
 		'build_id'            => 'BIGINT(20) UNSIGNED NULL',
+		'post_id'             => 'BIGINT(20) UNSIGNED NULL',
 		'found_on_id'         => 'BIGINT(20) UNSIGNED NULL',
 		'url'                 => 'VARCHAR(255) NOT NULL',
 		'redirect_url'        => 'TEXT NULL',
