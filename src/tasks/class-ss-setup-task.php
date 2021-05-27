@@ -41,7 +41,7 @@ class Setup_Task extends Task {
 		// sections below.
 		$options = get_option( 'simply-static' );
 
-		if ( empty( $options['use-build'] ) ) {
+		if ( empty( $options['use-build'] ) && empty( $options['use-single'] ) ) {
 			Page::query()->delete_all();
 		}
 
