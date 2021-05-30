@@ -88,6 +88,8 @@ class Plugin {
 			add_action( 'admin_enqueue_scripts', array( self::$instance, 'enqueue_admin_scripts' ) );
 			// Add the options page and menu item.
 			add_action( 'admin_menu', array( self::$instance, 'add_plugin_admin_menu' ), 2 );
+			// Add admin info links.
+			add_action( 'simply_static_admin_info_links', array( self::$instance, 'add_info_links' ) );
 
 			// Handle AJAX requests
 			add_action( 'wp_ajax_static_archive_action', array( self::$instance, 'static_archive_action' ) );
@@ -817,5 +819,21 @@ class Plugin {
 	 */
 	public function debug_on() {
 		return $this->options->get( 'debugging_mode' ) === '1';
+	}
+
+	/**
+	 * Add information links in admin header.
+	 *
+	 * @return void
+	 */
+	public function add_info_links( $info_text ) {
+		ob_start();
+		?>
+		<a href="https://patrickposner.dev/plugins/simply-static" target="_blank">Go Pro</a>	
+		<a href="https://patrickposner.dev/docs/simply-static" target="_blank">Documentation</a>
+		<a href="https://wordpress.org/plugins/simply-static/" target="_blank">Support</a>
+		<?php
+		$info_text = apply_filters( 'simply_static_info_links', ob_get_clean() );
+		echo $info_text;
 	}
 }

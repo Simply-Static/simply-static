@@ -1,8 +1,12 @@
 <?php
 namespace Simply_Static;
 ?>
-
-<h1><?php _e( 'Simply Static &rsaquo; Settings', 'simply-static' ); ?></h1>
+<div class="simply-static-admin-header">
+	<div class="logo"><img src="<?php echo esc_url( SIMPLY_STATIC_URL . '/assets/simply-static-logo.svg' ); ?>" /></div>
+				<div class="info-links">
+					<?php do_action( 'simply_static_admin_info_links' ); ?>
+				</div>
+			</div>
 
 <div class='wrap' id='settingsPage'>
 
