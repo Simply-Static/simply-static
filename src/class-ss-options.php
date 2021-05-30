@@ -82,11 +82,24 @@ class Options {
 
 	/**
 	 * Returns a value of the option identified by $name
+     *
+     * Also checks if option exists in wp-config.php, and uses it to override the database value
+     *
+     * Fore example:
+     * SIMPLY_STATIC_TEMP_FILES_DIR     in wp-config.php overrides temp_files_dir loaded from database
+     * SIMPLY_STATIC_DELIVERY_METHOD    in wp-config.php overrides delivery_method loaded from database
+     *
 	 * @param string $name The option name
 	 * @return mixed|null
 	 */
-	public function get( $name ) {
-		return array_key_exists( $name, $this->options ) ? $this->options[ $name ] : null;
+	public function get( $name = '' ) {
+        return array_key_exists( $name, $this->options ) ?
+            (
+                defined('SIMPLY_STATIC_' . strtoupper( $name ) ) ?
+                constant('SIMPLY_STATIC_' . strtoupper( $name ) ) :
+                $this->options[ $name ]
+            )
+            : null;
 	}
 
 	/**
