@@ -32,6 +32,7 @@ class Diagnostic {
 		),
 		'WordPress' => array(
 			array( 'function' => 'is_permalink_structure_set' ),
+			array( 'function' => 'is_wp_cron_running' ),
 			array( 'function' => 'can_wp_make_requests_to_itself' )
 		),
 		'MySQL' => array(
@@ -44,6 +45,7 @@ class Diagnostic {
 		),
 		'PHP' => array(
 			array( 'function' => 'php_version' ),
+			array( 'function' => 'is_xml_active' ),
 			array( 'function' => 'has_curl' )
 		)
 	);
@@ -165,6 +167,20 @@ class Diagnostic {
 		);
 	}
 
+	public function is_wp_cron_running() {
+		$label = __( 'Checking if WordPress cron is available and running', 'simply-static' );
+
+		if ( ! defined( 'DISABLE_WP_CRON' ) || DISABLE_WP_CRON !== true ) {
+			$is_cron = true;
+		} else {
+			$is_cron = false;
+		}
+		return array(
+			'label' => $label,
+			'test' => $is_cron,
+		);
+	}
+
 	public function can_wp_make_requests_to_itself() {
 		$ip_address = getHostByName( getHostName() );
 		$label = sprintf( __( "Checking if WordPress can make requests to itself from <code>%s</code>", 'simply-static' ), $ip_address );
@@ -277,6 +293,15 @@ class Diagnostic {
 			'label' => $label,
 			'test' => version_compare( phpversion(), self::$min_version['php'], '>=' ),
 			'message'  => phpversion(),
+		);
+	}
+
+	public function is_xml_active() {
+		$label = __( 'Checking if php-xml is available', 'simply-static' );
+
+		return array(
+			'label' => $label,
+			'test' => extension_loaded( 'xml' ) ? 'OK' : 'MISSING',
 		);
 	}
 
