@@ -275,6 +275,12 @@
 	content: "\2717  ";
 }
 
+#sistContainer .fade {
+    float: left;
+    width: 100%;
+    max-width: 95%;
+}
+
 #diagnosticsForm {
     background: white;
     padding: 25px 25px 0 25px;
