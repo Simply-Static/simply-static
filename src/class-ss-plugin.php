@@ -97,7 +97,7 @@ class Plugin {
 			add_action( 'wp_ajax_render_activity_log', array( self::$instance, 'render_activity_log' ) );
 
 			// Instead of using ajax, activate export log file and run with cron.
-			add_action( 'simply_static_site_export_cron', array( self::$instance, 'run_static_export_with_cron' ) );
+			add_action( 'simply_static_site_export_cron', array( self::$instance, 'run_static_export' ) );
 
 			// Filters
 			add_filter( 'admin_footer_text', array( self::$instance, 'filter_admin_footer_text' ), 15 );
@@ -233,11 +233,11 @@ class Plugin {
 	}
 
 	/**
-	 * Handle archive job with cron.
+	 * Handle archive job without ajax.
 	 *
 	 * @return void
 	 */
-	public function run_static_export_with_cron() {
+	public function run_static_export() {
 		$this->archive_creation_job->start();
 	}
 
@@ -248,6 +248,7 @@ class Plugin {
 	 */
 	public function static_archive_action() {
 		check_ajax_referer( 'simply-static_generate' );
+
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			die( __( 'Not permitted', 'simply-static' ) );
 		}
@@ -266,7 +267,7 @@ class Plugin {
 				// Cron is unavaiable.
 				$this->archive_creation_job->start();
 			}
-		} else if ( $action === 'cancel' ) {
+		} elseif ( $action === 'cancel' ) {
 			Util::debug_log( "Received request to cancel static archive generation" );
 			$this->archive_creation_job->cancel();
 		}
