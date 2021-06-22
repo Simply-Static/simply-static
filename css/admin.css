@@ -31,6 +31,15 @@
 #sistContainer #generate {
     background: #6804cc;
     border: none;
+	width: 20%;
+	display: inline-block;
+}
+
+#sistContainer #cancel {
+    width: 20%;
+    display: inline-block;
+    min-height: 50px;
+    margin-left: 5px;
 }
 
 #sistContainer #activityLog .error-state {
@@ -39,6 +48,10 @@
 
 #sistContainer .spinner {
 	float: none;
+}
+
+#sistContainer .actions {
+    width: 100%;
 }
 
 #sistContainer .actions .spinner {
@@ -60,7 +73,7 @@
 }
 
 #sistContainer .hide {
-	display: none;
+	display: none !important;
 }
 
 #sistContainer .button.button-destroy {
