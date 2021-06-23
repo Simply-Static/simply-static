@@ -1,6 +1,6 @@
 === Simply Static ===
 Contributors: patrickposner
-Tags: html, static website generator, static site, secure, fast
+Tags: HTML, static website generator, static site, secure, fast
 Requires at least: 5.4
 Tested up to: 5.7
 Requires PHP: 7.2.5
@@ -12,21 +12,21 @@ Create a static website directly from your WordPress website with Simply Static.
 
 == Description ==
 
-Simply Static is a static site generator which converts your existing WordPress website to a static website that you can host on your server, a static hosting provider or a CDN.
-It drastically improves the performance of your website and minimize security risks as it removes the connection between your traditional server and your static website.
+Simply Static is a static site generator that converts your existing WordPress website to a static website that you can host on your server, a static hosting provider, or a CDN.
+It drastically improves the performance of your website and minimizes security risks as it removes the connection between your traditional server and your static website.
 
 Simply Static can also be used by local development tools like LocalWP or Lando to develop your website offline and push the static site online.
 This reduces your hosting costs to zero (depending on your requirements and the used service/provider).
 
 = Performance =
 
-Converting your website to a static website can drastically improve your performance. Simply Static eleminates all requests to your database and by that reducing the first time to byte.
-This is especially impactful for websites that use long pages with a lot of animations, graphs and other load-heavy tools like sliders.
+Converting your website to a static website can drastically improve your performance. Simply Static eliminates all requests to your database and by that reducing the first time to byte.
+This is especially impactful for websites that use long pages with a lot of animations, graphs, and other load-heavy tools like sliders.
 
 = Security =
 
 Removing the connection to your database and traditional server reduces the risk of getting hacked. 
-This reduces the stress to keep your WordPress website up to date and keeps your data secure (locally or in an protected environment).
+This reduces the stress to keep your WordPress website up to date and keeps your data secure (locally or in a protected environment).
 
 = Reduce hosting costs =
 
@@ -35,7 +35,7 @@ With the right setup, you can even host your website completely for free (Cloudf
 
 = Local development =
 
-Develop your site locally and only push the static exported website on a server. To ensure every thing works as expected I created a list of development tools that are completely supported:
+Develop your site locally and only push the static exported website on a server. To ensure everything works as expected I created a list of development tools that are completely supported:
 
 * [LocalWP](https://localwp.com/)
 * [lando](https://docs.lando.dev/)
@@ -48,10 +48,9 @@ The pro version of Simply Static enhances the plugin with various features.
 
 = GitHub Integration =
 
-With the GitHub integration you can completely automate your entire development process. The only thing you need is an GitHub account, no knowlege of Git or GitHub itself is required,
-as Simply Static Pro handles the entire process for you and keep your repository up to date.
+With the GitHub integration, you can completely automate your entire development process. The only thing you need is a GitHub account, no knowledge of Git or GitHub itself is required, as Simply Static Pro handles the entire process for you and keeps your repository up to date.
 
-This allows to deploy your static website to:
+This allows deploying your static website to:
 
 * GitHub Pages
 * Cloudflare Pages
@@ -60,9 +59,7 @@ This allows to deploy your static website to:
 * Amazon S3
 * Digital Ocean Spaces
 * BunnyCDN (and other CDN providers)
-* SFTP to your own server
-
-and on almost any other static hosting provider out there.
+* SFTP to your server
 
 Learn more about that [here](https://patrickposner.dev/docs/simply-static/github)
 
@@ -71,7 +68,7 @@ Learn more about that [here](https://patrickposner.dev/docs/simply-static/github
 Create builds to export only a subset of pages/posts. You can assign a build to every custom post type in your WordPress admin area and export them.
 Never sit back and watch a full static export running, instead run a complete export once and then use builds to export the changes as fast as possible.
 
-You can also export single pages/posts after you made a change to publish it immediately on your static website.
+You can also export single pages/posts after changed something.
 
 Learn more about that [here](https://patrickposner.dev/docs/simply-static/builds)
 
@@ -85,14 +82,14 @@ Learn more about that [here](https://patrickposner.dev/docs/simply-static/forms)
 = Search =
 
 Use a fully static search solution that does not rely on any Third-Party-Providers. It uses Fuse.js and creates an index of your whole website as a JSON file.
-The search supports autosuggestion and fuzzy logic and is by default way more convinient than your default WordPress search.
+The search supports autosuggestion and fuzzy logic and is by default way more convenient than your default WordPress search.
 
 Learn more about that [here](https://patrickposner.dev/docs/simply-static/search)
 
 = Comments =
 
 Enable comments on your static website without the requirement of Third-Party-Providers. Use your original WordPress website to process the comment.
-After a comment was made, Simply Static automatically exports a new static version of the post that got a new comment and you don't have to do anything.
+After a comment was submitted, Simply Static automatically exports a new static version of the post. You don't have to do anything.
 
 Learn more about that [here](https://patrickposner.dev/docs/simply-static/search)
 
@@ -111,7 +108,7 @@ You can check the current tutorials [here](https://patrickposner.dev/tag/simply-
 1. Log into your WordPress website.
 2. On the left menu, hover over Plugins and then click on Add New.
 3. In the Search Plugins box, type in "Simply Static" and press the Enter key.
-4. You will see a list of search results which should include the Simply Static plugin. Click on the Install Now button to install the plugin.
+4. You will see a list of search results that should include the Simply Static plugin. Click on the Install Now button to install the plugin.
 5. After installing the plugin you will be prompted to activate it. Click on the Activate Plugin link.
 6. The Simply Static plugin is now installed and can be found on the left menu.
 
@@ -126,17 +123,17 @@ or
 
 Simply Static generates static (HTML) copies of your WordPress pages. It works a bit like a web crawler, starting at the main page of your website and looking for links to other pages to create static copies of. It also includes any images, CSS & JS files, and any other files that it can find a link to.
 
-As Simply Static is creating the static pages, it will automatically replace the URLs for the WordPress installation with either (a) absolute URLs, at a domain of your choice or (b) relative URLs, so you can host the static files on any domain or (c) URLs constructed for offline use, so you can browse the site locally on your own computer.
+As Simply Static is creating the static pages, it will automatically replace the URLs for the WordPress installation with either (a) absolute URLs, at a domain of your choice or (b) relative URLs, so you can host the static files on any domain or (c) URLs constructed for offline use, so you can browse the site locally on your computer.
 
 = Who should use Simply Static? =
 
-Pretty much everyone, besides e-commerce or membership sites as they require a serious amount of interaction and user accounts, which are not available on a static website.
+Pretty much everyone, besides e-commerce or membership sites. They require a serious amount of interaction and user accounts, which are not available on a static website.
 
 = Are there any limitations? =
 
 You can not use plugins that require a login as there is no account system on a static website. This applies to e-commerce (like WooCommerce) or membership sites.
 
-Also some kind of websites that rely heavily on ajax to update content in realtime are not the best project for Simply Static as a serious amount of custom development would be required.
+Also, a website that relies heavily on ajax to update content in real-time is not the best project for Simply Static as a serious amount of custom development would be required.
 
 = How do I set up Simply Static? =
 
@@ -146,7 +143,7 @@ If www.example.com is on the same server as your WordPress installation, you can
 
 = Will this plugin interfere with other plugins? =
 
-No, Simply Static will not interfere with other plugins. In fact, Simply Static works well alongside other plugins, such as plugins to improve your site's SEO.
+No, Simply Static will not interfere with other plugins. Simply Static works well alongside other plugins, such as plugins to improve your site's SEO.
 
 Simply Static creates a static copy of your website, which is just a collection of files: HTML, CSS, JS, images, etc. Any functionality that requires PHP code will not work with that static copy. That includes, but is not limited to: blog post comments, contact forms, forums, membership areas, and eCommerce.
 
@@ -154,14 +151,14 @@ Note that you can achieve much of this functionality by using plugins that inter
 
 = How is Simply Static different from cache plugins? =
 
-Cache plugins -- such as W3 Total Cache or WP Super Cache -- make your existing WordPress site faster by caching pages as they're visited. This makes your site much faster, but still leaves your WordPress installation accessible to the outside world. Unless you keep on top of updates, your WordPress installation can become vulnerable to hackers due to security vulnerabilities that are found over time.
+Cache plugins -- such as W3 Total Cache or WP Super Cache -- make your existing WordPress site faster by caching pages as they're visited. This makes your site much faster but still leaves your WordPress installation accessible to the outside world. Unless you keep on top of updates, your WordPress installation can become vulnerable to hackers due to security vulnerabilities that are found over time.
 
-Simply Static creates a static copy of your WordPress site that is intended to be used completely separately from your WordPress installation. Your WordPress installation lives on one server and your static site is served on a different server. Or, they're both on the same server, but your WordPress installation is restricted to only allow access from certain ip addresses or with an additional username/password requirement. Your static site is just a collection of static files with no server-side code or database -- nothing for hackers to hack -- while your WordPress installation remains safe and secure.
+Simply Static creates a static copy of your WordPress site that is intended to be used completely separately from your WordPress installation. Your WordPress installation lives on one server and your static site is served on a different server. Or, they're both on the same server, but your WordPress installation is restricted to only allow access from certain IP addresses or with an additional username/password requirement. Your static site is just a collection of static files with no server-side code or database -- nothing for hackers to hack -- while your WordPress installation remains safe and secure.
 
 == Screenshots ==
 
-1. This is what the Simply Static Generate page looks like after you've generated your static files. While Simply Static is running, you can view it's progress in the Activity Log. Once Simply Static has finished running, we'll show you exactly which files we made a static copy of in the Export Log.
-2. The Simply Static General Settings page. With the Destination URLs option you can select how you want URLs to show up on your static site. And for the Delivery Method you have the choice of creating a ZIP archive or saving the files to a directory on the server.
+1. This is what the Simply Static Generate page looks like after you've generated your static files. While Simply Static is running, you can view its progress in the Activity Log. Once Simply Static has finished running, we'll show you exactly which files we made a static copy of in the Export Log.
+2. The Simply Static General Settings page. With the Destination URLs option, you can select how you want URLs to show up on your static site. And for the Delivery Method, you have the choice of creating a ZIP archive or saving the files to a directory on the server.
 3. On the Include/Exclude page, you can select additional URLs, files, or directories to include in your static site. And you can also choose URLs (or URL patterns) to exclude from your static site.
 
 == Changelog ==
@@ -194,17 +191,17 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 * added composer support
 * updated dependencies
 * more fail-safe bootup
-* added sorting by status code
+* Added sorting by status code
 * removed wp_mail_content_type filter
-* fixed PHP notices for PHP 7.4 support
+* Fixed PHP notices for PHP 7.4 support
 * new composer package for simplehtmldom with Symfony Finder
 + improved doc blocks for models and tasks
-* auto exclude wp-json and wp-login.php from export
-* trailingslash / untrailingslash check pages
+* auto exclude wp-JSON and wp-login.php from export
+* trailing slash / untrailingslash check pages
 
 = 2.1.1, December 20, 2020 =
 
-* fixed PHP Dom parser for later PHP versions
+* Fixed PHP Dom parser for later PHP versions
 * removed PHP faker due to end of development
 * little color modifications in admin areas
 * new plugin header and readme
@@ -215,7 +212,7 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 
 = 2.0.7, April 7, 2017 =
 
-* Fix: Non-latin characters should no longer get converted to HTML entities (thanks xi80r6!)
+* Fix: Non-Latin characters should no longer get converted to HTML entities (thanks xi80r6!)
 
 = 2.0.6, April 4, 2017 =
 
@@ -254,7 +251,7 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 * New: Added support for Accelerated Mobile Pages (AMP) HTML attributes
 * Fix: URLs containing the WP URL as a query param will rewrite the param with the new URL
 * Fix: Non-WP URLs in the Additional URLs section no longer cause Simply Static to hang
-* Fix: Zip creation will no longer throw errors when trying to process 0 byte files
+* Fix: Zip creation will no longer throw errors when trying to process 0-byte files
 * Fix: Fixed an issue that could cause Simply Static to not remove all files when uninstalling
 * Fix: Local directories are now always chmod'd to 0755 so that they're readable
 * Fix: Additional errors will be caught and displayed when generating static files
@@ -279,7 +276,7 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 
 = 1.7.0, October 06, 2016 =
 
-* New: Destination URLs can now begin with // (in addition to http:// & https://)
+* New: Destination URLs can now begin with // (in addition to HTTP:// & HTTPS://)
 * New: You can now use relative URLs (instead of absolute URLs) for the static site
 * New: Now able to export a static site for use offline
 
@@ -294,13 +291,13 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 
 = 1.6.1, July 14, 2016 =
 
-* Fix: No more "Call to a member function find() on a non-object" error. Thanks jwatkins0101!
+* Fix: No more "Call to a member function find() on a non-object" error. Thanks, jwatkins0101!
 
 = 1.6.0, June 07, 2016 =
 
 * Improvement: The DomDocument PHP extension is no longer required (replaced by SimpleHtmlDomParser)
 * Fix: No longer creating empty html attributes
-* Fix: No longer throwing the 'Function name must be a string' error in diagnostics. Thanks andrew-s!
+* Fix: No longer throwing the 'Function name must be a string' error in diagnostics. Thanks, Andrew-s!
 
 = 1.5.1, June 05, 2016 =
 
@@ -336,11 +333,11 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 
 = 1.3.3, April 13, 2016 =
 
-* Fix: Attempt #3 at fixing Simply Static's upgrading process :'(
+* Fix Attempt #3 at fixing Simply Static's upgrading process :'(
 
 = 1.3.2, April 12, 2016 =
 
-* Fix: Attempt #2 at fixing Simply Static's upgrading process :(
+* Fix Attempt #2 at fixing Simply Static's upgrading process :(
 
 = 1.3.1, April 12, 2016 =
 
@@ -357,7 +354,7 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 
 = 1.2.3, March 8, 2016 =
 
-* Fix: http and https on the same domain are treated as the same site (no redirect files will be created)
+* Fix: HTTP and HTTPS on the same domain are treated as the same site (no redirect files will be created)
 * New: Added support for the img tag's srcset attribute, used for responsive images
 
 = 1.2.2, January 26, 2016 =
