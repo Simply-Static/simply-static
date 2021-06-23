@@ -8,29 +8,103 @@ Stable tag: 2.1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Create a static copy of your WordPress site that you can serve on your favorite web server.
+Create a static website directly from your WordPress website with Simply Static.
 
 == Description ==
 
-Simply Static is a static site generator for WordPress that helps you create a static site that you can serve separately from your WordPress installation. This provides a couple benefits. One, this allows you to keep WordPress in a secure location that no one can access but you. Two, your static site is going to be really, _really_ fast.
+Simply Static is a static site generator which converts your existing WordPress website to a static website that you can host on your server, a static hosting provider or a CDN.
+It drastically improves the performance of your website and minimize security risks as it removes the connection between your traditional server and your static website.
 
-= Security =
-
-WordPress is used by [one in four websites](http://venturebeat.com/2015/11/08/wordpress-now-powers-25-of-the-web/). That makes it a prime target for hackers. There are a lot of ways that your site can be compromised, but two-thirds of all hacks are caused by [vulnerabilities in WordPress plugins, themes, and core files](https://www.wordfence.com/blog/2016/03/attackers-gain-access-wordpress-sites/).
-
-Keeping WordPress secure requires constant vigilance. Exploits are being found for WordPress themes and plugins every day. Even WordPress itself has critical vulnerabilities from time to time. If you don’t stay on top of updates, your site *will* get hacked. It’s just a matter of when.
-
-But what if there was an easy way to keep WordPress secure? What if you could lock WordPress away somewhere where no one can get to it but you?
-
-With Simply Static you can put your WordPress installation in a secure location and publish a static site for the rest of the world to see. You can keep WordPress at a secret URL, protect it with .htaccess, or even put it behind a VPN. Simply Static will create static copies of all of the pages from your WordPress installation and replace the URLs to match where you’ll be hosting it.
+Simply Static can also be used by local development tools like LocalWP or Lando to develop your website offline and push the static site online.
+This reduces your hosting costs to zero (depending on your requirements and the used service/provider).
 
 = Performance =
 
-Every time you visit a WordPress page it needs to perform database queries to fetch content and run PHP code to render the page. These actions take time to perform.
+Converting your website to a static website can drastically improve your performance. Simply Static eleminates all requests to your database and by that reducing the first time to byte.
+This is especially impactful for websites that use long pages with a lot of animations, graphs and other load-heavy tools like sliders.
 
-With Simply Static, you’re creating a static copy of all of your WordPress pages. That time to create each page is incurred once, when Simply Static runs. When someone visits your static site they can instantly receive the page because Simply Static already did the work of creating it.
+= Security =
 
-Depending on the complexity of your site, theme, and plugins, using a static site can easily increase the performance of your site by 10x.
+Removing the connection to your database and traditional server reduces the risk of getting hacked. 
+This reduces the stress to keep your WordPress website up to date and keeps your data secure (locally or in an protected environment).
+
+= Reduce hosting costs =
+
+Using Simply Static to deploy your website to one of the static hosting providers, a CDN or an S3 bucket reduces the amount of money required for reliable web hosting.
+With the right setup, you can even host your website completely for free (Cloudflare Pages and GitHub Pages for example).
+
+= Local development =
+
+Develop your site locally and only push the static exported website on a server. To ensure every thing works as expected I created a list of development tools that are completely supported:
+
+* [LocalWP](https://localwp.com/)
+* [lando](https://docs.lando.dev/)
+
+I highly recommend not to use another tool for local development if you are not a programmer as in most cases manual package installation is required.
+
+== Simply Static Pro ==
+
+The pro version of Simply Static enhances the plugin with various features.
+
+= GitHub Integration =
+
+With the GitHub integration you can completely automate your entire development process. The only thing you need is an GitHub account, no knowlege of Git or GitHub itself is required,
+as Simply Static Pro handles the entire process for you and keep your repository up to date.
+
+This allows to deploy your static website to:
+
+* GitHub Pages
+* Cloudflare Pages
+* Netlify
+* Vercel
+* Amazon S3
+* Digital Ocean Spaces
+* BunnyCDN (and other CDN providers)
+* SFTP to your own server
+
+and on almost any other static hosting provider out there.
+
+Learn more about that [here](https://patrickposner.dev/docs/simply-static/github)
+
+= Builds and Single Exports =
+
+Create builds to export only a subset of pages/posts. You can assign a build to every custom post type in your WordPress admin area and export them.
+Never sit back and watch a full static export running, instead run a complete export once and then use builds to export the changes as fast as possible.
+
+You can also export single pages/posts after you made a change to publish it immediately on your static website.
+
+Learn more about that [here](https://patrickposner.dev/docs/simply-static/builds)
+
+= Forms =
+
+Simply Static Pro supports Contact Form 7 and Gravity Forms to use on your static website. You can decide if you want to use an external service like Zapier and IFTTT or
+if your original WordPress website should handle the submission and send you an e-mail with all the details.
+
+Learn more about that [here](https://patrickposner.dev/docs/simply-static/forms)
+
+= Search =
+
+Use a fully static search solution that does not rely on any Third-Party-Providers. It uses Fuse.js and creates an index of your whole website as a JSON file.
+The search supports autosuggestion and fuzzy logic and is by default way more convinient than your default WordPress search.
+
+Learn more about that [here](https://patrickposner.dev/docs/simply-static/search)
+
+= Comments =
+
+Enable comments on your static website without the requirement of Third-Party-Providers. Use your original WordPress website to process the comment.
+After a comment was made, Simply Static automatically exports a new static version of the post that got a new comment and you don't have to do anything.
+
+Learn more about that [here](https://patrickposner.dev/docs/simply-static/search)
+
+= Get the Pro version =
+
+You can get the pro version [here](https://patrickposner.dev/plugins/simply-static/).
+
+= Tutorials =
+
+I publish new tutorials on how to work with Simply Static and other tools on my blog.
+You can check the current tutorials [here](https://patrickposner.dev/tag/simply-static/)
+
 
 == Installation ==
 
@@ -56,11 +130,13 @@ As Simply Static is creating the static pages, it will automatically replace the
 
 = Who should use Simply Static? =
 
-Simply Static is great for sites with no user interactivity, such as blogs (with comments disabled) or brochure-ware sites for small businesses (with no forms).
+Pretty much everyone, besides e-commerce or membership sites as they require a serious amount of interaction and user accounts, which are not available on a static website.
 
 = Are there any limitations? =
 
-Yes. Simply Static is only able to create a static copy of an *entire* site. It cannot selectively create static copies of specific pages, such as recently added posts. This means that if you have a site with 20,000 posts, and you add a new post, Simply Static will create a static copy of all 20,001 posts. This, combined with the fact that the plugin doesn't provide any kind of progress notification, means that Simply Static will provide a less-than-optimal experience for very large WordPress sites. We do plan to support very large sites eventually.
+You can not use plugins that require a login as there is no account system on a static website. This applies to e-commerce (like WooCommerce) or membership sites.
+
+Also some kind of websites that rely heavily on ajax to update content in realtime are not the best project for Simply Static as a serious amount of custom development would be required.
 
 = How do I set up Simply Static? =
 
@@ -74,17 +150,13 @@ No, Simply Static will not interfere with other plugins. In fact, Simply Static 
 
 Simply Static creates a static copy of your website, which is just a collection of files: HTML, CSS, JS, images, etc. Any functionality that requires PHP code will not work with that static copy. That includes, but is not limited to: blog post comments, contact forms, forums, membership areas, and eCommerce.
 
-Note that you can achieve much of this functionality by using plugins that interact with third-party services. For example, for blog post comments you could use [Disqus](https://wordpress.org/plugins/disqus-comment-system/) and for forms you could use [Wufoo](https://wordpress.org/plugins/wufoo-shortcode/).
+Note that you can achieve much of this functionality by using plugins that interact with third-party services or Simply Static Pro.
 
 = How is Simply Static different from cache plugins? =
 
 Cache plugins -- such as W3 Total Cache or WP Super Cache -- make your existing WordPress site faster by caching pages as they're visited. This makes your site much faster, but still leaves your WordPress installation accessible to the outside world. Unless you keep on top of updates, your WordPress installation can become vulnerable to hackers due to security vulnerabilities that are found over time.
 
 Simply Static creates a static copy of your WordPress site that is intended to be used completely separately from your WordPress installation. Your WordPress installation lives on one server and your static site is served on a different server. Or, they're both on the same server, but your WordPress installation is restricted to only allow access from certain ip addresses or with an additional username/password requirement. Your static site is just a collection of static files with no server-side code or database -- nothing for hackers to hack -- while your WordPress installation remains safe and secure.
-
-= Does Simply Static work on Windows hosts? What about WAMP? =
-
-No. We haven't done any testing on Windows and, based on user feedback, it seems like it is not working on Windows presently.
 
 == Screenshots ==
 
@@ -100,6 +172,8 @@ No. We haven't done any testing on Windows and, based on user feedback, it seems
 * check for WP cron
 * check for PHP XML extension
 * fallback if cron not available
+* CSS improvements
+
 
 = 2.1.3 =
 
