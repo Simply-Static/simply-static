@@ -37,7 +37,7 @@ class Fetch_Urls_Task extends Task {
 			->where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time )
 			->limit( $batch_size )
 			->find(),
-			$this->archive_start_time,
+			$this->archive_start_time
 		);
 
 		$pages_remaining = apply_filters(
@@ -45,7 +45,7 @@ class Fetch_Urls_Task extends Task {
 			Page::query()
 			->where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time )
 			->count(),
-			$this->archive_start_time,
+			$this->archive_start_time
 		);
 
 		$total_pages = apply_filters( 'ss_total_pages', Page::query()->count() );

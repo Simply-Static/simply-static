@@ -495,7 +495,7 @@ class Plugin {
 				'delivery_method'      => $this->fetch_post_value( 'delivery_method' ),
 				'local_dir'            => Util::trailingslashit_unless_blank( $this->fetch_post_value( 'local_dir' ) ),
 				'destination_url_type' => $destination_url_type,
-				'relative_path'        => $relative_path,
+				'relative_path'        => $relative_path
 			)
 		);
 
