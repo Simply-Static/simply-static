@@ -169,9 +169,9 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 
 == Screenshots ==
 
-1. This is what the Simply Static Generate page looks like after you've generated your static files. While Simply Static is running, you can view its progress in the Activity Log. Once Simply Static has finished running, we'll show you exactly which files we made a static copy of in the Export Log.
-2. The Simply Static General Settings page. With the Destination URLs option, you can select how you want URLs to show up on your static site. And for the Delivery Method, you have the choice of creating a ZIP archive or saving the files to a directory on the server.
-3. On the Include/Exclude page, you can select additional URLs, files, or directories to include in your static site. And you can also choose URLs (or URL patterns) to exclude from your static site.
+1. Generate
+2. Settings
+3. Diagnostics
 
 == Changelog ==
 
