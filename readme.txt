@@ -13,24 +13,29 @@ Create a static website directly from your WordPress website with Simply Static.
 == Description ==
 
 Simply Static is a static site generator that converts your existing WordPress website to a static website that you can host on your server, a static hosting provider, or a CDN.
+
 It drastically improves the performance of your website and minimizes security risks as it removes the connection between your traditional server and your static website.
 
 Simply Static can also be used by local development tools like LocalWP or Lando to develop your website offline and push the static site online.
+
 This reduces your hosting costs to zero (depending on your requirements and the used service/provider).
 
 = Performance =
 
 Converting your website to a static website can drastically improve your performance. Simply Static eliminates all requests to your database and by that reducing the first time to byte.
+
 This is especially impactful for websites that use long pages with a lot of animations, graphs, and other load-heavy tools like sliders.
 
 = Security =
 
 Removing the connection to your database and traditional server reduces the risk of getting hacked. 
+
 This reduces the stress to keep your WordPress website up to date and keeps your data secure (locally or in a protected environment).
 
 = Reduce hosting costs =
 
 Using Simply Static to deploy your website to one of the static hosting providers, a CDN or an S3 bucket reduces the amount of money required for reliable web hosting.
+
 With the right setup, you can even host your website completely for free (Cloudflare Pages and GitHub Pages for example).
 
 = Local development =
@@ -48,7 +53,9 @@ The pro version of Simply Static enhances the plugin with various features.
 
 = GitHub Integration =
 
-With the GitHub integration, you can completely automate your entire development process. The only thing you need is a GitHub account, no knowledge of Git or GitHub itself is required, as Simply Static Pro handles the entire process for you and keeps your repository up to date.
+With the GitHub integration, you can completely automate your entire development process. 
+
+The only thing you need is a GitHub account, no knowledge of Git or GitHub itself is required, as Simply Static Pro handles the entire process for you and keeps your repository up to date.
 
 This allows deploying your static website to:
 
@@ -66,6 +73,7 @@ Learn more about that [here](https://patrickposner.dev/docs/simply-static/github
 = Builds and Single Exports =
 
 Create builds to export only a subset of pages/posts. You can assign a build to every custom post type in your WordPress admin area and export them.
+
 Never sit back and watch a full static export running, instead run a complete export once and then use builds to export the changes as fast as possible.
 
 You can also export single pages/posts after changed something.
@@ -74,14 +82,16 @@ Learn more about that [here](https://patrickposner.dev/docs/simply-static/builds
 
 = Forms =
 
-Simply Static Pro supports Contact Form 7 and Gravity Forms to use on your static website. You can decide if you want to use an external service like Zapier and IFTTT or
-if your original WordPress website should handle the submission and send you an e-mail with all the details.
+Simply Static Pro supports Contact Form 7 and Gravity Forms to use on your static website.
+
+You can decide if you want to use an external service like Zapier and IFTTT or if your original WordPress website should handle the submission and send you an e-mail with all the details.
 
 Learn more about that [here](https://patrickposner.dev/docs/simply-static/forms)
 
 = Search =
 
 Use a fully static search solution that does not rely on any Third-Party-Providers. It uses Fuse.js and creates an index of your whole website as a JSON file.
+
 The search supports autosuggestion and fuzzy logic and is by default way more convenient than your default WordPress search.
 
 Learn more about that [here](https://patrickposner.dev/docs/simply-static/search)
@@ -89,6 +99,7 @@ Learn more about that [here](https://patrickposner.dev/docs/simply-static/search
 = Comments =
 
 Enable comments on your static website without the requirement of Third-Party-Providers. Use your original WordPress website to process the comment.
+
 After a comment was submitted, Simply Static automatically exports a new static version of the post. You don't have to do anything.
 
 Learn more about that [here](https://patrickposner.dev/docs/simply-static/search)
@@ -100,6 +111,7 @@ You can get the pro version [here](https://patrickposner.dev/plugins/simply-stat
 = Tutorials =
 
 I publish new tutorials on how to work with Simply Static and other tools on my blog.
+
 You can check the current tutorials [here](https://patrickposner.dev/tag/simply-static/)
 
 
