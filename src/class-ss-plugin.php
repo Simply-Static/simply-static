@@ -339,7 +339,7 @@ class Plugin {
 			->limit( $per_page )
 			->offset( $offset )
 			->order( 'http_status_code' )
-			->find(),
+			->find()
 		);
 
 		$http_status_codes  = Page::get_http_status_codes_summary();
