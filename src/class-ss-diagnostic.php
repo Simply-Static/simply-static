@@ -121,7 +121,7 @@ class Diagnostic {
 
 	public function is_additional_url_valid( $url ) {
 		$label = sprintf( __( 'Checking if Additional URL <code>%s</code> is valid', 'simply-static' ), $url );
-		if ( filter_var( $url, FILTER_VALIDATE_URL ) === false ) {
+		if ( filter_var( $url, FILTER_VALIDATE_URL ) ) {
 			$test = false;
 			$message = __( 'Not a valid URL', 'simply-static' );
 		} else if ( ! Util::is_local_url( $url ) ) {
