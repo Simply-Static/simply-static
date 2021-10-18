@@ -61,6 +61,8 @@ class Setup_Task extends Task {
 		self::add_origin_and_additional_urls_to_db( $additional_urls );
 		self::add_additional_files_to_db( $this->options->get( 'additional_files' ) );
 
+		do_action('ss_after_setup_task');
+
 		return true;
 	}
 

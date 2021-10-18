@@ -289,6 +289,12 @@ class Url_Extractor {
 				$tag->innertext = $updated_css;
 			}
 
+			do_action(
+				'ss_after_extract_and_replace_urls_in_html',
+				$dom,
+				$this
+			);
+
 			return $dom->save();
 		}
 	}
@@ -404,7 +410,7 @@ class Url_Extractor {
 	 * @return string The URL that should be added to the list of extracted URLs
 	 * @return string The URL, converted to an absolute/relative/offline URL
 	 */
-	private function add_to_extracted_urls( $extracted_url ) {
+	public function add_to_extracted_urls( $extracted_url ) {
 		$url = Util::relative_to_absolute_url( $extracted_url, $this->static_page->url );
 
 		if ( $url && Util::is_local_url( $url ) ) {
