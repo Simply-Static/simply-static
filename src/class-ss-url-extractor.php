@@ -54,7 +54,7 @@ class Url_Extractor {
 		'embed'        => array( 'src', 'code', 'pluginspage' ),
 		'event-source' => array( 'src' ),
 		'html'         => array( 'manifest', 'background', 'xmlns' ),
-		'source'       => array( 'src' ),
+		'source'       => array( 'src', 'srcset' ),
 		'video'        => array( 'src', 'poster' ),
 
 		'bgsound'      => array( 'src' ),
