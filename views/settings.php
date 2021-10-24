@@ -281,6 +281,21 @@ namespace Simply_Static;
 				</tbody>
 			</table>
 
+			<h2 class="title"><?php _e( "WP-Cron", 'simply-static' ); ?></h2>
+			<p><?php _e( "If you want to export a large site with Simply Static you may want to use WP-Cron for that.", 'simply-static' ); ?></p>
+			<table class='form-table  id='cron'>
+				<tbody>
+					<tr>
+						<th>
+							<label for='use_cron'><?php _e( "Use WP-Cron", 'simply-static' ); ?></label>
+						</th>
+						<td>						
+							<input type="checkbox" name="use_cron" id="use_cron" <?php Util::checked_if( $this->use_cron === 'on' ); ?> />
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
 			<table class='form-table'>
 				<tbody>
 					<tr>

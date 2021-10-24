@@ -259,7 +259,7 @@ class Plugin {
 			Util::delete_debug_log();
 			Util::debug_log( "Received request to start generating a static archive" );
 
-			if ( ! defined( 'DISABLE_WP_CRON' ) || DISABLE_WP_CRON !== true ) {
+			if ( 'on' === $this->options->get( 'use_cron' ) && ! defined( 'DISABLE_WP_CRON' ) || 'DISABLE_WP_CRON' !== true ) {
 				if ( ! wp_next_scheduled( 'simply_static_site_export_cron' ) ) {
 					wp_schedule_single_event( time(), 'simply_static_site_export_cron' );
 				}
@@ -400,6 +400,7 @@ class Plugin {
 			->assign( 'delivery_method', $this->options->get( 'delivery_method' ) )
 			->assign( 'local_dir', $this->options->get( 'local_dir' ) )
 			->assign( 'destination_url_type', $this->options->get( 'destination_url_type' ) )
+			->assign( 'use_cron', $this->options->get( 'use_cron' ) )
 			->assign( 'relative_path', $this->options->get( 'relative_path' ) )
 			->assign( 'http_basic_auth_digest', $this->options->get( 'http_basic_auth_digest' ) )
 			->render();
@@ -495,7 +496,8 @@ class Plugin {
 				'delivery_method'      => $this->fetch_post_value( 'delivery_method' ),
 				'local_dir'            => Util::trailingslashit_unless_blank( $this->fetch_post_value( 'local_dir' ) ),
 				'destination_url_type' => $destination_url_type,
-				'relative_path'        => $relative_path
+				'relative_path'        => $relative_path,
+				'use_cron'             => $this->fetch_post_value( 'use_cron' ),
 			)
 		);
 
