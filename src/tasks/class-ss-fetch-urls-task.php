@@ -96,6 +96,8 @@ class Fetch_Urls_Task extends Task {
 
 			$this->handle_200_response( $static_page, $save_file, $follow_urls );
 
+			do_action( 'ss_after_setup_static_page', $static_page );
+
 		}
 
 		$message = sprintf( __( "Fetched %d of %d pages/files", 'simply-static' ), $pages_processed, $total_pages );
