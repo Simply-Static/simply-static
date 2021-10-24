@@ -129,21 +129,8 @@ namespace Simply_Static;
 						<?php endif; ?>
 					</td>
 				</tr>
-				<tr>
-					<th><?php _e( "Send Debug Log by Email", 'simply-static' ); ?></th>
-					<td>
-						<?php if ( $this->debug_file_exists ) : ?>
-							<input type="email" name="email_address" id="emailAddress" value="support@simplystatic.co" />
-							<input class="button" type="submit" id="sendEmail" value="<?php _e( "Send", 'simply-static' );?>"/>
-						<?php else : ?>
-							<p><?php _e( "You have not created a debug log yet.", 'simply-static' ); ?></p>
-						<?php endif; ?>
-					</td>
-				</tr>
 			</tbody>
 		</table>
-
 	</form>
-
 </div>
 <!-- .wrap -->
