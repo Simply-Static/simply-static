@@ -29,7 +29,7 @@ class Url_Extractor {
 		// HTML
 		'a'            => array( 'href', 'urn' ),
 		'base'         => array( 'href' ),
-		'form'         => array( 'action', 'data' ),
+		'form'         => array( 'data' ),
 		'img'          => array( 'src', 'usemap', 'longdesc', 'dynsrc', 'lowsrc', 'srcset' ),
 		'amp-img'      => array( 'src', 'srcset' ),
 		'link'         => array( 'href' ),
@@ -37,7 +37,7 @@ class Url_Extractor {
 		'applet'       => array( 'code', 'codebase', 'archive', 'object' ),
 		'area'         => array( 'href' ),
 		'body'         => array( 'background', 'credits', 'instructions', 'logo' ),
-		'input'        => array( 'src', 'usemap', 'dynsrc', 'lowsrc', 'action', 'formaction' ),
+		'input'        => array( 'src', 'usemap', 'dynsrc', 'lowsrc', 'formaction' ),
 
 		'blockquote'   => array( 'cite' ),
 		'del'          => array( 'cite' ),
@@ -66,7 +66,7 @@ class Url_Extractor {
 		'layer'        => array( 'src' ),
 		'xml'          => array( 'src' ),
 
-		'button'       => array( 'action', 'formaction' ),
+		'button'       => array( 'formaction' ),
 		'datalist'     => array( 'data' ),
 		'select'       => array( 'data' ),
 
@@ -103,7 +103,7 @@ class Url_Extractor {
 	 * The url of the site
 	 * @var array
 	 */
-	protected $extracted_urls = array();
+	public $extracted_urls = array();
 
 	/**
 	 * Constructor
