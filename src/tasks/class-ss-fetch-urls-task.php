@@ -11,7 +11,7 @@ class Fetch_Urls_Task extends Task {
 	 *
 	 * @var string
 	 */
-	protected static $task_name = 'fetch_urls';
+	public static $task_name = 'fetch_urls';
 
 	/**
 	 * Constructor
@@ -95,6 +95,7 @@ class Fetch_Urls_Task extends Task {
 			}
 
 			$this->handle_200_response( $static_page, $save_file, $follow_urls );
+
 		}
 
 		$message = sprintf( __( "Fetched %d of %d pages/files", 'simply-static' ), $pages_processed, $total_pages );
@@ -104,6 +105,8 @@ class Fetch_Urls_Task extends Task {
 		return $pages_remaining == 0;
 	}
 
+
+
 	/**
 	 * Process the response for a 200 response (success)
 	 *
@@ -112,7 +115,7 @@ class Fetch_Urls_Task extends Task {
 	 * @param  boolean            $follow_urls Save found URLs to database.
 	 * @return void
 	 */
-	protected function handle_200_response( $static_page, $save_file, $follow_urls ) {
+	public function handle_200_response( $static_page, $save_file, $follow_urls ) {
 		if ( $save_file || $follow_urls ) {
 			Util::debug_log( "Extracting URLs and replacing URLs in the static file" );
 			// Fetch all URLs from the page and add them to the queue...
@@ -158,7 +161,7 @@ class Fetch_Urls_Task extends Task {
 	 * @param  boolean            $follow_urls   Save redirect URL to database?
 	 * @return void
 	 */
-	protected function handle_30x_redirect( $static_page, $save_file, $follow_urls ) {
+	public function handle_30x_redirect( $static_page, $save_file, $follow_urls ) {
 		$origin_url = Util::origin_url();
 		$destination_url = $this->options->get_destination_url();
 		$current_url = $static_page->url;
@@ -240,7 +243,7 @@ class Fetch_Urls_Task extends Task {
 	 * @param object $static_page current page.
 	 * @return bool
 	 */
-	protected function find_excludable( $static_page ) {
+	public function find_excludable( $static_page ) {
 		$url         = $static_page->url;
 		$excludables = array();
 
@@ -268,7 +271,7 @@ class Fetch_Urls_Task extends Task {
 	 * @param string             $start_time  Static generation start time.
 	 * @return void
 	 */
-	protected function set_url_found_on( $static_page, $child_url ) {
+	public function set_url_found_on( $static_page, $child_url ) {
 		$child_static_page = Page::query()->find_or_create_by( 'url' , $child_url );
 		if ( $child_static_page->found_on_id === null || $child_static_page->updated_at < $this->archive_start_time ) {
 			$child_static_page->found_on_id = $static_page->id;
@@ -283,7 +286,7 @@ class Fetch_Urls_Task extends Task {
 	 * @param string             $content The content of the page we want to save.
 	 * @return string|null                The file path of the saved file.
 	 */
-	protected function save_static_page_content_to_file( $static_page, $content ) {
+	public function save_static_page_content_to_file( $static_page, $content ) {
 		$relative_filename = Url_Fetcher::instance()->create_directories_for_static_page( $static_page );
 
 		if ( $relative_filename ) {
