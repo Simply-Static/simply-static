@@ -2,9 +2,9 @@
 Contributors: patrickposner
 Tags: HTML, static website generator, static site, secure, fast
 Requires at least: 5.4
-Tested up to: 5.7
+Tested up to: 5.8
 Requires PHP: 7.2.5
-Stable tag: 2.1.4.2
+Stable tag: 2.1.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -174,6 +174,24 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 3. Diagnostics
 
 == Changelog ==
+
+= 2.1.5 =
+
+* default export without cron
+* fixed generation of RSS feeds
+* better support for Yoast XML Sitemap in additional URLs
+* added option to change cron on/off
+* better URL validation
+* Windows support for slash URLs
+* actions for custom parsers (Blocksy theme compatibility)
+* enhanced matched_tags list (added srcset)
+* fixed upgrader class for DB migration
+* smaller CSS admin improvements
+* fixed Logo saving it without font requirements
+* better additional URL validation checks
+* removed send debug log mail
+* modified method visibility for fetch URLs task
+* added complete german translations
 
 = 2.1.4.2 =
 
