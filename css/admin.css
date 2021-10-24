@@ -31,12 +31,12 @@
 #sistContainer #generate {
     background: #6804cc;
     border: none;
-	width: 20%;
+	width: auto;
 	display: inline-block;
 }
 
 #sistContainer #cancel {
-    width: 20%;
+    width: auto;
     display: inline-block;
     min-height: 50px;
     margin-left: 5px;
