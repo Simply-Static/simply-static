@@ -91,7 +91,7 @@ class Upgrade_Handler {
 		if ( version_compare( $version, Plugin::VERSION, '!=' ) ) {
 			$save_changes = true;
 
-			Model::create_or_update_table();
+			Page::create_or_update_table();
 			self::set_default_options();
 
 			// perform migrations if our saved version # is older than
@@ -124,6 +124,8 @@ class Upgrade_Handler {
 
 			self::remove_old_options();
 		}
+
+		Page::create_or_update_table();
 
 		if ( $save_changes ) {
 			// update the version and save options
