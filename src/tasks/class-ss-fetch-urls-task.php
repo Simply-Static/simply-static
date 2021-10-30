@@ -104,6 +104,10 @@ class Fetch_Urls_Task extends Task {
 		$this->save_status_message( $message );
 
 		// if we haven't processed any additional pages, we're done.
+		if ( $pages_remaining == 0 ) {
+			do_action( 'ss_finished_fetching_pages' );
+		}
+
 		return $pages_remaining == 0;
 	}
 

@@ -38,8 +38,10 @@ class Transfer_Files_Locally_Task extends Task {
 		}
 
 		// return true when done (no more pages).
+		if ( $pages_processed >= $total_pages ) {
+			do_action( 'ss_finished_transferring_files_locally' );
+		}
 		return $pages_processed >= $total_pages;
-
 	}
 
 	/**
