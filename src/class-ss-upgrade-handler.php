@@ -124,9 +124,6 @@ class Upgrade_Handler {
 
 			self::remove_old_options();
 		}
-
-		Page::create_or_update_table();
-
 		if ( $save_changes ) {
 			// update the version and save options
 			self::$options
