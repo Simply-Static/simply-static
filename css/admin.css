@@ -52,6 +52,8 @@
 
 #sistContainer .actions {
     width: 100%;
+	float: left;
+	margin-bottom: 15px;	
 }
 
 #sistContainer .actions .spinner {
@@ -165,6 +167,7 @@
     display: block;
     transition: 0.5s;
     text-transform: uppercase;
+	float: left;
 }
 #sistContainer input, #sistContainer textarea {
     max-width: 60%;
