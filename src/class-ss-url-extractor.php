@@ -33,6 +33,7 @@ class Url_Extractor {
 		'img'          => array( 'src', 'usemap', 'longdesc', 'dynsrc', 'lowsrc', 'srcset' ),
 		'amp-img'      => array( 'src', 'srcset' ),
 		'link'         => array( 'href' ),
+		'meta'         => array( 'content' ),
 
 		'applet'       => array( 'code', 'codebase', 'archive', 'object' ),
 		'area'         => array( 'href' ),
