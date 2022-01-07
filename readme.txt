@@ -175,6 +175,14 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 
 == Changelog ==
 
+= 2.1.5.3 =
+
+* webp support (source tag)
+* imagify support
+* action to trigger functions before static export
+* added meta tags to extractor for twitter cards and og tags
+* added filter to extend matched_tags
+
 = 2.1.5.2 =
 
 * introduced ss_finished_fetching_pages hook
