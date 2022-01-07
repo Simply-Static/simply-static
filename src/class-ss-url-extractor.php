@@ -24,13 +24,12 @@ class Url_Extractor {
 	 * - http://php.net/manual/en/book.dom.php
 	 */
 
-	/** @const */
 	protected static $match_tags = array(
-		// HTML
 		'a'            => array( 'href', 'urn' ),
 		'base'         => array( 'href' ),
 		'form'         => array( 'data' ),
 		'img'          => array( 'src', 'usemap', 'longdesc', 'dynsrc', 'lowsrc', 'srcset' ),
+		'source'       => array( 'srcset' ),
 		'amp-img'      => array( 'src', 'srcset' ),
 		'link'         => array( 'href' ),
 		'meta'         => array( 'content' ),
@@ -265,6 +264,7 @@ class Url_Extractor {
 	 */
 	private function extract_and_replace_urls_in_html() {
 		$html_string = $this->get_body();
+		$match_tags  = apply_filters( 'ss_match_tags', self::$match_tags );
 
 		$dom = HtmlDomParser::str_get_html( $html_string );
 
@@ -273,7 +273,7 @@ class Url_Extractor {
 			return $html_string;
 		} else {
 			// handle tags with attributes
-			foreach ( self::$match_tags as $tag_name => $attributes ) {
+			foreach ( $match_tags as $tag_name => $attributes ) {
 
 				$tags = $dom->find( $tag_name );
 
