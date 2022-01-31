@@ -105,6 +105,9 @@ class Plugin {
 			add_filter( 'http_request_args', array( self::$instance, 'wpbp_http_request_args' ), 10, 2 );
 			add_filter( 'simplystatic.archive_creation_job.task_list', array( self::$instance, 'filter_task_list' ), 10, 2 );
 
+			// Updraft Plus compatibility.
+			add_action( 'updraft_backup', array( self::$instance, 'remove_http_request_filter' ) );
+
 			self::$instance->options = Options::instance();
 			self::$instance->view = new View();
 			self::$instance->archive_creation_job = new Archive_Creation_Job();
@@ -824,6 +827,15 @@ class Plugin {
 	 */
 	public function debug_on() {
 		return $this->options->get( 'debugging_mode' ) === '1';
+	}
+
+	/**
+	 * Remove Basic Auth when Updraft backup is in process
+	 *
+	 * @return void
+	 */
+	public function remove_http_request_filter() {
+		remove_filter( 'http_request_args', array( self::$instance, 'wpbp_http_request_args' ), 10, 2 );
 	}
 
 	/**
