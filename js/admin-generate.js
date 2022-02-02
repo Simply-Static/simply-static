@@ -23,9 +23,6 @@ jQuery( document ).ready( function( $ ) {
 	function initiate_action( action ) {
 		if ( action == null ) {
 			action = 'ping';
-		} else {
-			$( '#sistContainer .actions input' ).attr( 'disabled', 'disabled' );
-			$( '#sistContainer .actions .spinner' ).addClass( 'is-active' );
 		}
 
 		// cancel existing timer
@@ -49,6 +46,10 @@ jQuery( document ).ready( function( $ ) {
 		};
 
 		$.post( window.ajaxurl, data, function( response ) {
+			if ( response.action == 'start' ) {
+				$( '#generate' ).attr( 'disabled', 'disabled' );
+				$( '#sistContainer .actions .spinner' ).addClass( 'is-active' );
+			}
 			handle_response_from_archive_manager( response );
 		} );
 	}
@@ -68,18 +69,19 @@ jQuery( document ).ready( function( $ ) {
 		// only adjust the button/spinner state on a 'ping'
 		// (ensures that the job has had time to process the action)
 		if ( response.action == 'ping' ) {
-			// re-enable and hide all actions
-			$( '#sistContainer .actions input' )
-				.removeAttr( 'disabled' )
-				.addClass( 'hide' );
+				if ( done == true ) {
+					// remove spinner and show #generate
+					$( '#sistContainer .actions .spinner' ).removeClass( 'is-active' );
+					$( '#sistContainer #generate' ).removeClass( 'hide' );
+					$( '#sistContainer #cancel' ).addClass( 'hide' );
+				} else {
+					// Enable cancel button.
+					$( '#sistContainer #cancel' ).removeClass( 'hide' );
 
-			if ( done == true ) {
-				// remove spinner and show #generate
-				$( '#sistContainer .actions .spinner' ).removeClass( 'is-active' );
-				$( '#sistContainer #generate' ).removeClass( 'hide' );
-			} else {
-				$( '#sistContainer #cancel' ).removeClass( 'hide' );
-			}
+					// Disable generate button.
+					$( '#generate' ).removeAttr( 'disabled' );
+					$( '#generate' ).addClass( 'hide' );
+				}
 		}
 	}
 
