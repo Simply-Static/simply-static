@@ -104,7 +104,7 @@ class Plugin {
 			add_filter( 'update_footer', array( self::$instance, 'filter_update_footer' ), 15 );
 			add_filter( 'simplystatic.archive_creation_job.task_list', array( self::$instance, 'filter_task_list' ), 10, 2 );
 
-			add_action( 'ss_before_static_export', 'add_http_filters' );
+			add_action( 'ss_before_static_export', array( self::$instance, 'add_http_filters' ) );
 
 			self::$instance->options = Options::instance();
 			self::$instance->view = new View();
