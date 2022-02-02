@@ -102,11 +102,9 @@ class Plugin {
 			// Filters
 			add_filter( 'admin_footer_text', array( self::$instance, 'filter_admin_footer_text' ), 15 );
 			add_filter( 'update_footer', array( self::$instance, 'filter_update_footer' ), 15 );
-			add_filter( 'http_request_args', array( self::$instance, 'wpbp_http_request_args' ), 10, 2 );
 			add_filter( 'simplystatic.archive_creation_job.task_list', array( self::$instance, 'filter_task_list' ), 10, 2 );
 
-			// Updraft Plus compatibility.
-			add_action( 'updraft_backup', array( self::$instance, 'remove_http_request_filter' ) );
+			add_action( 'ss_before_static_export', 'add_http_filters' );
 
 			self::$instance->options = Options::instance();
 			self::$instance->view = new View();
@@ -834,8 +832,8 @@ class Plugin {
 	 *
 	 * @return void
 	 */
-	public function remove_http_request_filter() {
-		remove_filter( 'http_request_args', array( self::$instance, 'wpbp_http_request_args' ), 10, 2 );
+	public function add_http_filters() {
+		add_filter( 'http_request_args', array( self::$instance, 'wpbp_http_request_args' ), 10, 2 );
 	}
 
 	/**
