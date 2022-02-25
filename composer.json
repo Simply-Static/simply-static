@@ -3,9 +3,9 @@
   "description": "A simple WordPress static site generator",
   "type": "wordpress-plugin",
   "require": {
-      "voku/simple_html_dom": "^4.7.28",
+      "voku/simple_html_dom": "^4.8.3",
       "a5hleyrich/wp-background-processing": "^1.0.2",
-      "voku/portable-utf8": "^5.4"
+      "voku/portable-utf8": "^6.0.3"
   },
   "license": "gpl",
   "authors": [
