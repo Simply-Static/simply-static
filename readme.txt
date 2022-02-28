@@ -47,6 +47,22 @@ Develop your site locally and only push the static exported website on a server.
 
 I highly recommend not to use another tool for local development if you are not a programmer as in most cases manual package installation is required.
 
+
+== Simply Static Hosting ==
+
+Do you need an all-in-one solution to export and deploy your static website with Simply Static?
+
+[Simply Static Hosting](https://simplystatic.io) covers the entire process from securing your WordPress website and making it only accessible to logged-in users
+to deploying your static website to a powerful CDN for maximum security and performance. It also handles RSS-Feeds, Comments, Forms, Search, Caching, and more for you.
+
+The installations are completely configured for you, and you can also request a migration of your current website free of charge.
+
+This solution is mainly dedicated to non-technical users that like to get the benefits of running WordPress static, but don't have the time or knowledge to configure everything by themself.
+
+If you like to go the self-hosted way and you can configure deployment and your server, I would recommend going with [Simply Static Pro](https://patrickposner.dev/plugins/simply-static)
+to enhance Simply Static with solutions to handle deployment via GitHub or CDN, forms, search, and CORS for you.
+
+
 == Simply Static Pro ==
 
 The pro version of Simply Static enhances the plugin with various features.
