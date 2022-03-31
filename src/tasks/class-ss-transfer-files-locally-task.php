@@ -22,9 +22,6 @@ class Transfer_Files_Locally_Task extends Task {
 	public function perform() {
 		$local_dir = apply_filters( 'ss_local_dir', $this->options->get( 'local_dir' ) );
 
-		// Clear out the local directory before copying files.
-		$this->delete_local_directory_static_files( $local_dir );
-
 		list( $pages_processed, $total_pages ) = $this->copy_static_files( $local_dir );
 
 		if ( $pages_processed !== 0 ) {
@@ -105,36 +102,6 @@ class Transfer_Files_Locally_Task extends Task {
 		}
 
 		return array( $pages_processed, $total_pages );
-	}
-
-	/**
-	 * Delete previously generated static files from the local directory.
-	 *
-	 * @param string $local_dir The directory to delete files from.
-	 * @return true|\WP_Error True on success, WP_Error otherwise.
-	 */
-	public function delete_local_directory_static_files( $local_dir ) {
-		$options = Options::instance();
-		$dir     = $options->get( 'temp_files_dir' );
-
-		if ( false === file_exists( $dir ) ) {
-			return false;
-		}
-
-		$files = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $local_dir, \RecursiveDirectoryIterator::SKIP_DOTS ), \RecursiveIteratorIterator::CHILD_FIRST );
-
-		foreach ( $files as $fileinfo ) {
-			if ( $fileinfo->isDir() ) {
-				if ( false === rmdir( $fileinfo->getRealPath() ) ) {
-					return false;
-				}
-			} else {
-				if ( false === unlink( $fileinfo->getRealPath() ) ) {
-					return false;
-				}
-			}
-		}
-		return true;
 	}
 
 }
