@@ -267,7 +267,7 @@ class Plugin {
 			Util::delete_debug_log();
 			Util::debug_log( "Received request to start generating a static archive" );
 
-			if ( 'on' === $this->options->get( 'use_cron' ) && ( ! defined( 'DISABLE_WP_CRON' ) || 'DISABLE_WP_CRON' !== true ) ) {
+			if ( 'on' === $this->options->get( 'use_cron' ) && ! defined( 'DISABLE_WP_CRON' ) ) {
 				if ( ! wp_next_scheduled( 'simply_static_site_export_cron' ) ) {
 					wp_schedule_single_event( time(), 'simply_static_site_export_cron' );
 				}
