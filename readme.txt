@@ -191,6 +191,14 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 
 == Changelog ==
 
+= 2.1.5.7 =
+
+* http_request_args filter added for better performance with Basic Authentication
+* Windows compatibility fix for path conversion
+* reverted delete local directory for local dir exports (original merge request)
+* added filter for options getter
+* cleaned up WP Cron conditional
+
 = 2.1.5.6 =
 
 * fixed non-valid HTML character error
