@@ -44,12 +44,11 @@ class Options {
 	 * Return an instance of Simply_Static\Options
 	 * @return Simply_Static
 	 */
-	public static function instance()
-	{
+	public static function instance() {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 
-			$options = get_option( Plugin::SLUG );
+			$options = apply_filters( 'ss_get_options', get_option( Plugin::SLUG ) );
 			if ( false === $options ) {
 				$options = array();
 			}
