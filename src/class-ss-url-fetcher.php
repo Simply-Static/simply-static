@@ -68,6 +68,10 @@ class Url_Fetcher {
 	public function fetch( Page $static_page ) {
 		$url = $static_page->url;
 
+		if ( strpos( $url, '\\' ) !== false || strpos( $url, '\\' ) !== false ) {
+			$url = str_replace( '\\', '/', $url );
+		}
+
 		$static_page->last_checked_at = Util::formatted_datetime();
 
 		// Don't process URLs that don't match the URL of this WordPress installation
