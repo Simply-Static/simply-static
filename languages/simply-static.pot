@@ -5,19 +5,19 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Simply Static 2.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simply-static\n"
-"POT-Creation-Date: 2021-10-24 15:56+0200\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2022-05-23 13:31+0200\n"
 "PO-Revision-Date: 2017-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"X-Generator: Poedit 3.0\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.0.1\n"
 "X-Poedit-KeywordsList: __;_e;_x:1,2c;_ex:1,2c;_n:1,2;_nx:1,2,4c;_n_noop:1,2;"
 "_nx_noop:1,2,3c;esc_attr__;esc_html__;esc_attr_e;esc_html_e;esc_attr_x:1,2c;"
 "esc_html_x:1,2c\n"
-"Language: en\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: ..\n"
 "X-Textdomain-Support: yes\n"
@@ -37,8 +37,8 @@ msgstr ""
 msgid "An exception occurred: %s"
 msgstr ""
 
-#: src/class-ss-archive-creation-job.php:299 src/class-ss-url-fetcher.php:77
-#: src/class-ss-url-fetcher.php:95
+#: src/class-ss-archive-creation-job.php:299 src/class-ss-url-fetcher.php:82
+#: src/class-ss-url-fetcher.php:100
 #, php-format
 msgid "An error occurred: %s"
 msgstr ""
@@ -48,187 +48,191 @@ msgstr ""
 msgid "Error: %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:103
+#: src/class-ss-diagnostic.php:105
 msgid "OK"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:103
+#: src/class-ss-diagnostic.php:105
 msgid "FAIL"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:115
+#: src/class-ss-diagnostic.php:117
 #, php-format
 msgid "Checking if Destination URL <code>%s</code> is valid"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:123
+#: src/class-ss-diagnostic.php:126
+msgid "Checking if website has an SSL certificate (HTTPS)"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:132
 #, php-format
 msgid "Checking if Additional URL <code>%s</code> is valid"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:135
+#: src/class-ss-diagnostic.php:144
 #, php-format
 msgid "Checking if Additional File/Dir <code>%s</code> is valid"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:138
+#: src/class-ss-diagnostic.php:147
 msgid "Not a valid path"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:141
+#: src/class-ss-diagnostic.php:150
 msgid "Not readable"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:155
+#: src/class-ss-diagnostic.php:164
 msgid "Checking if WordPress permalink structure is set"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:163
+#: src/class-ss-diagnostic.php:172
 msgid "Checking if WordPress cron is available and running"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:183
+#: src/class-ss-diagnostic.php:192
 #, php-format
 msgid "Checking if WordPress can make requests to itself from <code>%s</code>"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:197
+#: src/class-ss-diagnostic.php:206
 #, php-format
 msgid "Checking if web server can read from Temp Files Directory: <code>%s</code>"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:206
+#: src/class-ss-diagnostic.php:215
 #, php-format
 msgid "Checking if web server can write to Temp Files Directory: <code>%s</code>"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:215
+#: src/class-ss-diagnostic.php:224
 #, php-format
 msgid "Checking if web server can write to Local Directory: <code>%s</code>"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:223
+#: src/class-ss-diagnostic.php:232
 msgid "Checking if MySQL user has <code>DELETE</code> privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:231
+#: src/class-ss-diagnostic.php:240
 msgid "Checking if MySQL user has <code>INSERT</code> privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:239
+#: src/class-ss-diagnostic.php:248
 msgid "Checking if MySQL user has <code>SELECT</code> privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:247
+#: src/class-ss-diagnostic.php:256
 msgid "Checking if MySQL user has <code>CREATE</code> privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:255
+#: src/class-ss-diagnostic.php:264
 msgid "Checking if MySQL user has <code>ALTER</code> privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:263
+#: src/class-ss-diagnostic.php:272
 msgid "Checking if MySQL user has <code>DROP</code> privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:271
+#: src/class-ss-diagnostic.php:280
 #, php-format
 msgid "Checking if PHP version >= %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:280
+#: src/class-ss-diagnostic.php:289
 msgid "Checking if php-xml is available"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:289
+#: src/class-ss-diagnostic.php:298
 msgid "Checking for cURL support"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:315
+#: src/class-ss-diagnostic.php:324
 msgid "Not a valid url."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:324
+#: src/class-ss-diagnostic.php:333
 #, php-format
 msgid "Received a %s response. This might indicate a problem."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:327
+#: src/class-ss-diagnostic.php:336
 #, php-format
 msgid "Received a %s response."
 msgstr ""
 
-#: src/class-ss-plugin.php:199 src/class-ss-plugin.php:200
+#: src/class-ss-plugin.php:206 src/class-ss-plugin.php:207
 msgid "Simply Static"
 msgstr ""
 
-#: src/class-ss-plugin.php:209
+#: src/class-ss-plugin.php:216
 msgid "Generate Static Site"
 msgstr ""
 
-#: src/class-ss-plugin.php:210
+#: src/class-ss-plugin.php:217
 msgid "Generate"
 msgstr ""
 
-#: src/class-ss-plugin.php:218
+#: src/class-ss-plugin.php:225
 msgid "Simply Static Settings"
 msgstr ""
 
-#: src/class-ss-plugin.php:219
+#: src/class-ss-plugin.php:226
 msgid "Settings"
 msgstr ""
 
-#: src/class-ss-plugin.php:227
+#: src/class-ss-plugin.php:234
 msgid "Simply Static Diagnostics"
 msgstr ""
 
-#: src/class-ss-plugin.php:228
+#: src/class-ss-plugin.php:235
 msgid "Diagnostics"
 msgstr ""
 
-#: src/class-ss-plugin.php:253 src/class-ss-plugin.php:306
-#: src/class-ss-plugin.php:329
+#: src/class-ss-plugin.php:261 src/class-ss-plugin.php:315
+#: src/class-ss-plugin.php:338
 msgid "Not permitted"
 msgstr ""
 
-#: src/class-ss-plugin.php:510 src/class-ss-plugin.php:563
+#: src/class-ss-plugin.php:519 src/class-ss-plugin.php:572
 msgid "Your changes have been saved."
 msgstr ""
 
-#: src/class-ss-plugin.php:582
+#: src/class-ss-plugin.php:591
 msgid "Unable to create a ZIP of the debug log."
 msgstr ""
 
-#: src/class-ss-plugin.php:590
+#: src/class-ss-plugin.php:599
 #, php-format
 msgid "Debug log successfully sent to: %s"
 msgstr ""
 
-#: src/class-ss-plugin.php:593
+#: src/class-ss-plugin.php:602
 msgid "We encountered an error when attempting to send out the debug log."
 msgstr ""
 
-#: src/class-ss-plugin.php:724
+#: src/class-ss-plugin.php:733
 msgid "Plugin reset complete."
 msgstr ""
 
-#: src/class-ss-plugin.php:769
+#: src/class-ss-plugin.php:778
 msgid "Contact Support"
 msgstr ""
 
-#: src/class-ss-plugin.php:773
+#: src/class-ss-plugin.php:782
 msgid "Enjoying Simply Static? Add your [stars] on wordpress.org."
 msgstr ""
 
-#: src/class-ss-plugin.php:788
+#: src/class-ss-plugin.php:797
 msgid "Simply Static Version"
 msgstr ""
 
-#: src/class-ss-plugin.php:788
+#: src/class-ss-plugin.php:797
 msgid "View what changed in this version"
 msgstr ""
 
-#: src/class-ss-url-fetcher.php:77
+#: src/class-ss-url-fetcher.php:82
 msgid "Attempted to fetch a remote URL"
 msgstr ""
 
@@ -262,18 +266,18 @@ msgstr ""
 msgid "Do not save or follow"
 msgstr ""
 
-#: src/tasks/class-ss-fetch-urls-task.php:101
+#: src/tasks/class-ss-fetch-urls-task.php:103
 #, php-format
 msgid "Fetched %d of %d pages/files"
 msgstr ""
 
-#: src/tasks/class-ss-fetch-urls-task.php:133
-#: src/tasks/class-ss-fetch-urls-task.php:201 views/settings.php:192
+#: src/tasks/class-ss-fetch-urls-task.php:139
+#: src/tasks/class-ss-fetch-urls-task.php:207 views/settings.php:192
 msgid "Do not follow"
 msgstr ""
 
-#: src/tasks/class-ss-fetch-urls-task.php:151
-#: src/tasks/class-ss-fetch-urls-task.php:232 views/settings.php:186
+#: src/tasks/class-ss-fetch-urls-task.php:157
+#: src/tasks/class-ss-fetch-urls-task.php:238 views/settings.php:186
 msgid "Do not save"
 msgstr ""
 

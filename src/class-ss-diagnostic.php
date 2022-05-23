@@ -25,7 +25,9 @@ class Diagnostic {
 	 * @var array
 	 */
 	protected $description = array(
-		'URLs' => array(),
+		'URLs' => array(
+			array( 'function' => 'is_ssl' )
+		),
 		'Filesystem' => array(
 			array( 'function' => 'is_temp_files_dir_readable' ),
 			array( 'function' => 'is_temp_files_dir_writeable' )
@@ -116,6 +118,13 @@ class Diagnostic {
 		return array(
 			'label' => $label,
 			'test' => filter_var( $destination_url, FILTER_VALIDATE_URL ) !== false
+		);
+	}
+
+	public function is_ssl() {
+		return array(
+			'label' => esc_html__('Checking if website has an SSL certificate (HTTPS)', 'simply-static' ),
+			'test' => is_ssl()
 		);
 	}
 
