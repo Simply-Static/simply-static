@@ -2,7 +2,7 @@
 Contributors: patrickposner
 Tags: HTML, static website generator, static site, secure, fast
 Requires at least: 5.4
-Tested up to: 5.8
+Tested up to: 5.9
 Requires PHP: 7.4
 Stable tag: 2.1.5.8
 License: GPLv2 or later
