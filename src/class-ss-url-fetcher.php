@@ -183,12 +183,12 @@ class Url_Fetcher {
 			}
 		}
 
-		$create_dir = wp_mkdir_p( $this->archive_dir . $relative_file_dir );
+		$create_dir = wp_mkdir_p( $this->archive_dir . urldecode( $relative_file_dir ) );
 		if ( $create_dir === false ) {
-			Util::debug_log( "Unable to create temporary directory: " . $this->archive_dir . $relative_file_dir );
+			Util::debug_log( "Unable to create temporary directory: " . $this->archive_dir . urldecode( $relative_file_dir ) );
 			$static_page->set_error_message( 'Unable to create temporary directory' );
 		} else {
-			$relative_filename = $relative_file_dir . $path_info['filename'] . '.' . $path_info['extension'];
+			$relative_filename = urldecode( $relative_file_dir ) . $path_info['filename'] . '.' . $path_info['extension'];
 			Util::debug_log( "New filename for static page: " . $relative_filename );
 
 			// check that file doesn't exist OR exists but is writeable
