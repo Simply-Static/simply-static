@@ -193,7 +193,7 @@ class Url_Fetcher {
 
 			// check that file doesn't exist OR exists but is writeable
 			// (generally, we'd expect it to never exist)
-			if ( ! file_exists( $relative_filename ) || is_writable( $relative_filename ) ) {
+			if ( ! file_exists( $this->archive_dir . $relative_filename ) || is_writable( $this->archive_dir . $relative_filename ) ) {
 				return $relative_filename;
 			} else {
 				Util::debug_log( "File exists and is unwriteable" );
