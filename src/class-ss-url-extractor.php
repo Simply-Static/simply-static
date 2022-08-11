@@ -27,7 +27,6 @@ class Url_Extractor {
 	protected static $match_tags = array(
 		'a'            => array( 'href', 'urn' ),
 		'base'         => array( 'href' ),
-		'form'         => array( 'data' ),
 		'img'          => array( 'src', 'usemap', 'longdesc', 'dynsrc', 'lowsrc', 'srcset' ),
 		'source'       => array( 'srcset' ),
 		'amp-img'      => array( 'src', 'srcset' ),
@@ -42,7 +41,6 @@ class Url_Extractor {
 		'del'          => array( 'cite' ),
 		'frame'        => array( 'longdesc', 'src' ),
 		'head'         => array( 'profile' ),
-		'iframe'       => array( 'longdesc', 'src' ),
 		'ins'          => array( 'cite' ),
 		'object'       => array( 'archive', 'classid', 'codebase', 'data', 'usemap' ),
 		'q'            => array( 'cite' ),
