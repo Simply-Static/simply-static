@@ -165,11 +165,6 @@ class Url_Extractor {
 			$this->save_body( $this->extract_and_replace_urls_in_xml() );
 		}
 
-		// failsafe URL replacement
-		if ( $this->static_page->is_type( 'html' ) || $this->static_page->is_type( 'css' ) || $this->static_page->is_type( 'xml' ) ) {
-			$this->replace_urls();
-		}
-
 		return array_unique( $this->extracted_urls );
 	}
 
