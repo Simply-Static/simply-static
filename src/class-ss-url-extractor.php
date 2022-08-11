@@ -335,6 +335,7 @@ class Url_Extractor {
 	 * @return string The CSS with all URLs converted
 	 */
 	private function extract_and_replace_urls_in_css( $text ) {
+		$text = html_entity_decode($text);
 		$patterns = array(
 			"/url\(\s*[\"']?([^)\"']+)/", // url()
 			"/@import\s+[\"']([^\"']+)/"
