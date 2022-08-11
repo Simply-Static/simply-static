@@ -51,7 +51,7 @@ class Transfer_Files_Locally_Task extends Task {
 	 * @return array
 	 */
 	public function copy_static_files( $destination_dir ) {
-		$batch_size = apply_filters( 'simply_static_copy_files_batch_size', 100 );
+		$batch_size = apply_filters( 'simply_static_copy_files_batch_size', 500 );
 
 		$archive_dir = $this->options->get_archive_dir();
 		$archive_start_time = $this->options->get( 'archive_start_time' );

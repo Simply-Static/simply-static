@@ -29,7 +29,7 @@ class Fetch_Urls_Task extends Task {
 	 * @return boolean|WP_Error true if done, false if not done, WP_Error if error.
 	 */
 	public function perform() {
-		$batch_size = apply_filters( 'simply_static_fetch_urls_batch_size', 10 );
+		$batch_size = apply_filters( 'simply_static_fetch_urls_batch_size', 500 );
 
 		$static_pages = apply_filters(
 			'ss_static_pages',
