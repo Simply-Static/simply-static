@@ -179,7 +179,7 @@ class Url_Fetcher {
 			if ( $static_page->is_type( 'xml' ) ) {
 				$path_info['extension'] = 'xml';
 			} else {
-				$path_info['extension'] = 'html';
+				$path_info['extension'] = apply_filters( 'ss_default_extension_type', 'html' );
 			}
 		}
 
