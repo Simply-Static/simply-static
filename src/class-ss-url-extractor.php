@@ -76,8 +76,8 @@ class Url_Extractor {
 		'template' => array( 'onenterforward', 'onenterbackward', 'ontimer' ),
 		'wml'      => array( 'xmlns' ),
 
-		'meta' => array('content'),
-		'link' => array('href'),
+		'meta' => array( 'content' ),
+		'link' => array( 'href' ),
 	);
 
 	// /** @const */
@@ -237,12 +237,18 @@ class Url_Extractor {
 				$extracted_urls  = array();
 				$attribute_value = $tag->$attribute_name;
 
-				// srcset is a fair bit different from most html
-				// attributes, so it gets it's own processsing
-				if ( $attribute_name === 'srcset' ) {
-					$extracted_urls = $this->extract_urls_from_srcset( $attribute_value );
+				// we need to verify that the meta tag is a URL.
+				if ( 'meta' === $tag_name ) {
+					if ( filter_var( $attribute_value, FILTER_VALIDATE_URL ) ) {
+						$extracted_urls[] = $attribute_value;
+					}
 				} else {
-					$extracted_urls[] = $attribute_value;
+					// srcset is a fair bit different from most html
+					if ( $attribute_name === 'srcset' ) {
+						$extracted_urls = $this->extract_urls_from_srcset( $attribute_value );
+					} else {
+						$extracted_urls[] = $attribute_value;
+					}
 				}
 
 				foreach ( $extracted_urls as $extracted_url ) {
@@ -254,6 +260,7 @@ class Url_Extractor {
 				$tag->$attribute_name = $attribute_value;
 			}
 		}
+
 	}
 
 	/**
@@ -277,7 +284,6 @@ class Url_Extractor {
 		} else {
 			// handle tags with attributes
 			foreach ( $match_tags as $tag_name => $attributes ) {
-
 				$tags = $dom->find( $tag_name );
 
 				foreach ( $tags as $tag ) {
