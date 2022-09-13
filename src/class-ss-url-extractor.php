@@ -74,7 +74,10 @@ class Url_Extractor {
 		'go'       => array( 'href' ),
 		'option'   => array( 'onpick' ),
 		'template' => array( 'onenterforward', 'onenterbackward', 'ontimer' ),
-		'wml'      => array( 'xmlns' )
+		'wml'      => array( 'xmlns' ),
+
+		'meta' => array('content'),
+		'link' => array('href'),
 	);
 
 	// /** @const */
@@ -335,7 +338,7 @@ class Url_Extractor {
 	 * @return string The CSS with all URLs converted
 	 */
 	private function extract_and_replace_urls_in_css( $text ) {
-		$text = html_entity_decode($text);
+		$text     = html_entity_decode( $text );
 		$patterns = array(
 			"/url\(\s*[\"']?([^)\"']+)/", // url()
 			"/@import\s+[\"']([^\"']+)/"
