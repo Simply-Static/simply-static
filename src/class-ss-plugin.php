@@ -100,7 +100,6 @@ class Plugin {
 			add_action( 'simply_static_site_export_cron', array( self::$instance, 'run_static_export' ) );
 
 			// Filters
-			add_filter( 'admin_footer_text', array( self::$instance, 'filter_admin_footer_text' ), 15 );
 			add_filter( 'update_footer', array( self::$instance, 'filter_update_footer' ), 15 );
 			add_filter( 'simplystatic.archive_creation_job.task_list', array( self::$instance, 'filter_task_list' ), 10, 2 );
 
@@ -763,26 +762,6 @@ class Plugin {
 			$r['headers']['Authorization'] = 'Basic ' . $digest;
 		}
 		return $r;
-	}
-
-	/**
-	 * Display support text in footer when on plugin page
-	 * @return string
-	 */
-	public function filter_admin_footer_text( $text ) {
-		if ( ! self::$instance->in_plugin() ) {
-			return $text;
-		}
-
-		$contact_support = '<a target="_blank" href="https://wordpress.org/support/plugin/simply-static#new-post">'
-			. __( 'Contact Support', 'simply-static' ) . '</a> | ';
-		$add_your_rating = str_replace(
-				'[stars]',
-				'<a target="_blank" href="https://wordpress.org/support/plugin/simply-static/reviews/#new-post" >&#9733;&#9733;&#9733;&#9733;&#9733;</a>',
-				__( 'Enjoying Simply Static? Add your [stars] on wordpress.org.', 'simply-static' )
-			);
-
-		return $contact_support . $add_your_rating;
 	}
 
 	/**
