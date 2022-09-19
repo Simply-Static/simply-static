@@ -103,13 +103,7 @@ class Plugin {
 			add_filter( 'update_footer', array( self::$instance, 'filter_update_footer' ), 15 );
 			add_filter( 'simplystatic.archive_creation_job.task_list', array( self::$instance, 'filter_task_list' ), 10, 2 );
 
-			$direct_http_args = apply_filters( 'ss_direct_http_request_args', true );
-
-			if ( $direct_http_args ) {
-				add_filter( 'http_request_args', array( self::$instance, 'wpbp_http_request_args' ), 10, 2 );
-			} else {
-				add_action( 'ss_before_static_export', array( self::$instance, 'add_http_filters' ) );
-			}
+			add_filter( 'http_request_args', array( self::$instance, 'add_http_filters' ), 10, 2 );
 
 			self::$instance->options = Options::instance();
 			self::$instance->view = new View();
@@ -344,10 +338,10 @@ class Plugin {
 		$static_pages = apply_filters(
 			'ss_total_pages_log',
 			Page::query()
-			->limit( $per_page )
-			->offset( $offset )
-			->order( 'http_status_code' )
-			->find()
+			    ->limit( $per_page )
+			    ->offset( $offset )
+			    ->order( 'http_status_code' )
+			    ->find()
 		);
 
 		$http_status_codes  = Page::get_http_status_codes_summary();
@@ -615,13 +609,13 @@ class Plugin {
 		$content = "<div class='center'>";
 
 		$content .= "<table width='600'>"
-			. "<tr><td><b>URL:</b></td><td>"            . get_bloginfo( 'url' )             . "</td></tr>"
-			. "<tr><td><b>WP URL:</b></td><td>"         . get_bloginfo( 'wpurl' )           . "</td></tr>"
-			. "<tr><td><b>Plugin Version:</b></td><td>" . Plugin::VERSION                   . "</td></tr>"
-			. "<tr><td><b>WP Version:</b></td><td>"     . get_bloginfo( 'version' )         . "</td></tr>"
-			. "<tr><td><b>Multisite:</b></td><td>"      . ( is_multisite() ? 'yes' : 'no' ) . "</td></tr>"
-			. "<tr><td><b>Admin Email:</b></td><td>"    . get_bloginfo( 'admin_email' )     . "</td></tr>"
-			. "</table><br />";
+		            . "<tr><td><b>URL:</b></td><td>"            . get_bloginfo( 'url' )             . "</td></tr>"
+		            . "<tr><td><b>WP URL:</b></td><td>"         . get_bloginfo( 'wpurl' )           . "</td></tr>"
+		            . "<tr><td><b>Plugin Version:</b></td><td>" . Plugin::VERSION                   . "</td></tr>"
+		            . "<tr><td><b>WP Version:</b></td><td>"     . get_bloginfo( 'version' )         . "</td></tr>"
+		            . "<tr><td><b>Multisite:</b></td><td>"      . ( is_multisite() ? 'yes' : 'no' ) . "</td></tr>"
+		            . "<tr><td><b>Admin Email:</b></td><td>"    . get_bloginfo( 'admin_email' )     . "</td></tr>"
+		            . "</table><br />";
 
 		$content .= "<table width='600'><thead><tr><th>Settings</th></tr></thead><tbody><tr><td><pre>";
 		$options = get_option( Plugin::SLUG );
@@ -641,7 +635,7 @@ class Plugin {
 					$content .= "<td style='color: #dc143c; font-weight: bold;'>" . $result['message'] . "</td>";
 				}
 				$content .= "</tr>";
-				}
+			}
 			$content .= "</tbody></table><br />";
 		}
 
@@ -750,18 +744,22 @@ class Plugin {
 	 * @return string
 	 */
 	public function filter_wp_mail_content_type() {
-	    return 'text/html';
+		return 'text/html';
 	}
 
 	/**
 	 * Set HTTP Basic Auth for wp-background-processing
 	 */
-	public function wpbp_http_request_args( $r, $url ) {
-		$digest = self::$instance->options->get( 'http_basic_auth_digest' );
-		if ( $digest ) {
-			$r['headers']['Authorization'] = 'Basic ' . $digest;
+	public function add_http_filters( $parsed_args, $url ) {
+		if ( strpos( $url, get_bloginfo( 'url' ) ) !== false ) {
+			$digest = self::$instance->options->get( 'http_basic_auth_digest' );
+
+			if ( $digest ) {
+				$parsed_args['headers']['Authorization'] = 'Basic ' . $digest;
+			}
 		}
-		return $r;
+
+		return $parsed_args;
 	}
 
 	/**
@@ -810,15 +808,6 @@ class Plugin {
 	 */
 	public function debug_on() {
 		return $this->options->get( 'debugging_mode' ) === '1';
-	}
-
-	/**
-	 * Remove Basic Auth when Updraft backup is in process
-	 *
-	 * @return void
-	 */
-	public function add_http_filters() {
-		add_filter( 'http_request_args', array( self::$instance, 'wpbp_http_request_args' ), 10, 2 );
 	}
 
 	/**
