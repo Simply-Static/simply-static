@@ -2,6 +2,7 @@
 
 namespace Simply_Static;
 
+use Exception;
 use voku\helper\HtmlDomParser;
 
 // Exit if accessed directly
@@ -290,20 +291,32 @@ class Url_Extractor {
 				}
 			}
 
-			// handle 'style' tag differently, since we need to parse the content
+			// handle 'style' tag differently, since we need to parse the content.
 			$tags = $dom->find( 'style' );
 
 			foreach ( $tags as $tag ) {
-				$updated_css        = $this->extract_and_replace_urls_in_css( $tag->innerhtmlKeep );
-				$tag->innerhtmlKeep = $updated_css;
+				// Check if valid content exists.
+				try {
+					$updated_css        = $this->extract_and_replace_urls_in_css( $tag->innerhtmlKeep );
+					$tag->innerhtmlKeep = $updated_css;
+				} catch ( Exception $e ) {
+					// If not skip the result.
+					continue;
+				}
 			}
 
-			// handle 'script' tag differently, since we need to parse the content
+			// handle 'script' tag differently, since we need to parse the content.
 			$tags = $dom->find( 'script' );
 
 			foreach ( $tags as $tag ) {
-				$updated_script     = $this->extract_and_replace_urls_in_script( $tag->innerhtmlKeep );
-				$tag->innerhtmlKeep = $updated_script;
+				// Check if valid content exists.
+				try {
+					$updated_script     = $this->extract_and_replace_urls_in_script( $tag->innerhtmlKeep );
+					$tag->innerhtmlKeep = $updated_script;
+				} catch ( Exception $e ) {
+					// If not skip the result.
+					continue;
+				}
 			}
 
 			do_action(
@@ -365,6 +378,7 @@ class Url_Extractor {
 	}
 
 	private function extract_and_replace_urls_in_script( $text ) {
+
 		$text = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $this->options->get_destination_url(), html_entity_decode( $text ) );
 
 		return $text;
