@@ -26,7 +26,7 @@ class Url_Extractor {
 	 */
 
 	protected static $match_tags = array(
-		'a'       => array( 'href', 'urn' ),
+		'a'       => array( 'href', 'urn', 'style' ),
 		'base'    => array( 'href' ),
 		'img'     => array( 'src', 'usemap', 'longdesc', 'dynsrc', 'lowsrc', 'srcset' ),
 		'picture' => array( 'src', 'srcset' ),
@@ -49,6 +49,7 @@ class Url_Extractor {
 		'script'     => array( 'src' ),
 
 		'audio'        => array( 'src' ),
+		'figure'       => array( 'src' ),
 		'command'      => array( 'icon' ),
 		'embed'        => array( 'src', 'code', 'pluginspage' ),
 		'event-source' => array( 'src' ),
@@ -58,6 +59,9 @@ class Url_Extractor {
 
 		'bgsound' => array( 'src' ),
 		'div'     => array( 'href', 'src', 'style' ),
+		'section' => array( 'style' ),
+		'footer'  => array( 'style' ),
+		'header'  => array( 'style' ),
 		'ilayer'  => array( 'src' ),
 		'table'   => array( 'background' ),
 		'td'      => array( 'background' ),
@@ -65,7 +69,7 @@ class Url_Extractor {
 		'layer'   => array( 'src' ),
 		'xml'     => array( 'src' ),
 
-		'button'   => array( 'formaction' ),
+		'button'   => array( 'formaction', 'style' ),
 		'datalist' => array( 'data' ),
 		'select'   => array( 'data' ),
 
