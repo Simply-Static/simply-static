@@ -50,6 +50,15 @@ abstract class Task {
 			->save();
 	}
 
+	protected function save_pages_status( $pages_remaining, $pages_total ) {
+		$task_name = $key ?: static::$task_name;
+		Util::debug_log( '[PAGES STATUS] Remaining:' . $pages_remaining . '; Total: ' . $pages_total );
+
+		$this->options
+			->set( 'pages_status', array("remaining" => $pages_remaining, "total" => $pages_total) )
+			->save();
+	}
+
 	/*
 	* Override this method to perform the task action.
 	* @return boolean|WP_Error true if done, false if not done, WP_Error if error

@@ -55,6 +55,7 @@ class Fetch_Urls_Task extends Task {
 
 		while ( $static_page = array_shift( $static_pages ) ) {
 			Util::debug_log( "URL: " . $static_page->url );
+			$this->save_pages_status( count($static_pages)+1, intval($total_pages));
 
 			$excludable = $this->find_excludable( $static_page );
 			if ( $excludable !== false ) {
