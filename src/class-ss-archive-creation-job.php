@@ -169,6 +169,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 
 		$this->save_status_message( sprintf( __( 'Done! Finished in %s', 'simply-static' ), $time_string ) );
 		parent::complete();
+		do_action('ss_completed');
 	}
 
 
