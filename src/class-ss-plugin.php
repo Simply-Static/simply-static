@@ -294,6 +294,7 @@ class Plugin {
 		wp_send_json( array(
 			'action' => $action,
 			'activity_log_html' => $activity_log_html,
+			'pages_status' => $this->options->get( 'pages_status' ),
 			'done' => $done // $done
 		) );
 	}

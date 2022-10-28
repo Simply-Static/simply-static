@@ -67,6 +67,7 @@ class Upgrade_Handler {
 			'relative_path'           => '',
 			'destination_url_type'    => 'relative',
 			'archive_status_messages' => array(),
+			'pages_status' => array(),
 			'archive_name'            => null,
 			'archive_start_time'      => null,
 			'archive_end_time'        => null,
