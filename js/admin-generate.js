@@ -1,6 +1,5 @@
 'use strict';
 jQuery(document).ready(function ($) {
-	var REFRESH_EVERY_X_SECONDS = 15;
 	var STATIC_PAGES_PER_PAGE = 50; // max number of pages to show at once
 	var done = true;
 	var refreshTimer = null;
@@ -34,7 +33,7 @@ jQuery(document).ready(function ($) {
 		// set loop for pinging server
 		refreshTimer = setInterval(function () {
 			send_action_to_archive_manager('ping');
-		}, REFRESH_EVERY_X_SECONDS * 1000);
+		}, 60);
 	}
 
 	// where action is one of 'start', 'continue', 'cancel'
