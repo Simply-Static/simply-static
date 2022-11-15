@@ -177,9 +177,14 @@ class Url_Extractor {
 			$this->save_body( $this->extract_and_replace_urls_in_xml() );
 		}
 
-		// Replace encoded URLs
 		if ( $this->static_page->is_type( 'html' ) || $this->static_page->is_type( 'css' ) || $this->static_page->is_type( 'xml' ) ) {
+			// Replace encoded URLs.
 			$this->replace_encoded_urls();
+
+			// If activated forced string/replace for URLs.
+			if ( 'on' === $this->options->get( 'force_replace_url' ) ) {
+				$this->force_replace_urls();
+			}
 		}
 
 		return array_unique( $this->extracted_urls );
@@ -210,6 +215,43 @@ class Url_Extractor {
 
 		// replace encoded URLs, as found in query params
 		$response_body = preg_replace( '/(https?%3A)?%2F%2F' . addcslashes( urlencode( Util::origin_host() ), '.' ) . '/i', urlencode( $destination_url ), $response_body );
+
+		$this->save_body( $response_body );
+	}
+
+	/**
+	 * Replaces origin URL with destination URL in response body
+	 *
+	 * This is a function of last resort for URL replacement. Ideally it was
+	 * already done in one of the extract_and_replace_urls_in_x functions.
+	 *
+	 * This catches instances of WordPress URLs and replaces them with the
+	 * destinaton_url. This generally works fine for absolute and relative URL
+	 * generation. It'll produce sub-optimal results for offline URLs, in that
+	 * it's only replacing the host and not adjusting the path according to the
+	 * current page. The point of this is more to remove any traces of the
+	 * WordPress URL than anything else.
+	 *
+	 * @return void
+	 */
+	public function force_replace_urls() {
+		/*
+		TODO:
+		Can we get it to work with offline URLs via preg_replace_callback
+		+ convert_url? To do that we'd need to grab the entire URL. Ideally
+		that would also work with escaped URLs / inside of JavaScript. And
+		even more ideally, we'd only have a single preg_replace.
+		 */
+
+		$destination_url = $this->options->get_destination_url();
+		$response_body   = $this->get_body();
+
+		// replace any instance of the origin url, whether it starts with https://, http://, or //.
+		$response_body = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $destination_url, $response_body );
+
+		// replace wp_json_encode'd urls, as used by WP's `concatemoji`.
+		// e.g. {"concatemoji":"http:\/\/www.example.org\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.6.1"}.
+		$response_body = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
 
 		$this->save_body( $response_body );
 	}

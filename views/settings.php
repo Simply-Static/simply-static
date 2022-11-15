@@ -281,21 +281,36 @@ namespace Simply_Static;
 				</tbody>
 			</table>
 
-			<h2 class="title"><?php _e( "WP-Cron", 'simply-static' ); ?></h2>
-			<p><?php _e( "If you want to export a large site with Simply Static you may want to use WP-Cron for that.", 'simply-static' ); ?></p>
-			<table class='form-table  id='cron'>
+			<h2 class="title"><?php _e( "Additional Settings", 'simply-static' ); ?></h2>
+			<p><?php esc_html_e( 'Here you can configure some additional settings like running exports with WP-Cron, modifing the URL replacement behaviour and more.', 'simply-static' ); ?></p>
+			<table class='form-table  id='additional-settings'>
 				<tbody>
 					<tr>
 						<th>
-							<label for='use_cron'><?php _e( "Use WP-Cron", 'simply-static' ); ?></label>
+							<label for='use_cron'><?php _e( "Run with WP-Cron", 'simply-static' ); ?></label>
 						</th>
 						<td>						
 							<input type="checkbox" name="use_cron" id="use_cron" <?php Util::checked_if( $this->use_cron === 'on' ); ?> />
 						</td>
 					</tr>
+                    <tr>
+                        <th>
+                            <label for='force_replace_url'><?php _e( "Force URL replacements", 'simply-static' ); ?></label>
+                        </th>
+                        <td>
+                            <input type="checkbox" name="force_replace_url" id="force_replace_url" <?php Util::checked_if( $this->force_replace_url === 'on' ); ?> />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label for='clear_directory_before_export'><?php _e( "Clear local directory before export", 'simply-static' ); ?></label>
+                        </th>
+                        <td>
+                            <input type="checkbox" name="clear_directory_before_export" id="clear_directory_before_export" <?php Util::checked_if( $this->clear_directory_before_export === 'on' ); ?> />
+                        </td>
+                    </tr>
 				</tbody>
 			</table>
-
 			<table class='form-table'>
 				<tbody>
 					<tr>
