@@ -819,8 +819,8 @@ class Plugin {
 	public function add_info_links( $info_text ) {
 		ob_start();
 		?>
+        <a href="https://patrickposner.dev/docs/simply-static/" target="_blank">Documentation</a>
         <a href="https://patrickposner.dev/plugins/simply-static" target="_blank">Simply Static Pro</a>
-        <a href="https://simplycdn.io" target="_blank">Simply CDN</a>
 		<?php
 		$info_text = apply_filters( 'simply_static_info_links', ob_get_clean() );
 		echo $info_text;
