@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Development (trunk)\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simply-static\n"
-"POT-Creation-Date: 2022-05-23 13:31+0200\n"
-"PO-Revision-Date: 2022-05-23 13:32+0200\n"
+"POT-Creation-Date: 2022-11-15 14:30+0100\n"
+"PO-Revision-Date: 2022-11-15 14:32+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de_DE\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.2\n"
 
 #: simply-static.php:26
 msgid "Simply Static requires PHP 7.2.5 or higher."
@@ -24,18 +24,18 @@ msgstr "Simply Static benötigt PHP 7.2.5 oder höher."
 msgid "Done! Finished in %s"
 msgstr "Fertig! Fertigstellt in %s"
 
-#: src/class-ss-archive-creation-job.php:286
+#: src/class-ss-archive-creation-job.php:287
 #, php-format
 msgid "An exception occurred: %s"
 msgstr "Eine Ausnahme ist eingetreten: %s"
 
-#: src/class-ss-archive-creation-job.php:299 src/class-ss-url-fetcher.php:82
-#: src/class-ss-url-fetcher.php:100
+#: src/class-ss-archive-creation-job.php:301 src/class-ss-url-fetcher.php:87
+#: src/class-ss-url-fetcher.php:106
 #, php-format
 msgid "An error occurred: %s"
 msgstr "Ein Fehler ist aufgetreten: %s"
 
-#: src/class-ss-archive-creation-job.php:326
+#: src/class-ss-archive-creation-job.php:329
 #, php-format
 msgid "Error: %s"
 msgstr "Fehler: %s"
@@ -190,49 +190,41 @@ msgstr "Simply Static Diagnose"
 msgid "Diagnostics"
 msgstr "Diagnose"
 
-#: src/class-ss-plugin.php:261 src/class-ss-plugin.php:315
-#: src/class-ss-plugin.php:338
+#: src/class-ss-plugin.php:261 src/class-ss-plugin.php:316
+#: src/class-ss-plugin.php:339
 msgid "Not permitted"
 msgstr "Nicht berechtigt"
 
-#: src/class-ss-plugin.php:519 src/class-ss-plugin.php:572
+#: src/class-ss-plugin.php:524 src/class-ss-plugin.php:577
 msgid "Your changes have been saved."
 msgstr "Deine Einstellungen wurden gespeichert."
 
-#: src/class-ss-plugin.php:591
+#: src/class-ss-plugin.php:596
 msgid "Unable to create a ZIP of the debug log."
 msgstr "ZIP Archiv für den Debug-Log konnte nicht erstellt werden."
 
-#: src/class-ss-plugin.php:599
+#: src/class-ss-plugin.php:604
 #, php-format
 msgid "Debug log successfully sent to: %s"
 msgstr "Debug-Log erfolgreich gesendet zu %s"
 
-#: src/class-ss-plugin.php:602
+#: src/class-ss-plugin.php:607
 msgid "We encountered an error when attempting to send out the debug log."
 msgstr "Es gab einen Fehler beim versenden des Debug-Logs."
 
-#: src/class-ss-plugin.php:733
+#: src/class-ss-plugin.php:743
 msgid "Plugin reset complete."
 msgstr "Plugin-Reset erfolgreich ausgeführt."
 
-#: src/class-ss-plugin.php:778
-msgid "Contact Support"
-msgstr "Support kontaktieren"
-
-#: src/class-ss-plugin.php:782
-msgid "Enjoying Simply Static? Add your [stars] on wordpress.org."
-msgstr "Die gefällt Simply Static? Füge deine [stars] auf wordpress.org hinzu!"
-
-#: src/class-ss-plugin.php:797
+#: src/class-ss-plugin.php:791
 msgid "Simply Static Version"
 msgstr "Simply Static Version"
 
-#: src/class-ss-plugin.php:797
+#: src/class-ss-plugin.php:791
 msgid "View what changed in this version"
 msgstr "Sieh dir den Changelog an"
 
-#: src/class-ss-url-fetcher.php:82
+#: src/class-ss-url-fetcher.php:87
 msgid "Attempted to fetch a remote URL"
 msgstr "Versuche die URL abzurufen: %s"
 
@@ -262,22 +254,22 @@ msgstr "Klicke hier zum Download."
 msgid "Unable to create ZIP archive"
 msgstr "ZIP Archiv konnte nicht erstellt werden."
 
-#: src/tasks/class-ss-fetch-urls-task.php:75
+#: src/tasks/class-ss-fetch-urls-task.php:76
 msgid "Do not save or follow"
 msgstr "Nicht speichern oder folgen"
 
-#: src/tasks/class-ss-fetch-urls-task.php:103
+#: src/tasks/class-ss-fetch-urls-task.php:104
 #, php-format
 msgid "Fetched %d of %d pages/files"
 msgstr "%d von %d Seiten/Dateien abgerufen"
 
-#: src/tasks/class-ss-fetch-urls-task.php:139
-#: src/tasks/class-ss-fetch-urls-task.php:207 views/settings.php:192
+#: src/tasks/class-ss-fetch-urls-task.php:140
+#: src/tasks/class-ss-fetch-urls-task.php:208 views/settings.php:192
 msgid "Do not follow"
 msgstr "Nicht folgen"
 
-#: src/tasks/class-ss-fetch-urls-task.php:157
-#: src/tasks/class-ss-fetch-urls-task.php:238 views/settings.php:186
+#: src/tasks/class-ss-fetch-urls-task.php:158
+#: src/tasks/class-ss-fetch-urls-task.php:239 views/settings.php:186
 msgid "Do not save"
 msgstr "Nicht speichern"
 
@@ -301,12 +293,12 @@ msgstr "Zusätzliche Datei"
 msgid "Additional Dir"
 msgstr "Zusätzliches Verzeichnis"
 
-#: src/tasks/class-ss-transfer-files-locally-task.php:28
+#: src/tasks/class-ss-transfer-files-locally-task.php:35
 #, php-format
 msgid "Copied %d of %d files"
 msgstr "%d von %d Dateien kopiert"
 
-#: src/tasks/class-ss-transfer-files-locally-task.php:35
+#: src/tasks/class-ss-transfer-files-locally-task.php:42
 msgid "Destination URL:"
 msgstr "Ziel-URL:"
 
@@ -429,7 +421,7 @@ msgstr ""
 "Generierung in einem Logfile."
 
 #: views/diagnostics.php:106 views/settings.php:126 views/settings.php:218
-#: views/settings.php:305
+#: views/settings.php:320
 msgid "Save Changes"
 msgstr "Änderungen speichern"
 
@@ -769,31 +761,56 @@ msgid "Basic Auth Password"
 msgstr "Basic Auth Passwort"
 
 #: views/settings.php:284
-msgid "WP-Cron"
-msgstr "WP-Cron"
+msgid "Additional Settings"
+msgstr "Zusätzliches Einstellungen"
 
 #: views/settings.php:285
 msgid ""
-"If you want to export a large site with Simply Static you may want to use WP-"
-"Cron for that."
+"Here you can configure some additional settings like running exports with WP-"
+"Cron, modifing the URL replacement behaviour and more."
 msgstr ""
-"Wenn du eine große Seite mit Simply Static exportieren möchtest, empfiehlt "
-"sich die Verwendung von WP-Cron. Prüfe bitte gründlich, ob deine Cron-Jobs "
-"funktionieren, bevor du diese Option aktivierst."
+"Hier kannst du zusätzliche Einstellungen konfigurieren wie die Ausführung "
+"mit WP-Cron oder die erweiterte URL-Ersetzen-Funktion."
 
 #: views/settings.php:290
-msgid "Use WP-Cron"
-msgstr "WP-Cron benutzen"
+msgid "Run with WP-Cron"
+msgstr "Mit WP-Cron ausführen"
 
-#: views/settings.php:324 views/settings.php:327
+#: views/settings.php:298
+msgid "Force URL replacements"
+msgstr "Erweitertes URL-Ersetzen"
+
+#: views/settings.php:306
+msgid "Clear local directory before export"
+msgstr "Lokales Verzeichnis leeren vor Export"
+
+#: views/settings.php:339 views/settings.php:342
 msgid "Reset Plugin Settings"
 msgstr "Plugin-Einstellungen zurücksetzen"
 
-#: views/settings.php:329
+#: views/settings.php:344
 msgid "This will reset Simply Static's settings back to their defaults."
 msgstr ""
 "Dies setze alle Simply Static Einstellungen auf die Standardeinstellungen "
 "zurück."
+
+#~ msgid "Contact Support"
+#~ msgstr "Support kontaktieren"
+
+#~ msgid "Enjoying Simply Static? Add your [stars] on wordpress.org."
+#~ msgstr ""
+#~ "Die gefällt Simply Static? Füge deine [stars] auf wordpress.org hinzu!"
+
+#~ msgid ""
+#~ "If you want to export a large site with Simply Static you may want to use "
+#~ "WP-Cron for that."
+#~ msgstr ""
+#~ "Wenn du eine große Seite mit Simply Static exportieren möchtest, "
+#~ "empfiehlt sich die Verwendung von WP-Cron. Prüfe bitte gründlich, ob "
+#~ "deine Cron-Jobs funktionieren, bevor du diese Option aktivierst."
+
+#~ msgid "Use WP-Cron"
+#~ msgstr "WP-Cron benutzen"
 
 #~ msgid ""
 #~ "An Additional File or Directory is not located within an expected "
