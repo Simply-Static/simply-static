@@ -51,7 +51,6 @@ abstract class Task {
 	}
 
 	protected function save_pages_status( $pages_remaining, $pages_total ) {
-		$task_name = $key ?: static::$task_name;
 		Util::debug_log( '[PAGES STATUS] Remaining:' . $pages_remaining . '; Total: ' . $pages_total );
 
 		$this->options
