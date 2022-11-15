@@ -1,4 +1,5 @@
 <?php
+
 namespace Simply_Static;
 
 // Exit if accessed directly
@@ -32,28 +33,30 @@ class Url_Fetcher {
 	 * Disable usage of "new"
 	 * @return void
 	 */
-	protected function __construct() {}
+	protected function __construct() {
+	}
 
 	/**
 	 * Disable cloning of the class
 	 * @return void
 	 */
-	protected function __clone() {}
+	protected function __clone() {
+	}
 
 	/**
 	 * Disable unserializing of the class
 	 * @return void
 	 */
-	public function __wakeup() {}
+	public function __wakeup() {
+	}
 
 	/**
 	 * Return an instance of Simply_Static\Url_Fetcher
 	 * @return Simply_Static
 	 */
-	public static function instance()
-	{
+	public static function instance() {
 		if ( null === self::$instance ) {
-			self::$instance = new self();
+			self::$instance              = new self();
 			self::$instance->archive_dir = Options::instance()->get_archive_dir();
 		}
 
@@ -62,7 +65,9 @@ class Url_Fetcher {
 
 	/**
 	 * Fetch the URL and return a \WP_Error if we get one, otherwise a Response class.
+	 *
 	 * @param Simply_Static\Page $static_page URL to fetch
+	 *
 	 * @return boolean                        Was the fetch successful?
 	 */
 	public function fetch( Page $static_page ) {
@@ -79,9 +84,10 @@ class Url_Fetcher {
 		if ( ! Util::is_local_url( $url ) ) {
 			Util::debug_log( "Not fetching URL because it is not a local URL" );
 			$static_page->http_status_code = null;
-			$message = sprintf( __( "An error occurred: %s", 'simply-static' ), __( "Attempted to fetch a remote URL", 'simply-static' ) );
+			$message                       = sprintf( __( "An error occurred: %s", 'simply-static' ), __( "Attempted to fetch a remote URL", 'simply-static' ) );
 			$static_page->set_error_message( $message );
 			$static_page->save();
+
 			return false;
 		}
 
@@ -97,16 +103,17 @@ class Url_Fetcher {
 			Util::debug_log( "We encountered an error when fetching: " . $response->get_error_message() );
 			Util::debug_log( $response );
 			$static_page->http_status_code = null;
-			$message = sprintf( __( "An error occurred: %s", 'simply-static' ), $response->get_error_message() );
+			$message                       = sprintf( __( "An error occurred: %s", 'simply-static' ), $response->get_error_message() );
 			$static_page->set_error_message( $message );
 			$static_page->save();
+
 			return false;
 		} else {
 			$static_page->http_status_code = $response['response']['code'];
-			$static_page->content_type = $response['headers']['content-type'];
-			$static_page->redirect_url = isset( $response['headers']['location'] ) ? $response['headers']['location'] : null;
+			$static_page->content_type     = $response['headers']['content-type'];
+			$static_page->redirect_url     = isset( $response['headers']['location'] ) ? $response['headers']['location'] : null;
 
-			Util::debug_log( "http_status_code: " . $static_page->http_status_code . " | content_type: " . $static_page->content_type  );
+			Util::debug_log( "http_status_code: " . $static_page->http_status_code . " | content_type: " . $static_page->content_type );
 
 			$relative_filename = null;
 			if ( $static_page->http_status_code == 200 ) {
@@ -121,7 +128,7 @@ class Url_Fetcher {
 
 			if ( $relative_filename !== null ) {
 				$static_page->file_path = $relative_filename;
-				$file_path = $this->archive_dir . $relative_filename;
+				$file_path              = $this->archive_dir . $relative_filename;
 
 				// Windows support.
 				if ( strpos( $file_path, '\/' ) !== false || strpos( $temp_filename, '\/' ) !== false ) {
@@ -149,6 +156,7 @@ class Url_Fetcher {
 	 * created at the returned file path.
 	 *
 	 * @param Simply_Static\Page $static_page The Simply_Static\Page
+	 *
 	 * @return string|null                The relative file path of the file
 	 */
 	public function create_directories_for_static_page( $static_page ) {
@@ -207,15 +215,18 @@ class Url_Fetcher {
 	public static function remote_get( $url, $filename = null ) {
 		$basic_auth_digest = Options::instance()->get( 'http_basic_auth_digest' );
 
-		$args = array(
-			'timeout'     => self::TIMEOUT,
-			'sslverify'   => apply_filters( 'https_local_ssl_verify', false ),
-			'redirection' => 0, // disable redirection
-			'blocking'    => true // do not execute code until this call is complete
+		$args = apply_filters(
+			'ss_remote_get_args',
+			array(
+				'timeout'     => self::TIMEOUT,
+				'sslverify'   => false,
+				'redirection' => 0, // disable redirection.
+				'blocking'    => true // do not execute code until this call is complete.
+			)
 		);
 
 		if ( $filename ) {
-			$args['stream'] = true; // stream body content to a file
+			$args['stream']   = true; // stream body content to a file
 			$args['filename'] = $filename;
 		}
 
@@ -224,6 +235,7 @@ class Url_Fetcher {
 		}
 
 		$response = wp_remote_get( $url, $args );
+
 		return $response;
 	}
 
