@@ -33,7 +33,7 @@ jQuery(document).ready(function ($) {
 		// set loop for pinging server
 		refreshTimer = setInterval(function () {
 			send_action_to_archive_manager('ping');
-		}, 60);
+		}, 2000);
 	}
 
 	// where action is one of 'start', 'continue', 'cancel'
