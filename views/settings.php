@@ -243,7 +243,6 @@ namespace Simply_Static;
 					</tr>
 				</tbody>
 			</table>
-
 			<h2 class="title"><?php _e( "HTTP Basic Authentication", 'simply-static' ); ?></h2>
 			<p><?php _e( "If you've secured WordPress with HTTP Basic Auth you can specify the username and password to use below.", 'simply-static' ); ?></p>
 			<?php if ( $this->http_basic_auth_digest != null ) : ?>
@@ -280,7 +279,18 @@ namespace Simply_Static;
 					</tr>
 				</tbody>
 			</table>
-
+            <table class='form-table'>
+                <tbody>
+                <tr>
+                    <th></th>
+                    <td>
+                        <p class='submit'>
+                            <input class='button button-primary' type='submit' name='save' value='<?php _e( "Save Changes", 'simply-static' );?>' />
+                        </p>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
 			<h2 class="title"><?php _e( "Additional Settings", 'simply-static' ); ?></h2>
 			<p><?php esc_html_e( 'Here you can configure some additional settings like running exports with WP-Cron, modifing the URL replacement behaviour and more.', 'simply-static' ); ?></p>
 			<table class='form-table  id='additional-settings'>
