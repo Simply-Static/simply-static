@@ -136,7 +136,7 @@ class Options {
 	 * @return string The path to the temp static archive directory
 	 */
 	public function get_archive_dir() {
-		return Util::add_trailing_directory_separator( $this->get( 'temp_files_dir' ) . $this->get( 'archive_name' ) );
+		return Util::add_trailing_directory_separator( $this->get( 'temp_files_dir' ) . apply_filters( 'ss_archive_file_name', $this->get( 'archive_name' ) ) );
 	}
 
 	/**
