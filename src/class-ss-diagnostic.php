@@ -171,7 +171,7 @@ class Diagnostic {
 	public function is_wp_cron_running() {
 		$label = __( 'Checking if WordPress cron is available and running', 'simply-static' );
 
-		if ( ! defined( 'DISABLE_WP_CRON' ) || DISABLE_WP_CRON !== true ) {
+		if ( ! defined( 'DISABLE_WP_CRON' ) || DISABLE_WP_CRON !== true || defined( 'SS_CRON' ) ) {
 			$is_cron = true;
 		} else {
 			$is_cron = false;
