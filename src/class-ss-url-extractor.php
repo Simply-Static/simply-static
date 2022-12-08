@@ -355,6 +355,7 @@ class Url_Extractor {
 				try {
 					$updated_script     = $this->extract_and_replace_urls_in_script( $tag->innerhtmlKeep );
 					$tag->innerhtmlKeep = $updated_script;
+                    $this->extract_and_replace_urls_in_script_inner_text( $tag );
 				} catch ( Exception $e ) {
 					// If not skip the result.
 					continue;
@@ -425,6 +426,17 @@ class Url_Extractor {
 
 		return $text;
 	}
+
+    /**
+     * @param \ $tag
+     * @return array|string|string[]|null
+     */
+    private function extract_and_replace_urls_in_script_inner_text( $tag ) {
+
+        $tag->innerText = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $this->options->get_destination_url(), html_entity_decode( $tag->innerText ) );
+
+        return $tag;
+    }
 
 	/**
 	 * callback function for preg_replace in extract_and_replace_urls_in_css
