@@ -54,7 +54,7 @@ class Create_Zip_Archive_Task extends Task {
 
 		// Now we are creating a new zip file.
 		$archive_dir  = $this->options->get_archive_dir();
-		$zip_filename = apply_filters( 'ss_archive_file_name', untrailingslashit( $archive_dir ) . '.zip' );
+		$zip_filename = untrailingslashit( $archive_dir ) . '.zip';
 		$zip_archive  = new \PclZip( $zip_filename );
 
 		Util::debug_log( 'Fetching list of files to include in zip' );
