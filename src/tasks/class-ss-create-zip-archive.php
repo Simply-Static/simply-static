@@ -72,6 +72,8 @@ class Create_Zip_Archive_Task extends Task {
 			return new \WP_Error( 'create_zip_failed', __( 'Unable to create ZIP archive', 'simply-static' ) );
 		}
 
+		do_action('ss_zip_file_created', $zip_archive );
+
 		$download_url = Util::abs_path_to_url( $zip_archive->zipname );
 		return $download_url;
 	}
