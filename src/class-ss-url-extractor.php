@@ -433,7 +433,25 @@ class Url_Extractor {
      */
     private function extract_and_replace_urls_in_script_inner_text( $tag ) {
 
-        $tag->innerText = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $this->options->get_destination_url(), html_entity_decode( $tag->innerText ) );
+        $regex = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i';
+
+        switch( $this->options->get( 'destination_url_type' ) ) {
+            case 'absolute':
+                $convert_to = $this->options->get_destination_url();
+                break;
+            case 'relative':
+                // Adding \/? before end of regex pattern to convert url.com/ & url.com to relative path, ex. /path/.
+                $regex = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '\/?/i';
+                $convert_to = $this->options->get( 'relative_path' );
+                break;
+            default:
+                // Offline mode.
+                // Adding \/? before end of regex pattern to convert url.com/ & url.com to relative path, ex. /path/.
+                $regex = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '\/?/i';
+                $convert_to = '/';
+        }
+
+        $tag->innerText = preg_replace( $regex, $convert_to, html_entity_decode( $tag->innerText ) );
 
         return $tag;
     }
