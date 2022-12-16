@@ -22,12 +22,6 @@ class Transfer_Files_Locally_Task extends Task {
 	 */
 	public function perform() {
 		$local_dir = apply_filters( 'ss_local_dir', $this->options->get( 'local_dir' ) );
-		$options   = Options::instance();
-
-		// Clear out the local directory before copying files.
-		if ( 'on' === $this->options->get( 'clear_directory_before_export' ) ) {
-			$this->delete_local_directory_static_files( $local_dir, $options );
-		}
 
 		list( $pages_processed, $total_pages ) = $this->copy_static_files( $local_dir );
 
@@ -122,7 +116,7 @@ class Transfer_Files_Locally_Task extends Task {
 	 *
 	 * @return true|\WP_Error True on success, WP_Error otherwise.
 	 */
-	public function delete_local_directory_static_files( $local_dir, $options ) {
+	public static function delete_local_directory_static_files( $local_dir, $options ) {
 		$temp_dir = $options->get( 'temp_files_dir' );
 
 		if ( false === file_exists( $temp_dir ) ) {
