@@ -184,6 +184,8 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 * improved URL replacement in script tags
 * fixed clear directory before export when using local path exports
 * added action fired after ZIP file created
+* fixed path replacement for Windows filesystems in Additional Files and Directories
+* untrailingslash path on transfer files locally
 
 = 2.1.9 =
 
