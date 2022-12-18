@@ -94,6 +94,9 @@ class Plugin {
 			// Add admin info links.
 			add_action( 'simply_static_admin_info_links', array( self::$instance, 'add_info_links' ) );
 
+			// Maybe clear local directory.
+			add_action( 'ss_after_setup_task', array( self::$instance, 'maybe_clear_directory' ) );
+
 			// Handle AJAX requests
 			add_action( 'wp_ajax_static_archive_action', array( self::$instance, 'static_archive_action' ) );
 			add_action( 'wp_ajax_render_export_log', array( self::$instance, 'render_export_log' ) );
@@ -842,5 +845,20 @@ class Plugin {
 		<?php
 		$info_text = apply_filters( 'simply_static_info_links', ob_get_clean() );
 		echo $info_text;
+	}
+
+	/**
+     * Maybe clear local directory before export.
+     *
+	 * @return void
+	 */
+	public function maybe_clear_directory() {
+		// Clear out the local directory before copying files.
+		if ( 'on' === $this->options->get( 'clear_directory_before_export' ) ) {
+			$local_dir = apply_filters( 'ss_local_dir', $this->options->get( 'local_dir' ) );
+
+			Transfer_Files_Locally_Task::delete_local_directory_static_files( $local_dir, $this->options );
+		}
+
 	}
 }

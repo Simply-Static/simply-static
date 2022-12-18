@@ -355,6 +355,7 @@ class Url_Extractor {
 				try {
 					$updated_script     = $this->extract_and_replace_urls_in_script( $tag->innerhtmlKeep );
 					$tag->innerhtmlKeep = $updated_script;
+                    $this->extract_and_replace_urls_in_script_inner_text( $tag );
 				} catch ( Exception $e ) {
 					// If not skip the result.
 					continue;
@@ -425,6 +426,35 @@ class Url_Extractor {
 
 		return $text;
 	}
+
+    /**
+     * @param \ $tag
+     * @return array|string|string[]|null
+     */
+    private function extract_and_replace_urls_in_script_inner_text( $tag ) {
+
+        $regex = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i';
+
+        switch( $this->options->get( 'destination_url_type' ) ) {
+            case 'absolute':
+                $convert_to = $this->options->get_destination_url();
+                break;
+            case 'relative':
+                // Adding \/? before end of regex pattern to convert url.com/ & url.com to relative path, ex. /path/.
+                $regex = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '\/?/i';
+                $convert_to = $this->options->get( 'relative_path' );
+                break;
+            default:
+                // Offline mode.
+                // Adding \/? before end of regex pattern to convert url.com/ & url.com to relative path, ex. /path/.
+                $regex = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '\/?/i';
+                $convert_to = '/';
+        }
+
+        $tag->innerText = preg_replace( $regex, $convert_to, html_entity_decode( $tag->innerText ) );
+
+        return $tag;
+    }
 
 	/**
 	 * callback function for preg_replace in extract_and_replace_urls_in_css
