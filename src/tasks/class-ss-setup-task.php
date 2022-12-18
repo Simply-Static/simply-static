@@ -151,6 +151,9 @@ class Setup_Task extends Task {
 		} elseif ( stripos( $path, get_home_path() ) === 0 ) {
 			$url = str_replace( untrailingslashit( get_home_path() ), Util::origin_url(), $path );
 		}
+
+		// Replace backslashes with forward slashes due to windows paths
+		$url = str_replace('\\', '/', $url);
 		return $url;
 	}
 
