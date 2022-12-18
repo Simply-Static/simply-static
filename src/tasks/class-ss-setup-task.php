@@ -153,7 +153,10 @@ class Setup_Task extends Task {
 		}
 
 		// Replace backslashes with forward slashes due to windows paths
-		$url = str_replace('\\', '/', $url);
+		if ( strpos( $url, '\\' ) !== false || strpos( $url, '\\' ) !== false ) {
+			$url = str_replace( '\\', '/', $url );
+		}
+
 		return $url;
 	}
 
