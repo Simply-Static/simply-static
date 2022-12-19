@@ -484,19 +484,19 @@ class Util {
 
 	private const SEPARATOR = "/";
 
-	/**
-	 * Combine multiple paths into a single path
-	 * while handling varying slashes and trailing slashes
-	 * 
-	 * @param string ...$paths Each path to combine. You can
-	 * 					       pass as many paths as you want
-	 * @return string The combined path
-	 */
+    /**
+     * Combine multiple paths into a single path
+     * while handling varying slashes and trailing slashes
+     * 
+     * @param string ...$paths Each path to combine. You can
+     * 					       pass as many paths as you want
+     * @return string The combined path
+     */
     public static function combine_path(): string
     {
         $paths = func_get_args();
 
-		if ( count( $paths ) < 1 )
+        if ( count( $paths ) < 1 )
         {
             return "";
         }
@@ -509,12 +509,12 @@ class Util {
         return implode( self::SEPARATOR, $trimmedPaths );
     }
     
-	/**
-	 * Normalize slashes in a path to forward slashes
-	 * 
-	 * @param string $path The path to normalize
-	 * @return string The normalized path
-	 */
+    /**
+     * Normalize slashes in a path to forward slashes
+     * 
+     * @param string $path The path to normalize
+     * @return string The normalized path
+     */
     public static function normalize_slashes(string $path): string
     {
         return strpos( $path, '\\' ) !== false ? str_replace( '\\', self::SEPARATOR, $path ) : $path;
