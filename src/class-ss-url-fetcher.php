@@ -74,9 +74,7 @@ class Url_Fetcher {
 		$url = $static_page->url;
 
 		// Windows support.
-		if ( strpos( $url, '\\' ) !== false || strpos( $url, '\\' ) !== false ) {
-			$url = str_replace( '\\', '/', $url );
-		}
+		$url = Util::normalize_slashes( $url );
 
 		$static_page->last_checked_at = Util::formatted_datetime();
 

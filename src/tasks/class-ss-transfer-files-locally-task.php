@@ -56,8 +56,7 @@ class Transfer_Files_Locally_Task extends Task {
 	public function copy_static_files( $destination_dir ) {
 		$batch_size = apply_filters( 'simply_static_copy_files_batch_size', 50 );
 
-		$archive_dir          = untrailingslashit( $this->options->get_archive_dir() );
-		$destination_dir_safe = untrailingslashit( $destination_dir );
+		$archive_dir = $this->options->get_archive_dir();
 
 		$archive_start_time = $this->options->get( 'archive_start_time' );
 
@@ -79,15 +78,14 @@ class Transfer_Files_Locally_Task extends Task {
 
 		while ( $static_page = array_shift( $static_pages ) ) {
 			$path_info  = Util::url_path_info( $static_page->file_path );
-			$path       = $destination_dir_safe . $path_info['dirname'];
-			$create_dir = wp_mkdir_p( $path );
-			if ( $create_dir === false ) {
-				Util::debug_log( "Cannot create directory: " . $destination_dir_safe . $path_info['dirname'] );
+			$path       = Util::combine_path( $destination_dir, $path_info['dirname'] );
+			if ( wp_mkdir_p( $path ) === false ) {
+				Util::debug_log( "Cannot create directory: " . $path );
 				$static_page->set_error_message( 'Unable to create destination directory' );
 			} else {
 				chmod( $path, 0755 );
-				$origin_file_path      = $archive_dir . $static_page->file_path;
-				$destination_file_path = $destination_dir_safe . $static_page->file_path;
+				$origin_file_path      = Util::combine_path( $archive_dir, $static_page->file_path );
+				$destination_file_path = Util::combine_path( $destination_dir, $static_page->file_path );
 
 				// check that destination file doesn't exist OR exists but is writeable
 				if ( ! file_exists( $destination_file_path ) || is_writable( $destination_file_path ) ) {
