@@ -848,16 +848,21 @@ class Plugin {
 	}
 
 	/**
-     * Maybe clear local directory before export.
-     *
+	 * Maybe clear local directory before export.
+	 *
 	 * @return void
 	 */
 	public function maybe_clear_directory() {
 		// Clear out the local directory before copying files.
-		if ( 'on' === $this->options->get( 'clear_directory_before_export' ) ) {
+		if ( 'on' === $this->options->get( 'clear_directory_before_export' ) && 'local' === $this->options->get( 'delivery_method' ) ) {
 			$local_dir = apply_filters( 'ss_local_dir', $this->options->get( 'local_dir' ) );
 
-			Transfer_Files_Locally_Task::delete_local_directory_static_files( $local_dir, $this->options );
+			// Make sure the directory exists and is not empty.
+			$iterator = new \FilesystemIterator( $local_dir );
+
+			if ( is_dir( $local_dir ) && $iterator->valid() ) {
+				Transfer_Files_Locally_Task::delete_local_directory_static_files( $local_dir, $this->options );
+			}
 		}
 
 	}
