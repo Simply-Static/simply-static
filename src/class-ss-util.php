@@ -481,4 +481,42 @@ class Util {
 		);
 		return esc_url_raw( $url );
 	}
+
+	private const SEPARATOR = "/";
+
+    /**
+     * Combine multiple paths into a single path
+     * while handling varying slashes and trailing slashes
+     * 
+     * @param string ...$paths Each path to combine. You can
+     * 					       pass as many paths as you want
+     * @return string The combined path
+     */
+    public static function combine_path(): string
+    {
+        $paths = func_get_args();
+
+        if ( count( $paths ) < 1 )
+        {
+            return "";
+        }
+
+        $paths = array_map(fn($path) => self::normalize_slashes( $path ), $paths);
+
+        // We don't strip the slashes from the first path because on Linux, paths start with a slash
+        $trimmedPaths = array_map( fn( $path ) => trim( trim( $path ), self::SEPARATOR ), array_slice( $paths, 1 ) );
+        array_unshift( $trimmedPaths, untrailingslashit( $paths[0] ) );
+        return implode( self::SEPARATOR, $trimmedPaths );
+    }
+    
+    /**
+     * Normalize slashes in a path to forward slashes
+     * 
+     * @param string $path The path to normalize
+     * @return string The normalized path
+     */
+    public static function normalize_slashes(string $path): string
+    {
+        return strpos( $path, '\\' ) !== false ? str_replace( '\\', self::SEPARATOR, $path ) : $path;
+    }
 }
