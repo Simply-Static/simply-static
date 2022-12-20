@@ -75,8 +75,9 @@ class Transfer_Files_Locally_Task extends Task {
 		Util::debug_log( "Total pages: " . $total_pages . '; Pages remaining: ' . $pages_remaining );
 
 		while ( $static_page = array_shift( $static_pages ) ) {
-			$path_info  = Util::url_path_info( $static_page->file_path );
-			$path       = Util::combine_path( $destination_dir, $path_info['dirname'] );
+			$path_info = Util::url_path_info( $static_page->file_path );
+			$path      = Util::combine_path( $destination_dir, $path_info['dirname'] );
+
 			if ( wp_mkdir_p( $path ) === false ) {
 				Util::debug_log( "Cannot create directory: " . $path );
 				$static_page->set_error_message( 'Unable to create destination directory' );

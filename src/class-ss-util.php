@@ -1,4 +1,5 @@
 <?php
+
 namespace Simply_Static;
 
 // Exit if accessed directly
@@ -12,18 +13,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Util {
 
 	/**
-	* Get the protocol used for the origin URL
-	* @return string http or https
-	*/
+	 * Get the protocol used for the origin URL
+	 * @return string http or https
+	 */
 	public static function origin_scheme() {
 		$pattern = '/:\/\/.*/';
+
 		return preg_replace( $pattern, '', self::origin_url() );
 	}
 
 	/**
-	* Get the host for the origin URL
-	* @return string host (URL minus the protocol)
-	*/
+	 * Get the host for the origin URL
+	 * @return string host (URL minus the protocol)
+	 */
 	public static function origin_host() {
 		return untrailingslashit( self::strip_protocol_from_url( self::origin_url() ) );
 	}
@@ -49,7 +51,7 @@ class Util {
 	 * @return null
 	 */
 	public static function selected_if( $statement ) {
-		echo ( $statement == true ? 'selected="selected"' : '' );
+		echo( $statement == true ? 'selected="selected"' : '' );
 	}
 
 	/**
@@ -57,7 +59,7 @@ class Util {
 	 * @return null
 	 */
 	public static function checked_if( $statement ) {
-		echo ( $statement == true ? 'checked="checked"' : '' );
+		echo( $statement == true ? 'checked="checked"' : '' );
 	}
 
 	/**
@@ -78,7 +80,9 @@ class Util {
 
 	/**
 	 * Dump an object to error_log
+	 *
 	 * @param mixed $object Object to dump to the error log
+	 *
 	 * @return void
 	 */
 	public static function error_log( $object = null ) {
@@ -99,7 +103,9 @@ class Util {
 
 	/**
 	 * Save an object/string to the debug log
+	 *
 	 * @param mixed $object Object to save to the debug log
+	 *
 	 * @return void
 	 */
 	public static function debug_log( $object = null ) {
@@ -143,7 +149,9 @@ class Util {
 
 	/**
 	 * Get contents of an object as a string
-	 * @param  mixed  $object Object to get string for
+	 *
+	 * @param mixed $object Object to get string for
+	 *
 	 * @return string         String containing the contents of the object
 	 */
 	protected static function get_contents_from_object( $object ) {
@@ -155,6 +163,7 @@ class Util {
 		var_dump( $object );
 		$contents = ob_get_contents();
 		ob_end_clean();
+
 		return $contents;
 	}
 
@@ -168,8 +177,9 @@ class Util {
 	 * A null value is returned in the event that the extracted_url is blank or it's
 	 * unable to be parsed.
 	 *
-	 * @param  string       $extracted_url   Relative or absolute URL extracted from page
-	 * @param  string       $page_url        URL of page
+	 * @param string $extracted_url Relative or absolute URL extracted from page
+	 * @param string $page_url URL of page
+	 *
 	 * @return string|null                   Absolute URL, or null
 	 */
 	public static function relative_to_absolute_url( $extracted_url, $page_url ) {
@@ -210,8 +220,8 @@ class Util {
 
 		// if no path, check for an ending slash; if there isn't one, add one
 		if ( ! isset( $parsed_extracted_url['path'] ) ) {
-			$clean_url = self::remove_params_and_fragment( $extracted_url );
-			$fragment = substr( $extracted_url, strlen( $clean_url ) );
+			$clean_url     = self::remove_params_and_fragment( $extracted_url );
+			$fragment      = substr( $extracted_url, strlen( $clean_url ) );
 			$extracted_url = trailingslashit( $clean_url ) . $fragment;
 		}
 
@@ -228,7 +238,7 @@ class Util {
 
 			$path = isset( $parsed_extracted_url['path'] ) ? $parsed_extracted_url['path'] : '';
 
-			$query = isset( $parsed_extracted_url['query'] ) ? '?' . $parsed_extracted_url['query'] : '';
+			$query    = isset( $parsed_extracted_url['query'] ) ? '?' . $parsed_extracted_url['query'] : '';
 			$fragment = isset( $parsed_extracted_url['fragment'] ) ? '#' . $parsed_extracted_url['fragment'] : '';
 
 			// turn our relative url into an absolute url
@@ -239,38 +249,41 @@ class Util {
 		}
 	}
 
-	 /**
-	  * Recursively create a path from one page to another
-	  *
-	  * Takes a path (e.g. /blog/foobar/) extracted from a page (e.g. /blog/page/3/)
-	  * and returns a path to get to the extracted page from the current page
-	  * (e.g. ./../../foobar/index.html). Since this is for offline use, the path
-	  * return will include a /index.html if the extracted path doesn't contain
-	  * an extension.
-	  *
-	  * The function recursively calls itself, cutting off sections of the page path
-	  * until the base matches the extracted path or it runs out of parts to remove,
-	  * then it builds out the path to the extracted page.
-	  *
-	  * @param  string      $extracted_path Relative or absolute URL extracted from page
-	  * @param  string      $page_path      URL of page
-	  * @param  int         $iterations     Number of times the page path has been chopped
-	  * @return string|null                 Absolute URL, or null
-	  */
+	/**
+	 * Recursively create a path from one page to another
+	 *
+	 * Takes a path (e.g. /blog/foobar/) extracted from a page (e.g. /blog/page/3/)
+	 * and returns a path to get to the extracted page from the current page
+	 * (e.g. ./../../foobar/index.html). Since this is for offline use, the path
+	 * return will include a /index.html if the extracted path doesn't contain
+	 * an extension.
+	 *
+	 * The function recursively calls itself, cutting off sections of the page path
+	 * until the base matches the extracted path or it runs out of parts to remove,
+	 * then it builds out the path to the extracted page.
+	 *
+	 * @param string $extracted_path Relative or absolute URL extracted from page.
+	 * @param string $page_path URL of page.
+	 * @param int $iterations Number of times the page path has been chopped.
+	 *
+	 * @return string|null                 Absolute URL, or null
+	 */
 	public static function create_offline_path( $extracted_path, $page_path, $iterations = 0 ) {
 		// We're done if we get a match between the path of the page and the extracted URL
 		// OR if there are no more slashes to remove
 		if ( strpos( $page_path, '/' ) === false || strpos( $extracted_path, $page_path ) === 0 ) {
 			$extracted_path = substr( $extracted_path, strlen( $page_path ) );
-			$iterations = ( $iterations == 0 ) ? 0 : $iterations - 1;
-			$new_path = '.' . str_repeat( '/..', $iterations ) . self::add_leading_slash( $extracted_path );
+			$iterations     = ( $iterations == 0 ) ? 0 : $iterations - 1;
+			$new_path       = '.' . str_repeat( '/..', $iterations ) . self::add_leading_slash( $extracted_path );
+
 			return $new_path;
 		} else {
 			// match everything before the last slash
 			$pattern = '/(.*)\/[^\/]*$/';
 			// remove the last slash and anything after it
 			$new_page_path = preg_replace( $pattern, '$1', $page_path );
-			return self::create_offline_path( $extracted_path, $new_page_path, ++$iterations );
+
+			return self::create_offline_path( $extracted_path, $new_page_path, ++ $iterations );
 		}
 	}
 
@@ -279,7 +292,8 @@ class Util {
 	 *
 	 * Both http and https are assumed to be the same domain.
 	 *
-	 * @param  string  $url URL to check
+	 * @param string $url URL to check
+	 *
 	 * @return boolean      true if URL is local, false otherwise
 	 */
 	public static function is_local_url( $url ) {
@@ -288,55 +302,69 @@ class Util {
 
 	/**
 	 * Get the path from a local URL, removing the protocol and host
-	 * @param  string  $url URL to strip protocol/host from
+	 *
+	 * @param string $url URL to strip protocol/host from
+	 *
 	 * @return string       URL sans protocol/host
 	 */
 	public static function get_path_from_local_url( $url ) {
 		$url = self::strip_protocol_from_url( $url );
 		$url = str_replace( self::origin_host(), '', $url );
+
 		return $url;
 	}
 
 	/**
 	 * Returns a URL w/o the query string or fragment (i.e. nothing after the path)
-	 * @param  string $url URL to remove query string/fragment from
+	 *
+	 * @param string $url URL to remove query string/fragment from
+	 *
 	 * @return string      URL without query string/fragment
 	 */
 	public static function remove_params_and_fragment( $url ) {
-		return preg_replace('/(\?|#).*/', '', $url);
+		return preg_replace( '/(\?|#).*/', '', $url );
 	}
 
 	/**
 	 * Converts a textarea into an array w/ each line being an entry in the array
-	 * @param  string $textarea Textarea to convert
+	 *
+	 * @param string $textarea Textarea to convert
+	 *
 	 * @return array            Converted array
 	 */
 	public static function string_to_array( $textarea ) {
 		// using preg_split to intelligently break at newlines
 		// see: http://stackoverflow.com/questions/1483497/how-to-put-string-in-array-split-by-new-line
-		$lines =  preg_split( "/\r\n|\n|\r/", $textarea );
+		$lines = preg_split( "/\r\n|\n|\r/", $textarea );
 		array_walk( $lines, 'trim' );
 		$lines = array_filter( $lines );
+
 		return $lines;
 	}
 
 	/**
 	 * Remove the //, http://, https:// protocols from a URL
-	 * @param  string $url URL to remove protocol from
+	 *
+	 * @param string $url URL to remove protocol from
+	 *
 	 * @return string      URL sans http/https protocol
 	 */
 	public static function strip_protocol_from_url( $url ) {
 		$pattern = '/^(https?:)?\/\//';
+
 		return preg_replace( $pattern, '', $url );
 	}
 
 	/**
 	 * Remove index.html/index.php from a URL
-	 * @param  string $url URL to remove index file from
+	 *
+	 * @param string $url URL to remove index file from
+	 *
 	 * @return string      URL sans index file
 	 */
 	public static function strip_index_filenames_from_url( $url ) {
 		$pattern = '/index.(html?|php)$/';
+
 		return preg_replace( $pattern, '', $url );
 	}
 
@@ -357,14 +385,16 @@ class Util {
 	 *     $info['basename']  === 'function.pathinfo.php'
 	 *     $info['extension'] === 'php'
 	 *     $info['filename']  === 'function.pathinfo'
-	 * @param  string $path The URL path
+	 *
+	 * @param string $path The URL path
+	 *
 	 * @return array        Array containing info on the parts of the path
 	 */
 	public static function url_path_info( $path ) {
 		$info = array(
-			'dirname' => '',
-			'basename' => '',
-			'filename' => '',
+			'dirname'   => '',
+			'basename'  => '',
+			'filename'  => '',
 			'extension' => ''
 		);
 
@@ -375,8 +405,8 @@ class Util {
 		if ( $last_slash_location === false ) {
 			$info['basename'] = $path;
 		} else {
-			$info['dirname'] = substr( $path, 0, $last_slash_location+1 );
-			$info['basename'] = substr( $path, $last_slash_location+1 );
+			$info['dirname']  = substr( $path, 0, $last_slash_location + 1 );
+			$info['basename'] = substr( $path, $last_slash_location + 1 );
 		}
 
 		// finding the dot for the extension
@@ -384,8 +414,8 @@ class Util {
 		if ( $last_dot_location === false ) {
 			$info['filename'] = $info['basename'];
 		} else {
-			$info['filename'] = substr( $info['basename'], 0, $last_dot_location );
-			$info['extension'] = substr( $info['basename'], $last_dot_location+1 );
+			$info['filename']  = substr( $info['basename'], 0, $last_dot_location );
+			$info['extension'] = substr( $info['basename'], $last_dot_location + 1 );
 		}
 
 		// substr sets false if it fails, we're going to reset those values to ''
@@ -400,6 +430,7 @@ class Util {
 
 	/**
 	 * Ensure there is a single trailing directory separator on the path
+	 *
 	 * @param string $path File path to add trailing directory separator to
 	 */
 	public static function add_trailing_directory_separator( $path ) {
@@ -408,6 +439,7 @@ class Util {
 
 	/**
 	 * Remove all trailing directory separators
+	 *
 	 * @param string $path File path to remove trailing directory separators from
 	 */
 	public static function remove_trailing_directory_separator( $path ) {
@@ -416,6 +448,7 @@ class Util {
 
 	/**
 	 * Ensure there is a single leading directory separator on the path
+	 *
 	 * @param string $path File path to add leading directory separator to
 	 */
 	public static function add_leading_directory_separator( $path ) {
@@ -424,6 +457,7 @@ class Util {
 
 	/**
 	 * Remove all leading directory separators
+	 *
 	 * @param string $path File path to remove leading directory separators from
 	 */
 	public static function remove_leading_directory_separator( $path ) {
@@ -432,6 +466,7 @@ class Util {
 
 	/**
 	 * Add a slash to the beginning of a path
+	 *
 	 * @param string $path URL path to add leading slash to
 	 */
 	public static function add_leading_slash( $path ) {
@@ -440,6 +475,7 @@ class Util {
 
 	/**
 	 * Remove a slash from the beginning of a path
+	 *
 	 * @param string $path URL path to remove leading slash from
 	 */
 	public static function remove_leading_slash( $path ) {
@@ -448,16 +484,18 @@ class Util {
 
 	/**
 	 * Add a message to the array of status messages for the job
-	 * @param  array  $messages  Array of messages to add the message to
-	 * @param  string $task_name Name of the task
-	 * @param  string $message   Message to display about the status of the job
+	 *
+	 * @param array $messages Array of messages to add the message to
+	 * @param string $task_name Name of the task
+	 * @param string $message Message to display about the status of the job
+	 *
 	 * @return void
 	 */
 	public static function add_archive_status_message( $messages, $task_name, $message ) {
 		// if the state exists, set the datetime and message
 		if ( ! array_key_exists( $task_name, $messages ) ) {
 			$messages[ $task_name ] = array(
-				'message' => $message,
+				'message'  => $message,
 				'datetime' => self::formatted_datetime()
 			);
 		} else { // otherwise just update the message
@@ -471,6 +509,7 @@ class Util {
 	 * Get full URL from path.
 	 *
 	 * @param string $path given path.
+	 *
 	 * @return string
 	 */
 	public static function abs_path_to_url( $path = '' ) {
@@ -479,44 +518,41 @@ class Util {
 			site_url(),
 			wp_normalize_path( $path )
 		);
+
 		return esc_url_raw( $url );
 	}
 
-	private const SEPARATOR = "/";
+	/**
+	 * Combine multiple paths into a single path while handling varying slashes and trailing slashes
+	 *
+	 * @param string ...$paths Each path to combine. You can pass as many paths as you want.
+	 *
+	 * @return string The combined path
+	 */
+	public static function combine_path(): string {
+		$paths = func_get_args();
 
-    /**
-     * Combine multiple paths into a single path
-     * while handling varying slashes and trailing slashes
-     * 
-     * @param string ...$paths Each path to combine. You can
-     * 					       pass as many paths as you want
-     * @return string The combined path
-     */
-    public static function combine_path(): string
-    {
-        $paths = func_get_args();
+		if ( count( $paths ) < 1 ) {
+			return '';
+		}
 
-        if ( count( $paths ) < 1 )
-        {
-            return "";
-        }
+		$paths = array_map( fn( $path ) => self::normalize_slashes( $path ), $paths );
 
-        $paths = array_map(fn($path) => self::normalize_slashes( $path ), $paths);
+		// We don't strip the slashes from the first path because on Linux, paths start with a slash.
+		$trimmed_path = array_map( fn( $path ) => trim( trim( $path ), '/' ), array_slice( $paths, 1 ) );
+		array_unshift( $trimmed_path, untrailingslashit( $paths[0] ) );
 
-        // We don't strip the slashes from the first path because on Linux, paths start with a slash
-        $trimmedPaths = array_map( fn( $path ) => trim( trim( $path ), self::SEPARATOR ), array_slice( $paths, 1 ) );
-        array_unshift( $trimmedPaths, untrailingslashit( $paths[0] ) );
-        return implode( self::SEPARATOR, $trimmedPaths );
-    }
-    
-    /**
-     * Normalize slashes in a path to forward slashes
-     * 
-     * @param string $path The path to normalize
-     * @return string The normalized path
-     */
-    public static function normalize_slashes(string $path): string
-    {
-        return strpos( $path, '\\' ) !== false ? str_replace( '\\', self::SEPARATOR, $path ) : $path;
-    }
+		return implode( '/', $trimmed_path );
+	}
+
+	/**
+	 * Normalize slashes in a path to forward slashes
+	 *
+	 * @param string $path The path to normalize.
+	 *
+	 * @return string The normalized path.
+	 */
+	public static function normalize_slashes( string $path ): string {
+		return strpos( $path, '\\' ) !== false ? str_replace( '\\', '/', $path ) : $path;
+	}
 }
