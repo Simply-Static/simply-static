@@ -96,7 +96,7 @@ class Options {
             (
                 defined('SIMPLY_STATIC_' . strtoupper( $name ) ) ?
                 constant('SIMPLY_STATIC_' . strtoupper( $name ) ) :
-                $this->options[ $name ]
+                apply_filters( 'ss_get_option_' . strtolower( $name ), $this->options[ $name ], $this )
             )
             : null;
 	}
