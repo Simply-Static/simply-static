@@ -208,7 +208,7 @@ class Plugin {
 		add_menu_page(
 			__( 'Simply Static', 'simply-static' ),
 			__( 'Simply Static', 'simply-static' ),
-			'edit_posts',
+			apply_filters( 'ss_settings_capability', 'edit_posts' ),
 			self::SLUG,
 			array( self::$instance, 'display_generate_page' ),
 			'dashicons-text-page'
@@ -218,7 +218,7 @@ class Plugin {
 			self::SLUG,
 			__( 'Generate Static Site', 'simply-static' ),
 			__( 'Generate', 'simply-static' ),
-			'edit_posts',
+			apply_filters( 'ss_settings_capability', 'edit_posts' ),
 			self::SLUG,
 			array( self::$instance, 'display_generate_page' )
 		);
@@ -227,7 +227,7 @@ class Plugin {
 			self::SLUG,
 			__( 'Simply Static Settings', 'simply-static' ),
 			__( 'Settings', 'simply-static' ),
-			'manage_options',
+			apply_filters( 'ss_settings_capability', 'manage_options' ),
 			self::SLUG . '_settings',
 			array( self::$instance, 'display_settings_page' )
 		);
@@ -236,7 +236,7 @@ class Plugin {
 			self::SLUG,
 			__( 'Simply Static Diagnostics', 'simply-static' ),
 			__( 'Diagnostics', 'simply-static' ),
-			'manage_options',
+			apply_filters( 'ss_settings_capability', 'manage_options' ),
 			self::SLUG . '_diagnostics',
 			array( self::$instance, 'display_diagnostics_page' )
 		);
