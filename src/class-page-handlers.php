@@ -16,7 +16,14 @@ class Page_Handlers {
      * Constructor.
      */
     public function __construct() {
+        $this->includes();
         add_action( 'init', [ $this, 'run_page_handlers_from_request' ], 1 );
+    }
+
+    public function includes() {
+        $path = plugin_dir_path( dirname( __FILE__ ) ) . 'src/handlers/';
+        require_once $path . 'class-ss-page-handler.php';
+        require_once $path . 'class-ss-yoast-sitemap-handler.php';
     }
 
     /**

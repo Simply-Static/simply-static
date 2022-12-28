@@ -128,6 +128,8 @@ class Plugin {
 			self::$instance->current_page = $page;
 
 			Upgrade_Handler::run();
+            $integrations = new Integrations();
+            $integrations->load();
 
 			// Exclude pages if not set.
 			$urls_to_exclude = self::$instance->options->get( 'urls_to_exclude' );
@@ -179,6 +181,7 @@ class Plugin {
 		require_once $path . 'src/class-ss-upgrade-handler.php';
 		require_once $path . 'src/class-ss-util.php';
         require_once $path . 'src/class-page-handlers.php';
+        require_once $path . 'src/class-integrations.php';
 	}
 
 	/**

@@ -38,6 +38,15 @@ class Page_Handler {
     }
 
     /**
+     * Get Options Instance.
+     *
+     * @return \Simply_Static\Options|null
+     */
+    public function get_options() {
+        return Options::instance();
+    }
+
+    /**
      * Run hooks on page request.
      *
      * Useful in case a type of page requires different hooks to be ran before the static page is generated.
