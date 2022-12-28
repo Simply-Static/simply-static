@@ -92,6 +92,7 @@ class Url_Fetcher {
 		$temp_filename = wp_tempnam();
 
 		Util::debug_log( "Fetching URL and saving it to: " . $temp_filename );
+        $url = $static_page->get_handler()->prepare_url( $url );
 		$response = self::remote_get( $url, $temp_filename );
 
 		$filesize = file_exists( $temp_filename ) ? filesize( $temp_filename ) : 0;

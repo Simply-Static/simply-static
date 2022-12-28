@@ -43,6 +43,7 @@ class Page extends Model {
 		'content_hash'        => 'BINARY(20) NULL',
 		'error_message'       => 'VARCHAR(255) NULL',
 		'status_message'      => 'VARCHAR(255) NULL',
+        'handler'             => 'VARCHAR(255) NULL',
 		'last_checked_at'     => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
 		'last_modified_at'    => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
 		'last_transferred_at' => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
@@ -163,4 +164,29 @@ class Page extends Model {
 	public function is_type( $content_type ) {
 		return stripos( $this->content_type, $content_type ) !== false;
 	}
+
+    public function get_handler_class() {
+        $handler = $this->handler ?? Page_Handler::class;
+
+        if ( ! class_exists( $handler ) ) {
+            $handler = '\Simply_Static\\' . $handler;
+        }
+
+        if ( ! class_exists( $handler ) ) {
+            $handler = Page_Handler::class;
+        }
+
+        return $handler;
+    }
+
+    /**
+     * Get the Page Handler based on the column saved.
+     *
+     * @return Page_Handler
+     */
+    public function get_handler() {
+        $handler_class = $this->get_handler_class();
+
+        return new $handler_class( $this );
+    }
 }

@@ -15,7 +15,7 @@ class Plugin {
 	 * Plugin version
 	 * @var string
 	 */
-	const VERSION = '2.2.1.1';
+	const VERSION = '2.2.2.0';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
@@ -52,6 +52,11 @@ class Plugin {
 	 * @var string
 	 */
 	protected $current_page = '';
+
+    /**
+     * @var null|\Simply_Static\Page_Handlers
+     */
+    protected $page_handlers = null;
 
 	/**
 	 * Disable usage of "new"
@@ -117,6 +122,7 @@ class Plugin {
 			self::$instance->options              = Options::instance();
 			self::$instance->view                 = new View();
 			self::$instance->archive_creation_job = new Archive_Creation_Job();
+            self::$instance->page_handlers        = new Page_Handlers();
 
 			$page                         = isset( $_GET['page'] ) ? $_GET['page'] : '';
 			self::$instance->current_page = $page;
@@ -172,6 +178,7 @@ class Plugin {
 		require_once $path . 'src/class-ss-sql-permissions.php';
 		require_once $path . 'src/class-ss-upgrade-handler.php';
 		require_once $path . 'src/class-ss-util.php';
+        require_once $path . 'src/class-page-handlers.php';
 	}
 
 	/**
