@@ -66,7 +66,7 @@ class Url_Fetcher {
 	/**
 	 * Fetch the URL and return a \WP_Error if we get one, otherwise a Response class.
 	 *
-	 * @param Simply_Static\Page $static_page URL to fetch
+	 * @param \Simply_Static\Page $static_page URL to fetch
 	 *
 	 * @return boolean                        Was the fetch successful?
 	 */
@@ -137,6 +137,7 @@ class Url_Fetcher {
 
 				Util::debug_log( "Renaming temp file from " . $temp_filename . " to " . $file_path );
 				rename( $temp_filename, $file_path );
+                $static_page->get_handler()->after_file_fetch( $this->archive_dir );
 			} else {
 				Util::debug_log( "We weren't able to establish a filename; deleting temp file" );
 				unlink( $temp_filename );

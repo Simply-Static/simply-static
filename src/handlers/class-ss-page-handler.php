@@ -54,4 +54,6 @@ class Page_Handler {
      * @return void
      */
     public function run_hooks() {}
+
+    public function after_file_fetch( $archive_dir ) {}
 }

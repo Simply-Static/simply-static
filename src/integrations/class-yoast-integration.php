@@ -29,7 +29,7 @@ class Yoast_Integration extends Integration {
      * Can this integration run?
      * @return bool
      */
-    public function can_run() {die('Running Yoast');
+    public function can_run() {
         return defined( 'WPSEO_FILE' );
     }
 }

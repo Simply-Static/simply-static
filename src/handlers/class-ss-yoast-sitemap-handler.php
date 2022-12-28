@@ -23,7 +23,26 @@ class Yoast_Sitemap_Handler extends Page_Handler {
      * @return string
      */
     public function stylesheet_url( $xsl_string ) {
-        return '<?xml-stylesheet type="text/xsl" href="' . esc_url( trailingslashit( $this->get_options()->get_destination_url() ) . 'main-sitemap.xsl' ) . '"?>';
+        return '<?xml-stylesheet type="text/xsl" href="' . trailingslashit( $this->get_options()->get_destination_url() ) . 'main-sitemap.xsl' . '"?>';
     }
 
+    /**
+     * @param $destination_dir
+     * @return void
+     */
+    public function after_file_fetch( $destination_dir ) {
+
+        $xsl_path = dirname( WPSEO_FILE ) . '/css/main-sitemap.xsl';
+        $destination_path = Util::combine_path( $destination_dir, '/main-sitemap.xsl' );
+        if ( file_exists( $destination_path ) ) {
+            return;
+        }
+        $copy = copy( $xsl_path, $destination_path );
+        if ( $copy === false ) {
+            Util::debug_log( "Cannot copy " . $xsl_path . " to " . $destination_path );
+        } else {
+
+            Util::debug_log( "Copied " . $xsl_path . " to " . $destination_path );
+        }
+    }
 }
