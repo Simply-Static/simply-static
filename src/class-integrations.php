@@ -25,7 +25,8 @@ class Integrations {
     public function get_integrations() {
        return apply_filters( 'simply_static_integrations', [
            'yoast' => Yoast_Integration::class,
-           'rank-math' => Rank_Math_Integration::class
+           'rank-math' => Rank_Math_Integration::class,
+           'aio-seo'   => AIO_SEO_Integration::class,
        ] );
     }
 
@@ -34,5 +35,6 @@ class Integrations {
         require_once $path . 'class-integration.php';
         require_once $path . 'class-yoast-integration.php';
         require_once $path . 'class-rank-math-integration.php';
+        require_once $path . 'class-aio-seo-integration.php';
     }
 }

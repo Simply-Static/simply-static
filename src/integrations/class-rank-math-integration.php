@@ -16,7 +16,7 @@ class Rank_Math_Integration extends Integration {
     public function run() {
         add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_page' ] );
 
-        $this->include_file( 'handlers/class-rank-math-handler.php' );
+        $this->include_file( 'handlers/class-ss-rank-math-sitemap-handler.php' );
     }
 
     public function register_sitemap_page() {
