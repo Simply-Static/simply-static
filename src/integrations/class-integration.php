@@ -55,4 +55,14 @@ abstract class Integration {
      * @return void
      */
     public function run() {}
+
+    /**
+     * Include File.
+     *
+     * @param $path
+     * @return void
+     */
+    public function include_file( $path ) {
+       require_once trailingslashit( SIMPLY_STATIC_PATH ) . 'src/' . $path;
+    }
 }

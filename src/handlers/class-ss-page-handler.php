@@ -34,6 +34,7 @@ class Page_Handler {
      */
     public function prepare_url( $url ) {
         $url = add_query_arg( 'simply_static_page', $this->page->id, $url );
+        Util::debug_log( 'URL Prepared:' . $url );
         return $url;
     }
 
@@ -55,5 +56,5 @@ class Page_Handler {
      */
     public function run_hooks() {}
 
-    public function after_file_fetch( $archive_dir ) {}
+    public function after_file_fetch( $destination_dir ) {}
 }

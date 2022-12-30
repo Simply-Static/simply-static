@@ -23,7 +23,8 @@ class Yoast_Sitemap_Handler extends Page_Handler {
      * @return string
      */
     public function stylesheet_url( $xsl_string ) {
-        return '<?xml-stylesheet type="text/xsl" href="' . trailingslashit( $this->get_options()->get_destination_url() ) . 'main-sitemap.xsl' . '"?>';
+        // Using Origin URL to make sure the URL gets swapped correctly with destination url.
+        return '<?xml-stylesheet type="text/xsl" href="' . trailingslashit( Util::origin_url() ) . 'main-sitemap.xsl' . '"?>';
     }
 
     /**

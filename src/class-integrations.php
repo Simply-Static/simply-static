@@ -24,7 +24,8 @@ class Integrations {
 
     public function get_integrations() {
        return apply_filters( 'simply_static_integrations', [
-           'yoast' => Yoast_Integration::class
+           'yoast' => Yoast_Integration::class,
+           'rank-math' => Rank_Math_Integration::class
        ] );
     }
 
@@ -32,5 +33,6 @@ class Integrations {
         $path = plugin_dir_path( dirname( __FILE__ ) ) . 'src/integrations/';
         require_once $path . 'class-integration.php';
         require_once $path . 'class-yoast-integration.php';
+        require_once $path . 'class-rank-math-integration.php';
     }
 }
