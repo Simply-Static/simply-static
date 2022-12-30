@@ -23,9 +23,6 @@ class AIO_SEO_Integration extends Integration {
         if ( function_exists( 'aioseo' ) ) {
             aioseo()->sitemap->type = 'general';
             $post_types  = aioseo()->sitemap->helpers->includedPostTypes();
-            if ( ! $post_types ) {
-                Util::debug_log( 'No post types for sitemap.' );
-            }
             foreach ( $post_types as $post_type ) {
                 $post_type_url = home_url( $post_type . '-sitemap.xml' );
                 $this->register_sitemap_page( $post_type_url );
