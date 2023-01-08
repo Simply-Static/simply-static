@@ -99,7 +99,7 @@ class Transfer_Files_Locally_Task extends Task {
 				}
 			}
 
-            do_action( 'simply_static_page_file_transferred', $static_page, $destination_dir );
+			do_action( 'simply_static_page_file_transferred', $static_page, $destination_dir );
 
 			$static_page->last_transferred_at = Util::formatted_datetime();
 			$static_page->save();
