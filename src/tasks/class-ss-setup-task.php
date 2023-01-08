@@ -56,7 +56,7 @@ class Setup_Task extends Task {
 		//->delete_all();
 
 		// add origin url and additional urls/files to database.
-		$additional_urls = $this->options->get( 'additional_urls' );
+		$additional_urls = apply_filters( 'ss_setup_task_additional_urls', $this->options->get( 'additional_urls' ) );
 
 		self::add_origin_and_additional_urls_to_db( $additional_urls );
 		self::add_additional_files_to_db( $this->options->get( 'additional_files' ) );

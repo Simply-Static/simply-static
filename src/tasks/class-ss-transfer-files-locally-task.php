@@ -40,7 +40,7 @@ class Transfer_Files_Locally_Task extends Task {
 
 		// return true when done (no more pages).
 		if ( $pages_processed >= $total_pages ) {
-			do_action( 'ss_finished_transferring_files_locally' );
+			do_action( 'ss_finished_transferring_files_locally', $local_dir );
 		}
 
 		return $pages_processed >= $total_pages;
@@ -98,6 +98,8 @@ class Transfer_Files_Locally_Task extends Task {
 					$static_page->set_error_message( 'Destination file exists and is unwriteable' );
 				}
 			}
+
+            do_action( 'simply_static_page_file_transferred', $static_page, $destination_dir );
 
 			$static_page->last_transferred_at = Util::formatted_datetime();
 			$static_page->save();
