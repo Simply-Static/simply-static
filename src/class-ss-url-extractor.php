@@ -422,6 +422,9 @@ class Url_Extractor {
 
 	private function extract_and_replace_urls_in_script( $text ) {
 
+        // Fix URLs in script JSON and HTML in script templates.
+        $text = stripslashes( $text );
+
 		$text = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $this->options->get_destination_url(), html_entity_decode( $text ) );
 
 		return $text;
