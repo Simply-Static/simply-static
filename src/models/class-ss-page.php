@@ -165,6 +165,15 @@ class Page extends Model {
 		return stripos( $this->content_type, $content_type ) !== false;
 	}
 
+    /**
+     * Return if it's a binary file.
+     *
+     * @return bool
+     */
+    public function is_binary_file() {
+        return $this->is_type('application/octet-stream');
+    }
+
     public function get_handler_class() {
         $handler = $this->handler ?? Page_Handler::class;
 

@@ -155,7 +155,7 @@ class Url_Fetcher {
 	 * This will also create directories as needed so that a file could be
 	 * created at the returned file path.
 	 *
-	 * @param Simply_Static\Page $static_page The Simply_Static\Page
+	 * @param \Simply_Static\Page $static_page The Simply_Static\Page
 	 *
 	 * @return string|null                The relative file path of the file
 	 */
@@ -176,7 +176,7 @@ class Url_Fetcher {
 
 		// If there's no extension, we're going to create a directory with the
 		// filename and place an index.html/xml file in there.
-		if ( $path_info['extension'] === '' ) {
+		if ( $path_info['extension'] === '' && ! $static_page->is_binary_file() ) {
 			if ( $path_info['filename'] !== '' ) {
 				// the filename would be blank for the root url, in that
 				// instance we don't want to add an extra slash
@@ -196,7 +196,7 @@ class Url_Fetcher {
 			Util::debug_log( "Unable to create temporary directory: " . $this->archive_dir . urldecode( $relative_file_dir ) );
 			$static_page->set_error_message( 'Unable to create temporary directory' );
 		} else {
-			$relative_filename = urldecode( $relative_file_dir ) . $path_info['filename'] . '.' . $path_info['extension'];
+			$relative_filename = urldecode( $relative_file_dir ) . $path_info['filename'] . ( $path_info['extension'] ? '.' . $path_info['extension'] : '' );
 			Util::debug_log( "New filename for static page: " . $relative_filename );
 
 			// check that file doesn't exist OR exists but is writeable
