@@ -316,6 +316,7 @@ class Url_Extractor {
 	 */
 	private function extract_and_replace_urls_in_html() {
 		$html_string = $this->get_body();
+        $html_string = stripslashes( $html_string );
 		$match_tags  = apply_filters( 'ss_match_tags', self::$match_tags );
 
 		$dom = HtmlDomParser::str_get_html( $html_string );
@@ -421,6 +422,9 @@ class Url_Extractor {
 	}
 
 	private function extract_and_replace_urls_in_script( $text ) {
+
+        // Fix URLs in script JSON and HTML in script templates.
+        $text = stripslashes( $text );
 
 		$text = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $this->options->get_destination_url(), html_entity_decode( $text ) );
 
