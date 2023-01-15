@@ -16,8 +16,8 @@ class Diagnostic {
 
 	/** @const */
 	protected static $min_version = array(
-		'php' => '7.2.5',
-		'curl' => '7.15.0'
+		'php' => '7.4',
+		'curl' => '7.81.0'
 	);
 
 	/**
