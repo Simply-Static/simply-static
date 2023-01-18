@@ -560,6 +560,8 @@ class Url_Extractor {
 			$url = $this->convert_offline_url( $url );
 		}
 
+        $url = remove_query_arg( 'simply_static_page', $url );
+
 		return $url;
 	}
 
