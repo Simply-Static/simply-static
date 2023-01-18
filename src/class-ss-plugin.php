@@ -451,6 +451,8 @@ class Plugin {
 			$destination_scheme = $this->fetch_post_value( 'destination_scheme' );
 			$destination_host   = untrailingslashit( $this->fetch_post_value( 'destination_host' ) );
 		}
+        $destination_scheme = $this->fetch_post_value( 'destination_scheme' );
+        $destination_host   = untrailingslashit( $this->fetch_post_value( 'destination_host' ) );
 
 		// Set URLs to exclude
 		$urls_to_exclude = array();
