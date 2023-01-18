@@ -6,7 +6,7 @@ namespace Simply_Static;
 
 <div class='wrap' id='generatePage'>
 
-	<?php wp_nonce_field( 'simply-static_generate' ) ?>
+	<?php wp_nonce_field( 'simply-static_generate', 'simply_static_nonce' ) ?>
 
 	<div class='actions'>
 		<input id='generate' class='button button-primary button-hero <?php if ( ! $this->archive_generation_done ) { echo 'hide'; } ?>' type='submit' name='generate' value='<?php _e( "Generate Static Files", 'simply-static' ); ?>' />

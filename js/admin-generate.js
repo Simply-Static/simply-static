@@ -39,7 +39,7 @@ jQuery(document).ready(function ($) {
 	// where action is one of 'start', 'continue', 'cancel'
 	function send_action_to_archive_manager(action) {
 		var data = {
-			'_ajax_nonce': $('#_wpnonce').val(),
+			'_ajax_nonce': $('#simply_static_nonce').val(),
 			'action': 'static_archive_action',
 			'perform': action
 		};
@@ -86,7 +86,7 @@ jQuery(document).ready(function ($) {
 
 	function display_export_log() {
 		var data = {
-			'_ajax_nonce': $('#_wpnonce').val(),
+			'_ajax_nonce': $('#simply_static_nonce').val(),
 			'action': 'render_export_log',
 			'page': 1,
 			'per_page': STATIC_PAGES_PER_PAGE
@@ -102,7 +102,7 @@ jQuery(document).ready(function ($) {
 
 	function display_activity_log() {
 		var data = {
-			'_ajax_nonce': $('#_wpnonce').val(),
+			'_ajax_nonce': $('#simply_static_nonce').val(),
 			'action': 'render_activity_log'
 		};
 
@@ -129,7 +129,7 @@ jQuery(document).ready(function ($) {
 		}
 
 		var data = {
-			'_ajax_nonce': $('#_wpnonce').val(),
+			'_ajax_nonce': $('#simply_static_nonce').val(),
 			'action': 'render_export_log',
 			'page': page,
 			'per_page': STATIC_PAGES_PER_PAGE
