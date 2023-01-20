@@ -4,7 +4,7 @@ Tags: HTML, static website generator, static site, secure, fast
 Requires at least: 5.4
 Tested up to: 6.1
 Requires PHP: 7.4
-Stable tag: 2.2.3
+Stable tag: 2.2.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -178,6 +178,14 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 3. Diagnostics
 
 == Changelog ==
+
+= 2.2.4 =
+
+* reverted blackslash extraction producing invalid markup in CSS + JS
+* remember configuration for destination (while switching options)
+* unique nonce for Simply Static Ajax request to fix conflict with MiniOrange SSL On plugin
+* removed simply_static_page query parameters from URL on static site
+* automatically remove quotation marks on save additional URL/File
 
 = 2.2.3 =
 

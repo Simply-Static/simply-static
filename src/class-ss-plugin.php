@@ -15,7 +15,7 @@ class Plugin {
 	 * Plugin version
 	 * @var string
 	 */
-	const VERSION = '2.2.3';
+	const VERSION = '2.2.4';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
@@ -118,6 +118,9 @@ class Plugin {
 			), 10, 2 );
 
 			add_filter( 'http_request_args', array( self::$instance, 'add_http_filters' ), 10, 2 );
+
+            // Disable WP lazy loading for more fail-safe crawling.
+			add_filter( 'wp_lazy_loading_enabled', '__return_false' );
 
 			self::$instance->options              = Options::instance();
 			self::$instance->view                 = new View();
