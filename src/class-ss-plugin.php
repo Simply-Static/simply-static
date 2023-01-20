@@ -529,6 +529,7 @@ class Plugin {
 		);
 
 		foreach ( $options as $key => $value ) {
+            $value = $this->sanitize_option( $key, $value );
 			$this->options->set( $key, $value );
 		}
 
@@ -537,6 +538,24 @@ class Plugin {
 		$message = __( 'Your changes have been saved.', 'simply-static' );
 		$this->view->add_flash( 'updated', $message );
 	}
+
+    /**
+     * Sanitize Option
+     *
+     * @param string $key Option key.
+     * @param mixed  $value Option value.
+     * @return mixed
+     */
+    public function sanitize_option( $key, $value ) {
+        switch ( $key ) {
+            case 'additional_urls':
+            case 'additional_files':
+                $value = str_replace( '"', '', $value );
+                $value = str_replace( "'", '', $value );
+                break;
+        }
+        return $value;
+    }
 
 	/**
 	 * Render the diagnostics page
