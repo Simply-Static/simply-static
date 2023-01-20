@@ -144,6 +144,15 @@ class Options {
 	 * @return string The destination URL
 	 */
 	public function get_destination_url() {
-		return $this->get( 'destination_scheme' ) . $this->get( 'destination_host' );
+
+        switch ( $this->get( 'destination_url_type' ) ) {
+            case 'absolute':
+                return $this->get( 'destination_scheme' ) . $this->get( 'destination_host' );
+                break;
+            case 'relative':
+                return $this->get( 'relative_path' );
+        }
+
+		return './';
 	}
 }

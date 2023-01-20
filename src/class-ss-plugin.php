@@ -441,16 +441,8 @@ class Plugin {
 		// Set destination url type / scheme / host
 		$destination_url_type = $this->fetch_post_value( 'destination_url_type' );
 
-		if ( $destination_url_type == 'offline' ) {
-			$destination_scheme = '';
-			$destination_host   = '.';
-		} else if ( $destination_url_type == 'relative' ) {
-			$destination_scheme = '';
-			$destination_host   = '';
-		} else {
-			$destination_scheme = $this->fetch_post_value( 'destination_scheme' );
-			$destination_host   = untrailingslashit( $this->fetch_post_value( 'destination_host' ) );
-		}
+        $destination_scheme = $this->fetch_post_value( 'destination_scheme' );
+        $destination_host   = untrailingslashit( $this->fetch_post_value( 'destination_host' ) );
 
 		// Set URLs to exclude
 		$urls_to_exclude = array();
