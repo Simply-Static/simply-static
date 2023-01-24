@@ -59,6 +59,8 @@ class Page_Handler {
 	public function run_hooks() {
 	}
 
-	public function after_file_fetch( $destination_dir ) {
-	}
+	public function after_file_fetch( $destination_dir ) {}
+
+    public function get_path_info( $path_info ) { return $path_info; }
+    public function get_relative_dir( $relative_dir ) { return $relative_dir; }
 }

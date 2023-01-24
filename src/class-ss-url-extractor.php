@@ -532,7 +532,12 @@ class Url_Extractor {
 
 		if ( $url && Util::is_local_url( $url ) ) {
 			// add to extracted urls queue
-			$this->extracted_urls[] = Util::remove_params_and_fragment( $url );
+			$this->extracted_urls[] = apply_filters(
+                'simply_static_extracted_url',
+                Util::remove_params_and_fragment( $url ),
+                $url,
+                $this->static_page
+            );
 
 			$url = $this->convert_url( $url );
 		}
@@ -548,6 +553,9 @@ class Url_Extractor {
 	 * @return string      Converted URL
 	 */
 	private function convert_url( $url ) {
+
+        $url = apply_filters( 'simply_static_pre_converted_url', $url, $this->static_page, $this );
+
 		if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
 			$url = $this->convert_absolute_url( $url );
 		} else if ( $this->options->get( 'destination_url_type' ) == 'relative' ) {
@@ -558,7 +566,7 @@ class Url_Extractor {
 
         $url = remove_query_arg( 'simply_static_page', $url );
 
-		return $url;
+		return apply_filters( 'simply_static_converted_url', $url, $this->static_page, $this );
 	}
 
 	/**

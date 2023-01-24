@@ -288,7 +288,7 @@ class Fetch_Urls_Task extends Task {
 		$child_static_page = Page::query()->find_or_create_by( 'url', $child_url );
 		if ( $child_static_page->found_on_id === null || $child_static_page->updated_at < $this->archive_start_time ) {
 			$child_static_page->found_on_id = $static_page->id;
-			$child_static_page->handler     = $static_page->get_handler_class();
+			$child_static_page->handler     = apply_filters( 'simply_static_handler_class_on_url_found', $static_page->get_handler_class(), $child_url, $static_page );
 			$child_static_page->save();
 		}
 	}
