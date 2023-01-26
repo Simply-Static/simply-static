@@ -85,6 +85,15 @@ class Fetch_Urls_Task extends Task {
 				continue;
 			}
 
+            // Not found? It's maybe a redirection page. Let's try it without our param.
+            if ( $static_page->http_status_code === 404 ) {
+                $success = Url_Fetcher::instance()->fetch( $static_page, false );
+
+                if ( ! $success ) {
+                    continue;
+                }
+            }
+
 			// If we get a 30x redirect...
 			if ( in_array( $static_page->http_status_code, array( 301, 302, 303, 307, 308 ) ) ) {
 				$this->handle_30x_redirect( $static_page, $save_file, $follow_urls );
