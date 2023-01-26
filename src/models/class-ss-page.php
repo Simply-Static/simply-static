@@ -35,6 +35,7 @@ class Page extends Model {
 		'build_id'            => 'BIGINT(20) UNSIGNED NULL',
 		'post_id'             => 'BIGINT(20) UNSIGNED NULL',
 		'found_on_id'         => 'BIGINT(20) UNSIGNED NULL',
+        'site_id'             => 'BIGINT(20) UNSIGNED NULL',
 		'url'                 => 'VARCHAR(255) NOT NULL',
 		'redirect_url'        => 'TEXT NULL',
 		'file_path'           => 'VARCHAR(255) NULL',
@@ -197,5 +198,19 @@ class Page extends Model {
         $handler_class = $this->get_handler_class();
 
         return new $handler_class( $this );
+    }
+
+    /**
+     * Set the attributes of the model
+     *
+     * @param  array $attributes Array of attributes to set.
+     * @return static            An instance of the class.
+     */
+    public function attributes( $attributes ) {
+        if ( empty( $attributes['site_id'] ) ) {
+            $attributes['site_id'] = get_current_blog_id();
+        }
+
+        return parent::attributes( $attributes );
     }
 }
