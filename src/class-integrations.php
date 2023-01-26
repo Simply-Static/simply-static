@@ -29,7 +29,11 @@ class Integrations {
            'aio-seo'   => AIO_SEO_Integration::class,
            'seopress'  => SEOPress_Integration::class,
            'elementor' => Elementor_Integration::class,
+<<<<<<< HEAD
            'cookieyes' => CookieYes_Integration::class
+=======
+           'brizy'    => Brizy_Integration::class
+>>>>>>> issue_61
        ] );
     }
 
@@ -41,6 +45,10 @@ class Integrations {
         require_once $path . 'class-aio-seo-integration.php';
         require_once $path . 'class-seopress-integration.php';
         require_once $path . 'class-elementor-integration.php';
+<<<<<<< HEAD
         require_once $path . 'class-cookieyes-integration.php';
+=======
+        require_once $path . 'class-brizy-integration.php';
+>>>>>>> issue_61
     }
 }

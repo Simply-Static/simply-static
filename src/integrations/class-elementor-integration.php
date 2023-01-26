@@ -2,8 +2,6 @@
 
 namespace Simply_Static;
 
-use function Clue\StreamFilter\fun;
-
 class Elementor_Integration extends Integration {
     /**
      * Given plugin handler ID.

@@ -171,7 +171,7 @@ class Page extends Model {
      * @return bool
      */
     public function is_binary_file() {
-        return $this->is_type('application/octet-stream');
+        return $this->is_type('application/octet-stream') || $this->is_type('image');
     }
 
     public function get_handler_class() {
