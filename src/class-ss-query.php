@@ -374,6 +374,10 @@ class Query {
 			$where .= ' AND ' . $condition;
 		}
 
+        if ( is_a( $model, Page::class ) && false === strpos( $where, 'site_id=' ) ) {
+            $where .= ' AND site_id=' . get_current_blog_id();
+        }
+
 		if ( $where !== '' ) {
 			$where = ' WHERE 1=1' . $where;
 		}
