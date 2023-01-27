@@ -96,6 +96,7 @@ class Plugin {
 			add_action( 'admin_enqueue_scripts', array( self::$instance, 'enqueue_admin_scripts' ) );
 			// Add the options page and menu item.
 			add_action( 'admin_menu', array( self::$instance, 'add_plugin_admin_menu' ), 2 );
+            add_action( 'network_admin_menu', array( self::$instance, 'add_plugin_admin_menu' ), 2 );
 			// Add admin info links.
 			add_action( 'simply_static_admin_info_links', array( self::$instance, 'add_info_links' ) );
 

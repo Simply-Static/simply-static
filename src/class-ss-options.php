@@ -48,7 +48,8 @@ class Options {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 
-			$options = apply_filters( 'ss_get_options', get_option( Plugin::SLUG ) );
+            $db_options = is_network_admin() ? get_site_option( Plugin::SLUG ) : get_option( Plugin::SLUG );
+			$options = apply_filters( 'ss_get_options', $db_options );
 			if ( false === $options ) {
 				$options = array();
 			}
@@ -128,7 +129,7 @@ class Options {
 	 * @return boolean
 	 */
 	public function save() {
-		return update_option( Plugin::SLUG, $this->options );
+		return is_network_admin() ? update_site_option( Plugin::SLUG, $this->options ) : update_option( Plugin::SLUG, $this->options );
 	}
 
 	/**
