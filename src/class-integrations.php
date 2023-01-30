@@ -42,7 +42,7 @@ class Integrations {
 		require_once $path . 'class-aio-seo-integration.php';
 		require_once $path . 'class-seopress-integration.php';
 		require_once $path . 'class-elementor-integration.php';
-		require_once $path . 'class-cookieyes-integration.php';
+		require_once $path . 'class-cookie-yes-integration.php';
 		require_once $path . 'class-brizy-integration.php';
 	}
 }
