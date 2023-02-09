@@ -41,7 +41,9 @@ jQuery(document).ready(function ($) {
 		var data = {
 			'_ajax_nonce': $('#simply_static_nonce').val(),
 			'action': 'static_archive_action',
-			'perform': action
+			'perform': action,
+			'blog_id': $('#simply_static_blog_id').val(),
+			'is_network_admin': ss_generate.is_network_admin
 		};
 
 		$.post(window.ajaxurl, data, function (response) {
@@ -73,6 +75,8 @@ jQuery(document).ready(function ($) {
 				$('#sistContainer .actions .spinner').removeClass('is-active');
 				$('#sistContainer #generate').removeClass('hide');
 				$('#sistContainer #cancel').addClass('hide');
+				$('#sistContainer #generate').removeAttr('disabled');
+				clearInterval(refreshTimer);
 			} else {
 				// Enable cancel button.
 				$('#sistContainer #cancel').removeClass('hide');
@@ -89,7 +93,9 @@ jQuery(document).ready(function ($) {
 			'_ajax_nonce': $('#simply_static_nonce').val(),
 			'action': 'render_export_log',
 			'page': 1,
-			'per_page': STATIC_PAGES_PER_PAGE
+			'per_page': STATIC_PAGES_PER_PAGE,
+			'blog_id': $('#simply_static_blog_id').val(),
+			'is_network_admin': ss_generate.is_network_admin
 		};
 
 		var $exportLog = $('#exportLog');
@@ -103,7 +109,9 @@ jQuery(document).ready(function ($) {
 	function display_activity_log() {
 		var data = {
 			'_ajax_nonce': $('#simply_static_nonce').val(),
-			'action': 'render_activity_log'
+			'action': 'render_activity_log',
+			'blog_id': $('#simply_static_blog_id').val(),
+			'is_network_admin': ss_generate.is_network_admin
 		};
 
 		var $activityLog = $('#activityLog');
@@ -132,7 +140,9 @@ jQuery(document).ready(function ($) {
 			'_ajax_nonce': $('#simply_static_nonce').val(),
 			'action': 'render_export_log',
 			'page': page,
-			'per_page': STATIC_PAGES_PER_PAGE
+			'per_page': STATIC_PAGES_PER_PAGE,
+			'blog_id': $('#simply_static_blog_id').val(),
+			'is_network_admin': ss_generate.is_network_admin
 		};
 
 		$.post(window.ajaxurl, data, function (response) {

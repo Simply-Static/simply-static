@@ -27,7 +27,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 
 	/**
 	 * An instance of the options structure containing all options for this plugin
-	 * @var Simply_Static\Options
+	 * @var \Simply_Static\Options
 	 */
 	protected $options = null;
 
@@ -56,12 +56,22 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 * Helper method for starting the Archive_Creation_Job
 	 * @return boolean true if we were able to successfully start generating an archive
 	 */
-	public function start() {
+	public function start( $blog_id = 0 ) {
+		if ( ! $blog_id ) {
+			$blog_id = get_current_blog_id();
+		}
+
+		if ( is_multisite() ) {
+			switch_to_blog( $blog_id );
+			Util::debug_log( "Switched to blog: " . get_current_blog_id() );
+		}
+
 		if ( $this->is_job_done() ) {
+
 			Util::debug_log( "Starting a job; no job is presently running" );
 			Util::debug_log( "Here's our task list: " . implode( ', ', $this->task_list ) );
 
-			global $blog_id;
+			//global $blog_id;
 
 			$first_task = $this->task_list[0];
 			$archive_name = join( '-', array( Plugin::SLUG, $blog_id, time() ) );
@@ -79,10 +89,18 @@ class Archive_Creation_Job extends \WP_Background_Process {
 				->save()
 				->dispatch();
 
+			if ( is_multisite() ) {
+				restore_current_blog();
+				Util::debug_log( "Restored to blog: " . get_current_blog_id() );
+			}
 			return true;
 		} else {
 			Util::debug_log( "Not starting; we're already in the middle of a job" );
 			// looks like we're in the middle of creating an archive...
+			if ( is_multisite() ) {
+				restore_current_blog();
+				Util::debug_log( "Restored to blog: " . get_current_blog_id() );
+			}
 			return false;
 		}
 	}

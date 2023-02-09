@@ -205,6 +205,13 @@ class Plugin {
 		// Plugin admin JS. Tack on plugin version.
 		if ( $this->current_page === 'simply-static' ) {
 			wp_enqueue_script( self::SLUG . '-generate-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'js/admin-generate.js', array(), self::VERSION );
+            wp_localize_script(
+                self::SLUG . '-generate-styles',
+                'ss_generate',
+                [
+                    'is_network_admin' => is_network_admin() ? '1' : '0'
+                ]
+            );
 		}
 
 		if ( $this->current_page === 'simply-static_settings' ) {
@@ -217,6 +224,15 @@ class Plugin {
 	 * @return void
 	 */
 	public function add_plugin_admin_menu() {
+
+        if ( is_multisite() && ! is_network_admin() ) {
+            $options = get_site_option( Plugin::SLUG );
+            $allow_subsites = isset( $options['allow_subsites'] ) ? $options['allow_subsites'] : 'yes';
+
+            if ( 'no' === $allow_subsites ) {
+                return;
+            }
+        }
 
 		// Add main menu item
 		add_menu_page(
@@ -261,9 +277,12 @@ class Plugin {
 	 *
 	 * @return void
 	 */
-	public function run_static_export() {
-		do_action( 'ss_before_static_export' );
-		$this->archive_creation_job->start();
+	public function run_static_export( $blog_id = 0 ) {
+        if ( ! $blog_id ) {
+            $blog_id = get_current_blog_id();
+        }
+		do_action( 'ss_before_static_export', $blog_id );
+		$this->archive_creation_job->start( $blog_id );
 	}
 
 
@@ -279,6 +298,11 @@ class Plugin {
 		}
 
 		$action = $_POST['perform'];
+        $blog_id = isset( $_POST['blog_id'] ) ? absint( $_POST['blog_id'] ) : get_current_blog_id();
+
+        if (is_multisite()) {
+            switch_to_blog($blog_id);
+        }
 
 		if ( $action === 'start' ) {
 			Util::delete_debug_log();
@@ -286,12 +310,12 @@ class Plugin {
 
 			if ( 'on' === $this->options->get( 'use_cron' ) && ! defined( 'DISABLE_WP_CRON' ) || 'on' === $this->options->get( 'use_cron' ) && defined( 'SS_CRON' ) ) {
 				if ( ! wp_next_scheduled( 'simply_static_site_export_cron' ) ) {
-					wp_schedule_single_event( time(), 'simply_static_site_export_cron' );
+					wp_schedule_single_event( time(), 'simply_static_site_export_cron', [ 'blog_id' => $blog_id ] );
 				}
 			} else {
 				// Cron is unavaiable.
-				do_action( 'ss_before_static_export' );
-				$this->archive_creation_job->start();
+				do_action( 'ss_before_static_export', $blog_id );
+				$this->archive_creation_job->start( $blog_id );
 			}
 		} elseif ( $action === 'cancel' ) {
 			Util::debug_log( "Received request to cancel static archive generation" );
@@ -314,6 +338,10 @@ class Plugin {
 			->assign( 'status_messages', $this->options->get( 'archive_status_messages' ) )
 			->render_to_string();
 
+		if (is_multisite()) {
+			restore_current_blog();
+		}
+
 		// send json response and die()
 		wp_send_json( array(
 			'action'            => $action,
@@ -333,6 +361,12 @@ class Plugin {
 			die( __( 'Not permitted', 'simply-static' ) );
 		}
 
+		$blog_id = isset( $_POST['blog_id'] ) ? absint( $_POST['blog_id'] ) : get_current_blog_id();
+
+		if (is_multisite()) {
+			switch_to_blog($blog_id);
+		}
+
 		// $archive_manager = new Archive_Manager();
 
 		$content = $this->view
@@ -340,6 +374,11 @@ class Plugin {
 			->assign( 'status_messages', $this->options->get( 'archive_status_messages' ) )
 			->render_to_string();
 
+		if (is_multisite()) {
+			restore_current_blog();
+		}
+
+        
 		// send json response and die()
 		wp_send_json( array(
 			'html' => $content
@@ -354,6 +393,12 @@ class Plugin {
 		check_ajax_referer( 'simply-static_generate' );
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			die( __( 'Not permitted', 'simply-static' ) );
+		}
+
+		$blog_id = isset( $_POST['blog_id'] ) ? absint( $_POST['blog_id'] ) : get_current_blog_id();
+
+		if (is_multisite()) {
+			switch_to_blog($blog_id);
 		}
 
 		$per_page     = $_POST['per_page'];
@@ -382,6 +427,10 @@ class Plugin {
 			->assign( 'total_static_pages', $total_static_pages )
 			->render_to_string();
 
+		if (is_multisite()) {
+			restore_current_blog();
+		}
+
 		// send json response and die()
 		wp_send_json( array(
 			'html' => $content
@@ -398,8 +447,13 @@ class Plugin {
 		$this->view
 			->set_layout( 'admin' )
 			->set_template( 'generate' )
-			->assign( 'archive_generation_done', $done )
-			->render();
+			->assign( 'archive_generation_done', $done );
+
+        if ( is_multisite() && is_network_admin() ) {
+            $this->view->assign('allow_subsites', $this->options->get('allow_subsites') );
+        }
+
+        $this->view->render();
 	}
 
 	/**
@@ -432,6 +486,7 @@ class Plugin {
 			->assign( 'clear_directory_before_export', $this->options->get( 'clear_directory_before_export' ) )
 			->assign( 'relative_path', $this->options->get( 'relative_path' ) )
 			->assign( 'http_basic_auth_digest', $this->options->get( 'http_basic_auth_digest' ) )
+            ->assign( 'allow_subsites', $this->options->get( 'allow_subsites' ) )
 			->render();
 	}
 
@@ -523,6 +578,10 @@ class Plugin {
 				'clear_directory_before_export' => $this->fetch_post_value( 'clear_directory_before_export' ),
 			)
 		);
+
+        if ( is_network_admin() ) {
+            $options['allow_subsites'] = $this->fetch_post_value( 'allow_subsites' );
+        }
 
 		foreach ( $options as $key => $value ) {
             $value = $this->sanitize_option( $key, $value );

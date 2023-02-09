@@ -119,6 +119,30 @@ namespace Simply_Static;
 							</div>
 						</td>
 					</tr>
+                    <?php
+                        if ( is_network_admin() ) {
+                            $this->allow_subsites = is_null( $this->allow_subsites ) ? 'yes' : $this->allow_subsites;
+                            ?>
+                            <tr>
+                                <th>
+                                    <label for='local_dir'><?php _e( "Allow Sites to use Simply Static?", 'simply-static' );?></label>
+                                </th>
+                                <td>
+                                    <div>
+                                        <label>
+                                            <input <?php checked( $this->allow_subsites, 'yes' ); ?> type='radio' name='allow_subsites' value="yes" /> Yes
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label>
+                                            <input <?php checked( $this->allow_subsites, 'no' ); ?> type='radio' name='allow_subsites' value="no" /> No
+                                        </label>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php
+                        }
+                    ?>
 					<tr>
 						<th></th>
 						<td>
