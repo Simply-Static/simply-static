@@ -61,6 +61,10 @@ class Page_Handlers {
 
 		$page = $this->get_static_page();
 
+		if (!$page) {
+			return;
+		}
+
 		$handler = $page->get_handler();
 
 		$handler->run_hooks();
