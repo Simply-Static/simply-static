@@ -63,7 +63,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 
 		if ( is_multisite() ) {
 			switch_to_blog( $blog_id );
-			Util::debug_log( "Switched to blog: " . get_current_blog_id() );
+			Util::debug_log( "Switched to blog: " . get_current_blog_id() );Util::debug_log( "Using what? " . $_REQUEST['settings_type'] );
 		}
 
 		if ( $this->is_job_done() ) {
@@ -72,6 +72,25 @@ class Archive_Creation_Job extends \WP_Background_Process {
 			Util::debug_log( "Here's our task list: " . implode( ', ', $this->task_list ) );
 
 			//global $blog_id;
+
+			if ( is_multisite() && isset( $_REQUEST['blog_id'] ) && isset( $_REQUEST['is_network_admin'] ) ) {
+				switch_to_blog( $_REQUEST['blog_id'] );
+				$db_options = get_option( Plugin::SLUG );
+
+				if ( isset( $_REQUEST['settings_type'] ) && 'network' === $_REQUEST['settings_type'] ) {
+					$backup_exists = get_option( Plugin::SLUG . '_origin' );
+					// Just in case as we don't want to do it twice for one export.
+					if ( ! $backup_exists ) {
+
+						$network_options = get_site_option( Plugin::SLUG );
+						update_option( Plugin::SLUG . '_origin', $db_options );
+						update_option( Plugin::SLUG, $network_options );
+
+						$this->options->set_options($network_options);
+					}
+				}
+				restore_current_blog();
+			}
 
 			$first_task = $this->task_list[0];
 			$archive_name = join( '-', array( Plugin::SLUG, $blog_id, time() ) );
@@ -187,6 +206,22 @@ class Archive_Creation_Job extends \WP_Background_Process {
 
 		$this->save_status_message( sprintf( __( 'Done! Finished in %s', 'simply-static' ), $time_string ) );
 		parent::complete();
+
+		$origin_options = get_option( Plugin::SLUG . '_origin' );
+		if ( $origin_options ) {
+			error_log( "Getting Backup Options: " . print_r( $origin_options, true ) );
+			$options = get_option( Plugin::SLUG );
+			error_log( "Getting Cloned Options: " . print_r( $options, true ) );
+			// Making sure we retain such info here for logs.
+			$origin_options['archive_status_messages'] = $options['archive_status_messages'];
+			$origin_options['archive_name']            = $options['archive_name'];
+			$origin_options['archive_start_time']      = $options['archive_start_time'];
+			$origin_options['archive_end_time']        = $options['archive_end_time'];
+
+			update_option( Plugin::SLUG, $origin_options );
+			delete_option( Plugin::SLUG . '_origin' );
+		}
+
 		do_action('ss_completed', 'success');
 	}
 

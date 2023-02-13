@@ -47,6 +47,12 @@ class Create_Zip_Archive_Task extends Task {
 		if ( ! $temp_dir_empty ) {
 			foreach ( new \DirectoryIterator( $temp_dir ) as $file ) {
 				if ( ! $file->isDir() ) {
+					if ( is_multisite() ) {
+						// If this file isn't for this blog ID, skip it.
+						if ( 0 !== strpos( $file->getFilename(), Plugin::SLUG . '-' . get_current_blog_id() . '-' ) ) {
+							continue;
+						}
+					}
 					unlink( $file->getPathname() );
 				}
 			}

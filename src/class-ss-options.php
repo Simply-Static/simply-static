@@ -79,10 +79,22 @@ class Options {
 	 * Updates the option identified by $name with the value provided in $value
 	 * @param string $name The option name
 	 * @param mixed $value The option value
-	 * @return Simply_Static\Options
+	 * @return \Simply_Static\Options
 	 */
 	public function set( $name, $value ) {
 		$this->options[ $name ] = $value;
+		return $this;
+	}
+
+	/**
+	 * Set all options.
+	 *
+	 * @param array $options All options.
+	 *
+	 * @return \Simply_Static\Options
+	 */
+	public function set_options( $options ) {
+		$this->options = $options;
 		return $this;
 	}
 

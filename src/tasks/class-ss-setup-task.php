@@ -174,6 +174,13 @@ class Setup_Task extends Task {
 		$files = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $dir, \RecursiveDirectoryIterator::SKIP_DOTS ), \RecursiveIteratorIterator::CHILD_FIRST );
 
 		foreach ( $files as $fileinfo ) {
+			if ( is_multisite() ) {
+				$lookup = untrailingslashit( $dir ) . DIRECTORY_SEPARATOR . Plugin::SLUG . '-' . get_current_blog_id() . '-';
+				// Don't remove files/folders for a different blog.
+				if ( 0 !== strpos( $fileinfo->getRealPath(), $lookup ) ) {
+					continue;
+				}
+			}
 			if ( $fileinfo->isDir() ) {
 				if ( false === rmdir( $fileinfo->getRealPath() ) ) {
 					return false;

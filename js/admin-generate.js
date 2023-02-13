@@ -36,6 +36,18 @@ jQuery(document).ready(function ($) {
 		}, 2000);
 	}
 
+	function send_action_site_setting() {
+		if ( ! $('#simply_static_use_settings_network').length ) {
+			return 'site';
+		}
+
+		if ( $('#simply_static_use_settings_network').prop('checked') ) {
+			return 'network';
+		}
+
+		return 'site';
+	}
+
 	// where action is one of 'start', 'continue', 'cancel'
 	function send_action_to_archive_manager(action) {
 		var data = {
@@ -43,7 +55,8 @@ jQuery(document).ready(function ($) {
 			'action': 'static_archive_action',
 			'perform': action,
 			'blog_id': $('#simply_static_blog_id').val(),
-			'is_network_admin': ss_generate.is_network_admin
+			'is_network_admin': ss_generate.is_network_admin,
+			'settings_type': send_action_site_setting()
 		};
 
 		$.post(window.ajaxurl, data, function (response) {
