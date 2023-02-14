@@ -14,6 +14,7 @@ class Integrations {
 	 */
 	public function load() {
 		$this->includes();
+		do_action( 'ss_integrations_before_load' );
 		$integrations = $this->get_integrations();
 
 		foreach ( $integrations as $integration ) {

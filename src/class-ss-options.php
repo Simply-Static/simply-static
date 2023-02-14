@@ -48,12 +48,7 @@ class Options {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 
-            $db_options = is_network_admin() ? get_site_option( Plugin::SLUG ) : get_option( Plugin::SLUG );
-			if ( is_multisite() && isset( $_REQUEST['blog_id'] ) && isset( $_REQUEST['is_network_admin'] ) ) {
-				switch_to_blog( $_REQUEST['blog_id'] );
-				$db_options = get_option( Plugin::SLUG );
-				restore_current_blog();
-			}
+            $db_options = get_option( Plugin::SLUG );
 
 			$options = apply_filters( 'ss_get_options', $db_options );
 			if ( false === $options ) {

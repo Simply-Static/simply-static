@@ -123,6 +123,9 @@ class Plugin {
             // Disable WP lazy loading for more fail-safe crawling.
 			add_filter( 'wp_lazy_loading_enabled', '__return_false' );
 
+			$integrations = new Integrations();
+			$integrations->load();
+
 			self::$instance->options              = Options::instance();
 			self::$instance->view                 = new View();
 			self::$instance->archive_creation_job = new Archive_Creation_Job();
@@ -132,8 +135,6 @@ class Plugin {
 			self::$instance->current_page = $page;
 
 			Upgrade_Handler::run();
-            $integrations = new Integrations();
-            $integrations->load();
 
 			// Exclude pages if not set.
 			$urls_to_exclude = self::$instance->options->get( 'urls_to_exclude' );
@@ -225,13 +226,8 @@ class Plugin {
 	 */
 	public function add_plugin_admin_menu() {
 
-        if ( is_multisite() && ! is_network_admin() ) {
-            $options = get_site_option( Plugin::SLUG );
-            $allow_subsites = isset( $options['allow_subsites'] ) ? $options['allow_subsites'] : 'yes';
-
-            if ( 'no' === $allow_subsites ) {
-                return;
-            }
+        if ( apply_filters( 'ss_hide_admin_menu', false ) ) {
+            return;
         }
 
 		// Add main menu item
@@ -300,9 +296,7 @@ class Plugin {
 		$action = $_POST['perform'];
         $blog_id = isset( $_POST['blog_id'] ) ? absint( $_POST['blog_id'] ) : get_current_blog_id();
 
-        if (is_multisite()) {
-            switch_to_blog($blog_id);
-        }
+        do_action( 'ss_before_perform_archive_action', $blog_id );
 
 		if ( $action === 'start' ) {
 			Util::delete_debug_log();
@@ -338,9 +332,7 @@ class Plugin {
 			->assign( 'status_messages', $this->options->get( 'archive_status_messages' ) )
 			->render_to_string();
 
-		if (is_multisite()) {
-			restore_current_blog();
-		}
+        do_action( 'ss_before_sending_response_for_static_archive' );
 
 		// send json response and die()
 		wp_send_json( array(
@@ -363,9 +355,7 @@ class Plugin {
 
 		$blog_id = isset( $_POST['blog_id'] ) ? absint( $_POST['blog_id'] ) : get_current_blog_id();
 
-		if (is_multisite()) {
-			switch_to_blog($blog_id);
-		}
+        do_action( 'ss_before_render_activity_log', $blog_id );
 
 		// $archive_manager = new Archive_Manager();
 
@@ -374,9 +364,7 @@ class Plugin {
 			->assign( 'status_messages', $this->options->get( 'archive_status_messages' ) )
 			->render_to_string();
 
-		if (is_multisite()) {
-			restore_current_blog();
-		}
+		do_action( 'ss_after_render_activity_log', $blog_id );
 
         
 		// send json response and die()
@@ -397,9 +385,7 @@ class Plugin {
 
 		$blog_id = isset( $_POST['blog_id'] ) ? absint( $_POST['blog_id'] ) : get_current_blog_id();
 
-		if (is_multisite()) {
-			switch_to_blog($blog_id);
-		}
+        do_action( 'ss_before_render_export_log', $blog_id );
 
 		$per_page     = $_POST['per_page'];
 		$current_page = $_POST['page'];
@@ -427,9 +413,8 @@ class Plugin {
 			->assign( 'total_static_pages', $total_static_pages )
 			->render_to_string();
 
-		if (is_multisite()) {
-			restore_current_blog();
-		}
+		do_action( 'ss_after_render_export_log' );
+
 
 		// send json response and die()
 		wp_send_json( array(
@@ -449,9 +434,7 @@ class Plugin {
 			->set_template( 'generate' )
 			->assign( 'archive_generation_done', $done );
 
-        if ( is_multisite() && is_network_admin() ) {
-            $this->view->assign('allow_subsites', $this->options->get('allow_subsites') );
-        }
+        do_action( 'ss_before_render_generate_page', $this->view, $this->options );
 
         $this->view->render();
 	}
