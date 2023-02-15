@@ -47,7 +47,7 @@ class Create_Zip_Archive_Task extends Task {
 		if ( ! $temp_dir_empty ) {
 			foreach ( new \DirectoryIterator( $temp_dir ) as $file ) {
 				if ( ! $file->isDir() ) {
-					$can_delete_file = apply_filters( 'ss_can_delete_file', true, $file );
+					$can_delete_file = apply_filters( 'ss_can_delete_file', true, $file, $temp_dir );
 
 					if ( ! $can_delete_file ) {
 						continue;
