@@ -89,6 +89,7 @@ class Model {
 	 */
 	public function __set( $field_name, $field_value ) {
 		if ( ! array_key_exists( $field_name, static::$columns ) ) {
+            return;
 			throw new \Exception( 'Column doesn\'t exist for ' . get_called_class() );
 		} else {
 			if ( ! array_key_exists( $field_name, $this->data ) || $this->data[ $field_name ] !== $field_value ) {
