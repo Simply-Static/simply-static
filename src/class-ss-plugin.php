@@ -877,6 +877,8 @@ class Plugin {
 			array_push( $task_list, 'create_zip_archive' );
 		} else if ( $delivery_method === 'local' ) {
 			array_push( $task_list, 'transfer_files_locally' );
+		} else if ( $delivery_method === 'simply-cdn' ) {
+			array_push( $task_list, 'simply_cdn' );
 		}
 		array_push( $task_list, 'wrapup' );
 
