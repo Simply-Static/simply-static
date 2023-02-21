@@ -373,7 +373,7 @@ class Util {
 	 * @return string MySQL formatted datetime
 	 */
 	public static function formatted_datetime() {
-		return date( 'Y-m-d H:i:s' );
+		return current_time( 'Y-m-d H:i:s' );
 	}
 
 	/**
