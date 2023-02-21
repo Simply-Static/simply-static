@@ -45,7 +45,7 @@ class Elementor_Integration extends Integration {
             Util::debug_log( 'Adding elementor bundle asset to queue: ' . $url );
             /** @var \Simply_Static\Page $static_page */
             $static_page = Page::query()->find_or_initialize_by( 'url', $url );
-            $static_page->set_status_message( __( 'Elementor AssetL', 'simply-static' ) );
+            $static_page->set_status_message( __( 'Elementor Asset', 'simply-static' ) );
             $static_page->found_on_id = 0;
             $static_page->save();
         }
