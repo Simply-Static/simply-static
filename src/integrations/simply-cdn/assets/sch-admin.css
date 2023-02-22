@@ -1,0 +1,96 @@
+.simply-static_page_simply-static_cdn #wpfooter {
+    position: relative;
+}
+
+.sch-container {
+    width: 100%;
+    max-width: 780px;
+}
+
+.sch-container .wrap {
+    background: #fafafa;
+    padding: 30px;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+    float: left;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sch-container #submit {
+    background: #7200e5;
+    color: #fff;
+    border: 2px solid transparent;
+    box-shadow: 0 0 20px 0 rgba(114, 0, 229, .2);
+    margin: 0;
+    display: inline-block;
+    box-sizing: border-box;
+    padding: 0 30px;
+    vertical-align: middle;
+    font-size: 15px;
+    line-height: 36px;
+    text-align: center;
+    text-decoration: none;
+    transition: .3s ease-in-out;
+    transition-property: all;
+    border-radius: 5px;
+    background-origin: border-box;
+}
+
+.sch-container #submit:hover {
+    background-color: #6500cc;
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 0 30px 0 rgba(114, 0, 229, .4);
+}
+
+.sch-container input {
+    width: 100%;
+}
+
+.sch-container select {
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.sch-secondary-button {
+    background-color: #959595 !important;
+    color: #fff;
+    border: 2px solid transparent !important;
+    box-shadow: 0 0 20px 0 rgba(114, 0, 229, .2);
+    margin: 0;
+    display: inline-block;
+    box-sizing: border-box;
+    padding: 0 30px;
+    vertical-align: middle;
+    font-size: 15px;
+    line-height: 36px;
+    text-align: center;
+    text-decoration: none;
+    transition: .3s ease-in-out;
+    transition-property: all;
+    border-radius: 5px;
+    background-origin: border-box;
+    width: 100%;
+}
+
+.sch-secondary-button:hover {
+    background-color: #626262;
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 0 30px 0 rgba(98, 98, 98, .4);
+}
+
+.sch-container .success {
+    color: #2aa42a;
+}
+
+.sch-container input[type="checkbox"] {
+    max-width: 10px;
+}
+
+#sch-clear-cache {
+    color: white;
+}
