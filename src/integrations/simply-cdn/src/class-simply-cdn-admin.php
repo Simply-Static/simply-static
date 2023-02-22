@@ -172,65 +172,68 @@ class Simply_CDN_Admin {
                 <div>
                 </div>
             </div>
-            <div class="wrap">
-                <div>
-                    <p>
-                    <h2><?php esc_html_e( 'Forms integration', 'simply-static' ); ?></h2>
-                    </p>
-                    <p>
-						<?php esc_html_e( 'We automatically send form submissions to the configured e-mail address of your project from message@simplycdn.io.', 'simply-static' ); ?>
-                    </p>
-                    <p>
-						<?php esc_html_e( 'Make sure to add your form token as a hidden field to each form of your website.', 'simply-static' ); ?>
-                    </p>
-                    <p>
-                        <b><?php esc_html_e( 'Your form token: ', 'simly-static' ); ?></b><?php echo esc_html( $data->cdn->form_token ); ?>
-                    </p>
-                    <form method="post" action="options.php">
-						<?php settings_fields( 'sch_forms_group' ); ?>
-                        <p>
-                            <label for="sch_use_forms">
-                                <input type="checkbox" name="sch_use_forms"
-                                       value="1" <?php checked( 1, get_option( 'sch_use_forms' ), true ); ?> />
-								<?php esc_html_e( 'Use Forms integration', 'simply-static' ); ?>
-                            </label>
-                        </p>
-						<?php submit_button(); ?>
-                    </form>
-                </div>
-                <div>
-                </div>
-            </div>
-            <div class="wrap">
-                <div>
-                    <p>
-                    <h2><?php esc_html_e( 'Automation & Utilities', 'simply-static' ); ?></h2>
-                    </p>
-                    <p>
-						<?php esc_html_e( 'Automatically updates a post/page on your static website once you saved it in WordPress.', 'simply-static' ); ?>
-                    </p>
-                    <form method="post" action="options.php">
-						<?php settings_fields( 'sch_automation_group' ); ?>
-                        <p>
-                            <label for="sch_use_auto_publish">
-                                <input type="checkbox" name="sch_use_auto_publish"
-                                       value="1" <?php checked( 1, get_option( 'sch_use_auto_publish' ), true ); ?> />
-								<?php esc_html_e( 'Use Auto-Publish', 'simply-static' ); ?>
-                            </label>
-                        </p>
-						<?php submit_button(); ?>
-                    </form>
+			<?php if ( ! class_exists( '\simply_static_pro\Form_Webhook' ) ) : ?>
+                <div class="wrap">
                     <div>
-                        <h2><?php esc_html_e( 'Caching', 'simly-static' ); ?></h2>
-						<?php esc_html_e( 'The CDN cache is cleared automatically after each static export. Sometimes you want to clear the cache manually to make sure you get the latest results in your browser.', 'simply-static' ); ?>
                         <p>
-                        <span class="button-secondary button sch-secondary-button"
-                              id="sch-clear-cache"><?php esc_html_e( 'Clear Cache', 'simply-static' ); ?></span>
+                        <h2><?php esc_html_e( 'Forms integration', 'simply-static' ); ?></h2>
                         </p>
+                        <p>
+							<?php esc_html_e( 'We automatically send form submissions to the configured e-mail address of your project from message@simplycdn.io.', 'simply-static' ); ?>
+                        </p>
+                        <p>
+							<?php esc_html_e( 'Make sure to add your form token as a hidden field to each form of your website.', 'simply-static' ); ?>
+                        </p>
+                        <p>
+                            <b><?php esc_html_e( 'Your form token: ', 'simly-static' ); ?></b><?php echo esc_html( $data->cdn->form_token ); ?>
+                        </p>
+                        <form method="post" action="options.php">
+							<?php settings_fields( 'sch_forms_group' ); ?>
+                            <p>
+                                <label for="sch_use_forms">
+                                    <input type="checkbox" name="sch_use_forms"
+                                           value="1" <?php checked( 1, get_option( 'sch_use_forms' ), true ); ?> />
+									<?php esc_html_e( 'Use Forms integration', 'simply-static' ); ?>
+                                </label>
+                            </p>
+							<?php submit_button(); ?>
+                        </form>
+                    </div>
+                    <div>
                     </div>
                 </div>
-
-            </div>
+			<?php endif; ?>
+			<?php if ( ! class_exists( '\simply_static_pro\Single' ) ) : ?>
+                <div class="wrap">
+                    <div>
+                        <p>
+                        <h2><?php esc_html_e( 'Automation & Utilities', 'simply-static' ); ?></h2>
+                        </p>
+                        <p>
+							<?php esc_html_e( 'Automatically updates a post/page on your static website once you saved it in WordPress.', 'simply-static' ); ?>
+                        </p>
+                        <form method="post" action="options.php">
+							<?php settings_fields( 'sch_automation_group' ); ?>
+                            <p>
+                                <label for="sch_use_auto_publish">
+                                    <input type="checkbox" name="sch_use_auto_publish"
+                                           value="1" <?php checked( 1, get_option( 'sch_use_auto_publish' ), true ); ?> />
+									<?php esc_html_e( 'Use Auto-Publish', 'simply-static' ); ?>
+                                </label>
+                            </p>
+							<?php submit_button(); ?>
+                        </form>
+                        <div>
+                            <h2><?php esc_html_e( 'Caching', 'simly-static' ); ?></h2>
+							<?php esc_html_e( 'The CDN cache is cleared automatically after each static export. Sometimes you want to clear the cache manually to make sure you get the latest results in your browser.', 'simply-static' ); ?>
+                            <p>
+                        <span class="button-secondary button sch-secondary-button"
+                              id="sch-clear-cache"><?php esc_html_e( 'Clear Cache', 'simply-static' ); ?></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+			<?php endif; ?>
             </div>
 		<?php endif; ?>
         </div>
