@@ -44,27 +44,35 @@ class Simply_CDN_Integration {
 	public function include_files() {
 		$path = SIMPLY_STATIC_PATH . 'src/integrations/simply-cdn/src/';
 
-		// Admin settings.
-		require_once $path . 'class-simply-cdn-admin.php';
-		Simply_CDN_Admin::get_instance();
+		// CDN.
+		require_once $path . 'class-simply-cdn-handler.php';
 
 		// Api.
 		require_once $path . 'class-simply-cdn-api.php';
 		Simply_CDN_Api::get_instance();
 
-		// Cors.
-		require_once $path . 'class-simply-cdn-cors.php';
-		Simply_CDN_CORS::get_instance();
+		// Admin settings.
+		require_once $path . 'class-simply-cdn-admin.php';
+		Simply_CDN_Admin::get_instance();
 
-		// Webhook.
-		require_once $path . 'class-simply-cdn-webhook.php';
-		Simply_CDN_Webhook::get_instance();
+		// Include only if connected.
+		if ( ! empty( get_option( 'sch_token' ) ) ) {
+			$data = Simply_CDN_Api::get_data();
 
-		// Exports.
-		require_once $path . 'class-simply-cdn-export.php';
-		Simply_CDN_Export::get_instance();
+			if ( $data && ! empty( $data->cdn->url ) ) {
+				// Cors.
+				require_once $path . 'class-simply-cdn-cors.php';
+				Simply_CDN_CORS::get_instance();
 
-		// CDN.
-		require_once $path . 'class-simply-cdn-handler.php';
+				// Webhook.
+				require_once $path . 'class-simply-cdn-webhook.php';
+				Simply_CDN_Webhook::get_instance();
+
+				// Exports.
+				require_once $path . 'class-simply-cdn-export.php';
+				Simply_CDN_Export::get_instance();
+
+			}
+		}
 	}
 }

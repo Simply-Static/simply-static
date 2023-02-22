@@ -27,6 +27,10 @@ jQuery(document).ready(function ($) {
             success: function (response) {
                 if (response.success) {
                     $('<p style="color:#2aa42a;">' + sch_ajax.token_connected + '</p>').insertAfter('#simply-cdn-connect').delay(3000).fadeOut(300);
+
+                    setTimeout(function () {
+                        location.reload(true);
+                    }, 3500);
                 } else {
                     $('<p style="color:#e61a3d;">' + response.error_message + '</p>').insertAfter('#simply-cdn-connect').delay(3000).fadeOut(300);
                 }

@@ -32,12 +32,19 @@ class Simply_CDN_Admin {
 	 */
 	public function __construct() {
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
-		add_action( 'admin_menu', array( $this, 'register_menu_page' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_admin_scripts' ) );
 		add_action( 'added_option', array( $this, 'set_default_configuration' ), 10, 2 );
-
 		add_action( 'wp_ajax_update_token', array( $this, 'update_token' ) );
 
+		// Include only if connected.
+		if ( ! empty( get_option( 'sch_token' ) ) ) {
+			$data = Simply_CDN_Api::get_data();
+
+			if ( $data && ! empty( $data->cdn->url ) ) {
+				add_action( 'admin_menu', array( $this, 'register_menu_page' ) );
+
+			}
+		}
 		// Only include if Simply Static Pro is not installed.
 		if ( ! class_exists( '\simply_static_pro\Build_Settings' ) ) {
 			add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_menu' ), 500 );
