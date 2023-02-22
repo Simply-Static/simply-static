@@ -35,7 +35,7 @@ class Simply_CDN_Export {
 	public function __construct() {
 		$use_auto_publish = get_option( 'sch_use_auto_publish' );
 
-		if ( $use_auto_publish ) {
+		if ( $use_auto_publish && if ( ! class_exists( '\simply_static_pro\Single' ) ) {
 			add_action( 'save_post', array( $this, 'run_single_export' ) );
 			add_action( 'elementor/editor/after_save', array( $this, 'run_single_export' ) );
 			add_filter( 'ss_static_pages', array( $this, 'filter_static_pages' ), 10, 2 );
