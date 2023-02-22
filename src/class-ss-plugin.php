@@ -53,10 +53,10 @@ class Plugin {
 	 */
 	protected $current_page = '';
 
-    /**
-     * @var null|\Simply_Static\Page_Handlers
-     */
-    protected $page_handlers = null;
+	/**
+	 * @var null|\Simply_Static\Page_Handlers
+	 */
+	protected $page_handlers = null;
 
 	/**
 	 * Disable usage of "new"
@@ -96,7 +96,7 @@ class Plugin {
 			add_action( 'admin_enqueue_scripts', array( self::$instance, 'enqueue_admin_scripts' ) );
 			// Add the options page and menu item.
 			add_action( 'admin_menu', array( self::$instance, 'add_plugin_admin_menu' ), 2 );
-            add_action( 'network_admin_menu', array( self::$instance, 'add_plugin_admin_menu' ), 2 );
+			add_action( 'network_admin_menu', array( self::$instance, 'add_plugin_admin_menu' ), 2 );
 			// Add admin info links.
 			add_action( 'simply_static_admin_info_links', array( self::$instance, 'add_info_links' ) );
 
@@ -120,7 +120,7 @@ class Plugin {
 
 			add_filter( 'http_request_args', array( self::$instance, 'add_http_filters' ), 10, 2 );
 
-            // Disable WP lazy loading for more fail-safe crawling.
+			// Disable WP lazy loading for more fail-safe crawling.
 			add_filter( 'wp_lazy_loading_enabled', '__return_false' );
 
 			$integrations = new Integrations();
@@ -129,7 +129,7 @@ class Plugin {
 			self::$instance->options              = Options::instance();
 			self::$instance->view                 = new View();
 			self::$instance->archive_creation_job = new Archive_Creation_Job();
-            self::$instance->page_handlers        = new Page_Handlers();
+			self::$instance->page_handlers        = new Page_Handlers();
 
 			$page                         = isset( $_GET['page'] ) ? $_GET['page'] : '';
 			self::$instance->current_page = $page;
@@ -185,8 +185,8 @@ class Plugin {
 		require_once $path . 'src/class-ss-sql-permissions.php';
 		require_once $path . 'src/class-ss-upgrade-handler.php';
 		require_once $path . 'src/class-ss-util.php';
-        require_once $path . 'src/class-page-handlers.php';
-        require_once $path . 'src/class-integrations.php';
+		require_once $path . 'src/class-page-handlers.php';
+		require_once $path . 'src/class-integrations.php';
 	}
 
 	/**
@@ -206,13 +206,13 @@ class Plugin {
 		// Plugin admin JS. Tack on plugin version.
 		if ( $this->current_page === 'simply-static' ) {
 			wp_enqueue_script( self::SLUG . '-generate-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'js/admin-generate.js', array(), self::VERSION );
-            wp_localize_script(
-                self::SLUG . '-generate-styles',
-                'ss_generate',
-                [
-                    'is_network_admin' => is_network_admin() ? '1' : '0'
-                ]
-            );
+			wp_localize_script(
+				self::SLUG . '-generate-styles',
+				'ss_generate',
+				[
+					'is_network_admin' => is_network_admin() ? '1' : '0'
+				]
+			);
 		}
 
 		if ( $this->current_page === 'simply-static_settings' ) {
@@ -226,9 +226,9 @@ class Plugin {
 	 */
 	public function add_plugin_admin_menu() {
 
-        if ( apply_filters( 'ss_hide_admin_menu', false ) ) {
-            return;
-        }
+		if ( apply_filters( 'ss_hide_admin_menu', false ) ) {
+			return;
+		}
 
 		// Add main menu item
 		add_menu_page(
@@ -274,9 +274,9 @@ class Plugin {
 	 * @return void
 	 */
 	public function run_static_export( $blog_id = 0 ) {
-        if ( ! $blog_id ) {
-            $blog_id = get_current_blog_id();
-        }
+		if ( ! $blog_id ) {
+			$blog_id = get_current_blog_id();
+		}
 		do_action( 'ss_before_static_export', $blog_id );
 		$this->archive_creation_job->start( $blog_id );
 	}
@@ -293,10 +293,10 @@ class Plugin {
 			die( __( 'Not permitted', 'simply-static' ) );
 		}
 
-		$action = $_POST['perform'];
-        $blog_id = isset( $_POST['blog_id'] ) ? absint( $_POST['blog_id'] ) : get_current_blog_id();
+		$action  = $_POST['perform'];
+		$blog_id = isset( $_POST['blog_id'] ) ? absint( $_POST['blog_id'] ) : get_current_blog_id();
 
-        do_action( 'ss_before_perform_archive_action', $blog_id );
+		do_action( 'ss_before_perform_archive_action', $blog_id );
 
 		if ( $action === 'start' ) {
 			Util::delete_debug_log();
@@ -332,7 +332,7 @@ class Plugin {
 			->assign( 'status_messages', $this->options->get( 'archive_status_messages' ) )
 			->render_to_string();
 
-        do_action( 'ss_before_sending_response_for_static_archive' );
+		do_action( 'ss_before_sending_response_for_static_archive' );
 
 		// send json response and die()
 		wp_send_json( array(
@@ -355,7 +355,7 @@ class Plugin {
 
 		$blog_id = isset( $_POST['blog_id'] ) ? absint( $_POST['blog_id'] ) : get_current_blog_id();
 
-        do_action( 'ss_before_render_activity_log', $blog_id );
+		do_action( 'ss_before_render_activity_log', $blog_id );
 
 		// $archive_manager = new Archive_Manager();
 
@@ -366,7 +366,7 @@ class Plugin {
 
 		do_action( 'ss_after_render_activity_log', $blog_id );
 
-        
+
 		// send json response and die()
 		wp_send_json( array(
 			'html' => $content
@@ -385,7 +385,7 @@ class Plugin {
 
 		$blog_id = isset( $_POST['blog_id'] ) ? absint( $_POST['blog_id'] ) : get_current_blog_id();
 
-        do_action( 'ss_before_render_export_log', $blog_id );
+		do_action( 'ss_before_render_export_log', $blog_id );
 
 		$per_page     = $_POST['per_page'];
 		$current_page = $_POST['page'];
@@ -434,9 +434,9 @@ class Plugin {
 			->set_template( 'generate' )
 			->assign( 'archive_generation_done', $done );
 
-        do_action( 'ss_before_render_generate_page', $this->view, $this->options );
+		do_action( 'ss_before_render_generate_page', $this->view, $this->options );
 
-        $this->view->render();
+		$this->view->render();
 	}
 
 	/**
@@ -469,7 +469,7 @@ class Plugin {
 			->assign( 'clear_directory_before_export', $this->options->get( 'clear_directory_before_export' ) )
 			->assign( 'relative_path', $this->options->get( 'relative_path' ) )
 			->assign( 'http_basic_auth_digest', $this->options->get( 'http_basic_auth_digest' ) )
-            ->assign( 'allow_subsites', $this->options->get( 'allow_subsites' ) )
+			->assign( 'allow_subsites', $this->options->get( 'allow_subsites' ) )
 			->render();
 	}
 
@@ -483,8 +483,8 @@ class Plugin {
 		// Set destination url type / scheme / host
 		$destination_url_type = $this->fetch_post_value( 'destination_url_type' );
 
-        $destination_scheme = $this->fetch_post_value( 'destination_scheme' );
-        $destination_host   = untrailingslashit( $this->fetch_post_value( 'destination_host' ) );
+		$destination_scheme = $this->fetch_post_value( 'destination_scheme' );
+		$destination_host   = untrailingslashit( $this->fetch_post_value( 'destination_host' ) );
 
 		// Set URLs to exclude
 		$urls_to_exclude = array();
@@ -562,12 +562,12 @@ class Plugin {
 			)
 		);
 
-        if ( is_network_admin() ) {
-            $options['allow_subsites'] = $this->fetch_post_value( 'allow_subsites' );
-        }
+		if ( is_network_admin() ) {
+			$options['allow_subsites'] = $this->fetch_post_value( 'allow_subsites' );
+		}
 
 		foreach ( $options as $key => $value ) {
-            $value = $this->sanitize_option( $key, $value );
+			$value = $this->sanitize_option( $key, $value );
 			$this->options->set( $key, $value );
 		}
 
@@ -577,23 +577,25 @@ class Plugin {
 		$this->view->add_flash( 'updated', $message );
 	}
 
-    /**
-     * Sanitize Option
-     *
-     * @param string $key Option key.
-     * @param mixed  $value Option value.
-     * @return mixed
-     */
-    public function sanitize_option( $key, $value ) {
-        switch ( $key ) {
-            case 'additional_urls':
-            case 'additional_files':
-                $value = str_replace( '"', '', $value );
-                $value = str_replace( "'", '', $value );
-                break;
-        }
-        return $value;
-    }
+	/**
+	 * Sanitize Option
+	 *
+	 * @param string $key Option key.
+	 * @param mixed $value Option value.
+	 *
+	 * @return mixed
+	 */
+	public function sanitize_option( $key, $value ) {
+		switch ( $key ) {
+			case 'additional_urls':
+			case 'additional_files':
+				$value = str_replace( '"', '', $value );
+				$value = str_replace( "'", '', $value );
+				break;
+		}
+
+		return $value;
+	}
 
 	/**
 	 * Render the diagnostics page
@@ -909,8 +911,9 @@ class Plugin {
 	public function add_info_links( $info_text ) {
 		ob_start();
 		?>
-        <a href="https://patrickposner.dev/docs/simply-static/" target="_blank">Documentation</a>
-        <a href="https://patrickposner.dev/plugins/simply-static" target="_blank">Simply Static Pro</a>
+        <a class="button button-secondary" href="https://simplycdn.io" target="_blank">Simply CDN</a>
+        <a class="button button-secondary" href="https://patrickposner.dev/plugins/simply-static" target="_blank">Simply
+            Static Pro</a>
 		<?php
 		$info_text = apply_filters( 'simply_static_info_links', ob_get_clean() );
 		echo $info_text;

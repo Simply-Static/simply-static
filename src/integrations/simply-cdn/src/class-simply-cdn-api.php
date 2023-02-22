@@ -48,7 +48,7 @@ class Simply_CDN_Api {
 	}
 
 	/**
-	 * Get site data
+	 * Clear cache
 	 *
 	 * @return object|bool
 	 */

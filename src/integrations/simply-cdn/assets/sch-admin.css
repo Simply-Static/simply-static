@@ -1,5 +1,10 @@
+.simply-static_page_simply-static_cdn #wpfooter {
+    position: relative;
+}
+
 .sch-container {
     width: 100%;
+    max-width: 780px;
 }
 
 .sch-container .wrap {
@@ -8,9 +13,7 @@
     box-sizing: border-box;
     margin-bottom: 15px;
     float: left;
-    width: 45%;
-    min-height: 400px;
-    max-width: 700px;
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;

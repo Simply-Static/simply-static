@@ -89,7 +89,7 @@ namespace Simply_Static;
 							<select name='delivery_method' id='deliveryMethod'>
 								<option value='zip' <?php Util::selected_if( $this->delivery_method === 'zip' ) ?>><?php _e( "ZIP Archive", 'simply-static' ); ?></option>
 								<option value='local' <?php Util::selected_if( $this->delivery_method === 'local' ) ?>><?php _e( "Local Directory", 'simply-static' ); ?></option>
-                                <option value='local' <?php Util::selected_if( $this->delivery_method === 'simply-cdn' ) ?>><?php _e( "Simply CDN", 'simply-static' ); ?></option>
+                                <option value='simply-cdn' <?php Util::selected_if( $this->delivery_method === 'simply-cdn' ) ?>><?php _e( "Simply CDN", 'simply-static' ); ?></option>
 								<?php do_action( 'simply_static_delivery_methods' ); ?>
 							</select>
 						</td>
@@ -120,6 +120,28 @@ namespace Simply_Static;
 							</div>
 						</td>
 					</tr>
+                    <tr class='delivery-method simply-cdn'>
+                        <th></th>
+                        <td>
+                            <p>
+                                <?php echo sprintf(__("The fast and easy way to bring your static website online. %s handles hosting, performance, security and form submissions for your static site.", 'simply-static' ), '<a target="_blank" href="https://simplycdn.io">Simply CDN</a>'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr class='delivery-method simply-cdn'>
+                        <th>
+                            <label for='sch_token'><?php _e( "Security Token", 'simply-static' );?></label>
+                        </th>
+                        <td>
+                            <p>
+		                        <?php esc_html_e( 'Copy and paste the Security Token from your project and click connect.', 'simply-static' ); ?>
+                            </p>
+                            <p>
+                                <input aria-describedby='securityTokenHelpBlock' type='text' id='sch_token' name='sch_token' value='<?php echo esc_attr( get_option('sch_token') ); ?>' class='widefat' />
+                                <span class="button button-secondary" id="simply-cdn-connect"><?php esc_html_e( 'Connect', 'simply-static' ); ?></span>
+                            </p>
+                        </td>
+                    </tr>
                     <?php
                         if ( is_network_admin() ) {
                             $this->allow_subsites = is_null( $this->allow_subsites ) ? 'yes' : $this->allow_subsites;

@@ -36,6 +36,8 @@ class Simply_CDN_Admin {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_admin_scripts' ) );
 		add_action( 'added_option', array( $this, 'set_default_configuration' ), 10, 2 );
 
+		add_action( 'wp_ajax_update_token', array( $this, 'update_token' ) );
+
 		// Only include if Simply Static Pro is not installed.
 		if ( ! class_exists( '\simply_static_pro\Build_Settings' ) ) {
 			add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_menu' ), 500 );
@@ -52,9 +54,11 @@ class Simply_CDN_Admin {
 		wp_enqueue_script( 'sch-admin', SIMPLY_STATIC_URL . '/src/integrations/simply-cdn/assets/sch-admin.js', array( 'jquery' ), Plugin::VERSION, true );
 
 		$args = array(
-			'ajax_url'      => admin_url( 'admin-ajax.php' ),
-			'cache_nonce'   => wp_create_nonce( 'sch-cache-nonce' ),
-			'cache_cleared' => esc_html__( 'Cache cleared successfully.', 'simply-static' ),
+			'ajax_url'        => admin_url( 'admin-ajax.php' ),
+			'cache_nonce'     => wp_create_nonce( 'sch-cache-nonce' ),
+			'token_nonce'     => wp_create_nonce( 'sch-token-nonce' ),
+			'token_connected' => esc_html__( 'Your website is successfully connected to the Simply CDN.', 'simply-static' ),
+			'cache_cleared'   => esc_html__( 'Cache cleared successfully.', 'simply-static' ),
 		);
 
 		wp_localize_script( 'sch-admin', 'sch_ajax', $args );
@@ -132,33 +136,6 @@ class Simply_CDN_Admin {
 		?>
         <div class="sch-container">
         <h1><?php esc_html_e( 'Simply CDN', 'simply-static' ); ?></h1>
-        <div class="wrap">
-            <div>
-                <p>
-                <h2><?php esc_html_e( 'Connect your website', 'simply-static' ); ?></h2>
-                </p>
-                <p>
-					<?php esc_html_e( 'Copy and paste the Security Token from your account dashboard and save it to enable the connection.', 'simply-static' ); ?>
-                    <br>
-					<?php esc_html_e( 'This is required to publish your static site on simplycdn.io and enable the CDN settings.', 'simply-static' ); ?>
-
-                </p>
-                <form method="post" action="options.php">
-					<?php settings_fields( 'sch_options_group' ); ?>
-                    <p>
-                        <label for="sch_token"><?php esc_html_e( 'Security Token', 'simply-static' ); ?></label><br>
-                        <input type="text" id="sch_token" name="sch_token"
-                               value="<?php echo esc_html( get_option( 'sch_token' ) ); ?>"/>
-                    </p>
-					<?php submit_button( esc_html__( 'Connect', 'simply-static' ), 'primary' );; ?>
-					<?php if ( ! empty( $data ) ) : ?>
-                        <p class="success"><?php esc_html_e( 'Your site is successfully connected to the platform.', 'simply-static' ); ?></p>
-					<?php endif; ?>
-                </form>
-            </div>
-            <div>
-            </div>
-        </div>
 		<?php if ( $data ) : ?>
             <div class="wrap">
                 <div>
@@ -294,6 +271,36 @@ class Simply_CDN_Admin {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Update token with ajax.
+	 *
+	 * @return void
+	 */
+	public function update_token() {
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'sch-token-nonce' ) ) {
+			die();
+		}
+
+		$token = sanitize_text_field( $_POST['security-token'] );
+		update_option( 'sch_token', $token );
+
+		$data = Simply_CDN_Api::get_data();
+
+		if ( $data && ! empty( $data->cdn->url ) ) {
+			$response = array( 'success' => true );
+		} else {
+			$response = array(
+				'success'       => false,
+				'error_message' => esc_html__( 'There is something wrong with that security token.', 'simply-static' )
+			);
+
+            delete_option('sch_token');
+		}
+
+		print wp_json_encode( $response );
+		exit;
 	}
 
 	/**
