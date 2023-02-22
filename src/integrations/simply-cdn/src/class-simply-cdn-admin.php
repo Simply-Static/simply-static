@@ -43,11 +43,11 @@ class Simply_CDN_Admin {
 			if ( $data && ! empty( $data->cdn->url ) ) {
 				add_action( 'admin_menu', array( $this, 'register_menu_page' ) );
 
+				// Only include if Simply Static Pro is not installed.
+				if ( ! class_exists( '\simply_static_pro\Build_Settings' ) ) {
+					add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_menu' ), 500 );
+				}
 			}
-		}
-		// Only include if Simply Static Pro is not installed.
-		if ( ! class_exists( '\simply_static_pro\Build_Settings' ) ) {
-			add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_menu' ), 500 );
 		}
 	}
 
@@ -303,7 +303,7 @@ class Simply_CDN_Admin {
 				'error_message' => esc_html__( 'There is something wrong with that security token.', 'simply-static' )
 			);
 
-            delete_option('sch_token');
+			delete_option( 'sch_token' );
 		}
 
 		print wp_json_encode( $response );

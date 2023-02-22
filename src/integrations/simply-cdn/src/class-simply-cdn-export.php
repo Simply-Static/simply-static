@@ -2,6 +2,7 @@
 
 namespace Simply_Static;
 
+use voku\helper\HtmlDomParser;
 
 /**
  * Class to handle automatic exports.
@@ -36,6 +37,7 @@ class Simply_CDN_Export {
 
 		if ( $use_auto_publish ) {
 			add_action( 'save_post', array( $this, 'run_single_export' ) );
+			add_action( 'elementor/editor/after_save', array( $this, 'run_single_export' ) );
 			add_filter( 'ss_static_pages', array( $this, 'filter_static_pages' ), 10, 2 );
 			add_filter( 'ss_remaining_pages', array( $this, 'filter_remaining_pages' ), 10, 2 );
 			add_filter( 'ss_total_pages', array( $this, 'filter_total_pages' ) );

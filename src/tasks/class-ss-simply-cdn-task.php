@@ -12,8 +12,26 @@ class Simply_Cdn_Task extends Task {
 	 * @var string
 	 */
 	protected static $task_name = 'simply_cdn';
+
+	/**
+	 * Object containing all data for the CDN.
+	 *
+	 * @var object|Simply_CDN_Handler|null
+	 */
 	private $cdn;
+
+	/**
+	 * Data for the SimplyCDN project.
+	 *
+	 * @var bool|object
+	 */
 	private $data;
+
+	/**
+	 * Given temporary directory.
+	 *
+	 * @var string
+	 */
 	private $temp_dir;
 
 	/**
@@ -55,11 +73,11 @@ class Simply_Cdn_Task extends Task {
 		if ( $pages_processed >= $total_pages ) {
 			do_action( 'ss_finished_cdn_transfer', $this->temp_dir );
 
-			// Maybe add 404
+			// Maybe add 404.
 			$this->add_404();
 
 			// Clear cache.
-			Api::clear_cache();
+			Simply_CDN_Api::clear_cache();
 		}
 
 		return $pages_processed >= $total_pages;
@@ -85,16 +103,16 @@ class Simply_Cdn_Task extends Task {
 
 		// last_modified_at > ? AND
 		$static_pages    = Page::query()
-		                                     ->where( "file_path IS NOT NULL" )
-		                                     ->where( "file_path != ''" )
-		                                     ->where( "( last_transferred_at < ? OR last_transferred_at IS NULL )", $archive_start_time )
-		                                     ->limit( $batch_size )
-		                                     ->find();
+		                       ->where( "file_path IS NOT NULL" )
+		                       ->where( "file_path != ''" )
+		                       ->where( "( last_transferred_at < ? OR last_transferred_at IS NULL )", $archive_start_time )
+		                       ->limit( $batch_size )
+		                       ->find();
 		$pages_remaining = count( $static_pages );
 		$total_pages     = Page::query()
-		                                     ->where( "file_path IS NOT NULL" )
-		                                     ->where( "file_path != ''" )
-		                                     ->count();
+		                       ->where( "file_path IS NOT NULL" )
+		                       ->where( "file_path != ''" )
+		                       ->count();
 
 		$pages_processed = $total_pages - $pages_remaining;
 		Util::debug_log( "Total pages: " . $total_pages . '; Pages remaining: ' . $pages_remaining );
@@ -115,6 +133,11 @@ class Simply_Cdn_Task extends Task {
 		return array( $pages_processed, $total_pages );
 	}
 
+	/**
+	 * Maybe add a custom 404 page.
+	 *
+	 * @return void
+	 */
 	public function add_404() {
 		$cdn_404_path = get_option( 'sch_404_path' );
 

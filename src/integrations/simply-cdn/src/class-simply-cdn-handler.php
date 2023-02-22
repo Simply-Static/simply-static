@@ -40,7 +40,7 @@ class Simply_CDN_Handler {
 	 * @return void
 	 */
 	public function __construct() {
-		$this->data = Api::get_data();
+		$this->data = Simply_CDN_Api::get_data();
 	}
 
 	/**
@@ -48,8 +48,8 @@ class Simply_CDN_Handler {
 	 *
 	 * @param string $access_key given access key for verification.
 	 * @param string $pull_zone given pullzone name.
-	 * @param string $to_path path to upload
-	 * @param string $file_path path in local filesystem
+	 * @param string $to_path path to upload.
+	 * @param string $file_path path in local filesystem.
 	 *
 	 * @return void
 	 */
@@ -77,14 +77,14 @@ class Simply_CDN_Handler {
 
 		if ( ! is_wp_error( $response ) ) {
 			if ( 200 == wp_remote_retrieve_response_code( $response ) ) {
-				Simply_Static\Util::debug_log( 'Sucessfully uploaded ' . $file_path );
+				Util::debug_log( 'Sucessfully uploaded ' . $file_path );
 			} else {
 				$error_message = wp_remote_retrieve_response_message( $response );
-				Simply_Static\Util::debug_log( $error_message );
+				Util::debug_log( $error_message );
 			}
 		} else {
 			$error_message = $response->get_error_message();
-			Simply_Static\Util::debug_log( $error_message );
+			Util::debug_log( $error_message );
 		}
 	}
 }
