@@ -342,14 +342,6 @@ namespace Simply_Static;
 			<p><?php esc_html_e( 'Here you can configure some additional settings like running exports with WP-Cron, modifing the URL replacement behaviour and more.', 'simply-static' ); ?></p>
 			<table class='form-table'  id='additional-settings'>
 				<tbody>
-					<tr>
-						<th>
-							<label for='use_cron'><?php _e( "Run with WP-Cron", 'simply-static' ); ?></label>
-						</th>
-						<td>						
-							<input type="checkbox" name="use_cron" id="use_cron" <?php Util::checked_if( $this->use_cron === 'on' ); ?> />
-						</td>
-					</tr>
                     <tr>
                         <th>
                             <label for='force_replace_url'><?php _e( "Force URL replacements", 'simply-static' ); ?></label>

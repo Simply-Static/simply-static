@@ -336,7 +336,6 @@ class Simply_CDN_Admin {
 				$options['destination_host']     = $static_url['host'];
 				$options['delivery_method']      = 'simply-cdn';
 				$options['force_replace_url']    = 'on';
-				$options['use_cron']             = 'on';
 
 				update_option( 'simply-static', $options );
 			}
