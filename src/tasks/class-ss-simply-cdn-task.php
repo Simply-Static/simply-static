@@ -41,9 +41,10 @@ class Simply_Cdn_Task extends Task {
 		parent::__construct();
 
 		$options = Options::instance();
+		$token   = get_option( 'sch_token' );
 
 		$this->cdn      = Simply_CDN_Handler::get_instance();
-		$this->data     = Simply_CDN_Api::get_data();
+		$this->data     = Simply_CDN_Api::get_data( $token );
 		$this->options  = $options;
 		$this->temp_dir = $options->get_archive_dir();
 	}
