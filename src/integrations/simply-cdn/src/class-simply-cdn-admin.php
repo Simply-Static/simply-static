@@ -37,8 +37,10 @@ class Simply_CDN_Admin {
 		add_action( 'wp_ajax_update_token', array( $this, 'update_token' ) );
 
 		// Include only if connected.
-		if ( ! empty( get_option( 'sch_token' ) ) ) {
-			$data = Simply_CDN_Api::get_data();
+		$token = get_option( 'sch_token' );
+
+		if ( ! empty( $token ) ) {
+			$data = Simply_CDN_Api::get_data( $token );
 
 			if ( $data && ! empty( $data->cdn->url ) ) {
 				add_action( 'admin_menu', array( $this, 'register_menu_page' ) );
@@ -135,7 +137,8 @@ class Simply_CDN_Admin {
 	 * @return void
 	 */
 	public function render_options() {
-		$data = Simply_CDN_Api::get_data();
+		$token = get_option( 'sch_token' );
+		$data  = Simply_CDN_Api::get_data( $token );
 
 		if ( $data && ! empty( $data->cdn->url ) ) {
 			update_option( 'sch_static_url', esc_url( $data->cdn->url ) );
@@ -296,7 +299,7 @@ class Simply_CDN_Admin {
 		$token = sanitize_text_field( $_POST['security-token'] );
 		update_option( 'sch_token', $token );
 
-		$data = Simply_CDN_Api::get_data();
+		$data = Simply_CDN_Api::get_data( $token );
 
 		if ( $data && ! empty( $data->cdn->url ) ) {
 			$response = array( 'success' => true );
@@ -326,7 +329,8 @@ class Simply_CDN_Admin {
 		if ( 'sch_token' === $option && ! empty( $value ) ) {
 			// Apply default configuration.
 			$options = get_option( 'simply-static' );
-			$data    = Simply_CDN_Api::get_data();
+			$token   = get_option( 'sch_token' );
+			$data    = Simply_CDN_Api::get_data( $token );
 
 			if ( $data && $options ) {
 				$static_url = wp_parse_url( $data->cdn->url );

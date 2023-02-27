@@ -32,8 +32,7 @@ class Simply_CDN_Api {
 	 *
 	 * @return object|bool
 	 */
-	public static function get_data() {
-		$token    = get_option( 'sch_token' );
+	public static function get_data( $token ) {
 		$response = wp_remote_get( 'https://simplycdn.io?security-token=' . $token, array() );
 
 		if ( ! is_wp_error( $response ) ) {

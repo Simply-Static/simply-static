@@ -56,8 +56,10 @@ class Simply_CDN_Integration {
 		Simply_CDN_Admin::get_instance();
 
 		// Include only if connected.
-		if ( ! empty( get_option( 'sch_token' ) ) ) {
-			$data = Simply_CDN_Api::get_data();
+		$token = get_option( 'sch_token' );
+
+		if ( ! empty( $token ) ) {
+			$data = Simply_CDN_Api::get_data( $token );
 
 			if ( $data && ! empty( $data->cdn->url ) ) {
 				// Cors.
