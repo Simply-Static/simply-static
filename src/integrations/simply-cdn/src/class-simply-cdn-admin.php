@@ -206,9 +206,9 @@ class Simply_CDN_Admin {
                     </div>
                 </div>
 			<?php endif; ?>
-			<?php if ( ! class_exists( '\simply_static_pro\Single' ) ) : ?>
-                <div class="wrap">
-                    <div>
+            <div class="wrap">
+                <div>
+					<?php if ( ! class_exists( '\simply_static_pro\Single' ) ) : ?>
                         <p>
                         <h2><?php esc_html_e( 'Automation & Utilities', 'simply-static' ); ?></h2>
                         </p>
@@ -226,17 +226,18 @@ class Simply_CDN_Admin {
                             </p>
 							<?php submit_button(); ?>
                         </form>
-                        <div>
-                            <h2><?php esc_html_e( 'Caching', 'simly-static' ); ?></h2>
-							<?php esc_html_e( 'The CDN cache is cleared automatically after each static export. Sometimes you want to clear the cache manually to make sure you get the latest results in your browser.', 'simply-static' ); ?>
-                            <p>
+					<?php endif; ?>
+                    <div>
+                        <h2><?php esc_html_e( 'Caching', 'simly-static' ); ?></h2>
+						<?php esc_html_e( 'The CDN cache is cleared automatically after each static export. Sometimes you want to clear the cache manually to make sure you get the latest results in your browser.', 'simply-static' ); ?>
+                        <p>
                         <span class="button-secondary button sch-secondary-button"
                               id="sch-clear-cache"><?php esc_html_e( 'Clear Cache', 'simply-static' ); ?></span>
-                            </p>
-                        </div>
+                        </p>
                     </div>
                 </div>
-			<?php endif; ?>
+            </div>
+
             </div>
 		<?php endif; ?>
         </div>
