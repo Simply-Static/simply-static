@@ -339,7 +339,7 @@ namespace Simply_Static;
                 </tbody>
             </table>
 			<h2 class="title"><?php _e( "Additional Settings", 'simply-static' ); ?></h2>
-			<p><?php esc_html_e( 'Here you can configure some additional settings like running exports with WP-Cron, modifing the URL replacement behaviour and more.', 'simply-static' ); ?></p>
+			<p><?php esc_html_e( 'Here you can configure some additional settings like clearing the local directory before running an export or activating force replacement for all URLs.', 'simply-static' ); ?></p>
 			<table class='form-table'  id='additional-settings'>
 				<tbody>
                     <tr>
