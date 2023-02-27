@@ -33,7 +33,11 @@ class Simply_CDN_Integration {
 	 * @return void
 	 */
 	public function __construct() {
-		$this->include_files();
+		include_once ABSPATH . 'wp-admin/includes/plugin.php';
+		
+		if ( ! is_plugin_active( 'simply-cdn-helper/simply-cdn-helper.php' ) ) {
+			$this->include_files();
+		}
 	}
 
 	/**
