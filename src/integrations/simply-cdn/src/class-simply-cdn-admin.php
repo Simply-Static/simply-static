@@ -35,6 +35,7 @@ class Simply_CDN_Admin {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_admin_scripts' ) );
 		add_action( 'added_option', array( $this, 'set_default_configuration' ), 10, 2 );
 		add_action( 'wp_ajax_update_token', array( $this, 'update_token' ) );
+		add_action( 'wp_ajax_clear_cache', array( $this, 'reset_cache' ) );
 
 		// Include only if connected.
 		$token = get_option( 'sch_token' );
@@ -311,6 +312,39 @@ class Simply_CDN_Admin {
 			);
 
 			delete_option( 'sch_token' );
+		}
+
+		print wp_json_encode( $response );
+		exit;
+	}
+
+	/**
+	 * Clear cache
+	 *
+	 * @return void
+	 */
+	public function reset_cache() {
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'sch-cache-nonce' ) ) {
+			die();
+		}
+
+		$token    = get_option( 'sch_token' );
+		$response = wp_remote_get( 'https://simplycdn.io?security-token=' . $token . '&clear-cache=true', array() );
+
+		if ( ! is_wp_error( $response ) ) {
+			if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
+				$response = array( 'success' => true );
+			} else {
+				$response = array(
+					'success'       => false,
+					'error_message' => esc_html__( 'There is something wrong with that security token.', 'simply-static' )
+				);
+			}
+		} else {
+			$response = array(
+				'success'       => false,
+				'error_message' => esc_html__( 'There is something wrong with that security token.', 'simply-static' )
+			);
 		}
 
 		print wp_json_encode( $response );
