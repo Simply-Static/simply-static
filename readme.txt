@@ -47,6 +47,27 @@ Develop your site locally and only push the static exported website on a server.
 
 I highly recommend not to use another tool for local development if you are not a programmer as in most cases manual package installation is required.
 
+== Simply CDN ==
+
+Simply CDN is a hosting platform for static sites generated with Simply Static.
+
+Create an account, copy & paste the Security Token into Simply Static, and immediately push your static website live.
+
+[youtube https://youtu.be/7ejlvDxXMXM]
+
+Simply CDN also ships with a bunch of features to simplify the process of working with your static website:
+
+* handles caching and security
+* temporary domains for setup and testing
+* forward form submissions to your e-mail address
+* handles 404 pages with a custom template
+* automatically export changes in the background
+
+It's built on BunnyCDN and combines affordable static site hosting with everything learned while developing Simply Static.
+
+Start your 7-day free trial [here](https://simplycdn.io/#pricing).
+
+
 == Simply Static Pro ==
 
 The pro version of Simply Static enhances the plugin with various features.
