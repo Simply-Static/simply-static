@@ -36,18 +36,51 @@ class Yoast_Sitemap_Handler extends Page_Handler {
 	 * @return void
 	 */
 	public function after_file_fetch( $destination_dir ) {
-
-		$xsl_path         = dirname( WPSEO_FILE ) . '/css/main-sitemap.xsl';
-		$destination_path = Util::combine_path( $destination_dir, '/main-sitemap.xsl' );
-		if ( file_exists( $destination_path ) ) {
-			return;
-		}
-		$copy = copy( $xsl_path, $destination_path );
-		if ( $copy === false ) {
-			Util::debug_log( 'Cannot copy ' . $xsl_path . ' to ' . $destination_path );
-		} else {
-
-			Util::debug_log( 'Copied ' . $xsl_path . ' to ' . $destination_path );
-		}
+        $this->copy_xsl( $destination_dir );
+        $this->rename_sitemap( $destination_dir );
 	}
+
+    /**
+     * Rename sitemap to sitemap.xml
+     *
+     * @param string $destination_dir Destination directory.
+     * @return void
+     */
+    protected function rename_sitemap( $destination_dir ) {
+        $sitemap_xml = Util::combine_path( $destination_dir, '/sitemap_index.xml' );
+        if ( ! file_exists( $sitemap_xml ) ) {
+            return;
+        }
+
+        $new_sitemap_xml = Util::combine_path( $destination_dir, '/sitemap.xml' );
+
+        $copy = copy( $sitemap_xml, $new_sitemap_xml );
+        if ( $copy === false ) {
+            Util::debug_log( 'Cannot copy ' . $sitemap_xml . ' to ' . $new_sitemap_xml );
+        } else {
+
+            Util::debug_log( 'Copied ' . $sitemap_xml . ' to ' . $new_sitemap_xml );
+        }
+    }
+
+    /**
+     * Copy XSL for sitemap
+     *
+     * @param string $destination_dir Destination directory.
+     * @return void
+     */
+    protected function copy_xsl( $destination_dir ) {
+        $xsl_path         = dirname( WPSEO_FILE ) . '/css/main-sitemap.xsl';
+        $destination_path = Util::combine_path( $destination_dir, '/main-sitemap.xsl' );
+        if ( file_exists( $destination_path ) ) {
+            return;
+        }
+        $copy = copy( $xsl_path, $destination_path );
+        if ( $copy === false ) {
+            Util::debug_log( 'Cannot copy ' . $xsl_path . ' to ' . $destination_path );
+        } else {
+
+            Util::debug_log( 'Copied ' . $xsl_path . ' to ' . $destination_path );
+        }
+    }
 }
