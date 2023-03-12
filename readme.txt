@@ -131,13 +131,13 @@ Simply Static Pro also supports configuring settings per language, using the ava
 
 = Get the Pro version =
 
-You can get the pro version [here](https://patrickposner.dev/plugins/simply-static/).
+You can get the pro version [here](https://simplystatic.com/simply-static-pro/).
 
 = Tutorials =
 
 I publish new tutorials on how to work with Simply Static and other tools on my blog.
 
-You can check the current tutorials [here](https://patrickposner.dev/tutorials/tag/simply-static/)
+You can check the current tutorials [here](https://simplystatic.com/tutorials/)
 
 
 == Installation ==
