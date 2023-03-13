@@ -60,6 +60,7 @@ class Url_Extractor {
 
 		'bgsound' => array( 'src' ),
 		'div'     => array( 'href', 'src', 'style' ),
+		'span'    => array( 'href', 'src', 'style' ),
 		'section' => array( 'style' ),
 		'footer'  => array( 'style' ),
 		'header'  => array( 'style' ),
@@ -355,7 +356,7 @@ class Url_Extractor {
 				try {
 					$updated_script     = $this->extract_and_replace_urls_in_script( $tag->innerhtmlKeep );
 					$tag->innerhtmlKeep = $updated_script;
-                    $this->extract_and_replace_urls_in_script_inner_text( $tag );
+					$this->extract_and_replace_urls_in_script_inner_text( $tag );
 				} catch ( Exception $e ) {
 					// If not skip the result.
 					continue;
@@ -427,34 +428,35 @@ class Url_Extractor {
 		return $text;
 	}
 
-    /**
-     * @param \ $tag
-     * @return array|string|string[]|null
-     */
-    private function extract_and_replace_urls_in_script_inner_text( $tag ) {
+	/**
+	 * @param \ $tag
+	 *
+	 * @return array|string|string[]|null
+	 */
+	private function extract_and_replace_urls_in_script_inner_text( $tag ) {
 
-        $regex = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i';
+		$regex = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i';
 
-        switch( $this->options->get( 'destination_url_type' ) ) {
-            case 'absolute':
-                $convert_to = $this->options->get_destination_url();
-                break;
-            case 'relative':
-                // Adding \/? before end of regex pattern to convert url.com/ & url.com to relative path, ex. /path/.
-                $regex = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '\/?/i';
-                $convert_to = $this->options->get( 'relative_path' );
-                break;
-            default:
-                // Offline mode.
-                // Adding \/? before end of regex pattern to convert url.com/ & url.com to relative path, ex. /path/.
-                $regex = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '\/?/i';
-                $convert_to = '/';
-        }
+		switch ( $this->options->get( 'destination_url_type' ) ) {
+			case 'absolute':
+				$convert_to = $this->options->get_destination_url();
+				break;
+			case 'relative':
+				// Adding \/? before end of regex pattern to convert url.com/ & url.com to relative path, ex. /path/.
+				$regex      = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '\/?/i';
+				$convert_to = $this->options->get( 'relative_path' );
+				break;
+			default:
+				// Offline mode.
+				// Adding \/? before end of regex pattern to convert url.com/ & url.com to relative path, ex. /path/.
+				$regex      = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '\/?/i';
+				$convert_to = '/';
+		}
 
-        $tag->innerText = preg_replace( $regex, $convert_to, html_entity_decode( $tag->innerText ) );
+		$tag->innerText = preg_replace( $regex, $convert_to, html_entity_decode( $tag->innerText ) );
 
-        return $tag;
-    }
+		return $tag;
+	}
 
 	/**
 	 * callback function for preg_replace in extract_and_replace_urls_in_css
@@ -533,11 +535,11 @@ class Url_Extractor {
 		if ( $url && Util::is_local_url( $url ) ) {
 			// add to extracted urls queue
 			$this->extracted_urls[] = apply_filters(
-                'simply_static_extracted_url',
-                Util::remove_params_and_fragment( $url ),
-                $url,
-                $this->static_page
-            );
+				'simply_static_extracted_url',
+				Util::remove_params_and_fragment( $url ),
+				$url,
+				$this->static_page
+			);
 
 			$url = $this->convert_url( $url );
 		}
@@ -554,7 +556,7 @@ class Url_Extractor {
 	 */
 	private function convert_url( $url ) {
 
-        $url = apply_filters( 'simply_static_pre_converted_url', $url, $this->static_page, $this );
+		$url = apply_filters( 'simply_static_pre_converted_url', $url, $this->static_page, $this );
 
 		if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
 			$url = $this->convert_absolute_url( $url );
@@ -564,7 +566,7 @@ class Url_Extractor {
 			$url = $this->convert_offline_url( $url );
 		}
 
-        $url = remove_query_arg( 'simply_static_page', $url );
+		$url = remove_query_arg( 'simply_static_page', $url );
 
 		return apply_filters( 'simply_static_converted_url', $url, $this->static_page, $this );
 	}
