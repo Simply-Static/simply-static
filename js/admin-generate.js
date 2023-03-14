@@ -18,6 +18,11 @@ jQuery(document).ready(function ($) {
 		initiate_action('cancel');
 	});
 
+	$(document.body).on( 'change', '#simply_static_blog_id', function (){
+		display_export_log();
+		display_activity_log();
+	});
+
 	// disable all actions and show spinner
 	function initiate_action(action) {
 		if (action == null) {
@@ -74,6 +79,7 @@ jQuery(document).ready(function ($) {
 		var $activityLog = $('#activityLog');
 		$activityLog.html(response.activity_log_html)
 			.scrollTop($activityLog.prop('scrollHeight'));
+
 		if (response.done == true && done == false) {
 			display_export_log();
 		}

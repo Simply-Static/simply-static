@@ -37,7 +37,7 @@ class Plugin {
 
 	/**
 	 * View object
-	 * @var Simply_Static\View
+	 * @var \Simply_Static\View
 	 */
 	protected $view = null;
 
@@ -96,7 +96,6 @@ class Plugin {
 			add_action( 'admin_enqueue_scripts', array( self::$instance, 'enqueue_admin_scripts' ) );
 			// Add the options page and menu item.
 			add_action( 'admin_menu', array( self::$instance, 'add_plugin_admin_menu' ), 2 );
-			add_action( 'network_admin_menu', array( self::$instance, 'add_plugin_admin_menu' ), 2 );
 			// Add admin info links.
 			add_action( 'simply_static_admin_info_links', array( self::$instance, 'add_info_links' ) );
 
@@ -298,7 +297,7 @@ class Plugin {
 		$action  = $_POST['perform'];
 		$blog_id = isset( $_POST['blog_id'] ) ? absint( $_POST['blog_id'] ) : get_current_blog_id();
 
-		do_action( 'ss_before_perform_archive_action', $blog_id );
+		do_action( 'ss_before_perform_archive_action', $blog_id, $action, $this->archive_creation_job );
 
 		if ( $action === 'start' ) {
 			Util::delete_debug_log();
@@ -317,6 +316,9 @@ class Plugin {
 			Util::debug_log( "Received request to cancel static archive generation" );
 			$this->archive_creation_job->cancel();
 		}
+
+		do_action( 'ss_after_perform_archive_action', $blog_id, $action, $this->archive_creation_job );
+
 
 		$this->send_json_response_for_static_archive( $action );
 	}
