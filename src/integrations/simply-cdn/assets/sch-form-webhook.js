@@ -17,7 +17,7 @@ function submitForm(method, url, data, el) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState !== XMLHttpRequest.DONE) return;
 
-        if (xhr.status === 200) {
+        if (xhr.status == 200) {
             return true;
         }
     };
