@@ -130,7 +130,7 @@
     color: #fff;
     text-decoration: none;
     white-space: nowrap;
-    width: 25%;
+    width: 33.33333333%;
     border-bottom: solid 1px #fff;
     border-right: solid 1px #fff;
     margin: 0;
@@ -255,8 +255,12 @@
     margin-left: 10px;
 }
 
-#optionsForm, #resetForm {
+#optionsForm {
     padding: 30px;
+}
+
+#reset-settings {
+    display: block !important;
 }
 
 .generate > .generate-build {
