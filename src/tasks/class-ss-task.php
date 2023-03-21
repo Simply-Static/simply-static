@@ -48,6 +48,10 @@ abstract class Task {
 		$this->options
 			->set( 'archive_status_messages', $messages )
 			->save();
+
+        if ( $this->is_wp_cli_running() ) {
+            \WP_CLI::line( $message );
+        }
 	}
 
 	protected function save_pages_status( $pages_remaining, $pages_total ) {
@@ -64,4 +68,7 @@ abstract class Task {
 	*/
 	abstract public function perform();
 
+    protected function is_wp_cli_running() {
+        return defined( 'WP_CLI' ) && WP_CLI;
+    }
 }
