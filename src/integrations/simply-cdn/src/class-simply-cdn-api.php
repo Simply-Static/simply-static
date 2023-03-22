@@ -2,6 +2,8 @@
 
 namespace Simply_Static;
 
+use stdClass;
+
 /**
  * Class to handle Api settings
  */
@@ -30,9 +32,23 @@ class Simply_CDN_Api {
 	/**
 	 * Get site data
 	 *
+	 * @param string $token Given security token for authentication.
+	 *
 	 * @return object|bool
 	 */
 	public static function get_data( $token ) {
+		// Maybe use constant instead of options.
+		if ( defined( 'SIMPLYCDN' ) ) {
+			$connection = SIMPLYCDN;
+
+			$response                             = new StdClass();
+			$response->data->cdn->sub_directory   = $connection['sub-directory'];
+			$response->data->cdn->access_key      = $connection['access-key'];
+			$response->data->cdn->pull_zone->name = $connection['pull-zone'];
+
+			return $response;
+		}
+
 		$response = wp_remote_get( 'https://simplycdn.io?security-token=' . $token, array() );
 
 		if ( ! is_wp_error( $response ) ) {
