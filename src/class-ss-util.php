@@ -301,6 +301,19 @@ class Util {
 	}
 
 	/**
+	 * Check if WP-Cron is running.
+	 *
+	 * @return bool
+	 */
+	public static function is_cron(): bool {
+		if ( ! defined( 'DISABLE_WP_CRON' ) || DISABLE_WP_CRON !== true || defined( 'SS_CRON' ) ) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	 * Get the path from a local URL, removing the protocol and host
 	 *
 	 * @param string $url URL to strip protocol/host from
