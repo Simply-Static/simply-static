@@ -29,7 +29,7 @@ class Url_Extractor {
 	protected static $match_tags = array(
 		'a'       => array( 'href', 'urn', 'style' ),
 		'base'    => array( 'href' ),
-		'img'     => array( 'src', 'usemap', 'longdesc', 'dynsrc', 'lowsrc', 'srcset' ),
+		'img'     => array( 'src', 'usemap', 'longdesc', 'dynsrc', 'lowsrc', 'srcset', 'data-src', 'data-bg' ),
 		'picture' => array( 'src', 'srcset' ),
 		'source'  => array( 'srcset' ),
 		'amp-img' => array( 'src', 'srcset' ),
