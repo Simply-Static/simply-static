@@ -51,7 +51,7 @@ namespace Simply_Static;
 							 --><input aria-describedby='destinationHostHelpBlock' type='text' id='destinationHost'
                                        class='host-entry' name='destination_host'
                                        placeholder='<?php _e( "www.example.com/", 'simply-static' ); ?>'
-                                       value='<?php echo trailingslashit( esc_attr( $this->destination_host ) ); ?>'
+                                       value='<?php echo untrailingslashit( esc_attr( $this->destination_host ) ); ?>'
                                        size='50'/>
 								<p id='destinationHostHelpBlock'
                                    class='help-block'><?php _e( "Convert all URLs for your WordPress site to absolute URLs at the domain specified above.", 'simply-static' ); ?></p>

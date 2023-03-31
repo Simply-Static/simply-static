@@ -35,7 +35,7 @@ class Util {
 	 * @return string home URL
 	 */
 	public static function origin_url() {
-		return apply_filters( 'ss_origin_url', home_url() );
+		return apply_filters( 'ss_origin_url', untrailingslashit( home_url() ) );
 	}
 
 	/**
@@ -43,7 +43,7 @@ class Util {
 	 * @return string home URL
 	 */
 	public static function wp_installation_url() {
-		return site_url();
+		return untrailingslashit( site_url() );
 	}
 
 	/**

@@ -295,7 +295,7 @@ class Url_Extractor {
 				}
 
 				foreach ( $extracted_urls as $extracted_url ) {
-					if ( $extracted_url !== '' ) {
+					if ( filter_var( $extracted_url, FILTER_VALIDATE_URL ) ) {
 						$updated_extracted_url = $this->add_to_extracted_urls( $extracted_url );
 						$attribute_value       = str_replace( $extracted_url, $updated_extracted_url, $attribute_value );
 					}
@@ -335,9 +335,9 @@ class Url_Extractor {
 			}
 
 			// handle 'style' tag differently, since we need to parse the content.
-			$tags = $dom->find( 'style' );
+			$style_tags = $dom->find( 'style' );
 
-			foreach ( $tags as $tag ) {
+			foreach ( $style_tags as $tag ) {
 				// Check if valid content exists.
 				try {
 					$updated_css        = $this->extract_and_replace_urls_in_css( $tag->innerhtmlKeep );
@@ -349,9 +349,9 @@ class Url_Extractor {
 			}
 
 			// handle 'script' tag differently, since we need to parse the content.
-			$tags = $dom->find( 'script' );
+			$script_tags = $dom->find( 'script' );
 
-			foreach ( $tags as $tag ) {
+			foreach ( $script_tags as $tag ) {
 				// Check if valid content exists.
 				try {
 					$updated_script     = $this->extract_and_replace_urls_in_script( $tag->innerhtmlKeep );
