@@ -2,9 +2,9 @@
 Contributors: patrickposner
 Tags: HTML, static website generator, static site, secure, fast
 Requires at least: 5.4
-Tested up to: 6.1
+Tested up to: 6.2
 Requires PHP: 7.4
-Stable tag: 2.2.8
+Stable tag: 2.2.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -199,6 +199,14 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 3. Diagnostics
 
 == Changelog ==
+
+= 2.2.9 =
+
+* constants for Simply CDN implemented
+* remaining pages as argument in fetch URLs task
+* fixed log updates if running with WP-Cron
+* match_tags improvements for lazyload
+* fixed inline CSS extraction to avoid trailingslash for hexcodes
 
 = 2.2.8 =
 
