@@ -468,7 +468,7 @@ class Url_Extractor {
 	 *
 	 * @return string An updated string for the text that was originally matched
 	 */
-	private function css_matches( $matches ) {
+	public function css_matches( $matches ) {
 		$full_match    = $matches[0];
 		$extracted_url = $matches[1];
 
