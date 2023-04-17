@@ -422,8 +422,12 @@ class Url_Extractor {
 	}
 
 	private function extract_and_replace_urls_in_script( $text ) {
-
-		$text = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $this->options->get_destination_url(), html_entity_decode( $text ) );
+        if ( $this->is_json( $text ) ) {
+            $decoded_text = html_entity_decode( $text, ENT_NOQUOTES );
+        } else {
+            $decoded_text = html_entity_decode( $text );
+        }
+		$text = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $this->options->get_destination_url(), $decoded_text );
 
 		return $text;
 	}
@@ -453,10 +457,40 @@ class Url_Extractor {
 				$convert_to = '/';
 		}
 
-		$tag->innerText = preg_replace( $regex, $convert_to, html_entity_decode( $tag->innerText ) );
+        if ( $this->is_json( $tag->innerText ) ) {
+            $decoded_text = html_entity_decode( $tag->innerText, ENT_NOQUOTES );
+        } else {
+            $decoded_text = html_entity_decode( $tag->innerText );
+        }
+
+		$tag->innerText = preg_replace( $regex, $convert_to, $decoded_text );
 
 		return $tag;
 	}
+
+    /**
+     * Check whether a given string is a valid JSON representation.
+     *
+     * Copied from: WP CLI, https://github.com/wp-cli/wp-cli/blob/f3e4b0785aa3d3132ee73be30aedca8838a8fa06/php/utils.php#L1600-L1612
+     *
+     * @param string $argument       String to evaluate.
+     * @param bool   $ignore_scalars Optional. Whether to ignore scalar values.
+     *                               Defaults to true.
+     * @return bool Whether the provided string is a valid JSON representation.
+     */
+    protected function is_json( $argument, $ignore_scalars = true ) {
+        if ( ! is_string( $argument ) || '' === $argument ) {
+            return false;
+        }
+        $arg = $argument[0];
+        if ( $ignore_scalars && ! in_array( $argument[0], [ '{', '[' ], true ) ) {
+            return false;
+        }
+
+        json_decode( $argument, $assoc = true );
+$last_error = json_last_error();
+        return json_last_error() === JSON_ERROR_NONE;
+    }
 
 	/**
 	 * callback function for preg_replace in extract_and_replace_urls_in_css
