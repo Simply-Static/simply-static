@@ -17,8 +17,24 @@ class AIO_SEO_Integration extends Integration {
 	 * @return void
 	 */
 	public function run() {
+        add_filter( 'aioseo_unrecognized_allowed_query_args', [ $this, 'allowed_query_args' ] );
 		add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_pages' ] );
 	}
+
+    /**
+     * Adding 'simply_static_page' as an allowed query argument.
+     *
+     * @param array $args Query Arguments that are allowed and won't be removed from urls.
+     * @return array|mixed
+     */
+    public function allowed_query_args( $args ) {
+        if ( ! is_array( $args ) ) {
+            $args = [];
+        }
+
+        $args[] = 'simply_static_page';
+        return $args;
+    }
 
 	/**
 	 * Register sitemap maps for static export.
