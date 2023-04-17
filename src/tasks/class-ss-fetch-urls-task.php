@@ -184,7 +184,8 @@ class Fetch_Urls_Task extends Task {
 		$origin_url      = Util::origin_url();
 		$destination_url = $this->options->get_destination_url();
 		$current_url     = $static_page->url;
-		$redirect_url    = $static_page->redirect_url;
+		$redirect_url    = remove_query_arg( 'simply_static_page', $static_page->redirect_url );
+
 
 		Util::debug_log( "redirect_url: " . $redirect_url );
 
