@@ -41,15 +41,11 @@ class Simply_CDN_Admin {
 		$token = get_option( 'sch_token' );
 
 		if ( ! empty( $token ) ) {
-			$data = Simply_CDN_Api::get_data( $token );
+			add_action( 'admin_menu', array( $this, 'register_menu_page' ) );
 
-			if ( $data && ! empty( $data->cdn->url ) ) {
-				add_action( 'admin_menu', array( $this, 'register_menu_page' ) );
-
-				// Only include if Simply Static Pro is not installed.
-				if ( ! class_exists( '\simply_static_pro\Build_Settings' ) ) {
-					add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_menu' ), 500 );
-				}
+			// Only include if Simply Static Pro is not installed.
+			if ( ! class_exists( '\simply_static_pro\Build_Settings' ) ) {
+				add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_menu' ), 500 );
 			}
 		}
 	}
@@ -138,16 +134,18 @@ class Simply_CDN_Admin {
 	 * @return void
 	 */
 	public function render_options() {
+		$screen = get_current_screen();
+
+		if ( 'simply-static_page_simply-static_cdn' !== $screen->id ) {
+			return;
+		}
+
 		$token = get_option( 'sch_token' );
 		$data  = Simply_CDN_Api::get_data( $token );
-
-		if ( $data && ! empty( $data->cdn->url ) ) {
-			update_option( 'sch_static_url', esc_url( $data->cdn->url ) );
-		}
 		?>
         <div class="sch-container">
         <h1><?php esc_html_e( 'Simply CDN', 'simply-static' ); ?></h1>
-		<?php if ( $data ) : ?>
+		<?php if ( $token ) : ?>
             <div class="wrap">
                 <div>
                     <p>
@@ -304,6 +302,8 @@ class Simply_CDN_Admin {
 		$data = Simply_CDN_Api::get_data( $token );
 
 		if ( $data && ! empty( $data->cdn->url ) ) {
+			update_option( 'sch_static_url', esc_url( $data->cdn->url ) );
+
 			$response = array( 'success' => true );
 		} else {
 			$response = array(

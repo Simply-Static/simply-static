@@ -123,6 +123,7 @@ class Simply_Cdn_Task extends Task {
 
 			if ( ! is_dir( $file_path ) && file_exists( $file_path ) ) {
 				$this->cdn->upload_file( $this->data->cdn->access_key, $this->data->cdn->pull_zone->name, $cdn_path . $static_page->file_path, $file_path );
+				Util::debug_log( "Uploaded: " . $file_path );
 			}
 
 			do_action( 'ss_file_transfered_to_cdn', $static_page, $destination_dir );
