@@ -294,8 +294,14 @@ class Url_Extractor {
 					}
 				}
 
+                $strict_url_validation = apply_filters( 'simply_static_strict_url_validation', false );
+
 				foreach ( $extracted_urls as $extracted_url ) {
-					if ( filter_var( $extracted_url, FILTER_VALIDATE_URL ) ) {
+                    if ( $strict_url_validation && ! filter_var( $extracted_url, FILTER_VALIDATE_URL ) ) {
+                        continue;
+                    }
+
+                    if ( $extracted_url !== '' ) {
 						$updated_extracted_url = $this->add_to_extracted_urls( $extracted_url );
 						$attribute_value       = str_replace( $extracted_url, $updated_extracted_url, $attribute_value );
 					}
