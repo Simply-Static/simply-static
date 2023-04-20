@@ -198,7 +198,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 * Cancel the currently running job
 	 * @return void
 	 */
-	public function cancel() {
+	public function cancel( $message = '' ) {
 		if ( ! $this->is_job_done() ) {
 			Util::debug_log( "Cancelling job; job is not done" );
 
@@ -220,6 +220,10 @@ class Archive_Creation_Job extends \WP_Background_Process {
 				$batch->data = array( 'cancel' );
 				$this->update( $batch->key, $batch->data );
 			}
+
+            if ( $message ) {
+                $this->save_status_message( $message );
+            }
 
 			$this->dispatch();
 		} else {
