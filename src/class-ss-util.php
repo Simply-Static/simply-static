@@ -167,6 +167,15 @@ class Util {
 		return $contents;
 	}
 
+    public static function is_valid_scheme( $scheme ) {
+        $valid_schemes = apply_filters( 'simply_static_valid_schemes', [
+           'http',
+           'https',
+        ]);
+
+        return in_array( $scheme, $valid_schemes );
+    }
+
 	/**
 	 * Given a URL extracted from a page, return an absolute URL
 	 *
@@ -220,6 +229,9 @@ class Util {
 
 		// if no path, check for an ending slash; if there isn't one, add one
 		if ( ! isset( $parsed_extracted_url['path'] ) ) {
+            if ( isset( $parsed_extracted_url['scheme'] ) && ! self::is_valid_scheme( $parsed_extracted_url['scheme'] ) ) {
+                return $extracted_url;
+            }
 			$clean_url     = self::remove_params_and_fragment( $extracted_url );
 			$fragment      = substr( $extracted_url, strlen( $clean_url ) );
 			$extracted_url = trailingslashit( $clean_url ) . $fragment;
