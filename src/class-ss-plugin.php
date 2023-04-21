@@ -43,7 +43,7 @@ class Plugin {
 
 	/**
 	 * Archive creation process
-	 * @var Simply_Static\Archive_Creation_Job
+	 * @var \Simply_Static\Archive_Creation_Job
 	 */
 	protected $archive_creation_job = null;
 
@@ -418,6 +418,13 @@ class Plugin {
 		wp_send_json( array(
 			'html' => $content
 		) );
+	}
+
+	/**
+	 * @return Archive_Creation_Job|null
+	 */
+	public function get_archive_creation_job() {
+		return $this->archive_creation_job;
 	}
 
 	/**

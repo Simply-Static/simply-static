@@ -153,6 +153,15 @@ class Url_Extractor {
 		return file_put_contents( $this->options->get_archive_dir() . $this->static_page->file_path, $content );
 	}
 
+    /**
+     * Get the Static Page.
+     *
+     * @return \Simply_Static\Page|string
+     */
+    public function get_static_page() {
+        return $this->static_page;
+    }
+
 	/**
 	 * Extracts URLs from the static_page and update them based on the dest. type
 	 *
