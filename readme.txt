@@ -4,7 +4,7 @@ Tags: HTML, static website generator, static site, secure, fast
 Requires at least: 5.4
 Tested up to: 6.2
 Requires PHP: 7.4
-Stable tag: 2.2.9
+Stable tag: 2.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -199,6 +199,17 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 3. Diagnostics
 
 == Changelog ==
+
+= 2.3.0 =
+
+* fix for Yoast sitemap inclusion
+* better approach to extract URLs from HTML
+* added support for WP-CLI integration
+* better task handling with ajax and WP-Cron with progress without reload
+* better quote handling in JSON
+* improved SimplyCDN integration and security token handling
+* fix for redirect pages by removing query args before saving
+* fix for Elementor Pro for data attributes
 
 = 2.2.9 =
 
