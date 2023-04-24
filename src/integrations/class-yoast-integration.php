@@ -32,14 +32,20 @@ class Yoast_Integration extends Integration {
 			return;
 		}
 
-		$url = \WPSEO_Sitemaps_Router::get_base_url( 'sitemap_index.xml' );
-		Util::debug_log( 'Adding sitemap URL to queue: ' . $url );
-		/** @var \Simply_Static\Page $static_page */
-		$static_page = Page::query()->find_or_initialize_by( 'url', $url );
-		$static_page->set_status_message( __( 'Sitemap URL', 'simply-static' ) );
-		$static_page->found_on_id = 0;
-		$static_page->handler     = Yoast_Sitemap_Handler::class;
-		$static_page->save();
+		$urls = array(
+			\WPSEO_Sitemaps_Router::get_base_url( 'sitemap.xml' ),
+			\WPSEO_Sitemaps_Router::get_base_url( 'sitemap_index.xml' ),
+		);
+
+		foreach ( $urls as $url ) {
+			Util::debug_log( 'Adding sitemap URL to queue: ' . $url );
+			/** @var \Simply_Static\Page $static_page */
+			$static_page = Page::query()->find_or_initialize_by( 'url', $url );
+			$static_page->set_status_message( __( 'Sitemap URL', 'simply-static' ) );
+			$static_page->found_on_id = 0;
+			$static_page->handler     = Yoast_Sitemap_Handler::class;
+			$static_page->save();
+		}
 	}
 
 	/**
