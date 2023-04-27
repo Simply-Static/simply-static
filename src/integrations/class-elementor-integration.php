@@ -27,6 +27,7 @@ class Elementor_Integration extends Integration {
      * @return void
      */
     public function run() {
+        add_action( 'ss_finished_fetching_pages', [ $this, 'move_files' ] );
         add_action( 'ss_after_setup_task', [ $this, 'register_assets' ] );
         add_action( 'ss_after_extract_and_replace_urls_in_html', [ $this, 'extract_elementor_settings' ], 20, 2 );
     }
@@ -50,6 +51,71 @@ class Elementor_Integration extends Integration {
         }
     }
 
+
+
+    /**
+     * Move Elementor Files to make sure all assets that might be required are there.
+     * @return void
+     */
+    public function move_files() {
+        $lib_assets   = trailingslashit( ELEMENTOR_PATH ) . 'assets/lib/';
+        $options      = Options::instance();
+        $archive_dir  = $options->get_archive_dir();
+        $relative_dir = str_replace( trailingslashit( ABSPATH ), '', $lib_assets );
+        $destination  = trailingslashit( $archive_dir ) . $relative_dir;
+
+        $this->recurseCopy( $lib_assets, $destination );
+    }
+
+    protected function recurseCopy(
+        string $sourceDirectory,
+        string $destinationDirectory,
+        string $childFolder = ''
+    ): void {
+        $directory = opendir($sourceDirectory);
+
+        if (is_dir($destinationDirectory) === false) {
+            mkdir($destinationDirectory);
+        }
+
+        if ($childFolder !== '') {
+            if (is_dir("$destinationDirectory/$childFolder") === false) {
+                mkdir("$destinationDirectory/$childFolder");
+            }
+
+            while (($file = readdir($directory)) !== false) {
+                if ($file === '.' || $file === '..') {
+                    continue;
+                }
+
+                if (is_dir("$sourceDirectory/$file") === true) {
+                    $this->recurseCopy("$sourceDirectory/$file", "$destinationDirectory/$childFolder/$file");
+                } else {
+                    copy("$sourceDirectory/$file", "$destinationDirectory/$childFolder/$file");
+                }
+            }
+
+            closedir($directory);
+
+            return;
+        }
+
+        while (($file = readdir($directory)) !== false) {
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+
+            if (is_dir("$sourceDirectory/$file") === true) {
+                $this->recurseCopy("$sourceDirectory/$file", "$destinationDirectory/$file");
+            }
+            else {
+                copy("$sourceDirectory/$file", "$destinationDirectory/$file");
+            }
+        }
+
+        closedir($directory);
+    }
+
     /**
      * Register Elementor Assets to be added that are loaded conditionally
      *
@@ -59,7 +125,7 @@ class Elementor_Integration extends Integration {
         $js_bundles_folder = trailingslashit( ELEMENTOR_PATH ) . 'assets/js/';
         $files             = scandir( $js_bundles_folder );
         $only_bundle_min   = array_filter( $files, function( $file ) {
-           return strpos( $file, 'bundle.min.js' );
+            return strpos( $file, 'bundle.min.js' );
         });
 
         foreach ( $only_bundle_min as $minified_file ) {
