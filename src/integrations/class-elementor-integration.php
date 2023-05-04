@@ -27,7 +27,6 @@ class Elementor_Integration extends Integration {
      * @return void
      */
     public function run() {
-        add_action( 'ss_finished_fetching_pages', [ $this, 'move_files' ] );
         add_action( 'ss_after_setup_task', [ $this, 'register_assets' ] );
         add_action( 'ss_after_extract_and_replace_urls_in_html', [ $this, 'extract_elementor_settings' ], 20, 2 );
     }
@@ -46,74 +45,78 @@ class Elementor_Integration extends Integration {
             $json = preg_replace_callback( $pattern, array( $extractor, 'css_matches' ), $decoded );
             $json = json_decode( $json );
             $node->{'data-settings'} = esc_attr( wp_json_encode( $json ) );
-
-
         }
     }
-
-
 
     /**
      * Move Elementor Files to make sure all assets that might be required are there.
-     * @return void
+     * @return array
      */
-    public function move_files() {
-        $lib_assets   = trailingslashit( ELEMENTOR_PATH ) . 'assets/lib/';
-        $options      = Options::instance();
-        $archive_dir  = $options->get_archive_dir();
-        $relative_dir = str_replace( trailingslashit( ABSPATH ), '', $lib_assets );
-        $destination  = trailingslashit( $archive_dir ) . $relative_dir;
-
-        $this->recurseCopy( $lib_assets, $destination );
+    public function get_lib_files() {
+        return $this->get_files_in_url( 'lib' );
     }
 
-    protected function recurseCopy(
-        string $sourceDirectory,
-        string $destinationDirectory,
-        string $childFolder = ''
-    ): void {
-        $directory = opendir($sourceDirectory);
+    /**
+     * Move Elementor Files to make sure all assets that might be required are there.
+     * @return array
+     */
+    public function get_files_in_url( $asset_dir ) {
+        $dir   = trailingslashit( ELEMENTOR_PATH ) . 'assets/' . $asset_dir;
+        $files = $this->get_files_in_dir( $dir );
+        $urls  = [];
 
-        if (is_dir($destinationDirectory) === false) {
-            mkdir($destinationDirectory);
+        foreach ( $files as $file ) {
+            $urls[] = str_replace( trailingslashit( ELEMENTOR_PATH ), trailingslashit( ELEMENTOR_URL ), $file );
         }
 
-        if ($childFolder !== '') {
-            if (is_dir("$destinationDirectory/$childFolder") === false) {
-                mkdir("$destinationDirectory/$childFolder");
-            }
+        return $urls;
+    }
 
-            while (($file = readdir($directory)) !== false) {
-                if ($file === '.' || $file === '..') {
-                    continue;
-                }
-
-                if (is_dir("$sourceDirectory/$file") === true) {
-                    $this->recurseCopy("$sourceDirectory/$file", "$destinationDirectory/$childFolder/$file");
-                } else {
-                    copy("$sourceDirectory/$file", "$destinationDirectory/$childFolder/$file");
-                }
-            }
-
-            closedir($directory);
-
-            return;
-        }
+    /**
+     * Get fields in directory
+     *
+     * @param string $source_dir Directory path.
+     * @param array  $files
+     * @return array
+     */
+    public function get_files_in_dir(
+        string $source_dir,
+        array $files = []
+    ) {
+        $directory = opendir($source_dir);
 
         while (($file = readdir($directory)) !== false) {
             if ($file === '.' || $file === '..') {
                 continue;
             }
 
-            if (is_dir("$sourceDirectory/$file") === true) {
-                $this->recurseCopy("$sourceDirectory/$file", "$destinationDirectory/$file");
+            if (is_dir("$source_dir/$file") === true) {
+               $files = $this->get_files_in_dir("$source_dir/$file", $files );
             }
             else {
-                copy("$sourceDirectory/$file", "$destinationDirectory/$file");
+                $files[] = "$source_dir/$file";
             }
         }
 
         closedir($directory);
+        return $files;
+    }
+
+
+    protected function get_bundle_files() {
+        $js_bundles_folder = trailingslashit( ELEMENTOR_PATH ) . 'assets/js/';
+        $files             = scandir( $js_bundles_folder );
+        $only_bundle_min   = array_filter( $files, function( $file ) {
+            return strpos( $file, 'bundle.min.js' );
+        });
+
+        $urls = [];
+
+        foreach ( $only_bundle_min as $minified_file ) {
+            $urls[] = trailingslashit( ELEMENTOR_URL ) . 'assets/js/' . $minified_file;
+        }
+
+        return $urls;
     }
 
     /**
@@ -122,14 +125,19 @@ class Elementor_Integration extends Integration {
      * @return void
      */
     public function register_assets() {
-        $js_bundles_folder = trailingslashit( ELEMENTOR_PATH ) . 'assets/js/';
-        $files             = scandir( $js_bundles_folder );
-        $only_bundle_min   = array_filter( $files, function( $file ) {
-            return strpos( $file, 'bundle.min.js' );
-        });
 
-        foreach ( $only_bundle_min as $minified_file ) {
-            $url = trailingslashit( ELEMENTOR_URL ) . 'assets/js/' . $minified_file;
+        $file_urls   = [];
+        $bundle_urls = $this->get_bundle_files();
+        $lib_urls    = $this->get_lib_files();
+        $file_urls   = array_merge( $file_urls, $bundle_urls );
+        $file_urls   = array_merge( $file_urls, $lib_urls );
+        $file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'images' ) );
+        $file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'shapes' ) );
+        $file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'mask-shapes' ) );
+        $file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'svg-paths' ) );
+        $file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'data' ) );
+
+        foreach ( $file_urls as $url ) {
             Util::debug_log( 'Adding elementor bundle asset to queue: ' . $url );
             /** @var \Simply_Static\Page $static_page */
             $static_page = Page::query()->find_or_initialize_by( 'url', $url );
