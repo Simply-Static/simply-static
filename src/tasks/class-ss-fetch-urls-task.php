@@ -58,7 +58,7 @@ class Fetch_Urls_Task extends Task {
 			Util::debug_log( "URL: " . $static_page->url );
 			$this->save_pages_status( count( $static_pages ) + 1, intval( $total_pages ) );
 
-			$excludable = $this->find_excludable( $static_page );
+			$excludable = apply_filters( 'ss_find_excludable', $this->find_excludable( $static_page ), $static_page );
 			if ( $excludable !== false ) {
 				$save_file   = $excludable['do_not_save'] !== '1';
 				$follow_urls = $excludable['do_not_follow'] !== '1';
@@ -258,7 +258,7 @@ class Fetch_Urls_Task extends Task {
 	}
 
 	/**
-	 * Find executeable.
+	 * Find excludable.
 	 *
 	 * @param object $static_page current page.
 	 *
