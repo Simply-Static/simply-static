@@ -97,7 +97,7 @@ class Url_Extractor {
 
 	/**
 	 * The static page to extract URLs from
-	 * @var Simply_Static\Page
+	 * @var \Simply_Static\Page
 	 */
 	protected $static_page;
 
@@ -503,7 +503,7 @@ class Url_Extractor {
         }
 
         json_decode( $argument, $assoc = true );
-$last_error = json_last_error();
+
         return json_last_error() === JSON_ERROR_NONE;
     }
 
