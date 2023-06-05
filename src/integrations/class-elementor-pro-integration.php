@@ -46,10 +46,11 @@ class Elementor_Pro_Integration extends Integration {
 	 */
 	public function register_assets() {
 		$file_urls   = [];
-		$bundle_urls = $this->get_bundle_files();
+		//$bundle_urls = $this->get_bundle_files();
 		$lib_urls    = $this->get_lib_files();
-		$file_urls   = array_merge( $file_urls, $bundle_urls );
+		//$file_urls   = array_merge( $file_urls, $bundle_urls );
 		$file_urls   = array_merge( $file_urls, $lib_urls );
+        $file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'js' ) );
 		$file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'css' ) );
 		$file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'images' ) );
 		$file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'mask-shapes' ) );
