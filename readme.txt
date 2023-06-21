@@ -204,6 +204,7 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 
 * bugfix: Elementor asset loading via webpack
 * repositioned filter for HTTPS args to be able to modify all arguments
+* latest version of WP Background processing added
 
 = 2.3.1 =
 

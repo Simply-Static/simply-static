@@ -4,7 +4,7 @@
   "type": "wordpress-plugin",
   "require": {
       "voku/simple_html_dom": "^4.8.3",
-      "a5hleyrich/wp-background-processing": "^1.0.2",
+      "a5hleyrich/wp-background-processing": "^1.1.0",
       "voku/portable-utf8": "^6.0.3"
   },
   "license": "gpl",
