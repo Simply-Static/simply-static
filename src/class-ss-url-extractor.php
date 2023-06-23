@@ -153,14 +153,14 @@ class Url_Extractor {
 		return file_put_contents( $this->options->get_archive_dir() . $this->static_page->file_path, $content );
 	}
 
-    /**
-     * Get the Static Page.
-     *
-     * @return \Simply_Static\Page|string
-     */
-    public function get_static_page() {
-        return $this->static_page;
-    }
+	/**
+	 * Get the Static Page.
+	 *
+	 * @return \Simply_Static\Page|string
+	 */
+	public function get_static_page() {
+		return $this->static_page;
+	}
 
 	/**
 	 * Extracts URLs from the static_page and update them based on the dest. type
@@ -303,14 +303,14 @@ class Url_Extractor {
 					}
 				}
 
-                $strict_url_validation = apply_filters( 'simply_static_strict_url_validation', false );
+				$strict_url_validation = apply_filters( 'simply_static_strict_url_validation', false );
 
 				foreach ( $extracted_urls as $extracted_url ) {
-                    if ( $strict_url_validation && ! filter_var( $extracted_url, FILTER_VALIDATE_URL ) ) {
-                        continue;
-                    }
+					if ( $strict_url_validation && ! filter_var( $extracted_url, FILTER_VALIDATE_URL ) ) {
+						continue;
+					}
 
-                    if ( $extracted_url !== '' ) {
+					if ( $extracted_url !== '' ) {
 						$updated_extracted_url = $this->add_to_extracted_urls( $extracted_url );
 						$attribute_value       = str_replace( $extracted_url, $updated_extracted_url, $attribute_value );
 					}
@@ -350,31 +350,39 @@ class Url_Extractor {
 			}
 
 			// handle 'style' tag differently, since we need to parse the content.
-			$style_tags = $dom->find( 'style' );
+			$parse_inline_style = apply_filters( 'ss_parse_inline_style', true );
 
-			foreach ( $style_tags as $tag ) {
-				// Check if valid content exists.
-				try {
-					$updated_css        = $this->extract_and_replace_urls_in_css( $tag->innerhtmlKeep );
-					$tag->innerhtmlKeep = $updated_css;
-				} catch ( Exception $e ) {
-					// If not skip the result.
-					continue;
+			if ( $parse_inline_style ) {
+				$style_tags = $dom->find( 'style' );
+
+				foreach ( $style_tags as $tag ) {
+					// Check if valid content exists.
+					try {
+						$updated_css        = $this->extract_and_replace_urls_in_css( $tag->innerhtmlKeep );
+						$tag->innerhtmlKeep = $updated_css;
+					} catch ( Exception $e ) {
+						// If not skip the result.
+						continue;
+					}
 				}
 			}
 
 			// handle 'script' tag differently, since we need to parse the content.
-			$script_tags = $dom->find( 'script' );
+			$parse_inline_script = apply_filters( 'ss_parse_inline_script', true );
 
-			foreach ( $script_tags as $tag ) {
-				// Check if valid content exists.
-				try {
-					$updated_script     = $this->extract_and_replace_urls_in_script( $tag->innerhtmlKeep );
-					$tag->innerhtmlKeep = $updated_script;
-					$this->extract_and_replace_urls_in_script_inner_text( $tag );
-				} catch ( Exception $e ) {
-					// If not skip the result.
-					continue;
+			if ( $parse_inline_script ) {
+				$script_tags = $dom->find( 'script' );
+
+				foreach ( $script_tags as $tag ) {
+					// Check if valid content exists.
+					try {
+						$updated_script     = $this->extract_and_replace_urls_in_script( $tag->innerhtmlKeep );
+						$tag->innerhtmlKeep = $updated_script;
+						$this->extract_and_replace_urls_in_script_inner_text( $tag );
+					} catch ( Exception $e ) {
+						// If not skip the result.
+						continue;
+					}
 				}
 			}
 
@@ -437,11 +445,11 @@ class Url_Extractor {
 	}
 
 	private function extract_and_replace_urls_in_script( $text ) {
-        if ( $this->is_json( $text ) ) {
-            $decoded_text = html_entity_decode( $text, ENT_NOQUOTES );
-        } else {
-            $decoded_text = html_entity_decode( $text );
-        }
+		if ( $this->is_json( $text ) ) {
+			$decoded_text = html_entity_decode( $text, ENT_NOQUOTES );
+		} else {
+			$decoded_text = html_entity_decode( $text );
+		}
 		$text = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $this->options->get_destination_url(), $decoded_text );
 
 		return $text;
@@ -472,40 +480,41 @@ class Url_Extractor {
 				$convert_to = '/';
 		}
 
-        if ( $this->is_json( $tag->innerText ) ) {
-            $decoded_text = html_entity_decode( $tag->innerText, ENT_NOQUOTES );
-        } else {
-            $decoded_text = html_entity_decode( $tag->innerText );
-        }
+		if ( $this->is_json( $tag->innerText ) ) {
+			$decoded_text = html_entity_decode( $tag->innerText, ENT_NOQUOTES );
+		} else {
+			$decoded_text = html_entity_decode( $tag->innerText );
+		}
 
 		$tag->innerText = preg_replace( $regex, $convert_to, $decoded_text );
 
 		return $tag;
 	}
 
-    /**
-     * Check whether a given string is a valid JSON representation.
-     *
-     * Copied from: WP CLI, https://github.com/wp-cli/wp-cli/blob/f3e4b0785aa3d3132ee73be30aedca8838a8fa06/php/utils.php#L1600-L1612
-     *
-     * @param string $argument       String to evaluate.
-     * @param bool   $ignore_scalars Optional. Whether to ignore scalar values.
-     *                               Defaults to true.
-     * @return bool Whether the provided string is a valid JSON representation.
-     */
-    protected function is_json( $argument, $ignore_scalars = true ) {
-        if ( ! is_string( $argument ) || '' === $argument ) {
-            return false;
-        }
-        $arg = $argument[0];
-        if ( $ignore_scalars && ! in_array( $argument[0], [ '{', '[' ], true ) ) {
-            return false;
-        }
+	/**
+	 * Check whether a given string is a valid JSON representation.
+	 *
+	 * Copied from: WP CLI, https://github.com/wp-cli/wp-cli/blob/f3e4b0785aa3d3132ee73be30aedca8838a8fa06/php/utils.php#L1600-L1612
+	 *
+	 * @param string $argument String to evaluate.
+	 * @param bool $ignore_scalars Optional. Whether to ignore scalar values.
+	 *                               Defaults to true.
+	 *
+	 * @return bool Whether the provided string is a valid JSON representation.
+	 */
+	protected function is_json( $argument, $ignore_scalars = true ) {
+		if ( ! is_string( $argument ) || '' === $argument ) {
+			return false;
+		}
+		$arg = $argument[0];
+		if ( $ignore_scalars && ! in_array( $argument[0], [ '{', '[' ], true ) ) {
+			return false;
+		}
 
-        json_decode( $argument, $assoc = true );
+		json_decode( $argument, $assoc = true );
 
-        return json_last_error() === JSON_ERROR_NONE;
-    }
+		return json_last_error() === JSON_ERROR_NONE;
+	}
 
 	/**
 	 * callback function for preg_replace in extract_and_replace_urls_in_css
