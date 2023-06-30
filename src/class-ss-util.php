@@ -453,6 +453,33 @@ class Util {
 		return $info;
 	}
 
+	public static function is_local_asset_url( $url ) {
+		if ( ! self::is_local_url( $url ) ) {
+			return false;
+		}
+
+		$allowed_asset_extensions = apply_filters( 'simply_static_allowed_local_asset_extensions', [
+			'webp',
+			'gif',
+			'jpg',
+			'jpeg',
+			'png',
+			'svg',
+			'json',
+			'js',
+			'css',
+			'xml',
+		]);
+
+		$path_info = self::url_path_info( $url );
+
+		if ( empty( $path_info['extension'] ) ) {
+			return false;
+		}
+
+		return in_array( $path_info['extension'], $allowed_asset_extensions, true );
+	}
+
 	/**
 	 * Ensure there is a single trailing directory separator on the path
 	 *
