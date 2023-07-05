@@ -3,3 +3,4 @@
 /static-files
 /debug.txt
 /composer.lock
+node_modules

@@ -1,0 +1,130 @@
+.simplystatic-settings {
+  /* Hide notices from other plugins/themes */
+  .settings-error.notice.notice-warning {
+    display: none;
+  }
+
+  /* Modify default WP admin styles */
+  #wpfooter {
+    display: none;
+  }
+}
+
+/* Start plugin settings */
+.plugin-settings-container {
+  background: white;
+  padding-bottom: 20px;
+
+  .components-flex-item {
+    margin-left: 0;
+  }
+
+  .inner-settings > * {
+    max-width: 800px;
+  }
+
+  /* Navigation */
+  .plugin-nav {
+    padding: 25px 40px;
+    height: 100vh;
+    max-width: 260px;
+    margin: 0;
+
+    button:focus, button:focus-visible {
+      box-shadow: none;
+    }
+
+    .components-button {
+      width: 100%;
+      text-align: left;
+      padding: 0;
+    }
+
+    .components-card__body {
+      padding: 20px 0;
+    }
+
+    .components-button.is-primary {
+      width: auto;
+      padding: 10px 15px;
+      margin: 10px 0;
+    }
+
+    .dashicon.dashicons.dashicons-admin-links {
+      font-size: 15px;
+      top: 2px;
+      position: relative;
+    }
+
+    .plugin-logo {
+      max-width: 150px;
+    }
+
+    .is-active-item {
+      color: var(--wp-admin-theme-color);
+      text-decoration: underline;
+    }
+  }
+
+  /* Settings */
+  .plugin-settings {
+    padding: 25px 40px;
+    height: 100vh;
+    background: white;
+
+    /* Tables */
+    table {
+      width: 100%;
+    }
+
+    table th {
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    table td {
+      padding: 10px 10px 10px 0;
+      width: 50%;
+    }
+
+    /* Notices */
+    .components-notice {
+      margin: 15px 0 0 0;
+    }
+
+    /* Tooltips */
+    .inline-tooltip {
+      display: inline;
+      top: -2px;
+      position: relative;
+      margin-left: 5px;
+    }
+
+    .save-settings {
+      margin-top: 20px;
+    }
+
+    .dashicons-yes.icon-yes, .dashicons-yes.icon-no {
+      border: solid 1px;
+      border-radius: 50%;
+      padding: 2px 2px;
+    }
+
+    .dashicons-yes.icon-yes {
+      color: #51aa51;
+    }
+
+    .dashicons-yes.icon-no {
+      color: #ca4242;
+    }
+
+    .formatted-label {
+      margin-bottom: 10px;
+      display: block;
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+  }
+}
+

@@ -1,0 +1,20 @@
+{
+  "name": "simplystatic-settings",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "wp-scripts build",
+    "start": "wp-scripts start",
+    "packages-update": "wp-scripts packages-update"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "@wordpress/api-fetch": "^6.10.0",
+    "@wordpress/components": "^19.15.0",
+    "@wordpress/data": "^6.15.0",
+    "@wordpress/element": "^4.11.0",
+    "@wordpress/scripts": "^26.7.0"
+  }
+}

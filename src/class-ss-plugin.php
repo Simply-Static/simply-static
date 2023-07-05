@@ -153,6 +153,9 @@ class Plugin {
 				);
 				self::$instance->options->set( 'urls_to_exclude', $urls_to_exclude );
 			}
+
+			// Boot up new admin.
+			Admin_Settings::get_instance();
 		}
 
 		return self::$instance;
@@ -188,6 +191,7 @@ class Plugin {
 		require_once $path . 'src/class-ss-util.php';
 		require_once $path . 'src/class-page-handlers.php';
 		require_once $path . 'src/class-integrations.php';
+		require_once $path . 'src/admin/inc/class-ss-admin-settings.php';
 	}
 
 	/**
