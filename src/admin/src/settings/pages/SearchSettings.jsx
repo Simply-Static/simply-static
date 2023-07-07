@@ -6,7 +6,7 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl, SelectControl, Flex, FlexItem, TextareaControl,
+    TextControl, SelectControl, Flex, FlexItem, TextareaControl, ToggleControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -15,7 +15,7 @@ const {__} = wp.i18n;
 
 function SearchSettings() {
     const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
-    const [useSearch, setUseSearch] = useState('no');
+    const [useSearch, setUseSearch] = useState(false);
     const [searchType, setSearchType] = useState('fuse');
 
     const setSavingSettings = () => {
@@ -37,19 +37,20 @@ function SearchSettings() {
                 <b>{__('Search', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
-                <SelectControl
+                <ToggleControl
                     label={__('Use search?', 'simply-static')}
-                    value={useSearch}
-                    help={__('Decide whether or not you want to use search on your static site.', 'simply-static')}
-                    options={[
-                        {label: 'no', value: 'no'},
-                        {label: 'yes', value: 'yes'},
-                    ]}
-                    onChange={(value) => {
-                        setUseSearch(value);
-                    }}
+                    help={
+                        useSearch
+                            ? 'Use search on your static website.'
+                            : 'Don\'t use search on your static website.'
+                    }
+                    checked={ useSearch }
+                    onChange={ () => {
+                        setUseSearch( ( state ) => ! state );
+                    } }
                 />
-                {useSearch === 'yes' &&
+
+                {useSearch &&
                     <SelectControl
                         label={__('Search Type', 'simply-static')}
                         value={searchType}
@@ -65,7 +66,7 @@ function SearchSettings() {
                 }
             </CardBody>
         </Card>
-        {useSearch === 'yes' &&
+        {useSearch &&
             <>
                 <Spacer margin={5}/>
                 <Card>
@@ -118,7 +119,7 @@ function SearchSettings() {
                 </Card>
             </>
         }
-        {useSearch === 'yes' && searchType === 'algolia' &&
+        {useSearch && searchType === 'algolia' &&
             <>
                 <Spacer margin={5}/>
                 <Card>

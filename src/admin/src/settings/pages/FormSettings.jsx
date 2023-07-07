@@ -6,7 +6,7 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl, SelectControl, Flex, FlexItem, TextareaControl,
+    TextControl, SelectControl, Flex, FlexItem, TextareaControl, ToggleControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -16,8 +16,8 @@ const {__} = wp.i18n;
 function FormSettings() {
     const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
     const [corsMethod, setCorsMethod] = useState('allowed_http_origins');
-    const [useForms, setUseForms] = useState('no');
-    const [useComments, setUseComments] = useState('no');
+    const [useForms, setUseForms] = useState(false);
+    const [useComments, setUseComments] = useState(false);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -38,25 +38,24 @@ function FormSettings() {
                 <b>{__('Forms', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
-                <SelectControl
+                <ToggleControl
                     label={__('Use forms?', 'simply-static')}
-                    value={useForms}
-                    help={__('Decide whether or not you want to use forms on your static site.', 'simply-static')}
-                    options={[
-                        {label: 'no', value: 'no'},
-                        {label: 'yes', value: 'yes'},
-                    ]}
-                    onChange={(value) => {
-                        setUseForms(value);
-                    }}
+                    help={
+                        useForms
+                            ? 'Use Forms on your static website.'
+                            : 'Don\'t use forms on your static website.'
+                    }
+                    checked={ useForms }
+                    onChange={ () => {
+                        setUseForms( ( state ) => ! state );
+                    } }
                 />
-                {useForms === 'yes' &&
+                {useForms &&
                     <>
                         <Button variant="secondary"
                                 className={"create-form-config"}>{__('Create Form Config', 'simply-static')}</Button>
                     </>
                 }
-
             </CardBody>
         </Card>
         <Spacer margin={5}/>
@@ -65,19 +64,20 @@ function FormSettings() {
                 <b>{__('Comments', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
-                <SelectControl
+                <ToggleControl
                     label={__('Use comments?', 'simply-static')}
-                    value={useComments}
-                    help={__('Decide whether or not you want to use comments on your static site.', 'simply-static')}
-                    options={[
-                        {label: 'no', value: 'no'},
-                        {label: 'yes', value: 'yes'},
-                    ]}
-                    onChange={(value) => {
-                        setUseComments(value);
-                    }}
+                    help={
+                        useComments
+                            ? 'Use comments on your static website.'
+                            : 'Don\'t use comments on your static website.'
+                    }
+                    checked={ useComments }
+                    onChange={ () => {
+                        setUseComments( ( state ) => ! state );
+                    } }
                 />
-                {useComments === 'yes' &&
+
+                {useComments &&
                     <TextControl
                         label={__('Redirect URL', 'simply-static')}
                         type={"url"}
