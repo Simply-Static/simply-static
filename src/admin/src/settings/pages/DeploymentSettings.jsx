@@ -171,7 +171,7 @@ function DeploymentSettings() {
                     />
                     {githubAccountType === 'organization' &&
                         <>
-                            <Notice status="warning">
+                            <Notice status="warning" isDismissible={false}>
                                 <p>{__('You need to create the repository manually within your organization before connecting it.', 'simply-static')}</p>
                             </Notice>
                             <Spacer margin={5}/>
