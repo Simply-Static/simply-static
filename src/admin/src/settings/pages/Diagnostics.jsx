@@ -2,7 +2,7 @@ import {Card, CardBody, CardHeader, __experimentalSpacer as Spacer, Dashicon} fr
 import {useContext} from "@wordpress/element";
 import {SettingsContext} from "../context/SettingsContext";
 
-function SystemStatus() {
+function Diagnostics() {
     const {configs} = useContext(SettingsContext);
 
     const statusData = () => (
@@ -57,4 +57,4 @@ function SystemStatus() {
     )
 }
 
-export default SystemStatus;
+export default Diagnostics;

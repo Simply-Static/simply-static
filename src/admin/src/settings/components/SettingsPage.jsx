@@ -1,5 +1,5 @@
 import GeneralSettings from "../pages/GeneralSettings";
-import SystemStatus from "../pages/SystemStatus";
+import Diagnostics from "../pages/Diagnostics";
 import Utilities from "../pages/Utilities";
 import {useState, useEffect, useContext} from "@wordpress/element";
 import {Flex, FlexItem} from '@wordpress/components';
@@ -83,20 +83,20 @@ function SettingsPage() {
                             </CardBody>
                             <CardDivider/>
                             <CardBody>
-                                <NavigatorButton onClick={() => setActiveItem('/system-status')}
-                                                 className={activeItem === '/system-status' ? 'is-active-item' : ''}
-                                                 path="/system-status">
-                                    {__('System Status', 'content-protector')}
+                                <NavigatorButton onClick={() => setActiveItem('/advanced')}
+                                                 className={activeItem === '/advanced' ? 'is-active-item' : ''}
+                                                 path="/advanced">
+                                    {__('Advanced', 'content-protector')}
+                                </NavigatorButton>
+                                <NavigatorButton onClick={() => setActiveItem('/diagnostics')}
+                                                 className={activeItem === '/diagnostics' ? 'is-active-item' : ''}
+                                                 path="/diagnostics">
+                                    {__('Diagnostics', 'content-protector')}
                                 </NavigatorButton>
                                 <NavigatorButton onClick={() => setActiveItem('/utilities')}
                                                  className={activeItem === '/utilities' ? 'is-active-item' : ''}
                                                  path="/utilities">
                                     {__('Utilities', 'content-protector')}
-                                </NavigatorButton>
-                                <NavigatorButton onClick={() => setActiveItem('/advanced')}
-                                                 className={activeItem === '/advanced' ? 'is-active-item' : ''}
-                                                 path="/advanced">
-                                    {__('Advanced', 'content-protector')}
                                 </NavigatorButton>
                             </CardBody>
                             <CardDivider/>
@@ -155,11 +155,20 @@ function SettingsPage() {
                             </NavigatorScreen>
                         </FlexItem>
                     }
-                    {activeItem === '/system-status' &&
+                    {activeItem === '/advanced' &&
                         <FlexItem isBlock={true}>
-                            <NavigatorScreen path="/system-status">
+                            <NavigatorScreen path="/advanced">
                                 <div className={"plugin-settings"}>
-                                    <SystemStatus/>
+                                    <AdvancedSettings/>
+                                </div>
+                            </NavigatorScreen>
+                        </FlexItem>
+                    }
+                    {activeItem === '/diagnostics' &&
+                        <FlexItem isBlock={true}>
+                            <NavigatorScreen path="/diagnostics">
+                                <div className={"plugin-settings"}>
+                                    <Diagnostics/>
                                 </div>
                             </NavigatorScreen>
                         </FlexItem>
@@ -169,15 +178,6 @@ function SettingsPage() {
                             <NavigatorScreen path="/utilities">
                                 <div className={"plugin-settings"}>
                                     <Utilities/>
-                                </div>
-                            </NavigatorScreen>
-                        </FlexItem>
-                    }
-                    {activeItem === '/advanced' &&
-                        <FlexItem isBlock={true}>
-                            <NavigatorScreen path="/advanced">
-                                <div className={"plugin-settings"}>
-                                    <AdvancedSettings/>
                                 </div>
                             </NavigatorScreen>
                         </FlexItem>
