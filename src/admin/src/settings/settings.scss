@@ -27,6 +27,10 @@
     max-width: 800px;
   }
 
+  .settings-wide > * {
+    max-width: 90%;
+  }
+
   /* Navigation */
   .plugin-nav {
     padding: 25px 40px;
