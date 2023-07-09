@@ -176,6 +176,11 @@ function SearchSettings() {
 
                             }}
                         />
+                        <p>
+                            <Notice status="warning" isDismissible={false}>
+                                {__('If you have multiple search elements with different CSS selectors, separate them by a comma (,) such as: .search-field, .search-field2', 'simply-static')}
+                            </Notice>
+                        </p>
                     </CardBody>
                 </Card>
             </>

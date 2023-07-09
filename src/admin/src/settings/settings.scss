@@ -1,21 +1,23 @@
-.simplystatic-settings {
-  /* Hide notices from other plugins/themes */
-  .settings-error.notice.notice-warning {
-    display: none;
-  }
-
-  /* Modify default WP admin styles */
-  #wpfooter {
-    display: none;
-  }
+#wpcontent {
+  padding-left: 0;
 }
+
+#wpbody-content {
+  padding-bottom: 0;
+}
+
+#wpfooter {
+  display: none;
+}
+
+.settings-error.notice.notice-warning {
+  display: none;
+}
+
 
 /* Start plugin settings */
 .plugin-settings-container {
-  margin-top:20px;
-
-  background: white;
-  padding-bottom: 20px;
+  background: #f0f0f1;
 
   .components-flex-item {
     margin-left: 0;
@@ -32,8 +34,22 @@
     max-width: 260px;
     margin: 0;
 
-    button:focus, button:focus-visible {
+    button:focus, button:focus-visible, button:hover {
       box-shadow: none;
+      color: rgb(104, 4, 204);
+    }
+
+    .generate-container {
+      margin-top: 30px;
+
+      button {
+        background: #6804cc;
+        border: solid 1px #50059b;
+        color: white;
+        text-decoration: none;
+        padding: 20px;
+        max-width: 200px;
+      }
     }
 
     .components-button {
@@ -58,13 +74,20 @@
       position: relative;
     }
 
+    .components-button > .dashicon {
+      margin-right: 10px;
+    }
+
     .plugin-logo {
       max-width: 150px;
     }
 
     .is-active-item {
-      color: var(--wp-admin-theme-color);
-      text-decoration: underline;
+      color: rgb(104, 4, 204);
+    }
+
+    h4.settings-headline {
+      text-transform: uppercase;
     }
   }
 
@@ -72,7 +95,7 @@
   .plugin-settings {
     padding: 25px 40px;
     height: 100vh;
-    background: white;
+    background: #f0f0f1;
 
     /* Tables */
     table {
@@ -100,10 +123,6 @@
       top: -2px;
       position: relative;
       margin-left: 5px;
-    }
-
-    .save-settings {
-      margin-top: 20px;
     }
 
     .dashicons-yes.icon-yes, .dashicons-yes.icon-no {

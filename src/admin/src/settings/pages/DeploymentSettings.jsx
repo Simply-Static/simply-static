@@ -6,7 +6,7 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl, SelectControl, Flex, FlexItem, TextareaControl,
+    TextControl, SelectControl, Flex, FlexItem, TextareaControl, ToggleControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -21,6 +21,8 @@ function DeploymentSettings() {
     const [githubAccountType, setGithubAccountType] = useState('personal');
     const [githubVisibility, setGithubVisibility] = useState('private');
     const [githubExistingRepository, setGithubExistingRepository] = useState('no');
+    const [emptyBucketBeforeExport, setEmptyBucketBeforeExport] = useState(false);
+    const [region, setRegion] = useState('us-east-2');
 
 
     const setSavingSettings = () => {
@@ -53,6 +55,8 @@ function DeploymentSettings() {
                         {label: __('GitHub', 'simply-static'), value: 'github'},
                         {label: __('Tiiny.host', 'simply-static'), value: 'tiiny'},
                         {label: __('BunnyCDN', 'simply-static'), value: 'cdn'},
+                        {label: __('Amazon AWS S3', 'simply-static'), value: 'aws-s3'},
+                        {label: __('Digital Ocean Spaces', 'simply-static'), value: 'digitalocean'},
                     ]}
                     onChange={(method) => {
                         setDeploymentMethod(method);
@@ -367,6 +371,125 @@ function DeploymentSettings() {
 
                         }}
                     />
+                </CardBody>
+            </Card>
+        }
+        <Spacer margin={5}/>
+        {deploymentMethod === 'aws-s3' &&
+            <Card>
+                <CardHeader>
+                    <b>{__('Amazon AWS S3', 'simply-static')}</b>
+                </CardHeader>
+                <CardBody>
+                    <TextControl
+                        label={__('Access Key ID', 'simply-static')}
+                        type={"text"}
+                        help={__('Enter your Access Key from AWS. You can find your API-Key as described here.', 'simply-static')}
+                    />
+
+                    <TextControl
+                        label={__('Secret Access Key', 'simply-static')}
+                        type={"password"}
+                        help={__('Enter your Secret Key from AWS. You can find your API-Key as described here.', 'simply-static')}
+                    />
+
+                    <SelectControl
+                        label={__('Region', 'simply-static')}
+                        value={region}
+                        options={[
+                            {label: __('US East (Ohio)', 'simply-static'), value: 'us-east-2'},
+                            {label: __('US East (N. Virginia)', 'simply-static'), value: 'us-east-1'},
+                            {label: __('US West (N. California)', 'simply-static'), value: 'us-west-1'},
+                            {label: __('US West (Oregon)', 'simply-static'), value: 'us-west-2'},
+                            {label: __('Africa (Cape Town)', 'simply-static'), value: 'af-south-1'},
+                            {label: __('Asia Pacific (Hong Kong)', 'simply-static'), value: 'ap-east-1'},
+                            {label: __('Asia Pacific (Hyderabad)', 'simply-static'), value: 'ap-south-2'},
+                            {label: __('Asia Pacific (Jakarta)', 'simply-static'), value: 'ap-southeast-3'},
+                            {label: __('Asia Pacific (Melbourne)', 'simply-static'), value: 'ap-southeast-4'},
+                            {label: __('Asia Pacific (Mumbai)', 'simply-static'), value: 'ap-south-1'},
+                            {label: __('Asia Pacific (Osaka)', 'simply-static'), value: 'ap-northeast-3'},
+                            {label: __('Asia Pacific (Seoul)', 'simply-static'), value: 'ap-northeast-2'},
+                            {label: __('Asia Pacific (Singapore)', 'simply-static'), value: 'ap-southeast-1'},
+                            {label: __('Asia Pacific (Sydney)', 'simply-static'), value: 'ap-southeast-2'},
+                            {label: __('Asia Pacific (Tokyo)', 'simply-static'), value: 'ap-northeast-1'},
+                            {label: __('Canada (Central)', 'simply-static'), value: 'ca-central-1'},
+                            {label: __('Europe (Frankfurt)', 'simply-static'), value: 'eu-central-1'},
+                            {label: __('Europe (Ireland)', 'simply-static'), value: 'eu-west-1'},
+                            {label: __('Europe (London)', 'simply-static'), value: 'eu-west-2'},
+                            {label: __('Europe (Milan)', 'simply-static'), value: 'eu-south-1'},
+                            {label: __('Europe (Paris)', 'simply-static'), value: 'eu-west-3'},
+                            {label: __('Europe (Spain)', 'simply-static'), value: 'eu-south-2'},
+                            {label: __('Europe (Stockholm)', 'simply-static'), value: 'eu-north-1'},
+                            {label: __('Europe (Zurich)', 'simply-static'), value: 'eu-central-2'},
+                            {label: __('Middle East (Bahrain)', 'simply-static'), value: 'me-south-1'},
+                            {label: __('Middle East (UAE)', 'simply-static'), value: 'me-central-1'},
+                            {label: __('South America (São Paulo)', 'simply-static'), value: 'sa-east-1'},
+                            {label: __('AWS GovCloud (US-East)', 'simply-static'), value: 'us-gov-east-1'},
+                            {label: __('AWS GovCloud (US-West)', 'simply-static'), value: 'us-gov-west-1'}
+                        ]}
+                        onChange={(region) => {
+                            setRegion(region);
+                        }}
+                    />
+                    <TextControl
+                        label={__('Bucket', 'simply-static')}
+                        type={"text"}
+                        help={__('Add the name of your bucket here.', 'simply-static')}
+                    />
+
+                    <ToggleControl
+                        label={__('Empty bucket before new export?', 'simply-static')}
+                        help={
+                            emptyBucketBeforeExport
+                                ? 'Clear bucket before new export.'
+                                : 'Don\'t clear bucket before new export.'
+                        }
+                        checked={emptyBucketBeforeExport}
+                        onChange={() => {
+                            setEmptyBucketBeforeExport((state) => !state);
+                        }}
+                    />
+                </CardBody>
+            </Card>
+        }
+        <Spacer margin={5}/>
+        {deploymentMethod === 'digitalocean' &&
+            <Card>
+                <CardHeader>
+                    <b>{__('Digital Ocean Spaces', 'simply-static')}</b>
+                </CardHeader>
+                <CardBody>
+                    <TextControl
+                        label={__('Spaces Key', 'simply-static')}
+                        type={"text"}
+                        help={__('Enter your Spaces Key from Digital Ocean. You can find your API-Key as described here.', 'simply-static')}
+                    />
+
+                    <TextControl
+                        label={__('Secret', 'simply-static')}
+                        type={"password"}
+                        help={__('Enter your Spaces Secret from Digital Ocean. You can find your API-Key as described here.', 'simply-static')}
+                    />
+
+                    <TextControl
+                        label={__('Bucket Name', 'simply-static')}
+                        help={__('The bucket name for your space.', 'simply-static')}
+                        type={"text"}
+                        placeholder={"my-bucket"}
+                    />
+
+                    <TextControl
+                        label={__('Region', 'simply-static')}
+                        type={"text"}
+                        help={__('The region for your space.', 'simply-static')}
+                        placeholder={"ams3"}
+                    />
+                    <p>
+                        <Notice status="warning" isDismissible={false}>
+                            {__('Your endpoint will be', 'simply-static')}:
+                            https://your-bucket-name.your-region.digitaloceanspaces.com
+                        </Notice>
+                    </p>
                 </CardBody>
             </Card>
         }

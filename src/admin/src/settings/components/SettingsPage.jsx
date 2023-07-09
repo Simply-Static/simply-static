@@ -21,7 +21,9 @@ import {SettingsContext} from "../context/SettingsContext";
 import DeploymentSettings from "../pages/DeploymentSettings";
 import FormSettings from "../pages/FormSettings";
 import SearchSettings from "../pages/SearchSettings";
-import AdvancedSettings from "../pages/AdvancedSettings";
+import MiscSettings from "../pages/MiscSettings";
+import Generate from "../pages/Generate";
+import Optimize from "../pages/Optimize";
 
 const {__} = wp.i18n;
 
@@ -59,61 +61,65 @@ function SettingsPage() {
                             </div>
                             {/* eslint-disable-next-line no-undef */}
                             <p>Version: <b>{options.version}</b></p>
-                            <div className={"save-settings"}>
-                                <Button onClick={setSavingSettings}
-                                        variant="primary">{__('Save Settings', 'content-protector')}</Button>
+                            <div className={"generate-container"}>
+                                <NavigatorButton onClick={() => setActiveItem('/')}
+                                                 className={activeItem === '/' ? 'is-active-item generate' : 'generate'} path="/">
+                                    <Dashicon icon="update" /> {__('Generate Static Files', 'content-protector')}
+                                </NavigatorButton>
+
                             </div>
                             <CardBody>
-                                <NavigatorButton onClick={() => setActiveItem('/')}
-                                                 className={activeItem === '/' ? 'is-active-item' : ''} path="/">
-                                    {__('General', 'content-protector')}
+                                <h4 className={"settings-headline"}> {__('Settings', 'content-protector')}</h4>
+                                <NavigatorButton onClick={() => setActiveItem('/general')}
+                                                 className={activeItem === '/general' ? 'is-active-item' : ''} path="/general">
+                                    <Dashicon icon="admin-generic" /> {__('General', 'content-protector')}
                                 </NavigatorButton>
                                 <NavigatorButton onClick={() => setActiveItem('/deployment')}
                                                  className={activeItem === '/deployment' ? 'is-active-item' : ''} path="/deployment">
-                                    {__('Deployment', 'content-protector')}
+                                    <Dashicon icon="migrate" /> {__('Deployment', 'content-protector')}
                                 </NavigatorButton>
                                 <NavigatorButton onClick={() => setActiveItem('/forms')}
                                                  className={activeItem === '/forms' ? 'is-active-item' : ''} path="/forms">
-                                    {__('Forms', 'content-protector')}
+                                    <Dashicon icon="align-center" /> {__('Forms', 'content-protector')}
                                 </NavigatorButton>
                                 <NavigatorButton onClick={() => setActiveItem('/search')}
                                                  className={activeItem === '/search' ? 'is-active-item' : ''} path="/search">
-                                    {__('Search', 'content-protector')}
+                                    <Dashicon icon="search" /> {__('Search', 'content-protector')}
                                 </NavigatorButton>
                             </CardBody>
-                            <CardDivider/>
                             <CardBody>
-                                <NavigatorButton onClick={() => setActiveItem('/advanced')}
-                                                 className={activeItem === '/advanced' ? 'is-active-item' : ''}
-                                                 path="/advanced">
-                                    {__('Advanced', 'content-protector')}
+                                <h4 className={"settings-headline"}> {__('Advanced', 'content-protector')}</h4>
+                                <NavigatorButton onClick={() => setActiveItem('/optimize')}
+                                                 className={activeItem === '/optimize' ? 'is-active-item' : ''} path="/optimize">
+                                    <Dashicon icon="dashboard" /> {__('Optimize', 'content-protector')}
                                 </NavigatorButton>
                                 <NavigatorButton onClick={() => setActiveItem('/diagnostics')}
                                                  className={activeItem === '/diagnostics' ? 'is-active-item' : ''}
                                                  path="/diagnostics">
-                                    {__('Diagnostics', 'content-protector')}
+                                    <Dashicon icon="editor-help" /> {__('Diagnostics', 'content-protector')}
                                 </NavigatorButton>
                                 <NavigatorButton onClick={() => setActiveItem('/utilities')}
                                                  className={activeItem === '/utilities' ? 'is-active-item' : ''}
                                                  path="/utilities">
-                                    {__('Utilities', 'content-protector')}
+                                    <Dashicon icon="admin-tools" /> {__('Utilities', 'content-protector')}
+                                </NavigatorButton>
+                                <NavigatorButton onClick={() => setActiveItem('/misc')}
+                                                 className={activeItem === '/misc' ? 'is-active-item' : ''}
+                                                 path="/misc">
+                                    <Dashicon icon="block-default" /> {__('Misc', 'content-protector')}
                                 </NavigatorButton>
                             </CardBody>
-                            <CardDivider/>
                             <CardBody>
-                                <Button href="https://simplystatic.com/docs/" target="_blank">
-                                    {__('Documentation', 'content-protector')} <small><Dashicon
-                                    icon="admin-links"/></small>
-                                </Button>
+                                <h4 className={"settings-headline"}> {__('Simply Static', 'content-protector')}</h4>
                                 <Button href="https://simplystatic.com/changelogs/" target="_blank">
-                                    {__('Changelog', 'content-protector')} <small><Dashicon
-                                    icon="admin-links"/></small>
+                                    <Dashicon icon="editor-ul" /> {__('Changelog', 'content-protector')}
+                                </Button>
+                                <Button href="https://simplystatic.com/docs/" target="_blank">
+                                    <Dashicon icon="admin-links" /> {__('Documentation', 'content-protector')}
                                 </Button>
                                 {!options.is_pro &&
-                                    <Button href="https://simplystatic.com/simply-static-pro/" target="_blank"
-                                            style={{color: "#6804cc"}}>
-                                        {__('Simply Static Pro', 'content-protector')} <small><Dashicon
-                                        icon="admin-links"/></small>
+                                    <Button href="https://simplystatic.com/simply-static-pro/" target="_blank">
+                                        <Dashicon icon="admin-site-alt3" /> {__('Simply Static Pro', 'content-protector')}
                                     </Button>
                                 }
                             </CardBody>
@@ -122,6 +128,15 @@ function SettingsPage() {
                     {activeItem === '/' &&
                         <FlexItem isBlock={true}>
                             <NavigatorScreen path="/">
+                                <div className={"plugin-settings"}>
+                                    <Generate/>
+                                </div>
+                            </NavigatorScreen>
+                        </FlexItem>
+                    }
+                    {activeItem === '/general' &&
+                        <FlexItem isBlock={true}>
+                            <NavigatorScreen path="/general">
                                 <div className={"plugin-settings"}>
                                     <GeneralSettings/>
                                 </div>
@@ -155,11 +170,20 @@ function SettingsPage() {
                             </NavigatorScreen>
                         </FlexItem>
                     }
-                    {activeItem === '/advanced' &&
+                    {activeItem === '/optimize' &&
                         <FlexItem isBlock={true}>
-                            <NavigatorScreen path="/advanced">
+                            <NavigatorScreen path="/optimize">
                                 <div className={"plugin-settings"}>
-                                    <AdvancedSettings/>
+                                    <Optimize/>
+                                </div>
+                            </NavigatorScreen>
+                        </FlexItem>
+                    }
+                    {activeItem === '/misc' &&
+                        <FlexItem isBlock={true}>
+                            <NavigatorScreen path="/misc">
+                                <div className={"plugin-settings"}>
+                                    <MiscSettings/>
                                 </div>
                             </NavigatorScreen>
                         </FlexItem>

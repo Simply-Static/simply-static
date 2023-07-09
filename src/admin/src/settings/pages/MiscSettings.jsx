@@ -13,8 +13,9 @@ import {SettingsContext} from "../context/SettingsContext";
 
 const {__} = wp.i18n;
 
-function AdvancedSettings() {
+function MiscSettings() {
     const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
+    const [ showSubsiteSettings, setShowSubsiteSettings ] = useState( false );
     const [ forceURLReplacement, setForceURLReplacement ] = useState( false );
     const [ clearDirectory, setClearDirectory ] = useState( false );
 
@@ -81,6 +82,27 @@ function AdvancedSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
+                <b>{__('Multisite', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
+                <p>{__('Here you can configure settings related to WordPress Multisite.', 'simply-static')}</p>
+                <ToggleControl
+                    label={__('Show subsite settings', 'simply-static')}
+                    help={
+                        showSubsiteSettings
+                            ? 'Show admin settings in subsites.'
+                            : 'Hide admin settings in subsites.'
+                    }
+                    checked={ showSubsiteSettings }
+                    onChange={ () => {
+                        setShowSubsiteSettings( ( state ) => ! state );
+                    } }
+                />
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
                 <b>{__('Additional Settings', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
@@ -132,4 +154,4 @@ function AdvancedSettings() {
     </div>)
 }
 
-export default AdvancedSettings;
+export default MiscSettings;
