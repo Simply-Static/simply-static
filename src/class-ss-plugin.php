@@ -192,6 +192,7 @@ class Plugin {
 		require_once $path . 'src/class-page-handlers.php';
 		require_once $path . 'src/class-integrations.php';
 		require_once $path . 'src/admin/inc/class-ss-admin-settings.php';
+		require_once $path . 'src/admin/inc/class-ss-migrate-settings.php';
 	}
 
 	/**
