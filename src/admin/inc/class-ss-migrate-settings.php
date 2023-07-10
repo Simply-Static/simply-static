@@ -192,6 +192,19 @@ class Migrate_Settings {
 		if ( $options['use-comments'] == 'yes' ) {
 			$options['use_comments'] = true;
 			unset( $options['use-comments'] );
+
+			// Modify default WordPress comments.
+			$require_registration = get_option( 'comment_registration' );
+			$require_name_mail    = get_option( 'require_name_email' );
+
+			if ( 1 == $require_registration ) {
+				update_option( 'comment_registration', 0 );
+			}
+
+			if ( 0 == $require_name_mail ) {
+				update_option( 'comment_registration', 1 );
+			}
+
 		} else {
 			$options['use_comments'] = false;
 			unset( $options['use-comments'] );
@@ -265,6 +278,6 @@ class Migrate_Settings {
 			unset( $options['algolia-selector'] );
 		}
 
-		update_option('simply-static2', $options);
+		update_option( 'simply-static2', $options );
 	}
 }

@@ -9,7 +9,6 @@ function Diagnostics() {
         <div>
             {
                 Object.keys(configs).map(key => {
-
                     const items = configs[key];
 
                     return (
@@ -19,21 +18,28 @@ function Diagnostics() {
                                     <b>{key}</b>
                                 </CardHeader>
                                 <CardBody>
-                                    <div style={{maxWidth : "300px"}}>
-                                        <table>
+                                    <div>
+                                        <table style={{width: "100%", tableLayout: "fixed"}}>
                                             <tbody className={"table-data"}>
                                             {
                                                 Object.entries(items).map(item => {
-                                                    if (typeof item[1] == "boolean")
-                                                        return (<tr className={"table-row"} key={item[0]}>
+
+                                                    return (
+                                                        <tr className={"table-row"} key={item[0]}>
+                                                            <td> {item[1].test ?
+                                                                <Dashicon className={"icon-yes"} icon="yes"/> :
+                                                                <Dashicon className={"icon-no"} icon="no"/>}
+                                                            </td>
                                                             <td><b>{item[0]}</b></td>
-                                                            <td> {item[1] ? <Dashicon className={"icon-yes"} icon="yes"/> :
-                                                                <Dashicon  className={"icon-no"} icon="no"/>} </td>
-                                                        </tr>)
-                                                    return (<tr className={"table-row"} key={item[0]}>
-                                                        <td><b>{item[0]}</b></td>
-                                                        <td> {item[1]} </td>
-                                                    </tr>);
+                                                            <td>{item[1].test}</td>
+                                                            <td style={{width: "200px"}}> {
+                                                                item[1].test ?
+                                                                    <p>{item[1].description}</p> :
+                                                                    <p>{item[1].error}</p>
+                                                            }
+                                                            </td>
+                                                        </tr>
+                                                    )
                                                 })
                                             }
                                             </tbody>
