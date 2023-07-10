@@ -118,6 +118,14 @@ function SettingsContextProvider(props) {
         });
     }
 
+    const migrateSettings = () => {
+        apiFetch({
+            path: '/simplystatic/v1/migrate',
+            method: 'POST',
+            migrate: true,
+        });
+    }
+
     const updateSetting = (key, value) => {
         setSettings({...settings, [key]: value});
     };
@@ -145,6 +153,7 @@ function SettingsContextProvider(props) {
                 saveSettings,
                 resetSettings,
                 importSettings,
+                migrateSettings
             }}
         >
             {props.children}

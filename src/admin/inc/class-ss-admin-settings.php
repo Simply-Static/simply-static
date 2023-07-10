@@ -124,6 +124,15 @@ class Admin_Settings {
 				return current_user_can( 'manage_options' );
 			},
 		) );
+
+		register_rest_route( 'simplystatic/v1', '/migrate', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'migrate_settings' ],
+			'permission_callback' => function () {
+				return current_user_can( 'manage_options' );
+			},
+		) );
+
 	}
 
 	/**
@@ -169,4 +178,11 @@ class Admin_Settings {
 
 		return json_encode( [ "status" => 400, "message" => "No options updated." ] );
 	}
+
+	public function migrate_settings() {
+		Migrate_Settings::migrate();
+
+		return json_encode( [ "status" => 200, "message" => "Ok" ] );
+	}
+
 }

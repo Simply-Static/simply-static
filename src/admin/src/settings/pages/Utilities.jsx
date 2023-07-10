@@ -15,10 +15,11 @@ const {__} = wp.i18n;
 
 function Utilities() {
 
-    const {settings, importSettings, resetSettings} = useContext(SettingsContext);
+    const {settings, importSettings, saveSettings, resetSettings, migrateSettings} = useContext(SettingsContext);
     const [isExport, setIsExport] = useState(false);
     const [isImport, setIsImport] = useState(false);
     const [isReset, setIsReset] = useState(false);
+    const [isMigrate, setIsMigrate] = useState(false);
     const [hasCopied, setHasCopied] = useState(false);
     const [importData, setImportData] = useState(false);
 
@@ -44,8 +45,45 @@ function Utilities() {
         }, 2000);
     }
 
+
+    const runMigrateSettings = () => {
+        migrateSettings();
+        saveSettings();
+        setIsMigrate(true);
+
+        setTimeout(function () {
+            setIsMigrate(false);
+        }, 2000);
+    }
+
     return (
         <div className={"inner-settings"}>
+            <Card>
+                <CardHeader>
+                    <b>{__('Migrate Settings', 'simply-static')}</b>
+                </CardHeader>
+                <CardBody>
+                    <p>{__('Migrate all of your settings to Simply Static 3.0', 'simply-static')}</p>
+                    <p>
+                        <Button onClick={runMigrateSettings}
+                                variant="primary">{__('Migrate settings', 'simply-static')}</Button>
+                    </p>
+                    {isMigrate ?
+                        <Animate type="slide-in" options={{origin: 'top'}}>
+                            {() => (
+                                <Notice status="success" isDismissible={false}>
+                                    <p>
+                                        {__('Settings migration successfully.', 'simply-static')}
+                                    </p>
+                                </Notice>
+                            )}
+                        </Animate>
+                        :
+                        ''
+                    }
+                </CardBody>
+            </Card>
+            <Spacer margin={5}/>
             <Card>
                 <CardHeader>
                     <b>{__('Export', 'simply-static')}</b>
