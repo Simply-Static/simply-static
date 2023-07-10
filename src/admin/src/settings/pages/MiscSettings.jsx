@@ -6,7 +6,7 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl, SelectControl, Flex, FlexItem, TextareaControl, ToggleControl,
+    TextControl, ToggleControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -15,9 +15,9 @@ const {__} = wp.i18n;
 
 function MiscSettings() {
     const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
-    const [ showSubsiteSettings, setShowSubsiteSettings ] = useState( false );
-    const [ forceURLReplacement, setForceURLReplacement ] = useState( false );
-    const [ clearDirectory, setClearDirectory ] = useState( false );
+    const [showSubsiteSettings, setShowSubsiteSettings] = useState(false);
+    const [forceURLReplacement, setForceURLReplacement] = useState(false);
+    const [clearDirectory, setClearDirectory] = useState(false);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -29,7 +29,17 @@ function MiscSettings() {
     }
 
     useEffect(() => {
+        if (settings.allow_subsites) {
+            setShowSubsiteSettings(settings.allow_subsites);
+        }
 
+        if (settings.force_replace_url) {
+            setForceURLReplacement(settings.force_replace_url);
+        }
+
+        if (settings.clear_directory_before_export) {
+            setClearDirectory(settings.clear_directory_before_export);
+        }
     }, [settings]);
 
     return (<div className={"inner-settings"}>
@@ -38,15 +48,15 @@ function MiscSettings() {
                 <b>{__('Temporary Files', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
-               <p>{__('Your static files are temporarily saved to a directory before being copied to their destination or creating a ZIP.', 'simply-static')}</p>
+                <p>{__('Your static files are temporarily saved to a directory before being copied to their destination or creating a ZIP.', 'simply-static')}</p>
                 <TextControl
                     label={__('Temporary Files Directory', 'simply-static')}
                     type={"text"}
-                    placeholder={'/Users/patrickposner/Local Sites/simplystatic/app/public/wp-content/plugins/simply-static/static-files/'}
+                    placeholder={options.temp_files_dir}
                     help={__('Specify the directory to save your temporary files. This directory must exist and be writeable.', 'simply-static')}
-                    value={'/Users/patrickposner/Local Sites/simplystatic/app/public/wp-content/plugins/simply-static/static-files/'}
-                    onChange={(value) => {
-
+                    value={settings.temp_files_dir}
+                    onChange={(temp_dir) => {
+                        updateSetting('temp_files_dir', temp_dir);
                     }}
                 />
 
@@ -62,18 +72,18 @@ function MiscSettings() {
                 <TextControl
                     label={__('Basic Auth Username', 'simply-static')}
                     type={"text"}
-                    value={''}
-                    onChange={(value) => {
-
+                    value={settings.http_basic_auth_username}
+                    onChange={(username) => {
+                        updateSetting('http_basic_auth_username', username);
                     }}
                 />
 
                 <TextControl
                     label={__('Basic Auth Password', 'simply-static')}
                     type={"password"}
-                    value={''}
-                    onChange={(value) => {
-
+                    value={settings.http_basic_auth_password}
+                    onChange={(username) => {
+                        updateSetting('http_basic_auth_password', username);
                     }}
                 />
 
@@ -93,10 +103,11 @@ function MiscSettings() {
                             ? 'Show admin settings in subsites.'
                             : 'Hide admin settings in subsites.'
                     }
-                    checked={ showSubsiteSettings }
-                    onChange={ () => {
-                        setShowSubsiteSettings( ( state ) => ! state );
-                    } }
+                    checked={showSubsiteSettings}
+                    onChange={() => {
+                        setShowSubsiteSettings((state) => !state);
+                        updateSetting('allow_subsites', !state);
+                    }}
                 />
             </CardBody>
         </Card>
@@ -114,10 +125,11 @@ function MiscSettings() {
                             ? 'Replace all occurrences of the WordPress URL with the static URL.'
                             : 'Replace only occurrences of the WordPress URL that match the tags'
                     }
-                    checked={ forceURLReplacement }
-                    onChange={ () => {
-                        setForceURLReplacement( ( state ) => ! state );
-                    } }
+                    checked={forceURLReplacement}
+                    onChange={() => {
+                        setForceURLReplacement((state) => !state);
+                        updateSetting('force_replace_url', !state);
+                    }}
                 />
 
                 <ToggleControl
@@ -127,10 +139,11 @@ function MiscSettings() {
                             ? 'Clear local directory before running an export.'
                             : 'Don\'t clear local directory before running an export.'
                     }
-                    checked={ clearDirectory }
-                    onChange={ () => {
-                        setClearDirectory( ( state ) => ! state );
-                    } }
+                    checked={clearDirectory}
+                    onChange={() => {
+                        setClearDirectory((state) => !state);
+                        updateSetting('clear_directory_before_export', !state);
+                    }}
                 />
 
             </CardBody>

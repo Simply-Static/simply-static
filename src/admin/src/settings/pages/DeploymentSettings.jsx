@@ -1,12 +1,13 @@
 import {
     Button,
+    ClipboardButton,
     Card,
     CardBody,
     CardHeader,
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl, SelectControl, Flex, FlexItem, TextareaControl, ToggleControl,
+    TextControl, SelectControl, Flex, FlexItem, ToggleControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -16,14 +17,12 @@ const {__} = wp.i18n;
 function DeploymentSettings() {
     const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
     const [deploymentMethod, setDeploymentMethod] = useState('zip');
-    const [localPath, setLocalPath] = useState('https://');
     const [securityToken, setSecurityToken] = useState('');
     const [githubAccountType, setGithubAccountType] = useState('personal');
     const [githubVisibility, setGithubVisibility] = useState('private');
-    const [githubExistingRepository, setGithubExistingRepository] = useState('no');
     const [emptyBucketBeforeExport, setEmptyBucketBeforeExport] = useState(false);
     const [region, setRegion] = useState('us-east-2');
-
+    const [hasCopied, setHasCopied] = useState(false);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -35,7 +34,29 @@ function DeploymentSettings() {
     }
 
     useEffect(() => {
+        if (settings.delivery_method) {
+            setDeploymentMethod(settings.delivery_method);
+        }
 
+        if (settings.github_account_type) {
+            setGithubAccountType(settings.github_account_type);
+        }
+
+        if (settings.github_repository_visibility) {
+            setGithubVisibility(settings.github_repository_visibility);
+        }
+
+        if (settings.github_repository_visibility) {
+            setGithubVisibility(settings.github_repository_visibility);
+        }
+
+        if (settings.aws_empty) {
+            setEmptyBucketBeforeExport(settings.aws_empty);
+        }
+
+        if (settings.aws_region) {
+            setRegion(settings.aws_region);
+        }
     }, [settings]);
 
     return (<div className={"inner-settings"}>
@@ -60,6 +81,8 @@ function DeploymentSettings() {
                     ]}
                     onChange={(method) => {
                         setDeploymentMethod(method);
+                        updateSetting('deployment-provider', type);
+                        updateSetting('delivery_method', type);
                     }}
                 />
             </CardBody>
@@ -76,12 +99,20 @@ function DeploymentSettings() {
                     <TextControl
                         label={__('Path', 'simply-static')}
                         type={"text"}
-                        placeholder={"/Users/patrickposner/Local Sites/simplystatic/app/public_static/"}
-                        value={localPath}
-                        onChange={(value) => {
-                            setLocalPath(value);
+                        placeholder={options.home_path + "public_static/"}
+                        value={settings.local_dir}
+                        onChange={(path) => {
+                            updateSetting('local_dir', path);
                         }}
                     />
+                    <ClipboardButton
+                        variant="secondary"
+                        text={options.home_path}
+                        onCopy={() => setHasCopied(true)}
+                        onFinishCopy={() => setHasCopied(false)}
+                    >
+                        {hasCopied ? __('Copied home path', 'simply-static') : __('Copy home path', 'simply-static')}
+                    </ClipboardButton>
                 </CardBody>
             </Card>
         }
@@ -101,6 +132,7 @@ function DeploymentSettings() {
                                 value={securityToken}
                                 onChange={(value) => {
                                     setSecurityToken(value);
+                                    // Todo: Save as sch_token (seperate option)
                                 }}
                             />
                         </FlexItem>
@@ -130,17 +162,30 @@ function DeploymentSettings() {
                         ]}
                         onChange={(type) => {
                             setGithubAccountType(type);
+                            updateSetting('github-account-type', type);
                         }}
                     />
 
-                    {githubAccountType === 'organization' &&
+                    {githubAccountType === 'organization' ?
                         <TextControl
                             label={__('Organization', 'simply-static')}
                             type={"text"}
                             help={__('Enter the name of your organization.', 'simply-static')}
-                            value={''}
-                            onChange={(value) => {
-
+                            value={settings.github_user}
+                            onChange={(organization) => {
+                                updateSetting('github_user', organization);
+                                updateSetting('github_existing_repository', 'yes');
+                            }}
+                        />
+                        :
+                        <TextControl
+                            label={__('Username', 'simply-static')}
+                            type={"text"}
+                            help={__('Enter your GitHub username.', 'simply-static')}
+                            value={settings.github_user}
+                            onChange={(username) => {
+                                updateSetting('github_user', username);
+                                updateSetting('github_existing_repository', 'no');
                             }}
                         />
                     }
@@ -148,9 +193,9 @@ function DeploymentSettings() {
                         label={__('E-Mail', 'simply-static')}
                         type={"email"}
                         help={__('Enter your GitHub email address. This will be used to commit files to your repository.', 'simply-static')}
-                        value={''}
-                        onChange={(value) => {
-
+                        value={settings.github_email}
+                        onChange={(email) => {
+                            updateSetting('github_email', email);
                         }}
                     />
 
@@ -158,9 +203,9 @@ function DeploymentSettings() {
                         label={__('Personal Access Token', 'simply-static')}
                         type={"password"}
                         help={__('You need a personal access token from GitHub.', 'simply-static')}
-                        value={''}
-                        onChange={(value) => {
-
+                        value={settings.github_personal_access_token}
+                        onChange={(token) => {
+                            updateSetting('github_personal_access_token', token);
                         }}
                     />
 
@@ -168,9 +213,9 @@ function DeploymentSettings() {
                         label={__('Repository', 'simply-static')}
                         type={"text"}
                         help={__('Enter a name for your repository. This should be lowercase and without any spaces or special characters.', 'simply-static')}
-                        value={''}
-                        onChange={(value) => {
-
+                        value={settings.repository}
+                        onChange={(repository) => {
+                            updateSetting('github_repository', repository);
                         }}
                     />
                     {githubAccountType === 'organization' &&
@@ -191,42 +236,28 @@ function DeploymentSettings() {
                         ]}
                         onChange={(visibility) => {
                             setGithubVisibility(visibility);
+                            updateSetting('github_repository_visibility', visibility);
                         }}
                     />
 
                     <TextControl
                         label={__('Branch', 'simply-static')}
-                        type={"text"}
+                        type={settings.github_branch}
                         placeholder={"main"}
                         help={__('Simply Static automatically uses "main" as branch. You may want to modify that for example to gh-pages. for GitHub Pages.', 'simply-static')}
                         value={''}
-                        onChange={(value) => {
-
+                        onChange={(branch) => {
+                            updateSetting('github_branch', branch);
                         }}
                     />
-
-                    <div style={{display: "none"}}>
-                        <SelectControl
-                            label={__('Existing Repository?', 'simply-static')}
-                            value={githubExistingRepository}
-                            help={__('If you want to connect an existing repository (required for organizations) please activate this option.', 'simply-static')}
-                            options={[
-                                {label: __('Yes', 'simply-static'), value: 'yes'},
-                                {label: __('No', 'simply-static'), value: 'no'},
-                            ]}
-                            onChange={(visibility) => {
-                                setGithubExistingRepository(visibility);
-                            }}
-                        />
-                    </div>
 
                     <TextControl
                         label={__('Webhook URL', 'simply-static')}
                         type={"url"}
                         help={__('Enter your Webhook URL here and Simply Static will send a POST request after all files are commited to GitHub.', 'simply-static')}
-                        value={''}
-                        onChange={(value) => {
-
+                        value={settings.github_webhook_url}
+                        onChange={(webhook) => {
+                            updateSetting('github_webhook_url', webhook);
                         }}
                     />
 
@@ -264,9 +295,9 @@ function DeploymentSettings() {
                         label={__('Subdomain', 'simply-static')}
                         type={"text"}
                         help={__('That\'s the part before your TLD. Your full URL is the combination of the subdomain plus the domain suffix.', 'simply-static')}
-                        value={''}
-                        onChange={(value) => {
-
+                        value={settings.subdomain}
+                        onChange={(subdomain) => {
+                            updateSetting('tiiny_subdomain', subdomain);
                         }}
                     />
 
@@ -274,20 +305,19 @@ function DeploymentSettings() {
                         label={__('Domain Suffix', 'simply-static')}
                         type={"text"}
                         help={__('This defaults to tiiny.site. If you have a custom domain configured in Tiiny.host, you can also use  that one.', 'simply-static')}
-                        value={'tiiny.site'}
-                        onChange={(value) => {
-
+                        value={settings.tiiny_domain_suffix}
+                        onChange={(suffix) => {
+                            updateSetting('tiiny_domain_suffix', suffix);
                         }}
                     />
-
 
                     <TextControl
                         label={__('Password Protection', 'simply-static')}
                         type={"password"}
                         help={__('Adding a password will activate password protection on your static site. The website is only visible with the password.', 'simply-static')}
-                        value={''}
-                        onChange={(value) => {
-
+                        value={settings.tiiny_password}
+                        onChange={(password) => {
+                            updateSetting('tiiny_password', password);
                         }}
                     />
                 </CardBody>
@@ -307,9 +337,9 @@ function DeploymentSettings() {
                         label={__('Bunny CDN API Key', 'simply-static')}
                         type={"password"}
                         help={__('Enter your API Key from Bunny CDN. You can find your API-Key as described here.', 'simply-static')}
-                        value={''}
-                        onChange={(value) => {
-
+                        value={settings.cdn_api_key}
+                        onChange={(api_key) => {
+                            updateSetting('cdn_api_key', api_key);
                         }}
                     />
 
@@ -317,16 +347,19 @@ function DeploymentSettings() {
                         label={__('Storage Host', 'simply-static')}
                         type={"text"}
                         help={__('Depending on your location, you have a different storage host. You find out which URL to use here.', 'simply-static')}
-                        value={'storage.bunnycdn.com'}
+                        value={settings.cdn_storage_host}
+                        onChange={(storage_host) => {
+                            updateSetting('cdn_storage_host', storage_host);
+                        }}
                     />
 
                     <TextControl
                         label={__('Bunny CDN Access Key', 'simply-static')}
                         type={"password"}
                         help={__('Enter your Acess Key from Bunny CDN. You will find it within your storage zone setttings within FTP & API Access -> Password.', 'simply-static')}
-                        value={''}
-                        onChange={(value) => {
-
+                        value={settings.cdn_access_key}
+                        onChange={(access_key) => {
+                            updateSetting('cdn_access_key', access_key);
                         }}
                     />
 
@@ -334,9 +367,9 @@ function DeploymentSettings() {
                         label={__('Pull Zone', 'simply-static')}
                         type={"text"}
                         help={__('A pull zone is the connection of your CDN to the internet. Simply Static will try to find an existing pull zone with the provided name, if there is none it creates a new pull zone.', 'simply-static')}
-                        value={''}
-                        onChange={(value) => {
-
+                        value={settings.cdn_pull_zone}
+                        onChange={(pull_zone) => {
+                            updateSetting('cdn_pull_zone', pull_zone);
                         }}
                     />
 
@@ -344,9 +377,9 @@ function DeploymentSettings() {
                         label={__('Storage Zone', 'simply-static')}
                         type={"text"}
                         help={__('A storage zone contains your static files. Simply Static will try to find an existing storage zone with the provided name, if there is none it creates a new storage zone.', 'simply-static')}
-                        value={''}
-                        onChange={(value) => {
-
+                        value={settings.cdn_storage_zone}
+                        onChange={(storage_zone) => {
+                            updateSetting('cdn_storage_zone', storage_zone);
                         }}
                     />
 
@@ -355,9 +388,9 @@ function DeploymentSettings() {
                         type={"text"}
                         placeholder={'/subdirectory/'}
                         help={__('If you want to transfer the files to a specific subdirectory on your storage zone add the name of that directory here.', 'simply-static')}
-                        value={''}
-                        onChange={(value) => {
-
+                        value={settings.cdn_directory}
+                        onChange={(directory) => {
+                            updateSetting('cdn_directory', directory);
                         }}
                     />
 
@@ -366,9 +399,9 @@ function DeploymentSettings() {
                         type={"text"}
                         placeholder={'/custom-404/'}
                         help={__('Relative path to your custom 404 page.', 'simply-static')}
-                        value={''}
-                        onChange={(value) => {
-
+                        value={settings.cdn_404}
+                        onChange={(error_page) => {
+                            updateSetting('cdn_404', error_page);
                         }}
                     />
                 </CardBody>
@@ -385,12 +418,20 @@ function DeploymentSettings() {
                         label={__('Access Key ID', 'simply-static')}
                         type={"text"}
                         help={__('Enter your Access Key from AWS. You can find your API-Key as described here.', 'simply-static')}
+                        value={settings.aws_access_key}
+                        onChange={(access_key) => {
+                            updateSetting('aws_access_key', access_key);
+                        }}
                     />
 
                     <TextControl
                         label={__('Secret Access Key', 'simply-static')}
                         type={"password"}
                         help={__('Enter your Secret Key from AWS. You can find your API-Key as described here.', 'simply-static')}
+                        value={settings.aws_access_secret}
+                        onChange={(secret) => {
+                            updateSetting('aws_access_secret', secret);
+                        }}
                     />
 
                     <SelectControl
@@ -429,12 +470,17 @@ function DeploymentSettings() {
                         ]}
                         onChange={(region) => {
                             setRegion(region);
+                            updateSetting('aws_region', region);
                         }}
                     />
                     <TextControl
                         label={__('Bucket', 'simply-static')}
                         type={"text"}
                         help={__('Add the name of your bucket here.', 'simply-static')}
+                        value={settings.aws_bucket}
+                        onChange={(bucket) => {
+                            updateSetting('aws_bucket', bucket);
+                        }}
                     />
 
                     <ToggleControl
@@ -447,6 +493,7 @@ function DeploymentSettings() {
                         checked={emptyBucketBeforeExport}
                         onChange={() => {
                             setEmptyBucketBeforeExport((state) => !state);
+                            updateSetting('aws_empty', !state);
                         }}
                     />
                 </CardBody>
@@ -463,12 +510,20 @@ function DeploymentSettings() {
                         label={__('Spaces Key', 'simply-static')}
                         type={"text"}
                         help={__('Enter your Spaces Key from Digital Ocean. You can find your API-Key as described here.', 'simply-static')}
+                        value={settings.digitalocean_key}
+                        onChange={(api_key) => {
+                            updateSetting('digitalocean_key', api_key);
+                        }}
                     />
 
                     <TextControl
                         label={__('Secret', 'simply-static')}
                         type={"password"}
                         help={__('Enter your Spaces Secret from Digital Ocean. You can find your API-Key as described here.', 'simply-static')}
+                        value={settings.digitalocean_secret}
+                        onChange={(secret) => {
+                            updateSetting('digitalocean_secret', secret);
+                        }}
                     />
 
                     <TextControl
@@ -476,6 +531,10 @@ function DeploymentSettings() {
                         help={__('The bucket name for your space.', 'simply-static')}
                         type={"text"}
                         placeholder={"my-bucket"}
+                        value={settings.digitalocean_bucket}
+                        onChange={(bucket) => {
+                            updateSetting('digitalocean_bucket', bucket);
+                        }}
                     />
 
                     <TextControl
@@ -483,12 +542,18 @@ function DeploymentSettings() {
                         type={"text"}
                         help={__('The region for your space.', 'simply-static')}
                         placeholder={"ams3"}
+                        value={settings.digitalocean_region}
+                        onChange={(region) => {
+                            updateSetting('digitalocean_region', region);
+                        }}
                     />
                     <p>
-                        <Notice status="warning" isDismissible={false}>
-                            {__('Your endpoint will be', 'simply-static')}:
-                            https://your-bucket-name.your-region.digitaloceanspaces.com
-                        </Notice>
+                        {settings.digitalocean_bucket && settings.digitalocean_region &&
+                            <Notice status="warning" isDismissible={false}>
+                                {__('Your endpoint will be', 'simply-static')}:
+                                {'https://' + settings.digitalocean_bucket + '.' + settings.digitalocean_region + '.digitaloceanspaces.com'}
+                            </Notice>
+                        }
                     </p>
                 </CardBody>
             </Card>

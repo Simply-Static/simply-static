@@ -1,5 +1,6 @@
 import {
     Button,
+    ClipboardButton,
     Card,
     CardBody,
     CardHeader,
@@ -15,11 +16,11 @@ const {__} = wp.i18n;
 
 function GeneralSettings() {
     const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
-    const [replaceType, setReplaceType] = useState('absolute');
+    const [replaceType, setReplaceType] = useState('relative');
     const [scheme, setScheme] = useState('https://');
-    const [url, setUrl] = useState('');
+    const [host, setHost] = useState('');
     const [path, setPath] = useState('/');
-    const [ text, setText ] = useState( '' );
+    const [hasCopied, setHasCopied] = useState(false);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -31,6 +32,21 @@ function GeneralSettings() {
     }
 
     useEffect(() => {
+        if (settings.destination_url_type) {
+            setReplaceType(settings.destination_url_type);
+        }
+
+        if (settings.destination_scheme) {
+            setScheme(settings.destination_scheme);
+        }
+
+        if (settings.destination_host) {
+            setHost(settings.destination_host);
+        }
+
+        if (settings.relative_path) {
+            setPath(settings.relative_path);
+        }
 
     }, [settings]);
 
@@ -51,6 +67,7 @@ function GeneralSettings() {
                     ]}
                     onChange={(type) => {
                         setReplaceType(type);
+                        updateSetting('destination_url_type', type);
                     }}
                 />
                 {replaceType === 'absolute' &&
@@ -67,17 +84,19 @@ function GeneralSettings() {
                                     ]}
                                     onChange={(scheme) => {
                                         setScheme(scheme);
+                                        updateSetting('destination_scheme', type);
                                     }}
                                 />
                             </FlexItem>
                             <FlexItem style={{minWidth: "85%"}}>
                                 <TextControl
-                                    label={__('Url', 'simply-static')}
+                                    label={__('Host', 'simply-static')}
                                     type={"text"}
                                     placeholder={"example.com"}
-                                    value={url}
+                                    value={host}
                                     onChange={(value) => {
-                                        setUrl(value);
+                                        setHost(value);
+                                        updateSetting('destination_host', type);
                                     }}
                                 />
                             </FlexItem>
@@ -94,6 +113,7 @@ function GeneralSettings() {
                             value={path}
                             onChange={(value) => {
                                 setPath(value);
+                                updateSetting('relative_path', type);
                             }}
                         />
                         <p>
@@ -101,8 +121,10 @@ function GeneralSettings() {
                             {__('Optionally specify a path above if you intend to place the files in a subdirectory.', 'simply-static')}
                         </p>
                         <p>
-                            <b>{__('Example', 'simply-static')}: </b>
-                            {__('enter /path/ above if you wanted to serve your files at www.example.com/path/', 'simply-static')}
+                            <Notice status={"warning"} isDismissible={false}>
+                                <b>{__('Example', 'simply-static')}: </b>
+                                {__('enter /path/ above if you wanted to serve your files at www.example.com/path/', 'simply-static')}
+                            </Notice>
                         </p>
                     </>
                 }
@@ -119,22 +141,30 @@ function GeneralSettings() {
             <CardBody>
                 <TextareaControl
                     label={__('Additional URLs', 'simply-static')}
-                    placeholder={"https://simply-static.local/hidden-page/"}
-                    help={__('Simply Static will create a static copy of any page it can find a link to, starting at https://simply-static.local/. If you want to create static copies of pages or files that aren\'t linked to, add the URLs here (one per line).', 'simply-static')}
-                    value={ text }
-                    onChange={ ( value ) => {
-
-                    } }
+                    placeholder={ options.home + "/hidden-page/"}
+                    help={__('If you want to create static copies of pages or files that aren\'t linked to, add the URLs here (one per line).', 'simply-static')}
+                    value={settings.additional_urls}
+                    onChange={(value) => {
+                        updateSetting('additional_urls', value);
+                    }}
                 />
                 <TextareaControl
                     label={__('Additional Files and Directories', 'simply-static')}
-                    placeholder={"/Users/patrickposner/Local Sites/simplystatic/app/public/additional-directory/\n/Users/patrickposner/Local Sites/simplystatic/app/public/additional-file.html"}
+                    placeholder={ options.home_path + "additional-directory/\n" + options.home_path + "additional-file.html"}
                     help={__('Sometimes you may want to include additional files (such as files referenced via AJAX) or directories. Add the paths to those files or directories here (one per line).', 'simply-static')}
-                    value={ text }
-                    onChange={ ( value ) => {
-
-                    } }
+                    value={settings.additional_files}
+                    onChange={(value) => {
+                        updateSetting('additional_files', value);
+                    }}
                 />
+                <ClipboardButton
+                    variant="secondary"
+                    text={options.home_path}
+                    onCopy={ () => setHasCopied( true ) }
+                    onFinishCopy={ () => setHasCopied( false ) }
+                >
+                    { hasCopied ? __('Copied home path', 'simply-static') : __('Copy home path', 'simply-static') }
+                </ClipboardButton>
             </CardBody>
         </Card>
         <Spacer margin={5}/>
@@ -147,10 +177,10 @@ function GeneralSettings() {
                     label={__('Urls and Patterns to exclude', 'simply-static')}
                     placeholder={"wp-json.php\nwp-login.php\n.jpg"}
                     help={__('Specify URLs you want to exclude from the processing (one per line). You can also specify regex pattern to match.', 'simply-static')}
-                    value={ text }
-                    onChange={ ( value ) => {
-
-                    } }
+                    value={settings.urls_to_exclude}
+                    onChange={(value) => {
+                        updateSetting('urls_to_exclude', value);
+                    }}
                 />
             </CardBody>
         </Card>
@@ -166,6 +196,7 @@ function GeneralSettings() {
                 )}
             </Animate>
         }
+        <Spacer margin={5}/>
         <div className={"save-settings"}>
             <Button onClick={setSavingSettings}
                     variant="primary">{__('Save Settings', 'simply-static')}</Button>

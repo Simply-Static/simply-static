@@ -64,14 +64,20 @@ class Admin_Settings {
 			'wp-i18n'
 		), '2.3.2', true );
 
-		$options = get_option( 'simply-static' );
+
+		$options = Options::reinstance();
 
 		$args = array(
-			'screen'  => 'simplystatic-settings',
-			'version' => '2.3.2',
-			'logo'    => SIMPLY_STATIC_URL . '/assets/simply-static-logo.svg',
-			'is_pro'  => false,
+			'screen'         => 'simplystatic-settings',
+			'version'        => '2.3.2',
+			'logo'           => SIMPLY_STATIC_URL . '/assets/simply-static-logo.svg',
+			'is_pro'         => false,
+			'home'           => home_url(),
+			'home_path'      => get_home_path(),
+			'admin_email'    => get_bloginfo( 'admin_email' ),
+			'temp_files_dir' => $options->get( 'temp_files_dir' )
 		);
+
 
 		wp_localize_script( 'simplystatic-settings', 'options', $args );
 
@@ -126,7 +132,7 @@ class Admin_Settings {
 	 * @return false|mixed|null
 	 */
 	public function get_settings() {
-		return get_option( 'simply-static' );
+		return get_option( 'simply-static2' );
 	}
 
 	/**
@@ -155,10 +161,12 @@ class Admin_Settings {
 	 */
 	public function save_settings( object $request ) {
 		if ( $request->get_params() ) {
-			$options = sanitize_option( 'simply-static', $request->get_params() );
-			update_option( 'simply-static', $options );
+			$options = sanitize_option( 'simply-static2', $request->get_params() );
+			update_option( 'simply-static2', $options );
+
+			return json_encode( [ "status" => 200, "message" => "Ok" ] );
 		}
 
-		return json_encode( [ "status" => 200, "message" => "Ok" ] );
+		return json_encode( [ "status" => 400, "message" => "No options updated." ] );
 	}
 }

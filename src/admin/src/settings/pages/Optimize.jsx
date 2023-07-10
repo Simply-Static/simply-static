@@ -6,7 +6,7 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl, SelectControl, Flex, FlexItem, TextareaControl, ToggleControl,
+    ToggleControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -32,6 +32,29 @@ function Optimize() {
     }
 
     useEffect(() => {
+        if (settings.use_minify) {
+            setMinifyFiles(settings.use_minify);
+        }
+
+        if (settings.minify_html) {
+            setMinifyHtml(settings.minify_html);
+        }
+
+        if (settings.minify_css) {
+            setMinifyCss(settings.minify_css);
+        }
+
+        if (settings.minify_inline_css) {
+            setMinifyInlineCss(settings.minify_inline_css);
+        }
+
+        if (settings.minify_js) {
+            setMinifyJavascript(settings.minify_js);
+        }
+
+        if (settings.minify_inline_js) {
+            setMinifyInlineJavascript(settings.minify_inline_js);
+        }
 
     }, [settings]);
 
@@ -51,6 +74,7 @@ function Optimize() {
                     checked={minifyFiles}
                     onChange={() => {
                         setMinifyFiles((state) => !state);
+                        updateSetting('use_minify', !state);
                     }}
                 />
 
@@ -66,6 +90,7 @@ function Optimize() {
                             checked={minifyHtml}
                             onChange={() => {
                                 setMinifyHtml((state) => !state);
+                                updateSetting('minify_html', !state);
                             }}
                         />
 
@@ -79,6 +104,7 @@ function Optimize() {
                             checked={minifyCss}
                             onChange={() => {
                                 setMinifyCss((state) => !state);
+                                updateSetting('minify_css', !state);
                             }}
                         />
                         {minifyCss &&
@@ -92,6 +118,7 @@ function Optimize() {
                                 checked={minifyInlineCss}
                                 onChange={() => {
                                     setMinifyInlineCss((state) => !state);
+                                    updateSetting('minify_inline_css', !state);
                                 }}
                             />
                         }
@@ -105,6 +132,7 @@ function Optimize() {
                             checked={minifyJavascript}
                             onChange={() => {
                                 setMinifyJavascript((state) => !state);
+                                updateSetting('minify_js', !state);
                             }}
                         />
 
@@ -119,6 +147,7 @@ function Optimize() {
                                 checked={minifyInlineJavascript}
                                 onChange={() => {
                                     setMinifyInlineJavascript((state) => !state);
+                                    updateSetting('minify_inline_js', !state);
                                 }}
                             />
                         }

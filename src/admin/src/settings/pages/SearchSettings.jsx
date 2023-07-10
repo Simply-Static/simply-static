@@ -6,7 +6,7 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl, SelectControl, Flex, FlexItem, TextareaControl, ToggleControl,
+    TextControl, SelectControl, TextareaControl, ToggleControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -28,6 +28,13 @@ function SearchSettings() {
     }
 
     useEffect(() => {
+        if (settings.use_search) {
+            setUseSearch(settings.use_search);
+        }
+
+        if (settings.search_type) {
+            setSearchType(settings.search_type);
+        }
 
     }, [settings]);
 
@@ -47,6 +54,7 @@ function SearchSettings() {
                     checked={ useSearch }
                     onChange={ () => {
                         setUseSearch( ( state ) => ! state );
+                        updateSetting('use_search', ! state );
                     } }
                 />
 
@@ -59,8 +67,9 @@ function SearchSettings() {
                             {label: 'Fuse JS', value: 'fuse'},
                             {label: 'Algolia API', value: 'algolia'},
                         ]}
-                        onChange={(value) => {
-                            setSearchType(value);
+                        onChange={(type) => {
+                            setSearchType(type);
+                            updateSetting('search_type', type);
                         }}
                     />
                 }
@@ -79,9 +88,9 @@ function SearchSettings() {
                             type={"text"}
                             placeholder={'title'}
                             help={__('Add the CSS selector which contains the title of the page/post', 'simply-static')}
-                            value={'title'}
-                            onChange={(value) => {
-
+                            value={settings.search_index_title}
+                            onChange={(title) => {
+                                updateSetting('search_index_title', title);
                             }}
                         />
                         <TextControl
@@ -89,9 +98,9 @@ function SearchSettings() {
                             type={"text"}
                             placeholder={'body'}
                             help={__('Add the CSS selector which contains the content of the page/post.', 'simply-static')}
-                            value={'body'}
-                            onChange={(value) => {
-
+                            value={settings.search_index_content}
+                            onChange={(content) => {
+                                updateSetting('search_index_content', content);
                             }}
                         />
 
@@ -100,9 +109,9 @@ function SearchSettings() {
                             type={"text"}
                             placeholder={'.entry-content'}
                             help={__('Add the CSS selector which contains the excerpt of the page/post.', 'simply-static')}
-                            value={'.entry-content'}
-                            onChange={(value) => {
-
+                            value={settings.search_index_excerpt}
+                            onChange={(excerpt) => {
+                                updateSetting('search_index_excerpt', excerpt);
                             }}
                         />
 
@@ -110,9 +119,9 @@ function SearchSettings() {
                             label={__('Exclude URLs', 'simply-static')}
                             placeholder={"author\narchive\ncategory"}
                             help={__('Exclude URLs from indexing (one per line). You can use full URLs, parts of an URL or plain words (like stop words).', 'simply-static')}
-                            value={''}
-                            onChange={ ( value ) => {
-
+                            value={settings.search_excludable}
+                            onChange={ ( excludes ) => {
+                                updateSetting('search_excludable', excludes);
                             } }
                         />
                     </CardBody>
@@ -130,51 +139,51 @@ function SearchSettings() {
                         <TextControl
                             label={__('Application ID', 'simply-static')}
                             type={"password"}
-                            help={__('Add your Algolia App ID here.', 'simply-static')}
-                            value={''}
-                            onChange={(value) => {
-
-                            }}
+                            help={__('Add your Algolia App ID.', 'simply-static')}
+                            value={settings.algolia_app_id}
+                            onChange={ ( app_id ) => {
+                                updateSetting('algolia_app_id', app_id);
+                            } }
                         />
 
                         <TextControl
                             label={__('Admin API Key', 'simply-static')}
                             type={"password"}
-                            help={__('Add your Algolia Admin API Key here.', 'simply-static')}
-                            value={''}
-                            onChange={(value) => {
-
-                            }}
+                            help={__('Add your Algolia Admin API Key.', 'simply-static')}
+                            value={settings.algolia_admin_api_key}
+                            onChange={ ( api_key ) => {
+                                updateSetting('algolia_admin_api_key', api_key);
+                            } }
                         />
 
                         <TextControl
                             label={__('Search-Only API Key', 'simply-static')}
                             type={"password"}
                             help={__('Add your Algolia Search-Only API Key here. This is the only key that will be visible on your static site.', 'simply-static')}
-                            value={''}
-                            onChange={(value) => {
-
-                            }}
+                            value={settings.algolia_search_api_key}
+                            onChange={ ( api_key ) => {
+                                updateSetting('algolia_search_api_key', api_key);
+                            } }
                         />
 
                         <TextControl
                             label={__('Name for your index', 'simply-static')}
                             type={"text"}
                             help={__('Add your Algolia index name here.', 'simply-static')}
-                            value={'simply-static'}
-                            onChange={(value) => {
-
-                            }}
+                            value={settings.algolia_index}
+                            onChange={ ( index ) => {
+                                updateSetting('algolia_index', index);
+                            } }
                         />
 
                         <TextControl
                             label={__('CSS-Selector', 'simply-static')}
                             type={"text"}
                             help={__('Add the CSS selector of your search element here.', 'simply-static')}
-                            value={'.search-field'}
-                            onChange={(value) => {
-
-                            }}
+                            value={settings.algolia_selector}
+                            onChange={ ( selector ) => {
+                                updateSetting('algolia_selector', selector);
+                            } }
                         />
                         <p>
                             <Notice status="warning" isDismissible={false}>

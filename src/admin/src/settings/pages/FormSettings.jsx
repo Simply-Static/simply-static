@@ -6,7 +6,7 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl, SelectControl, Flex, FlexItem, TextareaControl, ToggleControl,
+    TextControl, SelectControl, ToggleControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -29,7 +29,17 @@ function FormSettings() {
     }
 
     useEffect(() => {
+        if (settings.fix_cors) {
+            setCorsMethod(settings.fix_cors);
+        }
 
+        if (settings.use_forms) {
+            setUseForms(settings.use_forms);
+        }
+
+        if (settings.use_comments) {
+            setUseComments(settings.use_comments);
+        }
     }, [settings]);
 
     return (<div className={"inner-settings"}>
@@ -45,10 +55,11 @@ function FormSettings() {
                             ? 'Use Forms on your static website.'
                             : 'Don\'t use forms on your static website.'
                     }
-                    checked={ useForms }
-                    onChange={ () => {
-                        setUseForms( ( state ) => ! state );
-                    } }
+                    checked={useForms}
+                    onChange={() => {
+                        setUseForms((state) => !state);
+                        updateSetting('use_forms', !state );
+                    }}
                 />
                 {useForms &&
                     <>
@@ -71,10 +82,11 @@ function FormSettings() {
                             ? 'Use comments on your static website.'
                             : 'Don\'t use comments on your static website.'
                     }
-                    checked={ useComments }
-                    onChange={ () => {
-                        setUseComments( ( state ) => ! state );
-                    } }
+                    checked={useComments}
+                    onChange={() => {
+                        setUseComments((state) => !state);
+                        updateSetting('use_comments', !state);
+                    }}
                 />
 
                 {useComments &&
@@ -83,9 +95,9 @@ function FormSettings() {
                         type={"url"}
                         placeholder={'https://static-example.com/thank-you'}
                         help={__('The page will be generated and committed automatically after a comment was added, but it might take a while so its good practice to redirect the visitor.', 'simply-static')}
-                        value={''}
-                        onChange={(value) => {
-
+                        value={settings.comment_redirect}
+                        onChange={(redirect) => {
+                            updateSetting('comment_redirect', redirect);
                         }}
                     />
                 }
@@ -109,11 +121,11 @@ function FormSettings() {
                 <TextControl
                     label={__('Static URL', 'simply-static')}
                     type={"url"}
-                    placeholder={'https://static-example.com'}
+                    placeholder={'https://static-site.com'}
                     help={__('Add the URL of your static website to allow CORS from it.', 'simply-static')}
-                    value={''}
-                    onChange={(value) => {
-
+                    value={settings.static_url}
+                    onChange={(url) => {
+                        updateSetting('static_url', url);
                     }}
                 />
                 <SelectControl
@@ -126,6 +138,7 @@ function FormSettings() {
                     ]}
                     onChange={(method) => {
                         setCorsMethod(method);
+                        updateSetting('fix_cors', method);
                     }}
                 />
             </CardBody>
