@@ -158,15 +158,18 @@ function Optimize() {
         </Card>
         <Spacer margin={5}/>
         {settingsSaved &&
-            <Animate type="slide-in" options={{origin: 'top'}}>
-                {() => (
-                    <Notice status="success" isDismissible={false}>
-                        <p>
-                            {__('Settings saved successfully.', 'simply-static')}
-                        </p>
-                    </Notice>
-                )}
-            </Animate>
+            <>
+                <Animate type="slide-in" options={{origin: 'top'}}>
+                    {() => (
+                        <Notice status="success" isDismissible={false}>
+                            <p>
+                                {__('Settings saved successfully.', 'simply-static')}
+                            </p>
+                        </Notice>
+                    )}
+                </Animate>
+                <Spacer margin={5}/>
+            </>
         }
         <div className={"save-settings"}>
             <Button onClick={setSavingSettings}

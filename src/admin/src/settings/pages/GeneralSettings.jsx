@@ -141,7 +141,7 @@ function GeneralSettings() {
             <CardBody>
                 <TextareaControl
                     label={__('Additional URLs', 'simply-static')}
-                    placeholder={ options.home + "/hidden-page/"}
+                    placeholder={options.home + "/hidden-page/"}
                     help={__('If you want to create static copies of pages or files that aren\'t linked to, add the URLs here (one per line).', 'simply-static')}
                     value={settings.additional_urls}
                     onChange={(value) => {
@@ -150,7 +150,7 @@ function GeneralSettings() {
                 />
                 <TextareaControl
                     label={__('Additional Files and Directories', 'simply-static')}
-                    placeholder={ options.home_path + "additional-directory/\n" + options.home_path + "additional-file.html"}
+                    placeholder={options.home_path + "additional-directory/\n" + options.home_path + "additional-file.html"}
                     help={__('Sometimes you may want to include additional files (such as files referenced via AJAX) or directories. Add the paths to those files or directories here (one per line).', 'simply-static')}
                     value={settings.additional_files}
                     onChange={(value) => {
@@ -160,10 +160,10 @@ function GeneralSettings() {
                 <ClipboardButton
                     variant="secondary"
                     text={options.home_path}
-                    onCopy={ () => setHasCopied( true ) }
-                    onFinishCopy={ () => setHasCopied( false ) }
+                    onCopy={() => setHasCopied(true)}
+                    onFinishCopy={() => setHasCopied(false)}
                 >
-                    { hasCopied ? __('Copied home path', 'simply-static') : __('Copy home path', 'simply-static') }
+                    {hasCopied ? __('Copied home path', 'simply-static') : __('Copy home path', 'simply-static')}
                 </ClipboardButton>
             </CardBody>
         </Card>
@@ -186,17 +186,20 @@ function GeneralSettings() {
         </Card>
         <Spacer margin={5}/>
         {settingsSaved &&
-            <Animate type="slide-in" options={{origin: 'top'}}>
-                {() => (
-                    <Notice status="success" isDismissible={false}>
-                        <p>
-                            {__('Settings saved successfully.', 'simply-static')}
-                        </p>
-                    </Notice>
-                )}
-            </Animate>
+            <>
+                <Animate type="slide-in" options={{origin: 'top'}}>
+                    {() => (
+                        <Notice status="success" isDismissible={false}>
+                            <p>
+                                {__('Settings saved successfully.', 'simply-static')}
+                            </p>
+                        </Notice>
+                    )}
+                </Animate>
+                <Spacer margin={5}/>
+            </>
         }
-        <Spacer margin={5}/>
+
         <div className={"save-settings"}>
             <Button onClick={setSavingSettings}
                     variant="primary">{__('Save Settings', 'simply-static')}</Button>
