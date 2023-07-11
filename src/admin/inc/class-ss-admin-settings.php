@@ -2,9 +2,6 @@
 
 namespace Simply_Static;
 
-use simply_static_pro\Github_Repository;
-use Simply_Static\Diagnostic;
-
 class Admin_Settings {
 	/**
 	 * Contains instance or null
@@ -152,7 +149,7 @@ class Admin_Settings {
 	 *
 	 * @return array[]
 	 */
-	public function get_system_status() {
+	public function get_system_status(): array {
 		$diagnostics = new Diagnostic();
 
 		return $diagnostics->get_checks();
@@ -170,15 +167,17 @@ class Admin_Settings {
 			$options = sanitize_option( 'simply-static2', $request->get_params() );
 			update_option( 'simply-static2', $options );
 
-			// $repository = Github_Repository::get_instance();
-			// Add file if repository exists $repository->add_file( 'simply-static.txt', 'This file was created by Simply Static Pro.', __( 'Added the sample file.', 'simply-static-pro' ) );
-
 			return json_encode( [ "status" => 200, "message" => "Ok" ] );
 		}
 
 		return json_encode( [ "status" => 400, "message" => "No options updated." ] );
 	}
 
+	/**
+	 * Migrate settings via rest API.
+	 *
+	 * @return false|string
+	 */
 	public function migrate_settings() {
 		Migrate_Settings::migrate();
 
