@@ -2,7 +2,7 @@
 
 namespace Simply_Static;
 
-// Exit if accessed directly
+// Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -19,36 +19,42 @@ class Plugin {
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
+	 *
 	 * @var string
 	 */
-	const SLUG = 'simply-static'; // keep it short; stick to alphas & dashes
+	const SLUG = 'simply-static';
 
 	/**
-	 * Singleton instance
+	 * Singleton instance.
+	 *
 	 * @var Simply_Static
 	 */
 	protected static $instance = null;
 
 	/**
 	 * An instance of the options structure containing all options for this plugin
+	 *
 	 * @var Simply_Static\Options
 	 */
 	protected $options = null;
 
 	/**
-	 * View object
+	 * View object.
+	 *
 	 * @var \Simply_Static\View
 	 */
 	protected $view = null;
 
 	/**
 	 * Archive creation process
+	 *
 	 * @var \Simply_Static\Archive_Creation_Job
 	 */
 	protected $archive_creation_job = null;
 
 	/**
-	 * Current page name
+	 * Current page name.
+	 *
 	 * @var string
 	 */
 	protected $current_page = '';
@@ -58,26 +64,6 @@ class Plugin {
 	 */
 	protected $page_handlers = null;
 
-	/**
-	 * Disable usage of "new"
-	 * @return void
-	 */
-	protected function __construct() {
-	}
-
-	/**
-	 * Disable cloning of the class
-	 * @return void
-	 */
-	protected function __clone() {
-	}
-
-	/**
-	 * Disable unserializing of the class
-	 * @return void
-	 */
-	public function __wakeup() {
-	}
 
 	/**
 	 * Return an instance of the Simply Static plugin
@@ -88,21 +74,15 @@ class Plugin {
 			self::$instance = new self();
 			self::$instance->includes();
 
-			// Load the text domain for i18n
-			add_action( 'plugins_loaded', array( self::$instance, 'load_textdomain' ) );
-			// Enqueue admin styles
-			add_action( 'admin_enqueue_scripts', array( self::$instance, 'enqueue_admin_styles' ) );
-			// Enqueue admin scripts
+			// Enqueue admin scripts.
 			add_action( 'admin_enqueue_scripts', array( self::$instance, 'enqueue_admin_scripts' ) );
 			// Add the options page and menu item.
 			add_action( 'admin_menu', array( self::$instance, 'add_plugin_admin_menu' ), 2 );
-			// Add admin info links.
-			add_action( 'simply_static_admin_info_links', array( self::$instance, 'add_info_links' ) );
 
 			// Maybe clear local directory.
 			add_action( 'ss_after_setup_task', array( self::$instance, 'maybe_clear_directory' ) );
 
-			// Handle AJAX requests
+			// Handle AJAX requests.
 			add_action( 'wp_ajax_static_archive_action', array( self::$instance, 'static_archive_action' ) );
 			add_action( 'wp_ajax_render_export_log', array( self::$instance, 'render_export_log' ) );
 			add_action( 'wp_ajax_render_activity_log', array( self::$instance, 'render_activity_log' ) );
@@ -110,17 +90,13 @@ class Plugin {
 			// Instead of using ajax, activate export log file and run with cron.
 			add_action( 'simply_static_site_export_cron', array( self::$instance, 'run_static_export' ) );
 
-			// Filters
-			add_filter( 'update_footer', array( self::$instance, 'filter_update_footer' ), 15 );
+			// Filters.
 			add_filter( 'simplystatic.archive_creation_job.task_list', array(
 				self::$instance,
 				'filter_task_list'
 			), 10, 2 );
 
 			add_filter( 'http_request_args', array( self::$instance, 'add_http_filters' ), 10, 2 );
-
-			// Disable WP lazy loading for more fail-safe crawling.
-			add_filter( 'wp_lazy_loading_enabled', '__return_false' );
 
 			$integrations = new Integrations();
 			$integrations->load();
@@ -133,28 +109,10 @@ class Plugin {
 			$page                         = isset( $_GET['page'] ) ? $_GET['page'] : '';
 			self::$instance->current_page = $page;
 
+			// Maybe run upgrade.
 			Upgrade_Handler::run();
 
-			// Exclude pages if not set.
-			$urls_to_exclude = self::$instance->options->get( 'urls_to_exclude' );
-
-			if ( ! isset( $urls_to_exclude ) || empty( $urls_to_exclude ) ) {
-				$urls_to_exclude = array(
-					site_url() . DIRECTORY_SEPARATOR . 'wp-json'      => array(
-						'url'           => site_url() . DIRECTORY_SEPARATOR . 'wp-json',
-						'do_not_save'   => '1',
-						'do_not_follow' => '1',
-					),
-					site_url() . DIRECTORY_SEPARATOR . 'wp-login.php' => array(
-						'url'           => site_url() . DIRECTORY_SEPARATOR . 'wp-login.php',
-						'do_not_save'   => '1',
-						'do_not_follow' => '1',
-					),
-				);
-				self::$instance->options->set( 'urls_to_exclude', $urls_to_exclude );
-			}
-
-			// Boot up new admin.
+			// Boot up admin.
 			Admin_Settings::get_instance();
 		}
 
@@ -196,15 +154,6 @@ class Plugin {
 	}
 
 	/**
-	 * Enqueue admin-specific style sheets for this plugin's admin pages only
-	 * @return void
-	 */
-	public function enqueue_admin_styles() {
-		// Plugin admin CSS. Tack on plugin version.
-		wp_enqueue_style( self::SLUG . '-admin-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'css/admin.css', array(), self::VERSION );
-	}
-
-	/**
 	 * Enqueue admin-specific javascript files for this plugin's admin pages only
 	 * @return void
 	 */
@@ -221,10 +170,6 @@ class Plugin {
 				]
 			);
 		}
-
-		if ( $this->current_page === 'simply-static_settings' ) {
-			wp_enqueue_script( self::SLUG . '-settings-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'js/admin-settings.js?1', array(), self::VERSION );
-		}
 	}
 
 	/**
@@ -237,7 +182,7 @@ class Plugin {
 			return;
 		}
 
-		// Add main menu item
+		// Add main menu item.
 		add_menu_page(
 			__( 'Simply Static', 'simply-static' ),
 			__( 'Simply Static', 'simply-static' ),
@@ -255,16 +200,25 @@ class Plugin {
 			self::SLUG,
 			array( self::$instance, 'display_generate_page' )
 		);
-
-		add_submenu_page(
-			self::SLUG,
-			__( 'Simply Static Settings', 'simply-static' ),
-			__( 'Settings', 'simply-static' ),
-			apply_filters( 'ss_settings_capability', 'manage_options' ),
-			self::SLUG . '_settings',
-			array( self::$instance, 'display_settings_page' )
-		);
 	}
+
+	/**
+	 * Render the page for generating a static site
+	 * @return void
+	 */
+	public function display_generate_page() {
+		$done = $this->archive_creation_job->is_job_done();
+
+		$this->view
+			->set_layout( 'admin' )
+			->set_template( 'generate' )
+			->assign( 'archive_generation_done', $done );
+
+		do_action( 'ss_before_render_generate_page', $this->view, $this->options );
+
+		$this->view->render();
+	}
+
 
 	/**
 	 * Handle archive job without ajax.
@@ -314,7 +268,8 @@ class Plugin {
 	}
 
 	/**
-	 * Render json+html for response to static archive creation
+	 * Render json+html for response to static archive creation.
+	 *
 	 * @return void
 	 */
 	public function send_json_response_for_static_archive( $action ) {
@@ -328,13 +283,15 @@ class Plugin {
 
 		do_action( 'ss_before_sending_response_for_static_archive' );
 
-		// send json response and die()
-		wp_send_json( array(
-			'action'            => $action,
-			'activity_log_html' => $activity_log_html,
-			'pages_status'      => $this->options->get( 'pages_status' ),
-			'done'              => $done // $done
-		) );
+		// send json response and die().
+		wp_send_json(
+			array(
+				'action'            => $action,
+				'activity_log_html' => $activity_log_html,
+				'pages_status'      => $this->options->get( 'pages_status' ),
+				'done'              => $done
+			)
+		);
 	}
 
 	/**
@@ -344,7 +301,7 @@ class Plugin {
 	public function render_activity_log() {
 		check_ajax_referer( 'simply-static_generate' );
 		if ( ! current_user_can( 'edit_posts' ) ) {
-			die( __( 'Not permitted', 'simply-static' ) );
+			die( esc_html__( 'Not permitted', 'simply-static' ) );
 		}
 
 		$blog_id = isset( $_POST['blog_id'] ) ? absint( $_POST['blog_id'] ) : get_current_blog_id();
@@ -361,14 +318,13 @@ class Plugin {
 		do_action( 'ss_after_render_activity_log', $blog_id );
 
 
-		// send json response and die()
-		wp_send_json( array(
-			'html' => $content
-		) );
+		// send json response and die().
+		wp_send_json( array( 'html' => $content ) );
 	}
 
 	/**
 	 * Render the export log and send it via ajax
+	 *
 	 * @return void
 	 */
 	public function render_export_log() {
@@ -410,13 +366,13 @@ class Plugin {
 		do_action( 'ss_after_render_export_log' );
 
 
-		// send json response and die()
-		wp_send_json( array(
-			'html' => $content
-		) );
+		// send json response and die().
+		wp_send_json( array( 'html' => $content ) );
 	}
 
 	/**
+	 * Starts the archive creation job.
+	 *
 	 * @return Archive_Creation_Job|null
 	 */
 	public function get_archive_creation_job() {
@@ -424,245 +380,12 @@ class Plugin {
 	}
 
 	/**
-	 * Render the page for generating a static site
-	 * @return void
-	 */
-	public function display_generate_page() {
-		$done = $this->archive_creation_job->is_job_done();
-
-		$this->view
-			->set_layout( 'admin' )
-			->set_template( 'generate' )
-			->assign( 'archive_generation_done', $done );
-
-		do_action( 'ss_before_render_generate_page', $this->view, $this->options );
-
-		$this->view->render();
-	}
-
-	/**
-	 * Render the options page
-	 * @return void
-	 */
-	public function display_settings_page() {
-		if ( isset( $_POST['_settings'] ) ) {
-			$this->save_options();
-		} else if ( isset( $_POST['_reset'] ) ) {
-			$this->reset_plugin();
-		}
-
-		$this->view
-			->set_layout( 'admin' )
-			->set_template( 'settings' )
-			->assign( 'origin_scheme', Util::origin_scheme() )
-			->assign( 'origin_host', Util::origin_host() )
-			->assign( 'destination_scheme', $this->options->get( 'destination_scheme' ) )
-			->assign( 'destination_host', $this->options->get( 'destination_host' ) )
-			->assign( 'temp_files_dir', $this->options->get( 'temp_files_dir' ) )
-			->assign( 'additional_urls', $this->options->get( 'additional_urls' ) )
-			->assign( 'additional_files', $this->options->get( 'additional_files' ) )
-			->assign( 'urls_to_exclude', $this->options->get( 'urls_to_exclude' ) )
-			->assign( 'delivery_method', $this->options->get( 'delivery_method' ) )
-			->assign( 'local_dir', $this->options->get( 'local_dir' ) )
-			->assign( 'destination_url_type', $this->options->get( 'destination_url_type' ) )
-			->assign( 'force_replace_url', $this->options->get( 'force_replace_url' ) )
-			->assign( 'clear_directory_before_export', $this->options->get( 'clear_directory_before_export' ) )
-			->assign( 'relative_path', $this->options->get( 'relative_path' ) )
-			->assign( 'http_basic_auth_digest', $this->options->get( 'http_basic_auth_digest' ) )
-			->assign( 'allow_subsites', $this->options->get( 'allow_subsites' ) )
-			->render();
-	}
-
-	/**
-	 * Save the options from the options page
-	 * @return void
-	 */
-	public function save_options() {
-		check_admin_referer( 'simply-static_settings' );
-
-		// Set destination url type / scheme / host
-		$destination_url_type = $this->fetch_post_value( 'destination_url_type' );
-
-		$destination_scheme = $this->fetch_post_value( 'destination_scheme' );
-		$destination_host   = untrailingslashit( $this->fetch_post_value( 'destination_host' ) );
-
-		// Set URLs to exclude
-		$urls_to_exclude = array();
-		$excludables     = $this->fetch_post_array_value( 'excludable' );
-
-		foreach ( $excludables as $excludable ) {
-			$url = trim( $excludable['url'] );
-			// excluding the template row (always has a blank url) and any rows
-			// that the user didn't fill in
-			if ( $url !== '' ) {
-				$urls_to_exclude[ $url ] = array(
-					'url'           => $url,
-					'do_not_save'   => $excludable['do_not_save'],
-					'do_not_follow' => $excludable['do_not_follow'],
-				);
-			}
-		}
-
-		$system_excludables = array(
-			site_url() . DIRECTORY_SEPARATOR . 'wp-json'      => array(
-				'url'           => site_url() . DIRECTORY_SEPARATOR . 'wp-json',
-				'do_not_save'   => '1',
-				'do_not_follow' => '1',
-			),
-			site_url() . DIRECTORY_SEPARATOR . 'wp-login.php' => array(
-				'url'           => site_url() . DIRECTORY_SEPARATOR . 'wp-login.php',
-				'do_not_save'   => '1',
-				'do_not_follow' => '1',
-			),
-		);
-
-		if ( isset( $urls_to_exclude ) && ! empty( $urls_to_exclude ) ) {
-			$urls_to_exclude = array_merge( $system_excludables, $urls_to_exclude );
-		} else {
-			$urls_to_exclude = $system_excludables;
-		}
-
-		// Set relative path
-		$relative_path = $this->fetch_post_value( 'relative_path' );
-		$relative_path = untrailingslashit( Util::add_leading_slash( $relative_path ) );
-
-		// Set basic auth
-		// Checking $_POST array to see if fields exist. The fields are disabled
-		// if the digest is set, but fetch_post_value() would still return them
-		// as empty strings.
-		if ( isset( $_POST['basic_auth_username'] ) && isset( $_POST['basic_auth_password'] ) ) {
-			$basic_auth_user = trim( $this->fetch_post_value( 'basic_auth_username' ) );
-			$basic_auth_pass = trim( $this->fetch_post_value( 'basic_auth_password' ) );
-
-			if ( $basic_auth_user != '' && $basic_auth_pass != '' ) {
-				$http_basic_auth_digest = base64_encode( $basic_auth_user . ':' . $basic_auth_pass );
-			} else {
-				$http_basic_auth_digest = null;
-			}
-			$this->options->set( 'http_basic_auth_digest', $http_basic_auth_digest );
-		}
-
-		// Save settings.
-		$options = apply_filters(
-			'simply_static_options',
-			array(
-				'destination_scheme'            => $destination_scheme,
-				'destination_host'              => $destination_host,
-				'temp_files_dir'                => Util::trailingslashit_unless_blank( $this->fetch_post_value( 'temp_files_dir' ) ),
-				'additional_urls'               => $this->fetch_post_value( 'additional_urls' ),
-				'additional_files'              => $this->fetch_post_value( 'additional_files' ),
-				'urls_to_exclude'               => $urls_to_exclude,
-				'delivery_method'               => $this->fetch_post_value( 'delivery_method' ),
-				'local_dir'                     => Util::trailingslashit_unless_blank( $this->fetch_post_value( 'local_dir' ) ),
-				'destination_url_type'          => $destination_url_type,
-				'relative_path'                 => $relative_path,
-				'force_replace_url'             => $this->fetch_post_value( 'force_replace_url' ),
-				'clear_directory_before_export' => $this->fetch_post_value( 'clear_directory_before_export' ),
-			)
-		);
-
-		if ( is_network_admin() ) {
-			$options['allow_subsites'] = $this->fetch_post_value( 'allow_subsites' );
-		}
-
-		foreach ( $options as $key => $value ) {
-			$value = $this->sanitize_option( $key, $value );
-			$this->options->set( $key, $value );
-		}
-
-		$this->options->save();
-
-		$message = __( 'Your changes have been saved.', 'simply-static' );
-		$this->view->add_flash( 'updated', $message );
-	}
-
-	/**
-	 * Sanitize Option
-	 *
-	 * @param string $key Option key.
-	 * @param mixed $value Option value.
-	 *
-	 * @return mixed
-	 */
-	public function sanitize_option( $key, $value ) {
-		switch ( $key ) {
-			case 'additional_urls':
-			case 'additional_files':
-				$value = str_replace( '"', '', $value );
-				$value = str_replace( "'", '', $value );
-				break;
-		}
-
-		return $value;
-	}
-
-	/**
-	 * Fetch a POST variable by name and sanitize it
-	 *
-	 * @param string $variable_name Name of the POST variable to fetch
-	 *
-	 * @return string                Value of the POST variable
-	 */
-	public function fetch_post_value( $variable_name ) {
-		$input = filter_input( INPUT_POST, $variable_name );
-
-		// using explode/implode to keep linebreaks in text areas
-		return implode( "\n", array_map( 'sanitize_text_field', explode( "\n", $input ) ) );
-	}
-
-	/**
-	 * Fetch a POST array variable by name and sanitize it
-	 *
-	 * @param string $variable_name Name of the POST variable to fetch
-	 *
-	 * @return string                Value of the POST variable
-	 */
-	public function fetch_post_array_value( $variable_name ) {
-		return filter_input( INPUT_POST, $variable_name, FILTER_DEFAULT, FILTER_REQUIRE_ARRAY );
-	}
-
-	/**
-	 * Reset the plugin back to its original state
-	 * @return void
-	 */
-	public function reset_plugin() {
-		check_admin_referer( 'simply-static_reset' );
-
-		// Delete Simply Static's settings
-		delete_option( 'simply-static' );
-		// Drop the Pages table
-		Page::drop_table();
-		// Set up a new instance of Options
-		$this->options = Options::reinstance();
-		// Set up default options and re-create the Pages table
-		Upgrade_Handler::run();
-
-		$message = __( 'Plugin reset complete.', 'simply-static' );
-		$this->view->add_flash( 'updated', $message );
-	}
-
-	/**
-	 * Loads the plugin language files
-	 * @return void
-	 */
-	public function load_textdomain() {
-		load_plugin_textdomain(
-			self::SLUG,
-			false,
-			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
-		);
-	}
-
-	/**
-	 * Set wp_mail to send out html emails
-	 * @return string
-	 */
-	public function filter_wp_mail_content_type() {
-		return 'text/html';
-	}
-
-	/**
 	 * Set HTTP Basic Auth for wp-background-processing
+	 *
+	 * @param array $parsed_args given args.
+	 * @param string $url given URL.
+	 *
+	 * @return array
 	 */
 	public function add_http_filters( $parsed_args, $url ) {
 		if ( strpos( $url, get_bloginfo( 'url' ) ) !== false ) {
@@ -677,24 +400,10 @@ class Plugin {
 	}
 
 	/**
-	 * Display plugin version in footer when on plugin page
-	 * @return string
-	 */
-	public function filter_update_footer( $text ) {
-		if ( ! self::$instance->in_plugin() ) {
-			return $text;
-		}
-
-		$version_text = __( 'Simply Static Version' ) . ': <a title="' . __( 'View what changed in this version', 'simply-static' ) . '" href="https://wordpress.org/plugins/simply-static/changelog/">' . self::VERSION . '</a>';
-
-		return $version_text;
-	}
-
-	/**
 	 * Return the task list for the Archive Creation Job to process
 	 *
-	 * @param array $task_list The list of tasks to process
-	 * @param string $delivery_method The method of delivering static files
+	 * @param array $task_list The list of tasks to process.
+	 * @param string $delivery_method The method of delivering static files.
 	 *
 	 * @return array                   The list of tasks to process
 	 */
@@ -712,37 +421,6 @@ class Plugin {
 		return $task_list;
 	}
 
-	/**
-	 * Are we currently within the plugin?
-	 * @return boolean true if we're within the plugin, false otherwise
-	 */
-	public function in_plugin() {
-		return strpos( $this->current_page, self::SLUG ) === 0;
-	}
-
-	/**
-	 * Return whether or not debug mode is on
-	 * @return boolean Debug mode enabled?
-	 */
-	public function debug_on() {
-		return $this->options->get( 'debugging_mode' ) === '1';
-	}
-
-	/**
-	 * Add information links in admin header.
-	 *
-	 * @return void
-	 */
-	public function add_info_links( $info_text ) {
-		ob_start();
-		?>
-        <a class="button button-secondary" href="https://simplycdn.io" target="_blank">Simply CDN</a>
-        <a class="button button-secondary" href="https://patrickposner.dev/plugins/simply-static" target="_blank">Simply
-            Static Pro</a>
-		<?php
-		$info_text = apply_filters( 'simply_static_info_links', ob_get_clean() );
-		echo $info_text;
-	}
 
 	/**
 	 * Maybe clear local directory before export.
