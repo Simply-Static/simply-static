@@ -104,9 +104,9 @@ function MiscSettings() {
                             : 'Hide admin settings in subsites.'
                     }
                     checked={showSubsiteSettings}
-                    onChange={() => {
-                        setShowSubsiteSettings((state) => !state);
-                        updateSetting('allow_subsites', !state);
+                    onChange={(value) => {
+                        setShowSubsiteSettings(value);
+                        updateSetting('allow_subsites', value);
                     }}
                 />
             </CardBody>
@@ -126,9 +126,9 @@ function MiscSettings() {
                             : 'Replace only occurrences of the WordPress URL that match the tags'
                     }
                     checked={forceURLReplacement}
-                    onChange={() => {
-                        setForceURLReplacement((state) => !state);
-                        updateSetting('force_replace_url', !state);
+                    onChange={(value) => {
+                        setForceURLReplacement(value);
+                        updateSetting('force_replace_url', value);
                     }}
                 />
 
@@ -140,9 +140,9 @@ function MiscSettings() {
                             : 'Don\'t clear local directory before running an export.'
                     }
                     checked={clearDirectory}
-                    onChange={() => {
-                        setClearDirectory((state) => !state);
-                        updateSetting('clear_directory_before_export', !state);
+                    onChange={(value) => {
+                        setClearDirectory(value);
+                        updateSetting('clear_directory_before_export', value);
                     }}
                 />
 

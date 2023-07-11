@@ -72,9 +72,9 @@ function Optimize() {
                             : 'Don\'t enable minify files on your static website.'
                     }
                     checked={minifyFiles}
-                    onChange={() => {
-                        setMinifyFiles((state) => !state);
-                        updateSetting('use_minify', !state);
+                    onChange={(value) => {
+                        setMinifyFiles(value);
+                        updateSetting('use_minify', value);
                     }}
                 />
 
@@ -88,9 +88,9 @@ function Optimize() {
                                     : 'Don\'t minify HTML files.'
                             }
                             checked={minifyHtml}
-                            onChange={() => {
-                                setMinifyHtml((state) => !state);
-                                updateSetting('minify_html', !state);
+                            onChange={(value) => {
+                                setMinifyHtml(value);
+                                updateSetting('minify_html', value);
                             }}
                         />
 
@@ -102,9 +102,9 @@ function Optimize() {
                                     : 'Don\'t minify CSS files.'
                             }
                             checked={minifyCss}
-                            onChange={() => {
-                                setMinifyCss((state) => !state);
-                                updateSetting('minify_css', !state);
+                            onChange={(value) => {
+                                setMinifyCss(value);
+                                updateSetting('minify_css', value);
                             }}
                         />
                         {minifyCss &&
@@ -116,9 +116,9 @@ function Optimize() {
                                         : 'Don\'t minify inline CSS.'
                                 }
                                 checked={minifyInlineCss}
-                                onChange={() => {
-                                    setMinifyInlineCss((state) => !state);
-                                    updateSetting('minify_inline_css', !state);
+                                onChange={(value) => {
+                                    setMinifyInlineCss(value);
+                                    updateSetting('minify_inline_css', value);
                                 }}
                             />
                         }
@@ -130,9 +130,9 @@ function Optimize() {
                                     : 'Don\'t minify JavaScript files.'
                             }
                             checked={minifyJavascript}
-                            onChange={() => {
-                                setMinifyJavascript((state) => !state);
-                                updateSetting('minify_js', !state);
+                            onChange={(value) => {
+                                setMinifyJavascript(value);
+                                updateSetting('minify_js', value);
                             }}
                         />
 
@@ -145,9 +145,9 @@ function Optimize() {
                                         : 'Don\'t minify inline JavaScript.'
                                 }
                                 checked={minifyInlineJavascript}
-                                onChange={() => {
-                                    setMinifyInlineJavascript((state) => !state);
-                                    updateSetting('minify_inline_js', !state);
+                                onChange={(value) => {
+                                    setMinifyInlineJavascript(value);
+                                    updateSetting('minify_inline_js', value);
                                 }}
                             />
                         }

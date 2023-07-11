@@ -56,9 +56,9 @@ function FormSettings() {
                             : 'Don\'t use forms on your static website.'
                     }
                     checked={useForms}
-                    onChange={() => {
-                        setUseForms((state) => !state);
-                        updateSetting('use_forms', !state );
+                    onChange={(value) => {
+                        setUseForms(value);
+                        updateSetting('use_forms', value );
                     }}
                 />
                 {useForms &&
@@ -83,9 +83,9 @@ function FormSettings() {
                             : 'Don\'t use comments on your static website.'
                     }
                     checked={useComments}
-                    onChange={() => {
-                        setUseComments((state) => !state);
-                        updateSetting('use_comments', !state);
+                    onChange={(value) => {
+                        setUseComments(value);
+                        updateSetting('use_comments', value);
                     }}
                 />
 

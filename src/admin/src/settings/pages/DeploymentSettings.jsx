@@ -514,9 +514,9 @@ function DeploymentSettings() {
                                 : 'Don\'t clear bucket before new export.'
                         }
                         checked={emptyBucketBeforeExport}
-                        onChange={() => {
-                            setEmptyBucketBeforeExport((state) => !state);
-                            updateSetting('aws_empty', !state);
+                        onChange={(value) => {
+                            setEmptyBucketBeforeExport(value);
+                            updateSetting('aws_empty', value);
                         }}
                     />
                 </CardBody>
