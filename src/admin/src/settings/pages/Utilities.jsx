@@ -53,6 +53,7 @@ function Utilities() {
 
         setTimeout(function () {
             setIsMigrate(false);
+            location.reload();
         }, 2000);
     }
 
