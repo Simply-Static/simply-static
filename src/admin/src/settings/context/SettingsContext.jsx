@@ -25,7 +25,6 @@ function SettingsContextProvider(props) {
         'allow_subsites' : false,
         'force_replace_url': false,
         'clear_directory_before_export': false,
-        'deployment-provider': 'zip',
         'tiiny_email': options.admin_email,
         'tiiny_subdomain': '',
         'tiiny_domain_suffix': 'tiiny.site',

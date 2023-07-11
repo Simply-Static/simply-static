@@ -17,7 +17,7 @@ const {__} = wp.i18n;
 
 function DeploymentSettings() {
     const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
-    const [deploymentMethod, setDeploymentMethod] = useState('zip');
+    const [deliveryMethod, setDeliveryMethod] = useState('zip');
     const [securityToken, setSecurityToken] = useState('');
     const [githubAccountType, setGithubAccountType] = useState('personal');
     const [githubVisibility, setGithubVisibility] = useState('private');
@@ -60,7 +60,7 @@ function DeploymentSettings() {
         }
 
         if (settings.delivery_method) {
-            setDeploymentMethod(settings.delivery_method);
+            setDeliveryMethod(settings.delivery_method);
         }
 
         if (settings.github_account_type) {
@@ -93,7 +93,7 @@ function DeploymentSettings() {
                 <p>{__('Choose from a variety of deployment methods. Depending on your selection we either provide a ZIP file, export to a local directory or send your files to a remote destination.', 'simply-static')}</p>
                 <SelectControl
                     label={__('Deployment method', 'simply-static')}
-                    value={deploymentMethod}
+                    value={deliveryMethod}
                     options={[
                         {label: __('ZIP Archive', 'simply-static'), value: 'zip'},
                         {label: __('Local Directory', 'simply-static'), value: 'local'},
@@ -105,15 +105,14 @@ function DeploymentSettings() {
                         {label: __('Digital Ocean Spaces', 'simply-static'), value: 'digitalocean'},
                     ]}
                     onChange={(method) => {
-                        setDeploymentMethod(method);
-                        updateSetting('deployment-provider', type);
-                        updateSetting('delivery_method', type);
+                        setDeliveryMethod(method);
+                        updateSetting('delivery_method', method);
                     }}
                 />
             </CardBody>
         </Card>
         <Spacer margin={5}/>
-        {deploymentMethod === 'local' &&
+        {deliveryMethod === 'local' &&
             <Card>
                 <CardHeader>
                     <b>{__('Local Directory', 'simply-static')}</b>
@@ -141,7 +140,7 @@ function DeploymentSettings() {
                 </CardBody>
             </Card>
         }
-        {deploymentMethod === 'simply-cdn' &&
+        {deliveryMethod === 'simply-cdn' &&
             <Card>
                 <CardHeader>
                     <b>{__('Simply CDN', 'simply-static')}</b>
@@ -161,11 +160,12 @@ function DeploymentSettings() {
                             />
                         </FlexItem>
                         <FlexItem>
-                            { securityToken ?
+                            {securityToken ?
                                 <Button variant="secondary" onClick={saveSimplyCDNToken(securityToken)}
                                         className={"simplycdn-connect"}>{__('Connect', 'simply-static')}</Button>
-                                    :
-                                <Button variant="secondary"  className={"simplycdn-connect"} disabled>{__('Connect', 'simply-static')}</Button>
+                                :
+                                <Button variant="secondary" className={"simplycdn-connect"}
+                                        disabled>{__('Connect', 'simply-static')}</Button>
                             }
                         </FlexItem>
                     </Flex>
@@ -177,7 +177,7 @@ function DeploymentSettings() {
                 </CardBody>
             </Card>
         }
-        {deploymentMethod === 'github' &&
+        {deliveryMethod === 'github' &&
             <Card>
                 <CardHeader>
                     <b>{__('GitHub', 'simply-static')}</b>
@@ -195,7 +195,7 @@ function DeploymentSettings() {
                         ]}
                         onChange={(type) => {
                             setGithubAccountType(type);
-                            updateSetting('github-account-type', type);
+                            updateSetting('github_account_type', type);
                         }}
                     />
 
@@ -293,21 +293,11 @@ function DeploymentSettings() {
                             updateSetting('github_webhook_url', webhook);
                         }}
                     />
-
-                    {githubAccountType === 'personal' &&
-                        <>
-                            <Button variant="secondary" style={{marginRight: "5px"}}
-                                    className={"github-action"}>{__('Create Repository', 'simply-static')}</Button>
-
-                            <Button variant="secondary"
-                                    className={"github-action"}>{__('Delete Repository', 'simply-static')}</Button>
-                        </>
-                    }
                 </CardBody>
             </Card>
         }
         <Spacer margin={5}/>
-        {deploymentMethod === 'tiiny' &&
+        {deliveryMethod === 'tiiny' &&
             <Card>
                 <CardHeader>
                     <b>{__('Tiiny.host', 'simply-static')}</b>
@@ -357,7 +347,7 @@ function DeploymentSettings() {
             </Card>
         }
         <Spacer margin={5}/>
-        {deploymentMethod === 'cdn' &&
+        {deliveryMethod === 'cdn' &&
             <Card>
                 <CardHeader>
                     <b>{__('Bunny CDN', 'simply-static')}</b>
@@ -441,7 +431,7 @@ function DeploymentSettings() {
             </Card>
         }
         <Spacer margin={5}/>
-        {deploymentMethod === 'aws-s3' &&
+        {deliveryMethod === 'aws-s3' &&
             <Card>
                 <CardHeader>
                     <b>{__('Amazon AWS S3', 'simply-static')}</b>
@@ -533,7 +523,7 @@ function DeploymentSettings() {
             </Card>
         }
         <Spacer margin={5}/>
-        {deploymentMethod === 'digitalocean' &&
+        {deliveryMethod === 'digitalocean' &&
             <Card>
                 <CardHeader>
                     <b>{__('Digital Ocean Spaces', 'simply-static')}</b>
@@ -593,15 +583,18 @@ function DeploymentSettings() {
         }
         <Spacer margin={5}/>
         {settingsSaved &&
-            <Animate type="slide-in" options={{origin: 'top'}}>
-                {() => (
-                    <Notice status="success" isDismissible={false}>
-                        <p>
-                            {__('Settings saved successfully.', 'simply-static')}
-                        </p>
-                    </Notice>
-                )}
-            </Animate>
+            <>
+                <Animate type="slide-in" options={{origin: 'top'}}>
+                    {() => (
+                        <Notice status="success" isDismissible={false}>
+                            <p>
+                                {__('Settings saved successfully.', 'simply-static')}
+                            </p>
+                        </Notice>
+                    )}
+                </Animate>
+                <Spacer margin={5}/>
+            </>
         }
         <div className={"save-settings"}>
             <Button onClick={setSavingSettings}

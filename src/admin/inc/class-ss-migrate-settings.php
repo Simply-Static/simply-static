@@ -47,9 +47,7 @@ class Migrate_Settings {
 		}
 
 		// Migrate options to always underscore instead of dash.
-
 		if ( $options['deployment-provider'] ) {
-			$options['deployment_provider'] = $options['deployment-provider'];
 			unset( $options['deployment-provider'] );
 		}
 
