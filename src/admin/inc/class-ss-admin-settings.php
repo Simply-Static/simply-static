@@ -165,6 +165,13 @@ class Admin_Settings {
 	public function save_settings( object $request ) {
 		if ( $request->get_params() ) {
 			$options = sanitize_option( 'simply-static2', $request->get_params() );
+
+			// Handle basic auth.
+			if ( isset( $options['http_basic_auth_username'] ) && isset( $options['http_basic_auth_password'] ) ) {
+				$options['http_basic_auth_digest'] = base64_encode( $options['http_basic_auth_username'] . ':' . $options['http_basic_auth_password'] );
+			}
+
+			// Update settings.
 			update_option( 'simply-static2', $options );
 
 			return json_encode( [ "status" => 200, "message" => "Ok" ] );
