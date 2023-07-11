@@ -189,7 +189,7 @@ class Plugin {
 			apply_filters( 'ss_settings_capability', 'edit_posts' ),
 			self::SLUG,
 			array( self::$instance, 'display_generate_page' ),
-			'dashicons-text-page'
+			SIMPLY_STATIC_URL . '/assets/simply-static-icon.svg',
 		);
 
 		add_submenu_page(
