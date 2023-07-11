@@ -183,7 +183,7 @@ class Diagnostic {
 		return array(
 			'test'        => $infos['test'],
 			'description' => sprintf( __( "WordPress can make requests to itself from %s", 'simply-static' ), $ip_address ),
-			'error'       => $infos['message'],
+			'error'       => sprintf( __( "WordPress can not make requests to itself from %s", 'simply-static' ), $ip_address ),
 		);
 	}
 
