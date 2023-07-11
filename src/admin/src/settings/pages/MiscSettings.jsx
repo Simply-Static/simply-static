@@ -18,6 +18,8 @@ function MiscSettings() {
     const [showSubsiteSettings, setShowSubsiteSettings] = useState(false);
     const [forceURLReplacement, setForceURLReplacement] = useState(false);
     const [clearDirectory, setClearDirectory] = useState(false);
+    const [debuggingMode, setDebuggingMode] = useState(false);
+
 
     const setSavingSettings = () => {
         saveSettings();
@@ -39,6 +41,10 @@ function MiscSettings() {
 
         if (settings.clear_directory_before_export) {
             setClearDirectory(settings.clear_directory_before_export);
+        }
+
+        if (settings.debugging_mode) {
+            setDebuggingMode(settings.debugging_mode);
         }
     }, [settings]);
 
@@ -143,6 +149,20 @@ function MiscSettings() {
                     onChange={(value) => {
                         setClearDirectory(value);
                         updateSetting('clear_directory_before_export', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Debugging Mode', 'simply-static')}
+                    help={
+                        debuggingMode
+                            ? 'Enable debugging mode.'
+                            : 'Disable debugging mode.'
+                    }
+                    checked={debuggingMode}
+                    onChange={(value) => {
+                        setDebuggingMode(value);
+                        updateSetting('debugging_mode', value);
                     }}
                 />
 

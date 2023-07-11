@@ -12,12 +12,15 @@ import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
 import Terminal, {ColorMode, TerminalOutput} from 'react-terminal-ui';
 import DataTable from 'react-data-table-component';
+import apiFetch from "@wordpress/api-fetch";
 
 const {__} = wp.i18n;
 
 function Generate() {
-    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
+    const {settings} = useContext(SettingsContext);
     const [isRunning, setIsRunning] = useState(false);
+    const [logDeleted, setLogDeleted] = useState(false);
+
     const [terminalLineData, setTerminalLineData] = useState([
         <TerminalOutput>Setting up..</TerminalOutput>
     ]);
@@ -77,27 +80,70 @@ function Generate() {
             url: 'https://simply-static.local/about/',
             notes: 'Found on /',
         },
-    ]
+    ];
 
-    const setSavingSettings = () => {
-        saveSettings();
-        setSettingsSaved(true);
+
+    const deleteLog = () => {
+        apiFetch({
+            path: '/simplystatic/v1/delete-log',
+            method: 'POST',
+        });
+
+        setLogDeleted(true);
 
         setTimeout(function () {
-            setSettingsSaved(false);
+            setLogDeleted(false);
         }, 2000);
     }
+
 
     useEffect(() => {
 
     }, [settings]);
 
     return (<div className={"inner-settings settings-wide"}>
-
         <Terminal name={__('Activity Log', 'simply-static')} height="250px" colorMode={ColorMode.Dark}>
             {terminalLineData}
         </Terminal>
-
+        <Spacer margin={5}/>
+        <Flex>
+            <FlexItem isBlock={true}>
+                <Card>
+                    <CardHeader>
+                        <b>{__('Multisite', 'simply-static')}</b>
+                    </CardHeader>
+                    <CardBody>
+                        <p>The options for the site selection are going here..</p>
+                    </CardBody>
+                </Card>
+            </FlexItem>
+            {settings.debugging_mode &&
+                <FlexItem isBlock={true}>
+                    <Card>
+                        <CardHeader>
+                            <b>{__('Debugging', 'simply-static')}</b>
+                        </CardHeader>
+                        <CardBody>
+                            <Button variant="primary" href={options.log_file} target={"_blank"}
+                                    style={{marginRight: "10px"}}>{__('Download Log', 'simply-static')}</Button>
+                            <Button variant="secondary"
+                                    onClick={deleteLog}>{__('Clear Log', 'simply-static')}</Button>
+                            {logDeleted &&
+                                <Animate type="slide-in" options={{origin: 'top'}}>
+                                    {() => (
+                                        <Notice status="success" isDismissible={false}>
+                                            <p>
+                                                {__('Log file successfully deleted.', 'simply-static')}
+                                            </p>
+                                        </Notice>
+                                    )}
+                                </Animate>
+                            }
+                        </CardBody>
+                    </Card>
+                </FlexItem>
+            }
+        </Flex>
         <Spacer margin={5}/>
         <Card>
             <CardHeader>

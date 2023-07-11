@@ -75,11 +75,13 @@ class Admin_Settings {
 			'version'        => '2.3.2',
 			'logo'           => SIMPLY_STATIC_URL . '/assets/simply-static-logo.svg',
 			'is_pro'         => false,
+			'is_network'     => false,
 			'home'           => home_url(),
 			'home_path'      => get_home_path(),
 			'admin_email'    => get_bloginfo( 'admin_email' ),
 			'temp_files_dir' => $options->get( 'temp_files_dir' ),
-			'token'          => get_option( 'sch_token' )
+			'token'          => get_option( 'sch_token' ),
+			'log_file'       => SIMPLY_STATIC_URL . '/debug.txt'
 		);
 
 
@@ -132,6 +134,14 @@ class Admin_Settings {
 		register_rest_route( 'simplystatic/v1', '/migrate', array(
 			'methods'             => 'POST',
 			'callback'            => [ $this, 'migrate_settings' ],
+			'permission_callback' => function () {
+				return current_user_can( 'manage_options' );
+			},
+		) );
+
+		register_rest_route( 'simplystatic/v1', '/delete-log', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'clear_log' ],
 			'permission_callback' => function () {
 				return current_user_can( 'manage_options' );
 			},
@@ -193,4 +203,17 @@ class Admin_Settings {
 
 		return json_encode( [ "status" => 200, "message" => "Ok" ] );
 	}
+
+	/**
+	 * Clear log file.
+	 *
+	 * @return false|string
+	 */
+	public function clear_log() {
+		Util::delete_debug_log();
+
+		return json_encode( [ "status" => 200, "message" => "Ok" ] );
+	}
+
+
 }
