@@ -39,13 +39,16 @@ class Admin_Settings {
 	 * @return void
 	 */
 	public function add_menu() {
+		if ( apply_filters( 'ss_hide_admin_menu', false ) ) {
+			return;
+		}
 
 		$settings_suffix = add_submenu_page(
 			'simply-static',
-			__( 'Options', 'simply-static' ),
-			__( 'Options', 'simply-static' ),
+			__( 'Settings', 'simply-static' ),
+			__( 'Settings', 'simply-static' ),
 			apply_filters( 'ss_user_capability', 'manage_options' ),
-			'simply-static-options',
+			'simply-static-settings',
 			array( $this, 'render_settings' )
 		);
 
@@ -141,7 +144,7 @@ class Admin_Settings {
 	 * @return false|mixed|null
 	 */
 	public function get_settings() {
-		return get_option( 'simply-static2' );
+		return get_option( 'simply-static' );
 	}
 
 	/**
@@ -164,7 +167,7 @@ class Admin_Settings {
 	 */
 	public function save_settings( object $request ) {
 		if ( $request->get_params() ) {
-			$options = sanitize_option( 'simply-static2', $request->get_params() );
+			$options = sanitize_option( 'simply-static', $request->get_params() );
 
 			// Handle basic auth.
 			if ( isset( $options['http_basic_auth_username'] ) && isset( $options['http_basic_auth_password'] ) ) {
@@ -172,7 +175,7 @@ class Admin_Settings {
 			}
 
 			// Update settings.
-			update_option( 'simply-static2', $options );
+			update_option( 'simply-static', $options );
 
 			return json_encode( [ "status" => 200, "message" => "Ok" ] );
 		}

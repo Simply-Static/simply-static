@@ -272,6 +272,6 @@ class Migrate_Settings {
 			unset( $options['algolia-selector'] );
 		}
 
-		update_option( 'simply-static2', $options );
+		update_option( 'simply-static', $options );
 	}
 }
