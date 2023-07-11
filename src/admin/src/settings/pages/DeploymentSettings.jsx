@@ -11,6 +11,7 @@ import {
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
+import apiFetch from "@wordpress/api-fetch";
 
 const {__} = wp.i18n;
 
@@ -23,6 +24,8 @@ function DeploymentSettings() {
     const [emptyBucketBeforeExport, setEmptyBucketBeforeExport] = useState(false);
     const [region, setRegion] = useState('us-east-2');
     const [hasCopied, setHasCopied] = useState(false);
+    const [tokenSaved, setTokenSaved] = useState(false);
+    const [tokenMessage, setTokenMessage] = useState('');
 
     const setSavingSettings = () => {
         saveSettings();
@@ -33,7 +36,29 @@ function DeploymentSettings() {
         }, 2000);
     }
 
+    const saveSimplyCDNToken = (securityToken) => {
+        apiFetch({
+            path: '/simplystatic/v1/token',
+            method: 'POST',
+            data: {token: securityToken},
+        }).then((response) => {
+            let data = JSON.parse(response);
+
+            if (data.success) {
+                setTokenSaved(true);
+                setTokenMessage(data.message);
+            } else {
+                setTokenSaved(false);
+                setTokenMessage(data.message);
+            }
+        });
+    }
+
     useEffect(() => {
+        if (options.token) {
+            setSecurityToken(options.token);
+        }
+
         if (settings.delivery_method) {
             setDeploymentMethod(settings.delivery_method);
         }
@@ -128,19 +153,27 @@ function DeploymentSettings() {
                             <TextControl
                                 label={__('Security Token', 'simply-static')}
                                 type={"text"}
-                                help={"Copy and paste the Security Token from your project and click connect."}
+                                help={__('Copy and paste the Security Token from your project and click connect.', 'simply-static')}
                                 value={securityToken}
                                 onChange={(value) => {
                                     setSecurityToken(value);
-                                    // Todo: Save as sch_token (seperate option)
                                 }}
                             />
                         </FlexItem>
                         <FlexItem>
-                            <Button variant="secondary"
-                                    className={"simplycdn-connect"}>{__('Connect', 'simply-static')}</Button>
+                            { securityToken ?
+                                <Button variant="secondary" onClick={saveSimplyCDNToken(securityToken)}
+                                        className={"simplycdn-connect"}>{__('Connect', 'simply-static')}</Button>
+                                    :
+                                <Button variant="secondary"  className={"simplycdn-connect"} disabled>{__('Connect', 'simply-static')}</Button>
+                            }
                         </FlexItem>
                     </Flex>
+                    {tokenSaved &&
+                        <Notice status="success" isDismissible={false}>
+                            <p>{tokenMessage}</p>
+                        </Notice>
+                    }
                 </CardBody>
             </Card>
         }

@@ -78,7 +78,8 @@ class Admin_Settings {
 			'home'           => home_url(),
 			'home_path'      => get_home_path(),
 			'admin_email'    => get_bloginfo( 'admin_email' ),
-			'temp_files_dir' => $options->get( 'temp_files_dir' )
+			'temp_files_dir' => $options->get( 'temp_files_dir' ),
+			'token'          => get_option( 'sch_token' )
 		);
 
 
@@ -135,7 +136,6 @@ class Admin_Settings {
 				return current_user_can( 'manage_options' );
 			},
 		) );
-
 	}
 
 	/**
@@ -184,5 +184,4 @@ class Admin_Settings {
 
 		return json_encode( [ "status" => 200, "message" => "Ok" ] );
 	}
-
 }
