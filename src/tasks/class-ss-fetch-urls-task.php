@@ -60,9 +60,9 @@ class Fetch_Urls_Task extends Task {
 
 			$excludable = apply_filters( 'ss_find_excludable', $this->find_excludable( $static_page ), $static_page );
 			if ( $excludable !== false ) {
-				$save_file   = $excludable['do_not_save'] !== '1';
-				$follow_urls = $excludable['do_not_follow'] !== '1';
-				Util::debug_log( "Excludable found: URL: " . $excludable['url'] . ' DNS: ' . $excludable['do_not_save'] . ' DNF: ' . $excludable['do_not_follow'] );
+				$save_file   = false;
+				$follow_urls = false;
+				Util::debug_log( "Excludable found: URL: " . $excludable['url'] );
 			} else {
 				$save_file   = true;
 				$follow_urls = true;
