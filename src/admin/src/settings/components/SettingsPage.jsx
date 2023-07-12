@@ -79,12 +79,14 @@ function SettingsPage() {
                                                  path="/general">
                                     <Dashicon icon="admin-generic"/> {__('General', 'content-protector')}
                                 </NavigatorButton>
-                                <NavigatorButton onClick={() => setActiveItem('/deployment')}
-                                                 className={activeItem === '/deployment' ? 'is-active-item' : ''}
-                                                 path="/deployment">
-                                    <Dashicon icon="migrate"/> {__('Deployment', 'content-protector')}
-                                </NavigatorButton>
-                                {'pro' === options.plan &&
+                                {!options.is_network &&
+                                    <NavigatorButton onClick={() => setActiveItem('/deployment')}
+                                                     className={activeItem === '/deployment' ? 'is-active-item' : ''}
+                                                     path="/deployment">
+                                        <Dashicon icon="migrate"/> {__('Deployment', 'content-protector')}
+                                    </NavigatorButton>
+                                }
+                                {'pro' === options.plan && !options.is_network &&
                                     <>
                                         <NavigatorButton onClick={() => setActiveItem('/forms')}
                                                          className={activeItem === '/forms' ? 'is-active-item' : ''}
