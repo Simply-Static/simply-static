@@ -61,12 +61,6 @@ function FormSettings() {
                         updateSetting('use_forms', value);
                     }}
                 />
-                {useForms &&
-                    <>
-                        <Button variant="secondary"
-                                className={"create-form-config"}>{__('Create Form Config', 'simply-static')}</Button>
-                    </>
-                }
             </CardBody>
         </Card>
         <Spacer margin={5}/>
