@@ -43,6 +43,17 @@ class Admin_Settings {
 			return;
 		}
 
+		$generate_suffix = add_submenu_page(
+			'simply-static',
+			__( 'Generate (new)', 'simply-static' ),
+			__( 'Generate (new)', 'simply-static' ),
+			apply_filters( 'ss_user_capability', 'manage_options' ),
+			'simply-static-generate',
+			array( $this, 'render_settings' )
+		);
+
+		add_action( "admin_print_scripts-{$generate_suffix}", array( $this, 'add_settings_scripts' ) );
+
 		$settings_suffix = add_submenu_page(
 			'simply-static',
 			__( 'Settings', 'simply-static' ),
@@ -67,8 +78,14 @@ class Admin_Settings {
 			'wp-i18n'
 		), '2.3.2', true );
 
-
 		$options = Options::reinstance();
+
+		// Determine initial screen.
+		$initial = '/';
+
+		if ( 'simply-static_page_simply-static-settings' === $screen->base ) {
+			$initial = '/general';
+		}
 
 		$args = array(
 			'screen'         => 'simplystatic-settings',
@@ -76,6 +93,7 @@ class Admin_Settings {
 			'logo'           => SIMPLY_STATIC_URL . '/assets/simply-static-logo.svg',
 			'is_pro'         => false,
 			'is_network'     => false,
+			'initial'        => $initial,
 			'home'           => home_url(),
 			'home_path'      => get_home_path(),
 			'admin_email'    => get_bloginfo( 'admin_email' ),
