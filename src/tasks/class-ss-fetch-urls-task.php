@@ -62,7 +62,7 @@ class Fetch_Urls_Task extends Task {
 			if ( $excludable !== false ) {
 				$save_file   = false;
 				$follow_urls = false;
-				Util::debug_log( "Excludable found: URL: " . $excludable['url'] );
+				Util::debug_log( "Excludable found: URL: " . $static_page->url );
 			} else {
 				$save_file   = true;
 				$follow_urls = true;
