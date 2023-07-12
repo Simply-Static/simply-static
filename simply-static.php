@@ -51,6 +51,8 @@ if ( ! function_exists( 'simply_static_run_plugin' ) ) {
 	}
 
 	// Do we need to migrate?
+	include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+
 	if ( is_plugin_active( 'simply-static-pro/simply-static-pro.php' ) || is_plugin_active_for_network( 'simply-static-pro/simply-static-pro.php' ) ) {
 		if ( defined( 'SIMPLY_STATIC_PRO_VERSION' ) && version_compare( SIMPLY_STATIC_PRO_VERSION, '1.4', '<' ) ) {
 			add_action(
