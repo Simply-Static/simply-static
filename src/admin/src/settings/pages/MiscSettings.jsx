@@ -95,28 +95,32 @@ function MiscSettings() {
 
             </CardBody>
         </Card>
-        <Spacer margin={5}/>
-        <Card>
-            <CardHeader>
-                <b>{__('Multisite', 'simply-static')}</b>
-            </CardHeader>
-            <CardBody>
-                <p>{__('Here you can configure settings related to WordPress Multisite.', 'simply-static')}</p>
-                <ToggleControl
-                    label={__('Show subsite settings', 'simply-static')}
-                    help={
-                        showSubsiteSettings
-                            ? 'Show admin settings in subsites.'
-                            : 'Hide admin settings in subsites.'
-                    }
-                    checked={showSubsiteSettings}
-                    onChange={(value) => {
-                        setShowSubsiteSettings(value);
-                        updateSetting('allow_subsites', value);
-                    }}
-                />
-            </CardBody>
-        </Card>
+        {'pro' === options.plan && options.is_multisite &&
+            <>
+                <Spacer margin={5}/>
+                <Card>
+                    <CardHeader>
+                        <b>{__('Multisite', 'simply-static')}</b>
+                    </CardHeader>
+                    <CardBody>
+                        <p>{__('Here you can configure settings related to WordPress Multisite.', 'simply-static')}</p>
+                        <ToggleControl
+                            label={__('Show subsite settings', 'simply-static')}
+                            help={
+                                showSubsiteSettings
+                                    ? 'Show admin settings in subsites.'
+                                    : 'Hide admin settings in subsites.'
+                            }
+                            checked={showSubsiteSettings}
+                            onChange={(value) => {
+                                setShowSubsiteSettings(value);
+                                updateSetting('allow_subsites', value);
+                            }}
+                        />
+                    </CardBody>
+                </Card>
+            </>
+        }
         <Spacer margin={5}/>
         <Card>
             <CardHeader>

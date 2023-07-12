@@ -107,16 +107,18 @@ function Generate() {
         </Terminal>
         <Spacer margin={5}/>
         <Flex>
-            <FlexItem isBlock={true}>
-                <Card>
-                    <CardHeader>
-                        <b>{__('Multisite', 'simply-static')}</b>
-                    </CardHeader>
-                    <CardBody>
-                        <p>The options for the site selection are going here..</p>
-                    </CardBody>
-                </Card>
-            </FlexItem>
+            {'pro' === options.plan && options.is_network &&
+                <FlexItem isBlock={true}>
+                    <Card>
+                        <CardHeader>
+                            <b>{__('Multisite', 'simply-static')}</b>
+                        </CardHeader>
+                        <CardBody>
+                            <p>The options for the site selection are going here..</p>
+                        </CardBody>
+                    </Card>
+                </FlexItem>
+            }
             {settings.debugging_mode &&
                 <FlexItem isBlock={true}>
                     <Card>

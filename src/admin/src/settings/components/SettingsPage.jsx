@@ -38,7 +38,7 @@ function SettingsPage() {
             setInitialPage(options.initial);
         }
     });
-    
+
     return (
         <div className={"plugin-settings-container"}>
             <NavigatorProvider initialPath={initialPage}>
@@ -84,24 +84,30 @@ function SettingsPage() {
                                                  path="/deployment">
                                     <Dashicon icon="migrate"/> {__('Deployment', 'content-protector')}
                                 </NavigatorButton>
-                                <NavigatorButton onClick={() => setActiveItem('/forms')}
-                                                 className={activeItem === '/forms' ? 'is-active-item' : ''}
-                                                 path="/forms">
-                                    <Dashicon icon="align-center"/> {__('Forms', 'content-protector')}
-                                </NavigatorButton>
-                                <NavigatorButton onClick={() => setActiveItem('/search')}
-                                                 className={activeItem === '/search' ? 'is-active-item' : ''}
-                                                 path="/search">
-                                    <Dashicon icon="search"/> {__('Search', 'content-protector')}
-                                </NavigatorButton>
+                                {'pro' === options.plan &&
+                                    <>
+                                        <NavigatorButton onClick={() => setActiveItem('/forms')}
+                                                         className={activeItem === '/forms' ? 'is-active-item' : ''}
+                                                         path="/forms">
+                                            <Dashicon icon="align-center"/> {__('Forms', 'content-protector')}
+                                        </NavigatorButton>
+                                        <NavigatorButton onClick={() => setActiveItem('/search')}
+                                                         className={activeItem === '/search' ? 'is-active-item' : ''}
+                                                         path="/search">
+                                            <Dashicon icon="search"/> {__('Search', 'content-protector')}
+                                        </NavigatorButton>
+                                    </>
+                                }
                             </CardBody>
                             <CardBody>
                                 <h4 className={"settings-headline"}> {__('Advanced', 'content-protector')}</h4>
-                                <NavigatorButton onClick={() => setActiveItem('/optimize')}
-                                                 className={activeItem === '/optimize' ? 'is-active-item' : ''}
-                                                 path="/optimize">
-                                    <Dashicon icon="dashboard"/> {__('Optimize', 'content-protector')}
-                                </NavigatorButton>
+                                {'pro' === options.plan &&
+                                    <NavigatorButton onClick={() => setActiveItem('/optimize')}
+                                                     className={activeItem === '/optimize' ? 'is-active-item' : ''}
+                                                     path="/optimize">
+                                        <Dashicon icon="dashboard"/> {__('Optimize', 'content-protector')}
+                                    </NavigatorButton>
+                                }
                                 <NavigatorButton onClick={() => setActiveItem('/utilities')}
                                                  className={activeItem === '/utilities' ? 'is-active-item' : ''}
                                                  path="/utilities">
@@ -121,7 +127,7 @@ function SettingsPage() {
                                 <Button href="https://simplystatic.com/docs/" target="_blank">
                                     <Dashicon icon="admin-links"/> {__('Documentation', 'content-protector')}
                                 </Button>
-                                {!options.is_pro &&
+                                {'free' === options.plan &&
                                     <Button href="https://simplystatic.com/simply-static-pro/" target="_blank">
                                         <Dashicon
                                             icon="admin-site-alt3"/> {__('Simply Static Pro', 'content-protector')}
@@ -135,6 +141,15 @@ function SettingsPage() {
                             <NavigatorScreen path="/">
                                 <div className={"plugin-settings"}>
                                     <Generate/>
+                                </div>
+                            </NavigatorScreen>
+                        </FlexItem>
+                    }
+                    {activeItem === '/diagnostics' &&
+                        <FlexItem isBlock={true}>
+                            <NavigatorScreen path="/diagnostics">
+                                <div className={"plugin-settings"}>
+                                    <Diagnostics/>
                                 </div>
                             </NavigatorScreen>
                         </FlexItem>
@@ -157,7 +172,7 @@ function SettingsPage() {
                             </NavigatorScreen>
                         </FlexItem>
                     }
-                    {activeItem === '/forms' &&
+                    {activeItem === '/forms' && 'pro' === options.plan &&
                         <FlexItem isBlock={true}>
                             <NavigatorScreen path="/forms">
                                 <div className={"plugin-settings"}>
@@ -166,7 +181,7 @@ function SettingsPage() {
                             </NavigatorScreen>
                         </FlexItem>
                     }
-                    {activeItem === '/search' &&
+                    {activeItem === '/search' && 'pro' === options.plan &&
                         <FlexItem isBlock={true}>
                             <NavigatorScreen path="/search">
                                 <div className={"plugin-settings"}>
@@ -175,29 +190,11 @@ function SettingsPage() {
                             </NavigatorScreen>
                         </FlexItem>
                     }
-                    {activeItem === '/optimize' &&
+                    {activeItem === '/optimize' && 'pro' === options.plan &&
                         <FlexItem isBlock={true}>
                             <NavigatorScreen path="/optimize">
                                 <div className={"plugin-settings"}>
                                     <Optimize/>
-                                </div>
-                            </NavigatorScreen>
-                        </FlexItem>
-                    }
-                    {activeItem === '/misc' &&
-                        <FlexItem isBlock={true}>
-                            <NavigatorScreen path="/misc">
-                                <div className={"plugin-settings"}>
-                                    <MiscSettings/>
-                                </div>
-                            </NavigatorScreen>
-                        </FlexItem>
-                    }
-                    {activeItem === '/diagnostics' &&
-                        <FlexItem isBlock={true}>
-                            <NavigatorScreen path="/diagnostics">
-                                <div className={"plugin-settings"}>
-                                    <Diagnostics/>
                                 </div>
                             </NavigatorScreen>
                         </FlexItem>
@@ -207,6 +204,15 @@ function SettingsPage() {
                             <NavigatorScreen path="/utilities">
                                 <div className={"plugin-settings"}>
                                     <Utilities/>
+                                </div>
+                            </NavigatorScreen>
+                        </FlexItem>
+                    }
+                    {activeItem === '/misc' &&
+                        <FlexItem isBlock={true}>
+                            <NavigatorScreen path="/misc">
+                                <div className={"plugin-settings"}>
+                                    <MiscSettings/>
                                 </div>
                             </NavigatorScreen>
                         </FlexItem>

@@ -87,21 +87,24 @@ class Admin_Settings {
 			$initial = '/general';
 		}
 
-		$args = array(
-			'screen'         => 'simplystatic-settings',
-			'version'        => '2.3.2',
-			'logo'           => SIMPLY_STATIC_URL . '/assets/simply-static-logo.svg',
-			'is_pro'         => false,
-			'is_network'     => false,
-			'initial'        => $initial,
-			'home'           => home_url(),
-			'home_path'      => get_home_path(),
-			'admin_email'    => get_bloginfo( 'admin_email' ),
-			'temp_files_dir' => $options->get( 'temp_files_dir' ),
-			'token'          => get_option( 'sch_token' ),
-			'log_file'       => SIMPLY_STATIC_URL . '/debug.txt'
+		$args = apply_filters(
+			'ss_settings_args',
+			array(
+				'screen'         => 'simplystatic-settings',
+				'version'        => '2.3.2',
+				'logo'           => SIMPLY_STATIC_URL . '/assets/simply-static-logo.svg',
+				'plan'           => 'free',
+				'is_network'     => is_network_admin(),
+				'is_multisite'   => is_multisite(),
+				'initial'        => $initial,
+				'home'           => home_url(),
+				'home_path'      => get_home_path(),
+				'admin_email'    => get_bloginfo( 'admin_email' ),
+				'temp_files_dir' => $options->get( 'temp_files_dir' ),
+				'token'          => get_option( 'sch_token' ),
+				'log_file'       => SIMPLY_STATIC_URL . '/debug.txt'
+			)
 		);
-
 
 		wp_localize_script( 'simplystatic-settings', 'options', $args );
 
