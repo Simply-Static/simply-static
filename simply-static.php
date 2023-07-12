@@ -26,16 +26,16 @@ if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
 	wp_die( esc_html__( 'Simply Static requires PHP 7.4 or higher.', 'simply-static' ), 'Plugin dependency check', array( 'back_link' => true ) );
 }
 
-// localize.
+// Localize.
 $textdomain_dir = plugin_basename( dirname( __FILE__ ) ) . '/languages';
 load_plugin_textdomain( 'simply-static', false, $textdomain_dir );
 
-// run autoloader.
+// Run autoloader.
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) && ! class_exists( 'Simply_Static\Plugin' ) ) {
 	require __DIR__ . '/vendor/autoload.php';
 }
 
-// boot Simply Static.
+// Boot Simply Static.
 if ( ! function_exists( 'simply_static_run_plugin' ) ) {
 	add_action( 'plugins_loaded', 'simply_static_run_plugin' );
 
@@ -48,5 +48,18 @@ if ( ! function_exists( 'simply_static_run_plugin' ) ) {
 		require_once SIMPLY_STATIC_PATH . 'src/class-ss-plugin.php';
 
 		Simply_Static\Plugin::instance();
+	}
+
+	// Do we need to migrate?
+	if ( is_plugin_active( 'simply-static-pro/simply-static-pro.php' ) || is_plugin_active_for_network( 'simply-static-pro/simply-static-pro.php' ) ) {
+		if ( defined( 'SIMPLY_STATIC_PRO_VERSION' ) && version_compare( SIMPLY_STATIC_PRO_VERSION, '1.4', '<' ) ) {
+			add_action(
+				'admin_notices',
+				function () {
+					$message = esc_html__( 'You need to update Simply Static Pro to version 1.4 before continuing to use Simply Static, as we made significant changes requiring an upgrade.', 'simply-static' );
+					echo wp_kses_post( '<div class="notice notice-error"><p>' . $message . '</p></div>' );
+				}
+			);
+		}
 	}
 }

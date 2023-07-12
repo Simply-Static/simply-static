@@ -88,6 +88,9 @@ class Upgrade_Handler {
 			// Sync database.
 			Page::create_or_update_table();
 
+			// Migrate settings.
+			Migrate_Settings::migrate();
+
 			// Update version.
 			self::$options
 			->set( 'version', Plugin::VERSION )
