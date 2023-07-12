@@ -26,15 +26,22 @@ import Optimize from "../pages/Optimize";
 const {__} = wp.i18n;
 
 function SettingsPage() {
+
     const [activeItem, setActiveItem] = useState({activeItem: "/"});
+    const [initialPage, setInitialPage] = useState(options.initial);
+    const [initialSet, setInitialSet] = useState(false);
 
     useEffect(() => {
-        setActiveItem(options.initial);
+        if (!initialSet) {
+            setInitialSet(true);
+            setActiveItem(options.initial);
+            setInitialPage(options.initial);
+        }
     });
-
+    
     return (
         <div className={"plugin-settings-container"}>
-            <NavigatorProvider initialPath={options.initial}>
+            <NavigatorProvider initialPath={initialPage}>
                 <Flex>
                     <FlexItem>
                         <Card className={"plugin-nav"}>
