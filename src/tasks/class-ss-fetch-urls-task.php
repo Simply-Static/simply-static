@@ -85,14 +85,14 @@ class Fetch_Urls_Task extends Task {
 				continue;
 			}
 
-            // Not found? It's maybe a redirection page. Let's try it without our param.
-            if ( $static_page->http_status_code === 404 ) {
-                $success = Url_Fetcher::instance()->fetch( $static_page, false );
+			// Not found? It's maybe a redirection page. Let's try it without our param.
+			if ( $static_page->http_status_code === 404 ) {
+				$success = Url_Fetcher::instance()->fetch( $static_page, false );
 
-                if ( ! $success ) {
-                    continue;
-                }
-            }
+				if ( ! $success ) {
+					continue;
+				}
+			}
 
 			// If we get a 30x redirect...
 			if ( in_array( $static_page->http_status_code, array( 301, 302, 303, 307, 308 ) ) ) {
@@ -265,16 +265,13 @@ class Fetch_Urls_Task extends Task {
 	 * @return bool
 	 */
 	public function find_excludable( $static_page ) {
-		$url         = $static_page->url;
-		$excludables = array();
+		$excluded_by_option = explode( "\n", $this->options->get( 'urls_to_exclude' ) );
 
-		foreach ( $this->options->get( 'urls_to_exclude' ) as $excludable ) {
-			// using | as the delimiter for regex instead of the traditional /
-			// because | won't show up in a path (it would have to be url-encoded)
-			$regex  = '|' . $excludable['url'] . '|';
-			$result = preg_match( $regex, $url );
-			if ( $result === 1 ) {
-				return $excludable;
+		foreach ( $excluded_by_option as $excludable ) {
+			$url = $static_page->url;
+
+			if ( strpos( $url, $excludable ) !== false ) {
+				return true;
 			}
 		}
 
