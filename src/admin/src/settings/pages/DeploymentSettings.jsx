@@ -528,8 +528,8 @@ function DeploymentSettings() {
                                 label={__('Empty bucket before new export?', 'simply-static')}
                                 help={
                                     emptyBucketBeforeExport
-                                        ? 'Clear bucket before new export.'
-                                        : 'Don\'t clear bucket before new export.'
+                                        ? __('Clear bucket before new export.', 'simply-static')
+                                        : __('Don\'t clear bucket before new export.', 'simply-static')
                                 }
                                 checked={emptyBucketBeforeExport}
                                 onChange={(value) => {

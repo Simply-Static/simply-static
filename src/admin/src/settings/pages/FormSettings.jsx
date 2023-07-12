@@ -52,8 +52,8 @@ function FormSettings() {
                     label={__('Use forms?', 'simply-static')}
                     help={
                         useForms
-                            ? 'Use Forms on your static website.'
-                            : 'Don\'t use forms on your static website.'
+                            ? __('Use Forms on your static website.', 'simply-static')
+                            : __('Don\'t use forms on your static website.', 'simply-static')
                     }
                     checked={useForms}
                     onChange={(value) => {
@@ -73,8 +73,8 @@ function FormSettings() {
                     label={__('Use comments?', 'simply-static')}
                     help={
                         useComments
-                            ? 'Use comments on your static website.'
-                            : 'Don\'t use comments on your static website.'
+                            ? __('Use comments on your static website.', 'simply-static')
+                            : __('Don\'t use comments on your static website.', 'simply-static')
                     }
                     checked={useComments}
                     onChange={(value) => {

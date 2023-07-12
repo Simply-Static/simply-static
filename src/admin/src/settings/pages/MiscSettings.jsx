@@ -132,8 +132,8 @@ function MiscSettings() {
                     label={__('Force URL replacements', 'simply-static')}
                     help={
                         forceURLReplacement
-                            ? 'Replace all occurrences of the WordPress URL with the static URL.'
-                            : 'Replace only occurrences of the WordPress URL that match the tags'
+                            ? __('Replace all occurrences of the WordPress URL with the static URL.', 'simply-static')
+                            : __('Replace only occurrences of the WordPress URL that match the tags', 'simply-static')
                     }
                     checked={forceURLReplacement}
                     onChange={(value) => {
@@ -146,8 +146,8 @@ function MiscSettings() {
                     label={__('Clear Directory', 'simply-static')}
                     help={
                         clearDirectory
-                            ? 'Clear local directory before running an export.'
-                            : 'Don\'t clear local directory before running an export.'
+                            ? __('Clear local directory before running an export.', 'simply-static')
+                            : __('Don\'t clear local directory before running an export.', 'simply-static')
                     }
                     checked={clearDirectory}
                     onChange={(value) => {
@@ -160,8 +160,8 @@ function MiscSettings() {
                     label={__('Debugging Mode', 'simply-static')}
                     help={
                         debuggingMode
-                            ? 'Enable debugging mode.'
-                            : 'Disable debugging mode.'
+                            ? __('Enable debugging mode.', 'simply-static')
+                            : __('Disable debugging mode.', 'simply-static')
                     }
                     checked={debuggingMode}
                     onChange={(value) => {

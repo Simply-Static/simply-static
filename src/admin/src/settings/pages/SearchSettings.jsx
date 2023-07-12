@@ -48,8 +48,8 @@ function SearchSettings() {
                     label={__('Use search?', 'simply-static')}
                     help={
                         useSearch
-                            ? 'Use search on your static website.'
-                            : 'Don\'t use search on your static website.'
+                            ? __('Use search on your static website.', 'simply-static')
+                            : __('Don\'t use search on your static website.', 'simply-static')
                     }
                     checked={useSearch}
                     onChange={(value) => {

@@ -68,8 +68,8 @@ function Optimize() {
                     label={__('Minify Files?', 'simply-static')}
                     help={
                         minifyFiles
-                            ? 'enable minify files on your static website.'
-                            : 'Don\'t enable minify files on your static website.'
+                            ? __('Enable minify files on your static website.', 'simply-static')
+                            : __('Don\'t enable minify files on your static website.', 'simply-static')
                     }
                     checked={minifyFiles}
                     onChange={(value) => {
@@ -84,8 +84,8 @@ function Optimize() {
                             label={__('Minify HTML', 'simply-static')}
                             help={
                                 minifyHtml
-                                    ? 'minify HTML files.'
-                                    : 'Don\'t minify HTML files.'
+                                    ? __('Minify HTML files.', 'simply-static')
+                                    : __('Don\'t minify HTML files.', 'simply-static')
                             }
                             checked={minifyHtml}
                             onChange={(value) => {
@@ -98,8 +98,8 @@ function Optimize() {
                             label={__('Minify CSS', 'simply-static')}
                             help={
                                 minifyCss
-                                    ? 'minify CSS files.'
-                                    : 'Don\'t minify CSS files.'
+                                    ? __('Minify CSS files.', 'simply-static')
+                                    : __('Don\'t minify CSS files.', 'simply-static')
                             }
                             checked={minifyCss}
                             onChange={(value) => {
@@ -112,8 +112,8 @@ function Optimize() {
                                 label={__('Minify Inline CSS', 'simply-static')}
                                 help={
                                     minifyInlineCss
-                                        ? 'minify inline CSS.'
-                                        : 'Don\'t minify inline CSS.'
+                                        ? __('Minify Inline CSS.', 'simply-static')
+                                        : __('Don\'t minify Inline CSS.', 'simply-static')
                                 }
                                 checked={minifyInlineCss}
                                 onChange={(value) => {
@@ -126,8 +126,8 @@ function Optimize() {
                             label={__('Minify JavaScript', 'simply-static')}
                             help={
                                 minifyJavascript
-                                    ? 'minify JavaScript files.'
-                                    : 'Don\'t minify JavaScript files.'
+                                    ? __('Minify JavaScript files.', 'simply-static')
+                                    : __('Don\'t minify JavaScript files.', 'simply-static')
                             }
                             checked={minifyJavascript}
                             onChange={(value) => {
@@ -141,8 +141,8 @@ function Optimize() {
                                 label={__('Minify Inline JavaScript', 'simply-static')}
                                 help={
                                     minifyInlineJavascript
-                                        ? 'minify inline JavaScript.'
-                                        : 'Don\'t minify inline JavaScript.'
+                                        ? __('Minify Inline JavaScript.', 'simply-static')
+                                        : __('Don\'t minify Inline JavaScript.', 'simply-static')
                                 }
                                 checked={minifyInlineJavascript}
                                 onChange={(value) => {
