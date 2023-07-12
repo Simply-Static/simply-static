@@ -69,6 +69,18 @@ function SettingsPage() {
 
                             </div>
                             <CardBody>
+                                <h4 className={"settings-headline"}> {__('Tools', 'content-protector')}</h4>
+                                <NavigatorButton onClick={() => setActiveItem('/')}
+                                                 className={activeItem === '/' ? 'is-active-item generate' : 'generate'} path="/">
+                                    <Dashicon icon="update" /> {__('Activity Log', 'content-protector')}
+                                </NavigatorButton>
+                                <NavigatorButton onClick={() => setActiveItem('/diagnostics')}
+                                                 className={activeItem === '/diagnostics' ? 'is-active-item' : ''}
+                                                 path="/diagnostics">
+                                    <Dashicon icon="editor-help" /> {__('Diagnostics', 'content-protector')}
+                                </NavigatorButton>
+                            </CardBody>
+                            <CardBody>
                                 <h4 className={"settings-headline"}> {__('Settings', 'content-protector')}</h4>
                                 <NavigatorButton onClick={() => setActiveItem('/general')}
                                                  className={activeItem === '/general' ? 'is-active-item' : ''} path="/general">
@@ -92,11 +104,6 @@ function SettingsPage() {
                                 <NavigatorButton onClick={() => setActiveItem('/optimize')}
                                                  className={activeItem === '/optimize' ? 'is-active-item' : ''} path="/optimize">
                                     <Dashicon icon="dashboard" /> {__('Optimize', 'content-protector')}
-                                </NavigatorButton>
-                                <NavigatorButton onClick={() => setActiveItem('/diagnostics')}
-                                                 className={activeItem === '/diagnostics' ? 'is-active-item' : ''}
-                                                 path="/diagnostics">
-                                    <Dashicon icon="editor-help" /> {__('Diagnostics', 'content-protector')}
                                 </NavigatorButton>
                                 <NavigatorButton onClick={() => setActiveItem('/utilities')}
                                                  className={activeItem === '/utilities' ? 'is-active-item' : ''}
