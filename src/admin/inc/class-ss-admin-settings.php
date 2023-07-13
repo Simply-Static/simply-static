@@ -76,7 +76,7 @@ class Admin_Settings {
 			'wp-api-fetch',
 			'wp-data',
 			'wp-i18n'
-		), '2.3.2', true );
+		), '3.0', true );
 
 		$options = Options::reinstance();
 
@@ -91,7 +91,7 @@ class Admin_Settings {
 			'ss_settings_args',
 			array(
 				'screen'         => 'simplystatic-settings',
-				'version'        => '2.3.2',
+				'version'        => '3.0',
 				'logo'           => SIMPLY_STATIC_URL . '/assets/simply-static-logo.svg',
 				'plan'           => 'free',
 				'is_network'     => is_network_admin(),
