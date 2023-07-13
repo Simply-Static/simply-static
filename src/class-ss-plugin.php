@@ -289,9 +289,21 @@ class Plugin {
 		);
 	}
 
+	public function get_activity_log( $blog_id = 0 ) {
+		$blog_id = $blog_id ?: get_current_blog_id();
+
+		do_action( 'ss_before_render_activity_log', $blog_id );
+
+		$log = $this->options->get( 'archive_status_messages' );
+
+		do_action( 'ss_after_render_activity_log', $blog_id );
+
+		return $log;
+	}
+
 	/**
 	 * Render the activity log and send it via ajax
-	 * @return void
+	 * @return void|array
 	 */
 	public function render_activity_log() {
 		check_ajax_referer( 'simply-static_generate' );
@@ -312,29 +324,17 @@ class Plugin {
 
 		do_action( 'ss_after_render_activity_log', $blog_id );
 
-
 		// send json response and die().
 		wp_send_json( array( 'html' => $content ) );
 	}
 
-	/**
-	 * Render the export log and send it via ajax
-	 *
-	 * @return void
-	 */
-	public function render_export_log() {
-		check_ajax_referer( 'simply-static_generate' );
-		if ( ! current_user_can( 'edit_posts' ) ) {
-			die( __( 'Not permitted', 'simply-static' ) );
-		}
+	public function get_export_log( $per_page, $current_page = 1, $blog_id = 0 ) {
 
-		$blog_id = isset( $_POST['blog_id'] ) ? absint( $_POST['blog_id'] ) : get_current_blog_id();
+		$blog_id = $blog_id ?: get_current_blog_id();
 
 		do_action( 'ss_before_render_export_log', $blog_id );
 
-		$per_page     = $_POST['per_page'];
-		$current_page = $_POST['page'];
-		$offset       = ( intval( $current_page ) - 1 ) * intval( $per_page );
+		$offset = ( intval( $current_page ) - 1 ) * intval( $per_page );
 
 		$static_pages = apply_filters(
 			'ss_total_pages_log',
@@ -349,17 +349,67 @@ class Plugin {
 		$total_static_pages = array_sum( array_values( $http_status_codes ) );
 		$total_pages        = ceil( $total_static_pages / $per_page );
 
+		do_action( 'ss_after_render_export_log', $blog_id );
+
+		$static_pages_formatted = [];
+
+		foreach ( $static_pages as $static_page ) {
+			$msg = '';
+			$parent_static_page = $static_page->parent_static_page();
+			if ( $parent_static_page ) {
+				$display_url = Util::get_path_from_local_url( $parent_static_page->url );
+				$msg .= "<a href='" . $parent_static_page->url . "'>" .sprintf( __( 'Found on %s', 'simply-static' ), $display_url ). "</a>";
+			}
+			if ( $msg !== '' && $static_page->status_message ) {
+				$msg .= '; ';
+			}
+			$msg .= $static_page->status_message;
+
+			$information = [
+				'id' => $static_page->id,
+				'url' => $static_page->url,
+				'processable' => in_array( $static_page->http_status_code, Page::$processable_status_codes ),
+				'code' => $static_page->http_status_code,
+				'notes' => $msg,
+				'error' => $static_page->error_message,
+			];
+
+			$static_pages_formatted[] = $information;
+		}
+
+		return [
+			'static_pages'       => $static_pages_formatted,
+			'total_static_pages' => $total_static_pages,
+			'total_pages'        => $total_pages,
+			'status_codes'       => $http_status_codes,
+		];
+	}
+
+	/**
+	 * Render the export log and send it via ajax
+	 *
+	 * @return void
+	 */
+	public function render_export_log() {
+		check_ajax_referer( 'simply-static_generate' );
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			die( __( 'Not permitted', 'simply-static' ) );
+		}
+
+		$blog_id      = isset( $_POST['blog_id'] ) ? absint( $_POST['blog_id'] ) : get_current_blog_id();
+		$per_page     = $_POST['per_page'];
+		$current_page = $_POST['page'];
+
+		$log = $this->get_export_log( $per_page, $current_page, $blog_id );
+
 		$content = $this->view
 			->set_template( '_export_log' )
-			->assign( 'static_pages', $static_pages )
-			->assign( 'http_status_codes', $http_status_codes )
+			->assign( 'static_pages', $log['static_pages'] )
+			->assign( 'http_status_codes', $log['status_codes'] )
 			->assign( 'current_page', $current_page )
-			->assign( 'total_pages', $total_pages )
-			->assign( 'total_static_pages', $total_static_pages )
+			->assign( 'total_pages', $log['total_pages'] )
+			->assign( 'total_static_pages', $log['total_static_pages'] )
 			->render_to_string();
-
-		do_action( 'ss_after_render_export_log' );
-
 
 		// send json response and die().
 		wp_send_json( array( 'html' => $content ) );

@@ -243,6 +243,12 @@ class Archive_Creation_Job extends \WP_Background_Process {
 		return ( $start_time == null && $end_time == null ) || ( $start_time != null && $end_time != null);
 	}
 
+	public function is_running() {
+		$start_time = $this->options->get( 'archive_start_time' );
+
+		return $start_time != null && ! $this->is_job_done();
+	}
+
 	/**
 	 * Return the current task
 	 * @return string The current task

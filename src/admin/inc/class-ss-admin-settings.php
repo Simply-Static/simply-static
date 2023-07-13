@@ -167,6 +167,22 @@ class Admin_Settings {
 				return current_user_can( 'manage_options' );
 			},
 		) );
+
+		register_rest_route( 'simplystatic/v1', '/activity-log', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'get_activity_log' ],
+			'permission_callback' => function () {
+				return current_user_can( 'manage_options' );
+			},
+		) );
+
+		register_rest_route( 'simplystatic/v1', '/export-log', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'get_export_log' ],
+			'permission_callback' => function () {
+				return current_user_can( 'manage_options' );
+			},
+		) );
 	}
 
 	/**
@@ -175,6 +191,7 @@ class Admin_Settings {
 	 * @return false|mixed|null
 	 */
 	public function get_settings() {
+
 		return get_option( 'simply-static' );
 	}
 
@@ -236,5 +253,34 @@ class Admin_Settings {
 		return json_encode( [ "status" => 200, "message" => "Ok" ] );
 	}
 
+	/**
+	 * Clear log file.
+	 *
+	 * @return false|string
+	 */
+	public function get_activity_log() {
+		$activity_log = Plugin::instance()->get_activity_log();
 
+		return json_encode( [
+			"status" => 200,
+			"data" => $activity_log,
+			"running" => Plugin::instance()->get_archive_creation_job()->is_running(),
+		] );
+	}
+
+	/**
+	 * Clear log file.
+	 *
+	 * @return false|string
+	 */
+	public function get_export_log(\WP_REST_Request $request) {
+		$params = $request->get_params();
+
+		$export_log = Plugin::instance()->get_export_log( $params['per_page'], $params['page'] );
+
+		return json_encode( [
+			"status" => 200,
+			"data" => $export_log,
+		] );
+	}
 }

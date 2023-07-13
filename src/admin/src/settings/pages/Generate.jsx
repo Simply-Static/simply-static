@@ -13,72 +13,40 @@ import {SettingsContext} from "../context/SettingsContext";
 import Terminal, {ColorMode, TerminalOutput} from 'react-terminal-ui';
 import DataTable from 'react-data-table-component';
 import apiFetch from "@wordpress/api-fetch";
+import useInterval from "../../hooks/useInterval";
 
 const {__} = wp.i18n;
 
 function Generate() {
     const {settings} = useContext(SettingsContext);
     const [isRunning, setIsRunning] = useState(false);
+    const [exportLog, setExportLog] = useState([]);
     const [logDeleted, setLogDeleted] = useState(false);
+    const [loadingExportLog, setLoadingExportLog] = useState(false);
+    const [totalExportLogRows, setExportLogTotalRows] = useState(0);
+    const [perPageExportLog, setPerPageExportLog] = useState(10);
 
     const [terminalLineData, setTerminalLineData] = useState([
         <TerminalOutput>Setting up..</TerminalOutput>
     ]);
-
 
     const columns = [
         {
             name: 'Code',
             selector: row => row.code,
             sortable: true,
+            maxWidth: '100px'
         },
         {
             name: 'URL',
-            selector: row => row.url,
+            selector: row => <a target={'_blank'} href={row.url}>{row.url}</a>,
             sortable: true,
+
         },
         {
             name: 'Notes',
-            selector: row => row.notes,
-        },
-    ];
-
-    const data = [
-        {
-            id: 1,
-            code: '200',
-            url: 'https://simply-static.local/sitemap.xml',
-            notes: 'Sitemap URL',
-        },
-        {
-            id: 2,
-            code: '200',
-            url: 'https://simply-static.local/wp-content/uploads/simply-static/configs/forms.json',
-            notes: 'Config File',
-        },
-        {
-            id: 3,
-            code: '200',
-            url: 'https://simply-static.local/about/',
-            notes: 'Found on /',
-        },
-        {
-            id: 4,
-            code: '200',
-            url: 'https://simply-static.local/sitemap.xml',
-            notes: 'Sitemap URL',
-        },
-        {
-            id: 5,
-            code: '200',
-            url: 'https://simply-static.local/wp-content/uploads/simply-static/configs/forms.json',
-            notes: 'Config File',
-        },
-        {
-            id: 6,
-            code: '200',
-            url: 'https://simply-static.local/about/',
-            notes: 'Found on /',
+            wrap: true,
+            selector: row => <span dangerouslySetInnerHTML={{__html: row.notes}}></span>,
         },
     ];
 
@@ -96,6 +64,59 @@ function Generate() {
         }, 2000);
     }
 
+    const handlePageChange = page => {
+        getExportLog(page);
+    };
+
+    const handlePerRowsChange = (newPerPage, page) => {
+        setPerPageExportLog(newPerPage);
+        getExportLog( page );
+    };
+
+    function getExportLog( page ) {
+        page = page ?? 1;
+        setLoadingExportLog(true);
+        apiFetch({
+            path: `/simplystatic/v1/export-log?page=${page}&per_page=${perPageExportLog}`,
+            method: 'GET',
+        }).then(resp => {
+            var json = JSON.parse( resp );
+            console.log(json);
+            setExportLog( json.data );
+            setLoadingExportLog(false);
+        } );
+    }
+
+    function refreshActivityLog() {
+        apiFetch({
+            path: '/simplystatic/v1/activity-log',
+            method: 'GET',
+        }).then(resp => {
+            var json = JSON.parse( resp );
+            var terminal = [];
+            for( var message in json.data ) {
+                var date = json.data[message].datetime;
+                var text = json.data[message].message;
+
+                terminal.push(
+                    <TerminalOutput>[{date}] <span dangerouslySetInnerHTML={{__html: text}}></span></TerminalOutput>
+                );
+            }
+
+            setTerminalLineData( terminal );
+            setIsRunning(json.running);
+        } );
+    }
+
+    useInterval(() => {
+        refreshActivityLog();
+        getExportLog();
+    }, isRunning ? 2000 : null);
+
+    useEffect(() => {
+        refreshActivityLog();
+        getExportLog();
+    }, []);
 
     useEffect(() => {
 
@@ -154,8 +175,13 @@ function Generate() {
             <CardBody>
                 <DataTable
                     columns={columns}
-                    data={data}
+                    data={exportLog.static_pages}
                     pagination
+                    paginationServer
+                    paginationTotalRows={exportLog.total_static_pages}
+                    progressPending={loadingExportLog}
+                    onChangeRowsPerPage={handlePerRowsChange}
+                    onChangePage={handlePageChange}
                 />
             </CardBody>
         </Card>
