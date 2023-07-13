@@ -49,7 +49,7 @@ class Simply_CDN_Webhook {
 	 * @return void
 	 */
 	public function add_webhook_scripts() {
-		wp_enqueue_script( 'sch-form-webhook-js', SIMPLY_STATIC_URL . '/src/integrations/simply-cdn/assets/sch-form-webhook.js', array(), Plugin::VERSION, true );
+		wp_enqueue_script( 'sch-form-webhook-js', SIMPLY_STATIC_URL . '/src/integrations/simply-cdn/assets/sch-form-webhook.js', array(), SIMPLY_STATIC_VERSION, true );
 	}
 
 	/**

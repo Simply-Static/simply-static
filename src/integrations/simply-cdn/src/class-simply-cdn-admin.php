@@ -56,8 +56,8 @@ class Simply_CDN_Admin {
 	 * @return void
 	 */
 	public function add_admin_scripts() {
-		wp_enqueue_style( 'sch-admin-style', SIMPLY_STATIC_URL . '/src/integrations/simply-cdn/assets/sch-admin.css', array(), Plugin::VERSION, 'all' );
-		wp_enqueue_script( 'sch-admin', SIMPLY_STATIC_URL . '/src/integrations/simply-cdn/assets/sch-admin.js', array( 'jquery' ), Plugin::VERSION, true );
+		wp_enqueue_style( 'sch-admin-style', SIMPLY_STATIC_URL . '/src/integrations/simply-cdn/assets/sch-admin.css', array(), SIMPLY_STATIC_VERSION, 'all' );
+		wp_enqueue_script( 'sch-admin', SIMPLY_STATIC_URL . '/src/integrations/simply-cdn/assets/sch-admin.js', array( 'jquery' ), SIMPLY_STATIC_VERSION, true );
 
 		$args = array(
 			'ajax_url'        => admin_url( 'admin-ajax.php' ),

@@ -84,7 +84,7 @@ class Upgrade_Handler {
 			self::set_default_options();
 		}
 
-		if ( version_compare( $version, Plugin::VERSION, '!=' ) ) {
+		if ( version_compare( $version, SIMPLY_STATIC_VERSION, '!=' ) ) {
 			// Sync database.
 			Page::create_or_update_table();
 
@@ -93,7 +93,7 @@ class Upgrade_Handler {
 
 			// Update version.
 			self::$options
-			->set( 'version', Plugin::VERSION )
+			->set( 'version', SIMPLY_STATIC_VERSION )
 			->save();
 		}
 	}

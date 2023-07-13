@@ -11,11 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The core plugin class
  */
 class Plugin {
-	/**
-	 * Plugin version
-	 * @var string
-	 */
-	const VERSION = '3.0';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
@@ -160,7 +155,7 @@ class Plugin {
 	public function enqueue_admin_scripts() {
 		// Plugin admin JS. Tack on plugin version.
 		if ( $this->current_page === 'simply-static' ) {
-			wp_enqueue_script( self::SLUG . '-generate-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'js/admin-generate.js', array(), self::VERSION );
+			wp_enqueue_script( self::SLUG . '-generate-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'js/admin-generate.js', array(), SIMPLY_STATIC_VERSION );
 			wp_localize_script(
 				self::SLUG . '-generate-styles',
 				'ss_generate',
