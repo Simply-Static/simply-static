@@ -11,7 +11,7 @@
 }
 
 toplevel_page_simply-static img {
-  width:100%;
+  width: 100%;
 }
 
 .settings-error.notice.notice-warning {
@@ -118,6 +118,7 @@ toplevel_page_simply-static img {
     /* Notices */
     .components-notice {
       margin: 15px 0 0 0;
+      box-sizing: border-box;
     }
 
     /* Tooltips */
