@@ -101,10 +101,16 @@ class Admin_Settings {
 				'home_path'      => get_home_path(),
 				'admin_email'    => get_bloginfo( 'admin_email' ),
 				'temp_files_dir' => $options->get( 'temp_files_dir' ),
-				'token'          => get_option( 'sch_token' ),
-				'log_file'       => SIMPLY_STATIC_URL . '/debug.txt'
+				'token'          => get_option( 'sch_token' )
 			)
 		);
+
+		// Check if debug log exists.
+		$debug_file = Util::get_debug_log_filename();
+
+		if ( file_exists( $debug_file ) ) {
+			$args['log_file'] = SIMPLY_STATIC_URL . '/debug.txt';
+		}
 
 		wp_localize_script( 'simplystatic-settings', 'options', $args );
 
