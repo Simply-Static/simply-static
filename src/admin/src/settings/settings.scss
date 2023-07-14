@@ -157,6 +157,15 @@ toplevel_page_simply-static img {
       position: relative;
       top: -7px;
     }
+
+    /* Terminal */
+    .react-terminal-line {
+      margin-bottom: 10px;
+    }
+
+    .react-terminal-line a {
+      color:#6fa4df;
+    }
   }
 }
 

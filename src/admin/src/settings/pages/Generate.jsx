@@ -22,7 +22,7 @@ function Generate() {
     const [exportLog, setExportLog] = useState([]);
     const [logDeleted, setLogDeleted] = useState(false);
     const [loadingExportLog, setLoadingExportLog] = useState(false);
-    const [perPageExportLog, setPerPageExportLog] = useState(10);
+    const [perPageExportLog, setPerPageExportLog] = useState(25);
 
     const [terminalLineData, setTerminalLineData] = useState([
         <TerminalOutput>Setting up..</TerminalOutput>
@@ -175,6 +175,8 @@ function Generate() {
                     pagination
                     paginationServer
                     paginationTotalRows={exportLog.total_static_pages}
+                    paginationPerPage={25}
+                    paginationRowsPerPageOptions={[25, 50, 100, 200]}
                     progressPending={loadingExportLog}
                     onChangeRowsPerPage={handlePerRowsChange}
                     onChangePage={handlePageChange}
