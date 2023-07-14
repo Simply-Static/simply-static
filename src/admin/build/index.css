@@ -104,6 +104,7 @@ toplevel_page_simply-static img {
 }
 .plugin-settings-container .plugin-settings .components-notice {
   margin: 15px 0 0 0;
+  box-sizing: border-box;
 }
 .plugin-settings-container .plugin-settings .inline-tooltip {
   display: inline;
@@ -132,6 +133,20 @@ toplevel_page_simply-static img {
 .plugin-settings-container .plugin-settings .simplycdn-connect {
   position: relative;
   top: -7px;
+}
+
+.dashicons.spin {
+  animation: dashicons-spin 2s infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes dashicons-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /*# sourceMappingURL=index.css.map*/

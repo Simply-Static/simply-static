@@ -19,6 +19,8 @@ toplevel_page_simply-static img {
 }
 
 
+
+
 /* Start plugin settings */
 .plugin-settings-container {
   background: #f0f0f1;
@@ -158,3 +160,16 @@ toplevel_page_simply-static img {
   }
 }
 
+.dashicons.spin {
+  animation: dashicons-spin 2s infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes dashicons-spin {
+  0% {
+    transform: rotate( 0deg );
+  }
+  100% {
+    transform: rotate( 360deg );
+  }
+}

@@ -1,5 +1,6 @@
 import {useState, createContext, useEffect} from "@wordpress/element";
 import apiFetch from '@wordpress/api-fetch';
+import useInterval from "../../hooks/useInterval";
 
 const {__} = wp.i18n;
 
@@ -79,7 +80,7 @@ function SettingsContextProvider(props) {
         'minify_js': false,
         'minify_inline_js': false,
     }
-
+    const [isRunning, setIsRunning] = useState(false);
     const [settingsSaved, setSettingsSaved] = useState(false);
     const [settings, setSettings] = useState(defaultSettings);
     const [configs, setConfigs] = useState({});
@@ -106,6 +107,16 @@ function SettingsContextProvider(props) {
             method: 'POST',
             data: defaultSettings,
         });
+    }
+
+    const checkIfRunning = () => {
+        apiFetch({
+            path: '/simplystatic/v1/is-running',
+            method: 'GET'
+        }).then(resp => {
+            var json = JSON.parse( resp );
+            setIsRunning( json.running );
+        } );
     }
 
     const importSettings = (newSettings) => {
@@ -136,9 +147,14 @@ function SettingsContextProvider(props) {
         });
     }
 
+    useInterval(() => {
+       checkIfRunning()
+    }, isRunning ? 5000 : null);
+
     useEffect(() => {
         getSettings();
         getStatus();
+        checkIfRunning();
     }, []);
 
     return (
@@ -153,7 +169,9 @@ function SettingsContextProvider(props) {
                 saveSettings,
                 resetSettings,
                 importSettings,
-                migrateSettings
+                migrateSettings,
+                isRunning,
+                setIsRunning
             }}
         >
             {props.children}

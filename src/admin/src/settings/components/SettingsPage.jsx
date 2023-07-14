@@ -1,7 +1,7 @@
 import GeneralSettings from "../pages/GeneralSettings";
 import Diagnostics from "../pages/Diagnostics";
 import Utilities from "../pages/Utilities";
-import {useState, useEffect} from "@wordpress/element";
+import {useState, useEffect, useContext} from "@wordpress/element";
 import {Flex, FlexItem} from '@wordpress/components';
 
 import {
@@ -15,6 +15,7 @@ import {
     Dashicon,
     Card,
     CardBody,
+    Spinner
 } from '@wordpress/components';
 import DeploymentSettings from "../pages/DeploymentSettings";
 import FormSettings from "../pages/FormSettings";
@@ -22,11 +23,13 @@ import SearchSettings from "../pages/SearchSettings";
 import MiscSettings from "../pages/MiscSettings";
 import Generate from "../pages/Generate";
 import Optimize from "../pages/Optimize";
+import {SettingsContext} from "../context/SettingsContext";
+import apiFetch from "@wordpress/api-fetch";
 
 const {__} = wp.i18n;
 
 function SettingsPage() {
-
+    const { isRunning, setIsRunning } = useContext(SettingsContext);
     const [activeItem, setActiveItem] = useState({activeItem: "/"});
     const [initialPage, setInitialPage] = useState(options.initial);
     const [initialSet, setInitialSet] = useState(false);
@@ -38,6 +41,15 @@ function SettingsPage() {
             setInitialPage(options.initial);
         }
     });
+
+    const startExport = () => {
+        apiFetch({
+            path: '/simplystatic/v1/start-export',
+            method: 'POST'
+        }).then(resp => {
+            setIsRunning( true );
+        } );
+    }
 
     return (
         <div className={"plugin-settings-container"}>
@@ -52,12 +64,21 @@ function SettingsPage() {
                             {/* eslint-disable-next-line no-undef */}
                             <p>Version: <b>{options.version}</b></p>
                             <div className={"generate-container"}>
-                                <NavigatorButton onClick={() => setActiveItem('/')}
+                                <Button onClick={() => {
+                                    startExport();
+                                    }
+                                }
+                                                 disabled={isRunning}
                                                  className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
-                                                 path="/">
-                                    <Dashicon icon="update"/> {__('Generate Static Files', 'simply-static')}
-                                </NavigatorButton>
+                                                 >
+                                    {!isRunning && [<Dashicon icon="update"  />,
+                                        __('Generate Static Files', 'simply-static')
+                                    ]}
+                                    {isRunning && [<Dashicon icon="update spin"/>,
+                                        __('Generating ...', 'simply-static')
+                                    ]}
 
+                                </Button>
                             </div>
                             <CardBody>
                                 <h4 className={"settings-headline"}> {__('Tools', 'simply-static')}</h4>

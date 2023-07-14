@@ -18,12 +18,10 @@ import useInterval from "../../hooks/useInterval";
 const {__} = wp.i18n;
 
 function Generate() {
-    const {settings} = useContext(SettingsContext);
-    const [isRunning, setIsRunning] = useState(false);
+    const {settings, isRunning} = useContext(SettingsContext);
     const [exportLog, setExportLog] = useState([]);
     const [logDeleted, setLogDeleted] = useState(false);
     const [loadingExportLog, setLoadingExportLog] = useState(false);
-    const [totalExportLogRows, setExportLogTotalRows] = useState(0);
     const [perPageExportLog, setPerPageExportLog] = useState(10);
 
     const [terminalLineData, setTerminalLineData] = useState([
@@ -34,13 +32,13 @@ function Generate() {
         {
             name: 'Code',
             selector: row => row.code,
-            sortable: true,
+            sortable: false,
             maxWidth: '100px'
         },
         {
             name: 'URL',
             selector: row => <a target={'_blank'} href={row.url}>{row.url}</a>,
-            sortable: true,
+            sortable: false,
 
         },
         {
@@ -103,19 +101,18 @@ function Generate() {
             }
 
             setTerminalLineData( terminal );
-            setIsRunning(json.running);
         } );
     }
 
     useInterval(() => {
         refreshActivityLog();
         getExportLog();
-    }, isRunning ? 2000 : null);
+    }, isRunning ? 5000 : null);
 
     useEffect(() => {
         refreshActivityLog();
         getExportLog();
-    }, []);
+    }, [isRunning]);
 
     useEffect(() => {
 

@@ -189,6 +189,22 @@ class Admin_Settings {
 				return current_user_can( 'manage_options' );
 			},
 		) );
+
+		register_rest_route( 'simplystatic/v1', '/start-export', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'start_export' ],
+			'permission_callback' => function () {
+				return current_user_can( 'manage_options' );
+			},
+		) );
+
+		register_rest_route( 'simplystatic/v1', '/is-running', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'is_running' ],
+			'permission_callback' => function () {
+				return current_user_can( 'manage_options' );
+			},
+		) );
 	}
 
 	/**
@@ -260,7 +276,7 @@ class Admin_Settings {
 	}
 
 	/**
-	 * Clear log file.
+	 * Get Activity Log.
 	 *
 	 * @return false|string
 	 */
@@ -275,7 +291,7 @@ class Admin_Settings {
 	}
 
 	/**
-	 * Clear log file.
+	 * Get Export Log
 	 *
 	 * @return false|string
 	 */
@@ -287,6 +303,34 @@ class Admin_Settings {
 		return json_encode( [
 			"status" => 200,
 			"data" => $export_log,
+		] );
+	}
+
+	/**
+	 * Start Export
+	 *
+	 * @return false|string
+	 */
+	public function start_export(\WP_REST_Request $request) {
+		$params = $request->get_params();
+		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
+
+		Plugin::instance()->run_static_export( $blog_id );
+
+		return json_encode( [
+			"status" => 200,
+		] );
+	}
+
+	/**
+	 * Is running
+	 *
+	 * @return false|string
+	 */
+	public function is_running(\WP_REST_Request $request) {
+		return json_encode( [
+			"status" => 200,
+			"running" => Plugin::instance()->get_archive_creation_job()->is_running()
 		] );
 	}
 }
