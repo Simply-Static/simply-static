@@ -82,7 +82,6 @@ function Generate() {
         },
     ];
 
-
     const deleteLog = () => {
         apiFetch({
             path: '/simplystatic/v1/delete-log',
@@ -119,7 +118,7 @@ function Generate() {
                     </Card>
                 </FlexItem>
             }
-            {settings.debugging_mode &&
+            {settings.debugging_mode && options.log_file &&
                 <FlexItem isBlock={true}>
                     <Card>
                         <CardHeader>
