@@ -179,6 +179,8 @@ function Generate() {
                     pagination
                     paginationServer
                     paginationTotalRows={exportLog.total_static_pages}
+                    paginationPerPage={25}
+                    paginationRowsPerPageOptions={[25, 50, 100, 200]}
                     progressPending={loadingExportLog}
                     onChangeRowsPerPage={handlePerRowsChange}
                     onChangePage={handlePageChange}
