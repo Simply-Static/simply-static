@@ -24,7 +24,7 @@ function Generate() {
     const [logDeleted, setLogDeleted] = useState(false);
     const [loadingExportLog, setLoadingExportLog] = useState(false);
     const [totalExportLogRows, setExportLogTotalRows] = useState(0);
-    const [perPageExportLog, setPerPageExportLog] = useState(10);
+    const [perPageExportLog, setPerPageExportLog] = useState(25);
 
     const [terminalLineData, setTerminalLineData] = useState([
         <TerminalOutput>Setting up..</TerminalOutput>
