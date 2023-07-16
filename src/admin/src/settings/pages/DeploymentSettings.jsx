@@ -262,7 +262,7 @@ function DeploymentSettings() {
                                 label={__('Repository', 'simply-static')}
                                 type={"text"}
                                 help={__('Enter a name for your repository. This should be lowercase and without any spaces or special characters.', 'simply-static')}
-                                value={settings.repository}
+                                value={settings.github_repository}
                                 onChange={(repository) => {
                                     updateSetting('github_repository', repository);
                                 }}
@@ -327,14 +327,14 @@ function DeploymentSettings() {
                                 label={__('E-Mail', 'simply-static')}
                                 type={"text"}
                                 help={__('This field is auto-filled with the e-mail address used for activating Simply Static Pro. An account will be created automatically on your first deployment.', 'simply-static')}
-                                value={'hello@patrickposner.dev'}
+                                value={options.admin_email}
                             />
 
                             <TextControl
                                 label={__('Subdomain', 'simply-static')}
                                 type={"text"}
                                 help={__('That\'s the part before your TLD. Your full URL is the combination of the subdomain plus the domain suffix.', 'simply-static')}
-                                value={settings.subdomain}
+                                value={settings.tiiny_subdomain}
                                 onChange={(subdomain) => {
                                     updateSetting('tiiny_subdomain', subdomain);
                                 }}
