@@ -225,7 +225,6 @@ function DeploymentSettings() {
                                     value={settings.github_user}
                                     onChange={(organization) => {
                                         updateSetting('github_user', organization);
-                                        updateSetting('github_existing_repository', 'yes');
                                     }}
                                 />
                                 :
@@ -234,9 +233,8 @@ function DeploymentSettings() {
                                     type={"text"}
                                     help={__('Enter your GitHub username.', 'simply-static')}
                                     value={settings.github_user}
-                                    onChange={(username) => {
-                                        updateSetting('github_user', username);
-                                        updateSetting('github_existing_repository', 'no');
+                                    onChange={(name) => {
+                                        updateSetting('github_user', name);
                                     }}
                                 />
                             }
@@ -296,7 +294,7 @@ function DeploymentSettings() {
                                 type={settings.github_branch}
                                 placeholder={"main"}
                                 help={__('Simply Static automatically uses "main" as branch. You may want to modify that for example to gh-pages. for GitHub Pages.', 'simply-static')}
-                                value={''}
+                                value={settings.github_branch}
                                 onChange={(branch) => {
                                     updateSetting('github_branch', branch);
                                 }}
