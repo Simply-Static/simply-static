@@ -456,7 +456,7 @@ function DeploymentSettings() {
                             <TextControl
                                 label={__('Access Key ID', 'simply-static')}
                                 type={"text"}
-                                help={__('Enter your Access Key from AWS. You can find your API-Key as described here.', 'simply-static')}
+                                help={__('Enter your Access Key from AWS.', 'simply-static')}
                                 value={settings.aws_access_key}
                                 onChange={(access_key) => {
                                     updateSetting('aws_access_key', access_key);
@@ -466,7 +466,7 @@ function DeploymentSettings() {
                             <TextControl
                                 label={__('Secret Access Key', 'simply-static')}
                                 type={"password"}
-                                help={__('Enter your Secret Key from AWS. You can find your API-Key as described here.', 'simply-static')}
+                                help={__('Enter your Secret Key from AWS.', 'simply-static')}
                                 value={settings.aws_access_secret}
                                 onChange={(secret) => {
                                     updateSetting('aws_access_secret', secret);
@@ -548,7 +548,7 @@ function DeploymentSettings() {
                             <TextControl
                                 label={__('Spaces Key', 'simply-static')}
                                 type={"text"}
-                                help={__('Enter your Spaces Key from Digital Ocean. You can find your API-Key as described here.', 'simply-static')}
+                                help={__('Enter your Spaces Key from Digital Ocean.', 'simply-static')}
                                 value={settings.digitalocean_key}
                                 onChange={(api_key) => {
                                     updateSetting('digitalocean_key', api_key);
@@ -558,7 +558,7 @@ function DeploymentSettings() {
                             <TextControl
                                 label={__('Secret', 'simply-static')}
                                 type={"password"}
-                                help={__('Enter your Spaces Secret from Digital Ocean. You can find your API-Key as described here.', 'simply-static')}
+                                help={__('Enter your Spaces Secret from Digital Ocean.', 'simply-static')}
                                 value={settings.digitalocean_secret}
                                 onChange={(secret) => {
                                     updateSetting('digitalocean_secret', secret);
@@ -589,7 +589,7 @@ function DeploymentSettings() {
                             <p>
                                 {settings.digitalocean_bucket && settings.digitalocean_region &&
                                     <Notice status="warning" isDismissible={false}>
-                                        {__('Your endpoint will be', 'simply-static')}:
+                                        {__('Your endpoint will be', 'simply-static')} :
                                         {'https://' + settings.digitalocean_bucket + '.' + settings.digitalocean_region + '.digitaloceanspaces.com'}
                                     </Notice>
                                 }
