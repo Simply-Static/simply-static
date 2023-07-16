@@ -231,6 +231,14 @@ class Plugin {
 		$this->archive_creation_job->start( $blog_id );
 	}
 
+	/**
+	 * Handle cancel archive job without ajax.
+	 *
+	 * @return void
+	 */
+	public function cancel_static_export() {
+		$this->archive_creation_job->cancel();
+	}
 
 	/**
 	 * Handle requests for creating a static archive and send a response via ajax
@@ -357,11 +365,11 @@ class Plugin {
 		$static_pages_formatted = [];
 
 		foreach ( $static_pages as $static_page ) {
-			$msg = '';
+			$msg                = '';
 			$parent_static_page = $static_page->parent_static_page();
 			if ( $parent_static_page ) {
 				$display_url = Util::get_path_from_local_url( $parent_static_page->url );
-				$msg .= "<a href='" . $parent_static_page->url . "'>" .sprintf( __( 'Found on %s', 'simply-static' ), $display_url ). "</a>";
+				$msg         .= "<a href='" . $parent_static_page->url . "'>" . sprintf( __( 'Found on %s', 'simply-static' ), $display_url ) . "</a>";
 			}
 			if ( $msg !== '' && $static_page->status_message ) {
 				$msg .= '; ';
@@ -369,12 +377,12 @@ class Plugin {
 			$msg .= $static_page->status_message;
 
 			$information = [
-				'id' => $static_page->id,
-				'url' => $static_page->url,
+				'id'          => $static_page->id,
+				'url'         => $static_page->url,
 				'processable' => in_array( $static_page->http_status_code, Page::$processable_status_codes ),
-				'code' => $static_page->http_status_code,
-				'notes' => $msg,
-				'error' => $static_page->error_message,
+				'code'        => $static_page->http_status_code,
+				'notes'       => $msg,
+				'error'       => $static_page->error_message,
 			];
 
 			$static_pages_formatted[] = $information;

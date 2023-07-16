@@ -216,6 +216,14 @@ class Admin_Settings {
 			},
 		) );
 
+		register_rest_route( 'simplystatic/v1', '/cancel-export', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'cancel_export' ],
+			'permission_callback' => function () {
+				return current_user_can( 'manage_options' );
+			},
+		) );
+
 		register_rest_route( 'simplystatic/v1', '/is-running', array(
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'is_running' ],
@@ -264,10 +272,10 @@ class Admin_Settings {
 			// Update settings.
 			update_option( 'simply-static', $options );
 
-			return json_encode( [ "status" => 200, "message" => "Ok" ] );
+			return json_encode( [ 'status' => 200, 'message' => "Ok" ] );
 		}
 
-		return json_encode( [ "status" => 400, "message" => "No options updated." ] );
+		return json_encode( [ 'status' => 400, 'message' => "No options updated." ] );
 	}
 
 	/**
@@ -278,7 +286,7 @@ class Admin_Settings {
 	public function migrate_settings() {
 		Migrate_Settings::migrate();
 
-		return json_encode( [ "status" => 200, "message" => "Ok" ] );
+		return json_encode( [ 'status' => 200, 'message' => "Ok" ] );
 	}
 
 	/**
@@ -289,7 +297,7 @@ class Admin_Settings {
 	public function clear_log() {
 		Util::delete_debug_log();
 
-		return json_encode( [ "status" => 200, "message" => "Ok" ] );
+		return json_encode( [ 'status' => 200, 'message' => "Ok" ] );
 	}
 
 	/**
@@ -301,9 +309,9 @@ class Admin_Settings {
 		$activity_log = Plugin::instance()->get_activity_log();
 
 		return json_encode( [
-			"status"  => 200,
-			"data"    => $activity_log,
-			"running" => Plugin::instance()->get_archive_creation_job()->is_running(),
+			'status'  => 200,
+			'data'    => $activity_log,
+			'running' => Plugin::instance()->get_archive_creation_job()->is_running(),
 		] );
 	}
 
@@ -318,8 +326,8 @@ class Admin_Settings {
 		$export_log = Plugin::instance()->get_export_log( $params['per_page'], $params['page'] );
 
 		return json_encode( [
-			"status" => 200,
-			"data"   => $export_log,
+			'status' => 200,
+			'data'   => $export_log,
 		] );
 	}
 
@@ -335,8 +343,20 @@ class Admin_Settings {
 		Plugin::instance()->run_static_export( $blog_id );
 
 		return json_encode( [
-			"status" => 200,
+			'status' => 200,
 		] );
+	}
+
+	/**
+	 * Start Export
+	 *
+	 * @return false|string
+	 */
+	public function cancel_export() {
+		Util::debug_log( "Received request to cancel static archive generation" );
+		Plugin::instance()->cancel_static_export();
+
+		return json_encode( [ 'status' => 200 ] );
 	}
 
 	/**
@@ -346,8 +366,8 @@ class Admin_Settings {
 	 */
 	public function is_running( \WP_REST_Request $request ) {
 		return json_encode( [
-			"status"  => 200,
-			"running" => Plugin::instance()->get_archive_creation_job()->is_running()
+			'status'  => 200,
+			'running' => Plugin::instance()->get_archive_creation_job()->is_running()
 		] );
 	}
 }

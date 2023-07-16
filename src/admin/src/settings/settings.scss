@@ -60,6 +60,16 @@ toplevel_page_simply-static img {
         padding: 20px;
         max-width: 200px;
       }
+
+      .cancel-button {
+        text-align: center;
+        display: block;
+        max-width: 200px;
+        margin: 10px 0;
+        cursor: pointer;
+        color: rgb(104, 4, 204);
+        text-decoration:underline;
+      }
     }
 
     .components-button {

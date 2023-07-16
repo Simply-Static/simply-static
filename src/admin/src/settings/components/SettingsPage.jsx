@@ -53,6 +53,15 @@ function SettingsPage() {
         });
     }
 
+    const cancelExport = () => {
+        apiFetch({
+            path: '/simplystatic/v1/cancel-export',
+            method: 'POST'
+        }).then(resp => {
+            setIsRunning(false);
+        });
+    }
+
     return (
         <div className={"plugin-settings-container"}>
             <NavigatorProvider initialPath={initialPage}>
@@ -76,9 +85,16 @@ function SettingsPage() {
                                         __('Generate Static Files', 'simply-static')
                                     ]}
                                     {isRunning && [<Dashicon icon="update spin"/>,
-                                        __('Generating...', 'simply-static')
+                                        __('Generating...', 'simply-static'),
                                     ]}
                                 </Button>
+                                {isRunning &&
+                                    <span onClick={() => {
+                                        cancelExport();
+                                    }} className={"cancel-button"}>
+                                            {__('Cancel Export', 'simply-static')}
+                                        </span>
+                                }
                             </div>
                             <CardBody>
                                 <h4 className={"settings-headline"}> {__('Tools', 'simply-static')}</h4>

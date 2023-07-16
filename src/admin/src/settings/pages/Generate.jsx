@@ -78,7 +78,6 @@ function Generate() {
             method: 'GET',
         }).then(resp => {
             var json = JSON.parse( resp );
-            console.log(json);
             setExportLog( json.data );
             setLoadingExportLog(false);
         } );
