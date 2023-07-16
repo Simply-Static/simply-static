@@ -29,7 +29,7 @@ import apiFetch from "@wordpress/api-fetch";
 const {__} = wp.i18n;
 
 function SettingsPage() {
-    const { isRunning, setIsRunning } = useContext(SettingsContext);
+    const {isRunning, setIsRunning} = useContext(SettingsContext);
     const [activeItem, setActiveItem] = useState({activeItem: "/"});
     const [initialPage, setInitialPage] = useState(options.initial);
     const [initialSet, setInitialSet] = useState(false);
@@ -43,12 +43,14 @@ function SettingsPage() {
     });
 
     const startExport = () => {
+        setIsRunning(true);
+
         apiFetch({
             path: '/simplystatic/v1/start-export',
             method: 'POST'
         }).then(resp => {
-            setIsRunning( true );
-        } );
+            setIsRunning(true);
+        });
     }
 
     return (
@@ -66,18 +68,16 @@ function SettingsPage() {
                             <div className={"generate-container"}>
                                 <Button onClick={() => {
                                     startExport();
-                                    }
-                                }
-                                                 disabled={isRunning}
-                                                 className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
-                                                 >
-                                    {!isRunning && [<Dashicon icon="update"  />,
+                                }}
+                                        disabled={isRunning}
+                                        className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
+                                >
+                                    {!isRunning && [<Dashicon icon="update"/>,
                                         __('Generate Static Files', 'simply-static')
                                     ]}
                                     {isRunning && [<Dashicon icon="update spin"/>,
-                                        __('Generating ...', 'simply-static')
+                                        __('Generating...', 'simply-static')
                                     ]}
-
                                 </Button>
                             </div>
                             <CardBody>
