@@ -155,7 +155,6 @@ class Migrate_Settings {
 		}
 
 		if ( isset( $options['github-repository-reset'] ) && $options['github-repository-reset'] ) {
-			$options['github_repository_reset'] = $options['github-repository-reset'];
 			unset( $options['github-repository-reset'] );
 		}
 
