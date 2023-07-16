@@ -94,9 +94,9 @@ function GeneralSettings() {
                                     type={"text"}
                                     placeholder={"example.com"}
                                     value={host}
-                                    onChange={(value) => {
-                                        setHost(value);
-                                        updateSetting('destination_host', type);
+                                    onChange={(host) => {
+                                        setHost(host);
+                                        updateSetting('destination_host', host);
                                     }}
                                 />
                             </FlexItem>
@@ -111,9 +111,9 @@ function GeneralSettings() {
                             type={"text"}
                             placeholder={"/"}
                             value={path}
-                            onChange={(value) => {
-                                setPath(value);
-                                updateSetting('relative_path', type);
+                            onChange={(path) => {
+                                setPath(path);
+                                updateSetting('relative_path', path);
                             }}
                         />
                         <p>
