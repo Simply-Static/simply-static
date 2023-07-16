@@ -43,10 +43,19 @@ class Admin_Settings {
 			return;
 		}
 
+		add_menu_page(
+			__( 'Simply Static', 'simply-static' ),
+			__( 'Simply Static', 'simply-static' ),
+			apply_filters( 'ss_user_capability', 'manage_options' ),
+			'simply-static-generate',
+			array( $this, 'render_settings' ),
+			SIMPLY_STATIC_URL . '/assets/simply-static-icon.svg',
+		);
+
 		$generate_suffix = add_submenu_page(
-			'simply-static',
-			__( 'Generate (new)', 'simply-static' ),
-			__( 'Generate (new)', 'simply-static' ),
+			'simply-static-generate',
+			__( 'Generate', 'simply-static' ),
+			__( 'Generate', 'simply-static' ),
 			apply_filters( 'ss_user_capability', 'manage_options' ),
 			'simply-static-generate',
 			array( $this, 'render_settings' )
@@ -55,7 +64,7 @@ class Admin_Settings {
 		add_action( "admin_print_scripts-{$generate_suffix}", array( $this, 'add_settings_scripts' ) );
 
 		$settings_suffix = add_submenu_page(
-			'simply-static',
+			'simply-static-generate',
 			__( 'Settings', 'simply-static' ),
 			__( 'Settings', 'simply-static' ),
 			apply_filters( 'ss_user_capability', 'manage_options' ),

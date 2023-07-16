@@ -178,23 +178,26 @@ class Plugin {
 		}
 
 		// Add main menu item.
-		add_menu_page(
-			__( 'Simply Static', 'simply-static' ),
-			__( 'Simply Static', 'simply-static' ),
-			apply_filters( 'ss_settings_capability', 'edit_posts' ),
-			self::SLUG,
-			array( self::$instance, 'display_generate_page' ),
-			SIMPLY_STATIC_URL . '/assets/simply-static-icon.svg',
-		);
+		/*
+	add_menu_page(
+		__( 'Simply Static', 'simply-static' ),
+		__( 'Simply Static', 'simply-static' ),
+		apply_filters( 'ss_settings_capability', 'edit_posts' ),
+		self::SLUG,
+		array( self::$instance, 'display_generate_page' ),
+		SIMPLY_STATIC_URL . '/assets/simply-static-icon.svg',
+	);
 
-		add_submenu_page(
-			self::SLUG,
-			__( 'Generate Static Site', 'simply-static' ),
-			__( 'Generate', 'simply-static' ),
-			apply_filters( 'ss_settings_capability', 'edit_posts' ),
-			self::SLUG,
-			array( self::$instance, 'display_generate_page' )
-		);
+
+	add_submenu_page(
+		self::SLUG,
+		__( 'Generate Static Site', 'simply-static' ),
+		__( 'Generate', 'simply-static' ),
+		apply_filters( 'ss_settings_capability', 'edit_posts' ),
+		self::SLUG,
+		array( self::$instance, 'display_generate_page' )
+	);
+	*/
 	}
 
 	/**
