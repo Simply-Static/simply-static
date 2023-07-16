@@ -76,7 +76,8 @@ class Admin_Settings {
 	}
 
 	public function add_settings_scripts() {
-		$screen = get_current_screen();
+		$screen  = get_current_screen();
+		$options = Options::reinstance();
 
 		wp_enqueue_script( 'simplystatic-settings', SIMPLY_STATIC_URL . '/src/admin/build/index.js', array(
 			'wp-api',
@@ -87,13 +88,21 @@ class Admin_Settings {
 			'wp-i18n'
 		), SIMPLY_STATIC_VERSION, true );
 
-		$options = Options::reinstance();
 
 		// Determine initial screen.
 		$initial = '/';
 
 		if ( 'simply-static_page_simply-static-settings' === $screen->base ) {
 			$initial = '/general';
+		}
+
+		// Check if directory exists, if not, create it.
+		$upload_dir = wp_upload_dir();
+		$temp_dir   = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
+
+		// Check if directory exists.
+		if ( ! is_dir( $temp_dir ) ) {
+			wp_mkdir_p( $temp_dir );
 		}
 
 		$args = apply_filters(
@@ -109,7 +118,7 @@ class Admin_Settings {
 				'home'           => home_url(),
 				'home_path'      => get_home_path(),
 				'admin_email'    => get_bloginfo( 'admin_email' ),
-				'temp_files_dir' => $options->get( 'temp_files_dir' ),
+				'temp_files_dir' => trailingslashit( $temp_dir ),
 				'token'          => get_option( 'sch_token' )
 			)
 		);
@@ -222,7 +231,6 @@ class Admin_Settings {
 	 * @return false|mixed|null
 	 */
 	public function get_settings() {
-
 		return get_option( 'simply-static' );
 	}
 
@@ -293,8 +301,8 @@ class Admin_Settings {
 		$activity_log = Plugin::instance()->get_activity_log();
 
 		return json_encode( [
-			"status" => 200,
-			"data" => $activity_log,
+			"status"  => 200,
+			"data"    => $activity_log,
 			"running" => Plugin::instance()->get_archive_creation_job()->is_running(),
 		] );
 	}
@@ -304,14 +312,14 @@ class Admin_Settings {
 	 *
 	 * @return false|string
 	 */
-	public function get_export_log(\WP_REST_Request $request) {
+	public function get_export_log( \WP_REST_Request $request ) {
 		$params = $request->get_params();
 
 		$export_log = Plugin::instance()->get_export_log( $params['per_page'], $params['page'] );
 
 		return json_encode( [
 			"status" => 200,
-			"data" => $export_log,
+			"data"   => $export_log,
 		] );
 	}
 
@@ -320,8 +328,8 @@ class Admin_Settings {
 	 *
 	 * @return false|string
 	 */
-	public function start_export(\WP_REST_Request $request) {
-		$params = $request->get_params();
+	public function start_export( \WP_REST_Request $request ) {
+		$params  = $request->get_params();
 		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
 
 		Plugin::instance()->run_static_export( $blog_id );
@@ -336,9 +344,9 @@ class Admin_Settings {
 	 *
 	 * @return false|string
 	 */
-	public function is_running(\WP_REST_Request $request) {
+	public function is_running( \WP_REST_Request $request ) {
 		return json_encode( [
-			"status" => 200,
+			"status"  => 200,
 			"running" => Plugin::instance()->get_archive_creation_job()->is_running()
 		] );
 	}
