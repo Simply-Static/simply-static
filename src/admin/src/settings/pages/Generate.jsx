@@ -143,7 +143,7 @@ function Generate() {
                             <b>{__('Debugging', 'simply-static')}</b>
                         </CardHeader>
                         <CardBody>
-                            <Button variant="primary" href={options.log_file} target={"_blank"}
+                            <Button variant="primary" href={options.log_file} download={true}
                                     style={{marginRight: "10px"}}>{__('Download Log', 'simply-static')}</Button>
                             <Button variant="secondary"
                                     onClick={deleteLog}>{__('Clear Log', 'simply-static')}</Button>
