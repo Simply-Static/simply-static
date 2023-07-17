@@ -23,6 +23,7 @@ function Generate() {
     const [logDeleted, setLogDeleted] = useState(false);
     const [loadingExportLog, setLoadingExportLog] = useState(false);
     const [perPageExportLog, setPerPageExportLog] = useState(25);
+    const [exportPage, setExportPage] = useState(0);
 
     const [terminalLineData, setTerminalLineData] = useState([
         <TerminalOutput>Waiting for new export..</TerminalOutput>
@@ -67,19 +68,29 @@ function Generate() {
 
     const handlePerRowsChange = (newPerPage, page) => {
         setPerPageExportLog(newPerPage);
-        getExportLog( page );
+        getExportLog( page, true );
     };
 
-    function getExportLog( page ) {
+    function getExportLog( page, force = false ) {
         page = page ?? 1;
-        setLoadingExportLog(true);
+
+        if ( page !== exportPage || force ) {
+            setLoadingExportLog(true);
+        }
+
         apiFetch({
             path: `/simplystatic/v1/export-log?page=${page}&per_page=${perPageExportLog}`,
             method: 'GET',
         }).then(resp => {
             var json = JSON.parse( resp );
-            setExportLog( json.data );
-            setLoadingExportLog(false);
+            if ( page !== exportPage || force ) {
+                setExportLog( json.data );
+                setLoadingExportLog(false);
+            } else {
+                exportLog.total_static_pages = json.data.total_static_pages;
+                setExportLog(exportLog);
+            }
+            setExportPage(page);
         } );
     }
 
@@ -103,22 +114,18 @@ function Generate() {
         } );
     }
 
-    useEffect(() => {
-        if (isRunning) {
-            setTerminalLineData([]);
-        }
-    }, [isRunning]);
-
     useInterval(() => {
         refreshActivityLog();
         getExportLog();
     }, isRunning ? 5000 : null);
 
     useEffect(() => {
+        if (isRunning) {
+            setTerminalLineData([]);
+        }
         refreshActivityLog();
-        getExportLog();
+        getExportLog( 1, true);
     }, [isRunning]);
-
 
 
     useEffect(() => {
