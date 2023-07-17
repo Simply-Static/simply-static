@@ -10,132 +10,19 @@ import {
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
-import Terminal, {ColorMode, TerminalOutput} from 'react-terminal-ui';
-import DataTable from 'react-data-table-component';
 import apiFetch from "@wordpress/api-fetch";
-import useInterval from "../../hooks/useInterval";
+import ActivityLog from "../components/ActivityLog";
+import ExportLog from "../components/ExportLog";
+import LogButtons from "../components/LogButtons";
 
 const {__} = wp.i18n;
 
 function Generate() {
-    const {settings, isRunning} = useContext(SettingsContext);
-    const [exportLog, setExportLog] = useState([]);
-    const [logDeleted, setLogDeleted] = useState(false);
-    const [loadingExportLog, setLoadingExportLog] = useState(false);
-    const [perPageExportLog, setPerPageExportLog] = useState(25);
-    const [exportPage, setExportPage] = useState(0);
+    const {settings} = useContext(SettingsContext);
 
-    const [terminalLineData, setTerminalLineData] = useState([
-        <TerminalOutput>Waiting for new export..</TerminalOutput>
-    ]);
-
-    const columns = [
-        {
-            name: 'Code',
-            selector: row => row.code,
-            sortable: false,
-            maxWidth: '100px'
-        },
-        {
-            name: 'URL',
-            selector: row => <a target={'_blank'} href={row.url}>{row.url}</a>,
-            sortable: false,
-
-        },
-        {
-            name: 'Notes',
-            wrap: true,
-            selector: row => <span dangerouslySetInnerHTML={{__html: row.notes}}></span>,
-        },
-    ];
-
-    const deleteLog = () => {
-        apiFetch({
-            path: '/simplystatic/v1/delete-log',
-            method: 'POST',
-        });
-
-        setLogDeleted(true);
-
-        setTimeout(function () {
-            setLogDeleted(false);
-        }, 2000);
-    }
-
-    const handlePageChange = page => {
-        getExportLog(page);
-    };
-
-    const handlePerRowsChange = (newPerPage, page) => {
-        setPerPageExportLog(newPerPage);
-        getExportLog( page, true );
-    };
-
-    function getExportLog( page, force = false ) {
-        page = page ?? 1;
-
-        if ( page !== exportPage || force ) {
-            setLoadingExportLog(true);
-        }
-
-        apiFetch({
-            path: `/simplystatic/v1/export-log?page=${page}&per_page=${perPageExportLog}`,
-            method: 'GET',
-        }).then(resp => {
-            var json = JSON.parse( resp );
-            if ( page !== exportPage || force ) {
-                setExportLog( json.data );
-                setLoadingExportLog(false);
-            } else {
-                exportLog.total_static_pages = json.data.total_static_pages;
-                setExportLog(exportLog);
-            }
-            setExportPage(page);
-        } );
-    }
-
-    function refreshActivityLog() {
-        apiFetch({
-            path: '/simplystatic/v1/activity-log',
-            method: 'GET',
-        }).then(resp => {
-            var json = JSON.parse( resp );
-            var terminal = [];
-            for( var message in json.data ) {
-                var date = json.data[message].datetime;
-                var text = json.data[message].message;
-
-                terminal.push(
-                    <TerminalOutput>[{date}] <span dangerouslySetInnerHTML={{__html: text}}></span></TerminalOutput>
-                );
-            }
-
-            setTerminalLineData( terminal );
-        } );
-    }
-
-    useInterval(() => {
-        refreshActivityLog();
-        getExportLog();
-    }, isRunning ? 5000 : null);
-
-    useEffect(() => {
-        if (isRunning) {
-            setTerminalLineData([]);
-        }
-        refreshActivityLog();
-        getExportLog( 1, true);
-    }, [isRunning]);
-
-
-    useEffect(() => {
-
-    }, [settings]);
 
     return (<div className={"inner-settings settings-wide"}>
-        <Terminal name={__('Activity Log', 'simply-static')} height="250px" colorMode={ColorMode.Dark}>
-            {terminalLineData}
-        </Terminal>
+        <ActivityLog />
         <Spacer margin={5}/>
         <Flex>
             {'pro' === options.plan && options.is_network &&
@@ -157,21 +44,7 @@ function Generate() {
                             <b>{__('Debugging', 'simply-static')}</b>
                         </CardHeader>
                         <CardBody>
-                            <Button variant="primary" href={options.log_file} download={true}
-                                    style={{marginRight: "10px"}}>{__('Download Log', 'simply-static')}</Button>
-                            <Button variant="secondary"
-                                    onClick={deleteLog}>{__('Clear Log', 'simply-static')}</Button>
-                            {logDeleted &&
-                                <Animate type="slide-in" options={{origin: 'top'}}>
-                                    {() => (
-                                        <Notice status="success" isDismissible={false}>
-                                            <p>
-                                                {__('Log file successfully deleted.', 'simply-static')}
-                                            </p>
-                                        </Notice>
-                                    )}
-                                </Animate>
-                            }
+                            <LogButtons />
                         </CardBody>
                     </Card>
                 </FlexItem>
@@ -183,18 +56,7 @@ function Generate() {
                 <b>{__('Export Log', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
-                <DataTable
-                    columns={columns}
-                    data={exportLog.static_pages}
-                    pagination
-                    paginationServer
-                    paginationTotalRows={exportLog.total_static_pages}
-                    paginationPerPage={25}
-                    paginationRowsPerPageOptions={[25, 50, 100, 200]}
-                    progressPending={loadingExportLog}
-                    onChangeRowsPerPage={handlePerRowsChange}
-                    onChangePage={handlePageChange}
-                />
+                <ExportLog />
             </CardBody>
         </Card>
     </div>)
