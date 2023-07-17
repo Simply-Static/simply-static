@@ -33,6 +33,7 @@ function SettingsPage() {
     const [activeItem, setActiveItem] = useState({activeItem: "/"});
     const [initialPage, setInitialPage] = useState(options.initial);
     const [initialSet, setInitialSet] = useState(false);
+    const [disabledButton, setDisabledButton] = useState(false);
 
     useEffect(() => {
         if (!initialSet) {
@@ -43,7 +44,7 @@ function SettingsPage() {
     });
 
     const startExport = () => {
-        setIsRunning(true);
+        setDisabledButton(true);
 
         apiFetch({
             path: '/simplystatic/v1/start-export',
@@ -62,6 +63,11 @@ function SettingsPage() {
         });
     }
 
+    useEffect(function (){
+        setDisabledButton(isRunning);
+    }, [isRunning])
+
+
     return (
         <div className={"plugin-settings-container"}>
             <NavigatorProvider initialPath={initialPage}>
@@ -78,17 +84,17 @@ function SettingsPage() {
                                 <Button onClick={() => {
                                     startExport();
                                 }}
-                                        disabled={isRunning}
+                                        disabled={disabledButton}
                                         className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
                                 >
-                                    {!isRunning && [<Dashicon icon="update"/>,
+                                    {!disabledButton && [<Dashicon icon="update"/>,
                                         __('Generate Static Files', 'simply-static')
                                     ]}
-                                    {isRunning && [<Dashicon icon="update spin"/>,
+                                    {disabledButton && [<Dashicon icon="update spin"/>,
                                         __('Generating...', 'simply-static'),
                                     ]}
                                 </Button>
-                                {isRunning &&
+                                {disabledButton &&
                                     <span onClick={() => {
                                         cancelExport();
                                     }} className={"cancel-button"}>

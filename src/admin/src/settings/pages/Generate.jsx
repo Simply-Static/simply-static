@@ -103,6 +103,12 @@ function Generate() {
         } );
     }
 
+    useEffect(() => {
+        if (isRunning) {
+            setTerminalLineData([]);
+        }
+    }, [isRunning]);
+
     useInterval(() => {
         refreshActivityLog();
         getExportLog();
@@ -112,6 +118,8 @@ function Generate() {
         refreshActivityLog();
         getExportLog();
     }, [isRunning]);
+
+
 
     useEffect(() => {
 
