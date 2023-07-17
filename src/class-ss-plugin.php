@@ -352,7 +352,7 @@ class Plugin {
 			Page::query()
 			    ->limit( $per_page )
 			    ->offset( $offset )
-			    ->order( 'http_status_code' )
+			    ->order( 'http_status_code DESC' )
 			    ->find()
 		);
 
