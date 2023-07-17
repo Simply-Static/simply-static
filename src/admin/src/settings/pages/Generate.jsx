@@ -25,7 +25,7 @@ function Generate() {
     const [perPageExportLog, setPerPageExportLog] = useState(25);
 
     const [terminalLineData, setTerminalLineData] = useState([
-        <TerminalOutput>Setting up..</TerminalOutput>
+        <TerminalOutput>Waiting for new export..</TerminalOutput>
     ]);
 
     const columns = [
