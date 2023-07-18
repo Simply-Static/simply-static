@@ -69,20 +69,7 @@ class Plugin {
 			self::$instance = new self();
 			self::$instance->includes();
 
-			// Enqueue admin scripts.
-			add_action( 'admin_enqueue_scripts', array( self::$instance, 'enqueue_admin_scripts' ) );
-			// Add the options page and menu item.
-			add_action( 'admin_menu', array( self::$instance, 'add_plugin_admin_menu' ), 2 );
-
-			// Maybe clear local directory.
-			add_action( 'ss_after_setup_task', array( self::$instance, 'maybe_clear_directory' ) );
-
-			// Handle AJAX requests.
-			add_action( 'wp_ajax_static_archive_action', array( self::$instance, 'static_archive_action' ) );
-			add_action( 'wp_ajax_render_export_log', array( self::$instance, 'render_export_log' ) );
-			add_action( 'wp_ajax_render_activity_log', array( self::$instance, 'render_activity_log' ) );
-
-			// Instead of using ajax, activate export log file and run with cron.
+			// Run export via WP-Cron.
 			add_action( 'simply_static_site_export_cron', array( self::$instance, 'run_static_export' ) );
 
 			// Filters.
@@ -91,7 +78,11 @@ class Plugin {
 				'filter_task_list'
 			), 10, 2 );
 
+			// Handle Basic Auth.
 			add_filter( 'http_request_args', array( self::$instance, 'add_http_filters' ), 10, 2 );
+
+			// Maybe clear local directory.
+			add_action( 'ss_after_setup_task', array( self::$instance, 'maybe_clear_directory' ) );
 
 			$integrations = new Integrations();
 			$integrations->load();
@@ -116,6 +107,7 @@ class Plugin {
 
 	/**
 	 * Include required files
+	 *
 	 * @return void
 	 */
 	private function includes() {
@@ -149,77 +141,9 @@ class Plugin {
 	}
 
 	/**
-	 * Enqueue admin-specific javascript files for this plugin's admin pages only
-	 * @return void
-	 */
-	public function enqueue_admin_scripts() {
-		// Plugin admin JS. Tack on plugin version.
-		if ( $this->current_page === 'simply-static' ) {
-			wp_enqueue_script( self::SLUG . '-generate-styles', plugin_dir_url( dirname( __FILE__ ) ) . 'js/admin-generate.js', array(), SIMPLY_STATIC_VERSION );
-			wp_localize_script(
-				self::SLUG . '-generate-styles',
-				'ss_generate',
-				[
-					'is_network_admin' => is_network_admin() ? '1' : '0',
-					'is_cron'          => Util::is_cron() ? '1' : '0'
-				]
-			);
-		}
-	}
-
-	/**
-	 * Register the administration menu for this plugin into the WordPress Dashboard menu.
-	 * @return void
-	 */
-	public function add_plugin_admin_menu() {
-
-		if ( apply_filters( 'ss_hide_admin_menu', false ) ) {
-			return;
-		}
-
-		// Add main menu item.
-		/*
-	add_menu_page(
-		__( 'Simply Static', 'simply-static' ),
-		__( 'Simply Static', 'simply-static' ),
-		apply_filters( 'ss_settings_capability', 'edit_posts' ),
-		self::SLUG,
-		array( self::$instance, 'display_generate_page' ),
-		SIMPLY_STATIC_URL . '/assets/simply-static-icon.svg',
-	);
-
-
-	add_submenu_page(
-		self::SLUG,
-		__( 'Generate Static Site', 'simply-static' ),
-		__( 'Generate', 'simply-static' ),
-		apply_filters( 'ss_settings_capability', 'edit_posts' ),
-		self::SLUG,
-		array( self::$instance, 'display_generate_page' )
-	);
-	*/
-	}
-
-	/**
-	 * Render the page for generating a static site
-	 * @return void
-	 */
-	public function display_generate_page() {
-		$done = $this->archive_creation_job->is_job_done();
-
-		$this->view
-			->set_layout( 'admin' )
-			->set_template( 'generate' )
-			->assign( 'archive_generation_done', $done );
-
-		do_action( 'ss_before_render_generate_page', $this->view, $this->options );
-
-		$this->view->render();
-	}
-
-
-	/**
-	 * Handle archive job without ajax.
+	 * Handle static export.
+	 *
+	 * @param int $blog_id given blog id.
 	 *
 	 * @return void
 	 */
@@ -241,65 +165,12 @@ class Plugin {
 	}
 
 	/**
-	 * Handle requests for creating a static archive and send a response via ajax
-	 * @return void
-	 */
-	public function static_archive_action() {
-		check_ajax_referer( 'simply-static_generate' );
-
-		if ( ! current_user_can( 'edit_posts' ) ) {
-			die( __( 'Not permitted', 'simply-static' ) );
-		}
-
-		$action  = $_POST['perform'];
-		$blog_id = isset( $_POST['blog_id'] ) ? absint( $_POST['blog_id'] ) : get_current_blog_id();
-
-		do_action( 'ss_before_perform_archive_action', $blog_id, $action, $this->archive_creation_job );
-
-		if ( $action === 'start' ) {
-			Util::delete_debug_log();
-			Util::debug_log( "Received request to start generating a static archive" );
-
-			do_action( 'ss_before_static_export', $blog_id );
-			$this->archive_creation_job->start( $blog_id );
-		} elseif ( $action === 'cancel' ) {
-			Util::debug_log( "Received request to cancel static archive generation" );
-			$this->archive_creation_job->cancel();
-		}
-
-		do_action( 'ss_after_perform_archive_action', $blog_id, $action, $this->archive_creation_job );
-
-
-		$this->send_json_response_for_static_archive( $action );
-	}
-
-	/**
-	 * Render json+html for response to static archive creation.
+	 * Get activity log data.
 	 *
-	 * @return void
+	 * @param int $blog_id given blog id.
+	 *
+	 * @return mixed
 	 */
-	public function send_json_response_for_static_archive( $action ) {
-		$done         = $this->archive_creation_job->is_job_done();
-		$current_task = $this->archive_creation_job->get_current_task();
-
-		$activity_log_html = $this->view
-			->set_template( '_activity_log' )
-			->assign( 'status_messages', $this->options->get( 'archive_status_messages' ) )
-			->render_to_string();
-
-		do_action( 'ss_before_sending_response_for_static_archive' );
-
-		// send json response and die().
-		wp_send_json(
-			array(
-				'action'            => $action,
-				'activity_log_html' => $activity_log_html,
-				'pages_status'      => $this->options->get( 'pages_status' ),
-				'done'              => $done
-			)
-		);
-	}
-
 	public function get_activity_log( $blog_id = 0 ) {
 		$blog_id = $blog_id ?: get_current_blog_id();
 
@@ -313,32 +184,14 @@ class Plugin {
 	}
 
 	/**
-	 * Render the activity log and send it via ajax
-	 * @return void|array
+	 * Get export log data.
+	 *
+	 * @param int $per_page given per page.
+	 * @param int $current_page given current page.
+	 * @param int $blog_id given blog id.
+	 *
+	 * @return array
 	 */
-	public function render_activity_log() {
-		check_ajax_referer( 'simply-static_generate' );
-		if ( ! current_user_can( 'edit_posts' ) ) {
-			die( esc_html__( 'Not permitted', 'simply-static' ) );
-		}
-
-		$blog_id = isset( $_REQUEST['blog_id'] ) ? absint( $_REQUEST['blog_id'] ) : get_current_blog_id();
-
-		do_action( 'ss_before_render_activity_log', $blog_id );
-
-		// $archive_manager = new Archive_Manager();
-
-		$content = $this->view
-			->set_template( '_activity_log' )
-			->assign( 'status_messages', $this->options->get( 'archive_status_messages' ) )
-			->render_to_string();
-
-		do_action( 'ss_after_render_activity_log', $blog_id );
-
-		// send json response and die().
-		wp_send_json( array( 'html' => $content ) );
-	}
-
 	public function get_export_log( $per_page, $current_page = 1, $blog_id = 0 ) {
 
 		$blog_id = $blog_id ?: get_current_blog_id();
@@ -397,36 +250,6 @@ class Plugin {
 	}
 
 	/**
-	 * Render the export log and send it via ajax
-	 *
-	 * @return void
-	 */
-	public function render_export_log() {
-		check_ajax_referer( 'simply-static_generate' );
-		if ( ! current_user_can( 'edit_posts' ) ) {
-			die( __( 'Not permitted', 'simply-static' ) );
-		}
-
-		$blog_id      = isset( $_POST['blog_id'] ) ? absint( $_POST['blog_id'] ) : get_current_blog_id();
-		$per_page     = $_POST['per_page'];
-		$current_page = $_POST['page'];
-
-		$log = $this->get_export_log( $per_page, $current_page, $blog_id );
-
-		$content = $this->view
-			->set_template( '_export_log' )
-			->assign( 'static_pages', $log['static_pages'] )
-			->assign( 'http_status_codes', $log['status_codes'] )
-			->assign( 'current_page', $current_page )
-			->assign( 'total_pages', $log['total_pages'] )
-			->assign( 'total_static_pages', $log['total_static_pages'] )
-			->render_to_string();
-
-		// send json response and die().
-		wp_send_json( array( 'html' => $content ) );
-	}
-
-	/**
 	 * Starts the archive creation job.
 	 *
 	 * @return Archive_Creation_Job|null
@@ -438,7 +261,7 @@ class Plugin {
 	/**
 	 * Set HTTP Basic Auth for wp-background-processing
 	 *
-	 * @param array $parsed_args given args.
+	 * @param array  $parsed_args given args.
 	 * @param string $url given URL.
 	 *
 	 * @return array
@@ -458,21 +281,22 @@ class Plugin {
 	/**
 	 * Return the task list for the Archive Creation Job to process
 	 *
-	 * @param array $task_list The list of tasks to process.
+	 * @param array  $task_list The list of tasks to process.
 	 * @param string $delivery_method The method of delivering static files.
 	 *
-	 * @return array                   The list of tasks to process
+	 * @return array The list of tasks to process.
 	 */
-	public function filter_task_list( $task_list, $delivery_method ) {
+	public function filter_task_list( $task_list, $delivery_method ): array {
 		array_push( $task_list, 'setup', 'fetch_urls' );
-		if ( $delivery_method === 'zip' ) {
-			array_push( $task_list, 'create_zip_archive' );
-		} else if ( $delivery_method === 'local' ) {
-			array_push( $task_list, 'transfer_files_locally' );
-		} else if ( $delivery_method === 'simply-cdn' ) {
-			array_push( $task_list, 'simply_cdn' );
+
+		if ( 'zip' === $delivery_method ) {
+			$task_list[] = 'create_zip_archive';
+		} elseif ( 'local' === $delivery_method ) {
+			$task_list[] = 'transfer_files_locally';
+		} elseif ( 'simply-cdn' === $delivery_method ) {
+			$task_list[] = 'simply_cdn';
 		}
-		array_push( $task_list, 'wrapup' );
+		$task_list[] = 'wrapup';
 
 		return $task_list;
 	}
@@ -495,6 +319,5 @@ class Plugin {
 				Transfer_Files_Locally_Task::delete_local_directory_static_files( $local_dir, $this->options );
 			}
 		}
-
 	}
 }
