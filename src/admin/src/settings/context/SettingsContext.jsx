@@ -82,6 +82,8 @@ function SettingsContextProvider(props) {
     const [settingsSaved, setSettingsSaved] = useState(false);
     const [settings, setSettings] = useState(defaultSettings);
     const [configs, setConfigs] = useState({});
+    const [blogId, setBlogId] = useState(1);
+    const [settingsType, setSettingsType] = useState('site');
 
     const getSettings = () => {
         apiFetch({path: '/simplystatic/v1/settings'}).then((options) => {
@@ -153,6 +155,7 @@ function SettingsContextProvider(props) {
         getSettings();
         getStatus();
         checkIfRunning();
+        setBlogId(options.blog_id)
     }, []);
 
     return (
@@ -169,7 +172,11 @@ function SettingsContextProvider(props) {
                 importSettings,
                 migrateSettings,
                 isRunning,
-                setIsRunning
+                setIsRunning,
+                blogId,
+                setBlogId,
+                settingsType,
+                setSettingsType
             }}
         >
             {props.children}

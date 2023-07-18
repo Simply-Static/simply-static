@@ -105,6 +105,21 @@ class Admin_Settings {
 			wp_mkdir_p( $temp_dir );
 		}
 
+		$sites = [];
+
+		if ( is_multisite() && is_network_admin() && function_exists('get_sites') ) {
+			$public_sites = get_sites( [ 'public' => true ] );
+			if ( $public_sites ) {
+				foreach ( $public_sites as $site ) {
+					$sites[] = [
+						'blog_id' => $site->blog_id,
+						'name'    => $site->blogname,
+						'url'     => $site->siteurl
+					];
+ 				}
+			}
+		}
+
 		$args = apply_filters(
 			'ss_settings_args',
 			array(
@@ -119,7 +134,10 @@ class Admin_Settings {
 				'home_path'      => get_home_path(),
 				'admin_email'    => get_bloginfo( 'admin_email' ),
 				'temp_files_dir' => trailingslashit( $temp_dir ),
-				'token'          => get_option( 'sch_token' )
+				'token'          => get_option( 'sch_token' ),
+				'blog_id'        => get_current_blog_id(),
+				'sites'          => $sites,
+
 			)
 		);
 
@@ -340,7 +358,11 @@ class Admin_Settings {
 		$params  = $request->get_params();
 		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
 
+		do_action( 'ss_before_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
+
 		Plugin::instance()->run_static_export( $blog_id );
+
+		do_action( 'ss_after_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
 
 		return json_encode( [
 			'status' => 200,
@@ -354,7 +376,13 @@ class Admin_Settings {
 	 */
 	public function cancel_export() {
 		Util::debug_log( "Received request to cancel static archive generation" );
+		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
+
+		do_action( 'ss_before_perform_archive_action', $blog_id, 'cancel', Plugin::instance()->get_archive_creation_job() );
+
 		Plugin::instance()->cancel_static_export();
+
+		do_action( 'ss_after_perform_archive_action', $blog_id, 'cancel', Plugin::instance()->get_archive_creation_job() );
 
 		return json_encode( [ 'status' => 200 ] );
 	}
@@ -365,6 +393,8 @@ class Admin_Settings {
 	 * @return false|string
 	 */
 	public function is_running( \WP_REST_Request $request ) {
+		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
+
 		return json_encode( [
 			'status'  => 200,
 			'running' => Plugin::instance()->get_archive_creation_job()->is_running()

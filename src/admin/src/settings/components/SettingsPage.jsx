@@ -29,7 +29,7 @@ import apiFetch from "@wordpress/api-fetch";
 const {__} = wp.i18n;
 
 function SettingsPage() {
-    const {isRunning, setIsRunning} = useContext(SettingsContext);
+    const {isRunning, setIsRunning, blogId, settingsType} = useContext(SettingsContext);
     const [activeItem, setActiveItem] = useState({activeItem: "/"});
     const [initialPage, setInitialPage] = useState(options.initial);
     const [initialSet, setInitialSet] = useState(false);
@@ -48,7 +48,12 @@ function SettingsPage() {
 
         apiFetch({
             path: '/simplystatic/v1/start-export',
-            method: 'POST'
+            method: 'POST',
+            data: {
+                'blog_id': blogId,
+                'is_network_admin': options.is_network,
+                'settings_type': settingsType
+            }
         }).then(resp => {
             setIsRunning(true);
         });
@@ -57,7 +62,12 @@ function SettingsPage() {
     const cancelExport = () => {
         apiFetch({
             path: '/simplystatic/v1/cancel-export',
-            method: 'POST'
+            method: 'POST',
+            data: {
+                'blog_id': blogId,
+                'is_network_admin': options.is_network,
+                'settings_type': settingsType
+            }
         }).then(resp => {
             setIsRunning(false);
         });

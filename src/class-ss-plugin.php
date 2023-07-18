@@ -322,7 +322,7 @@ class Plugin {
 			die( esc_html__( 'Not permitted', 'simply-static' ) );
 		}
 
-		$blog_id = isset( $_POST['blog_id'] ) ? absint( $_POST['blog_id'] ) : get_current_blog_id();
+		$blog_id = isset( $_REQUEST['blog_id'] ) ? absint( $_REQUEST['blog_id'] ) : get_current_blog_id();
 
 		do_action( 'ss_before_render_activity_log', $blog_id );
 

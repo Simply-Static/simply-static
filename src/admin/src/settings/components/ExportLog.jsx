@@ -5,7 +5,7 @@ import useInterval from "../../hooks/useInterval";
 import DataTable from "react-data-table-component";
 
 function ExportLog() {
-    const {isRunning} = useContext(SettingsContext);
+    const {isRunning, blogId} = useContext(SettingsContext);
     const [exportLog, setExportLog] = useState([]);
     const [loadingExportLog, setLoadingExportLog] = useState(false);
     const [perPageExportLog, setPerPageExportLog] = useState(25);
@@ -48,7 +48,7 @@ function ExportLog() {
         }
 
         apiFetch({
-            path: `/simplystatic/v1/export-log?page=${page}&per_page=${perPageExportLog}`,
+            path: `/simplystatic/v1/export-log?page=${page}&per_page=${perPageExportLog}&blog_id=${blogId}&is_network_admin=${options.is_network}`,
             method: 'GET',
         }).then(resp => {
             var json = JSON.parse( resp );

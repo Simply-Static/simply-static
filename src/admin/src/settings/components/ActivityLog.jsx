@@ -6,14 +6,14 @@ import useInterval from "../../hooks/useInterval";
 
 const {__} = wp.i18n;
 function ActivityLog() {
-    const {settings, isRunning} = useContext(SettingsContext);
+    const {isRunning, blogId} = useContext(SettingsContext);
     const [terminalLineData, setTerminalLineData] = useState([
         <TerminalOutput>Waiting for new export..</TerminalOutput>
     ]);
 
     function refreshActivityLog() {
         apiFetch({
-            path: '/simplystatic/v1/activity-log',
+            path: '/simplystatic/v1/activity-log?blog_id=' + blogId + '&is_network_admin=' + options.is_network,
             method: 'GET',
         }).then(resp => {
             var json = JSON.parse( resp );
