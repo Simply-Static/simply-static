@@ -107,7 +107,7 @@ class Admin_Settings {
 
 		$sites = [];
 
-		if ( is_multisite() && is_network_admin() && function_exists('get_sites') ) {
+		if ( is_multisite() && is_network_admin() && function_exists( 'get_sites' ) ) {
 			$public_sites = get_sites( [ 'public' => true ] );
 			if ( $public_sites ) {
 				foreach ( $public_sites as $site ) {
@@ -116,7 +116,7 @@ class Admin_Settings {
 						'name'    => $site->blogname,
 						'url'     => $site->siteurl
 					];
- 				}
+				}
 			}
 		}
 
