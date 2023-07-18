@@ -72,11 +72,11 @@ Start your 7-day free trial [here](https://simplycdn.io/#pricing).
 
 The pro version of Simply Static enhances the plugin with various features.
 
-[youtube https://www.youtube.com/watch?v=PwdO6B7Iet0]
+[youtube https://www.youtube.com/watch?v=PTuw1ChYCdI]
 
 = GitHub Integration =
 
-With the GitHub integration, you can completely automate your entire development process. 
+With the GitHub integration, you can completely automate your entire development process.
 
 The only thing you need is a GitHub account, no knowledge of Git or GitHub itself is required, as Simply Static Pro handles the entire process for you and keeps your repository up to date.
 
@@ -86,10 +86,17 @@ This allows deploying your static website to:
 * Cloudflare Pages
 * Netlify
 * Vercel
-* Amazon S3
-* Digital Ocean Spaces
-* BunnyCDN (and other CDN providers)
 * SFTP to your server
+
+
+= AWS S3 Integration & Digital Ocean Spaces Integration =
+
+Export directly to Amazon AWS S3 from Simply Static Pro. Connect your bucket and run your export.
+
+
+= BunnyCDN Integration =
+
+Export directly to BunnyCDN and get all the benefits of their CDN - including caching, file optimization and DNS management.
 
 
 = Builds and Single Exports =
@@ -127,6 +134,27 @@ After a comment was submitted, Simply Static automatically exports a new static 
 Use WPML, Polylang or TranslatePress and run static exports per language or all at once.
 
 Simply Static Pro also supports configuring settings per language, using the available language switchers and more to export a your multilingual website as easy as possible.
+
+
+= WP-CLI =
+
+Simply Static Pro has a detailed and comprehensive integration with WP-CLI.
+
+Control every option, run different kinds of exports and more with the WP-CLI integration.
+
+
+= Multisite =
+
+Export your entire network, subsites, change settings on the network level and more.
+
+The multisite integration of Simply Static Pro brings your static network to the next level.
+
+
+= Minification =
+
+Automatically minfiy HTML, CSS and JavaScript files on your static site.
+
+We can even minify inline CSS & JavaScript.
 
 
 = Get the Pro version =
