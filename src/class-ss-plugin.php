@@ -156,7 +156,7 @@ class Plugin {
 	}
 
 	/**
-	 * Handle cancel archive job without ajax.
+	 * Handle cancel archive job.
 	 *
 	 * @return void
 	 */
