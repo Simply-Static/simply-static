@@ -141,6 +141,15 @@ class Plugin {
 	}
 
 	/**
+	 * Old method to include admin menu.
+	 *
+	 * @return void
+	 */
+	public function add_plugin_admin_menu() {
+		// Deprecated, only for upgrade support.
+	}
+
+	/**
 	 * Handle static export.
 	 *
 	 * @param int $blog_id given blog id.
