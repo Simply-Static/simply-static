@@ -34,7 +34,7 @@ class Simply_CDN_Admin {
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_admin_scripts' ) );
 		add_action( 'added_option', array( $this, 'set_default_configuration' ), 10, 2 );
-		add_action( 'wp_ajax_update_token', array( $this, 'update_token' ) );
+		add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
 		add_action( 'wp_ajax_clear_cache', array( $this, 'reset_cache' ) );
 
 		// Include only if connected.
@@ -56,8 +56,8 @@ class Simply_CDN_Admin {
 	 * @return void
 	 */
 	public function add_admin_scripts() {
-		wp_enqueue_style( 'sch-admin-style', SIMPLY_STATIC_URL . '/src/integrations/simply-cdn/assets/sch-admin.css', array(), Plugin::VERSION, 'all' );
-		wp_enqueue_script( 'sch-admin', SIMPLY_STATIC_URL . '/src/integrations/simply-cdn/assets/sch-admin.js', array( 'jquery' ), Plugin::VERSION, true );
+		wp_enqueue_style( 'sch-admin-style', SIMPLY_STATIC_URL . '/src/integrations/simply-cdn/assets/sch-admin.css', array(), SIMPLY_STATIC_VERSION, 'all' );
+		wp_enqueue_script( 'sch-admin', SIMPLY_STATIC_URL . '/src/integrations/simply-cdn/assets/sch-admin.js', array( 'jquery' ), SIMPLY_STATIC_VERSION, true );
 
 		$args = array(
 			'ajax_url'        => admin_url( 'admin-ajax.php' ),
@@ -244,6 +244,60 @@ class Simply_CDN_Admin {
 	}
 
 	/**
+	 * Setup Rest API endpoints.
+	 *
+	 * @return void
+	 */
+	public function rest_api_init() {
+		register_rest_route( 'simplystatic/v1', '/token', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'validate_token' ],
+			'permission_callback' => function () {
+				return current_user_can( 'manage_options' );
+			},
+		) );
+	}
+
+
+	/**
+	 * Save token via rest API.
+	 *
+	 * @param object $request given request.
+	 *
+	 * @return false|string
+	 */
+	public function validate_token( object $request ) {
+		if ( $request->get_params() ) {
+			$data  = $request->get_params();
+			$token = $data['token'];
+
+			update_option( 'sch_token', $token );
+
+			$data = Simply_CDN_Api::get_data( $token );
+
+			if ( $data && ! empty( $data->cdn->url ) ) {
+				update_option( 'sch_static_url', esc_url( $data->cdn->url ) );
+
+				return json_encode( [
+					"status"  => 200,
+					"success" => true,
+					"message" => "Successfully connected to SimplyCDN.",
+					"token"   => $token
+				] );
+			} else {
+				delete_option( 'sch_token' );
+
+				return json_encode( [
+					"status"  => 400,
+					"success" => false,
+					"message" => "There is something wrong with that security token.",
+					"token"   => ''
+				] );
+			}
+		}
+	}
+
+	/**
 	 * Add admin bar menu to visit static website.
 	 *
 	 * @param \WP_Admin_Bar $admin_bar current admin bar object.
@@ -284,38 +338,6 @@ class Simply_CDN_Admin {
 				)
 			);
 		}
-	}
-
-	/**
-	 * Update token with ajax.
-	 *
-	 * @return void
-	 */
-	public function update_token() {
-		if ( ! wp_verify_nonce( $_POST['nonce'], 'sch-token-nonce' ) ) {
-			die();
-		}
-
-		$token = sanitize_text_field( $_POST['security-token'] );
-		update_option( 'sch_token', $token );
-
-		$data = Simply_CDN_Api::get_data( $token );
-
-		if ( $data && ! empty( $data->cdn->url ) ) {
-			update_option( 'sch_static_url', esc_url( $data->cdn->url ) );
-
-			$response = array( 'success' => true );
-		} else {
-			$response = array(
-				'success'       => false,
-				'error_message' => esc_html__( 'There is something wrong with that security token.', 'simply-static' )
-			);
-
-			delete_option( 'sch_token' );
-		}
-
-		print wp_json_encode( $response );
-		exit;
 	}
 
 	/**

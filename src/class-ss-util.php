@@ -110,7 +110,7 @@ class Util {
 	 */
 	public static function debug_log( $object = null ) {
 		$options = Options::instance();
-		if ( $options->get( 'debugging_mode' ) !== '1' ) {
+		if ( ! $options->get( 'debugging_mode' ) ) {
 			return;
 		}
 

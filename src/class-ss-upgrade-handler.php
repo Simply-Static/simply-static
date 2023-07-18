@@ -1,4 +1,5 @@
 <?php
+
 namespace Simply_Static;
 
 // Exit if accessed directly.
@@ -32,21 +33,24 @@ class Upgrade_Handler {
 	 *
 	 * @return void
 	 */
-	protected function __construct() {}
+	protected function __construct() {
+	}
 
 	/**
 	 * Disable cloning of the class
 	 *
 	 * @return void
 	 */
-	protected function __clone() {}
+	protected function __clone() {
+	}
 
 	/**
 	 * Disable unserializing of the class
 	 *
 	 * @return void
 	 */
-	public function __wakeup() {}
+	public function __wakeup() {
+	}
 
 	/**
 	 * Create settings and setup database
@@ -55,10 +59,19 @@ class Upgrade_Handler {
 	public static function run() {
 		self::$options = Options::instance();
 
+		// Check if directory exists, if not, create it.
+		$upload_dir = wp_upload_dir();
+		$temp_dir   = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
+
+		// Check if directory exists.
+		if ( ! is_dir( $temp_dir ) ) {
+			wp_mkdir_p( $temp_dir );
+		}
+
 		self::$default_options = array(
 			'destination_scheme'      => Util::origin_scheme(),
 			'destination_host'        => Util::origin_host(),
-			'temp_files_dir'          => trailingslashit( plugin_dir_path( dirname( __FILE__ ) ) . 'static-files' ),
+			'temp_files_dir'          => trailingslashit( $temp_dir ),
 			'additional_urls'         => '',
 			'additional_files'        => '',
 			'urls_to_exclude'         => array(),
@@ -67,7 +80,7 @@ class Upgrade_Handler {
 			'relative_path'           => '',
 			'destination_url_type'    => 'relative',
 			'archive_status_messages' => array(),
-			'pages_status' => array(),
+			'pages_status'            => array(),
 			'archive_name'            => null,
 			'archive_start_time'      => null,
 			'archive_end_time'        => null,
@@ -84,14 +97,17 @@ class Upgrade_Handler {
 			self::set_default_options();
 		}
 
-		if ( version_compare( $version, Plugin::VERSION, '!=' ) ) {
+		if ( version_compare( $version, SIMPLY_STATIC_VERSION, '!=' ) ) {
 			// Sync database.
 			Page::create_or_update_table();
 
+			// Migrate settings.
+			Migrate_Settings::migrate();
+
 			// Update version.
 			self::$options
-			->set( 'version', Plugin::VERSION )
-			->save();
+				->set( 'version', SIMPLY_STATIC_VERSION )
+				->save();
 		}
 	}
 
