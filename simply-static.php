@@ -51,18 +51,28 @@ if ( ! function_exists( 'simply_static_run_plugin' ) ) {
 		Simply_Static\Plugin::instance();
 	}
 
-	// Do we need to migrate?
-	include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+	// Update required?
+	if ( defined( 'SIMPLY_STATIC_PRO_VERSION' ) && version_compare( SIMPLY_STATIC_PRO_VERSION, '1.4', '<' ) ) {
+		// Site notice.
+		add_action(
+			'admin_notices',
+			function () {
+				$message = esc_html__( 'You need to update Simply Static Pro to version 1.4 before continuing to use Simply Static, as we made significant changes requiring an upgrade.', 'simply-static' );
+				echo wp_kses_post( '<div class="notice notice-error"><p>' . $message . '</p></div>' );
+			}
+		);
 
-	if ( is_plugin_active( 'simply-static-pro/simply-static-pro.php' ) || is_plugin_active_for_network( 'simply-static-pro/simply-static-pro.php' ) ) {
-		if ( defined( 'SIMPLY_STATIC_PRO_VERSION' ) && version_compare( SIMPLY_STATIC_PRO_VERSION, '1.4', '<' ) ) {
-			add_action(
-				'admin_notices',
-				function () {
-					$message = esc_html__( 'You need to update Simply Static Pro to version 1.4 before continuing to use Simply Static, as we made significant changes requiring an upgrade.', 'simply-static' );
-					echo wp_kses_post( '<div class="notice notice-error"><p>' . $message . '</p></div>' );
-				}
-			);
+		// Network notice.
+		if ( function_exists( 'is_network_admin' ) ) {
+			if ( is_network_admin() ) {
+				add_action(
+					'network_admin_notices',
+					function () {
+						$message = esc_html__( 'You need to update Simply Static Pro to version 1.4 before continuing to use Simply Static, as we made significant changes requiring an upgrade.', 'simply-static' );
+						echo wp_kses_post( '<div class="notice notice-error"><p>' . $message . '</p></div>' );
+					}
+				);
+			}
 		}
 	}
 }
