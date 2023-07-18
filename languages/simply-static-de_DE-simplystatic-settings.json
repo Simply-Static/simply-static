@@ -13,14 +13,29 @@
          "You need to update Simply Static Pro to version 1.4 before continuing to use Simply Static, as we made significant changes requiring an upgrade.": [
             "Du musst Simply Static Pro auf Version 1.4 aktualisieren, bevor du Simply Static weiterhin benutzt."
          ],
+         "Activity Log": [
+            "Aktivitätsprotokoll"
+         ],
+         "Download Log": [
+            "Log herunterladen"
+         ],
+         "Clear Log": [
+            "Log löschen"
+         ],
+         "Log file successfully deleted.": [
+            "Log-Datei erfolgreich gelöscht."
+         ],
          "Generate Static Files": [
             "Generieren"
          ],
+         "Generating...": [
+            "Generiere.."
+         ],
+         "Cancel Export": [
+            "Export abbrechen"
+         ],
          "Tools": [
             "Tools"
-         ],
-         "Activity Log": [
-            "Aktivitätsprotokoll"
          ],
          "Diagnostics": [
             "Diagnose"
@@ -259,14 +274,14 @@
          "Access Key ID": [
             "Access Key ID"
          ],
-         "Enter your Access Key from AWS. You can find your API-Key as described here.": [
-            "Trage deinen Access Key von AWS S3 hier ein."
+         "Enter your Access Key from AWS.": [
+            "Trage deinen AWS Access Key hier ein."
          ],
          "Secret Access Key": [
             "Secret Access Key"
          ],
-         "Enter your Secret Key from AWS. You can find your API-Key as described here.": [
-            "Trage deinen Secret Key von AWS S3 hier ein."
+         "Enter your Secret Key from AWS.": [
+            "Tragen deinen AWS Secret Key hier ein."
          ],
          "Region": [
             "Region"
@@ -376,13 +391,13 @@
          "Spaces Key": [
             "Spaces Key"
          ],
-         "Enter your Spaces Key from Digital Ocean. You can find your API-Key as described here.": [
+         "Enter your Spaces Key from Digital Ocean.": [
             "Trage deinen Digital Ocean Spaces API Key hier ein."
          ],
          "Secret": [
             "Secret"
          ],
-         "Enter your Spaces Secret from Digital Ocean. You can find your API-Key as described here.": [
+         "Enter your Spaces Secret from Digital Ocean.": [
             "Füge dein Digital Ocean API Secret hier ein."
          ],
          "Bucket Name": [
@@ -517,17 +532,20 @@
          "Multisite": [
             "Multisite"
          ],
+         "Choose a site to export": [
+            "Wähle eine Seite für den Export"
+         ],
+         "Settings to Use:": [
+            "Einstellungen benutzen:"
+         ],
+         "Use Network's Settings": [
+            "Nutze Netzwerk-Einstellungen"
+         ],
+         "Use Site's Settings": [
+            "Nutze Seiten-Einstellungen"
+         ],
          "Debugging": [
             "Debug-Modus"
-         ],
-         "Download Log": [
-            "Log herunterladen"
-         ],
-         "Clear Log": [
-            "Log löschen"
-         ],
-         "Log file successfully deleted.": [
-            "Log-Datei erfolgreich gelöscht."
          ],
          "Export Log": [
             "Export Log"
@@ -781,8 +799,11 @@
          "Settings resetted successfully.": [
             "Einstellungen erfolgreich zurückgesetzt."
          ],
-         "Generate (new)": [
-            "Generieren (new)"
+         "Simply Static": [
+            "Simply Static"
+         ],
+         "Generate": [
+            "Generieren"
          ],
          "Done! Finished in %s": [
             "Fertig! Fertigstellt in %s"
@@ -973,17 +994,8 @@
          "Received a %s response.": [
             "Es wurde eine %s Antwort erhalten."
          ],
-         "Simply Static": [
-            "Simply Static"
-         ],
-         "Generate Static Site": [
-            "Generiere eine Statische Seite"
-         ],
-         "Generate": [
-            "Generieren"
-         ],
-         "Not permitted": [
-            "Nicht berechtigt"
+         "Found on %s": [
+            "Gefunden auf %s"
          ],
          "Attempted to fetch a remote URL": [
             "Versuche die URL abzurufen: %s"
@@ -1125,48 +1137,6 @@
          ],
          "Every %d Minutes": [
             "Alle %d Minuten"
-         ],
-         "Code": [
-            "Code"
-         ],
-         "URL": [
-            "URL"
-         ],
-         "Notes": [
-            "Hinweise"
-         ],
-         "Errors (%d)": [
-            "Fehler(%d)"
-         ],
-         "Found on %s": [
-            "Gefunden auf %s"
-         ],
-         "1xx Informational:": [
-            "1xx Informationen:"
-         ],
-         "2xx Success:": [
-            "2xx Erfolgreich:"
-         ],
-         "3xx Redirection:": [
-            "3xx Weiterleitung:"
-         ],
-         "4xx Client Error:": [
-            "4xx Fehler:"
-         ],
-         "5xx Server Error:": [
-            "5xx: Server-Fehler:"
-         ],
-         "<a href='https://en.wikipedia.org/wiki/List_of_HTTP_status_codes'>More info on HTTP status codes</a>": [
-            "<a href='https://en.wikipedia.org/wiki/List_of_HTTP_status_codes'>Mehr über HTTP status codes</a>"
-         ],
-         "%d URLs": [
-            "%d URLs"
-         ],
-         "Simply Static &rsaquo; Generate": [
-            "Simply Static &rsaquo; Generieren"
-         ],
-         "Cancel": [
-            "Abbrechen"
          ],
          "Redirecting...": [
             "Weiterleiten.."
