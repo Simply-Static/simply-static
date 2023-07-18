@@ -265,13 +265,20 @@ class Fetch_Urls_Task extends Task {
 	 * @return bool
 	 */
 	public function find_excludable( $static_page ) {
-		$excluded_by_option = explode( "\n", $this->options->get( 'urls_to_exclude' ) );
+		$excluded = apply_filters( 'ss_excluded_by_default', array( 'wp-json.php', 'wp-login.php', 'xmlrpc.php' ) );
 
-		foreach ( $excluded_by_option as $excludable ) {
-			$url = $static_page->url;
+		if ( ! empty( $this->options->get( 'urls_to_exclude' ) ) ) {
+			$excluded_by_option = explode( "\n", $this->options->get( 'urls_to_exclude' ) );
+			$excluded           = array_merge( $excluded, $excluded_by_option );
+		}
 
-			if ( strpos( $url, $excludable ) !== false ) {
-				return true;
+		if ( ! empty( $excluded ) ) {
+			foreach ( $excluded as $excludable ) {
+				$url = $static_page->url;
+
+				if ( strpos( $url, $excludable ) !== false ) {
+					return true;
+				}
 			}
 		}
 
