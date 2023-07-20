@@ -228,6 +228,11 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 
 == Changelog ==
 
+= 3.0.1 =
+
+* prevent error on merge excludes if not an array
+* bust object cache after migration
+
 = 3.0 =
 
 * new admin UI for settings
