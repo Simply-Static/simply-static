@@ -269,7 +269,10 @@ class Fetch_Urls_Task extends Task {
 
 		if ( ! empty( $this->options->get( 'urls_to_exclude' ) ) ) {
 			$excluded_by_option = explode( "\n", $this->options->get( 'urls_to_exclude' ) );
-			$excluded           = array_merge( $excluded, $excluded_by_option );
+
+			if ( is_array( $excluded_by_option ) ) {
+				$excluded = array_merge( $excluded, $excluded_by_option );
+			}
 		}
 
 		if ( ! empty( $excluded ) ) {
