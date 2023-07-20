@@ -285,5 +285,8 @@ class Migrate_Settings {
 		}
 
 		update_option( 'simply-static', $options );
+
+		// Clear options cache.
+		wp_cache_flush();
 	}
 }
