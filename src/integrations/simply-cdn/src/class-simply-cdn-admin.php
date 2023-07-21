@@ -396,7 +396,7 @@ class Simply_CDN_Admin {
 				$options['destination_scheme']   = 'https://';
 				$options['destination_host']     = $static_url['host'];
 				$options['delivery_method']      = 'simply-cdn';
-				$options['force_replace_url']    = 'on';
+				$options['force_replace_url']    = true;
 
 				update_option( 'simply-static', $options );
 			}
