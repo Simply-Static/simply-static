@@ -318,7 +318,7 @@ class Plugin {
 	 */
 	public function maybe_clear_directory() {
 		// Clear out the local directory before copying files.
-		if ( 'on' === $this->options->get( 'clear_directory_before_export' ) && 'local' === $this->options->get( 'delivery_method' ) ) {
+		if ( $this->options->get( 'clear_directory_before_export' ) && 'local' === $this->options->get( 'delivery_method' ) ) {
 			$local_dir = apply_filters( 'ss_local_dir', $this->options->get( 'local_dir' ) );
 
 			// Make sure the directory exists and is not empty.
