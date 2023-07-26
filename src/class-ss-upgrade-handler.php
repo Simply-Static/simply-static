@@ -84,7 +84,7 @@ class Upgrade_Handler {
 			'archive_name'            => null,
 			'archive_start_time'      => null,
 			'archive_end_time'        => null,
-			'debugging_mode'          => '0',
+			'debugging_mode'          => false,
 			'http_basic_auth_digest'  => null,
 		);
 
@@ -101,8 +101,10 @@ class Upgrade_Handler {
 			// Sync database.
 			Page::create_or_update_table();
 
-			// Migrate settings.
-			Migrate_Settings::migrate();
+			if ( floatval( $version ) < floatval( SIMPLY_STATIC_VERSION ) ) {
+				// Migrate settings.
+				Migrate_Settings::migrate();
+			}
 
 			// Update version.
 			self::$options
