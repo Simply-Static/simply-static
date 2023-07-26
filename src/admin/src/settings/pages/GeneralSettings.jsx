@@ -84,7 +84,7 @@ function GeneralSettings() {
                                     ]}
                                     onChange={(scheme) => {
                                         setScheme(scheme);
-                                        updateSetting('destination_scheme', type);
+                                        updateSetting('destination_scheme', scheme);
                                     }}
                                 />
                             </FlexItem>
