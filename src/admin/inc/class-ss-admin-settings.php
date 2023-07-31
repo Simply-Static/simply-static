@@ -152,7 +152,7 @@ class Admin_Settings {
 		// Maybe show migration notice.
 		$version = $options->get( 'version' );
 
-		if ( floatval( $version ) < floatval( SIMPLY_STATIC_VERSION ) ) {
+		if ( floatval( $version ) < floatval( '3.0.4' ) ) {
 			$args['need_upgrade'] = 'yes';
 		}
 

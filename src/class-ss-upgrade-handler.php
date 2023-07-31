@@ -101,7 +101,7 @@ class Upgrade_Handler {
 			// Sync database.
 			Page::create_or_update_table();
 
-			if ( floatval( $version ) < floatval( SIMPLY_STATIC_VERSION ) ) {
+			if ( floatval( $version ) < floatval( '3.0.4' ) ) {
 				// Migrate settings.
 				Migrate_Settings::migrate();
 			}
