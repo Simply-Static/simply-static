@@ -37,6 +37,10 @@ toplevel_page_simply-static img {
     max-width: 90%;
   }
 
+  .migrate-notice.components-notice.is-warning {
+    margin: 0 0 10px 0;
+  }
+
   /* Navigation */
   .plugin-nav {
     padding: 25px 40px;

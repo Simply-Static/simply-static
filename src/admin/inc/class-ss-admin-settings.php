@@ -137,6 +137,7 @@ class Admin_Settings {
 				'token'          => get_option( 'sch_token' ),
 				'blog_id'        => get_current_blog_id(),
 				'sites'          => $sites,
+				'need_upgrade'   => 'no',
 
 			)
 		);
@@ -146,6 +147,13 @@ class Admin_Settings {
 
 		if ( file_exists( $debug_file ) ) {
 			$args['log_file'] = SIMPLY_STATIC_URL . '/debug.txt';
+		}
+
+		// Maybe show migration notice.
+		$version = $options->get( 'version' );
+
+		if ( floatval( $version ) < floatval( SIMPLY_STATIC_VERSION ) ) {
+			$args['need_upgrade'] = 'yes';
 		}
 
 		wp_localize_script( 'simplystatic-settings', 'options', $args );

@@ -288,6 +288,9 @@ class Migrate_Settings {
 			unset( $options['algolia-selector'] );
 		}
 
+		// Set version for upgrade.
+		$options['version'] = SIMPLY_STATIC_VERSION;
+
 		update_option( 'simply-static', $options );
 
 		// Clear options cache.

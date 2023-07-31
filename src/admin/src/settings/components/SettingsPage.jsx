@@ -2,9 +2,9 @@ import GeneralSettings from "../pages/GeneralSettings";
 import Diagnostics from "../pages/Diagnostics";
 import Utilities from "../pages/Utilities";
 import {useState, useEffect, useContext} from "@wordpress/element";
-import {Flex, FlexItem} from '@wordpress/components';
-
 import {
+    Flex,
+    FlexItem,
     // eslint-disable-next-line @wordpress/no-unsafe-wp-apis
     __experimentalNavigatorProvider as NavigatorProvider,
     // eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -15,7 +15,9 @@ import {
     Dashicon,
     Card,
     CardBody,
-    Spinner
+    Spinner,
+    Notice,
+    Animate
 } from '@wordpress/components';
 import DeploymentSettings from "../pages/DeploymentSettings";
 import FormSettings from "../pages/FormSettings";
@@ -29,7 +31,7 @@ import apiFetch from "@wordpress/api-fetch";
 const {__} = wp.i18n;
 
 function SettingsPage() {
-    const {isRunning, setIsRunning, blogId, settingsType} = useContext(SettingsContext);
+    const {isRunning, setIsRunning, blogId, settingsType, migrateSettings, saveSettings} = useContext(SettingsContext);
     const [activeItem, setActiveItem] = useState({activeItem: "/"});
     const [initialPage, setInitialPage] = useState(options.initial);
     const [initialSet, setInitialSet] = useState(false);
@@ -73,13 +75,33 @@ function SettingsPage() {
         });
     }
 
-    useEffect(function (){
+    const runMigrateSettings = () => {
+        migrateSettings();
+        saveSettings();
+        location.reload();
+    }
+
+    useEffect(function () {
         setDisabledButton(isRunning);
     }, [isRunning])
 
-
     return (
         <div className={"plugin-settings-container"}>
+            { 'yes' === options.need_upgrade ?
+                <Animate type="slide-in" options={{origin: 'top'}}>
+                    {() => (
+                        <Notice status="warning" isDismissible={false} className={"migrate-notice"}>
+                            <p>
+                                {__('You have to migrate your settings to version 3.x of Simply Static to ensure everything works smoothly with the new interface.', 'simply-static')}
+                            </p>
+                            <Button onClick={runMigrateSettings}
+                                    variant="primary">{__('Migrate settings', 'simply-static')}</Button>
+                        </Notice>
+                    )}
+                </Animate>
+                :
+                ''
+            }
             <NavigatorProvider initialPath={initialPage}>
                 <Flex>
                     <FlexItem>
