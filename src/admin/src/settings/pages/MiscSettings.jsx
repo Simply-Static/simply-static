@@ -77,6 +77,7 @@ function MiscSettings() {
                 <p>{__('If you\'ve secured WordPress with HTTP Basic Auth you can specify the username and password to use below.', 'simply-static')}</p>
                 <TextControl
                     label={__('Basic Auth Username', 'simply-static')}
+                    autoComplete={"off"}
                     type={"text"}
                     value={settings.http_basic_auth_username}
                     onChange={(username) => {
@@ -87,6 +88,7 @@ function MiscSettings() {
                 <TextControl
                     label={__('Basic Auth Password', 'simply-static')}
                     type={"password"}
+                    autoComplete={"off"}
                     value={settings.http_basic_auth_password}
                     onChange={(username) => {
                         updateSetting('http_basic_auth_password', username);
