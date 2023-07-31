@@ -37,13 +37,17 @@ class Migrate_Settings {
 		}
 
 		if ( isset( $options['urls_to_exclude'] ) ) {
-			$urls_to_exclude = [];
+			if ( is_array( $options['urls_to_exclude'] ) ) {
+				$urls_to_exclude = [];
 
-			foreach ( $options['urls_to_exclude'] as $url => $data ) {
-				$urls_to_exclude[] = $url;
+				foreach ( $options['urls_to_exclude'] as $url => $data ) {
+					$urls_to_exclude[] = $url;
+				}
+
+				$options['urls_to_exclude'] = implode( "\n", $urls_to_exclude );
+			} else {
+				$options['urls_to_exclude'] = '';
 			}
-
-			$options['urls_to_exclude'] = implode( "\n", $urls_to_exclude );
 		}
 
 		if ( isset( $options['temp_files_dir'] ) ) {

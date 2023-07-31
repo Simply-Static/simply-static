@@ -49,6 +49,20 @@ if ( ! function_exists( 'simply_static_run_plugin' ) ) {
 		require_once SIMPLY_STATIC_PATH . 'src/class-ss-plugin.php';
 
 		Simply_Static\Plugin::instance();
+
+		// Maybe update excludes.
+		$options = get_option( 'simply-static' );
+
+		if ( isset( $options['urls_to_exclude'] ) && is_array( $options['urls_to_exclude'] ) ) {
+			$urls_to_exclude = [];
+
+			foreach ( $options['urls_to_exclude'] as $url => $data ) {
+				$urls_to_exclude[] = $url;
+			}
+
+			$options['urls_to_exclude'] = implode( "\n", $urls_to_exclude );
+			update_option( 'simply-static', $options );
+		}
 	}
 
 	// Update required?

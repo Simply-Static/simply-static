@@ -74,7 +74,7 @@ class Upgrade_Handler {
 			'temp_files_dir'          => trailingslashit( $temp_dir ),
 			'additional_urls'         => '',
 			'additional_files'        => '',
-			'urls_to_exclude'         => array(),
+			'urls_to_exclude'         => 'wp-json\nwp-login.php',
 			'delivery_method'         => 'zip',
 			'local_dir'               => '',
 			'relative_path'           => '',
