@@ -209,8 +209,9 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 
 = 3.0.4 =
 
-* simplified url_exclude upgrade on upgrade
+* simplified url_exclude upgrade on update
 * disable browser autocomplete on basic auth settings
+* added additional notice with button in settings panel if all auto-migration fails
 
 = 3.0.3 =
 
