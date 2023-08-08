@@ -103,7 +103,7 @@ function SettingsContextProvider(props) {
         setSettings(defaultSettings);
 
         apiFetch({
-            path: '/simplystatic/v1/settings',
+            path: '/simplystatic/v1/settings/reset',
             method: 'POST',
             data: defaultSettings,
         });

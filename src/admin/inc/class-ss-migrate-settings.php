@@ -293,6 +293,9 @@ class Migrate_Settings {
 
 		update_option( 'simply-static', $options );
 
+		// Table validation.
+		Page::create_or_update_table();
+
 		// Clear options cache.
 		wp_cache_flush();
 	}

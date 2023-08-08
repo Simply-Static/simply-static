@@ -186,14 +186,6 @@ class Admin_Settings {
 			},
 		) );
 
-		register_rest_route( 'simplystatic/v1', '/system-status', array(
-			'methods'             => 'GET',
-			'callback'            => [ $this, 'get_system_status' ],
-			'permission_callback' => function () {
-				return current_user_can( 'manage_options' );
-			},
-		) );
-
 		register_rest_route( 'simplystatic/v1', '/settings', array(
 			'methods'             => 'POST',
 			'callback'            => [ $this, 'save_settings' ],
@@ -202,9 +194,25 @@ class Admin_Settings {
 			},
 		) );
 
+		register_rest_route( 'simplystatic/v1', '/settings/reset', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'reset_settings' ],
+			'permission_callback' => function () {
+				return current_user_can( 'manage_options' );
+			},
+		) );
+
 		register_rest_route( 'simplystatic/v1', '/migrate', array(
 			'methods'             => 'POST',
 			'callback'            => [ $this, 'migrate_settings' ],
+			'permission_callback' => function () {
+				return current_user_can( 'manage_options' );
+			},
+		) );
+
+		register_rest_route( 'simplystatic/v1', '/system-status', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'get_system_status' ],
 			'permission_callback' => function () {
 				return current_user_can( 'manage_options' );
 			},
@@ -288,6 +296,35 @@ class Admin_Settings {
 	 */
 	public function save_settings( object $request ) {
 		if ( $request->get_params() ) {
+			$options = sanitize_option( 'simply-static', $request->get_params() );
+
+			// Handle basic auth.
+			if ( isset( $options['http_basic_auth_username'] ) && isset( $options['http_basic_auth_password'] ) ) {
+				$options['http_basic_auth_digest'] = base64_encode( $options['http_basic_auth_username'] . ':' . $options['http_basic_auth_password'] );
+			}
+
+			// Update settings.
+			update_option( 'simply-static', $options );
+
+			return json_encode( [ 'status' => 200, 'message' => "Ok" ] );
+		}
+
+		return json_encode( [ 'status' => 400, 'message' => "No options updated." ] );
+	}
+
+	/**
+	 * Save settings via rest API.
+	 *
+	 * @param object $request given request.
+	 *
+	 * @return false|string
+	 */
+	public function reset_settings( object $request ) {
+		if ( $request->get_params() ) {
+			// Check table.
+			Page::create_or_update_table();
+
+			// Reset options.
 			$options = sanitize_option( 'simply-static', $request->get_params() );
 
 			// Handle basic auth.
