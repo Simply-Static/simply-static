@@ -384,12 +384,11 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	/**
 	 * Maybe cancel task if schedule is blocked.
 	 *
-	 * @param $return
+	 * @param null $return return value.
 	 *
-	 * @return void
+	 * @return string
 	 */
-	public function maybe_wp_die( $return = null ) {
-		$message = esc_html__( 'The current cron schedule is blocked by another plugin or service.', 'simply-static' );
-		Util::debug_log( $message );
+	public function maybe_wp_die( $return = null) {
+		return 'cancel';
 	}
 }

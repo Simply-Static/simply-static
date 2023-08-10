@@ -281,7 +281,7 @@ class Admin_Settings {
 	 *
 	 * @return array[]
 	 */
-	public function get_system_status(): array {
+	public function get_system_status() {
 		$diagnostics = new Diagnostic();
 
 		return $diagnostics->get_checks();
@@ -294,7 +294,7 @@ class Admin_Settings {
 	 *
 	 * @return false|string
 	 */
-	public function save_settings( object $request ) {
+	public function save_settings( $request ) {
 		if ( $request->get_params() ) {
 			$options = sanitize_option( 'simply-static', $request->get_params() );
 
@@ -319,7 +319,7 @@ class Admin_Settings {
 	 *
 	 * @return false|string
 	 */
-	public function reset_settings( object $request ) {
+	public function reset_settings( $request ) {
 		if ( $request->get_params() ) {
 			// Check table.
 			Page::create_or_update_table();
@@ -383,7 +383,7 @@ class Admin_Settings {
 	 *
 	 * @return false|string
 	 */
-	public function get_export_log( \WP_REST_Request $request ) {
+	public function get_export_log( $request ) {
 		$params = $request->get_params();
 
 		$export_log = Plugin::instance()->get_export_log( $params['per_page'], $params['page'] );
@@ -399,7 +399,7 @@ class Admin_Settings {
 	 *
 	 * @return false|string
 	 */
-	public function start_export( \WP_REST_Request $request ) {
+	public function start_export( $request ) {
 		$params  = $request->get_params();
 		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
 
@@ -437,7 +437,7 @@ class Admin_Settings {
 	 *
 	 * @return false|string
 	 */
-	public function is_running( \WP_REST_Request $request ) {
+	public function is_running( $request ) {
 		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
 
 		return json_encode( [
