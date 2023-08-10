@@ -4,7 +4,7 @@ Tags: HTML, static website generator, static site, secure, fast
 Requires at least: 5.4
 Tested up to: 6.3
 Requires PHP: 7.4
-Stable tag: 3.0.5
+Stable tag: 3.0.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -206,6 +206,11 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 3. Diagnostics
 
 == Changelog ==
+
+= 3.0.6 =
+
+* removed type hints in Rest API abstraction for PHP 7.4 support
+* make sure we only trigger maybe_wp_die() if there is an error on export
 
 = 3.0.5 =
 
