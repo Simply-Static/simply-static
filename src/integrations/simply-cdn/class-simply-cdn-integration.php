@@ -55,10 +55,6 @@ class Simply_CDN_Integration {
 		require_once $path . 'class-simply-cdn-api.php';
 		Simply_CDN_Api::get_instance();
 
-		// Rest Handler.
-		require_once $path . 'class-simply-cdn-rest.php';
-		Simply_CDN_Rest::get_instance();
-
 		// Include only if connected.
 		$options = get_option( 'simply-static' );
 
