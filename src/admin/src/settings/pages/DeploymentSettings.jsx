@@ -7,25 +7,22 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl, SelectControl, Flex, FlexItem, ToggleControl,
+    TextControl, SelectControl, ToggleControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
-import apiFetch from "@wordpress/api-fetch";
 
 const {__} = wp.i18n;
 
 function DeploymentSettings() {
     const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
     const [deliveryMethod, setDeliveryMethod] = useState('zip');
-    const [securityToken, setSecurityToken] = useState('');
     const [githubAccountType, setGithubAccountType] = useState('personal');
     const [githubVisibility, setGithubVisibility] = useState('private');
     const [emptyBucketBeforeExport, setEmptyBucketBeforeExport] = useState(false);
+    const [useForms, setUseForms] = useState(true);
     const [region, setRegion] = useState('us-east-2');
     const [hasCopied, setHasCopied] = useState(false);
-    const [tokenSaved, setTokenSaved] = useState(false);
-    const [tokenMessage, setTokenMessage] = useState('');
 
     const setSavingSettings = () => {
         saveSettings();
@@ -36,31 +33,13 @@ function DeploymentSettings() {
         }, 2000);
     }
 
-    const saveSimplyCDNToken = (securityToken) => {
-        apiFetch({
-            path: '/simplystatic/v1/token',
-            method: 'POST',
-            data: {token: securityToken},
-        }).then((response) => {
-            let data = JSON.parse(response);
-
-            if (data.success) {
-                setTokenSaved(true);
-                setTokenMessage(data.message);
-            } else {
-                setTokenSaved(false);
-                setTokenMessage(data.message);
-            }
-        });
-    }
-
     useEffect(() => {
-        if (options.token) {
-            setSecurityToken(options.token);
-        }
-
         if (settings.delivery_method) {
             setDeliveryMethod(settings.delivery_method);
+        }
+
+        if (settings.ssh_use_forms) {
+            setUseForms(settings.ssh_use_forms);
         }
 
         if (settings.github_account_type) {
@@ -163,32 +142,40 @@ function DeploymentSettings() {
                 </CardHeader>
                 <CardBody>
                     <p>{__('The fast and easy way to bring your static website online. Simply CDN handles hosting, performance, security and form submissions for your static site.', 'simply-static')}</p>
-                    <Flex>
-                        <FlexItem style={{minWidth: "90%"}}>
+                    <TextControl
+                        label={__('Security Token', 'simply-static')}
+                        type={"text"}
+                        help={__('Copy and paste the Security Token from your project.', 'simply-static')}
+                        value={settings.ssh_security_token}
+                        onChange={(token) => {
+                            updateSetting('ssh_security_token', token);
+                        }}
+                    />
+                    {settings.ssh_security_token &&
+                        <>
                             <TextControl
-                                label={__('Security Token', 'simply-static')}
+                                label={__('404 Path', 'simply-static')}
                                 type={"text"}
-                                help={__('Copy and paste the Security Token from your project and click connect.', 'simply-static')}
-                                value={securityToken}
-                                onChange={(value) => {
-                                    setSecurityToken(value);
+                                help={__('Relative path to your custom 404 error page.', 'simply-static')}
+                                value={settings.ssh_404_path}
+                                onChange={(errorPath) => {
+                                    updateSetting('ssh_404_path', errorPath);
                                 }}
                             />
-                        </FlexItem>
-                        <FlexItem>
-                            {securityToken ?
-                                <Button variant="secondary" onClick={saveSimplyCDNToken(securityToken)}
-                                        className={"simplycdn-connect"}>{__('Connect', 'simply-static')}</Button>
-                                :
-                                <Button variant="secondary" className={"simplycdn-connect"}
-                                        disabled>{__('Connect', 'simply-static')}</Button>
-                            }
-                        </FlexItem>
-                    </Flex>
-                    {tokenSaved &&
-                        <Notice status="success" isDismissible={false}>
-                            <p>{tokenMessage}</p>
-                        </Notice>
+                            <ToggleControl
+                                label={__('Use Forms?', 'simply-static')}
+                                help={
+                                    useForms
+                                        ? __('Proxy form submissions through Simply CDN.', 'simply-static')
+                                        : __('Don\'t proxy form submissions through Simply CDN.', 'simply-static')
+                                }
+                                checked={useForms}
+                                onChange={(value) => {
+                                    setUseForms(value);
+                                    updateSetting('ssh_use_forms', value);
+                                }}
+                            />
+                        </>
                     }
                 </CardBody>
             </Card>

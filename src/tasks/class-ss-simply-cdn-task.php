@@ -40,11 +40,11 @@ class Simply_Cdn_Task extends Task {
 	public function __construct() {
 		parent::__construct();
 
-		$options = Options::instance();
-		$token   = get_option( 'sch_token' );
+		$options    = Options::instance();
+		$ss_options = get_option( 'simply-static' );
 
 		$this->cdn      = Simply_CDN_Handler::get_instance();
-		$this->data     = Simply_CDN_Api::get_data( $token );
+		$this->data     = Simply_CDN_Api::get_data( $ss_options['ssh_security_token'] );
 		$this->options  = $options;
 		$this->temp_dir = $options->get_archive_dir();
 	}

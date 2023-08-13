@@ -40,8 +40,8 @@ class Simply_CDN_Handler {
 	 * @return void
 	 */
 	public function __construct() {
-		$token = get_option( 'sch_token' );
-		$this->data = Simply_CDN_Api::get_data( $token );
+		$options    = get_option( 'simply-static' );
+		$this->data = Simply_CDN_Api::get_data( $options['ssh_security_token'] );
 	}
 
 	/**

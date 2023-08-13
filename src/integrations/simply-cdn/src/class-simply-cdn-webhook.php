@@ -33,9 +33,9 @@ class Simply_CDN_Webhook {
 	 * @return void
 	 */
 	public function __construct() {
-		$use_forms = get_option( 'sch_use_forms' );
+		$options = get_option( 'simply-static' );
 
-		if ( $use_forms && ! class_exists( '\simply_static_pro\Form_Webhook' ) ) {
+		if ( $options['ssh_use_forms'] ) {
 			add_action( 'wp_enqueue_scripts', array( $this, 'add_webhook_scripts' ) );
 			add_filter( 'wpcf7_load_js', '__return_false' );
 			add_filter( 'gform_form_args', array( $this, 'disable_ajax' ) );
@@ -72,11 +72,11 @@ class Simply_CDN_Webhook {
 	 */
 	public function hide_elementor_ajax_errors() {
 		?>
-		<style>
+        <style>
             .elementor-message.elementor-message-danger {
                 display: none;
             }
-		</style>
+        </style>
 		<?php
 	}
 }

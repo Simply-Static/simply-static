@@ -63,6 +63,28 @@ if ( ! function_exists( 'simply_static_run_plugin' ) ) {
 			$options['urls_to_exclude'] = implode( "\n", $urls_to_exclude );
 			update_option( 'simply-static', $options );
 		}
+
+		// Maybe migrate SimplyCDN options.
+		$token = get_option( 'sch_token' );
+
+		if ( ! empty( $token ) ) {
+			$options['ssh_security_token'] = $token;
+			delete_option( 'sch_token' );
+
+			// Check other SimplyCDN options.
+			$use_forms = get_option( 'sch_use_forms' );
+
+			$options['ssh_use_forms'] = $use_forms;
+			delete_option( 'sch_use_forms' );
+
+			$error_path = get_option( 'sch_404_path' );
+
+			$options['ssh_404_path'] = $error_path;
+			delete_option( 'sch_404_path' );
+
+			// Update the general options.
+			update_option( 'simply-static', $options );
+		}
 	}
 
 	// Update required?

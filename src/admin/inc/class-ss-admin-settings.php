@@ -134,11 +134,9 @@ class Admin_Settings {
 				'home_path'      => get_home_path(),
 				'admin_email'    => get_bloginfo( 'admin_email' ),
 				'temp_files_dir' => trailingslashit( $temp_dir ),
-				'token'          => get_option( 'sch_token' ),
 				'blog_id'        => get_current_blog_id(),
 				'sites'          => $sites,
 				'need_upgrade'   => 'no',
-
 			)
 		);
 

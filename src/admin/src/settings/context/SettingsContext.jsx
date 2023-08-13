@@ -26,6 +26,9 @@ function SettingsContextProvider(props) {
         'allow_subsites': false,
         'force_replace_url': false,
         'clear_directory_before_export': false,
+        'ssh_security_token': '',
+        'ssh_use_forms': true,
+        'ssh_404_path': '',
         'tiiny_email': options.admin_email,
         'tiiny_subdomain': '',
         'tiiny_domain_suffix': 'tiiny.site',
@@ -114,9 +117,9 @@ function SettingsContextProvider(props) {
             path: '/simplystatic/v1/is-running',
             method: 'GET'
         }).then(resp => {
-            var json = JSON.parse( resp );
-            setIsRunning( json.running );
-        } );
+            var json = JSON.parse(resp);
+            setIsRunning(json.running);
+        });
     }
 
     const importSettings = (newSettings) => {
@@ -148,7 +151,7 @@ function SettingsContextProvider(props) {
     }
 
     useInterval(() => {
-       checkIfRunning()
+        checkIfRunning()
     }, isRunning ? 5000 : null);
 
     useEffect(() => {

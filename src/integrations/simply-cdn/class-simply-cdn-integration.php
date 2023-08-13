@@ -34,7 +34,7 @@ class Simply_CDN_Integration {
 	 */
 	public function __construct() {
 		include_once ABSPATH . 'wp-admin/includes/plugin.php';
-		
+
 		if ( ! is_plugin_active( 'simply-cdn-helper/simply-cdn-helper.php' ) ) {
 			$this->include_files();
 		}
@@ -55,29 +55,20 @@ class Simply_CDN_Integration {
 		require_once $path . 'class-simply-cdn-api.php';
 		Simply_CDN_Api::get_instance();
 
-		// Admin settings.
-		require_once $path . 'class-simply-cdn-admin.php';
-		Simply_CDN_Admin::get_instance();
+		// Rest Handler.
+		require_once $path . 'class-simply-cdn-rest.php';
+		Simply_CDN_Rest::get_instance();
 
 		// Include only if connected.
-		$token = get_option( 'sch_token' );
+		$options = get_option( 'simply-static' );
 
-		if ( ! empty( $token ) ) {
-			$data = Simply_CDN_Api::get_data( $token );
+		if ( ! empty( $options['ssh_security_token'] ) ) {
+			$data = Simply_CDN_Api::get_data( $options['ssh_security_token'] );
 
 			if ( $data && ! empty( $data->cdn->url ) ) {
-				// Cors.
-				require_once $path . 'class-simply-cdn-cors.php';
-				Simply_CDN_CORS::get_instance();
-
 				// Webhook.
 				require_once $path . 'class-simply-cdn-webhook.php';
 				Simply_CDN_Webhook::get_instance();
-
-				// Exports.
-				require_once $path . 'class-simply-cdn-export.php';
-				Simply_CDN_Export::get_instance();
-
 			}
 		}
 	}
