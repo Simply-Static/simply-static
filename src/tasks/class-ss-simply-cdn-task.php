@@ -58,7 +58,7 @@ class Simply_Cdn_Task extends Task {
 		list( $pages_processed, $total_pages ) = $this->upload_static_files( $this->temp_dir );
 
 		if ( $pages_processed !== 0 ) {
-			$message = sprintf( __( "Uploaded %d of %d pages/files", 'simply-static' ), $pages_processed, $total_pages );
+			$message = sprintf( __( "Uploading %d of %d pages/files", 'simply-static' ), $pages_processed, $total_pages );
 			$this->save_status_message( $message );
 		}
 
@@ -67,6 +67,9 @@ class Simply_Cdn_Task extends Task {
 				$destination_url = trailingslashit( $this->options->get_destination_url() );
 				$message         = __( 'Destination URL:', 'simply-static' ) . ' <a href="' . $destination_url . '" target="_blank">' . $destination_url . '</a>';
 				$this->save_status_message( $message, 'destination_url' );
+			} else {
+				$message = sprintf( __( "Uploaded %d of %d pages/files", 'simply-static' ), $pages_processed, $total_pages );
+				$this->save_status_message( $message );
 			}
 		}
 
@@ -123,7 +126,7 @@ class Simply_Cdn_Task extends Task {
 
 			if ( ! is_dir( $file_path ) && file_exists( $file_path ) ) {
 				$this->cdn->upload_file( $this->data->cdn->access_key, $this->data->cdn->pull_zone->name, $cdn_path . $static_page->file_path, $file_path );
-				Util::debug_log( "Uploaded: " . $file_path );
+				Util::debug_log( "Uploading: " . $file_path );
 			}
 
 			do_action( 'ss_file_transfered_to_cdn', $static_page, $destination_dir );
