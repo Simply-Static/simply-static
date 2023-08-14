@@ -1,6 +1,8 @@
 'use strict';
 
-function success(el ) {
+let form_redirect_element = document.querySelector("meta[name='ssh-thank-you-path']");
+
+function success(el, redirect_url) {
     el.target.submit.disabled = false;
 
     if (el.target.querySelector('input[type="submit"]')) {
@@ -8,9 +10,14 @@ function success(el ) {
     }
 
     el.target.reset();
+
+    // Redirect if set
+    if (redirect_url.length > 0) {
+        window.location.replace(redirect_url);
+    }
 }
 
-function submitForm(method, url, data, el) {
+function submitForm(method, url, redirect_url, data, el) {
     var xhr = new XMLHttpRequest();
 
     xhr.open(method, url);
@@ -18,7 +25,11 @@ function submitForm(method, url, data, el) {
         if (xhr.readyState !== XMLHttpRequest.DONE) return;
 
         if (xhr.status == 200) {
-            return true;
+            if (redirect_url !== false) {
+                success(el, redirect_url);
+            } else {
+                return true;
+            }
         }
     };
 
@@ -54,7 +65,16 @@ document.addEventListener("DOMContentLoaded", function () {
             el.preventDefault();
 
             var data = new FormData(form);
-            submitForm("POST", 'https://simplycdn.io?mailme=true', data, el);
+
+            if (null !== form_redirect_element) {
+                let redirect_path = form_redirect_element.getAttribute("content");
+                let redirect_url = window.location.origin + redirect_path;
+
+                submitForm("POST", 'https://simplycdn.io?mailme=true', redirect_url, data, el);
+
+            } else {
+                submitForm("POST", 'https://simplycdn.io?mailme=true', false, data, el);
+            }
         });
     });
 });

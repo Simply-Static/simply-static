@@ -11,6 +11,7 @@ import {
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
+import apiFetch from "@wordpress/api-fetch";
 
 const {__} = wp.i18n;
 
@@ -23,6 +24,8 @@ function DeploymentSettings() {
     const [useForms, setUseForms] = useState(true);
     const [region, setRegion] = useState('us-east-2');
     const [hasCopied, setHasCopied] = useState(false);
+    const [pages, setPages] = useState(false);
+
 
     const setSavingSettings = () => {
         saveSettings();
@@ -61,6 +64,15 @@ function DeploymentSettings() {
         if (settings.aws_region) {
             setRegion(settings.aws_region);
         }
+
+        // Get global page selection
+        apiFetch({path: '/simplystatic/v1/pages'}).then((fetched_pages) => {
+            let pages = fetched_pages;
+
+            pages.unshift({label: __('No page selected', 'simply-static'), value: 0});
+            setPages(pages);
+        });
+
     }, [settings]);
 
     return (<div className={"inner-settings"}>
@@ -153,13 +165,13 @@ function DeploymentSettings() {
                     />
                     {settings.ssh_security_token &&
                         <>
-                            <TextControl
-                                label={__('404 Path', 'simply-static')}
-                                type={"text"}
-                                help={__('Relative path to your custom 404 error page.', 'simply-static')}
-                                value={settings.ssh_404_path}
-                                onChange={(errorPath) => {
-                                    updateSetting('ssh_404_path', errorPath);
+                            <SelectControl
+                                label={__('Select a 404 page', 'content-protector')}
+                                options={pages}
+                                help={__('We will use that page as a 404 error page on your static website.', 'simply-static')}
+                                value={settings.ssh_404_page_id}
+                                onChange={(value) => {
+                                    updateSetting("ssh_404_page_id", value);
                                 }}
                             />
                             <ToggleControl
@@ -175,6 +187,17 @@ function DeploymentSettings() {
                                     updateSetting('ssh_use_forms', value);
                                 }}
                             />
+                            {useForms &&
+                                <SelectControl
+                                    label={__('Select a "Thank You" page', 'simply-static')}
+                                    options={pages}
+                                    help={__('We will use that page to redirect your visitors after submitting a form on your static website.', 'simply-static')}
+                                    value={settings.ssh_thank_you_page_id}
+                                    onChange={(value) => {
+                                        updateSetting("ssh_thank_you_page_id", value);
+                                    }}
+                                />
+                            }
                         </>
                     }
                 </CardBody>

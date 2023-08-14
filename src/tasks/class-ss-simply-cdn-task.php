@@ -141,7 +141,8 @@ class Simply_Cdn_Task extends Task {
 	 * @return void
 	 */
 	public function add_404() {
-		$cdn_404_path = get_option( 'sch_404_path' );
+		$options      = get_option( 'simply-static' );
+		$cdn_404_path = str_replace( home_url(), '', get_permalink( $options['ssh_404_page_id'] ) );
 
 		if ( ! empty( $cdn_404_path ) && realpath( $this->temp_dir . untrailingslashit( $cdn_404_path ) . '/index.html' ) ) {
 			// Rename and copy file.
