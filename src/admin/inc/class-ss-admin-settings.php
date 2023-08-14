@@ -181,7 +181,7 @@ class Admin_Settings {
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'get_settings' ],
 			'permission_callback' => function () {
-				return current_user_can( 'manage_options' );
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options' ) );
 			},
 		) );
 
@@ -189,7 +189,7 @@ class Admin_Settings {
 			'methods'             => 'POST',
 			'callback'            => [ $this, 'save_settings' ],
 			'permission_callback' => function () {
-				return current_user_can( 'manage_options' );
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options' ) );
 			},
 		) );
 
@@ -197,7 +197,7 @@ class Admin_Settings {
 			'methods'             => 'POST',
 			'callback'            => [ $this, 'reset_settings' ],
 			'permission_callback' => function () {
-				return current_user_can( 'manage_options' );
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options' ) );
 			},
 		) );
 
@@ -205,7 +205,7 @@ class Admin_Settings {
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'get_pages' ],
 			'permission_callback' => function () {
-				return current_user_can( 'manage_options' );
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options' ) );
 			},
 		) );
 
@@ -213,7 +213,7 @@ class Admin_Settings {
 			'methods'             => 'POST',
 			'callback'            => [ $this, 'migrate_settings' ],
 			'permission_callback' => function () {
-				return current_user_can( 'manage_options' );
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options' ) );
 			},
 		) );
 
@@ -221,7 +221,7 @@ class Admin_Settings {
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'get_system_status' ],
 			'permission_callback' => function () {
-				return current_user_can( 'manage_options' );
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options' ) );
 			},
 		) );
 
@@ -229,7 +229,7 @@ class Admin_Settings {
 			'methods'             => 'POST',
 			'callback'            => [ $this, 'clear_log' ],
 			'permission_callback' => function () {
-				return current_user_can( 'manage_options' );
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options' ) );
 			},
 		) );
 
@@ -237,7 +237,7 @@ class Admin_Settings {
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'get_activity_log' ],
 			'permission_callback' => function () {
-				return current_user_can( 'manage_options' );
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options' ) );
 			},
 		) );
 
@@ -245,7 +245,7 @@ class Admin_Settings {
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'get_export_log' ],
 			'permission_callback' => function () {
-				return current_user_can( 'manage_options' );
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options' ) );
 			},
 		) );
 
@@ -253,7 +253,7 @@ class Admin_Settings {
 			'methods'             => 'POST',
 			'callback'            => [ $this, 'start_export' ],
 			'permission_callback' => function () {
-				return current_user_can( 'manage_options' );
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options' ) );
 			},
 		) );
 
@@ -261,7 +261,7 @@ class Admin_Settings {
 			'methods'             => 'POST',
 			'callback'            => [ $this, 'cancel_export' ],
 			'permission_callback' => function () {
-				return current_user_can( 'manage_options' );
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options' ) );
 			},
 		) );
 
@@ -269,7 +269,7 @@ class Admin_Settings {
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'is_running' ],
 			'permission_callback' => function () {
-				return current_user_can( 'manage_options' );
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options' ) );
 			},
 		) );
 	}
