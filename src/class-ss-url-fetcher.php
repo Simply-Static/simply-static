@@ -169,8 +169,8 @@ class Url_Fetcher {
 		// a domain with no trailing slash has no path, so we're giving it one
 		$path = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
 
-		$origin_path_length = strlen( parse_url( Util::origin_url(), PHP_URL_PATH ) );
-		if ( $origin_path_length > 1 ) { // prevents removal of '/'
+		$origin_path_length = strlen( wp_parse_url( Util::origin_url(), PHP_URL_PATH ) );
+		if ( $origin_path_length > 1 ) { // prevents removal of '/'.
 			$path = substr( $path, $origin_path_length );
 		}
 
