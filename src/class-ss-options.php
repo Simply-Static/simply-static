@@ -174,7 +174,7 @@ class Options {
 
 		switch ( $this->get( 'destination_url_type' ) ) {
 			case 'absolute':
-				return $this->get( 'destination_scheme' ) . $this->get( 'destination_host' );
+				return untrailingslashit( $this->get( 'destination_scheme' ) . $this->get( 'destination_host' ) );
 				break;
 			case 'relative':
 				return $this->get( 'relative_path' );
