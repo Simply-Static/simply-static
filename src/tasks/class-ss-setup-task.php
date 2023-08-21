@@ -1,4 +1,5 @@
 <?php
+
 namespace Simply_Static;
 
 /**
@@ -61,7 +62,7 @@ class Setup_Task extends Task {
 		self::add_origin_and_additional_urls_to_db( $additional_urls );
 		self::add_additional_files_to_db( $this->options->get( 'additional_files' ) );
 
-		do_action('ss_after_setup_task');
+		do_action( 'ss_after_setup_task' );
 
 		return true;
 	}
@@ -69,20 +70,33 @@ class Setup_Task extends Task {
 	/**
 	 * Ensure the Origin URL and user-specified Additional URLs are in the DB.
 	 *
-	 * @param  array $additional_urls array of additional urls.
+	 * @param string $additional_urls array of additional urls.
+	 *
 	 * @return void
 	 */
 	public static function add_origin_and_additional_urls_to_db( $additional_urls ) {
 		$origin_url = trailingslashit( Util::origin_url() );
 		Util::debug_log( 'Adding origin URL to queue: ' . $origin_url );
 		$static_page = Page::query()->find_or_initialize_by( 'url', $origin_url );
-		$static_page->set_status_message( __( "Origin URL", 'simply-static' ) );
-		// setting to 0 for "not found anywhere" since it's either the origin
-		// or something the user specified
+		$static_page->set_status_message( __( 'Origin URL', 'simply-static' ) );
 		$static_page->found_on_id = 0;
 		$static_page->save();
 
 		$urls = array_unique( Util::string_to_array( $additional_urls ) );
+
+		// Add additional URls for SimplyCDN integration.
+		$options = get_option( 'simply-static' );
+
+		if ( isset( $options['ssh_404_page_id'] ) ) {
+			$urls[] = get_permalink( $options['ssh_404_page_id'] );
+		}
+
+		if ( isset( $options['ssh_thank_you_page_id'] ) ) {
+			$urls[] = get_permalink( $options['ssh_thank_you_page_id'] );
+		}
+
+		$urls = apply_filters( 'ss_additional_urls', $urls );
+
 		foreach ( $urls as $url ) {
 			if ( Util::is_local_url( $url ) ) {
 				Util::debug_log( 'Adding additional URL to queue: ' . $url );
@@ -97,13 +111,23 @@ class Setup_Task extends Task {
 	/**
 	 * Convert Additional Files/Directories to URLs and add them to the database.
 	 *
-	 * @param  array $additional_files array of additional files.
+	 * @param string $additional_files array of additional files.
+	 *
 	 * @return void
 	 */
 	public static function add_additional_files_to_db( $additional_files ) {
-		// Convert additional files to URLs and add to queue
-		foreach ( Util::string_to_array( $additional_files ) as $item ) {
 
+		$additional_files = apply_filters( 'ss_additional_files', Util::string_to_array( $additional_files ) );
+
+		// Add additional files for SimplyCDN integration.
+		$options = get_option( 'simply-static' );
+
+		if ( isset( $options['ssh_use_forms'] ) ) {
+			$additional_files[] = SIMPLY_STATIC_PATH . '/src/integrations/simply-cdn/assets/ssh-form-webhook.js';
+		}
+
+		// Convert additional files to URLs and add to queue.
+		foreach ( $additional_files as $item ) {
 			// If item is a file, convert to url and insert into database.
 			// If item is a directory, recursively iterate and grab all files,
 			// and for each file, convert to url and insert into database.
@@ -112,7 +136,7 @@ class Setup_Task extends Task {
 					$url = self::convert_path_to_url( $item );
 					Util::debug_log( "File " . $item . ' exists; adding to queue as: ' . $url );
 					$static_page = Page::query()
-						->find_or_create_by( 'url', $url );
+					                   ->find_or_create_by( 'url', $url );
 					$static_page->set_status_message( __( "Additional File", 'simply-static' ) );
 					// setting found_on_id to 0 since this was user-specified
 					$static_page->found_on_id = 0;
@@ -139,7 +163,8 @@ class Setup_Task extends Task {
 	/**
 	 * Convert a directory path into a valid WordPress URL
 	 *
-	 * @param  string $path The path to a directory or a file.
+	 * @param string $path The path to a directory or a file.
+	 *
 	 * @return string       The WordPress URL for the given path.
 	 */
 	private static function convert_path_to_url( $path ) {
@@ -151,7 +176,7 @@ class Setup_Task extends Task {
 		} elseif ( stripos( $path, get_home_path() ) === 0 ) {
 			$url = str_replace( untrailingslashit( get_home_path() ), Util::origin_url(), $path );
 		}
-		
+
 		// Windows support
 		$url = Util::normalize_slashes( $url );
 
@@ -190,6 +215,7 @@ class Setup_Task extends Task {
 				}
 			}
 		}
+
 		return true;
 	}
 }

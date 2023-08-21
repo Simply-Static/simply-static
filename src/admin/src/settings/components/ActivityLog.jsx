@@ -33,7 +33,7 @@ function ActivityLog() {
 
     useInterval(() => {
         refreshActivityLog();
-    }, isRunning ? 5000 : null);
+    }, isRunning ? 2500 : null);
 
     useEffect(() => {
         if (isRunning) {
