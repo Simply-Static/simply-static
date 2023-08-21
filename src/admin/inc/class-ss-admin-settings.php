@@ -306,9 +306,11 @@ class Admin_Settings {
 			$options = sanitize_option( 'simply-static', $request->get_params() );
 
 			// Handle basic auth.
-			if ( isset( $options['http_basic_auth_username'] ) && isset( $options['http_basic_auth_password'] ) ) {
+			if ( isset( $options['http_basic_auth_username'] ) && $options['http_basic_auth_username'] && isset( $options['http_basic_auth_password'] ) && $options['http_basic_auth_password'] ) {
 				$options['http_basic_auth_digest'] = base64_encode( $options['http_basic_auth_username'] . ':' . $options['http_basic_auth_password'] );
-			}
+			} else {
+                $options['http_basic_auth_digest'] = '';
+            }
 
 			// Update settings.
 			update_option( 'simply-static', $options );
@@ -335,8 +337,10 @@ class Admin_Settings {
 			$options = sanitize_option( 'simply-static', $request->get_params() );
 
 			// Handle basic auth.
-			if ( isset( $options['http_basic_auth_username'] ) && isset( $options['http_basic_auth_password'] ) ) {
+			if ( isset( $options['http_basic_auth_username'] ) && $options['http_basic_auth_username'] && isset( $options['http_basic_auth_password'] ) && $options['http_basic_auth_password'] ) {
 				$options['http_basic_auth_digest'] = base64_encode( $options['http_basic_auth_username'] . ':' . $options['http_basic_auth_password'] );
+			} else {
+				$options['http_basic_auth_digest'] = '';
 			}
 
 			// Update settings.
@@ -349,7 +353,7 @@ class Admin_Settings {
 	}
 
 	/**
-     * Get pages for settings.
+	 * Get pages for settings.
 	 * @return array
 	 */
 	public function get_pages() {
