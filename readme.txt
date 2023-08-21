@@ -1,7 +1,7 @@
 === Simply Static ===
 Contributors: patrickposner
 Tags: HTML, static website generator, static site, secure, fast
-Requires at least: 5.4
+Requires at least: 6.2
 Tested up to: 6.3
 Requires PHP: 7.4
 Stable tag: 3.0.7
