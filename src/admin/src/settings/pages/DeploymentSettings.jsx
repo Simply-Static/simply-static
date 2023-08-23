@@ -534,6 +534,26 @@ function DeploymentSettings() {
                                 }}
                             />
 
+                            <TextControl
+                                label={__('Subdirectory', 'simply-static')}
+                                type={"text"}
+                                help={__('Add an optional subdirectory for your bucket', 'simply-static')}
+                                value={settings.aws_subdirectory}
+                                onChange={(subdirectory) => {
+                                    updateSetting('aws_subdirectory', subdirectory);
+                                }}
+                            />
+
+                            <TextControl
+                                label={__('Cloudfront Distribution ID', 'simply-static')}
+                                type={"text"}
+                                help={__('We automatically invalidate the cache after each export.', 'simply-static')}
+                                value={settings.aws_distribution_id}
+                                onChange={(distribution_id) => {
+                                    updateSetting('aws_distribution_id', distribution_id);
+                                }}
+                            />
+
                             <ToggleControl
                                 label={__('Empty bucket before new export?', 'simply-static')}
                                 help={

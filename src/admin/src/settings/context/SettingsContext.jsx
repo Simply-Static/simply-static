@@ -53,6 +53,8 @@ function SettingsContextProvider(props) {
         'aws_access_key': '',
         'aws_access_secret': '',
         'aws_bucket': '',
+        'aws_subdirectory': '',
+        'aws_distribution_id': '',
         'aws_empty': false,
         'digitalocean_key': '',
         'digitalocean_secret': '',
