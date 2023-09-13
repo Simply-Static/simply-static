@@ -207,6 +207,13 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 
 == Changelog ==
 
+= 3.1.0 =
+
+* fix for scheme/host when resetting settings
+* enhanced integration setups (GitHub objects)
+* fixed example for relative path setups in settings
+
+
 = 3.0.9 =
 
 * PHP 8.2 support improved
