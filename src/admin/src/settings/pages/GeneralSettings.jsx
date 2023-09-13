@@ -123,7 +123,7 @@ function GeneralSettings() {
                         <p>
                             <Notice status={"warning"} isDismissible={false}>
                                 <b>{__('Example', 'simply-static')}: </b>
-                                {__('enter /path/ above if you wanted to serve your files at www.example.com/path/', 'simply-static')}
+                                {__('enter /path above if you wanted to serve your files at www.example.com/path/', 'simply-static')}
                             </Notice>
                         </p>
                     </>
