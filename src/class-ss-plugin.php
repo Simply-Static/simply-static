@@ -59,6 +59,11 @@ class Plugin {
 	 */
 	protected $page_handlers = null;
 
+	/**
+	 * @var null|\Simply_Static\Integrations
+	 */
+	protected $integrations = null;
+
 
 	/**
 	 * Return an instance of the Simply Static plugin
@@ -84,8 +89,8 @@ class Plugin {
 			// Maybe clear local directory.
 			add_action( 'ss_after_setup_task', array( self::$instance, 'maybe_clear_directory' ) );
 
-			$integrations = new Integrations();
-			$integrations->load();
+			self::$instance->integrations = new Integrations();
+			self::$instance->integrations->load();
 
 			self::$instance->options              = Options::instance();
 			self::$instance->view                 = new View();
@@ -103,6 +108,17 @@ class Plugin {
 		}
 
 		return self::$instance;
+	}
+
+	public function get_integration( $integration ) {
+		$integrations = $this->integrations->get_integrations();
+		if ( empty( $integrations[ $integration ] ) ) {
+			return null;
+		}
+
+		$class = $integrations[ $integration ];
+
+		return new $class();
 	}
 
 	/**
