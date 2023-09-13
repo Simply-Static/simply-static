@@ -69,12 +69,12 @@ class Upgrade_Handler {
 		}
 
 		self::$default_options = array(
-			'destination_scheme'      => Util::origin_scheme(),
-			'destination_host'        => Util::origin_host(),
+			'destination_scheme'      => 'https://',
+			'destination_host'        => '',
 			'temp_files_dir'          => trailingslashit( $temp_dir ),
 			'additional_urls'         => '',
 			'additional_files'        => '',
-			'urls_to_exclude'         => 'wp-json\nwp-login.php',
+			'urls_to_exclude'         => array(),
 			'delivery_method'         => 'zip',
 			'local_dir'               => '',
 			'relative_path'           => '',
