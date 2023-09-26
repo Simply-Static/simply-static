@@ -124,6 +124,16 @@ function SearchSettings() {
                                 updateSetting('search_excludable', excludes);
                             }}
                         />
+
+                        <TextareaControl
+                            label={__('Meta data', 'simply-static')}
+                            placeholder={"property|og:title\ndescription|content\nproperty|og:image"}
+                            help={__('Meta data to be used for indexing. Instructions: property|property_value (property|og:title) or name|attribute (description|content)', 'simply-static')}
+                            value={settings.search_metadata}
+                            onChange={(search_metadata) => {
+                                updateSetting('search_metadata', search_metadata);
+                            }}
+                        />
                     </CardBody>
                 </Card>
             </>
