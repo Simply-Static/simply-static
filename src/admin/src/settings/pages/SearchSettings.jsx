@@ -6,7 +6,7 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl, SelectControl, TextareaControl, ToggleControl,
+    TextControl, SelectControl, TextareaControl, ToggleControl, Modal
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -17,6 +17,9 @@ function SearchSettings() {
     const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
     const [useSearch, setUseSearch] = useState(false);
     const [searchType, setSearchType] = useState('fuse');
+    const [ isMetaModalOpen, setMetaModalOpen ] = useState( false );
+    const openMetaModal = () => setMetaModalOpen( true );
+    const closeMetaModal = () => setMetaModalOpen( false );
 
     const setSavingSettings = () => {
         saveSettings();
@@ -77,6 +80,28 @@ function SearchSettings() {
         </Card>
         {useSearch &&
             <>
+                { isMetaModalOpen && (
+                    <Modal title={__('How to select data with meta tags', 'simply-static') } onRequestClose={ closeMetaModal }>
+                        <p>{ __('Targeting for excerpt in the meta description tag.', 'simply-static') }</p>
+                        <pre>
+                            &lt;meta name="description" content="This content is what we want as excerpt" /&gt;
+                        </pre>
+                        <p>{ __('Adding such meta in the excerpt field would be:', 'simply-static') }</p>
+                        <pre>
+                            description|content
+                        </pre>
+                        <p>{ __('Targeting for title in the property meta tag.', 'simply-static') }</p>
+                        <pre>
+                            &lt;meta property="og:title" content="This content is what we want as excerpt" /&gt;
+                        </pre>
+                        <p>{ __('Adding such meta in the excerpt field would be:', 'simply-static') }</p>
+                        <pre>
+                            property|og:title
+                        </pre>
+                        <p>{ __('If the second item (after | ) is not <code>content</code>, we\'ll use it as value of that attribute (<code>property="og:title"</code> in this example) and use <code>content</code> for value.', 'simply-static') }</p>
+                        <p><strong>{ __('Caution: Use meta tags that exist everywhere for title.', 'simply-static') }</strong></p>
+                    </Modal>
+                ) }
                 <Spacer margin={5}/>
                 <Card>
                     <CardHeader>
@@ -87,7 +112,14 @@ function SearchSettings() {
                             label={__('CSS-Selector for Title', 'simply-static')}
                             type={"text"}
                             placeholder={'title'}
-                            help={__('Add the CSS selector which contains the title of the page/post', 'simply-static')}
+                            help={
+                                [
+                                    __('Add the CSS selector which contains the title of the page/post', 'simply-static'),
+                                    ' ',
+                                    <Button variant={'link'} onClick={ openMetaModal }>{__('Or meta tags. Click for more information.', 'simply-static')}</Button>
+                                ]
+
+                            }
                             value={settings.search_index_title}
                             onChange={(title) => {
                                 updateSetting('search_index_title', title);
@@ -97,7 +129,14 @@ function SearchSettings() {
                             label={__('CSS-Selector for Content', 'simply-static')}
                             type={"text"}
                             placeholder={'body'}
-                            help={__('Add the CSS selector which contains the content of the page/post.', 'simply-static')}
+                            help={
+                                [
+                                    __('Add the CSS selector which contains the content of the page/post.', 'simply-static'),
+                                    ' ',
+                                    <Button variant={'link'} onClick={ openMetaModal }>{__('Or meta tags. Click for more information.', 'simply-static')}</Button>
+                                ]
+
+                            }
                             value={settings.search_index_content}
                             onChange={(content) => {
                                 updateSetting('search_index_content', content);
@@ -108,7 +147,14 @@ function SearchSettings() {
                             label={__('CSS-Selector for Excerpt', 'simply-static')}
                             type={"text"}
                             placeholder={'.entry-content'}
-                            help={__('Add the CSS selector which contains the excerpt of the page/post.', 'simply-static')}
+                            help={
+                                [
+                                    __('Add the CSS selector which contains the excerpt of the page/post.', 'simply-static'),
+                                    ' ',
+                                    <Button variant={'link'} onClick={ openMetaModal }>{__('Or meta tags. Click for more information.', 'simply-static')}</Button>
+                                ]
+
+                            }
                             value={settings.search_index_excerpt}
                             onChange={(excerpt) => {
                                 updateSetting('search_index_excerpt', excerpt);
@@ -122,16 +168,6 @@ function SearchSettings() {
                             value={settings.search_excludable}
                             onChange={(excludes) => {
                                 updateSetting('search_excludable', excludes);
-                            }}
-                        />
-
-                        <TextareaControl
-                            label={__('Meta data', 'simply-static')}
-                            placeholder={"property|og:title\ndescription|content\nproperty|og:image"}
-                            help={__('Meta data to be used for indexing. Instructions: property|property_value (property|og:title) or name|attribute (description|content)', 'simply-static')}
-                            value={settings.search_metadata}
-                            onChange={(search_metadata) => {
-                                updateSetting('search_metadata', search_metadata);
                             }}
                         />
                     </CardBody>
