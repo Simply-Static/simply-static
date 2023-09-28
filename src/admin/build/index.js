@@ -2246,6 +2246,9 @@ function SearchSettings() {
   } = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useContext)(_context_SettingsContext__WEBPACK_IMPORTED_MODULE_2__.SettingsContext);
   const [useSearch, setUseSearch] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
   const [searchType, setSearchType] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('fuse');
+  const [isMetaModalOpen, setMetaModalOpen] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const openMetaModal = () => setMetaModalOpen(true);
+  const closeMetaModal = () => setMetaModalOpen(false);
   const setSavingSettings = () => {
     saveSettings();
     setSettingsSaved(true);
@@ -2286,13 +2289,19 @@ function SearchSettings() {
       setSearchType(type);
       updateSetting('search_type', type);
     }
-  }))), useSearch && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+  }))), useSearch && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, isMetaModalOpen && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Modal, {
+    title: __('How to select data with meta tags', 'simply-static'),
+    onRequestClose: closeMetaModal
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, __('Targeting for excerpt in the meta description tag.', 'simply-static')), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("pre", null, "<meta name=\"description\" content=\"This content is what we want as excerpt\" />"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, __('Adding such meta in the excerpt field would be:', 'simply-static')), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("pre", null, "description|content"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, __('Targeting for title in the property meta tag.', 'simply-static')), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("pre", null, "<meta property=\"og:title\" content=\"This content is what we want as excerpt\" />"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, __('Adding such meta in the excerpt field would be:', 'simply-static')), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("pre", null, "property|og:title"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, __('If the second item (after | ) is not <code>content</code>, we\'ll use it as value of that attribute (<code>property="og:title"</code> in this example) and use <code>content</code> for value.', 'simply-static')), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("strong", null, __('Caution: Use meta tags that exist everywhere for title.', 'simply-static')))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
     margin: 5
   }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Indexing', 'simply-static'))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
     label: __('CSS-Selector for Title', 'simply-static'),
     type: "text",
     placeholder: 'title',
-    help: __('Add the CSS selector which contains the title of the page/post', 'simply-static'),
+    help: [__('Add the CSS selector which contains the title of the page/post', 'simply-static'), ' ', (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+      variant: 'link',
+      onClick: openMetaModal
+    }, __('Or meta tags. Click for more information.', 'simply-static'))],
     value: settings.search_index_title,
     onChange: title => {
       updateSetting('search_index_title', title);
@@ -2301,7 +2310,10 @@ function SearchSettings() {
     label: __('CSS-Selector for Content', 'simply-static'),
     type: "text",
     placeholder: 'body',
-    help: __('Add the CSS selector which contains the content of the page/post.', 'simply-static'),
+    help: [__('Add the CSS selector which contains the content of the page/post.', 'simply-static'), ' ', (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+      variant: 'link',
+      onClick: openMetaModal
+    }, __('Or meta tags. Click for more information.', 'simply-static'))],
     value: settings.search_index_content,
     onChange: content => {
       updateSetting('search_index_content', content);
@@ -2310,7 +2322,10 @@ function SearchSettings() {
     label: __('CSS-Selector for Excerpt', 'simply-static'),
     type: "text",
     placeholder: '.entry-content',
-    help: __('Add the CSS selector which contains the excerpt of the page/post.', 'simply-static'),
+    help: [__('Add the CSS selector which contains the excerpt of the page/post.', 'simply-static'), ' ', (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+      variant: 'link',
+      onClick: openMetaModal
+    }, __('Or meta tags. Click for more information.', 'simply-static'))],
     value: settings.search_index_excerpt,
     onChange: excerpt => {
       updateSetting('search_index_excerpt', excerpt);
@@ -2322,14 +2337,6 @@ function SearchSettings() {
     value: settings.search_excludable,
     onChange: excludes => {
       updateSetting('search_excludable', excludes);
-    }
-  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextareaControl, {
-    label: __('Meta data', 'simply-static'),
-    placeholder: "property|og:title\ndescription|content\nproperty|og:image",
-    help: __('Meta data to be used for indexing. Instructions: property|property_value (property|og:title) or name|attribute (description|content)', 'simply-static'),
-    value: settings.search_metadata,
-    onChange: search_metadata => {
-      updateSetting('search_metadata', search_metadata);
     }
   })))), useSearch && searchType === 'fuse' && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
     margin: 5
