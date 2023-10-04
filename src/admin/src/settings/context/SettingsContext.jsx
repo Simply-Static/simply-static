@@ -84,6 +84,7 @@ function SettingsContextProvider(props) {
         'minify_inline_css': false,
         'minify_js': false,
         'minify_inline_js': false,
+        'generate_404': false
     }
     const [isRunning, setIsRunning] = useState(false);
     const [settingsSaved, setSettingsSaved] = useState(false);
