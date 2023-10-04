@@ -307,17 +307,13 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 *
 	 * @return void
 	 */
-	protected function save_status_message( $message, $key = null ) {
-		$task_name = $key ?: $this->get_current_task();
-		$messages  = $this->options->get( 'archive_status_messages' );
-		Util::debug_log( 'Status message: [' . $task_name . '] ' . $message );
-
-		$messages = Util::add_archive_status_message( $messages, $task_name, $message );
-
-		$this->options
-			->set( 'archive_status_messages', $messages )
-			->save();
-	}
+    protected function save_status_message( $message, $key = null ) {
+        $task_name = $key ?: $this->get_current_task();
+        $this->options
+            ->add_status_message($message, $task_name)
+            ->save();
+        Util::debug_log( 'Status message: [' . $task_name . '] ' . $message );
+    }
 
 	/**
 	 * Add a status message about the exception and cancel the job
