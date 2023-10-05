@@ -119,7 +119,7 @@ class Url_Fetcher {
 			Util::debug_log( "http_status_code: " . $static_page->http_status_code . " | content_type: " . $static_page->content_type );
 
 			$relative_filename = null;
-			if ( $static_page->http_status_code == 200 ) {
+			if ( $this->can_create_directories_for_page( $static_page ) ) {
 				// pclzip doesn't like 0 byte files (fread error), so we're
 				// going to fix that by putting a single space into the file
 				if ( $filesize === 0 ) {
@@ -152,6 +152,24 @@ class Url_Fetcher {
 
 			return true;
 		}
+	}
+
+	/**
+	 * @param Page $static_page
+	 *
+	 * @return boolean
+	 */
+	protected function can_create_directories_for_page( $static_page ) {
+		if ( $static_page->http_status_code == 200 ) {
+			return true;
+		}
+
+		$page_handler = $static_page->get_handler();
+		if ( $static_page->http_status_code === 404 && $page_handler && is_a( $page_handler, Handler_404::class ) ) {
+			return true;
+		}
+
+		return apply_filters( 'simply_static_can_create_directories_for_page', false, $static_page );
 	}
 
 	/**

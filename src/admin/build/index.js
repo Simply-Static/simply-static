@@ -800,7 +800,8 @@ function SettingsContextProvider(props) {
     'minify_css': false,
     'minify_inline_css': false,
     'minify_js': false,
-    'minify_inline_js': false
+    'minify_inline_js': false,
+    'generate_404': false
   };
   const [isRunning, setIsRunning] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
   const [settingsSaved, setSettingsSaved] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
@@ -1710,6 +1711,7 @@ function GeneralSettings() {
   const [host, setHost] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('');
   const [path, setPath] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('/');
   const [hasCopied, setHasCopied] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [generate404, setGenerate404] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
   const setSavingSettings = () => {
     saveSettings();
     setSettingsSaved(true);
@@ -1729,6 +1731,9 @@ function GeneralSettings() {
     }
     if (settings.relative_path) {
       setPath(settings.relative_path);
+    }
+    if (settings.generate_404) {
+      setGenerate404(settings.generate_404);
     }
   }, [settings]);
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
@@ -1819,7 +1824,17 @@ function GeneralSettings() {
     text: options.home_path,
     onCopy: () => setHasCopied(true),
     onFinishCopy: () => setHasCopied(false)
-  }, hasCopied ? __('Copied home path', 'simply-static') : __('Copy home path', 'simply-static')))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+  }, hasCopied ? __('Copied home path', 'simply-static') : __('Copy home path', 'simply-static')), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+    margin: 5
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+    label: __('Generate 404 Page?', 'simply-static'),
+    help: generate404 ? __('Generate a 404 page.', 'simply-static') : __('Don\'t generate a 404 page.', 'simply-static'),
+    checked: generate404,
+    onChange: value => {
+      setGenerate404(value);
+      updateSetting('generate_404', value);
+    }
+  }))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
     margin: 5
   }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Exclude', 'simply-static'))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextareaControl, {
     label: __('Urls and Patterns to exclude', 'simply-static'),

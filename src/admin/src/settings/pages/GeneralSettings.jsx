@@ -7,7 +7,7 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl, SelectControl, Flex, FlexItem, TextareaControl,
+    TextControl, SelectControl, Flex, FlexItem, TextareaControl, ToggleControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -21,6 +21,7 @@ function GeneralSettings() {
     const [host, setHost] = useState('');
     const [path, setPath] = useState('/');
     const [hasCopied, setHasCopied] = useState(false);
+    const [generate404, setGenerate404] = useState(false);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -46,6 +47,10 @@ function GeneralSettings() {
 
         if (settings.relative_path) {
             setPath(settings.relative_path);
+        }
+
+        if (settings.generate_404) {
+            setGenerate404(settings.generate_404);
         }
 
     }, [settings]);
@@ -165,6 +170,20 @@ function GeneralSettings() {
                 >
                     {hasCopied ? __('Copied home path', 'simply-static') : __('Copy home path', 'simply-static')}
                 </ClipboardButton>
+                <Spacer margin={5}/>
+                <ToggleControl
+                    label={__('Generate 404 Page?', 'simply-static')}
+                    help={
+                        generate404
+                            ? __('Generate a 404 page.', 'simply-static')
+                            : __('Don\'t generate a 404 page.', 'simply-static')
+                    }
+                    checked={generate404}
+                    onChange={(value) => {
+                        setGenerate404(value);
+                        updateSetting('generate_404', value);
+                    }}
+                />
             </CardBody>
         </Card>
         <Spacer margin={5}/>

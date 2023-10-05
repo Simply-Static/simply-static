@@ -142,6 +142,7 @@ class Plugin {
 		require_once $path . 'src/tasks/class-ss-create-zip-archive.php';
 		require_once $path . 'src/tasks/class-ss-wrapup-task.php';
 		require_once $path . 'src/tasks/class-ss-cancel-task.php';
+		require_once $path . 'src/tasks/class-ss-generate-404-task.php';
 		require_once $path . 'src/handlers/class-ss-page-handler.php';
 		require_once $path . 'src/class-ss-query.php';
 		require_once $path . 'src/models/class-ss-model.php';
@@ -313,6 +314,13 @@ class Plugin {
 	 */
 	public function filter_task_list( $task_list, $delivery_method ): array {
 		array_push( $task_list, 'setup', 'fetch_urls' );
+
+		$generate_404 = $this->options->get('generate_404');
+
+		// Add 404 task
+		if ( $generate_404 ) {
+			$task_list[] = 'generate_404';
+		}
 
 		if ( 'zip' === $delivery_method ) {
 			$task_list[] = 'create_zip_archive';
