@@ -315,6 +315,13 @@ class Plugin {
 	public function filter_task_list( $task_list, $delivery_method ): array {
 		array_push( $task_list, 'setup', 'fetch_urls' );
 
+		$generate_404 = $this->options->get('generate_404');
+
+		// Add 404 task
+		if ( $generate_404 ) {
+			$task_list[] = 'generate_404';
+		}
+
 		if ( 'zip' === $delivery_method ) {
 			$task_list[] = 'create_zip_archive';
 		} elseif ( 'local' === $delivery_method ) {
