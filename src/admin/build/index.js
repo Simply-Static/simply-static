@@ -766,6 +766,7 @@ function SettingsContextProvider(props) {
     'github_repository_visibility': 'public',
     'github_branch': 'main',
     'github_webhook_url': '',
+    'github_folder_path': '',
     'aws_region': 'us-east-2',
     'aws_access_key': '',
     'aws_access_secret': '',
@@ -1141,6 +1142,14 @@ function DeploymentSettings() {
     value: settings.github_repository,
     onChange: repository => {
       updateSetting('github_repository', repository);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+    label: __('Folder', 'simply-static'),
+    type: "text",
+    help: __('Enter a relative path to a folder if you want to push files under it. Example: for github.com/USER/REPOSITORY/folder1, enter folder1', 'simply-static'),
+    value: settings.github_folder_path,
+    onChange: repository => {
+      updateSetting('github_folder_path', repository);
     }
   }), githubAccountType === 'organization' && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Notice, {
     status: "warning",
