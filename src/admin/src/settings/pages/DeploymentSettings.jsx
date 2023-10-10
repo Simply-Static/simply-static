@@ -279,6 +279,16 @@ function DeploymentSettings() {
                                     updateSetting('github_repository', repository);
                                 }}
                             />
+                            <TextControl
+                                label={__('Folder', 'simply-static')}
+                                type={"text"}
+                                help={__('Enter a relative path to a folder if you want to push files under it. Example: for github.com/USER/REPOSITORY/folder1, enter folder1', 'simply-static')}
+                                value={settings.github_folder_path}
+                                onChange={(repository) => {
+                                    updateSetting('github_folder_path', repository);
+                                }}
+                            />
+
                             {githubAccountType === 'organization' &&
                                 <>
                                     <Notice status="warning" isDismissible={false}>

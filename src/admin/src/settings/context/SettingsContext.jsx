@@ -49,6 +49,7 @@ function SettingsContextProvider(props) {
         'github_repository_visibility': 'public',
         'github_branch': 'main',
         'github_webhook_url': '',
+        'github_folder_path': '',
         'aws_region': 'us-east-2',
         'aws_access_key': '',
         'aws_access_secret': '',
