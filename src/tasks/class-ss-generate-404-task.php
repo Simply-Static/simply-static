@@ -79,7 +79,7 @@ class Generate_404_Task extends Task {
 
 			$found_404 = true;
 
-			$message = __( 'Page 404 generated.', 'simply-static' );
+			$message = __( '404 Page generated', 'simply-static' );
 
 			$this->save_status_message( $message );
 
