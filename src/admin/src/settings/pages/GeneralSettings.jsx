@@ -193,9 +193,9 @@ function GeneralSettings() {
             </CardHeader>
             <CardBody>
                 <TextareaControl
-                    label={__('Urls and Patterns to exclude', 'simply-static')}
+                    label={__('Urls to exclude', 'simply-static')}
                     placeholder={"wp-json.php\nwp-login.php\n.jpg"}
-                    help={__('Specify URLs you want to exclude from the processing (one per line). You can also specify regex pattern to match.', 'simply-static')}
+                    help={__('Specify URLs (or parts of URLs) you want to exclude from the processing (one per line).', 'simply-static')}
                     value={settings.urls_to_exclude}
                     onChange={(value) => {
                         updateSetting('urls_to_exclude', value);
