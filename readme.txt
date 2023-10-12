@@ -140,6 +140,21 @@ We can even minify inline CSS & JavaScript.
 
 You can get the pro version [here](https://simplystatic.com/simply-static-pro/).
 
+== webtozip ==
+
+We also developed a service called [webtozip.com](https://webtozip.com/).
+
+If all you need is an archive of an existing WordPress website and you don't want to switch to a static site setup, we highly recommend using it instead of Simply Static.
+
+Here are the benefits:
+
+* it runs remotely (not on your server)
+* it is probably faster than running it on your own server
+* you don't have to worry about your WordPress version or your PHP version
+* you get the download link to the ZIP file via e-mail (no need for writing access on your server)
+
+It uses the same codebase as Simply Static but is not a plugin. It is a service that runs on our servers.
+
 = Tutorials =
 
 I publish new tutorials on how to work with Simply Static and other tools on my blog.
