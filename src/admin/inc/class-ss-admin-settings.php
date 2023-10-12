@@ -392,7 +392,7 @@ class Admin_Settings {
 	 * @return false|string
 	 */
 	public function clear_log() {
-		Util::delete_debug_log();
+		Util::clear_debug_log();
 
 		return json_encode( [ 'status' => 200, 'message' => "Ok" ] );
 	}
