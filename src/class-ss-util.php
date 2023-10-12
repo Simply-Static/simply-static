@@ -91,13 +91,14 @@ class Util {
 	}
 
 	/**
-	 * Delete the debug log
+	 * Clear the debug log
 	 * @return void
 	 */
-	public static function delete_debug_log() {
+	public static function clear_debug_log() {
 		$debug_file = self::get_debug_log_filename();
 		if ( file_exists( $debug_file ) ) {
-			unlink( $debug_file );
+            // Clear file
+            file_put_contents( $debug_file, '' );
 		}
 	}
 
