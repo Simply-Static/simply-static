@@ -145,7 +145,8 @@ class Admin_Settings {
 		$debug_file = Util::get_debug_log_filename();
 
 		if ( file_exists( $debug_file ) ) {
-			$args['log_file'] = SIMPLY_STATIC_URL . '/debug.txt';
+            $uploadsDir = wp_upload_dir();
+			$args['log_file'] = $uploadsDir['baseurl'] . '/simply-static-debug.txt';
 		}
 
 		// Maybe show migration notice.
