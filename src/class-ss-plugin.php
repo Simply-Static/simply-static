@@ -224,20 +224,25 @@ class Plugin {
 
 		do_action( 'ss_before_render_export_log', $blog_id );
 
-		$offset = ( intval( $current_page ) - 1 ) * intval( $per_page );
+
+		$query = Page::query();
+
+		if ( $per_page > 1 ) {
+			$offset = ( intval( $current_page ) - 1 ) * intval( $per_page );
+
+			$query = $query->limit( $per_page )
+				->offset( $offset );
+		}
 
 		$static_pages = apply_filters(
 			'ss_total_pages_log',
-			Page::query()
-			    ->limit( $per_page )
-			    ->offset( $offset )
-			    ->order( 'http_status_code DESC' )
+			$query->order( 'http_status_code DESC' )
 			    ->find()
 		);
 
 		$http_status_codes  = Page::get_http_status_codes_summary();
 		$total_static_pages = array_sum( array_values( $http_status_codes ) );
-		$total_pages        = ceil( $total_static_pages / $per_page );
+		$total_pages        = $per_page ? ceil( $total_static_pages / $per_page ) : $total_static_pages;
 
 		do_action( 'ss_after_render_export_log', $blog_id );
 
