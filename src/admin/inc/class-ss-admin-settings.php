@@ -472,8 +472,6 @@ class Admin_Settings {
 	 * @return false|string
 	 */
 	public function is_running( $request ) {
-		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
-
 		return json_encode( [
 			'status'  => 200,
 			'running' => Plugin::instance()->get_archive_creation_job()->is_running()
