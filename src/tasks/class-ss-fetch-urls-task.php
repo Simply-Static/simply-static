@@ -275,6 +275,10 @@ class Fetch_Urls_Task extends Task {
 			}
 		}
 
+		if ( $excluded ) {
+			$excluded = array_filter( $excluded );
+		}
+
 		if ( ! empty( $excluded ) ) {
 			foreach ( $excluded as $excludable ) {
 				$url = $static_page->url;
