@@ -228,6 +228,7 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 * refactored filter implementation for tasks
 * added check for empty strings in excludes
 * removed unused blog_id check
+* changed location of debug log to uploads dir
 
 = 3.1.2 =
 
