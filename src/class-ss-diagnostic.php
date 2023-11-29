@@ -18,7 +18,7 @@ class Diagnostic {
 	/** @const */
 	protected static $min_version = array(
 		'php'  => '7.4',
-		'curl' => '7.68.0'
+		'curl' => '7.6'
 	);
 
 	/**
@@ -54,6 +54,7 @@ class Diagnostic {
 			'WordPress'  => array(
 				__( 'Permalinks', 'simply-static' )         => $this->is_permalink_structure_set(),
 				__( 'WP-CRON', 'simply-static' )            => $this->is_wp_cron_running(),
+				__( 'WP REST API', 'simply-static' )            => $this->is_wp_rest_running(),
 				__( 'Requests to itself', 'simply-static' ) => $this->can_wp_make_requests_to_itself(),
 			),
 			'Filesystem' => array(
@@ -160,11 +161,28 @@ class Diagnostic {
 		} else {
 			$is_cron = false;
 		}
-
 		return array(
 			'test'        => $is_cron,
 			'description' => __( 'WordPress cron is available and running', 'simply-static' ),
 			'error'       => __( 'WordPress cron is not available and not running', 'simply-static' ),
+		);
+	}
+
+	/**
+	 * Is Rest API up and running.
+	 * @return array
+	 */
+	public function is_wp_rest_running() {
+		if ( empty( $GLOBALS['wp']->query_vars['rest_route'] ) ) {
+			$is_rest = false;
+		} else {
+			$is_rest = true;
+		}
+
+		return array(
+			'test'        => $is_rest,
+			'description' => __( 'Rest API is available and running', 'simply-static' ),
+			'error'       => __( 'Rest API is disabled or blocked', 'simply-static' ),
 		);
 	}
 
