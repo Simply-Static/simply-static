@@ -229,6 +229,8 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 * added check for empty strings in excludes
 * removed unused blog_id check
 * changed location of debug log to uploads dir
+* check for Rest API in diagnostics
+* increased PHP version for diagnostics >= 8.0
 
 = 3.1.2 =
 
