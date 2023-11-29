@@ -146,7 +146,7 @@ class Admin_Settings {
 
 		if ( file_exists( $debug_file ) ) {
             $uploadsDir = wp_upload_dir();
-			$args['log_file'] = $uploadsDir['baseurl'] . '/simply-static-debug.txt';
+			$args['log_file'] = $uploadsDir['baseurl'] . '/simply-static/debug.txt';
 		}
 
 		// Maybe show migration notice.
