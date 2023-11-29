@@ -11,14 +11,14 @@
   "author": "",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "@wordpress/api-fetch": "^6.10.0",
-    "@wordpress/components": "^19.15.0",
-    "@wordpress/data": "^6.15.0",
-    "@wordpress/element": "^4.11.0",
-    "@wordpress/scripts": "^26.8.0"
+    "@wordpress/api-fetch": "^6.43.0",
+    "@wordpress/components": "^25.12.0",
+    "@wordpress/data": "^9.16.0",
+    "@wordpress/element": "^5.23.0",
+    "@wordpress/scripts": "^26.17.0"
   },
   "dependencies": {
-    "react-data-table-component": "^7.5.3",
-    "react-terminal-ui": "^1.0.5"
+    "react-data-table-component": "^7.5.4",
+    "react-terminal-ui": "^1.2.0"
   }
 }
