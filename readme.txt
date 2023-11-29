@@ -231,6 +231,7 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 * changed location of debug log to uploads dir
 * check for Rest API in diagnostics
 * increased PHP version for diagnostics >= 8.0
+* whitelist Freemius API calls if Basic Auth enabled
 
 = 3.1.2 =
 
