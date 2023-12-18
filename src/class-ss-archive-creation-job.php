@@ -75,6 +75,9 @@ class Archive_Creation_Job extends \WP_Background_Process {
 			$blog_id = get_current_blog_id();
 		}
 
+		// Clear log before running the job.
+		Util::clear_debug_log();
+
 		do_action( 'ss_archive_creation_job_before_start', $blog_id, $this );
 
 		if ( $this->is_job_done() ) {
