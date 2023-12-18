@@ -102,6 +102,10 @@ class Generate_404_Task extends Task {
 	 */
 	public function handle_response( $static_page ) {
 
+		Util::debug_log( "Replacing URLs in the static file" );
+		$extractor = new Url_Extractor( $static_page );
+		$extractor->extract_and_update_urls();
+
 		$file = $this->archive_dir . $static_page->file_path;
 
 		Util::debug_log( "We're saving this URL; keeping the static file" );
