@@ -85,7 +85,9 @@ function SettingsContextProvider(props) {
         'minify_inline_css': false,
         'minify_js': false,
         'minify_inline_js': false,
-        'generate_404': false
+        'generate_404': false,
+        'wp_content_folder': '',
+        'wp_includes_folder': '',
     }
     const [isRunning, setIsRunning] = useState(false);
     const [settingsSaved, setSettingsSaved] = useState(false);

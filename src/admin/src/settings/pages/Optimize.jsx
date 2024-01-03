@@ -6,7 +6,7 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    ToggleControl,
+    ToggleControl, TextControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -21,6 +21,8 @@ function Optimize() {
     const [minifyInlineCss, setMinifyInlineCss] = useState(false);
     const [minifyJavascript, setMinifyJavascript] = useState(false);
     const [minifyInlineJavascript, setMinifyInlineJavascript] = useState(false);
+    const [wpContentFolder, setWpContentFolder] = useState('');
+    const [wpIncludesFolder, setWpIncludesFolder] = useState('');
 
     const setSavingSettings = () => {
         saveSettings();
@@ -54,6 +56,14 @@ function Optimize() {
 
         if (settings.minify_inline_js) {
             setMinifyInlineJavascript(settings.minify_inline_js);
+        }
+
+        if (settings.wp_content_folder) {
+            setWpContentFolder(settings.wp_content_folder);
+        }
+
+        if (settings.wp_includes_folder) {
+            setWpIncludesFolder(settings.wp_includes_folder);
         }
 
     }, [settings]);
@@ -153,6 +163,38 @@ function Optimize() {
                         }
                     </>
                 }
+
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <b>{__('Change', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
+                <TextControl
+                    label={__('Folder wp-content', 'simply-static')}
+                    help={  __('Change the folder wp-content', 'simply-static') }
+                    type={"text"}
+                    placeholder={"wp-content"}
+                    value={wpContentFolder}
+                    onChange={(folder) => {
+                        setWpIncludesFolder(folder);
+                        updateSetting('wp_content_folder', folder);
+                    }}
+                />
+
+                <TextControl
+                    label={__('Folder wp-includes', 'simply-static')}
+                    help={  __('Change the folder wp-includes', 'simply-static') }
+                    type={"text"}
+                    placeholder={"wp-includes"}
+                    value={wpIncludesFolder}
+                    onChange={(folder) => {
+                        setWpContentFolder(folder);
+                        updateSetting('wp_includes_folder', folder);
+                    }}
+                />
 
             </CardBody>
         </Card>

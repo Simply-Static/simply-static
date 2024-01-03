@@ -4,6 +4,7 @@ namespace Simply_Static;
 
 use Exception;
 use voku\helper\HtmlDomParser;
+use function WPML\FP\apply;
 
 // Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) {
@@ -450,6 +451,9 @@ class Url_Extractor {
 		} else {
 			$decoded_text = html_entity_decode( $text );
 		}
+
+		$decoded_text = apply_filters( 'simply_static_decoded_urls_in_script', $decoded_text, $this->static_page, $this );
+
 		$text = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $this->options->get_destination_url(), $decoded_text );
 
 		return $text;
@@ -485,6 +489,8 @@ class Url_Extractor {
 		} else {
 			$decoded_text = html_entity_decode( $tag->innerText );
 		}
+
+		$decoded_text = apply_filters( 'simply_static_decoded_text_in_script', $decoded_text, $this->static_page, $convert_to, $tag, $this );
 
 		$tag->innerText = preg_replace( $regex, $convert_to, $decoded_text );
 
