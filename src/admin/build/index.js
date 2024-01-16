@@ -804,7 +804,11 @@ function SettingsContextProvider(props) {
     'minify_inline_js': false,
     'generate_404': false,
     'wp_content_folder': '',
-    'wp_includes_folder': ''
+    'wp_includes_folder': '',
+    'wp_uploads_folder': '',
+    'wp_plugins_folder': '',
+    'rename_plugin_folders': false,
+    'author_url': ''
   };
   const [isRunning, setIsRunning] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
   const [settingsSaved, setSettingsSaved] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
@@ -2139,8 +2143,12 @@ function Optimize() {
   const [minifyInlineCss, setMinifyInlineCss] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
   const [minifyJavascript, setMinifyJavascript] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
   const [minifyInlineJavascript, setMinifyInlineJavascript] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
-  const [wpContentFolder, setWpContentFolder] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('');
-  const [wpIncludesFolder, setWpIncludesFolder] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('');
+  const [renamePluginFolders, setRenamePluginFolders] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [wpContentFolder, setWpContentFolder] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('wp-content');
+  const [wpIncludesFolder, setWpIncludesFolder] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('wp-includes');
+  const [wpUploadsFolder, setWpUploadsFolder] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('wp-content/uploads');
+  const [wpPluginsFolder, setWpPluginsFolder] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('wp-content/plugins');
+  const [authorUrl, setAuthorUrl] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('author');
   const setSavingSettings = () => {
     saveSettings();
     setSettingsSaved(true);
@@ -2172,6 +2180,18 @@ function Optimize() {
     }
     if (settings.wp_includes_folder) {
       setWpIncludesFolder(settings.wp_includes_folder);
+    }
+    if (settings.wp_uploads_folder) {
+      setWpUploadsFolder(settings.wp_uploads_folder);
+    }
+    if (settings.wp_plugins_folder) {
+      setWpPluginsFolder(settings.wp_plugins_folder);
+    }
+    if (settings.rename_plugin_folders) {
+      setRenamePluginFolders(settings.rename_plugin_folders);
+    }
+    if (settings.author_url) {
+      setAuthorUrl(settings.author_url);
     }
   }, [settings]);
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
@@ -2245,6 +2265,44 @@ function Optimize() {
     onChange: folder => {
       setWpContentFolder(folder);
       updateSetting('wp_includes_folder', folder);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+    label: __('Folder uploads', 'simply-static'),
+    help: __('Change the folder uploads', 'simply-static'),
+    type: "text",
+    placeholder: "uploads",
+    value: wpUploadsFolder,
+    onChange: folder => {
+      setWpUploadsFolder(folder);
+      updateSetting('wp_uploads_folder', folder);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+    label: __('Folder plugins', 'simply-static'),
+    help: __('Change the folder plugins', 'simply-static'),
+    type: "text",
+    placeholder: "plugins",
+    value: wpPluginsFolder,
+    onChange: folder => {
+      setWpPluginsFolder(folder);
+      updateSetting('wp_plugins_folder', folder);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+    label: __('Rename Plugin Names?', 'simply-static'),
+    help: renamePluginFolders ? __('Rename.', 'simply-static') : __('Keep original.', 'simply-static'),
+    checked: renamePluginFolders,
+    onChange: value => {
+      setRenamePluginFolders(value);
+      updateSetting('rename_plugin_folders', value);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+    label: __('Author URL', 'simply-static'),
+    help: __('Change the author url', 'simply-static'),
+    type: "text",
+    placeholder: "author",
+    value: authorUrl,
+    onChange: url => {
+      setAuthorUrl(url);
+      updateSetting('author_url', url);
     }
   }))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
     margin: 5

@@ -12,6 +12,8 @@ class Yoast_Sitemap_Handler extends Page_Handler {
 	 * @return void
 	 */
 	public function run_hooks() {
+		parent::run_hooks();
+
 		// Filter XSL.
 		add_filter( 'wpseo_stylesheet_url', [ $this, 'stylesheet_url' ] );
 	}

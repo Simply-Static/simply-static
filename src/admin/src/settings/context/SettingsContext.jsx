@@ -88,6 +88,10 @@ function SettingsContextProvider(props) {
         'generate_404': false,
         'wp_content_folder': '',
         'wp_includes_folder': '',
+        'wp_uploads_folder': '',
+        'wp_plugins_folder': '',
+        'rename_plugin_folders': false,
+        'author_url': '',
     }
     const [isRunning, setIsRunning] = useState(false);
     const [settingsSaved, setSettingsSaved] = useState(false);

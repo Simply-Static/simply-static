@@ -69,5 +69,7 @@ class Page_Handlers {
 		$handler = $page->get_handler();
 
 		$handler->run_hooks();
+
+		do_action( 'simply_static_page_handler_request_after_hooks', $handler );
 	}
 }

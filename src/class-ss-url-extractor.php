@@ -264,6 +264,8 @@ class Url_Extractor {
 		// e.g. {"concatemoji":"http:\/\/www.example.org\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.6.1"}.
 		$response_body = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
 
+		$response_body = apply_filters( 'simply_static_force_replaced_urls_body', $response_body, $this->static_page );
+
 		$this->save_body( $response_body );
 	}
 

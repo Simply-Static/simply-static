@@ -21,8 +21,12 @@ function Optimize() {
     const [minifyInlineCss, setMinifyInlineCss] = useState(false);
     const [minifyJavascript, setMinifyJavascript] = useState(false);
     const [minifyInlineJavascript, setMinifyInlineJavascript] = useState(false);
-    const [wpContentFolder, setWpContentFolder] = useState('');
-    const [wpIncludesFolder, setWpIncludesFolder] = useState('');
+    const [renamePluginFolders, setRenamePluginFolders] = useState(false);
+    const [wpContentFolder, setWpContentFolder] = useState('wp-content');
+    const [wpIncludesFolder, setWpIncludesFolder] = useState('wp-includes');
+    const [wpUploadsFolder, setWpUploadsFolder] = useState('wp-content/uploads');
+    const [wpPluginsFolder, setWpPluginsFolder] = useState('wp-content/plugins');
+    const [authorUrl, setAuthorUrl] = useState('author');
 
     const setSavingSettings = () => {
         saveSettings();
@@ -64,6 +68,22 @@ function Optimize() {
 
         if (settings.wp_includes_folder) {
             setWpIncludesFolder(settings.wp_includes_folder);
+        }
+
+        if (settings.wp_uploads_folder) {
+            setWpUploadsFolder(settings.wp_uploads_folder);
+        }
+
+        if (settings.wp_plugins_folder) {
+            setWpPluginsFolder(settings.wp_plugins_folder);
+        }
+
+        if (settings.rename_plugin_folders) {
+            setRenamePluginFolders(settings.rename_plugin_folders);
+        }
+
+        if (settings.author_url) {
+            setAuthorUrl(settings.author_url);
         }
 
     }, [settings]);
@@ -193,6 +213,56 @@ function Optimize() {
                     onChange={(folder) => {
                         setWpContentFolder(folder);
                         updateSetting('wp_includes_folder', folder);
+                    }}
+                />
+
+                <TextControl
+                    label={__('Folder uploads', 'simply-static')}
+                    help={  __('Change the folder uploads', 'simply-static') }
+                    type={"text"}
+                    placeholder={"uploads"}
+                    value={wpUploadsFolder}
+                    onChange={(folder) => {
+                        setWpUploadsFolder(folder);
+                        updateSetting('wp_uploads_folder', folder);
+                    }}
+                />
+
+                <TextControl
+                    label={__('Folder plugins', 'simply-static')}
+                    help={  __('Change the folder plugins', 'simply-static') }
+                    type={"text"}
+                    placeholder={"plugins"}
+                    value={wpPluginsFolder}
+                    onChange={(folder) => {
+                        setWpPluginsFolder(folder);
+                        updateSetting('wp_plugins_folder', folder);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Rename Plugin Names?', 'simply-static')}
+                    help={
+                        renamePluginFolders
+                            ? __('Rename.', 'simply-static')
+                            : __('Keep original.', 'simply-static')
+                    }
+                    checked={renamePluginFolders}
+                    onChange={(value) => {
+                        setRenamePluginFolders(value);
+                        updateSetting('rename_plugin_folders', value);
+                    }}
+                />
+
+                <TextControl
+                    label={__('Author URL', 'simply-static')}
+                    help={  __('Change the author url', 'simply-static') }
+                    type={"text"}
+                    placeholder={"author"}
+                    value={authorUrl}
+                    onChange={(url) => {
+                        setAuthorUrl(url);
+                        updateSetting('author_url', url);
                     }}
                 />
 
