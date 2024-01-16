@@ -145,8 +145,9 @@ class Admin_Settings {
 		$debug_file = Util::get_debug_log_filename();
 
 		if ( file_exists( $debug_file ) ) {
-			$uploadsDir       = wp_upload_dir();
-			$args['log_file'] = $uploadsDir['baseurl'] . '/simply-static/debug.txt';
+			$uploads_dir       = wp_upload_dir();
+			$simply_static_dir = $uploads_dir['baseurl'] . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR;
+			$args['log_file']  = $simply_static_dir . $options->get( 'encryption_key' ) . '-debug.txt';
 		}
 
 		// Maybe show migration notice.

@@ -64,6 +64,12 @@ if ( ! function_exists( 'simply_static_run_plugin' ) ) {
 			update_option( 'simply-static', $options );
 		}
 
+		// Generate a secure unique key.
+		if ( ! isset( $options['encryption_key'] ) ) {
+			$options['encryption_key'] = bin2hex( random_bytes( 16 ) );
+			update_option( 'simply-static', $options );
+		}
+
 		// Maybe migrate SimplyCDN options.
 		$token = get_option( 'sch_token' );
 
