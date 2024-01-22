@@ -145,17 +145,6 @@ class Util {
 	 * @return string Filename for the debug log
 	 */
 	public static function get_debug_log_filename() {
-		// Get filesystem.
-		global $wp_filesystem;
-
-		if ( ! function_exists( 'WP_Filesystem' ) ) {
-			require_once( ABSPATH . 'wp-admin/includes/file.php' );
-		}
-
-		if ( is_null( $wp_filesystem ) ) {
-			WP_Filesystem();
-		}
-
 		// Get directories.
 		$uploads_dir       = wp_upload_dir();
 		$simply_static_dir = $uploads_dir['basedir'] . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR;
@@ -164,14 +153,14 @@ class Util {
 		$options = get_option( 'simply-static' );
 
 		if ( isset( $options['encryption_key'] ) ) {
-			// Create htaccess file for protection.
-			$htaccess_file          = $simply_static_dir . '.htaccess';
-			$htaccess_inner_content = "\nrequire all denied\nrequire host localhost\n";
-			$htaccess_file_content  = '<Files "' . $options['encryption_key'] . '-debug.txt">' . $htaccess_inner_content . '</Files>';
+			$htaccess_file = get_home_path() . '.htaccess';
 
+			if ( file_exists( $htaccess_file ) && ! is_multisite() ) {
+				// Write to .htaccess file.
+				$htaccess_inner_content = "\nrequire all denied\nrequire host localhost\n";
+				$htaccess_file_content  = '<Files "' . $simply_static_dir . DIRECTORY_SEPARATOR . $options['encryption_key'] . '-debug.txt">' . $htaccess_inner_content . '</Files>';
 
-			if ( ! file_exists( $htaccess_file ) ) {
-				$wp_filesystem->put_contents( $htaccess_file, $htaccess_file_content, FS_CHMOD_FILE );
+				insert_with_markers( $htaccess_file, 'Simply Static', $htaccess_file_content );
 			}
 
 			return $simply_static_dir . $options['encryption_key'] . '-debug.txt';
