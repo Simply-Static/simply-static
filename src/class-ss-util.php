@@ -165,11 +165,13 @@ class Util {
 
 		if ( isset( $options['encryption_key'] ) ) {
 			// Create htaccess file for protection.
-			$htaccess_file    = $simply_static_dir . '.htaccess';
-			$htaccess_content = "<Files '" . $options['encryption_key'] . "-debug.txt'>\nrequire all denied\nrequire host localhost\n</Files>";
-			
+			$htaccess_file          = $simply_static_dir . '.htaccess';
+			$htaccess_inner_content = "\nrequire all denied\nrequire host localhost\n";
+			$htaccess_file_content  = '<Files "' . $options['encryption_key'] . '-debug.txt">' . $htaccess_inner_content . '</Files>';
+
+
 			if ( ! file_exists( $htaccess_file ) ) {
-				$wp_filesystem->put_contents( $htaccess_file, $htaccess_content, FS_CHMOD_FILE );
+				$wp_filesystem->put_contents( $htaccess_file, $htaccess_file_content, FS_CHMOD_FILE );
 			}
 
 			return $simply_static_dir . $options['encryption_key'] . '-debug.txt';
