@@ -22,6 +22,7 @@ function SettingsContextProvider(props) {
         'debugging_mode': true,
         'http_basic_auth_username': '',
         'http_basic_auth_password': '',
+        'origin_url': '',
         'version': options.version,
         'force_replace_url': false,
         'clear_directory_before_export': false,

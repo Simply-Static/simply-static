@@ -35,6 +35,12 @@ class Util {
 	 * @return string home URL
 	 */
 	public static function origin_url() {
+		$options = Options::instance();
+
+		if ( $options->get( 'origin_url' ) ) {
+			return apply_filters( 'ss_origin_url', esc_url( untrailingslashit( $options->get( 'origin_url' ) ) ) );
+		}
+
 		return apply_filters( 'ss_origin_url', untrailingslashit( home_url() ) );
 	}
 

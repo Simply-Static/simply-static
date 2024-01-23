@@ -15,10 +15,7 @@ const {__} = wp.i18n;
 
 function MiscSettings() {
     const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
-    const [showSubsiteSettings, setShowSubsiteSettings] = useState(false);
-
     const [debuggingMode, setDebuggingMode] = useState(false);
-
 
     const setSavingSettings = () => {
         saveSettings();
@@ -103,7 +100,17 @@ function MiscSettings() {
                         updateSetting('debugging_mode', value);
                     }}
                 />
-
+                <TextControl
+                    label={__('Origin URL', 'simply-static')}
+                    type={"url"}
+                    help={__('If the URL of your WordPress installation differs from the public-facing URL (Proxy Setup), add the public URL here.', 'simply-static')}
+                    placeholder={options.home}
+                    autoComplete={"off"}
+                    value={settings.origin_url}
+                    onChange={(origin_url) => {
+                        updateSetting('origin_url', origin_url);
+                    }}
+                />
             </CardBody>
         </Card>
         <Spacer margin={5}/>
