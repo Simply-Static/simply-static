@@ -16,8 +16,7 @@ const {__} = wp.i18n;
 function MiscSettings() {
     const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
     const [showSubsiteSettings, setShowSubsiteSettings] = useState(false);
-    const [forceURLReplacement, setForceURLReplacement] = useState(false);
-    const [clearDirectory, setClearDirectory] = useState(false);
+
     const [debuggingMode, setDebuggingMode] = useState(false);
 
 
@@ -33,14 +32,6 @@ function MiscSettings() {
     useEffect(() => {
         if (settings.allow_subsites) {
             setShowSubsiteSettings(settings.allow_subsites);
-        }
-
-        if (settings.force_replace_url) {
-            setForceURLReplacement(settings.force_replace_url);
-        }
-
-        if (settings.clear_directory_before_export) {
-            setClearDirectory(settings.clear_directory_before_export);
         }
 
         if (settings.debugging_mode) {
@@ -126,38 +117,9 @@ function MiscSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('Additional Settings', 'simply-static')}</b>
+                <b>{__('Debugging', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
-                <p>{__('Here you can configure some additional settings like clearing the local directory before running an export or activating force replacement for all URLs.', 'simply-static')}</p>
-                <ToggleControl
-                    label={__('Force URL replacements', 'simply-static')}
-                    help={
-                        forceURLReplacement
-                            ? __('Replace all occurrences of the WordPress URL with the static URL.', 'simply-static')
-                            : __('Replace only occurrences of the WordPress URL that match the tags', 'simply-static')
-                    }
-                    checked={forceURLReplacement}
-                    onChange={(value) => {
-                        setForceURLReplacement(value);
-                        updateSetting('force_replace_url', value);
-                    }}
-                />
-
-                <ToggleControl
-                    label={__('Clear Directory', 'simply-static')}
-                    help={
-                        clearDirectory
-                            ? __('Clear local directory before running an export.', 'simply-static')
-                            : __('Don\'t clear local directory before running an export.', 'simply-static')
-                    }
-                    checked={clearDirectory}
-                    onChange={(value) => {
-                        setClearDirectory(value);
-                        updateSetting('clear_directory_before_export', value);
-                    }}
-                />
-
                 <ToggleControl
                     label={__('Debugging Mode', 'simply-static')}
                     help={

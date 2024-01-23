@@ -20,6 +20,7 @@ function GeneralSettings() {
     const [scheme, setScheme] = useState('https://');
     const [host, setHost] = useState('');
     const [path, setPath] = useState('/');
+    const [forceURLReplacement, setForceURLReplacement] = useState(false);
     const [hasCopied, setHasCopied] = useState(false);
     const [generate404, setGenerate404] = useState(false);
 
@@ -47,6 +48,10 @@ function GeneralSettings() {
 
         if (settings.relative_path) {
             setPath(settings.relative_path);
+        }
+
+        if (settings.force_replace_url) {
+            setForceURLReplacement(settings.force_replace_url);
         }
 
         if (settings.generate_404) {
@@ -136,6 +141,19 @@ function GeneralSettings() {
                 {replaceType === 'offline' &&
                     <p>{__('Convert all URLs for your WordPress site so that you can browse the site locally on your own computer without hosting it on a web server.', 'simply-static')}</p>
                 }
+                <ToggleControl
+                    label={__('Force URL replacements', 'simply-static')}
+                    help={
+                        forceURLReplacement
+                            ? __('Replace all occurrences of the WordPress URL with the static URL (includes inline CSS and JS).', 'simply-static')
+                            : __('Replace only occurrences of the WordPress URL that match our tag list.', 'simply-static')
+                    }
+                    checked={forceURLReplacement}
+                    onChange={(value) => {
+                        setForceURLReplacement(value);
+                        updateSetting('force_replace_url', value);
+                    }}
+                />
             </CardBody>
         </Card>
         <Spacer margin={5}/>
