@@ -23,7 +23,6 @@ function SettingsContextProvider(props) {
         'http_basic_auth_username': '',
         'http_basic_auth_password': '',
         'version': options.version,
-        'allow_subsites': false,
         'force_replace_url': false,
         'clear_directory_before_export': false,
         'ssh_security_token': '',

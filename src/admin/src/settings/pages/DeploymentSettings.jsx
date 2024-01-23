@@ -184,7 +184,7 @@ function DeploymentSettings() {
                             updateSetting('ssh_security_token', token);
                         }}
                     />
-                    {settings.ssh_security_token ?
+                    {settings.ssh_security_token &&
                         <>
                             <SelectControl
                                 label={__('Select a 404 page', 'content-protector')}
@@ -220,9 +220,6 @@ function DeploymentSettings() {
                                 />
                             }
                         </>
-                        :
-                        <a target="_blank"
-                           href={"https://simplycdn.io/#pricing"}>{__('Start your 7-day free trial', 'simply-static')}</a>
                     }
                 </CardBody>
             </Card>
