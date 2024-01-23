@@ -307,9 +307,15 @@ class Admin_Settings {
 		if ( $request->get_params() ) {
 			$options = sanitize_option( 'simply-static', $request->get_params() );
 
+			$multiline_fields = [ 'additional_urls', 'additional_files', 'urls_to_exclude', 'search_excludable' ];
+
 			// Sanitize each key/value pair in options.
 			foreach ( $options as $key => $value ) {
-				$options[ $key ] = sanitize_text_field( $value );
+				if ( in_array( $key, $multiline_fields ) ) {
+					$options[ $key ] = sanitize_textarea_field( $value );
+				} else {
+					$options[ $key ] = sanitize_text_field( $value );
+				}
 			}
 
 			// Handle basic auth.
