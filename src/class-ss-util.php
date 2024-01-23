@@ -45,43 +45,11 @@ class Util {
 	}
 
 	/**
-	 * Wrapper around site_url(). Returns the URL used for the WP installation.
-	 * @return string home URL
-	 */
-	public static function wp_installation_url() {
-		return untrailingslashit( site_url() );
-	}
-
-	/**
-	 * Echo the selected value for an option tag if the statement is true.
-	 * @return null
-	 */
-	public static function selected_if( $statement ) {
-		echo( $statement == true ? 'selected="selected"' : '' );
-	}
-
-	/**
-	 * Echo the checked value for an input tag if the statement is true.
-	 * @return null
-	 */
-	public static function checked_if( $statement ) {
-		echo( $statement == true ? 'checked="checked"' : '' );
-	}
-
-	/**
 	 * Truncate if a string exceeds a certain length (30 chars by default)
 	 * @return string
 	 */
 	public static function truncate( $string, $length = 30, $omission = '...' ) {
 		return ( strlen( $string ) > $length + 3 ) ? ( substr( $string, 0, $length ) . $omission ) : $string;
-	}
-
-	/**
-	 * Use trailingslashit unless the string is empty
-	 * @return string
-	 */
-	public static function trailingslashit_unless_blank( $string ) {
-		return $string === '' ? $string : trailingslashit( $string );
 	}
 
 	/**
@@ -524,15 +492,6 @@ class Util {
 	 */
 	public static function remove_trailing_directory_separator( $path ) {
 		return rtrim( $path, DIRECTORY_SEPARATOR );
-	}
-
-	/**
-	 * Ensure there is a single leading directory separator on the path
-	 *
-	 * @param string $path File path to add leading directory separator to
-	 */
-	public static function add_leading_directory_separator( $path ) {
-		return DIRECTORY_SEPARATOR . self::remove_leading_directory_separator( $path );
 	}
 
 	/**
