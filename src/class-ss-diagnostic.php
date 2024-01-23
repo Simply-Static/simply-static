@@ -54,7 +54,7 @@ class Diagnostic {
 			'WordPress'  => array(
 				__( 'Permalinks', 'simply-static' )         => $this->is_permalink_structure_set(),
 				__( 'WP-CRON', 'simply-static' )            => $this->is_wp_cron_running(),
-				__( 'WP REST API', 'simply-static' )            => $this->is_wp_rest_running(),
+				__( 'WP REST API', 'simply-static' )        => $this->is_wp_rest_running(),
 				__( 'Requests to itself', 'simply-static' ) => $this->can_wp_make_requests_to_itself(),
 			),
 			'Filesystem' => array(
@@ -161,6 +161,7 @@ class Diagnostic {
 		} else {
 			$is_cron = false;
 		}
+
 		return array(
 			'test'        => $is_cron,
 			'description' => __( 'WordPress cron is available and running', 'simply-static' ),
@@ -335,7 +336,7 @@ class Diagnostic {
 				$test    = false;
 				$message = sprintf( __( "Received a %s response. This might indicate a problem.", 'simply-static' ), $code );
 			} else {
-				$test    = false;
+				$test    = true;
 				$message = sprintf( __( "Received a %s response.", 'simply-static' ), $code );
 			}
 		}
