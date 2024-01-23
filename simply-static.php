@@ -27,9 +27,13 @@ if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
 	wp_die( esc_html__( 'Simply Static requires PHP 7.4 or higher.', 'simply-static' ), 'Plugin dependency check', array( 'back_link' => true ) );
 }
 
-// Localize.
-$textdomain_dir = plugin_basename( dirname( __FILE__ ) ) . '/languages';
-load_plugin_textdomain( 'simply-static', false, $textdomain_dir );
+// localize.
+add_action( 'init', 'simply_static_load_textdomain' );
+
+function simply_static_load_textdomain() {
+	$textdomain_dir = plugin_basename( dirname( __FILE__ ) ) . '/languages';
+	load_plugin_textdomain( 'simply-static', false, $textdomain_dir );
+}
 
 // Run autoloader.
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) && ! class_exists( 'Simply_Static\Plugin' ) ) {
