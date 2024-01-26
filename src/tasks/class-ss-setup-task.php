@@ -33,7 +33,7 @@ class Setup_Task extends Task {
 			Util::debug_log( 'Creating archive directory: ' . $archive_dir );
 			$create_dir = wp_mkdir_p( $archive_dir );
 			if ( $create_dir === false ) {
-				return new \WP_Error( 'cannot_create_archive_dir', sprintf(__('Cannot create archive directory %s'), $archive_dir) );
+				return new \WP_Error( 'cannot_create_archive_dir', sprintf( __( 'Cannot create archive directory %s' ), $archive_dir ) );
 			}
 		}
 
@@ -93,6 +93,11 @@ class Setup_Task extends Task {
 
 		if ( isset( $options['ssh_thank_you_page_id'] ) ) {
 			$urls[] = get_permalink( $options['ssh_thank_you_page_id'] );
+		}
+
+		// Maybe add 404 page.
+		if ( $options['generate_404'] ) {
+			$urls[] = $origin_url . '404/';
 		}
 
 		$urls = apply_filters( 'ss_additional_urls', $urls );
