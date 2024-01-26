@@ -95,11 +95,6 @@ class Setup_Task extends Task {
 			$urls[] = get_permalink( $options['ssh_thank_you_page_id'] );
 		}
 
-		// Maybe add 404 page.
-		if ( $options['generate_404'] ) {
-			$urls[] = $origin_url . '404/';
-		}
-
 		$urls = apply_filters( 'ss_additional_urls', $urls );
 
 		foreach ( $urls as $url ) {
