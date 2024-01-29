@@ -807,6 +807,8 @@ function SettingsContextProvider(props) {
     'wp_includes_folder': '',
     'wp_uploads_folder': '',
     'wp_plugins_folder': '',
+    'wp_themes_folder': '',
+    'theme_style_name': 'style',
     'rename_plugin_folders': false,
     'author_url': ''
   };
@@ -2148,6 +2150,8 @@ function Optimize() {
   const [wpIncludesFolder, setWpIncludesFolder] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('wp-includes');
   const [wpUploadsFolder, setWpUploadsFolder] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('wp-content/uploads');
   const [wpPluginsFolder, setWpPluginsFolder] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('wp-content/plugins');
+  const [wpThemesFolder, setWpThemesFolder] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('wp-content/themes');
+  const [themeStyleName, setThemeStyleName] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('style');
   const [authorUrl, setAuthorUrl] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('author');
   const setSavingSettings = () => {
     saveSettings();
@@ -2189,6 +2193,12 @@ function Optimize() {
     }
     if (settings.rename_plugin_folders) {
       setRenamePluginFolders(settings.rename_plugin_folders);
+    }
+    if (settings.wp_themes_folder) {
+      setWpThemesFolder(settings.wp_themes_folder);
+    }
+    if (settings.theme_style_name) {
+      setThemeStyleName(settings.theme_style_name);
     }
     if (settings.author_url) {
       setAuthorUrl(settings.author_url);
@@ -2293,6 +2303,28 @@ function Optimize() {
     onChange: value => {
       setRenamePluginFolders(value);
       updateSetting('rename_plugin_folders', value);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+    label: __('Folder themes', 'simply-static'),
+    help: __('Change the folder themes', 'simply-static'),
+    type: "text",
+    placeholder: "themes",
+    value: wpThemesFolder,
+    onChange: folder => {
+      setWpThemesFolder(folder);
+      updateSetting('wp_themes_folder', folder);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalInputControl, {
+    label: __('Theme style name', 'simply-static'),
+    help: __('Change the style.css name', 'simply-static'),
+    type: "text",
+    className: "ss-theme-style-name",
+    suffix: '.css',
+    placeholder: "style",
+    value: themeStyleName,
+    onChange: style => {
+      setThemeStyleName(style);
+      updateSetting('theme_style_name', style);
     }
   }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
     label: __('Author URL', 'simply-static'),

@@ -4,6 +4,7 @@ import {
     CardBody,
     CardHeader,
     __experimentalSpacer as Spacer,
+    __experimentalInputControl as InputControl,
     Notice,
     Animate,
     ToggleControl, TextControl,
@@ -26,6 +27,8 @@ function Optimize() {
     const [wpIncludesFolder, setWpIncludesFolder] = useState('wp-includes');
     const [wpUploadsFolder, setWpUploadsFolder] = useState('wp-content/uploads');
     const [wpPluginsFolder, setWpPluginsFolder] = useState('wp-content/plugins');
+    const [wpThemesFolder, setWpThemesFolder] = useState('wp-content/themes');
+    const [themeStyleName, setThemeStyleName] = useState('style');
     const [authorUrl, setAuthorUrl] = useState('author');
 
     const setSavingSettings = () => {
@@ -80,6 +83,14 @@ function Optimize() {
 
         if (settings.rename_plugin_folders) {
             setRenamePluginFolders(settings.rename_plugin_folders);
+        }
+
+        if (settings.wp_themes_folder) {
+            setWpThemesFolder(settings.wp_themes_folder);
+        }
+
+        if (settings.theme_style_name) {
+            setThemeStyleName(settings.theme_style_name);
         }
 
         if (settings.author_url) {
@@ -251,6 +262,32 @@ function Optimize() {
                     onChange={(value) => {
                         setRenamePluginFolders(value);
                         updateSetting('rename_plugin_folders', value);
+                    }}
+                />
+
+                <TextControl
+                    label={__('Folder themes', 'simply-static')}
+                    help={  __('Change the folder themes', 'simply-static') }
+                    type={"text"}
+                    placeholder={"themes"}
+                    value={wpThemesFolder}
+                    onChange={(folder) => {
+                        setWpThemesFolder(folder);
+                        updateSetting('wp_themes_folder', folder);
+                    }}
+                />
+
+                <InputControl
+                    label={__('Theme style name', 'simply-static')}
+                    help={  __('Change the style.css name', 'simply-static') }
+                    type={"text"}
+                    className={"ss-theme-style-name"}
+                    suffix={'.css'}
+                    placeholder={"style"}
+                    value={themeStyleName}
+                    onChange={(style) => {
+                        setThemeStyleName(style);
+                        updateSetting('theme_style_name', style);
                     }}
                 />
 

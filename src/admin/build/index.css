@@ -153,6 +153,20 @@ toplevel_page_simply-static img {
 .plugin-settings-container .plugin-settings .react-terminal-line a {
   color: #6fa4df;
 }
+.plugin-settings-container .plugin-settings .ss-theme-style-name .components-base-control__help {
+  margin-bottom: 10px;
+}
+.plugin-settings-container .plugin-settings .ss-theme-style-name .components-input-control__container {
+  width: 200px;
+}
+.plugin-settings-container .plugin-settings .ss-theme-style-name .components-input-control__container .components-input-control__input {
+  text-align: right;
+}
+.plugin-settings-container .plugin-settings .ss-theme-style-name .components-input-control__container .components-input-control__suffix {
+  padding-right: 10px;
+  background: rgba(0, 0, 0, 0.05);
+  padding-left: 5px;
+}
 
 .dashicons.spin {
   animation: dashicons-spin 2s infinite;

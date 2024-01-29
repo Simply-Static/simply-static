@@ -90,6 +90,8 @@ function SettingsContextProvider(props) {
         'wp_includes_folder': '',
         'wp_uploads_folder': '',
         'wp_plugins_folder': '',
+        'wp_themes_folder': '',
+        'theme_style_name': 'style',
         'rename_plugin_folders': false,
         'author_url': '',
     }
