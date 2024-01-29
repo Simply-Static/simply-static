@@ -63,16 +63,18 @@ class Admin_Settings {
 
 		add_action( "admin_print_scripts-{$generate_suffix}", array( $this, 'add_settings_scripts' ) );
 
-		$settings_suffix = add_submenu_page(
-			'simply-static-generate',
-			__( 'Settings', 'simply-static' ),
-			__( 'Settings', 'simply-static' ),
-			apply_filters( 'ss_user_capability', 'manage_options', 'settings' ),
-			'simply-static-settings',
-			array( $this, 'render_settings' )
-		);
+		if ( is_multisite() && ! is_network_admin() ) {
+			$settings_suffix = add_submenu_page(
+				'simply-static-generate',
+				__( 'Settings', 'simply-static' ),
+				__( 'Settings', 'simply-static' ),
+				apply_filters( 'ss_user_capability', 'manage_options', 'settings' ),
+				'simply-static-settings',
+				array( $this, 'render_settings' )
+			);
 
-		add_action( "admin_print_scripts-{$settings_suffix}", array( $this, 'add_settings_scripts' ) );
+			add_action( "admin_print_scripts-{$settings_suffix}", array( $this, 'add_settings_scripts' ) );
+		}
 	}
 
 	public function add_settings_scripts() {
@@ -106,21 +108,6 @@ class Admin_Settings {
 			wp_mkdir_p( $temp_dir );
 		}
 
-		$sites = [];
-
-		if ( is_multisite() && is_network_admin() && function_exists( 'get_sites' ) ) {
-			$public_sites = get_sites( [ 'public' => true ] );
-			if ( $public_sites ) {
-				foreach ( $public_sites as $site ) {
-					$sites[] = [
-						'blog_id' => $site->blog_id,
-						'name'    => $site->blogname,
-						'url'     => $site->siteurl
-					];
-				}
-			}
-		}
-
 		$args = apply_filters(
 			'ss_settings_args',
 			array(
@@ -128,18 +115,46 @@ class Admin_Settings {
 				'version'        => SIMPLY_STATIC_VERSION,
 				'logo'           => SIMPLY_STATIC_URL . '/assets/simply-static-logo.svg',
 				'plan'           => 'free',
-				'is_network'     => is_network_admin(),
-				'is_multisite'   => is_multisite(),
 				'initial'        => $initial,
 				'home'           => home_url(),
 				'home_path'      => get_home_path(),
 				'admin_email'    => get_bloginfo( 'admin_email' ),
 				'temp_files_dir' => trailingslashit( $temp_dir ),
 				'blog_id'        => get_current_blog_id(),
-				'sites'          => $sites,
 				'need_upgrade'   => 'no',
 			)
 		);
+
+		// Multisite?
+		if ( is_multisite() && function_exists( 'get_sites' ) ) {
+			$sites            = [];
+			$selectable_sites = [];
+			$public_sites     = get_sites( [ 'public' => true ] );
+
+			if ( $public_sites ) {
+				foreach ( $public_sites as $site ) {
+					$sites[] = [
+						'blog_id'          => $site->blog_id,
+						'name'             => $site->blogname,
+						'url'              => $site->siteurl,
+						'settings_url'     => esc_url( get_admin_url( $site->blog_id ) . 'admin.php?page=simply-static-settings' ),
+						'activity_log_url' => esc_url( get_admin_url( $site->blog_id ) . 'admin.php?page=simply-static-generate' )
+					];
+
+					if ( $site->blog_id != get_current_blog_id() ) {
+						$selectable_sites[] = [
+							'blog_id' => $site->blog_id,
+							'name'    => $site->blogname,
+						];
+					}
+				}
+			}
+
+			$args['sites']            = $sites;
+			$args['selectable_sites'] = $selectable_sites;
+			$args['is_network']       = is_network_admin();
+			$args['is_multisite']     = is_multisite();
+		}
 
 		// Check if debug log exists.
 		$debug_file = Util::get_debug_log_filename();
@@ -198,6 +213,14 @@ class Admin_Settings {
 		register_rest_route( 'simplystatic/v1', '/settings/reset', array(
 			'methods'             => 'POST',
 			'callback'            => [ $this, 'reset_settings' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+			},
+		) );
+
+		register_rest_route( 'simplystatic/v1', '/update-from-network', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'update_from_network' ],
 			'permission_callback' => function () {
 				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
 			},
@@ -325,6 +348,15 @@ class Admin_Settings {
 				$options['http_basic_auth_digest'] = '';
 			}
 
+			// Maybe update network settings.
+			if ( is_multisite() ) {
+				$blog_id = get_current_blog_id();
+
+				if ( $blog_id > 1 ) {
+					update_site_option( 'simply-static-' . $blog_id, $options );
+				}
+			}
+
 			// Update settings.
 			update_option( 'simply-static', $options );
 
@@ -357,6 +389,41 @@ class Admin_Settings {
 			}
 
 			// Update settings.
+			update_option( 'simply-static', $options );
+
+			return json_encode( [ 'status' => 200, 'message' => "Ok" ] );
+		}
+
+		return json_encode( [ 'status' => 400, 'message' => "No options updated." ] );
+	}
+
+	/**
+	 * Save settings via rest API from another subsite in the network.
+	 *
+	 * @param object $request given request.
+	 *
+	 * @return false|string
+	 */
+	public function update_from_network( $request ) {
+		$params = $request->get_params();
+
+		if ( $request->get_params() ) {
+			$blog_id = intval( $params['blog_id'] );
+
+			// Get Settings from selected subsite.
+			$options = get_site_option( 'simply-static-' . $blog_id );
+
+			// Output notice if there are no network settings for the blog id.
+			if ( ! $options ) {
+				return json_encode(
+					[
+						'status'  => 400,
+						'message' => "Please save the settings on the selected subsite before importing them into a new site."
+					]
+				);
+			}
+
+			// Update current site settings.
 			update_option( 'simply-static', $options );
 
 			return json_encode( [ 'status' => 200, 'message' => "Ok" ] );
@@ -415,8 +482,9 @@ class Admin_Settings {
 	 *
 	 * @return false|string
 	 */
-	public function get_activity_log() {
-		$activity_log = Plugin::instance()->get_activity_log();
+	public function get_activity_log( $request ) {
+		$params       = $request->get_params();
+		$activity_log = Plugin::instance()->get_activity_log( $params['blog_id'] );
 
 		return json_encode( [
 			'status'  => 200,
@@ -431,9 +499,8 @@ class Admin_Settings {
 	 * @return false|string
 	 */
 	public function get_export_log( $request ) {
-		$params = $request->get_params();
-
-		$export_log = Plugin::instance()->get_export_log( $params['per_page'], $params['page'] );
+		$params     = $request->get_params();
+		$export_log = Plugin::instance()->get_export_log( $params['per_page'], $params['page'], $params['blog_id'] );
 
 		return json_encode( [
 			'status' => 200,

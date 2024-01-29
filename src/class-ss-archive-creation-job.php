@@ -71,10 +71,6 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 * @return boolean true if we were able to successfully start generating an archive
 	 */
 	public function start( $blog_id = 0 ) {
-		if ( ! $blog_id ) {
-			$blog_id = get_current_blog_id();
-		}
-
 		// Clear log before running the job.
 		Util::clear_debug_log();
 

@@ -3,9 +3,9 @@ import {
     CardBody,
     CardHeader,
     __experimentalSpacer as Spacer,
-    Flex, FlexItem, SelectControl,
+    Flex, FlexItem, SelectControl, Button,
 } from "@wordpress/components";
-import {useContext, useEffect, useState} from '@wordpress/element';
+import {useContext, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
 import ActivityLog from "../components/ActivityLog";
 import ExportLog from "../components/ExportLog";
@@ -14,13 +14,19 @@ import LogButtons from "../components/LogButtons";
 const {__} = wp.i18n;
 
 function Generate() {
-    const {settings, blogId, setBlogId, settingsType, setSettingsType} = useContext(SettingsContext);
+    const {settings, blogId, setBlogId} = useContext(SettingsContext);
+    const [selectedSiteUrl, setSelectedSiteURL] = useState('');
+    const [selectedSiteActivityUrl, setSelectedSiteActivityUrl] = useState('');
 
     return (<div className={"inner-settings settings-wide"}>
-        <ActivityLog />
-        <Spacer margin={5}/>
+        {!options.is_network &&
+            <>
+                <ActivityLog/>
+                <Spacer margin={5}/>
+            </>
+        }
         <Flex align={"top"}>
-            {'pro' === options.plan && options.is_network &&
+            {options.is_network &&
                 <FlexItem isBlock={true}>
                     <Card>
                         <CardHeader>
@@ -31,35 +37,39 @@ function Generate() {
                                 label={__('Choose a site to export', 'simply-static')}
                                 value={blogId}
                                 options={options.sites.map(function (site) {
-                                    return { label: `${site.name} (${site.url})`, value: site.blog_id}
+                                    return {label: `${site.name} (${site.url})`, value: site.blog_id}
                                 })}
                                 onChange={(blog_id) => {
                                     setBlogId(blog_id);
+
+                                    // Update admin edit URL:
+                                    options.sites.some(item => {
+                                        if (item.blog_id === blog_id) {
+                                            setSelectedSiteURL(item.settings_url);
+                                            setSelectedSiteActivityUrl(item.activity_log_url);
+                                        }
+                                    });
                                 }}
                             />
-                            <SelectControl
-                                label={__('Settings to Use:', 'simply-static')}
-                                value={settingsType}
-                                options={[
-                                    { label: __( 'Use Network\'s Settings', 'simply-static' ), value: 'network' },
-                                    { label: __( 'Use Site\'s Settings', 'simply-static' ), value: 'site' }
-                                ]}
-                                onChange={(type) => {
-                                    setSettingsType(type);
-                                }}
-                            />
+                            {selectedSiteUrl &&
+                                <p>
+                                    <Button isPrimary href={selectedSiteUrl}>Switch to Site settings</Button>
+                                    <Button style={{marginLeft: "5px"}} isSecondary href={selectedSiteActivityUrl}>Check
+                                        progress</Button>
+                                </p>
+                            }
                         </CardBody>
                     </Card>
                 </FlexItem>
             }
-            {settings.debugging_mode && options.log_file &&
+            {settings.debugging_mode && options.log_file && !options.is_network &&
                 <FlexItem isBlock={true}>
                     <Card>
                         <CardHeader>
                             <b>{__('Debugging', 'simply-static')}</b>
                         </CardHeader>
                         <CardBody>
-                            <LogButtons />
+                            <LogButtons/>
                         </CardBody>
                     </Card>
                 </FlexItem>
@@ -71,7 +81,7 @@ function Generate() {
                 <b>{__('Export Log', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
-                <ExportLog />
+                <ExportLog/>
             </CardBody>
         </Card>
     </div>)
