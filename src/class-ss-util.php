@@ -130,11 +130,16 @@ class Util {
 			$htaccess_file = get_home_path() . '.htaccess';
 
 			if ( file_exists( $htaccess_file ) && ! is_multisite() ) {
+				// Set up log file path.
+				$log_file = untrailingslashit( $simply_static_dir ) . DIRECTORY_SEPARATOR . $options['encryption_key'] . '-debug.txt';
+
 				// Write to .htaccess file.
 				$htaccess_inner_content = "\nrequire all denied\nrequire host localhost\n";
-				$htaccess_file_content  = '<Files "' . $simply_static_dir . DIRECTORY_SEPARATOR . $options['encryption_key'] . '-debug.txt">' . $htaccess_inner_content . '</Files>';
+				$htaccess_file_content  = '<Files "' . $log_file . '">' . $htaccess_inner_content . '</Files>';
 
-				insert_with_markers( $htaccess_file, 'Simply Static', $htaccess_file_content );
+				if ( file_exists( $log_file ) ) {
+					insert_with_markers( $htaccess_file, 'Simply Static', $htaccess_file_content );
+				}
 			}
 
 			return $simply_static_dir . $options['encryption_key'] . '-debug.txt';
