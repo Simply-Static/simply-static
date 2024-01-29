@@ -810,6 +810,7 @@ function SettingsContextProvider(props) {
     'wp_themes_folder': '',
     'theme_style_name': 'style',
     'rename_plugin_folders': false,
+    'hide_rest_api': false,
     'author_url': ''
   };
   const [isRunning, setIsRunning] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
@@ -2153,6 +2154,7 @@ function Optimize() {
   const [wpThemesFolder, setWpThemesFolder] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('wp-content/themes');
   const [themeStyleName, setThemeStyleName] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('style');
   const [authorUrl, setAuthorUrl] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('author');
+  const [hideRESTAPI, setHideRESTAPI] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
   const setSavingSettings = () => {
     saveSettings();
     setSettingsSaved(true);
@@ -2202,6 +2204,9 @@ function Optimize() {
     }
     if (settings.author_url) {
       setAuthorUrl(settings.author_url);
+    }
+    if (settings.hide_rest_api) {
+      setHideRESTAPI(settings.hide_rest_api);
     }
   }, [settings]);
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
@@ -2335,6 +2340,16 @@ function Optimize() {
     onChange: url => {
       setAuthorUrl(url);
       updateSetting('author_url', url);
+    }
+  }))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+    margin: 5
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Hide', 'simply-static'))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+    label: __('Hide REST API URLs', 'simply-static'),
+    help: hideRESTAPI ? __('Hide.', 'simply-static') : __('Show.', 'simply-static'),
+    checked: hideRESTAPI,
+    onChange: value => {
+      setHideRESTAPI(value);
+      updateSetting('hide_rest_api', value);
     }
   }))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
     margin: 5

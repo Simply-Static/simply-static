@@ -30,6 +30,7 @@ function Optimize() {
     const [wpThemesFolder, setWpThemesFolder] = useState('wp-content/themes');
     const [themeStyleName, setThemeStyleName] = useState('style');
     const [authorUrl, setAuthorUrl] = useState('author');
+    const [hideRESTAPI, setHideRESTAPI] = useState(false);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -95,6 +96,10 @@ function Optimize() {
 
         if (settings.author_url) {
             setAuthorUrl(settings.author_url);
+        }
+
+        if (settings.hide_rest_api) {
+            setHideRESTAPI(settings.hide_rest_api);
         }
 
     }, [settings]);
@@ -300,6 +305,29 @@ function Optimize() {
                     onChange={(url) => {
                         setAuthorUrl(url);
                         updateSetting('author_url', url);
+                    }}
+                />
+
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <b>{__('Hide', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
+
+                <ToggleControl
+                    label={__('Hide REST API URLs', 'simply-static')}
+                    help={
+                        hideRESTAPI
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={hideRESTAPI}
+                    onChange={(value) => {
+                        setHideRESTAPI(value);
+                        updateSetting('hide_rest_api', value);
                     }}
                 />
 

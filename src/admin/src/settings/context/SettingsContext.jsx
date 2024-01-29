@@ -93,6 +93,7 @@ function SettingsContextProvider(props) {
         'wp_themes_folder': '',
         'theme_style_name': 'style',
         'rename_plugin_folders': false,
+        'hide_rest_api': false,
         'author_url': '',
     }
     const [isRunning, setIsRunning] = useState(false);
