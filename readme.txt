@@ -231,6 +231,7 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 * improved sanitization for multiline fields
 * load textdomain in init hook instead of plugins_loaded
 * NPM packages updated to latest releases
+* new multisite integration
 
 = 3.1.4 =
 

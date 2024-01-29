@@ -101,6 +101,8 @@ class Transfer_Files_Locally_Task extends Task {
 
 			do_action( 'simply_static_page_file_transferred', $static_page, $destination_dir );
 
+			$this->transfer_404_page( $destination_dir );
+
 			$static_page->last_transferred_at = Util::formatted_datetime();
 			$static_page->save();
 		}
@@ -141,4 +143,40 @@ class Transfer_Files_Locally_Task extends Task {
 		return true;
 	}
 
+	/**
+	 * Transfer the 404 page if it exists.
+	 *
+	 * @param string $local_dir Path to local dir.
+	 *
+	 * @return void
+	 */
+	public function transfer_404_page( $local_dir ) {
+		$archive_dir  = $this->options->get_archive_dir();
+		$file_path    = untrailingslashit( $archive_dir ) . DIRECTORY_SEPARATOR . '404'  . DIRECTORY_SEPARATOR . 'index.html';
+
+		Util::debug_log( 'Transferring 404 Page');
+
+		if ( ! file_exists( $file_path ) ) {
+			Util::debug_log( 'No 404 Page found at ' . $file_path );
+			return;
+		}
+
+		$folder_404 = untrailingslashit( $local_dir ) . DIRECTORY_SEPARATOR . '404';
+
+		if ( ! is_dir( $folder_404 ) ) {
+			wp_mkdir_p( $folder_404 );
+		}
+
+		$destination_file = $folder_404  . DIRECTORY_SEPARATOR . 'index.html';
+
+		if ( file_exists( $destination_file ) ) {
+			return;
+		}
+
+		Util::debug_log( 'Destination 404 Page found at ' . $destination_file );
+
+		$copied = copy( $file_path, $destination_file );
+
+		Util::debug_log( 'Copy: ' . $copied ? 'Success' : 'No sucess' );
+	}
 }
