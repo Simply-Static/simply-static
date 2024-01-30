@@ -2,6 +2,8 @@
 
 namespace Simply_Static;
 
+use stdClass;
+
 class Compatibility {
 	/**
 	 * Slug for simply-static-compatible.
@@ -10,8 +12,16 @@ class Compatibility {
 	 */
 	const SS_COMPATIBLE = 'simply-static-compatible';
 
+
 	/**
-	 * List of AMP plugins.
+	 * Assets handle.
+	 *
+	 * @var string
+	 */
+	const ASSET_HANDLE = 'ss-plugin-install';
+
+	/**
+	 * List of Simply Static plugins.
 	 *
 	 * @var array
 	 */
@@ -43,7 +53,6 @@ class Compatibility {
 	 * @return void
 	 */
 	public function __construct() {
-		add_filter( 'install_plugins_tabs', [ $this, 'add_tab' ] );
 		add_filter( 'install_plugins_table_api_args_' . self::SS_COMPATIBLE, [
 			$this,
 			'filter_plugins_table_api_args'
@@ -56,9 +65,9 @@ class Compatibility {
 	}
 
 	/**
-	 * Get list of AMP plugins.
+	 * Get list of Simply Static plugins.
 	 *
-	 * @return array List of AMP plugins.
+	 * @return array List of Simply Static plugins.
 	 */
 	public function get_plugins() {
 
@@ -149,35 +158,40 @@ class Compatibility {
 			'plugin-install',
 			'plugin-install-network'
 		], true ) ) {
-			wp_enqueue_script( 'simply_static_plugins', SIMPLY_STATIC_URL . '/assets/simply-static-plugins.js', array(), '1.0', true );
 
-			wp_localize_script( 'simply_static_plugins', 'compatible_plugins', [
+			wp_enqueue_script(
+				self::ASSET_HANDLE,
+				SIMPLY_STATIC_URL . '/assets/install-plugins/build/index.js',
+				[],
+				SIMPLY_STATIC_VERSION,
+				true
+			);
+
+			wp_enqueue_style(
+				'ss-admin',
+				SIMPLY_STATIC_URL . '/assets/install-plugins/build/style-index.css',
+				[],
+				SIMPLY_STATIC_VERSION
+			);
+
+			$js_data = [
 				'SS_COMPATIBLE' => self::SS_COMPATIBLE,
-				'AMP_PLUGINS'   => wp_list_pluck( $this->get_plugins(), 'slug' ),
-				'icon'          => SIMPLY_STATIC_URL . '/assets/simply-static-icon.svg',
-			] );
+				'SS_PLUGINS'    => wp_list_pluck( $this->get_plugins(), 'slug' ),
+			];
+
+			wp_add_inline_script(
+				self::ASSET_HANDLE,
+				sprintf(
+					'var ssPlugins = %s;',
+					wp_json_encode( $js_data )
+				),
+				'before'
+			);
 		}
 	}
 
 	/**
-	 * Add extra tab in plugin install screen.
-	 *
-	 * @param array $tabs List of tab in plugin install screen.
-	 *
-	 * @return array List of tab in plugin install screen.
-	 */
-	public function add_tab( $tabs ) {
-
-		return array_merge(
-			$tabs,
-			[
-				self::SS_COMPATIBLE => esc_html__( 'Simply Static Compatible', 'simply-static' ),
-			]
-		);
-	}
-
-	/**
-	 * Modify args for the plugins_api query on the AMP-compatible tab in plugin install screen.
+	 * Modify args for the plugins_api query on the Simply Static-compatible tab in plugin install screen.
 	 *
 	 * @return array
 	 */
@@ -195,7 +209,6 @@ class Compatibility {
 			'page'              => $page,
 		];
 	}
-
 
 	/**
 	 * Update action links for plugin card in plugin install screen.
@@ -217,10 +230,10 @@ class Compatibility {
 					esc_url( $plugin['homepage'] ),
 					esc_attr(
 					/* translators: %s: Plugin name */
-						sprintf( __( 'Site link of %s', 'amp' ), $plugin['name'] )
+						sprintf( __( 'Site link of %s', 'simply-static' ), $plugin['name'] )
 					),
-					esc_html__( 'Visit site', 'amp' ),
-					esc_html__( '(opens in a new tab)', 'amp' ),
+					esc_html__( 'Visit site', 'simply-static' ),
+					esc_html__( '(opens in a new tab)', 'simply-static' ),
 					$external_icon
 				);
 			}
@@ -230,7 +243,7 @@ class Compatibility {
 	}
 
 	/**
-	 * Add plugin metadata for AMP compatibility in plugin listing page.
+	 * Add plugin metadata for Simply Static compatibility in plugin listing page.
 	 *
 	 * @param string[] $plugin_meta An array of the plugin's metadata, including
 	 *                              the version, author, author URI, and plugin URI.
@@ -241,10 +254,10 @@ class Compatibility {
 	 */
 	public function filter_plugin_row_meta( $plugin_meta, /** @noinspection PhpUnusedParameterInspection */ $plugin_file, $plugin_data ) {
 
-		$amp_plugins = wp_list_pluck( $this->get_plugins(), 'slug' );
+		$ss_plugins = wp_list_pluck( $this->get_plugins(), 'slug' );
 
-		if ( ! empty( $plugin_data['slug'] ) && in_array( $plugin_data['slug'], $amp_plugins, true ) ) {
-			$plugin_meta[] = esc_html__( 'Simply Static Compatible', 'amp' );
+		if ( ! empty( $plugin_data['slug'] ) && in_array( $plugin_data['slug'], $ss_plugins, true ) ) {
+			$plugin_meta[] = esc_html__( 'Simply Static Compatible', 'simply-static' );
 		}
 
 		return $plugin_meta;

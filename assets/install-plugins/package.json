@@ -1,0 +1,22 @@
+{
+  "name": "simplystatic-install-plugins",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "wp-scripts build",
+    "start": "wp-scripts start",
+    "packages-update": "wp-scripts packages-update"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "@wordpress/dom-ready": "^3.50.0",
+    "@wordpress/element": "^5.26.0",
+    "@wordpress/i18n": "^4.50.0",
+    "@wordpress/scripts": "^27.0.0"
+  },
+  "dependencies": {
+    "debounce": "^2.0.0"
+  }
+}

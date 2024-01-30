@@ -1,0 +1,81 @@
+.plugin-icon {
+  object-fit: contain; /* Account for non-square icons being used. */
+}
+
+.plugin-card {
+  position: relative;
+}
+
+.plugin-action-buttons .dashicons-external {
+  vertical-align: text-bottom;
+  margin-left: 5px;
+}
+
+.ss-extension-card-message {
+  text-align: center;
+  clear: both;
+  color: #3c434a;
+  position: absolute;
+  left: -13px;
+  top: -13px;
+  background: #6804cc;
+  padding: 5px;
+  box-sizing: border-box;
+  border: 1px solid #dcdcde;
+  border-radius: 50%;
+  height: 40px;
+  width: 40px;
+}
+
+.ss-logo-icon {
+  background-image: url("../../simply-static-icon.svg");
+  background-color: transparent;
+  background-size: 25px;
+  background-repeat: no-repeat;
+  height: 20px;
+  width: 25px;
+  display: inline-block;
+  vertical-align: middle;
+  cursor: pointer;
+  top: 6px;
+  position: relative;
+  right: 1px;
+}
+
+.ss-logo-icon.small {
+  background-size: 20px 20px;
+  height: 20px;
+  width: 20px;
+}
+
+.plugin-install-tab-ss-compatible .plugin-card-bottom {
+  display: none;
+}
+
+.ss-extension-card-message .tooltiptext {
+  visibility: hidden;
+  width: 60%;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  left: 40px;
+  min-width: 200px;
+}
+
+.tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  right: 100%;
+  border-width: 7px;
+  border-style: solid;
+  border-color: transparent rgba(0, 0, 0, 0.8) transparent transparent;
+}
+
+.ss-extension-card-message:hover .tooltiptext {
+  visibility: visible;
+}
