@@ -2,8 +2,6 @@
 
 namespace Simply_Static;
 
-use stdClass;
-
 class Compatibility {
 	/**
 	 * Slug for simply-static-compatible.
@@ -11,7 +9,6 @@ class Compatibility {
 	 * @var string
 	 */
 	const SS_COMPATIBLE = 'simply-static-compatible';
-
 
 	/**
 	 * Assets handle.
