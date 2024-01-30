@@ -109,7 +109,7 @@ class Plugin {
 			}
 
 			// Plugin compatibility.
-			Compatibility::get_instance();
+			Plugin_Compatibility::get_instance();
 
 			// Boot up admin.
 			Admin_Settings::get_instance();
@@ -164,7 +164,7 @@ class Plugin {
 		require_once $path . 'src/admin/inc/class-ss-admin-settings.php';
 		require_once $path . 'src/admin/inc/class-ss-migrate-settings.php';
 		require_once $path . 'src/class-ss-multisite.php';
-		require_once $path . 'src/class-ss-compatibility.php';
+		require_once $path . 'src/class-ss-plugin-compatibility.php';
 	}
 
 	/**

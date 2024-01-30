@@ -2,7 +2,7 @@
 
 namespace Simply_Static;
 
-class Compatibility {
+class Plugin_Compatibility {
 	/**
 	 * Slug for simply-static-compatible.
 	 *
@@ -73,7 +73,7 @@ class Compatibility {
 				static function ( $plugin ) {
 					return self::normalize_plugin_data( $plugin );
 				},
-				require SIMPLY_STATIC_PATH . 'src/plugins.php'
+				require SIMPLY_STATIC_PATH . 'src/compatible-plugins.php'
 			);
 
 			usort(
