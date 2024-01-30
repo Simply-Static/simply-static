@@ -1,5 +1,5 @@
 <?php
-return array(
+return apply_filters( 'ss_compatible_plugins', array(
 	array( 'slug' => 'wordpress-seo' ),
 	array( 'slug' => 'all-in-one-seo-pack' ),
 	array( 'slug' => 'seo-by-rank-math' ),
@@ -28,5 +28,5 @@ return array(
 	array( 'slug' => 'shortpixel-image-optimiser' ),
 	array( 'slug' => 'webp-express' ),
 	array( 'slug' => 'wp-optimize' ),
-);
+) );
 
