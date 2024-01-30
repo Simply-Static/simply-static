@@ -16,28 +16,12 @@ const ssPluginInstall = {
      * Init function.
      */
     init() {
-        if (this.isSSCompatibleTab()) {
-            this.removeAdditionalInfo();
-        } else {
-            this.addSSMessage();
-        }
+        this.addSSMessage();
         this.addSSMessageInSearchResult();
     },
 
     /**
-     * Check if "Simply Static Compatible" tab is open or not.
-     *
-     * @return {boolean} Is Simply Static-compatible tab.
-     */
-    isSSCompatibleTab() {
-        const queryParams = new URLSearchParams(
-            window.location.search.substr(1)
-        );
-        return queryParams.get('tab') === ssPlugins.SS_COMPATIBLE;
-    },
-
-    /**
-     * Add message for AMP Compatibility in SS-compatible plugins card after search result comes in.
+     * Add message for SS Compatibility in SS-compatible plugins card after search result comes in.
      */
     addSSMessageInSearchResult() {
         const pluginFilterForm = document.getElementById('plugin-filter');
@@ -54,15 +38,6 @@ const ssPluginInstall = {
                 startSearchResults,
                 {once: true}
             ); // For IE 11 which doesn't support once events.
-
-            // Replace the class for our custom SS-compatible tab once doing a search.
-            const wrap = document.querySelector(
-                '.plugin-install-tab-ss-compatible'
-            );
-            if (wrap) {
-                wrap.classList.remove('plugin-install-tab-simply-static-compatible');
-                wrap.classList.add('plugin-install-tab-search-result');
-            }
 
             // Start watching for changes the first time a search is being made.
             const mutationObserver = new MutationObserver(() => {
@@ -114,18 +89,6 @@ const ssPluginInstall = {
             messageElement.append(tooltipElement);
 
             pluginCardElement.appendChild(messageElement);
-        }
-    },
-
-    /**
-     * Remove the additional info from the plugin card in the "AMP Compatible" tab.
-     */
-    removeAdditionalInfo() {
-        const pluginCardBottom = document.querySelectorAll(
-            '.plugin-install-tab-ss-compatible .plugin-card-bottom'
-        );
-        for (const elementNode of pluginCardBottom) {
-            elementNode.remove();
         }
     },
 };
