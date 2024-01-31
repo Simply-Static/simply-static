@@ -151,6 +151,8 @@ class Url_Extractor {
 	 * @return int|false
 	 */
 	public function save_body( $content ) {
+		$content = apply_filters( 'simply_static_content_before_save', $content, $this );
+
 		return file_put_contents( $this->options->get_archive_dir() . $this->static_page->file_path, $content );
 	}
 

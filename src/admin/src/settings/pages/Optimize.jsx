@@ -31,6 +31,20 @@ function Optimize() {
     const [themeStyleName, setThemeStyleName] = useState('style');
     const [authorUrl, setAuthorUrl] = useState('author');
     const [hideRESTAPI, setHideRESTAPI] = useState(false);
+    const [hideStyleId, setHideStyleId] = useState(false);
+    const [hideComments, setHideComments] = useState(false);
+    const [hideVersion, setHideVersion] = useState(false);
+    const [hidePrefetch, setHidePrefetch] = useState(false);
+    const [hideGenerator, setHideGenerator] = useState(false);
+    const [hideRSD, setHideRSD] = useState(false);
+    const [hideEmojis, setHideEmojis] = useState(false);
+
+    const [disableXMLRPC, setDisableXMLRPC] = useState(false);
+    const [disableEmbed, setDisableEmbed] = useState(false);
+    const [disableDbDebug, setDisableDbDebug] = useState(false);
+    const [disableWLW, setDisableWLW] = useState(false);
+    const [disableDirectory, setDisableDirectory] = useState(false);
+
 
     const setSavingSettings = () => {
         saveSettings();
@@ -100,6 +114,54 @@ function Optimize() {
 
         if (settings.hide_rest_api) {
             setHideRESTAPI(settings.hide_rest_api);
+        }
+
+        if (settings.hide_style_id) {
+            setHideStyleId(settings.hide_style_id);
+        }
+
+        if (settings.hide_comments) {
+            setHideComments(settings.hide_comments);
+        }
+
+        if (settings.hide_version) {
+            setHideVersion(settings.hide_version);
+        }
+
+        if (settings.hide_generator) {
+            setHideGenerator(settings.hide_generator);
+        }
+
+        if (settings.hide_prefetch) {
+            setHidePrefetch(settings.hide_prefetch);
+        }
+
+        if (settings.hide_rsd) {
+            setHideRSD(settings.hide_rsd);
+        }
+
+        if (settings.hide_emotes) {
+            setHideEmojis(settings.hide_emotes)
+        }
+
+        if (settings.disable_xmlrpc) {
+            setDisableXMLRPC(settings.disable_xmlrpc)
+        }
+
+        if (settings.disable_embed) {
+            setDisableEmbed(settings.disable_embed)
+        }
+
+        if (settings.disable_db_debug) {
+            setDisableDbDebug(settings.disable_db_debug)
+        }
+
+        if (settings.disable_wlw_manifest) {
+            setDisableWLW(settings.disable_wlw_manifest)
+        }
+
+        if (settings.disable_directory_browsing) {
+            setDisableDirectory(settings.disable_directory_browsing)
         }
 
     }, [settings]);
@@ -331,9 +393,175 @@ function Optimize() {
                     }}
                 />
 
+                <ToggleControl
+                    label={__('Hide Style/Script IDs', 'simply-static')}
+                    help={
+                        hideStyleId
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={hideStyleId}
+                    onChange={(value) => {
+                        setHideStyleId(value);
+                        updateSetting('hide_style_id', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Hide HTML Comments', 'simply-static')}
+                    help={
+                        hideComments
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={hideComments}
+                    onChange={(value) => {
+                        setHideComments(value);
+                        updateSetting('hide_comments', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Hide WordPress Version', 'simply-static')}
+                    help={
+                        hideVersion
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={hideVersion}
+                    onChange={(value) => {
+                        setHideVersion(value);
+                        updateSetting('hide_version', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Hide WordPress Generator Meta', 'simply-static')}
+                    help={
+                        hideGenerator
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={hideGenerator}
+                    onChange={(value) => {
+                        setHideGenerator(value);
+                        updateSetting('hide_generator', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Hide DNS Prefetch WordPress link', 'simply-static')}
+                    help={
+                        hidePrefetch
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={hidePrefetch}
+                    onChange={(value) => {
+                        setHidePrefetch(value);
+                        updateSetting('hide_prefetch', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Hide RSD Header', 'simply-static')}
+                    help={
+                        hideRSD
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={hideRSD}
+                    onChange={(value) => {
+                        setHideRSD(value);
+                        updateSetting('hide_rsd', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Hide Emojis if you don\'t use them', 'simply-static')}
+                    help={
+                        hideEmojis
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={hideEmojis}
+                    onChange={(value) => {
+                        setHideEmojis(value);
+                        updateSetting('hide_emotes', value);
+                    }}
+                />
+
             </CardBody>
         </Card>
         <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <b>{__('Disable', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
+
+                <ToggleControl
+                    label={__('Disable XML-RPC', 'simply-static')}
+                    help={
+                        disableXMLRPC
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={disableXMLRPC}
+                    onChange={(value) => {
+                        setDisableXMLRPC(value);
+                        updateSetting('disable_xmlrpc', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Disable Embed Scripts', 'simply-static')}
+                    help={
+                        disableEmbed
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={disableEmbed}
+                    onChange={(value) => {
+                        setDisableEmbed(value);
+                        updateSetting('disable_embed', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Disable DB Debug in Frontend', 'simply-static')}
+                    help={
+                        disableDbDebug
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={disableDbDebug}
+                    onChange={(value) => {
+                        setDisableDbDebug(value);
+                        updateSetting('disable_db_debug', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Disable WLW Manifest Scripts', 'simply-static')}
+                    help={
+                        disableWLW
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={disableWLW}
+                    onChange={(value) => {
+                        setDisableWLW(value);
+                        updateSetting('disable_wlw_manifest', value);
+                    }}
+                />
+
+
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+
+
         {settingsSaved &&
             <>
                 <Animate type="slide-in" options={{origin: 'top'}}>

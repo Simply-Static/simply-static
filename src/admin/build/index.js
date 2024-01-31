@@ -810,8 +810,19 @@ function SettingsContextProvider(props) {
     'wp_themes_folder': '',
     'theme_style_name': 'style',
     'rename_plugin_folders': false,
+    'author_url': '',
     'hide_rest_api': false,
-    'author_url': ''
+    'hide_style_id': false,
+    'hide_comments': false,
+    'hide_version': false,
+    'hide_generator': false,
+    'hide_prefetch': false,
+    'hide_rsd': false,
+    'hide_emotes': false,
+    'disable_xmlrpc': false,
+    'disable_embed': false,
+    'disable_db_debug': false,
+    'disable_wlw_manifest': false
   };
   const [isRunning, setIsRunning] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
   const [settingsSaved, setSettingsSaved] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
@@ -2155,6 +2166,18 @@ function Optimize() {
   const [themeStyleName, setThemeStyleName] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('style');
   const [authorUrl, setAuthorUrl] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)('author');
   const [hideRESTAPI, setHideRESTAPI] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [hideStyleId, setHideStyleId] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [hideComments, setHideComments] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [hideVersion, setHideVersion] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [hidePrefetch, setHidePrefetch] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [hideGenerator, setHideGenerator] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [hideRSD, setHideRSD] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [hideEmojis, setHideEmojis] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [disableXMLRPC, setDisableXMLRPC] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [disableEmbed, setDisableEmbed] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [disableDbDebug, setDisableDbDebug] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [disableWLW, setDisableWLW] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [disableDirectory, setDisableDirectory] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
   const setSavingSettings = () => {
     saveSettings();
     setSettingsSaved(true);
@@ -2207,6 +2230,42 @@ function Optimize() {
     }
     if (settings.hide_rest_api) {
       setHideRESTAPI(settings.hide_rest_api);
+    }
+    if (settings.hide_style_id) {
+      setHideStyleId(settings.hide_style_id);
+    }
+    if (settings.hide_comments) {
+      setHideComments(settings.hide_comments);
+    }
+    if (settings.hide_version) {
+      setHideVersion(settings.hide_version);
+    }
+    if (settings.hide_generator) {
+      setHideGenerator(settings.hide_generator);
+    }
+    if (settings.hide_prefetch) {
+      setHidePrefetch(settings.hide_prefetch);
+    }
+    if (settings.hide_rsd) {
+      setHideRSD(settings.hide_rsd);
+    }
+    if (settings.hide_emotes) {
+      setHideEmojis(settings.hide_emotes);
+    }
+    if (settings.disable_xmlrpc) {
+      setDisableXMLRPC(settings.disable_xmlrpc);
+    }
+    if (settings.disable_embed) {
+      setDisableEmbed(settings.disable_embed);
+    }
+    if (settings.disable_db_debug) {
+      setDisableDbDebug(settings.disable_db_debug);
+    }
+    if (settings.disable_wlw_manifest) {
+      setDisableWLW(settings.disable_wlw_manifest);
+    }
+    if (settings.disable_directory_browsing) {
+      setDisableDirectory(settings.disable_directory_browsing);
     }
   }, [settings]);
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
@@ -2350,6 +2409,96 @@ function Optimize() {
     onChange: value => {
       setHideRESTAPI(value);
       updateSetting('hide_rest_api', value);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+    label: __('Hide Style/Script IDs', 'simply-static'),
+    help: hideStyleId ? __('Hide.', 'simply-static') : __('Show.', 'simply-static'),
+    checked: hideStyleId,
+    onChange: value => {
+      setHideStyleId(value);
+      updateSetting('hide_style_id', value);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+    label: __('Hide HTML Comments', 'simply-static'),
+    help: hideComments ? __('Hide.', 'simply-static') : __('Show.', 'simply-static'),
+    checked: hideComments,
+    onChange: value => {
+      setHideComments(value);
+      updateSetting('hide_comments', value);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+    label: __('Hide WordPress Version', 'simply-static'),
+    help: hideVersion ? __('Hide.', 'simply-static') : __('Show.', 'simply-static'),
+    checked: hideVersion,
+    onChange: value => {
+      setHideVersion(value);
+      updateSetting('hide_version', value);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+    label: __('Hide WordPress Generator Meta', 'simply-static'),
+    help: hideGenerator ? __('Hide.', 'simply-static') : __('Show.', 'simply-static'),
+    checked: hideGenerator,
+    onChange: value => {
+      setHideGenerator(value);
+      updateSetting('hide_generator', value);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+    label: __('Hide DNS Prefetch WordPress link', 'simply-static'),
+    help: hidePrefetch ? __('Hide.', 'simply-static') : __('Show.', 'simply-static'),
+    checked: hidePrefetch,
+    onChange: value => {
+      setHidePrefetch(value);
+      updateSetting('hide_prefetch', value);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+    label: __('Hide RSD Header', 'simply-static'),
+    help: hideRSD ? __('Hide.', 'simply-static') : __('Show.', 'simply-static'),
+    checked: hideRSD,
+    onChange: value => {
+      setHideRSD(value);
+      updateSetting('hide_rsd', value);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+    label: __('Hide Emojis if you don\'t use them', 'simply-static'),
+    help: hideEmojis ? __('Hide.', 'simply-static') : __('Show.', 'simply-static'),
+    checked: hideEmojis,
+    onChange: value => {
+      setHideEmojis(value);
+      updateSetting('hide_emotes', value);
+    }
+  }))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+    margin: 5
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Disable', 'simply-static'))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+    label: __('Disable XML-RPC', 'simply-static'),
+    help: disableXMLRPC ? __('Hide.', 'simply-static') : __('Show.', 'simply-static'),
+    checked: disableXMLRPC,
+    onChange: value => {
+      setDisableXMLRPC(value);
+      updateSetting('disable_xmlrpc', value);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+    label: __('Disable Embed Scripts', 'simply-static'),
+    help: disableEmbed ? __('Hide.', 'simply-static') : __('Show.', 'simply-static'),
+    checked: disableEmbed,
+    onChange: value => {
+      setDisableEmbed(value);
+      updateSetting('disable_embed', value);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+    label: __('Disable DB Debug in Frontend', 'simply-static'),
+    help: disableDbDebug ? __('Hide.', 'simply-static') : __('Show.', 'simply-static'),
+    checked: disableDbDebug,
+    onChange: value => {
+      setDisableDbDebug(value);
+      updateSetting('disable_db_debug', value);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+    label: __('Disable WLW Manifest Scripts', 'simply-static'),
+    help: disableWLW ? __('Hide.', 'simply-static') : __('Show.', 'simply-static'),
+    checked: disableWLW,
+    onChange: value => {
+      setDisableWLW(value);
+      updateSetting('disable_wlw_manifest', value);
     }
   }))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
     margin: 5
