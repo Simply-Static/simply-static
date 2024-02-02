@@ -88,8 +88,6 @@ class Plugin {
 
 			// Maybe clear local directory.
 			add_action( 'ss_after_setup_task', array( self::$instance, 'maybe_clear_directory' ) );
-			// Move 404 to local directory
-			add_action( 'ss_finished_transferring_files_locally', array( self::$instance, 'transfer_404_page' ) );
 
 			self::$instance->integrations = new Integrations();
 			self::$instance->integrations->load();
@@ -104,6 +102,14 @@ class Plugin {
 
 			// Maybe run upgrade.
 			Upgrade_Handler::run();
+
+			// Multisite.
+			if ( is_multisite() ) {
+				Multisite::get_instance();
+			}
+
+			// Plugin compatibility.
+			Plugin_Compatibility::get_instance();
 
 			// Boot up admin.
 			Admin_Settings::get_instance();
@@ -157,6 +163,8 @@ class Plugin {
 		require_once $path . 'src/class-integrations.php';
 		require_once $path . 'src/admin/inc/class-ss-admin-settings.php';
 		require_once $path . 'src/admin/inc/class-ss-migrate-settings.php';
+		require_once $path . 'src/class-ss-multisite.php';
+		require_once $path . 'src/class-ss-plugin-compatibility.php';
 	}
 
 	/**
@@ -180,6 +188,7 @@ class Plugin {
 			$blog_id = get_current_blog_id();
 		}
 		do_action( 'ss_before_static_export', $blog_id );
+
 		$this->archive_creation_job->start( $blog_id );
 	}
 
@@ -373,45 +382,5 @@ class Plugin {
 				Transfer_Files_Locally_Task::delete_local_directory_static_files( $local_dir, $this->options );
 			}
 		}
-	}
-
-	/**
-	 * Transfer the 404 page if it exists.
-	 *
-	 * @param string $local_dir Path to local dir.
-	 *
-	 * @return void
-	 */
-	public function transfer_404_page( $local_dir ) {
-		$archive_dir  = $this->options->get_archive_dir();
-		$file_path    = untrailingslashit( $archive_dir ) . DIRECTORY_SEPARATOR . '404'  . DIRECTORY_SEPARATOR . 'index.html';
-
-		Util::debug_log( 'Transferring 404 Page');
-
-		if ( ! file_exists( $file_path ) ) {
-			 Util::debug_log( 'No 404 Page found at ' . $file_path );
-			 return;
-		}
-
-		$folder_404 = untrailingslashit( $local_dir ) . DIRECTORY_SEPARATOR . '404';
-
-		if ( ! is_dir( $folder_404 ) ) {
-			wp_mkdir_p( $folder_404 );
-		}
-
-		$destination_file = $folder_404  . DIRECTORY_SEPARATOR . 'index.html';
-
-		if ( file_exists( $destination_file ) ) {
-			return;
-		}
-
-		Util::debug_log( 'Destination 404 Page found at ' . $destination_file );
-
-		$copied = copy( $file_path, $destination_file );
-
-		Util::debug_log( 'Copy: ' . $copied ? 'Success' : 'No sucess' );
-
-
-
 	}
 }

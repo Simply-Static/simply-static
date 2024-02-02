@@ -18,6 +18,7 @@ const {__} = wp.i18n;
 function DeploymentSettings() {
     const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
     const [deliveryMethod, setDeliveryMethod] = useState('zip');
+    const [clearDirectory, setClearDirectory] = useState(false);
     const [githubAccountType, setGithubAccountType] = useState('personal');
     const [githubVisibility, setGithubVisibility] = useState('private');
     const [emptyBucketBeforeExport, setEmptyBucketBeforeExport] = useState(false);
@@ -39,6 +40,10 @@ function DeploymentSettings() {
     useEffect(() => {
         if (settings.delivery_method) {
             setDeliveryMethod(settings.delivery_method);
+        }
+
+        if (settings.clear_directory_before_export) {
+            setClearDirectory(settings.clear_directory_before_export);
         }
 
         if (settings.ssh_use_forms) {
@@ -125,25 +130,41 @@ function DeploymentSettings() {
                     <b>{__('Local Directory', 'simply-static')}</b>
                 </CardHeader>
                 <CardBody>
-                    <p>{__('This is the directory where your static files will be saved. The directory must exist and be writeable by the webserver', 'simply-static')}</p>
-
                     <TextControl
                         label={__('Path', 'simply-static')}
                         type={"text"}
+                        help={__('This is the directory where your static files will be saved. The directory must exist and be writeable by the webserver', 'simply-static')}
                         placeholder={options.home_path + "public_static/"}
                         value={settings.local_dir}
                         onChange={(path) => {
                             updateSetting('local_dir', path);
                         }}
                     />
-                    <ClipboardButton
-                        variant="secondary"
-                        text={options.home_path}
-                        onCopy={() => setHasCopied(true)}
-                        onFinishCopy={() => setHasCopied(false)}
-                    >
-                        {hasCopied ? __('Copied home path', 'simply-static') : __('Copy home path', 'simply-static')}
-                    </ClipboardButton>
+                    <p>
+                        <ClipboardButton
+                            variant="secondary"
+                            text={options.home_path}
+                            onCopy={() => setHasCopied(true)}
+                            onFinishCopy={() => setHasCopied(false)}
+                        >
+                            {hasCopied ? __('Copied home path', 'simply-static') : __('Copy home path', 'simply-static')}
+                        </ClipboardButton>
+                    </p>
+                    <p>
+                        <ToggleControl
+                            label={__('Clear Local Directory', 'simply-static')}
+                            help={
+                                clearDirectory
+                                    ? __('Clear local directory before running an export.', 'simply-static')
+                                    : __('Don\'t clear local directory before running an export.', 'simply-static')
+                            }
+                            checked={clearDirectory}
+                            onChange={(value) => {
+                                setClearDirectory(value);
+                                updateSetting('clear_directory_before_export', value);
+                            }}
+                        />
+                    </p>
                 </CardBody>
             </Card>
         }
@@ -163,7 +184,7 @@ function DeploymentSettings() {
                             updateSetting('ssh_security_token', token);
                         }}
                     />
-                    {settings.ssh_security_token ?
+                    {settings.ssh_security_token &&
                         <>
                             <SelectControl
                                 label={__('Select a 404 page', 'content-protector')}
@@ -199,8 +220,6 @@ function DeploymentSettings() {
                                 />
                             }
                         </>
-                        :
-                        <a target="_blank" href={"https://simplycdn.io/#pricing"}>{__('Start your 7-day free trial', 'simply-static')}</a>
                     }
                 </CardBody>
             </Card>

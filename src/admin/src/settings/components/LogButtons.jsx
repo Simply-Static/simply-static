@@ -30,7 +30,7 @@ function LogButtons() {
             {() => (
                 <Notice status="success" isDismissible={false}>
                     <p>
-                        {__('Log file successfully deleted.', 'simply-static')}
+                        {__('Log file cleared.', 'simply-static')}
                     </p>
                 </Notice>
             )}

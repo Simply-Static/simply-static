@@ -251,12 +251,12 @@ class Url_Fetcher {
 		Util::debug_log( "Fetching URL: " . $url );
 
 		$args = array(
-			'timeout'     => self::TIMEOUT,
-			'sslverify'   => false,
-			'redirection' => 0, // disable redirection.
-			'blocking'    => true // do not execute code until this call is complete.
+			'timeout'             => self::TIMEOUT,
+			'sslverify'           => false,
+			'redirection'         => 0, // disable redirection.
+			'blocking'            => false, // don't wait for the request to complete.
+			'limit_response_size' => 2097152, // 2 MB
 		);
-
 
 		if ( $filename ) {
 			$args['stream']   = true; // stream body content to a file.

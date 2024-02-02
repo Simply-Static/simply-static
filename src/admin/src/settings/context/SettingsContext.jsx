@@ -22,8 +22,8 @@ function SettingsContextProvider(props) {
         'debugging_mode': true,
         'http_basic_auth_username': '',
         'http_basic_auth_password': '',
+        'origin_url': '',
         'version': options.version,
-        'allow_subsites': false,
         'force_replace_url': false,
         'clear_directory_before_export': false,
         'ssh_security_token': '',
@@ -112,7 +112,6 @@ function SettingsContextProvider(props) {
     const [settings, setSettings] = useState(defaultSettings);
     const [configs, setConfigs] = useState({});
     const [blogId, setBlogId] = useState(1);
-    const [settingsType, setSettingsType] = useState('site');
 
     const getSettings = () => {
         apiFetch({path: '/simplystatic/v1/settings'}).then((options) => {
@@ -135,6 +134,16 @@ function SettingsContextProvider(props) {
             path: '/simplystatic/v1/settings/reset',
             method: 'POST',
             data: defaultSettings,
+        });
+    }
+
+    const updateFromNetwork = ( blogId ) => {
+        apiFetch({
+            path: '/simplystatic/v1/update-from-network',
+            method: 'POST',
+            data: {
+                'blog_id': blogId,
+            }
         });
     }
 
@@ -198,14 +207,13 @@ function SettingsContextProvider(props) {
                 setSettings,
                 saveSettings,
                 resetSettings,
+                updateFromNetwork,
                 importSettings,
                 migrateSettings,
                 isRunning,
                 setIsRunning,
                 blogId,
                 setBlogId,
-                settingsType,
-                setSettingsType
             }}
         >
             {props.children}

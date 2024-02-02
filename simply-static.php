@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Plugin Name:       Simply Static
  * Plugin URI:        https://patrickposner.dev
  * Description:       A static site generator to create fast and secure static versions of your WordPress website.
- * Version:           3.1.3
+ * Version:           3.1.5
  * Author:            Patrick Posner
  * Author URI:        https://patrickposner.dev
  * License:           GPL-2.0+
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'SIMPLY_STATIC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SIMPLY_STATIC_URL', untrailingslashit( plugin_dir_url( __FILE__ ) ) );
-define( 'SIMPLY_STATIC_VERSION', '3.1.3' );
+define( 'SIMPLY_STATIC_VERSION', '3.1.5' );
 
 // Check PHP version.
 if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
@@ -27,9 +27,13 @@ if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
 	wp_die( esc_html__( 'Simply Static requires PHP 7.4 or higher.', 'simply-static' ), 'Plugin dependency check', array( 'back_link' => true ) );
 }
 
-// Localize.
-$textdomain_dir = plugin_basename( dirname( __FILE__ ) ) . '/languages';
-load_plugin_textdomain( 'simply-static', false, $textdomain_dir );
+// localize.
+add_action( 'init', 'simply_static_load_textdomain' );
+
+function simply_static_load_textdomain() {
+	$textdomain_dir = plugin_basename( dirname( __FILE__ ) ) . '/languages';
+	load_plugin_textdomain( 'simply-static', false, $textdomain_dir );
+}
 
 // Run autoloader.
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) && ! class_exists( 'Simply_Static\Plugin' ) ) {
@@ -61,6 +65,12 @@ if ( ! function_exists( 'simply_static_run_plugin' ) ) {
 			}
 
 			$options['urls_to_exclude'] = implode( "\n", $urls_to_exclude );
+			update_option( 'simply-static', $options );
+		}
+
+		// Generate a secure unique key.
+		if ( ! isset( $options['encryption_key'] ) ) {
+			$options['encryption_key'] = bin2hex( random_bytes( 16 ) );
 			update_option( 'simply-static', $options );
 		}
 

@@ -15,11 +15,7 @@ const {__} = wp.i18n;
 
 function MiscSettings() {
     const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
-    const [showSubsiteSettings, setShowSubsiteSettings] = useState(false);
-    const [forceURLReplacement, setForceURLReplacement] = useState(false);
-    const [clearDirectory, setClearDirectory] = useState(false);
     const [debuggingMode, setDebuggingMode] = useState(false);
-
 
     const setSavingSettings = () => {
         saveSettings();
@@ -31,18 +27,6 @@ function MiscSettings() {
     }
 
     useEffect(() => {
-        if (settings.allow_subsites) {
-            setShowSubsiteSettings(settings.allow_subsites);
-        }
-
-        if (settings.force_replace_url) {
-            setForceURLReplacement(settings.force_replace_url);
-        }
-
-        if (settings.clear_directory_before_export) {
-            setClearDirectory(settings.clear_directory_before_export);
-        }
-
         if (settings.debugging_mode) {
             setDebuggingMode(settings.debugging_mode);
         }
@@ -97,67 +81,12 @@ function MiscSettings() {
 
             </CardBody>
         </Card>
-        {'pro' === options.plan && options.is_multisite &&
-            <>
-                <Spacer margin={5}/>
-                <Card>
-                    <CardHeader>
-                        <b>{__('Multisite', 'simply-static')}</b>
-                    </CardHeader>
-                    <CardBody>
-                        <p>{__('Here you can configure settings related to WordPress Multisite.', 'simply-static')}</p>
-                        <ToggleControl
-                            label={__('Show subsite settings', 'simply-static')}
-                            help={
-                                showSubsiteSettings
-                                    ? 'Show admin settings in subsites.'
-                                    : 'Hide admin settings in subsites.'
-                            }
-                            checked={showSubsiteSettings}
-                            onChange={(value) => {
-                                setShowSubsiteSettings(value);
-                                updateSetting('allow_subsites', value);
-                            }}
-                        />
-                    </CardBody>
-                </Card>
-            </>
-        }
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('Additional Settings', 'simply-static')}</b>
+                <b>{__('Debugging', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
-                <p>{__('Here you can configure some additional settings like clearing the local directory before running an export or activating force replacement for all URLs.', 'simply-static')}</p>
-                <ToggleControl
-                    label={__('Force URL replacements', 'simply-static')}
-                    help={
-                        forceURLReplacement
-                            ? __('Replace all occurrences of the WordPress URL with the static URL.', 'simply-static')
-                            : __('Replace only occurrences of the WordPress URL that match the tags', 'simply-static')
-                    }
-                    checked={forceURLReplacement}
-                    onChange={(value) => {
-                        setForceURLReplacement(value);
-                        updateSetting('force_replace_url', value);
-                    }}
-                />
-
-                <ToggleControl
-                    label={__('Clear Directory', 'simply-static')}
-                    help={
-                        clearDirectory
-                            ? __('Clear local directory before running an export.', 'simply-static')
-                            : __('Don\'t clear local directory before running an export.', 'simply-static')
-                    }
-                    checked={clearDirectory}
-                    onChange={(value) => {
-                        setClearDirectory(value);
-                        updateSetting('clear_directory_before_export', value);
-                    }}
-                />
-
                 <ToggleControl
                     label={__('Debugging Mode', 'simply-static')}
                     help={
@@ -171,7 +100,17 @@ function MiscSettings() {
                         updateSetting('debugging_mode', value);
                     }}
                 />
-
+                <TextControl
+                    label={__('Origin URL', 'simply-static')}
+                    type={"url"}
+                    help={__('If the URL of your WordPress installation differs from the public-facing URL (Proxy Setup), add the public URL here.', 'simply-static')}
+                    placeholder={options.home}
+                    autoComplete={"off"}
+                    value={settings.origin_url}
+                    onChange={(origin_url) => {
+                        updateSetting('origin_url', origin_url);
+                    }}
+                />
             </CardBody>
         </Card>
         <Spacer margin={5}/>

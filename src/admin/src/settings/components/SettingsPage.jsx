@@ -17,7 +17,7 @@ import {
     CardBody,
     Spinner,
     Notice,
-    Animate
+    Animate, __experimentalSpacer as Spacer, SelectControl
 } from '@wordpress/components';
 import DeploymentSettings from "../pages/DeploymentSettings";
 import FormSettings from "../pages/FormSettings";
@@ -31,11 +31,27 @@ import apiFetch from "@wordpress/api-fetch";
 const {__} = wp.i18n;
 
 function SettingsPage() {
-    const {isRunning, setIsRunning, blogId, settingsType, migrateSettings, saveSettings} = useContext(SettingsContext);
+    const {isRunning, setIsRunning, blogId, migrateSettings, saveSettings, updateFromNetwork} = useContext(SettingsContext);
     const [activeItem, setActiveItem] = useState({activeItem: "/"});
     const [initialPage, setInitialPage] = useState(options.initial);
     const [initialSet, setInitialSet] = useState(false);
     const [disabledButton, setDisabledButton] = useState(false);
+    const [selectedCopySite, setSelectedCopySite] = useState('current');
+    const [selectablesSites, setSelectableSites] = useState([]);
+    const [isUpdatingFromNetwork, setIsUpdatingFromNetwork] = useState(false);
+
+
+    const runUpdateFromNetwork = (blogId) => {
+        // Update settings from selected blog_id.
+        updateFromNetwork(blogId);
+
+        setIsUpdatingFromNetwork(true);
+
+        setTimeout(function () {
+            setIsUpdatingFromNetwork(false);
+            window.location.reload();
+        }, 2000);
+    }
 
     useEffect(() => {
         if (!initialSet) {
@@ -43,7 +59,16 @@ function SettingsPage() {
             setActiveItem(options.initial);
             setInitialPage(options.initial);
         }
-    });
+
+        if (options.selectable_sites && !options.is_network && options.is_multisite) {
+            let sites = options.selectable_sites.map(function (site) {
+                return {label: `${site.name}`, value: site.blog_id}
+            });
+
+            sites.unshift({label: __('Use current settings', 'simply-static'), value: 'current'});
+            setSelectableSites(sites);
+        }
+    }, [options]);
 
     const startExport = () => {
         setDisabledButton(true);
@@ -53,8 +78,6 @@ function SettingsPage() {
             method: 'POST',
             data: {
                 'blog_id': blogId,
-                'is_network_admin': options.is_network,
-                'settings_type': settingsType
             }
         }).then(resp => {
             setIsRunning(true);
@@ -67,8 +90,6 @@ function SettingsPage() {
             method: 'POST',
             data: {
                 'blog_id': blogId,
-                'is_network_admin': options.is_network,
-                'settings_type': settingsType
             }
         }).then(resp => {
             setIsRunning(false);
@@ -87,7 +108,7 @@ function SettingsPage() {
 
     return (
         <div className={"plugin-settings-container"}>
-            { 'yes' === options.need_upgrade ?
+            {'yes' === options.need_upgrade ?
                 <Animate type="slide-in" options={{origin: 'top'}}>
                     {() => (
                         <Notice status="warning" isDismissible={false} className={"migrate-notice"}>
@@ -105,99 +126,37 @@ function SettingsPage() {
             <NavigatorProvider initialPath={initialPage}>
                 <Flex>
                     <FlexItem>
-                        <Card className={"plugin-nav"}>
-                            <div className={"plugin-logo"}>
-                                <img alt="Logo"
-                                     src={options.logo}/>
-                            </div>
-                            {/* eslint-disable-next-line no-undef */}
-                            <p>Version: <b>{options.version}</b></p>
-                            <div className={"generate-container"}>
-                                <Button onClick={() => {
-                                    startExport();
-                                }}
-                                        disabled={disabledButton}
-                                        className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
-                                >
-                                    {!disabledButton && [<Dashicon icon="update"/>,
-                                        __('Generate Static Files', 'simply-static')
-                                    ]}
-                                    {disabledButton && [<Dashicon icon="update spin"/>,
-                                        __('Generating...', 'simply-static'),
-                                    ]}
-                                </Button>
-                                {disabledButton &&
-                                    <span onClick={() => {
-                                        cancelExport();
-                                    }} className={"cancel-button"}>
+                        {options.is_network ?
+                            <Card className={"plugin-nav"}>
+                                <div className={"plugin-logo"}>
+                                    <img alt="Logo"
+                                         src={options.logo}/>
+                                </div>
+                                {/* eslint-disable-next-line no-undef */}
+                                <p>Version: <b>{options.version}</b></p>
+                                <div className={"generate-container"}>
+                                    <Button onClick={() => {
+                                        startExport();
+                                    }}
+                                            disabled={disabledButton}
+                                            className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
+                                    >
+                                        {!disabledButton && [<Dashicon icon="update"/>,
+                                            __('Generate Static Files', 'simply-static')
+                                        ]}
+                                        {disabledButton && [<Dashicon icon="update spin"/>,
+                                            __('Generating...', 'simply-static'),
+                                        ]}
+                                    </Button>
+                                    {disabledButton &&
+                                        <span onClick={() => {
+                                            cancelExport();
+                                        }} className={"cancel-button"}>
                                             {__('Cancel Export', 'simply-static')}
                                         </span>
-                                }
-                            </div>
-                            <CardBody>
-                                <h4 className={"settings-headline"}> {__('Tools', 'simply-static')}</h4>
-                                <NavigatorButton onClick={() => setActiveItem('/')}
-                                                 className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
-                                                 path="/">
-                                    <Dashicon icon="update"/> {__('Activity Log', 'simply-static')}
-                                </NavigatorButton>
-                                <NavigatorButton onClick={() => setActiveItem('/diagnostics')}
-                                                 className={activeItem === '/diagnostics' ? 'is-active-item' : ''}
-                                                 path="/diagnostics">
-                                    <Dashicon icon="editor-help"/> {__('Diagnostics', 'simply-static')}
-                                </NavigatorButton>
-                            </CardBody>
-                            <CardBody>
-                                <h4 className={"settings-headline"}> {__('Settings', 'simply-static')}</h4>
-                                <NavigatorButton onClick={() => setActiveItem('/general')}
-                                                 className={activeItem === '/general' ? 'is-active-item' : ''}
-                                                 path="/general">
-                                    <Dashicon icon="admin-generic"/> {__('General', 'simply-static')}
-                                </NavigatorButton>
-                                {!options.is_network &&
-                                    <NavigatorButton onClick={() => setActiveItem('/deployment')}
-                                                     className={activeItem === '/deployment' ? 'is-active-item' : ''}
-                                                     path="/deployment">
-                                        <Dashicon icon="migrate"/> {__('Deployment', 'simply-static')}
-                                    </NavigatorButton>
-                                }
-                                {'pro' === options.plan && !options.is_network &&
-                                    <>
-                                        <NavigatorButton onClick={() => setActiveItem('/forms')}
-                                                         className={activeItem === '/forms' ? 'is-active-item' : ''}
-                                                         path="/forms">
-                                            <Dashicon icon="align-center"/> {__('Forms', 'simply-static')}
-                                        </NavigatorButton>
-                                        <NavigatorButton onClick={() => setActiveItem('/search')}
-                                                         className={activeItem === '/search' ? 'is-active-item' : ''}
-                                                         path="/search">
-                                            <Dashicon icon="search"/> {__('Search', 'simply-static')}
-                                        </NavigatorButton>
-                                    </>
-                                }
-                            </CardBody>
-                            <CardBody>
-                                <h4 className={"settings-headline"}> {__('Advanced', 'simply-static')}</h4>
-                                {'pro' === options.plan &&
-                                    <NavigatorButton onClick={() => setActiveItem('/optimize')}
-                                                     className={activeItem === '/optimize' ? 'is-active-item' : ''}
-                                                     path="/optimize">
-                                        <Dashicon icon="dashboard"/> {__('Optimize', 'simply-static')}
-                                    </NavigatorButton>
-                                }
-                                <NavigatorButton onClick={() => setActiveItem('/utilities')}
-                                                 className={activeItem === '/utilities' ? 'is-active-item' : ''}
-                                                 path="/utilities">
-                                    <Dashicon icon="admin-tools"/> {__('Utilities', 'simply-static')}
-                                </NavigatorButton>
-                                <NavigatorButton onClick={() => setActiveItem('/misc')}
-                                                 className={activeItem === '/misc' ? 'is-active-item' : ''}
-                                                 path="/misc">
-                                    <Dashicon icon="block-default"/> {__('Misc', 'simply-static')}
-                                </NavigatorButton>
-                            </CardBody>
-                            <CardBody>
-                                <h4 className={"settings-headline"}>Simply Static</h4>
+                                    }
+                                </div>
+                                <Spacer margin={5}/>
                                 <Button href="https://simplystatic.com/changelogs/" target="_blank">
                                     <Dashicon icon="editor-ul"/> {__('Changelog', 'simply-static')}
                                 </Button>
@@ -210,8 +169,147 @@ function SettingsPage() {
                                             icon="admin-site-alt3"/>Simply Static Pro
                                     </Button>
                                 }
-                            </CardBody>
-                        </Card>
+                            </Card>
+                            :
+                            <Card className={"plugin-nav"}>
+                                <div className={"plugin-logo"}>
+                                    <img alt="Logo"
+                                         src={options.logo}/>
+                                </div>
+                                {/* eslint-disable-next-line no-undef */}
+                                <p>Version: <b>{options.version}</b></p>
+                                <div className={"generate-container"}>
+                                    <Button onClick={() => {
+                                        startExport();
+                                    }}
+                                            disabled={disabledButton}
+                                            className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
+                                    >
+                                        {!disabledButton && [<Dashicon icon="update"/>,
+                                            __('Generate Static Files', 'simply-static')
+                                        ]}
+                                        {disabledButton && [<Dashicon icon="update spin"/>,
+                                            __('Generating...', 'simply-static'),
+                                        ]}
+                                    </Button>
+                                    {disabledButton &&
+                                        <span onClick={() => {
+                                            cancelExport();
+                                        }} className={"cancel-button"}>
+                                            {__('Cancel Export', 'simply-static')}
+                                        </span>
+                                    }
+                                </div>
+                                <CardBody>
+                                    {!options.is_network && options.is_multisite &&
+                                        <>
+                                            <h4 className={"settings-headline"}> {__('Import', 'simply-static')}</h4>
+                                            <SelectControl
+                                                value={selectedCopySite}
+                                                options={selectablesSites}
+                                                help={__('Choose a subsite to import settings from.', 'simply-static')}
+                                                onChange={(blog_id) => {
+                                                    setSelectedCopySite(blog_id);
+                                                }}
+                                            />
+                                            {selectedCopySite !== 'current' &&
+                                                <Button isPrimary onClick={() => {
+                                                    runUpdateFromNetwork(selectedCopySite);
+                                                }}>{__('Import Settings', 'simply-static')}</Button>
+                                            }
+                                            { isUpdatingFromNetwork ?
+                                                <Animate type="slide-in" options={{origin: 'top'}}>
+                                                    {() => (
+                                                        <Notice status="success" isDismissible={false} className={"upgrade-network-notice"}>
+                                                            <p>
+                                                                {__('Settings successfully imported.', 'simply-static')}
+                                                            </p>
+                                                        </Notice>
+                                                    )}
+                                                </Animate>
+                                                :
+                                                ''
+                                            }
+                                        </>
+                                    }
+                                    <h4 className={"settings-headline"}> {__('Tools', 'simply-static')}</h4>
+                                    <NavigatorButton onClick={() => setActiveItem('/')}
+                                                     className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
+                                                     path="/">
+                                        <Dashicon icon="update"/> {__('Activity Log', 'simply-static')}
+                                    </NavigatorButton>
+                                    <NavigatorButton onClick={() => setActiveItem('/diagnostics')}
+                                                     className={activeItem === '/diagnostics' ? 'is-active-item' : ''}
+                                                     path="/diagnostics">
+                                        <Dashicon icon="editor-help"/> {__('Diagnostics', 'simply-static')}
+                                    </NavigatorButton>
+                                </CardBody>
+                                <CardBody>
+                                    <h4 className={"settings-headline"}> {__('Settings', 'simply-static')}</h4>
+                                    <NavigatorButton onClick={() => setActiveItem('/general')}
+                                                     className={activeItem === '/general' ? 'is-active-item' : ''}
+                                                     path="/general">
+                                        <Dashicon icon="admin-generic"/> {__('General', 'simply-static')}
+                                    </NavigatorButton>
+                                    {!options.is_network &&
+                                        <NavigatorButton onClick={() => setActiveItem('/deployment')}
+                                                         className={activeItem === '/deployment' ? 'is-active-item' : ''}
+                                                         path="/deployment">
+                                            <Dashicon icon="migrate"/> {__('Deployment', 'simply-static')}
+                                        </NavigatorButton>
+                                    }
+                                    {'pro' === options.plan && !options.is_network &&
+                                        <>
+                                            <NavigatorButton onClick={() => setActiveItem('/forms')}
+                                                             className={activeItem === '/forms' ? 'is-active-item' : ''}
+                                                             path="/forms">
+                                                <Dashicon icon="align-center"/> {__('Forms', 'simply-static')}
+                                            </NavigatorButton>
+                                            <NavigatorButton onClick={() => setActiveItem('/search')}
+                                                             className={activeItem === '/search' ? 'is-active-item' : ''}
+                                                             path="/search">
+                                                <Dashicon icon="search"/> {__('Search', 'simply-static')}
+                                            </NavigatorButton>
+                                        </>
+                                    }
+                                </CardBody>
+                                <CardBody>
+                                    <h4 className={"settings-headline"}> {__('Advanced', 'simply-static')}</h4>
+                                    {'pro' === options.plan &&
+                                        <NavigatorButton onClick={() => setActiveItem('/optimize')}
+                                                         className={activeItem === '/optimize' ? 'is-active-item' : ''}
+                                                         path="/optimize">
+                                            <Dashicon icon="dashboard"/> {__('Optimize', 'simply-static')}
+                                        </NavigatorButton>
+                                    }
+                                    <NavigatorButton onClick={() => setActiveItem('/utilities')}
+                                                     className={activeItem === '/utilities' ? 'is-active-item' : ''}
+                                                     path="/utilities">
+                                        <Dashicon icon="admin-tools"/> {__('Utilities', 'simply-static')}
+                                    </NavigatorButton>
+                                    <NavigatorButton onClick={() => setActiveItem('/misc')}
+                                                     className={activeItem === '/misc' ? 'is-active-item' : ''}
+                                                     path="/misc">
+                                        <Dashicon icon="block-default"/> {__('Misc', 'simply-static')}
+                                    </NavigatorButton>
+                                </CardBody>
+                                <CardBody>
+                                    <h4 className={"settings-headline"}>Simply Static</h4>
+                                    <Button href="https://simplystatic.com/changelogs/" target="_blank">
+                                        <Dashicon icon="editor-ul"/> {__('Changelog', 'simply-static')}
+                                    </Button>
+                                    <Button href="https://simplystatic.com/docs/" target="_blank">
+                                        <Dashicon icon="admin-links"/> {__('Documentation', 'simply-static')}
+                                    </Button>
+                                    {'free' === options.plan &&
+                                        <Button href="https://simplystatic.com/simply-static-pro/" target="_blank">
+                                            <Dashicon
+                                                icon="admin-site-alt3"/>Simply Static Pro
+                                        </Button>
+                                    }
+                                </CardBody>
+                            </Card>
+                        }
                     </FlexItem>
                     {activeItem === '/' &&
                         <FlexItem isBlock={true}>
