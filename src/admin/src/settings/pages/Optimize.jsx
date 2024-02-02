@@ -4,9 +4,10 @@ import {
     CardBody,
     CardHeader,
     __experimentalSpacer as Spacer,
+    __experimentalInputControl as InputControl,
     Notice,
     Animate,
-    ToggleControl,
+    ToggleControl, TextControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -21,6 +22,29 @@ function Optimize() {
     const [minifyInlineCss, setMinifyInlineCss] = useState(false);
     const [minifyJavascript, setMinifyJavascript] = useState(false);
     const [minifyInlineJavascript, setMinifyInlineJavascript] = useState(false);
+    const [renamePluginFolders, setRenamePluginFolders] = useState(false);
+    const [wpContentFolder, setWpContentFolder] = useState('wp-content');
+    const [wpIncludesFolder, setWpIncludesFolder] = useState('wp-includes');
+    const [wpUploadsFolder, setWpUploadsFolder] = useState('wp-content/uploads');
+    const [wpPluginsFolder, setWpPluginsFolder] = useState('wp-content/plugins');
+    const [wpThemesFolder, setWpThemesFolder] = useState('wp-content/themes');
+    const [themeStyleName, setThemeStyleName] = useState('style');
+    const [authorUrl, setAuthorUrl] = useState('author');
+    const [hideRESTAPI, setHideRESTAPI] = useState(false);
+    const [hideStyleId, setHideStyleId] = useState(false);
+    const [hideComments, setHideComments] = useState(false);
+    const [hideVersion, setHideVersion] = useState(false);
+    const [hidePrefetch, setHidePrefetch] = useState(false);
+    const [hideGenerator, setHideGenerator] = useState(false);
+    const [hideRSD, setHideRSD] = useState(false);
+    const [hideEmojis, setHideEmojis] = useState(false);
+
+    const [disableXMLRPC, setDisableXMLRPC] = useState(false);
+    const [disableEmbed, setDisableEmbed] = useState(false);
+    const [disableDbDebug, setDisableDbDebug] = useState(false);
+    const [disableWLW, setDisableWLW] = useState(false);
+    const [disableDirectory, setDisableDirectory] = useState(false);
+
 
     const setSavingSettings = () => {
         saveSettings();
@@ -54,6 +78,90 @@ function Optimize() {
 
         if (settings.minify_inline_js) {
             setMinifyInlineJavascript(settings.minify_inline_js);
+        }
+
+        if (settings.wp_content_folder) {
+            setWpContentFolder(settings.wp_content_folder);
+        }
+
+        if (settings.wp_includes_folder) {
+            setWpIncludesFolder(settings.wp_includes_folder);
+        }
+
+        if (settings.wp_uploads_folder) {
+            setWpUploadsFolder(settings.wp_uploads_folder);
+        }
+
+        if (settings.wp_plugins_folder) {
+            setWpPluginsFolder(settings.wp_plugins_folder);
+        }
+
+        if (settings.rename_plugin_folders) {
+            setRenamePluginFolders(settings.rename_plugin_folders);
+        }
+
+        if (settings.wp_themes_folder) {
+            setWpThemesFolder(settings.wp_themes_folder);
+        }
+
+        if (settings.theme_style_name) {
+            setThemeStyleName(settings.theme_style_name);
+        }
+
+        if (settings.author_url) {
+            setAuthorUrl(settings.author_url);
+        }
+
+        if (settings.hide_rest_api) {
+            setHideRESTAPI(settings.hide_rest_api);
+        }
+
+        if (settings.hide_style_id) {
+            setHideStyleId(settings.hide_style_id);
+        }
+
+        if (settings.hide_comments) {
+            setHideComments(settings.hide_comments);
+        }
+
+        if (settings.hide_version) {
+            setHideVersion(settings.hide_version);
+        }
+
+        if (settings.hide_generator) {
+            setHideGenerator(settings.hide_generator);
+        }
+
+        if (settings.hide_prefetch) {
+            setHidePrefetch(settings.hide_prefetch);
+        }
+
+        if (settings.hide_rsd) {
+            setHideRSD(settings.hide_rsd);
+        }
+
+        if (settings.hide_emotes) {
+            setHideEmojis(settings.hide_emotes)
+        }
+
+        if (settings.disable_xmlrpc) {
+            setDisableXMLRPC(settings.disable_xmlrpc)
+        }
+
+        if (settings.disable_embed) {
+            setDisableEmbed(settings.disable_embed)
+        }
+
+        if (settings.disable_db_debug) {
+            setDisableDbDebug(settings.disable_db_debug)
+        }
+
+        if (settings.disable_wlw_manifest) {
+            setDisableWLW(settings.disable_wlw_manifest)
+        }
+
+        if (settings.disable_directory_browsing) {
+            setDisableDirectory(settings.disable_directory_browsing)
         }
 
     }, [settings]);
@@ -157,6 +265,303 @@ function Optimize() {
             </CardBody>
         </Card>
         <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <b>{__('Change', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
+                <TextControl
+                    label={__('Folder wp-content', 'simply-static')}
+                    help={  __('Change the folder wp-content', 'simply-static') }
+                    type={"text"}
+                    placeholder={"wp-content"}
+                    value={wpContentFolder}
+                    onChange={(folder) => {
+                        setWpIncludesFolder(folder);
+                        updateSetting('wp_content_folder', folder);
+                    }}
+                />
+
+                <TextControl
+                    label={__('Folder wp-includes', 'simply-static')}
+                    help={  __('Change the folder wp-includes', 'simply-static') }
+                    type={"text"}
+                    placeholder={"wp-includes"}
+                    value={wpIncludesFolder}
+                    onChange={(folder) => {
+                        setWpContentFolder(folder);
+                        updateSetting('wp_includes_folder', folder);
+                    }}
+                />
+
+                <TextControl
+                    label={__('Folder uploads', 'simply-static')}
+                    help={  __('Change the folder uploads', 'simply-static') }
+                    type={"text"}
+                    placeholder={"uploads"}
+                    value={wpUploadsFolder}
+                    onChange={(folder) => {
+                        setWpUploadsFolder(folder);
+                        updateSetting('wp_uploads_folder', folder);
+                    }}
+                />
+
+                <TextControl
+                    label={__('Folder plugins', 'simply-static')}
+                    help={  __('Change the folder plugins', 'simply-static') }
+                    type={"text"}
+                    placeholder={"plugins"}
+                    value={wpPluginsFolder}
+                    onChange={(folder) => {
+                        setWpPluginsFolder(folder);
+                        updateSetting('wp_plugins_folder', folder);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Rename Plugin Names?', 'simply-static')}
+                    help={
+                        renamePluginFolders
+                            ? __('Rename.', 'simply-static')
+                            : __('Keep original.', 'simply-static')
+                    }
+                    checked={renamePluginFolders}
+                    onChange={(value) => {
+                        setRenamePluginFolders(value);
+                        updateSetting('rename_plugin_folders', value);
+                    }}
+                />
+
+                <TextControl
+                    label={__('Folder themes', 'simply-static')}
+                    help={  __('Change the folder themes', 'simply-static') }
+                    type={"text"}
+                    placeholder={"themes"}
+                    value={wpThemesFolder}
+                    onChange={(folder) => {
+                        setWpThemesFolder(folder);
+                        updateSetting('wp_themes_folder', folder);
+                    }}
+                />
+
+                <InputControl
+                    label={__('Theme style name', 'simply-static')}
+                    help={  __('Change the style.css name', 'simply-static') }
+                    type={"text"}
+                    className={"ss-theme-style-name"}
+                    suffix={'.css'}
+                    placeholder={"style"}
+                    value={themeStyleName}
+                    onChange={(style) => {
+                        setThemeStyleName(style);
+                        updateSetting('theme_style_name', style);
+                    }}
+                />
+
+                <TextControl
+                    label={__('Author URL', 'simply-static')}
+                    help={  __('Change the author url', 'simply-static') }
+                    type={"text"}
+                    placeholder={"author"}
+                    value={authorUrl}
+                    onChange={(url) => {
+                        setAuthorUrl(url);
+                        updateSetting('author_url', url);
+                    }}
+                />
+
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <b>{__('Hide', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
+
+                <ToggleControl
+                    label={__('Hide REST API URLs', 'simply-static')}
+                    help={
+                        hideRESTAPI
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={hideRESTAPI}
+                    onChange={(value) => {
+                        setHideRESTAPI(value);
+                        updateSetting('hide_rest_api', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Hide Style/Script IDs', 'simply-static')}
+                    help={
+                        hideStyleId
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={hideStyleId}
+                    onChange={(value) => {
+                        setHideStyleId(value);
+                        updateSetting('hide_style_id', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Hide HTML Comments', 'simply-static')}
+                    help={
+                        hideComments
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={hideComments}
+                    onChange={(value) => {
+                        setHideComments(value);
+                        updateSetting('hide_comments', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Hide WordPress Version', 'simply-static')}
+                    help={
+                        hideVersion
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={hideVersion}
+                    onChange={(value) => {
+                        setHideVersion(value);
+                        updateSetting('hide_version', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Hide WordPress Generator Meta', 'simply-static')}
+                    help={
+                        hideGenerator
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={hideGenerator}
+                    onChange={(value) => {
+                        setHideGenerator(value);
+                        updateSetting('hide_generator', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Hide DNS Prefetch WordPress link', 'simply-static')}
+                    help={
+                        hidePrefetch
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={hidePrefetch}
+                    onChange={(value) => {
+                        setHidePrefetch(value);
+                        updateSetting('hide_prefetch', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Hide RSD Header', 'simply-static')}
+                    help={
+                        hideRSD
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={hideRSD}
+                    onChange={(value) => {
+                        setHideRSD(value);
+                        updateSetting('hide_rsd', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Hide Emojis if you don\'t use them', 'simply-static')}
+                    help={
+                        hideEmojis
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={hideEmojis}
+                    onChange={(value) => {
+                        setHideEmojis(value);
+                        updateSetting('hide_emotes', value);
+                    }}
+                />
+
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <b>{__('Disable', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
+
+                <ToggleControl
+                    label={__('Disable XML-RPC', 'simply-static')}
+                    help={
+                        disableXMLRPC
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={disableXMLRPC}
+                    onChange={(value) => {
+                        setDisableXMLRPC(value);
+                        updateSetting('disable_xmlrpc', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Disable Embed Scripts', 'simply-static')}
+                    help={
+                        disableEmbed
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={disableEmbed}
+                    onChange={(value) => {
+                        setDisableEmbed(value);
+                        updateSetting('disable_embed', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Disable DB Debug in Frontend', 'simply-static')}
+                    help={
+                        disableDbDebug
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={disableDbDebug}
+                    onChange={(value) => {
+                        setDisableDbDebug(value);
+                        updateSetting('disable_db_debug', value);
+                    }}
+                />
+
+                <ToggleControl
+                    label={__('Disable WLW Manifest Scripts', 'simply-static')}
+                    help={
+                        disableWLW
+                            ? __('Hide.', 'simply-static')
+                            : __('Show.', 'simply-static')
+                    }
+                    checked={disableWLW}
+                    onChange={(value) => {
+                        setDisableWLW(value);
+                        updateSetting('disable_wlw_manifest', value);
+                    }}
+                />
+
+
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+
+
         {settingsSaved &&
             <>
                 <Animate type="slide-in" options={{origin: 'top'}}>

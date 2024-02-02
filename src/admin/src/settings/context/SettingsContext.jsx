@@ -85,7 +85,27 @@ function SettingsContextProvider(props) {
         'minify_inline_css': false,
         'minify_js': false,
         'minify_inline_js': false,
-        'generate_404': false
+        'generate_404': false,
+        'wp_content_folder': '',
+        'wp_includes_folder': '',
+        'wp_uploads_folder': '',
+        'wp_plugins_folder': '',
+        'wp_themes_folder': '',
+        'theme_style_name': 'style',
+        'rename_plugin_folders': false,
+        'author_url': '',
+        'hide_rest_api': false,
+        'hide_style_id': false,
+        'hide_comments': false,
+        'hide_version': false,
+        'hide_generator': false,
+        'hide_prefetch': false,
+        'hide_rsd': false,
+        'hide_emotes': false,
+        'disable_xmlrpc': false,
+        'disable_embed': false,
+        'disable_db_debug': false,
+        'disable_wlw_manifest': false
     }
     const [isRunning, setIsRunning] = useState(false);
     const [settingsSaved, setSettingsSaved] = useState(false);

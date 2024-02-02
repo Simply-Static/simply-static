@@ -184,6 +184,26 @@ toplevel_page_simply-static img {
     .react-terminal-line a {
       color:#6fa4df;
     }
+
+    .ss-theme-style-name {
+      .components-base-control__help {
+        margin-bottom: 10px;
+      }
+
+      .components-input-control__container {
+        width: 200px;
+
+        .components-input-control__input {
+          text-align: right;
+        }
+
+        .components-input-control__suffix {
+          padding-right: 10px;
+          background: rgba(0,0,0,0.05);
+          padding-left: 5px;
+        }
+      }
+    }
   }
 }
 

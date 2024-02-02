@@ -17,6 +17,8 @@ class Rank_Math_Sitemap_Handler extends Page_Handler {
 	 * @return void
 	 */
 	public function run_hooks() {
+		parent::run_hooks();
+
 		// Filter XSL.
 		foreach ( Helper::get_accessible_taxonomies() as $taxonomy ) {
 			if ( 'post_format' === $taxonomy->name ) {
