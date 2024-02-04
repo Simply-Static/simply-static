@@ -139,15 +139,14 @@ function SettingsPage() {
                                     <img alt="Logo"
                                          src={options.logo}/>
                                 </div>
-                                {/* eslint-disable-next-line no-undef */}
-                                <p>
-                                    Version: <b>{options.version}</b><br></br>
-                                    {'pro' === options.plan &&
-                                        <>
+                                {'pro' === options.plan ?
+                                    <p>
+                                        Free: <b>{options.version}</b><br></br>
                                         Pro: <b>{options.version_pro}</b>
-                                        </>
-                                    }
-                                </p>
+                                    </p>
+                                    :
+                                    <p>Version: <b>{options.version}</b></p>
+                                }
                                 <div className={"generate-container"}>
                                     <Button onClick={() => {
                                         startExport();
@@ -190,15 +189,14 @@ function SettingsPage() {
                                     <img alt="Logo"
                                          src={options.logo}/>
                                 </div>
-                                {/* eslint-disable-next-line no-undef */}
-                                <p>
-                                    Version: <b>{options.version}</b><br></br>
-                                    {'pro' === options.plan &&
-                                        <>
-                                            Pro: <b>{options.version_pro}</b>
-                                        </>
-                                    }
-                                </p>
+                                {'pro' === options.plan ?
+                                    <p>
+                                        Free: <b>{options.version}</b><br></br>
+                                        Pro: <b>{options.version_pro}</b>
+                                    </p>
+                                    :
+                                    <p>Version: <b>{options.version}</b></p>
+                                }
                                 <div className={"generate-container"}>
                                     <Button onClick={() => {
                                         startExport();
