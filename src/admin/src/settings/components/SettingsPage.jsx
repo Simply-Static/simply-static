@@ -31,7 +31,14 @@ import apiFetch from "@wordpress/api-fetch";
 const {__} = wp.i18n;
 
 function SettingsPage() {
-    const {isRunning, setIsRunning, blogId, migrateSettings, saveSettings, updateFromNetwork} = useContext(SettingsContext);
+    const {
+        isRunning,
+        setIsRunning,
+        blogId,
+        migrateSettings,
+        saveSettings,
+        updateFromNetwork
+    } = useContext(SettingsContext);
     const [activeItem, setActiveItem] = useState({activeItem: "/"});
     const [initialPage, setInitialPage] = useState(options.initial);
     const [initialSet, setInitialSet] = useState(false);
@@ -133,7 +140,14 @@ function SettingsPage() {
                                          src={options.logo}/>
                                 </div>
                                 {/* eslint-disable-next-line no-undef */}
-                                <p>Version: <b>{options.version}</b></p>
+                                <p>
+                                    Version: <b>{options.version}</b><br></br>
+                                    {'pro' === options.plan &&
+                                        <>
+                                        Pro: <b>{options.version_pro}</b>
+                                        </>
+                                    }
+                                </p>
                                 <div className={"generate-container"}>
                                     <Button onClick={() => {
                                         startExport();
@@ -164,7 +178,7 @@ function SettingsPage() {
                                     <Dashicon icon="admin-links"/> {__('Documentation', 'simply-static')}
                                 </Button>
                                 {'free' === options.plan &&
-                                    <Button href="https://simplystatic.com/simply-static-pro/" target="_blank">
+                                    <Button href="https://simplystatic.com" target="_blank">
                                         <Dashicon
                                             icon="admin-site-alt3"/>Simply Static Pro
                                     </Button>
@@ -177,7 +191,14 @@ function SettingsPage() {
                                          src={options.logo}/>
                                 </div>
                                 {/* eslint-disable-next-line no-undef */}
-                                <p>Version: <b>{options.version}</b></p>
+                                <p>
+                                    Version: <b>{options.version}</b><br></br>
+                                    {'pro' === options.plan &&
+                                        <>
+                                            Pro: <b>{options.version_pro}</b>
+                                        </>
+                                    }
+                                </p>
                                 <div className={"generate-container"}>
                                     <Button onClick={() => {
                                         startExport();
@@ -217,10 +238,11 @@ function SettingsPage() {
                                                     runUpdateFromNetwork(selectedCopySite);
                                                 }}>{__('Import Settings', 'simply-static')}</Button>
                                             }
-                                            { isUpdatingFromNetwork ?
+                                            {isUpdatingFromNetwork ?
                                                 <Animate type="slide-in" options={{origin: 'top'}}>
                                                     {() => (
-                                                        <Notice status="success" isDismissible={false} className={"upgrade-network-notice"}>
+                                                        <Notice status="success" isDismissible={false}
+                                                                className={"upgrade-network-notice"}>
                                                             <p>
                                                                 {__('Settings successfully imported.', 'simply-static')}
                                                             </p>
@@ -255,7 +277,7 @@ function SettingsPage() {
                                         <NavigatorButton onClick={() => setActiveItem('/deployment')}
                                                          className={activeItem === '/deployment' ? 'is-active-item' : ''}
                                                          path="/deployment">
-                                            <Dashicon icon="migrate"/> {__('Deployment', 'simply-static')}
+                                            <Dashicon icon="migrate"/> {__('Deploy', 'simply-static')}
                                         </NavigatorButton>
                                     }
                                     {'pro' === options.plan && !options.is_network &&
@@ -270,18 +292,16 @@ function SettingsPage() {
                                                              path="/search">
                                                 <Dashicon icon="search"/> {__('Search', 'simply-static')}
                                             </NavigatorButton>
+                                            <NavigatorButton onClick={() => setActiveItem('/optimize')}
+                                                             className={activeItem === '/optimize' ? 'is-active-item' : ''}
+                                                             path="/optimize">
+                                                <Dashicon icon="dashboard"/> {__('Optimize', 'simply-static')}
+                                            </NavigatorButton>
                                         </>
                                     }
                                 </CardBody>
                                 <CardBody>
                                     <h4 className={"settings-headline"}> {__('Advanced', 'simply-static')}</h4>
-                                    {'pro' === options.plan &&
-                                        <NavigatorButton onClick={() => setActiveItem('/optimize')}
-                                                         className={activeItem === '/optimize' ? 'is-active-item' : ''}
-                                                         path="/optimize">
-                                            <Dashicon icon="dashboard"/> {__('Optimize', 'simply-static')}
-                                        </NavigatorButton>
-                                    }
                                     <NavigatorButton onClick={() => setActiveItem('/utilities')}
                                                      className={activeItem === '/utilities' ? 'is-active-item' : ''}
                                                      path="/utilities">
@@ -302,7 +322,7 @@ function SettingsPage() {
                                         <Dashicon icon="admin-links"/> {__('Documentation', 'simply-static')}
                                     </Button>
                                     {'free' === options.plan &&
-                                        <Button href="https://simplystatic.com/simply-static-pro/" target="_blank">
+                                        <Button href="https://simplystatic.com" target="_blank">
                                             <Dashicon
                                                 icon="admin-site-alt3"/>Simply Static Pro
                                         </Button>

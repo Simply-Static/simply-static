@@ -93,12 +93,12 @@ function DeploymentSettings() {
                         value={deliveryMethod}
                         options={[
                             {label: __('ZIP Archive', 'simply-static'), value: 'zip'},
-                            {label: __('Local Directory', 'simply-static'), value: 'local'},
-                            {label: __('Simply CDN', 'simply-static'), value: 'simply-cdn'},
                             {label: __('GitHub', 'simply-static'), value: 'github'},
+                            {label: __('AWS S3', 'simply-static'), value: 'aws-s3'},
                             {label: __('Tiiny.host', 'simply-static'), value: 'tiiny'},
-                            {label: __('BunnyCDN', 'simply-static'), value: 'cdn'},
-                            {label: __('Amazon AWS S3', 'simply-static'), value: 'aws-s3'},
+                            {label: __('Bunny CDN', 'simply-static'), value: 'cdn'},
+                            {label: __('Simply CDN', 'simply-static'), value: 'simply-cdn'},
+                            {label: __('Local Directory', 'simply-static'), value: 'local'},
                             {label: __('Digital Ocean Spaces', 'simply-static'), value: 'digitalocean'},
                         ]}
                         onChange={(method) => {

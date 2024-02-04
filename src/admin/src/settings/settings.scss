@@ -19,8 +19,6 @@ toplevel_page_simply-static img {
 }
 
 
-
-
 /* Start plugin settings */
 .plugin-settings-container {
   background: #f0f0f1;
@@ -76,7 +74,7 @@ toplevel_page_simply-static img {
         margin: 10px 0;
         cursor: pointer;
         color: rgb(104, 4, 204);
-        text-decoration:underline;
+        text-decoration: underline;
       }
     }
 
@@ -128,11 +126,23 @@ toplevel_page_simply-static img {
     /* Tables */
     table {
       width: 100%;
-    }
 
-    table th {
-      text-align: left;
-      text-transform: uppercase;
+      th {
+        text-align: left;
+        text-transform: uppercase;
+      }
+
+      td.diagnostics-icon {
+        width: 15%;
+      }
+
+      td.diagnostics-test {
+        width: 30%;
+      }
+
+      td.diagnostics-result {
+        width: 55%;
+      }
     }
 
     /* Notices */
@@ -182,7 +192,7 @@ toplevel_page_simply-static img {
     }
 
     .react-terminal-line a {
-      color:#6fa4df;
+      color: #6fa4df;
     }
 
     .ss-theme-style-name {
@@ -199,7 +209,7 @@ toplevel_page_simply-static img {
 
         .components-input-control__suffix {
           padding-right: 10px;
-          background: rgba(0,0,0,0.05);
+          background: rgba(0, 0, 0, 0.05);
           padding-left: 5px;
         }
       }
@@ -214,9 +224,9 @@ toplevel_page_simply-static img {
 
 @keyframes dashicons-spin {
   0% {
-    transform: rotate( 0deg );
+    transform: rotate(0deg);
   }
   100% {
-    transform: rotate( 360deg );
+    transform: rotate(360deg);
   }
 }

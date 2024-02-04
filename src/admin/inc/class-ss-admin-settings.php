@@ -125,6 +125,10 @@ class Admin_Settings {
 			)
 		);
 
+        if( defined( 'SIMPLY_STATIC_PRO_VERSION' ) ) {
+            $args['version_pro'] = SIMPLY_STATIC_PRO_VERSION;
+        }
+
 		// Multisite?
 		if ( is_multisite() && function_exists( 'get_sites' ) ) {
 			$sites            = [];

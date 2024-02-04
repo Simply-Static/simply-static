@@ -26,13 +26,13 @@ function Diagnostics() {
 
                                                     return (
                                                         <tr className={"table-row"} key={item[0]}>
-                                                            <td> {item[1].test ?
+                                                            <td className={"diagnostics-icon"}> {item[1].test ?
                                                                 <Dashicon className={"icon-yes"} icon="yes"/> :
                                                                 <Dashicon className={"icon-no"} icon="no"/>}
                                                             </td>
-                                                            <td><b>{item[0]}</b></td>
+                                                            <td className={"diagnostics-test"}><b>{item[0]}</b></td>
                                                             <td>{item[1].test}</td>
-                                                            <td style={{width: "200px"}}> {
+                                                            <td className={"diagnostics-result"}> {
                                                                 item[1].test ?
                                                                     <p>{item[1].description}</p> :
                                                                     <p>{item[1].error}</p>
