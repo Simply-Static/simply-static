@@ -7,6 +7,9 @@
             "plural_forms": "nplurals=2; plural=n != 1;",
             "lang": "de_DE"
          },
+         "This is known to work well with the Simply Static plugin.": [
+            "Dieses Plugin ist mit Simply Static kompatibel."
+         ],
          "Simply Static requires PHP 7.4 or higher.": [
             "Simply Static benötigt PHP 7.4 oder höher."
          ],
@@ -22,8 +25,17 @@
          "Clear Log": [
             "Log löschen"
          ],
-         "Log file successfully deleted.": [
-            "Log-Datei erfolgreich gelöscht."
+         "Log file cleared.": [
+            "Log-Datei erfolgreich geleert."
+         ],
+         "Use current settings": [
+            "Nutze aktuelle Einstellungen"
+         ],
+         "You have to migrate your settings to version 3.x of Simply Static to ensure everything works smoothly with the new interface.": [
+            "Du musst deine Einstellungen auf Version 3.x upgraden um sicherzustellen, dass die neue Admin-Oberfläche korrekt funktioniert."
+         ],
+         "Migrate settings": [
+            "Einstellungen migrieren"
          ],
          "Generate Static Files": [
             "Generieren"
@@ -33,6 +45,24 @@
          ],
          "Cancel Export": [
             "Export abbrechen"
+         ],
+         "Changelog": [
+            "Changelog"
+         ],
+         "Documentation": [
+            "Dokumentation"
+         ],
+         "Import": [
+            "Import"
+         ],
+         "Choose a subsite to import settings from.": [
+            "Wähle eine Subsite um Einstellungen zu importieren"
+         ],
+         "Import Settings": [
+            "Import-Einstellungen"
+         ],
+         "Settings successfully imported.": [
+            "Einstellungen erfolgreich importiert."
          ],
          "Tools": [
             "Tools"
@@ -46,7 +76,7 @@
          "General": [
             "Allgemein"
          ],
-         "Deployment": [
+         "Deploy": [
             "Deployment"
          ],
          "Forms": [
@@ -55,11 +85,11 @@
          "Search": [
             "Suche"
          ],
-         "Advanced": [
-            "Erweitert"
-         ],
          "Optimize": [
             "Optimierung"
+         ],
+         "Advanced": [
+            "Erweitert"
          ],
          "Utilities": [
             "Werkzeuge"
@@ -67,11 +97,8 @@
          "Misc": [
             "Weiteres"
          ],
-         "Changelog": [
-            "Changelog"
-         ],
-         "Documentation": [
-            "Dokumentation"
+         "No page selected": [
+            "Keine Seite ausgewählt"
          ],
          "Deployment Settings": [
             "Deployment Einstellungen"
@@ -85,32 +112,32 @@
          "ZIP Archive": [
             "ZIP Archiv"
          ],
-         "Local Directory": [
-            "Lokales Verzeichnis"
-         ],
-         "Simply CDN": [
-            "Simply CDN"
-         ],
          "GitHub": [
             "GitHub"
+         ],
+         "AWS S3": [
+            "AWS S3"
          ],
          "Tiiny.host": [
             "Tiiny.host"
          ],
-         "BunnyCDN": [
-            "BunnyCDN"
+         "Bunny CDN": [
+            "Bunny CDN"
          ],
-         "Amazon AWS S3": [
-            "Amazon AWS S3"
+         "Simply CDN": [
+            "Simply CDN"
+         ],
+         "Local Directory": [
+            "Lokales Verzeichnis"
          ],
          "Digital Ocean Spaces": [
             "Digital Ocean Spaces"
          ],
-         "This is the directory where your static files will be saved. The directory must exist and be writeable by the webserver": [
-            "Dies ist das Verzeichnis in dem deine statischen Dateien gespeichert werden. Dieses Verzeichnis muss existieren und beschreibbar sein"
-         ],
          "Path": [
             "Pfad"
+         ],
+         "This is the directory where your static files will be saved. The directory must exist and be writeable by the webserver": [
+            "Dies ist das Verzeichnis in dem deine statischen Dateien gespeichert werden. Dieses Verzeichnis muss existieren und beschreibbar sein"
          ],
          "Copied home path": [
             "Homeverzeichnis kopiert"
@@ -118,17 +145,44 @@
          "Copy home path": [
             "Homeverzeichnis kopieren"
          ],
+         "Clear Local Directory": [
+            "Lokales Verzeichnis leeren"
+         ],
+         "Clear local directory before running an export.": [
+            "Leere lokales Verzeichnis vor nächstem Export."
+         ],
+         "Don't clear local directory before running an export.": [
+            "Leere lokales Verzeichnis nicht vor nächstem Export."
+         ],
          "The fast and easy way to bring your static website online. Simply CDN handles hosting, performance, security and form submissions for your static site.": [
             "Der schnelle und einfache Weg deine statische Seite online zu bringen. Simply CDN händelt Hosting, Performance, Sicherheit und Formulare für dich."
          ],
          "Security Token": [
             "Security Token"
          ],
-         "Copy and paste the Security Token from your project and click connect.": [
+         "Copy and paste the Security Token from your project.": [
             "Füge hier deinen Security Token aus der Projektübersicht von Simply CDN ein."
          ],
-         "Connect": [
-            "Verbinden"
+         "Select a 404 page": [
+            "Wähle eine 404-Fehlerseite"
+         ],
+         "We will use that page as a 404 error page on your static website.": [
+            "Wir verwenden diese 404 Seite auf deiner statischen Website"
+         ],
+         "Use Forms?": [
+            "Formulare benutzen?"
+         ],
+         "Proxy form submissions through Simply CDN.": [
+            "Proxy Formular-Einträge durch Simply CDN."
+         ],
+         "Don't proxy form submissions through Simply CDN.": [
+            "Nutze keinen Proxy."
+         ],
+         "Select a \"Thank You\" page": [
+            "Wähle eine Vielen-Dank-Seite."
+         ],
+         "We will use that page to redirect your visitors after submitting a form on your static website.": [
+            "Wir nutzen diese Seite um deinen Besucher nach Absenden des Formulars weiterzuleiten."
          ],
          "GitHub enables you to export your static website to one of the common static hosting providers like Netlify, Cloudflare Pages or GitHub Pages.": [
             "GitHub ermöglicht es dir deine statische Seite auf einem der populären statischen Hostinganbieter zu hosten. Beispiele sind Netlify, Cloudflare Pages oder GitHub Pages."
@@ -171,6 +225,12 @@
          ],
          "Enter a name for your repository. This should be lowercase and without any spaces or special characters.": [
             "Trage den Namen deines Repositories ein. Dieser Name sollte aus Kleinbuchstaben bestehen und keine Leer-und Sonderzeichen enthalten."
+         ],
+         "Folder": [
+            "Verzeichnis"
+         ],
+         "Enter a relative path to a folder if you want to push files under it. Example: for github.com/USER/REPOSITORY/folder1, enter folder1": [
+            "Füge einen relativen Pfad ein. Beispiel: für github.com/USER/REPOSITORY/folder1 setze folder1 ein"
          ],
          "You need to create the repository manually within your organization before connecting it.": [
             "Du musst das Repository manuell in deinem Konto einrichten bevor du die Verbindung aufbauen kannst."
@@ -223,9 +283,6 @@
          "Adding a password will activate password protection on your static site. The website is only visible with the password.": [
             "Deine statische Website wird mit dem eingetragenen Passwort geschützt und ist erst nach Eingabe erreichbar."
          ],
-         "Bunny CDN": [
-            "Bunny CDN"
-         ],
          "Bunny CDN is a fast and reliable CDN provider that you can run your static website on.": [
             "Bunny CDN ist eine schnelle und zuverlässige Option um deine statische Seite zu hosten."
          ],
@@ -266,10 +323,13 @@
             "Wenn du deine statischen Dateien in einem Unterverzeichnis ablegen möchtest, gib den Pfad hier ein."
          ],
          "404 Page": [
-            "404 Seite"
+            "404 Fehlerseite"
          ],
          "Relative path to your custom 404 page.": [
             "Gib den relativen Pfad zu deiner 404 Seite ein."
+         ],
+         "Amazon AWS S3": [
+            "Amazon AWS S3"
          ],
          "Access Key ID": [
             "Access Key ID"
@@ -378,6 +438,15 @@
          ],
          "Add the name of your bucket here.": [
             "Trage den Namen deines Buckets hier ein."
+         ],
+         "Add an optional subdirectory for your bucket": [
+            "Füge ein optionales Unterverzeichnis ein"
+         ],
+         "Cloudfront Distribution ID": [
+            "Cloudfront Distribution ID"
+         ],
+         "We automatically invalidate the cache after each export.": [
+            "Wir leeren den Cache automatisch nach jedem statischen Export."
          ],
          "Empty bucket before new export?": [
             "Sollen wir den Inhalt des Buckets löschen bevor wir die neuen Dateien hochladen?"
@@ -499,11 +568,20 @@
          "Example": [
             "Beispiel"
          ],
-         "enter /path/ above if you wanted to serve your files at www.example.com/path/": [
+         "enter /path above if you wanted to serve your files at www.example.com/path/": [
             "füge /pfad/ ein, falls deine Seite unter www.example.com/path/ erreichbar sein soll"
          ],
          "Convert all URLs for your WordPress site so that you can browse the site locally on your own computer without hosting it on a web server.": [
             "Konvertiert alle deine WordPress-URLs so, dass sie auf deinem lokalen Computer geöffnet werden können. Dies ist nicht für die Verwendung auf einem Webserver geeignet."
+         ],
+         "Force URL replacements": [
+            "Erweitertes URL-Ersetzen"
+         ],
+         "Replace all occurrences of the WordPress URL with the static URL (includes inline CSS and JS).": [
+            "Ersetze alle Vorkommnisse deiner WordPress URL mit deiner statischen URL."
+         ],
+         "Replace only occurrences of the WordPress URL that match our tag list.": [
+            "Ersetze alle Vorkommnisse deiner WordPress URL die mit dem Tag matchen."
          ],
          "Include": [
             "Einschließen"
@@ -520,29 +598,29 @@
          "Sometimes you may want to include additional files (such as files referenced via AJAX) or directories. Add the paths to those files or directories here (one per line).": [
             "Simply Static wird eine statische Kopie jeder Datei anlegen die es finden kann. Wenn du zusätzliche Dateien, welche nirgendwo verlinkt sind, hinzufügen möchtest, kannst du dies hier tun. Bitte trage eine URL je Zeile ein."
          ],
+         "Generate 404 Page?": [
+            "Generiere eine 404-Fehlerseite?"
+         ],
+         "Generate a 404 page.": [
+            "Generiere 404-Fehlerseite."
+         ],
+         "Don't generate a 404 page.": [
+            "Keine 404-Fehlerseite generieren."
+         ],
          "Exclude": [
             "Ausschließen"
          ],
-         "Urls and Patterns to exclude": [
-            "Urls und Pfade ausschließen"
+         "Urls to exclude": [
+            "URLs zum Ausschließen"
          ],
-         "Specify URLs you want to exclude from the processing (one per line). You can also specify regex pattern to match.": [
-            "Hier kannst du URLs hinterlegen, die du vom statischen Export ausschließen möchtest. Du kannst auch Regex benutzen um nach bestimmten Mustern zu filtern."
+         "Specify URLs (or parts of URLs) you want to exclude from the processing (one per line).": [
+            "Hier kannst du URLs hinterlegen, die du vom statischen Export ausschließen möchtest (eine pro Zeile)."
          ],
          "Multisite": [
             "Multisite"
          ],
          "Choose a site to export": [
             "Wähle eine Seite für den Export"
-         ],
-         "Settings to Use:": [
-            "Einstellungen benutzen:"
-         ],
-         "Use Network's Settings": [
-            "Nutze Netzwerk-Einstellungen"
-         ],
-         "Use Site's Settings": [
-            "Nutze Seiten-Einstellungen"
          ],
          "Debugging": [
             "Debug-Modus"
@@ -574,36 +652,6 @@
          "Basic Auth Password": [
             "Basic Auth Passwort"
          ],
-         "Here you can configure settings related to WordPress Multisite.": [
-            "Hier kannst du Einstellungen für WordPress Multisite konfigurieren."
-         ],
-         "Show subsite settings": [
-            "Aktiviere Einstellungen auf Subsites"
-         ],
-         "Additional Settings": [
-            "Zusätzliches Einstellungen"
-         ],
-         "Here you can configure some additional settings like clearing the local directory before running an export or activating force replacement for all URLs.": [
-            "Hier kannst du zusätzliche Einstellungen konfigurieren wie die Ausführung mit WP-Cron oder die erweiterte URL-Ersetzen-Funktion."
-         ],
-         "Force URL replacements": [
-            "Erweitertes URL-Ersetzen"
-         ],
-         "Replace all occurrences of the WordPress URL with the static URL.": [
-            "Ersetze alle Vorkommnisse deiner WordPress URL mit deiner statischen URL."
-         ],
-         "Replace only occurrences of the WordPress URL that match the tags": [
-            "Ersetze alle Vorkommnisse deiner WordPress URL die mit dem Tag matchen"
-         ],
-         "Clear Directory": [
-            "Lokales Verzeichnis löschen"
-         ],
-         "Clear local directory before running an export.": [
-            "Leere lokales Verzeichnis vor nächstem Export."
-         ],
-         "Don't clear local directory before running an export.": [
-            "Leere lokales Verzeichnis nicht vor nächstem Export."
-         ],
          "Debugging Mode": [
             "Debug-Modus"
          ],
@@ -612,6 +660,12 @@
          ],
          "Disable debugging mode.": [
             "Debug-Modus deaktivieren."
+         ],
+         "Origin URL": [
+            "Quell-URL"
+         ],
+         "If the URL of your WordPress installation differs from the public-facing URL (Proxy Setup), add the public URL here.": [
+            "Wenn die URL deiner WordPress Installation von der öffentlichen URL abweicht (Proxy Setup), füge die öffentliche URL hier ein."
          ],
          "Minify": [
             "Minifizieren"
@@ -670,6 +724,102 @@
          "Don't minify Inline JavaScript.": [
             "Inline-JavaScript nicht minifizieren."
          ],
+         "Replace": [
+            "Ersetzen"
+         ],
+         "wp-content directory": [
+            "wp-content Verzeichnis"
+         ],
+         "Replace the \"wp-content\" directory.": [
+            "Ersetze das \"wp-content\" Verzeichnis."
+         ],
+         "wp-includes directory": [
+            "wp-includes Verzeichnis"
+         ],
+         "Replace the \"wp-includes\" directory.": [
+            "Ersetze das \"wp-includes\" Verzeichnis."
+         ],
+         "uploads directory": [
+            "uploads Verzeichnis"
+         ],
+         "Replace the \"wp-content/uploads\" directory.": [
+            "Ersetze das \"wp-content/uploads\" Verzeichnis."
+         ],
+         "plugins directory": [
+            "plugins Verzeichnis"
+         ],
+         "Replace the \"wp-content/plugins\" directory.": [
+            "Ersetze das \"wp-content/plugins\" Verzeichnis."
+         ],
+         "Replace Plugin Names?": [
+            "Plugin Namen ersetzen?"
+         ],
+         "Replace plugin names with a random string combinations.": [
+            "Ersetzt Verzeichnisnamen der Plugins mit einer zufälligen Zeichenkette."
+         ],
+         "Keep plugin names.": [
+            "Plugin Name nicht verändern"
+         ],
+         "themes directory": [
+            "themes Verzeichnis"
+         ],
+         "Replace the \"wp-content/themes\" directory.": [
+            "Ersetze das \"wp-content/themes\" Verzeichnis."
+         ],
+         "Theme style name": [
+            "Theme Stylesheet Name"
+         ],
+         "Replace the style.css filename.": [
+            "Ersetze den style.css Dateinamen."
+         ],
+         "Author URL": [
+            "Autoren-URLs"
+         ],
+         "Replace the author url.": [
+            "Ersetze die Autoren-URLs."
+         ],
+         "Hide": [
+            "Verstecken"
+         ],
+         "Hide REST API URLs": [
+            "Verstecke Rest API URLs"
+         ],
+         "Hide Style/Script IDs": [
+            "Verstecke Style/Script IDs"
+         ],
+         "Hide HTML Comments": [
+            "Verstecke HTML Kommentare"
+         ],
+         "Hide WordPress Version": [
+            "Verstecke WordPress Version"
+         ],
+         "Hide WordPress Generator Meta": [
+            "Verstecke WordPress Generator Meta"
+         ],
+         "Hide DNS Prefetch WordPress link": [
+            "Verstecke DNS Prefetch WordPress Link"
+         ],
+         "Hide RSD Header": [
+            "Verstecke RSD Header"
+         ],
+         "Hide Emojis if you don't use them": [
+            "Verstecke Emojis"
+         ],
+         "Disable": [
+            "Deaktivieren"
+         ],
+         "Disable XML-RPC": [
+            "Deaktiviere XML-RPC"
+         ],
+         "Disable Embed Scripts": [
+            "Deaktiviere Embed Scripts"
+         ],
+         "Disable DB Debug in Frontend": [
+            "Deaktiviere DB Debug"
+         ],
+         "Disable WLW Manifest Scripts": [
+            "Deaktiviere WLW Manifest Scripts"
+         ],
          "Use search?": [
             "Suche benutzen?"
          ],
@@ -685,6 +835,24 @@
          "Decide wich search type you want to use. Fuse runs locally based on file and Algolia is an external API service.": [
             "Entscheide dich für deinen Suche-Typ. Fuse.js nutzt eine lokale JSON Datei und Algolia ist ein externer API-Service."
          ],
+         "How to select data with meta tags": [
+            "Wie man Daten aus Metatags selektiert"
+         ],
+         "Targeting for excerpt in the meta description tag.": [
+            "Ziel für das Excerpt im Meta-Description-Tag."
+         ],
+         "Adding such meta in the excerpt field would be:": [
+            "Ein Beispiel dafür würde wie folgt aussehen:"
+         ],
+         "Targeting for title in the property meta tag.": [
+            "Ziel für den Title im Meta-Description-Tag."
+         ],
+         "If the second item (after | ) is not <code>content</code>, we'll use it as value of that attribute (<code>property=\"og:title\"</code> in this example) and use <code>content</code> for value.": [
+            "Wenn das zweite Element (nach | ) nicht <code>content</code> ist, nutzen wir den Wert dieses Attributs (<code>property=\"og:title\"</code>in diesem Beispiel <code>content</code> als Wert."
+         ],
+         "Caution: Use meta tags that exist everywhere for title.": [
+            "Warnung: Nutze Meta-Tags die überall für den Titel existieren."
+         ],
          "Indexing": [
             "Indexierung"
          ],
@@ -693,6 +861,9 @@
          ],
          "Add the CSS selector which contains the title of the page/post": [
             "Trage den CSS-Selector ein der den Titel der Seite enthält."
+         ],
+         "Or meta tags. Click for more information.": [
+            "Oder Meta-Tags. Klicke für mehr Informationen."
          ],
          "CSS-Selector for Content": [
             "CSS-Selector für den Inhalt"
@@ -757,9 +928,6 @@
          "Migrate all of your settings to Simply Static 3.0": [
             "Migriere alle Einstellungen zu Simply Static 3.0"
          ],
-         "Migrate settings": [
-            "Einstellungen migrieren"
-         ],
          "Settings migration successfully.": [
             "Migration erfolgreich abgeschlossen."
          ],
@@ -775,14 +943,8 @@
          "Copy export data": [
             "Kopiere Export-Daten"
          ],
-         "Import": [
-            "Import"
-         ],
          "Paste in the JSON string you got from your export to import all settings for the plugin.": [
             "Füge den JSON-String aus dem Export hier ein und importiere deine Einstellungen."
-         ],
-         "Import Settings": [
-            "Import-Einstellungen"
          ],
          "Settings imported successfully.": [
             "Einstellungen erfolgreich importiert."
@@ -834,6 +996,9 @@
          ],
          "WP-CRON": [
             "WP-CRON"
+         ],
+         "WP REST API": [
+            "WP REST API"
          ],
          "Requests to itself": [
             "Anfragen zu sich selbst"
@@ -906,6 +1071,12 @@
          ],
          "WordPress cron is not available and not running": [
             "Es gibt ein Problem mit WP-Cron"
+         ],
+         "Rest API is available and running": [
+            "Rest API ist verfügbar und aktiviert"
+         ],
+         "Rest API is disabled or blocked": [
+            "Rest API ist deaktiviert oder blockiert"
          ],
          "WordPress can make requests to itself from %s": [
             "WordPress kann Anfragen ans sich selbst von %s stellen"
@@ -994,6 +1165,18 @@
          "Received a %s response.": [
             "Es wurde eine %s Antwort erhalten."
          ],
+         "Site link of %s": [
+            "Seiten-Link von %s"
+         ],
+         "Visit site": [
+            "Seite ansehen"
+         ],
+         "(opens in a new tab)": [
+            "(öffnet sich in einem neuen Tab)"
+         ],
+         "Simply Static Compatible": [
+            "Simply Static kompatibel"
+         ],
          "Found on %s": [
             "Gefunden auf %s"
          ],
@@ -1024,66 +1207,6 @@
          "Elementor Pro Lottie": [
             "Elementor Pro Lottie"
          ],
-         "Your website is successfully connected to the Simply CDN.": [
-            "Deine Website wurde erfolgreich mit Simply CDN verbunden."
-         ],
-         "Cache cleared successfully.": [
-            "Cache erfolgreich gelöscht."
-         ],
-         "Configure your static website": [
-            "Konfiguriere deine statische Website"
-         ],
-         "Once your website is connected you can configure all settings related to the CDN here. This includes settings up redirects, proxy URLs and setting up a custom 404 error page.": [
-            "Sobald du eine Verbindung mit Simply CDN aufgebaut hast, kann du deine statische Seite hier konfigurieren."
-         ],
-         "This is your static site URL. We automatically change it based on your project configuration on simplycdn.io": [
-            "Das ist deine statische URL. Wir ändern dies automatisch basierend auf deinen Projekt-Einstellungen auf simplycdn.io"
-         ],
-         "Relative path to your 404 page": [
-            "Relativer Pfad zur deiner 404-Seite"
-         ],
-         "Forms integration": [
-            "Formular-Integration"
-         ],
-         "We automatically send form submissions to the configured e-mail address of your project from message@simplycdn.io.": [
-            "Wir senden dir automatisch eine E-Mail sobald jemand dein Formular ausfüllt."
-         ],
-         "Make sure to add your form token as a hidden field to each form of your website.": [
-            "Stelle sicher, dass du den Formular-Token als verstecktes Feld in deinem Formular hinterlegst."
-         ],
-         "Your form token: ": [
-            "Dein Formular-Token: "
-         ],
-         "Use Forms integration": [
-            "Nutze Formular-Integration"
-         ],
-         "Automation & Utilities": [
-            "Automatisierung & Werkzeuge"
-         ],
-         "Automatically updates a post/page on your static website once you saved it in WordPress.": [
-            "Aktualisiere deine statische Seite sobald du einen Beitrag oder Seite in WordPress speicherst."
-         ],
-         "Use Auto-Publish": [
-            "Nutze Auto-Publishing"
-         ],
-         "Caching": [
-            "Caching"
-         ],
-         "The CDN cache is cleared automatically after each static export. Sometimes you want to clear the cache manually to make sure you get the latest results in your browser.": [
-            "Der CDN-Cache leert sich automatisch nach jedem statischen Export. Wenn du den Cache manuell löschen möchtest, kannst du das hier tun."
-         ],
-         "Clear Cache": [
-            "Cache löschen"
-         ],
-         "View static URL": [
-            "Statische URL ansehen"
-         ],
-         "There is something wrong with that security token.": [
-            "Etwas stimmt mit deinem Security Token nicht."
-         ],
-         "Additional URL": [
-            "Zusätzliche URL"
-         ],
          "Cancelling job": [
             "Ausführung wird abgebrochen"
          ],
@@ -1108,11 +1231,20 @@
          "Do not save": [
             "Nicht speichern"
          ],
+         "Generating 404 Page.": [
+            "Generiere 404-Fehlerseite."
+         ],
+         "404 Page generated": [
+            "404 Fehlerseite generiert"
+         ],
          "Setting up": [
             "Einstellen"
          ],
-         "Origin URL": [
-            "Haupt-URL"
+         "Cannot create archive directory %s": [
+            "Konnte die Datei bzw. das Verzeichnis nicht erstellen: %s"
+         ],
+         "Additional URL": [
+            "Zusätzliche URL"
          ],
          "Additional File": [
             "Zusätzliche Datei"
@@ -1120,11 +1252,14 @@
          "Additional Dir": [
             "Zusätzliches Verzeichnis"
          ],
-         "Uploaded %d of %d pages/files": [
-            "%d von %d Seiten/Dateien aktualisiert"
+         "Uploading %d of %d pages/files": [
+            "%d von %d Seiten/Dateien hochgeladen"
          ],
          "Destination URL:": [
             "Ziel-URL:"
+         ],
+         "Uploaded %d of %d pages/files": [
+            "%d von %d Seiten/Dateien aktualisiert"
          ],
          "Copied %d of %d files": [
             "%d von %d Dateien kopiert"
