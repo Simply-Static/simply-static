@@ -121,20 +121,36 @@ Simply Static Pro has a detailed and comprehensive integration with WP-CLI.
 
 Control every option, run different kinds of exports and more with the WP-CLI integration.
 
-
-= Multisite =
-
-Export your entire network, subsites, change settings on the network level and more.
-
-The multisite integration of Simply Static Pro brings your static network to the next level.
-
-
 = Minification =
 
 Automatically minfiy HTML, CSS and JavaScript files on your static site.
 
 We can even minify inline CSS & JavaScript.
 
+= Optimization =
+
+Replace default WordPress paths and completely hide that you are using WordPress behind the scenes.
+
+Replace:
+
+* wp-content
+* wp-includes
+* wp-content/plugins/
+* wp-content/themes/
+* wp-content/uploads/
+
+
+Hide & Disable:
+
+Disabled unwanted features in WordPress before running an static export like:
+
+* XML-RPC
+* REST API URLs
+* Emoji support
+* Shortlink support
+* WordPress version in HTML
+
+and much more.
 
 = Get the Pro version =
 
