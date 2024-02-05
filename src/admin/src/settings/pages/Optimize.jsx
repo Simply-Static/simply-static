@@ -267,36 +267,34 @@ function Optimize() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('Change', 'simply-static')}</b>
+                <b>{__('Replace', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
                 <TextControl
-                    label={__('Folder wp-content', 'simply-static')}
-                    help={  __('Change the folder wp-content', 'simply-static') }
+                    label={__('wp-content directory', 'simply-static')}
+                    help={  __('Replace the "wp-content" directory.', 'simply-static') }
                     type={"text"}
                     placeholder={"wp-content"}
                     value={wpContentFolder}
                     onChange={(folder) => {
-                        setWpIncludesFolder(folder);
                         updateSetting('wp_content_folder', folder);
                     }}
                 />
 
                 <TextControl
-                    label={__('Folder wp-includes', 'simply-static')}
-                    help={  __('Change the folder wp-includes', 'simply-static') }
+                    label={__('wp-includes directory', 'simply-static')}
+                    help={  __('Replace the "wp-includes" directory.', 'simply-static') }
                     type={"text"}
                     placeholder={"wp-includes"}
                     value={wpIncludesFolder}
                     onChange={(folder) => {
-                        setWpContentFolder(folder);
                         updateSetting('wp_includes_folder', folder);
                     }}
                 />
 
                 <TextControl
-                    label={__('Folder uploads', 'simply-static')}
-                    help={  __('Change the folder uploads', 'simply-static') }
+                    label={__('uploads directory', 'simply-static')}
+                    help={  __('Replace the "wp-content/uploads" directory.', 'simply-static') }
                     type={"text"}
                     placeholder={"uploads"}
                     value={wpUploadsFolder}
@@ -307,8 +305,8 @@ function Optimize() {
                 />
 
                 <TextControl
-                    label={__('Folder plugins', 'simply-static')}
-                    help={  __('Change the folder plugins', 'simply-static') }
+                    label={__('plugins directory', 'simply-static')}
+                    help={  __('Replace the "wp-content/plugins" directory.', 'simply-static') }
                     type={"text"}
                     placeholder={"plugins"}
                     value={wpPluginsFolder}
@@ -319,11 +317,11 @@ function Optimize() {
                 />
 
                 <ToggleControl
-                    label={__('Rename Plugin Names?', 'simply-static')}
+                    label={__('Replace Plugin Names?', 'simply-static')}
                     help={
                         renamePluginFolders
-                            ? __('Rename.', 'simply-static')
-                            : __('Keep original.', 'simply-static')
+                            ? __('Replace plugin names with a random string combinations.', 'simply-static')
+                            : __('Keep plugin names.', 'simply-static')
                     }
                     checked={renamePluginFolders}
                     onChange={(value) => {
@@ -333,8 +331,8 @@ function Optimize() {
                 />
 
                 <TextControl
-                    label={__('Folder themes', 'simply-static')}
-                    help={  __('Change the folder themes', 'simply-static') }
+                    label={__('themes directory', 'simply-static')}
+                    help={  __('Replace the "wp-content/themes" directory.', 'simply-static') }
                     type={"text"}
                     placeholder={"themes"}
                     value={wpThemesFolder}
@@ -346,7 +344,7 @@ function Optimize() {
 
                 <InputControl
                     label={__('Theme style name', 'simply-static')}
-                    help={  __('Change the style.css name', 'simply-static') }
+                    help={  __('Replace the style.css filename.', 'simply-static') }
                     type={"text"}
                     className={"ss-theme-style-name"}
                     suffix={'.css'}
@@ -360,7 +358,7 @@ function Optimize() {
 
                 <TextControl
                     label={__('Author URL', 'simply-static')}
-                    help={  __('Change the author url', 'simply-static') }
+                    help={  __('Replace the author url.', 'simply-static') }
                     type={"text"}
                     placeholder={"author"}
                     value={authorUrl}
@@ -381,11 +379,6 @@ function Optimize() {
 
                 <ToggleControl
                     label={__('Hide REST API URLs', 'simply-static')}
-                    help={
-                        hideRESTAPI
-                            ? __('Hide.', 'simply-static')
-                            : __('Show.', 'simply-static')
-                    }
                     checked={hideRESTAPI}
                     onChange={(value) => {
                         setHideRESTAPI(value);
@@ -395,11 +388,6 @@ function Optimize() {
 
                 <ToggleControl
                     label={__('Hide Style/Script IDs', 'simply-static')}
-                    help={
-                        hideStyleId
-                            ? __('Hide.', 'simply-static')
-                            : __('Show.', 'simply-static')
-                    }
                     checked={hideStyleId}
                     onChange={(value) => {
                         setHideStyleId(value);
@@ -409,11 +397,6 @@ function Optimize() {
 
                 <ToggleControl
                     label={__('Hide HTML Comments', 'simply-static')}
-                    help={
-                        hideComments
-                            ? __('Hide.', 'simply-static')
-                            : __('Show.', 'simply-static')
-                    }
                     checked={hideComments}
                     onChange={(value) => {
                         setHideComments(value);
@@ -423,11 +406,6 @@ function Optimize() {
 
                 <ToggleControl
                     label={__('Hide WordPress Version', 'simply-static')}
-                    help={
-                        hideVersion
-                            ? __('Hide.', 'simply-static')
-                            : __('Show.', 'simply-static')
-                    }
                     checked={hideVersion}
                     onChange={(value) => {
                         setHideVersion(value);
@@ -437,11 +415,6 @@ function Optimize() {
 
                 <ToggleControl
                     label={__('Hide WordPress Generator Meta', 'simply-static')}
-                    help={
-                        hideGenerator
-                            ? __('Hide.', 'simply-static')
-                            : __('Show.', 'simply-static')
-                    }
                     checked={hideGenerator}
                     onChange={(value) => {
                         setHideGenerator(value);
@@ -451,11 +424,6 @@ function Optimize() {
 
                 <ToggleControl
                     label={__('Hide DNS Prefetch WordPress link', 'simply-static')}
-                    help={
-                        hidePrefetch
-                            ? __('Hide.', 'simply-static')
-                            : __('Show.', 'simply-static')
-                    }
                     checked={hidePrefetch}
                     onChange={(value) => {
                         setHidePrefetch(value);
@@ -465,11 +433,6 @@ function Optimize() {
 
                 <ToggleControl
                     label={__('Hide RSD Header', 'simply-static')}
-                    help={
-                        hideRSD
-                            ? __('Hide.', 'simply-static')
-                            : __('Show.', 'simply-static')
-                    }
                     checked={hideRSD}
                     onChange={(value) => {
                         setHideRSD(value);
@@ -479,11 +442,6 @@ function Optimize() {
 
                 <ToggleControl
                     label={__('Hide Emojis if you don\'t use them', 'simply-static')}
-                    help={
-                        hideEmojis
-                            ? __('Hide.', 'simply-static')
-                            : __('Show.', 'simply-static')
-                    }
                     checked={hideEmojis}
                     onChange={(value) => {
                         setHideEmojis(value);
@@ -502,11 +460,6 @@ function Optimize() {
 
                 <ToggleControl
                     label={__('Disable XML-RPC', 'simply-static')}
-                    help={
-                        disableXMLRPC
-                            ? __('Hide.', 'simply-static')
-                            : __('Show.', 'simply-static')
-                    }
                     checked={disableXMLRPC}
                     onChange={(value) => {
                         setDisableXMLRPC(value);
@@ -516,11 +469,6 @@ function Optimize() {
 
                 <ToggleControl
                     label={__('Disable Embed Scripts', 'simply-static')}
-                    help={
-                        disableEmbed
-                            ? __('Hide.', 'simply-static')
-                            : __('Show.', 'simply-static')
-                    }
                     checked={disableEmbed}
                     onChange={(value) => {
                         setDisableEmbed(value);
@@ -530,11 +478,6 @@ function Optimize() {
 
                 <ToggleControl
                     label={__('Disable DB Debug in Frontend', 'simply-static')}
-                    help={
-                        disableDbDebug
-                            ? __('Hide.', 'simply-static')
-                            : __('Show.', 'simply-static')
-                    }
                     checked={disableDbDebug}
                     onChange={(value) => {
                         setDisableDbDebug(value);
@@ -544,11 +487,6 @@ function Optimize() {
 
                 <ToggleControl
                     label={__('Disable WLW Manifest Scripts', 'simply-static')}
-                    help={
-                        disableWLW
-                            ? __('Hide.', 'simply-static')
-                            : __('Show.', 'simply-static')
-                    }
                     checked={disableWLW}
                     onChange={(value) => {
                         setDisableWLW(value);
