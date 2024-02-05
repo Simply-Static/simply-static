@@ -22,12 +22,12 @@ function Optimize() {
     const [minifyInlineCss, setMinifyInlineCss] = useState(false);
     const [minifyJavascript, setMinifyJavascript] = useState(false);
     const [minifyInlineJavascript, setMinifyInlineJavascript] = useState(false);
-    const [renamePluginFolders, setRenamePluginFolders] = useState(false);
-    const [wpContentFolder, setWpContentFolder] = useState('wp-content');
-    const [wpIncludesFolder, setWpIncludesFolder] = useState('wp-includes');
-    const [wpUploadsFolder, setWpUploadsFolder] = useState('wp-content/uploads');
-    const [wpPluginsFolder, setWpPluginsFolder] = useState('wp-content/plugins');
-    const [wpThemesFolder, setWpThemesFolder] = useState('wp-content/themes');
+    const [renamePlugin, setRenamePlugin] = useState(false);
+    const [wpContentDirectory, setWpContentDirectory] = useState('wp-content');
+    const [wpIncludesDirectory, setWpIncludesDirectory] = useState('wp-includes');
+    const [wpUploadsDirectory, setWpUploadsDirectory] = useState('wp-content/uploads');
+    const [wpPluginsDirectory, setWpPluginsDirectory] = useState('wp-content/plugins');
+    const [wpThemesDirectory, setWpThemesDirectory] = useState('wp-content/themes');
     const [themeStyleName, setThemeStyleName] = useState('style');
     const [authorUrl, setAuthorUrl] = useState('author');
     const [hideRESTAPI, setHideRESTAPI] = useState(false);
@@ -80,28 +80,28 @@ function Optimize() {
             setMinifyInlineJavascript(settings.minify_inline_js);
         }
 
-        if (settings.wp_content_folder) {
-            setWpContentFolder(settings.wp_content_folder);
+        if (settings.wp_content_directory) {
+            setWpContentDirectory(settings.wp_content_directory);
         }
 
-        if (settings.wp_includes_folder) {
-            setWpIncludesFolder(settings.wp_includes_folder);
+        if (settings.wp_includes_directory) {
+            setWpIncludesDirectory(settings.wp_includes_directory);
         }
 
-        if (settings.wp_uploads_folder) {
-            setWpUploadsFolder(settings.wp_uploads_folder);
+        if (settings.wp_uploads_directory) {
+            setWpUploadsDirectory(settings.wp_uploads_directory);
         }
 
-        if (settings.wp_plugins_folder) {
-            setWpPluginsFolder(settings.wp_plugins_folder);
+        if (settings.wp_plugins_directory) {
+            setWpPluginsDirectory(settings.wp_plugins_directory);
         }
 
-        if (settings.rename_plugin_folders) {
-            setRenamePluginFolders(settings.rename_plugin_folders);
+        if (settings.rename_plugin_directories) {
+            setRenamePluginDirectorys(settings.rename_plugin_directories);
         }
 
-        if (settings.wp_themes_folder) {
-            setWpThemesFolder(settings.wp_themes_folder);
+        if (settings.wp_themes_directory) {
+            setWpThemesDirectory(settings.wp_themes_directory);
         }
 
         if (settings.theme_style_name) {
@@ -275,9 +275,9 @@ function Optimize() {
                     help={  __('Replace the "wp-content" directory.', 'simply-static') }
                     type={"text"}
                     placeholder={"wp-content"}
-                    value={wpContentFolder}
-                    onChange={(folder) => {
-                        updateSetting('wp_content_folder', folder);
+                    value={wpContentDirectory}
+                    onChange={(directory) => {
+                        updateSetting('wp_content_directory', directory);
                     }}
                 />
 
@@ -286,9 +286,9 @@ function Optimize() {
                     help={  __('Replace the "wp-includes" directory.', 'simply-static') }
                     type={"text"}
                     placeholder={"wp-includes"}
-                    value={wpIncludesFolder}
-                    onChange={(folder) => {
-                        updateSetting('wp_includes_folder', folder);
+                    value={wpIncludesDirectory}
+                    onChange={(directory) => {
+                        updateSetting('wp_includes_directory', directory);
                     }}
                 />
 
@@ -297,10 +297,10 @@ function Optimize() {
                     help={  __('Replace the "wp-content/uploads" directory.', 'simply-static') }
                     type={"text"}
                     placeholder={"uploads"}
-                    value={wpUploadsFolder}
-                    onChange={(folder) => {
-                        setWpUploadsFolder(folder);
-                        updateSetting('wp_uploads_folder', folder);
+                    value={wpUploadsDirectory}
+                    onChange={(directory) => {
+                        setWpUploadsDirectory(directory);
+                        updateSetting('wp_uploads_directory', directory);
                     }}
                 />
 
@@ -309,24 +309,24 @@ function Optimize() {
                     help={  __('Replace the "wp-content/plugins" directory.', 'simply-static') }
                     type={"text"}
                     placeholder={"plugins"}
-                    value={wpPluginsFolder}
-                    onChange={(folder) => {
-                        setWpPluginsFolder(folder);
-                        updateSetting('wp_plugins_folder', folder);
+                    value={wpPluginsDirectory}
+                    onChange={(directory) => {
+                        setWpPluginsDirectory(directory);
+                        updateSetting('wp_plugins_directory', directory);
                     }}
                 />
 
                 <ToggleControl
                     label={__('Replace Plugin Names?', 'simply-static')}
                     help={
-                        renamePluginFolders
+                        renamePlugin
                             ? __('Replace plugin names with a random string combinations.', 'simply-static')
                             : __('Keep plugin names.', 'simply-static')
                     }
-                    checked={renamePluginFolders}
+                    checked={renamePlugin}
                     onChange={(value) => {
-                        setRenamePluginFolders(value);
-                        updateSetting('rename_plugin_folders', value);
+                        setRenamePlugin(value);
+                        updateSetting('rename_plugins', value);
                     }}
                 />
 
@@ -335,10 +335,10 @@ function Optimize() {
                     help={  __('Replace the "wp-content/themes" directory.', 'simply-static') }
                     type={"text"}
                     placeholder={"themes"}
-                    value={wpThemesFolder}
-                    onChange={(folder) => {
-                        setWpThemesFolder(folder);
-                        updateSetting('wp_themes_folder', folder);
+                    value={wpThemesDirectory}
+                    onChange={(directory) => {
+                        setWpThemesDirectory(directory);
+                        updateSetting('wp_themes_directory', directory);
                     }}
                 />
 
