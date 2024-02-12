@@ -254,8 +254,8 @@ class Url_Fetcher {
 			'timeout'             => self::TIMEOUT,
 			'sslverify'           => false,
 			'redirection'         => 0, // disable redirection.
-			'blocking'            => false, // don't wait for the request to complete.
-			'limit_response_size' => 2097152, // 2 MB
+			'blocking'            => true,
+			'limit_response_size' => wp_max_upload_size(),
 		);
 
 		if ( $filename ) {
