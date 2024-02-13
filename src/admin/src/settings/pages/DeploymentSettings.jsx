@@ -100,6 +100,7 @@ function DeploymentSettings() {
                             {label: __('Simply CDN', 'simply-static'), value: 'simply-cdn'},
                             {label: __('Local Directory', 'simply-static'), value: 'local'},
                             {label: __('Digital Ocean Spaces', 'simply-static'), value: 'digitalocean'},
+                            {label: __('SFTP', 'simply-static'), value: 'sftp'},
                         ]}
                         onChange={(method) => {
                             setDeliveryMethod(method);
@@ -655,6 +656,58 @@ function DeploymentSettings() {
                                     </Notice>
                                 }
                             </p>
+                        </CardBody>
+                    </Card>
+                }
+                <Spacer margin={5}/>
+                {deliveryMethod === 'sftp' &&
+                    <Card>
+                        <CardHeader>
+                            <b>{__('SFTP', 'simply-static')}</b>
+                        </CardHeader>
+                        <CardBody>
+                            <TextControl
+                                label={__('Host', 'simply-static')}
+                                type={"text"}
+                                help={__('Enter your SFTP host.', 'simply-static')}
+                                value={settings.sftp_host}
+                                onChange={(host) => {
+                                    updateSetting('sftp_host', host);
+                                }}
+                            />
+
+                            <TextControl
+                                label={__('SFTP username', 'simply-static')}
+                                help={__('Enter your SFTP username.', 'simply-static')}
+                                type={"text"}
+                                placeholder={"username"}
+                                value={settings.sftp_user}
+                                onChange={(user) => {
+                                    updateSetting('sftp_user', user);
+                                }}
+                            />
+
+                            <TextControl
+                                label={__('SFTP password', 'simply-static')}
+                                type={"password"}
+                                help={__('Enter your SFTP password.', 'simply-static')}
+                                value={settings.sftp_pass}
+                                onChange={(pass) => {
+                                    updateSetting('sftp_pass', pass);
+                                }}
+                            />
+
+                            <TextControl
+                                label={__('SFTP folder', 'simply-static')}
+                                help={__('Leave empty to upload to the default SFTP folder. Enter a folder path where you want the static files to be uploaded to (example: "uploads" will upload to uploads folder. "uploads/new-folder" will upload files to "new-folder"). ', 'simply-static')}
+                                type={"text"}
+                                placeholder={""}
+                                value={settings.sftp_folder}
+                                onChange={(folder) => {
+                                    updateSetting('sftp_folder', folder);
+                                }}
+                            />
+
                         </CardBody>
                     </Card>
                 }

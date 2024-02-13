@@ -105,7 +105,11 @@ function SettingsContextProvider(props) {
         'disable_xmlrpc': false,
         'disable_embed': false,
         'disable_db_debug': false,
-        'disable_wlw_manifest': false
+        'disable_wlw_manifest': false,
+        'sftp_host': '',
+        'sftp_user': '',
+        'sftp_pass': '',
+        'sftp_folder': ''
     }
     const [isRunning, setIsRunning] = useState(false);
     const [settingsSaved, setSettingsSaved] = useState(false);
