@@ -109,7 +109,8 @@ function SettingsContextProvider(props) {
         'sftp_host': '',
         'sftp_user': '',
         'sftp_pass': '',
-        'sftp_folder': ''
+        'sftp_folder': '',
+        'sftp_port': 22
     }
     const [isRunning, setIsRunning] = useState(false);
     const [settingsSaved, setSettingsSaved] = useState(false);

@@ -677,6 +677,16 @@ function DeploymentSettings() {
                             />
 
                             <TextControl
+                                label={__('Port', 'simply-static')}
+                                type={"number"}
+                                help={__('Enter your SFTP port.', 'simply-static')}
+                                value={settings.sftp_port}
+                                onChange={(port) => {
+                                    updateSetting('sftp_port', port);
+                                }}
+                            />
+
+                            <TextControl
                                 label={__('SFTP username', 'simply-static')}
                                 help={__('Enter your SFTP username.', 'simply-static')}
                                 type={"text"}
