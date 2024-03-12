@@ -213,6 +213,10 @@ class Query {
 		return $wpdb->get_var( $query );
 	}
 
+	public function get_raw_sql( $fields ) {
+		return $this->compose_select_query( $fields );
+	}
+
 	/**
 	 * Set the maximum number of rows to return
 	 * @param  integer $limit

@@ -105,7 +105,8 @@ function SettingsContextProvider(props) {
         'disable_xmlrpc': false,
         'disable_embed': false,
         'disable_db_debug': false,
-        'disable_wlw_manifest': false
+        'disable_wlw_manifest': false,
+        'incremental_export': false
     }
     const [isRunning, setIsRunning] = useState(false);
     const [settingsSaved, setSettingsSaved] = useState(false);

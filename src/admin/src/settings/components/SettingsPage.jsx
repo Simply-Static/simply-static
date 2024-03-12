@@ -17,7 +17,7 @@ import {
     CardBody,
     Spinner,
     Notice,
-    Animate, __experimentalSpacer as Spacer, SelectControl
+    Animate, __experimentalSpacer as Spacer, SelectControl, ToggleControl
 } from '@wordpress/components';
 import DeploymentSettings from "../pages/DeploymentSettings";
 import FormSettings from "../pages/FormSettings";
@@ -46,6 +46,7 @@ function SettingsPage() {
     const [selectedCopySite, setSelectedCopySite] = useState('current');
     const [selectablesSites, setSelectableSites] = useState([]);
     const [isUpdatingFromNetwork, setIsUpdatingFromNetwork] = useState(false);
+    const [selectedExportType, setSelectedExportType] = useState('export');
 
 
     const runUpdateFromNetwork = (blogId) => {
@@ -85,6 +86,7 @@ function SettingsPage() {
             method: 'POST',
             data: {
                 'blog_id': blogId,
+                'type': selectedExportType
             }
         }).then(resp => {
             setIsRunning(true);
@@ -148,6 +150,25 @@ function SettingsPage() {
                                     <p>Version: <b>{options.version}</b></p>
                                 }
                                 <div className={"generate-container"}>
+                                    {'pro' === options.plan && <p>
+                                        <SelectControl
+
+                                            value={selectedExportType}
+                                            options={[
+                                                {
+                                                    label:  __( 'Export', 'simply-static' ),
+                                                    value: 'export'
+                                                },
+                                                {
+                                                    label:  __( 'Update', 'simply-static' ),
+                                                    value: 'update'
+                                                }
+                                            ]}
+                                            onChange={(value) => {
+                                                setSelectedExportType(value);
+                                            }}
+                                        />
+                                    </p>}
                                     <Button onClick={() => {
                                         startExport();
                                     }}
@@ -198,6 +219,23 @@ function SettingsPage() {
                                     <p>Version: <b>{options.version}</b></p>
                                 }
                                 <div className={"generate-container"}>
+                                    {'pro' === options.plan && <SelectControl
+                                            className={'generate-type'}
+                                            value={selectedExportType}
+                                            options={[
+                                                {
+                                                    label:  __( 'Export', 'simply-static' ),
+                                                    value: 'export'
+                                                },
+                                                {
+                                                    label:  __( 'Update', 'simply-static' ),
+                                                    value: 'update'
+                                                }
+                                            ]}
+                                            onChange={(value) => {
+                                                setSelectedExportType(value);
+                                            }}
+                                        />}
                                     <Button onClick={() => {
                                         startExport();
                                     }}

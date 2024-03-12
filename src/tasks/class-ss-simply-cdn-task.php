@@ -6,6 +6,9 @@ namespace Simply_Static;
  * Class which upload files to SimplyCDN.
  */
 class Simply_Cdn_Task extends Task {
+
+	use canProcessPages;
+
 	/**
 	 * The task name.
 	 *
@@ -34,6 +37,8 @@ class Simply_Cdn_Task extends Task {
 	 */
 	private $temp_dir;
 
+	protected $cdn_path = '';
+
 	/**
 	 * Constructor
 	 */
@@ -47,6 +52,24 @@ class Simply_Cdn_Task extends Task {
 		$this->data     = Simply_CDN_Api::get_data( $ss_options['ssh_security_token'] );
 		$this->options  = $options;
 		$this->temp_dir = $options->get_archive_dir();
+
+		if ( ! empty( $this->cdn->data->cdn->sub_directory ) ) {
+			$this->cdn_path = $this->cdn->data->cdn->sub_directory . '/';
+		}
+	}
+
+	protected function process_page( $static_page ) {
+		$file_path = $this->temp_dir . $static_page->file_path;
+
+		if ( ! is_dir( $file_path ) && file_exists( $file_path ) ) {
+			$this->cdn->upload_file( $this->data->cdn->access_key, $this->data->cdn->pull_zone->name, $this->cdn_path . $static_page->file_path, $file_path );
+			Util::debug_log( "Uploading: " . $file_path );
+		}
+
+		do_action( 'ss_file_transferred_to_cdn', $static_page, $this->temp_dir );
+
+		$static_page->last_transferred_at = Util::formatted_datetime();
+		$static_page->save();
 	}
 
 	/**
@@ -55,8 +78,9 @@ class Simply_Cdn_Task extends Task {
 	 * @return boolean true if done, false if not done.
 	 */
 	public function perform() {
-		list( $pages_processed, $total_pages ) = $this->upload_static_files( $this->temp_dir );
+		$done = $this->process_pages();
 
+		/*
 		if ( $pages_processed !== 0 ) {
 			$message = sprintf( __( "Uploading %d of %d pages/files", 'simply-static' ), $pages_processed, $total_pages );
 			$this->save_status_message( $message );
@@ -72,9 +96,15 @@ class Simply_Cdn_Task extends Task {
 				$this->save_status_message( $message );
 			}
 		}
+*/
+		if ( $done ) {
 
-		// return true when done (no more pages).
-		if ( $pages_processed >= $total_pages ) {
+			if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
+				$destination_url = trailingslashit( $this->options->get_destination_url() );
+				$message         = __( 'Destination URL:', 'simply-static' ) . ' <a href="' . $destination_url . '" target="_blank">' . $destination_url . '</a>';
+				$this->save_status_message( $message, 'destination_url' );
+			}
+
 			do_action( 'ss_finished_cdn_transfer', $this->temp_dir );
 
 			// Maybe add 404.
@@ -82,9 +112,12 @@ class Simply_Cdn_Task extends Task {
 
 			// Clear cache.
 			Simply_CDN_Api::clear_cache();
+
+
+			self::delete_transients();
 		}
 
-		return $pages_processed >= $total_pages;
+		return $done;
 	}
 
 	/**
