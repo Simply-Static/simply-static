@@ -6,6 +6,9 @@ namespace Simply_Static;
  * Class which upload files to SimplyCDN.
  */
 class Simply_Cdn_Task extends Task {
+
+	use canTransfer;
+
 	/**
 	 * The task name.
 	 *
@@ -122,10 +125,11 @@ class Simply_Cdn_Task extends Task {
 		Util::debug_log( "Total pages: " . $total_pages . '; Pages remaining: ' . $pages_remaining );
 
 		while ( $static_page = array_shift( $static_pages ) ) {
-			$file_path = $this->temp_dir . $static_page->file_path;
+			$page_file_path = $this->get_page_file_path( $static_page );
+			$file_path = $this->temp_dir . $page_file_path;
 
 			if ( ! is_dir( $file_path ) && file_exists( $file_path ) ) {
-				$this->cdn->upload_file( $this->data->cdn->access_key, $this->data->cdn->pull_zone->name, $cdn_path . $static_page->file_path, $file_path );
+				$this->cdn->upload_file( $this->data->cdn->access_key, $this->data->cdn->pull_zone->name, $cdn_path . $page_file_path, $file_path );
 				Util::debug_log( "Uploading: " . $file_path );
 			}
 

@@ -7,6 +7,8 @@ namespace Simply_Static;
  */
 class Transfer_Files_Locally_Task extends Task {
 
+	use canTransfer;
+
 	/**
 	 * Task name.
 	 *
@@ -75,7 +77,8 @@ class Transfer_Files_Locally_Task extends Task {
 		Util::debug_log( "Total pages: " . $total_pages . '; Pages remaining: ' . $pages_remaining );
 
 		while ( $static_page = array_shift( $static_pages ) ) {
-			$path_info = Util::url_path_info( $static_page->file_path );
+			$file_path = $this->get_page_file_path( $static_page );
+			$path_info = Util::url_path_info( $file_path );
 			$path      = Util::combine_path( $destination_dir, $path_info['dirname'] );
 
 			if ( wp_mkdir_p( $path ) === false ) {
@@ -83,8 +86,8 @@ class Transfer_Files_Locally_Task extends Task {
 				$static_page->set_error_message( 'Unable to create destination directory' );
 			} else {
 				chmod( $path, 0755 );
-				$origin_file_path      = Util::combine_path( $archive_dir, $static_page->file_path );
-				$destination_file_path = Util::combine_path( $destination_dir, $static_page->file_path );
+				$origin_file_path      = Util::combine_path( $archive_dir, $file_path );
+				$destination_file_path = Util::combine_path( $destination_dir, $file_path );
 
 				// check that destination file doesn't exist OR exists but is writeable
 				if ( ! file_exists( $destination_file_path ) || is_writable( $destination_file_path ) ) {
