@@ -96,8 +96,8 @@ function Optimize() {
             setWpPluginsDirectory(settings.wp_plugins_directory);
         }
 
-        if (settings.rename_plugin_directories) {
-            setRenamePluginDirectorys(settings.rename_plugin_directories);
+        if (settings.rename_plugins) {
+            setRenamePlugin(settings.rename_plugins);
         }
 
         if (settings.wp_themes_directory) {
