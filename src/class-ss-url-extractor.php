@@ -397,6 +397,9 @@ class Url_Extractor {
 				$this
 			);
 
+			// Further manipulate Dom?
+			$dom = apply_filters( 'ss_dom_before_save', $dom, $this->static_page->url );
+
 			return $dom->save();
 		}
 	}
