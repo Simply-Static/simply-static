@@ -6,7 +6,7 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl, SelectControl, ToggleControl,
+    TextControl, SelectControl, ToggleControl, TextareaControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -133,6 +133,33 @@ function FormSettings() {
                     onChange={(method) => {
                         setCorsMethod(method);
                         updateSetting('fix_cors', method);
+                    }}
+                />
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <b>{__('iFrame', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
+                <p>
+                    {__('We replace the HTML of the URLs with an iFrame that embeds the content directly from your WordPress website.', 'simply-static')}<br></br>
+                    {__('This way you can use dynamic elements on your static website without the need of a specific integration.', 'simply-static')}
+                </p>
+                <Notice status="warning" isDismissible={false}>
+                    <p>
+                        {__('This requires your WordPress website to be online all the time.', 'simply-static')}
+                    </p>
+                </Notice>
+                <Spacer margin={5}/>
+                <TextareaControl
+                    label={__('URLs to embed as an iFrame', 'simply-static')}
+                    placeholder={options.home + "/my-form-page/"}
+                    help={__('If you want to embed specific pages from your WordPress website into your static website, add the URLs here (one per line).', 'simply-static')}
+                    value={settings.iframe_urls}
+                    onChange={(value) => {
+                        updateSetting('iframe_urls', value);
                     }}
                 />
             </CardBody>
