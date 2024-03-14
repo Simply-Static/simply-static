@@ -28,6 +28,7 @@ function SettingsContextProvider(props) {
         'clear_directory_before_export': false,
         'ssh_security_token': '',
         'ssh_use_forms': true,
+        'iframe_urls': '',
         'ssh_404_page_id': '',
         'ssh_thank_you_page_id': '',
         'tiiny_email': options.admin_email,
@@ -106,7 +107,12 @@ function SettingsContextProvider(props) {
         'disable_embed': false,
         'disable_db_debug': false,
         'disable_wlw_manifest': false,
-        'incremental_export': false
+        'incremental_export': false,
+        'sftp_host': '',
+        'sftp_user': '',
+        'sftp_pass': '',
+        'sftp_folder': '',
+        'sftp_port': 22
     }
     const [isRunning, setIsRunning] = useState(false);
     const [settingsSaved, setSettingsSaved] = useState(false);

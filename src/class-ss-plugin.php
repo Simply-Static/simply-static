@@ -143,6 +143,7 @@ class Plugin {
 		require_once $path . 'src/class-ss-url-fetcher.php';
 		require_once $path . 'src/class-ss-archive-creation-job.php';
 		require_once $path . 'src/tasks/traits/trait-can-process-pages.php';
+		require_once $path . 'src/tasks/traits/trait-can-transfer.php';
 		require_once $path . 'src/tasks/class-ss-task.php';
 		require_once $path . 'src/tasks/class-ss-setup-task.php';
 		require_once $path . 'src/tasks/class-ss-fetch-urls-task.php';
@@ -372,8 +373,12 @@ class Plugin {
 	 * @return void
 	 */
 	public function maybe_clear_directory() {
+		// Check the export type.
+		$use_single = get_option( 'simply-static-use-single' );
+		$use_build  = get_option( 'simply-static-use-build' );
+
 		// Clear out the local directory before copying files.
-		if ( $this->options->get( 'clear_directory_before_export' ) && 'local' === $this->options->get( 'delivery_method' ) ) {
+		if ( empty( $use_build ) && empty( $use_single ) && $this->options->get( 'clear_directory_before_export' ) && 'local' === $this->options->get( 'delivery_method' ) ) {
 			$local_dir = apply_filters( 'ss_local_dir', $this->options->get( 'local_dir' ) );
 
 			// Make sure the directory exists and is not empty.
