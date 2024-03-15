@@ -8,8 +8,6 @@ namespace Simply_Static;
 class Simply_Cdn_Task extends Task {
 
 	use canProcessPages;
-
-
 	use canTransfer;
 
 	/**
@@ -84,23 +82,6 @@ class Simply_Cdn_Task extends Task {
 	public function perform() {
 		$done = $this->process_pages();
 
-		/*
-		if ( $pages_processed !== 0 ) {
-			$message = sprintf( __( "Uploading %d of %d pages/files", 'simply-static' ), $pages_processed, $total_pages );
-			$this->save_status_message( $message );
-		}
-
-		if ( $pages_processed >= $total_pages ) {
-			if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
-				$destination_url = trailingslashit( $this->options->get_destination_url() );
-				$message         = __( 'Destination URL:', 'simply-static' ) . ' <a href="' . $destination_url . '" target="_blank">' . $destination_url . '</a>';
-				$this->save_status_message( $message, 'destination_url' );
-			} else {
-				$message = sprintf( __( "Uploaded %d of %d pages/files", 'simply-static' ), $pages_processed, $total_pages );
-				$this->save_status_message( $message );
-			}
-		}
-*/
 		if ( $done ) {
 
 			if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
@@ -128,6 +109,8 @@ class Simply_Cdn_Task extends Task {
 	 * Upload files to CDN.
 	 *
 	 * @param string $destination_dir The directory to put the files..
+	 *
+	 * @deprecated Using process_page.
 	 *
 	 * @return array
 	 */

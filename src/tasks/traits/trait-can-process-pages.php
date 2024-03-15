@@ -121,7 +121,7 @@ trait canProcessPages {
 	 * @return string
 	 */
 	protected function processing_pages_message( $to_process, $total ) {
-		return sprintf( __( "Processing %d of %d files", 'simply-static' ), $to_process, $total );
+		return sprintf( __( "Uploading %d of %d files", 'simply-static' ), $to_process, $total );
 	}
 
 	/**
@@ -133,7 +133,7 @@ trait canProcessPages {
 	 * @return string
 	 */
 	protected function processed_pages_message( $processed, $total ) {
-		return sprintf( __( "Processed %d of %d files", 'simply-static' ), $processed, $total );
+		return sprintf( __( "Uploaded %d of %d files", 'simply-static' ), $processed, $total );
 	}
 
 	/**
