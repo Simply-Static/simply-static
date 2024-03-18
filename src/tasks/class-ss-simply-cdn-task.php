@@ -98,7 +98,6 @@ class Simply_Cdn_Task extends Task {
 			// Clear cache.
 			Simply_CDN_Api::clear_cache();
 
-
 			self::delete_transients();
 		}
 
