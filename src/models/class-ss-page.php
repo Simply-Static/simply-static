@@ -111,7 +111,8 @@ class Page extends Model {
 	 * @return boolean          Is the hash a match?
 	 */
 	public function is_content_identical( $sha1 ) {
-		return $sha1 === $this->content_hash;
+		Util::debug_log('Checking Content Identical:' . $sha1 . '===' . $this->content_hash . '. Value: ' . ( strpos( $sha1, $this->content_hash ) === 0 ? 'TRUE' : 'FALSE' ) );
+		return strpos( $sha1, $this->content_hash ) === 0;
 	}
 
 	/**
@@ -133,11 +134,27 @@ class Page extends Model {
 	 * @param string $message The error message.
 	 */
 	public function set_error_message( $message ) {
+		// Already has the same message.
+		if ( $this->has_error_message( $message ) ) {
+			return;
+		}
+
 		if ( $this->error_message ) {
 			$this->error_message = $this->error_message . '; ' . $message;
 		} else {
 			$this->error_message = $message;
 		}
+	}
+
+	protected function has_error_message( $message ) {
+		if ( ! $this->error_message ) {
+			return false;
+		}
+
+		$errors = explode( '; ', $this->error_message );
+		$index  = array_search( $message, $errors, true );
+
+		return false !== $index && $index >= 0;
 	}
 
 	/**

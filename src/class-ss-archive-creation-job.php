@@ -70,7 +70,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 * Helper method for starting the Archive_Creation_Job
 	 * @return boolean true if we were able to successfully start generating an archive
 	 */
-	public function start( $blog_id = 0 ) {
+	public function start( $blog_id = 0, $type = 'export' ) {
 		// Clear log before running the job.
 		Util::clear_debug_log();
 
@@ -86,13 +86,17 @@ class Archive_Creation_Job extends \WP_Background_Process {
 			do_action( 'ss_archive_creation_job_before_start_queue', $blog_id, $this );
 
 			$first_task   = $task_list[0];
-			$archive_name = join( '-', array( Plugin::SLUG, $blog_id, time() ) );
+
+			if ( 'update' !== $type ) {
+				$archive_name = join( '-', array( Plugin::SLUG, $blog_id, time() ) );
+				$this->options->set( 'archive_name', $archive_name );
+			}
 
 			$this->options
 				->set( 'archive_status_messages', array() )
-				->set( 'archive_name', $archive_name )
 				->set( 'archive_start_time', Util::formatted_datetime() )
 				->set( 'archive_end_time', null )
+				->set( 'generate_type', $type )
 				->save();
 
 			Util::debug_log( "Pushing first task to queue: " . $first_task );
