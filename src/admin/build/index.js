@@ -545,6 +545,15 @@ function SettingsPage() {
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     setDisabledButton(isRunning);
   }, [isRunning]);
+  let buildOptions = '';
+  if (Object.keys(options.builds).length) {
+    const builds = Object.keys(options.builds).map(id => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("option", {
+      value: id
+    }, options.builds[id]));
+    buildOptions = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("optgroup", {
+      label: "Builds"
+    }, builds);
+  }
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "plugin-settings-container"
   }, 'yes' === options.need_upgrade ? (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Animate, {
@@ -572,17 +581,14 @@ function SettingsPage() {
     className: "generate-container"
   }, 'pro' === options.plan && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.SelectControl, {
     value: selectedExportType,
-    options: [{
-      label: __('Export', 'simply-static'),
-      value: 'export'
-    }, {
-      label: __('Update', 'simply-static'),
-      value: 'update'
-    }],
     onChange: value => {
       setSelectedExportType(value);
     }
-  })), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Button, {
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("option", {
+    value: "export"
+  }, __('Export', 'simply-static')), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("option", {
+    value: "update"
+  }, __('Update', 'simply-static')), buildOptions)), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Button, {
     onClick: () => {
       startExport();
     },
@@ -626,17 +632,14 @@ function SettingsPage() {
   }, 'pro' === options.plan && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.SelectControl, {
     className: 'generate-type',
     value: selectedExportType,
-    options: [{
-      label: __('Export', 'simply-static'),
-      value: 'export'
-    }, {
-      label: __('Update', 'simply-static'),
-      value: 'update'
-    }],
     onChange: value => {
       setSelectedExportType(value);
     }
-  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Button, {
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("option", {
+    value: "export"
+  }, __('Export', 'simply-static')), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("option", {
+    value: "update"
+  }, __('Update', 'simply-static')), buildOptions), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Button, {
     onClick: () => {
       startExport();
     },
@@ -857,6 +860,7 @@ function SettingsContextProvider(props) {
     'clear_directory_before_export': false,
     'ssh_security_token': '',
     'ssh_use_forms': true,
+    'iframe_urls': '',
     'ssh_404_page_id': '',
     'ssh_thank_you_page_id': '',
     'tiiny_email': options.admin_email,
@@ -935,7 +939,12 @@ function SettingsContextProvider(props) {
     'disable_embed': false,
     'disable_db_debug': false,
     'disable_wlw_manifest': false,
-    'incremental_export': false
+    'incremental_export': false,
+    'sftp_host': '',
+    'sftp_user': '',
+    'sftp_pass': '',
+    'sftp_folder': '',
+    'sftp_port': 22
   };
   const [isRunning, setIsRunning] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
   const [settingsSaved, setSettingsSaved] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
@@ -1160,6 +1169,9 @@ function DeploymentSettings() {
     }, {
       label: __('Digital Ocean Spaces', 'simply-static'),
       value: 'digitalocean'
+    }, {
+      label: __('SFTP', 'simply-static'),
+      value: 'sftp'
     }],
     onChange: method => {
       setDeliveryMethod(method);
@@ -1614,7 +1626,51 @@ function DeploymentSettings() {
   }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, settings.digitalocean_bucket && settings.digitalocean_region && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Notice, {
     status: "warning",
     isDismissible: false
-  }, __('Your endpoint will be', 'simply-static'), " :", 'https://' + settings.digitalocean_bucket + '.' + settings.digitalocean_region + '.digitaloceanspaces.com'))))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+  }, __('Your endpoint will be', 'simply-static'), " :", 'https://' + settings.digitalocean_bucket + '.' + settings.digitalocean_region + '.digitaloceanspaces.com')))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+    margin: 5
+  }), deliveryMethod === 'sftp' && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('SFTP', 'simply-static'))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+    label: __('Host', 'simply-static'),
+    type: "text",
+    help: __('Enter your SFTP host.', 'simply-static'),
+    value: settings.sftp_host,
+    onChange: host => {
+      updateSetting('sftp_host', host);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+    label: __('Port', 'simply-static'),
+    type: "number",
+    help: __('Enter your SFTP port.', 'simply-static'),
+    value: settings.sftp_port,
+    onChange: port => {
+      updateSetting('sftp_port', port);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+    label: __('SFTP username', 'simply-static'),
+    help: __('Enter your SFTP username.', 'simply-static'),
+    type: "text",
+    placeholder: "username",
+    value: settings.sftp_user,
+    onChange: user => {
+      updateSetting('sftp_user', user);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+    label: __('SFTP password', 'simply-static'),
+    type: "password",
+    help: __('Enter your SFTP password.', 'simply-static'),
+    value: settings.sftp_pass,
+    onChange: pass => {
+      updateSetting('sftp_pass', pass);
+    }
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+    label: __('SFTP folder', 'simply-static'),
+    help: __('Leave empty to upload to the default SFTP folder. Enter a folder path where you want the static files to be uploaded to (example: "uploads" will upload to uploads folder. "uploads/new-folder" will upload files to "new-folder"). ', 'simply-static'),
+    type: "text",
+    placeholder: "",
+    value: settings.sftp_folder,
+    onChange: folder => {
+      updateSetting('sftp_folder', folder);
+    }
+  })))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
     margin: 5
   }), settingsSaved && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Animate, {
     type: "slide-in",
@@ -1812,6 +1868,21 @@ function FormSettings() {
     onChange: method => {
       setCorsMethod(method);
       updateSetting('fix_cors', method);
+    }
+  }))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+    margin: 5
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('iFrame', 'simply-static'))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, __('We replace the HTML of the URLs with an iFrame that embeds the content directly from your WordPress website.', 'simply-static'), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("br", null), __('This way you can use dynamic elements on your static website without the need of a specific integration.', 'simply-static')), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Notice, {
+    status: "warning",
+    isDismissible: false
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, __('This requires your WordPress website to be online all the time.', 'simply-static'))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+    margin: 5
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextareaControl, {
+    label: __('URLs to embed as an iFrame', 'simply-static'),
+    placeholder: options.home + "/my-form-page/",
+    help: __('If you want to embed specific pages from your WordPress website into your static website, add the URLs here (one per line).', 'simply-static'),
+    value: settings.iframe_urls,
+    onChange: value => {
+      updateSetting('iframe_urls', value);
     }
   }))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
     margin: 5
@@ -2336,8 +2407,8 @@ function Optimize() {
     if (settings.wp_plugins_directory) {
       setWpPluginsDirectory(settings.wp_plugins_directory);
     }
-    if (settings.rename_plugin_directories) {
-      setRenamePluginDirectorys(settings.rename_plugin_directories);
+    if (settings.rename_plugins) {
+      setRenamePlugin(settings.rename_plugins);
     }
     if (settings.wp_themes_directory) {
       setWpThemesDirectory(settings.wp_themes_directory);

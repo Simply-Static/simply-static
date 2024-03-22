@@ -524,6 +524,8 @@ class Admin_Settings {
 
 		do_action( 'ss_before_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
 
+        $type = apply_filters( 'ss_export_type', $type );
+
 		Plugin::instance()->run_static_export( $blog_id, $type );
 
 		do_action( 'ss_after_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );

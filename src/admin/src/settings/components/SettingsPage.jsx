@@ -113,7 +113,15 @@ function SettingsPage() {
 
     useEffect(function () {
         setDisabledButton(isRunning);
-    }, [isRunning])
+    }, [isRunning]);
+
+    let buildOptions = '';
+    if ( Object.keys(options.builds).length ) {
+        const builds = Object.keys(options.builds).map((id) => <option value={id}>{options.builds[id]}</option>);
+        buildOptions = <optgroup label="Builds">
+            {builds}
+        </optgroup>
+    }
 
     return (
         <div className={"plugin-settings-container"}>
@@ -152,22 +160,15 @@ function SettingsPage() {
                                 <div className={"generate-container"}>
                                     {'pro' === options.plan && <p>
                                         <SelectControl
-
                                             value={selectedExportType}
-                                            options={[
-                                                {
-                                                    label:  __( 'Export', 'simply-static' ),
-                                                    value: 'export'
-                                                },
-                                                {
-                                                    label:  __( 'Update', 'simply-static' ),
-                                                    value: 'update'
-                                                }
-                                            ]}
                                             onChange={(value) => {
                                                 setSelectedExportType(value);
                                             }}
-                                        />
+                                        >
+                                            <option value="export">{ __( 'Export', 'simply-static' ) }</option>
+                                            <option value="update">{ __( 'Update', 'simply-static' ) }</option>
+                                            {buildOptions}
+                                        </SelectControl>
                                     </p>}
                                     <Button onClick={() => {
                                         startExport();
@@ -222,20 +223,16 @@ function SettingsPage() {
                                     {'pro' === options.plan && <SelectControl
                                             className={'generate-type'}
                                             value={selectedExportType}
-                                            options={[
-                                                {
-                                                    label:  __( 'Export', 'simply-static' ),
-                                                    value: 'export'
-                                                },
-                                                {
-                                                    label:  __( 'Update', 'simply-static' ),
-                                                    value: 'update'
-                                                }
-                                            ]}
+
                                             onChange={(value) => {
                                                 setSelectedExportType(value);
                                             }}
-                                        />}
+                                        >
+
+                                            <option value="export">{ __( 'Export', 'simply-static' ) }</option>
+                                            <option value="update">{ __( 'Update', 'simply-static' ) }</option>
+                                            {buildOptions}
+                                        </SelectControl>}
                                     <Button onClick={() => {
                                         startExport();
                                     }}
