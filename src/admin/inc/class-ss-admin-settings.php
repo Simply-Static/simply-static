@@ -125,9 +125,9 @@ class Admin_Settings {
 			)
 		);
 
-        if( defined( 'SIMPLY_STATIC_PRO_VERSION' ) ) {
-            $args['version_pro'] = SIMPLY_STATIC_PRO_VERSION;
-        }
+		if ( defined( 'SIMPLY_STATIC_PRO_VERSION' ) ) {
+			$args['version_pro'] = SIMPLY_STATIC_PRO_VERSION;
+		}
 
 		// Multisite?
 		if ( is_multisite() && function_exists( 'get_sites' ) ) {
@@ -341,6 +341,10 @@ class Admin_Settings {
 				if ( in_array( $key, $multiline_fields ) ) {
 					$options[ $key ] = sanitize_textarea_field( $value );
 				} else {
+					// Exclude Basic Auth fields from sanitize.
+					if ( $key === 'http_basic_auth_username' || $key === 'http_basic_auth_password' ) {
+						continue;
+					}
 					$options[ $key ] = sanitize_text_field( $value );
 				}
 			}
