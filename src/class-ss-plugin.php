@@ -205,9 +205,9 @@ class Plugin {
 				$this->archive_creation_job->save_status_message( $message, 'error' );
 
 				// Reset logs.
-				$options['archive_name']            = null;
-				$options['archive_start_time']      = null;
-				$options['archive_end_time']        = null;
+				$options['archive_name']       = null;
+				$options['archive_start_time'] = null;
+				$options['archive_end_time']   = null;
 
 				update_option( 'simply-static', $options );
 			}
