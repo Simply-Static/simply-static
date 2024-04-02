@@ -15,6 +15,7 @@ import apiFetch from "@wordpress/api-fetch";
 
 const {__} = wp.i18n;
 
+
 function DeploymentSettings() {
     const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
     const [deliveryMethod, setDeliveryMethod] = useState('zip');
@@ -93,14 +94,14 @@ function DeploymentSettings() {
                         value={deliveryMethod}
                         options={[
                             {label: __('ZIP Archive', 'simply-static'), value: 'zip'},
+                            {label: __('Local Directory', 'simply-static'), value: 'local'},
+                            {label: __('SFTP', 'simply-static'), value: 'sftp'},
                             {label: __('GitHub', 'simply-static'), value: 'github'},
                             {label: __('AWS S3', 'simply-static'), value: 'aws-s3'},
-                            {label: __('Tiiny.host', 'simply-static'), value: 'tiiny'},
                             {label: __('Bunny CDN', 'simply-static'), value: 'cdn'},
-                            {label: __('Simply CDN', 'simply-static'), value: 'simply-cdn'},
-                            {label: __('Local Directory', 'simply-static'), value: 'local'},
-                            {label: __('Digital Ocean Spaces', 'simply-static'), value: 'digitalocean'},
-                            {label: __('SFTP', 'simply-static'), value: 'sftp'},
+                            {label: __('Tiiny.host', 'simply-static'), value: 'tiiny'},
+                            {label: __('Simply CDN (deprecated)', 'simply-static'), value: 'simply-cdn'},
+                            {label: __('Digital Ocean Spaces (deprecated)', 'simply-static'), value: 'digitalocean'},
                         ]}
                         onChange={(method) => {
                             setDeliveryMethod(method);
@@ -172,9 +173,10 @@ function DeploymentSettings() {
         {deliveryMethod === 'simply-cdn' &&
             <Card>
                 <CardHeader>
-                    <b>{__('Simply CDN', 'simply-static')}</b>
+                    <b>{__('Simply CDN (deprecated)', 'simply-static')}</b>
                 </CardHeader>
                 <CardBody>
+                    <b>{__('This integration will be removed in an upcoming update. We no longer recommend using it to avoid disruptions to your static site workflow.', 'simply-static')}</b>
                     <p>{__('The fast and easy way to bring your static website online. Simply CDN handles hosting, performance, security and form submissions for your static site.', 'simply-static')}</p>
                     <TextControl
                         label={__('Security Token', 'simply-static')}
@@ -283,7 +285,13 @@ function DeploymentSettings() {
                             <TextControl
                                 label={__('Personal Access Token', 'simply-static')}
                                 type={"password"}
-                                help={__('You need a personal access token from GitHub.', 'simply-static')}
+                                help={
+                                    <>
+                                        {__('You need a personal access token from GitHub. Learn how to get one ', 'simply-static')}
+                                        <a href={"https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic"}
+                                           target={"_blank"}>{__('here', 'simply-static')}</a>
+                                    </>
+                                }
                                 value={settings.github_personal_access_token}
                                 onChange={(token) => {
                                     updateSetting('github_personal_access_token', token);
@@ -293,7 +301,12 @@ function DeploymentSettings() {
                             <TextControl
                                 label={__('Repository', 'simply-static')}
                                 type={"text"}
-                                help={__('Enter a name for your repository. This should be lowercase and without any spaces or special characters.', 'simply-static')}
+                                help={
+                                    <>
+                                        {__('Enter a name for your repository (lowercase without spaces or special characters).', 'simply-static')}<br></br>
+                                        <b>{__('Please ensure to create the repository and add a readme file to it before running an export.', 'simply-static')}</b>
+                                    </>
+                                }
                                 value={settings.github_repository}
                                 onChange={(repository) => {
                                     updateSetting('github_repository', repository);
@@ -368,7 +381,12 @@ function DeploymentSettings() {
                                 disabled
                                 label={__('E-Mail', 'simply-static')}
                                 type={"text"}
-                                help={__('This field is auto-filled with the e-mail address used for activating Simply Static Pro. An account will be created automatically on your first deployment.', 'simply-static')}
+                                help={
+                                    <>
+                                        {__('This field is auto-filled with the e-mail address used for activating Simply Static Pro.', 'simply-static')}<br></br>
+                                        <b>{__('An account will be created automatically on your first deployment.', 'simply-static')}</b>
+                                    </>
+                                }
                                 value={options.admin_email}
                             />
 
@@ -413,11 +431,16 @@ function DeploymentSettings() {
                         <CardBody>
 
                             <p>{__('Bunny CDN is a fast and reliable CDN provider that you can run your static website on.', 'simply-static')}</p>
-
                             <TextControl
                                 label={__('Bunny CDN API Key', 'simply-static')}
                                 type={"password"}
-                                help={__('Enter your API Key from Bunny CDN. You can find your API-Key as described here.', 'simply-static')}
+                                help={
+                                    <>
+                                        {__('Enter your API Key from Bunny CDN. You can find your API-Key as described ', 'simply-static')}
+                                        <a href={"https://support.bunny.net/hc/en-us/articles/360012168840-Where-do-I-find-my-API-key"}
+                                           target={"_blank"}>{__('here', 'simply-static')}</a>
+                                    </>
+                                }
                                 value={settings.cdn_api_key}
                                 onChange={(api_key) => {
                                     updateSetting('cdn_api_key', api_key);
@@ -427,7 +450,13 @@ function DeploymentSettings() {
                             <TextControl
                                 label={__('Storage Host', 'simply-static')}
                                 type={"text"}
-                                help={__('Depending on your location, you have a different storage host. You find out which URL to use here.', 'simply-static')}
+                                help={
+                                    <>
+                                        {__('Depending on your location, you have a different storage host. You find out which URL to use ', 'simply-static')}
+                                        <a href={"https://docs.bunny.net/reference/storage-api#storage-endpoints"}
+                                           target={"_blank"}>{__('here', 'simply-static')}</a>
+                                    </>
+                                }
                                 value={settings.cdn_storage_host}
                                 onChange={(storage_host) => {
                                     updateSetting('cdn_storage_host', storage_host);
@@ -498,7 +527,13 @@ function DeploymentSettings() {
                             <TextControl
                                 label={__('Access Key ID', 'simply-static')}
                                 type={"text"}
-                                help={__('Enter your Access Key from AWS.', 'simply-static')}
+                                help={
+                                    <>
+                                        {__('Enter your Access Key from AWS. Learn how to get one ', 'simply-static')}
+                                        <a href={"https://docs.aws.amazon.com/en_en/IAM/latest/UserGuide/id_credentials_access-keys.html"}
+                                           target={"_blank"}>{__('here', 'simply-static')}</a>
+                                    </>
+                                }
                                 value={settings.aws_access_key}
                                 onChange={(access_key) => {
                                     updateSetting('aws_access_key', access_key);
@@ -508,7 +543,13 @@ function DeploymentSettings() {
                             <TextControl
                                 label={__('Secret Access Key', 'simply-static')}
                                 type={"password"}
-                                help={__('Enter your Secret Key from AWS.', 'simply-static')}
+                                help={
+                                    <>
+                                        {__('Enter your Secret Key from AWS. Learn how to get one ', 'simply-static')}
+                                        <a href={"https://docs.aws.amazon.com/en_en/IAM/latest/UserGuide/id_credentials_access-keys.html"}
+                                           target={"_blank"}>{__('here', 'simply-static')}</a>
+                                    </>
+                                }
                                 value={settings.aws_access_secret}
                                 onChange={(secret) => {
                                     updateSetting('aws_access_secret', secret);
@@ -607,6 +648,9 @@ function DeploymentSettings() {
                             <b>{__('Digital Ocean Spaces', 'simply-static')}</b>
                         </CardHeader>
                         <CardBody>
+                            <p>
+                                <b>{__('This integration will be removed in an upcoming update. We no longer recommend using it to avoid disruptions to your static site workflow.', 'simply-static')}</b>
+                            </p>
                             <TextControl
                                 label={__('Spaces Key', 'simply-static')}
                                 type={"text"}
