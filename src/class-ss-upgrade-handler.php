@@ -88,8 +88,7 @@ class Upgrade_Handler {
 			'http_basic_auth_digest'  => null,
 		);
 
-		$save_changes = false;
-		$version      = self::$options->get( 'version' );
+		$version = self::$options->get( 'version' );
 
 		// New installation, set default options.
 		if ( null === $version ) {
@@ -100,11 +99,6 @@ class Upgrade_Handler {
 		if ( version_compare( $version, SIMPLY_STATIC_VERSION, '!=' ) ) {
 			// Sync database.
 			Page::create_or_update_table();
-
-			if ( floatval( $version ) < floatval( '3.0.4' ) ) {
-				// Migrate settings.
-				Migrate_Settings::migrate();
-			}
 
 			// Update version.
 			self::$options
