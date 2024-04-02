@@ -299,7 +299,7 @@ class Plugin {
 	/**
 	 * Set HTTP Basic Auth for wp-background-processing
 	 *
-	 * @param array  $parsed_args given args.
+	 * @param array $parsed_args given args.
 	 * @param string $url given URL.
 	 *
 	 * @return array
@@ -328,7 +328,7 @@ class Plugin {
 				$parsed_args['headers']['Authorization2'] = $value;
 			} else if ( 'Authorization2' === $key ) {
 				$parsed_args['headers']['Authorization'] = $value;
-				unset($parsed_args['headers'][$key]);
+				unset( $parsed_args['headers'][ $key ] );
 			}
 		}
 
@@ -338,7 +338,7 @@ class Plugin {
 	/**
 	 * Return the task list for the Archive Creation Job to process
 	 *
-	 * @param array  $task_list The list of tasks to process.
+	 * @param array $task_list The list of tasks to process.
 	 * @param string $delivery_method The method of delivering static files.
 	 *
 	 * @return array The list of tasks to process.
@@ -346,7 +346,7 @@ class Plugin {
 	public function filter_task_list( $task_list, $delivery_method ): array {
 		array_push( $task_list, 'setup', 'fetch_urls' );
 
-		$generate_404 = $this->options->get('generate_404');
+		$generate_404 = $this->options->get( 'generate_404' );
 
 		// Add 404 task
 		if ( $generate_404 ) {
@@ -373,11 +373,12 @@ class Plugin {
 	 */
 	public function maybe_clear_directory() {
 		// Check the export type.
-		$use_single = get_option( 'simply-static-use-single' );
-		$use_build  = get_option( 'simply-static-use-build' );
+		$use_single            = get_option( 'simply-static-use-single' );
+		$use_build             = get_option( 'simply-static-use-build' );
+		$clear_local_directory = apply_filters( 'ss_clear_local_directory', empty( $use_build ) && empty( $use_single ) && $this->options->get( 'clear_directory_before_export' ) && 'local' === $this->options->get( 'delivery_method' ) );
 
 		// Clear out the local directory before copying files.
-		if ( empty( $use_build ) && empty( $use_single ) && $this->options->get( 'clear_directory_before_export' ) && 'local' === $this->options->get( 'delivery_method' ) ) {
+		if ( $clear_local_directory ) {
 			$local_dir = apply_filters( 'ss_local_dir', $this->options->get( 'local_dir' ) );
 
 			// Make sure the directory exists and is not empty.
