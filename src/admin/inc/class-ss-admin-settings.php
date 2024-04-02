@@ -63,16 +63,16 @@ class Admin_Settings {
 
 		add_action( "admin_print_scripts-{$generate_suffix}", array( $this, 'add_settings_scripts' ) );
 
-		$settings_suffix = add_submenu_page(
-			'simply-static-generate',
-			__( 'Settings', 'simply-static' ),
-			__( 'Settings', 'simply-static' ),
-			apply_filters( 'ss_user_capability', 'manage_options', 'settings' ),
-			'simply-static-settings',
-			array( $this, 'render_settings' )
-		);
-
 		if ( ! is_network_admin() ) {
+			$settings_suffix = add_submenu_page(
+				'simply-static-generate',
+				__( 'Settings', 'simply-static' ),
+				__( 'Settings', 'simply-static' ),
+				apply_filters( 'ss_user_capability', 'manage_options', 'settings' ),
+				'simply-static-settings',
+				array( $this, 'render_settings' )
+			);
+
 			add_action( "admin_print_scripts-{$settings_suffix}", array( $this, 'add_settings_scripts' ) );
 		}
 	}
