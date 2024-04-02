@@ -312,7 +312,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 *
 	 * @return void
 	 */
-    protected function save_status_message( $message, $key = null ) {
+    public function save_status_message( $message, $key = null ) {
         $task_name = $key ?: $this->get_current_task();
         $this->options
             ->add_status_message($message, $task_name)

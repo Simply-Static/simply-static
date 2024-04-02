@@ -191,6 +191,27 @@ class Plugin {
 		do_action( 'ss_before_static_export', $blog_id );
 
 		$this->archive_creation_job->start( $blog_id );
+
+		// Exit if Basic Auth but no credentials were provided.
+		if ( isset( $_SERVER['PHP_AUTH_USER'] ) && isset( $_SERVER['PHP_AUTH_PW'] ) ) {
+			$options         = get_option( 'simply-static' );
+			$basic_auth_user = $options['http_basic_auth_username'];
+			$basic_auth_pass = $options['http_basic_auth_password'];
+
+			if ( empty( $basic_auth_user ) && empty( $basic_auth_pass ) ) {
+				// Cancel export.
+				$message = __( 'Missing Basic Auth credentials - you need to configure the Basic Auth credentials in Simply Static -> Settings -> Misc -> Basic Auth to continue the export.', 'simply-static' );
+				$this->archive_creation_job->cancel();
+				$this->archive_creation_job->save_status_message( $message, 'error' );
+
+				// Reset logs.
+				$options['archive_name']            = null;
+				$options['archive_start_time']      = null;
+				$options['archive_end_time']        = null;
+
+				update_option( 'simply-static', $options );
+			}
+		}
 	}
 
 	/**
