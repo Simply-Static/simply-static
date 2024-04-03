@@ -301,17 +301,19 @@ function DeploymentSettings() {
                             <TextControl
                                 label={__('Repository', 'simply-static')}
                                 type={"text"}
-                                help={
-                                    <>
-                                        {__('Enter a name for your repository (lowercase without spaces or special characters).', 'simply-static')}<br></br>
-                                        <b>{__('Please ensure to create the repository and add a readme file to it before running an export.', 'simply-static')}</b>
-                                    </>
-                                }
+                                help= {__('Enter a name for your repository (lowercase without spaces or special characters).', 'simply-static')}
                                 value={settings.github_repository}
                                 onChange={(repository) => {
                                     updateSetting('github_repository', repository);
                                 }}
                             />
+                            <Notice status="warning" isDismissible={false}>
+                                <p>
+                                    {__('Ensure to create the repository and add a readme file to it before running an export as shown in the docs ', 'simply-static')}
+                                    <a href={"https://simplystatic.com/docs/setting-up-the-github-integration/#GitHub-Repository"} target={"_blank"}>{__('here', 'simply-static')}</a>
+                                </p>
+                            </Notice>
+                            <Spacer margin={5}/>
                             <TextControl
                                 label={__('Folder', 'simply-static')}
                                 type={"text"}
