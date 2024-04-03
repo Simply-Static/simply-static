@@ -41,7 +41,6 @@ function SettingsContextProvider(props) {
         'cdn_pull_zone': '',
         'cdn_storage_zone': '',
         'cdn_directory': '',
-        'cdn_404': '',
         'github_account_type': 'personal',
         'github_user': '',
         'github_email': '',

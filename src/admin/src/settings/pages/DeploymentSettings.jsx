@@ -503,17 +503,6 @@ function DeploymentSettings() {
                                     updateSetting('cdn_directory', directory);
                                 }}
                             />
-
-                            <TextControl
-                                label={__('404 Page', 'simply-static')}
-                                type={"text"}
-                                placeholder={'/custom-404/'}
-                                help={__('Relative path to your custom 404 page.', 'simply-static')}
-                                value={settings.cdn_404}
-                                onChange={(error_page) => {
-                                    updateSetting('cdn_404', error_page);
-                                }}
-                            />
                         </CardBody>
                     </Card>
                 }
