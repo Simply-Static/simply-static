@@ -2,9 +2,9 @@
 Contributors: patrickposner
 Tags: HTML, static website generator, static site, secure, fast
 Requires at least: 6.3
-Tested up to: 6.4
+Tested up to: 6.5
 Requires PHP: 7.4
-Stable tag: 3.1.6.2
+Stable tag: 3.1.6.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,7 +68,7 @@ This allows deploying your static website to:
 * SFTP to your server
 
 
-= AWS S3 Integration & Digital Ocean Spaces Integration =
+= AWS S3 Integration =
 
 Export directly to Amazon AWS S3 from Simply Static Pro. Connect your bucket and run your export.
 
@@ -154,22 +154,7 @@ and much more.
 
 = Get the Pro version =
 
-You can get the pro version [here](https://simplystatic.com/simply-static-pro/).
-
-== webtozip ==
-
-We also developed a service called [webtozip.com](https://webtozip.com/).
-
-If all you need is an archive of an existing WordPress website and you don't want to switch to a static site setup, we highly recommend using it instead of Simply Static.
-
-Here are the benefits:
-
-* it runs remotely (not on your server)
-* it is probably faster than running it on your own server
-* you don't have to worry about your WordPress version or your PHP version
-* you get the download link to the ZIP file via e-mail (no need for writing access on your server)
-
-It uses the same codebase as Simply Static but is not a plugin. It is a service that runs on our servers.
+You can get the pro version [here](https://simplystatic.com/pro/).
 
 = Tutorials =
 
@@ -237,6 +222,18 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 3. Diagnostics
 
 == Changelog ==
+
+= 3.1.6.3 =
+
+* no more filesize limits on wp_remote_get()
+* removed empty settings page on network admin
+* improved various descriptions + added links to the documentation
+* added filter to set conditions before clearing local directory
+* avoid clearing special characters from Basic Auth credentials
+* auto-cancel export if Basic Auth is set and credentials don't match
+* improved default settings handling
+* extended plugin compatibility list up to 100 (from 30)
+* unified 404 page option for CDN exports
 
 = 3.1.6.2 =
 
