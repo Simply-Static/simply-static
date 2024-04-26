@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Plugin Name:       Simply Static
  * Plugin URI:        https://patrickposner.dev
  * Description:       A static site generator to create fast and secure static versions of your WordPress website.
- * Version:           3.1.6.2
+ * Version:           3.1.6.3
  * Author:            Patrick Posner
  * Author URI:        https://patrickposner.dev
  * License:           GPL-2.0+
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'SIMPLY_STATIC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SIMPLY_STATIC_URL', untrailingslashit( plugin_dir_url( __FILE__ ) ) );
-define( 'SIMPLY_STATIC_VERSION', '3.1.6.2' );
+define( 'SIMPLY_STATIC_VERSION', '3.1.6.3' );
 
 // Check PHP version.
 if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
@@ -71,24 +71,6 @@ if ( ! function_exists( 'simply_static_run_plugin' ) ) {
 		// Generate a secure unique key.
 		if ( ! isset( $options['encryption_key'] ) ) {
 			$options['encryption_key'] = bin2hex( random_bytes( 16 ) );
-			update_option( 'simply-static', $options );
-		}
-
-		// Maybe migrate SimplyCDN options.
-		$token = get_option( 'sch_token' );
-
-		if ( ! empty( $token ) ) {
-			$options['ssh_security_token'] = $token;
-			delete_option( 'sch_token' );
-
-			// Check other SimplyCDN options.
-			$use_forms = get_option( 'sch_use_forms' );
-
-			$options['ssh_use_forms'] = $use_forms;
-			delete_option( 'sch_use_forms' );
-			delete_option( 'sch_404_path' );
-
-			// Update the general options.
 			update_option( 'simply-static', $options );
 		}
 	}

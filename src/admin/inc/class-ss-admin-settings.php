@@ -63,16 +63,16 @@ class Admin_Settings {
 
 		add_action( "admin_print_scripts-{$generate_suffix}", array( $this, 'add_settings_scripts' ) );
 
-		$settings_suffix = add_submenu_page(
-			'simply-static-generate',
-			__( 'Settings', 'simply-static' ),
-			__( 'Settings', 'simply-static' ),
-			apply_filters( 'ss_user_capability', 'manage_options', 'settings' ),
-			'simply-static-settings',
-			array( $this, 'render_settings' )
-		);
-
 		if ( ! is_network_admin() ) {
+			$settings_suffix = add_submenu_page(
+				'simply-static-generate',
+				__( 'Settings', 'simply-static' ),
+				__( 'Settings', 'simply-static' ),
+				apply_filters( 'ss_user_capability', 'manage_options', 'settings' ),
+				'simply-static-settings',
+				array( $this, 'render_settings' )
+			);
+
 			add_action( "admin_print_scripts-{$settings_suffix}", array( $this, 'add_settings_scripts' ) );
 		}
 	}
@@ -125,9 +125,9 @@ class Admin_Settings {
 			)
 		);
 
-        if( defined( 'SIMPLY_STATIC_PRO_VERSION' ) ) {
-            $args['version_pro'] = SIMPLY_STATIC_PRO_VERSION;
-        }
+		if ( defined( 'SIMPLY_STATIC_PRO_VERSION' ) ) {
+			$args['version_pro'] = SIMPLY_STATIC_PRO_VERSION;
+		}
 
 		// Multisite?
 		if ( is_multisite() && function_exists( 'get_sites' ) ) {
@@ -334,13 +334,17 @@ class Admin_Settings {
 		if ( $request->get_params() ) {
 			$options = sanitize_option( 'simply-static', $request->get_params() );
 
-			$multiline_fields = [ 'additional_urls', 'additional_files', 'urls_to_exclude', 'search_excludable' ];
+			$multiline_fields = [ 'additional_urls', 'additional_files', 'urls_to_exclude', 'search_excludable', 'iframe_urls' ];
 
 			// Sanitize each key/value pair in options.
 			foreach ( $options as $key => $value ) {
 				if ( in_array( $key, $multiline_fields ) ) {
 					$options[ $key ] = sanitize_textarea_field( $value );
 				} else {
+					// Exclude Basic Auth fields from sanitize.
+					if ( $key === 'http_basic_auth_username' || $key === 'http_basic_auth_password' ) {
+						continue;
+					}
 					$options[ $key ] = sanitize_text_field( $value );
 				}
 			}

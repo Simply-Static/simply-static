@@ -123,11 +123,6 @@ class Migrate_Settings {
 			unset( $options['cdn-directory'] );
 		}
 
-		if ( isset( $options['cdn-404'] ) ) {
-			$options['cdn_404'] = $options['cdn-404'];
-			unset( $options['cdn-404'] );
-		}
-
 		if ( isset( $options['github-account-type'] ) ) {
 			$options['github_account_type'] = $options['github-account-type'];
 			unset( $options['github-account-type'] );

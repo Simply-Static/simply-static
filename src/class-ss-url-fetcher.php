@@ -251,11 +251,10 @@ class Url_Fetcher {
 		Util::debug_log( "Fetching URL: " . $url );
 
 		$args = array(
-			'timeout'             => self::TIMEOUT,
-			'sslverify'           => false,
-			'redirection'         => 0, // disable redirection.
-			'blocking'            => true,
-			'limit_response_size' => wp_max_upload_size(),
+			'timeout'     => self::TIMEOUT,
+			'sslverify'   => false,
+			'redirection' => 0, // disable redirection.
+			'blocking'    => true,
 		);
 
 		if ( $filename ) {
