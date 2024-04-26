@@ -122,6 +122,7 @@ class Admin_Settings {
 				'temp_files_dir' => trailingslashit( $temp_dir ),
 				'blog_id'        => get_current_blog_id(),
 				'need_upgrade'   => 'no',
+                'builds' => array(),
 			)
 		);
 
