@@ -34,6 +34,12 @@ class Diagnostic {
 	public $results = array();
 
 	/**
+	 * List of incompatible plugins
+	 * @var array
+	 */
+	public $incompatible_plugins = array();
+
+	/**
 	 * An instance of the options structure containing all options for this plugin
 	 * @var Simply_Static\Options
 	 */
@@ -43,26 +49,27 @@ class Diagnostic {
 		$this->options = Options::instance();
 
 		$this->checks = array(
-			'URLs'       => array(
+			'URLs'                 => array(
 				__( 'SSL', 'simply-static' ) => $this->is_ssl()
 			),
-			'PHP'        => array(
+			'PHP'                  => array(
 				__( 'VERSION', 'simply-static' ) => $this->php_version(),
 				__( 'php-xml', 'simply-static' ) => $this->is_xml_active(),
 				__( 'cURL', 'simply-static' )    => $this->has_curl(),
 			),
-			'WordPress'  => array(
+			'WordPress'            => array(
 				__( 'Permalinks', 'simply-static' )         => $this->is_permalink_structure_set(),
 				__( 'Caching', 'simply-static' )            => $this->is_cache_set(),
 				__( 'WP-CRON', 'simply-static' )            => $this->is_wp_cron_running(),
 				__( 'WP REST API', 'simply-static' )        => $this->is_wp_rest_running(),
 				__( 'Requests to itself', 'simply-static' ) => $this->can_wp_make_requests_to_itself(),
 			),
-			'Filesystem' => array(
+			'Plugins' => array(),
+			'Filesystem'           => array(
 				__( 'Temp dir readable', 'simply-static' )  => $this->is_temp_files_dir_readable(),
 				__( 'Temp dir writeable', 'simply-static' ) => $this->is_temp_files_dir_writeable(),
 			),
-			'MySQL'      => array(
+			'MySQL'                => array(
 				__( 'DELETE', 'simply-static' ) => $this->user_can_delete(),
 				__( 'INSERT', 'simply-static' ) => $this->user_can_insert(),
 				__( 'SELECT', 'simply-static' ) => $this->user_can_select(),
@@ -83,7 +90,6 @@ class Diagnostic {
 
 		$additional_urls = Util::string_to_array( $this->options->get( 'additional_urls' ) );
 
-
 		foreach ( $additional_urls as $url ) {
 			$this->checks['URLs'][ $url ] = $this->is_additional_url_valid( $url );
 		}
@@ -91,6 +97,35 @@ class Diagnostic {
 		$additional_files = Util::string_to_array( $this->options->get( 'additional_files' ) );
 		foreach ( $additional_files as $file ) {
 			$this->checks['Filesystem'][ $file ] = $this->is_additional_file_valid( $file );
+		}
+
+
+		$plugins           = get_plugins();
+		$active_plugins    = get_option( 'active_plugins' );
+		$plugin_count      = 0;
+		$activated_plugins = array();
+
+		foreach ( $active_plugins as $plugin ) {
+			if ( isset( $plugins[ $plugin ] ) ) {
+				$activated_plugins[] = $plugins[ $plugin ];
+			}
+		}
+
+		$this->incompatible_plugins = apply_filters( 'ss_incompatible_plugins', $this->get_incompatible_plugins() );
+
+		foreach ( $activated_plugins as $plugin ) {
+			if ( in_array( $plugin['TextDomain'], $this->incompatible_plugins ) ) {
+				$this->checks['Plugins'][ $plugin['Name'] ] = $this->is_incompatible_plugin( $plugin );
+				$plugin_count++;
+			}
+		}
+
+		if( $plugin_count === 0 ) {
+			$this->checks['Plugins'][ 'Incompatible Plugins' ] = array(
+				'test'        => true,
+				'description' => __( 'No incompatible plugins are active on your website!', 'simply-static' ),
+				'error'       => sprintf( __( '%d incompatible plugins are active', 'simply-static' ), $plugin_count )
+			);
 		}
 	}
 
@@ -292,6 +327,83 @@ class Diagnostic {
 			'test'        => $infos['test'],
 			'description' => sprintf( __( "WordPress can make requests to itself from %s", 'simply-static' ), $ip_address ),
 			'error'       => sprintf( __( "WordPress can not make requests to itself from %s", 'simply-static' ), $ip_address ),
+		);
+	}
+
+	/**
+	 * Get incompatible plugins.
+	 * @return array
+	 */
+	public function get_incompatible_plugins() {
+		return array(
+			'autoptimize',
+			'wp-fastest-cache',
+			'wp-rocket',
+			'wp-search-with-algolia',
+			'w3-total-cache',
+			'coming-soon',
+			'wp-super-cache',
+			'hummingbird-performance',
+			'wpengine-common',
+			'cache-enabler',
+			'cloudflare',
+			'fluentformpro',
+			'fluentform',
+			'fluentcrm',
+			'happyforms',
+			'wpforms',
+			'real-cookie-banner',
+			'borlabs-cookie',
+			'redis-cache',
+			'wp-redis',
+			'woocommerce',
+			'popup-maker',
+			'wpcf7-redirect',
+			'weforms',
+			'booking-system',
+			'yet-another-stars-rating',
+			'mailpoet',
+			'the-events-calendar',
+			'buddypress',
+			'lifterlms',
+			'wp-job-manager',
+			'learnpress',
+			'sg-security',
+			'burst-statistics',
+			'ajax-load-more',
+			'wp-statistics',
+			'wp-slimstat',
+			'wp-power-stats',
+			'nitropack',
+			'ultimate-member',
+			'paid-memberships-pro',
+			'wp-members',
+			'wp-private-content-plus',
+			'forminator',
+			'catch-infinite-scroll',
+			'ultimate-post',
+			'facetwp',
+			'wp-ultimate-post-grid',
+			'searchwp',
+			'relevanssi',
+			'siteorigin-panels',
+			'wp-user-frontend',
+			'optinmonster',
+			'mailoptin',
+		);
+	}
+
+	/**
+	 * Check if plugins is compatible.
+	 *
+	 * @param string $plugin given plugin slug.
+	 *
+	 * @return array
+	 */
+	public function is_incompatible_plugin( $plugin ) {
+		return array(
+			'test'  => false,
+			'error' => sprintf( __( '%s is not compatible with Simply Static.', 'simply-static' ), $plugin['Name'] )
 		);
 	}
 
