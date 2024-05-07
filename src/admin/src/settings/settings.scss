@@ -44,11 +44,16 @@ toplevel_page_simply-static img {
     max-width: 800px;
     border-left: 4px solid var(--wp-components-color-accent, #b32d2e);
 
-     .is-secondary {
+    .is-secondary {
       box-shadow: inset 0 0 0 1px #b32d2e !important;
       color: #b32d2e !important;
     }
   }
+
+  .diagnostics-notice-generate {
+    max-width: 90% !important;
+  }
+
   .upgrade-network-notice {
     margin: 0 0 0 40px;
   }

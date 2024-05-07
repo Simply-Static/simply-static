@@ -77,6 +77,7 @@ function SettingsPage() {
             sites.unshift({label: __('Use current settings', 'simply-static'), value: 'current'});
             setSelectableSites(sites);
         }
+
     }, [options]);
 
     const startExport = () => {
@@ -352,16 +353,21 @@ function SettingsPage() {
                     </FlexItem>
                     <FlexItem isBlock={true}>
                         <div class={"plugin-settings"}>
-                            {!passedChecks ?
+                            {'no' === passedChecks ?
                                 <Animate type="slide-in" options={{origin: 'top'}}>
                                     {() => (
-                                        <Notice status="notice" isDismissible={false} className={"diagnostics-notice"}>
+
+                                        <Notice status="notice" isDismissible={false} className={ activeItem == '/' ? 'diagnostics-notice diagnostics-notice-generate' : 'diagnostics-notice'}>
                                             <p>
                                                 {__('There are errors in diagnostics that may negatively affect your static export.', 'simply-static')}<br></br>
                                                 {__('Please review them and get them fixed to avoid problems.', 'simply-static')}
                                             </p>
-                                            <Button onClick={() => setActiveItem('/diagnostics')}
-                                                    variant="secondary">{__('Visit Diagnostics', 'simply-static')}</Button>
+                                            <NavigatorButton isSecondary onClick={() => setActiveItem('/diagnostics')}
+                                                             className={activeItem === '/diagnostics' ? 'is-active-item' : ''}
+                                                             path="/diagnostics">
+                                                <Dashicon
+                                                    icon="editor-help"/> {__('Visit Diagnostics', 'simply-static')}
+                                            </NavigatorButton>
                                         </Notice>
                                     )}
                                 </Animate>

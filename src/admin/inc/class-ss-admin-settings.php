@@ -339,17 +339,17 @@ class Admin_Settings {
 	 */
 	public function check_system_status_passed() {
 		$diagnostics = new Diagnostic();
-		$passed      = true;
+		$passed      = 'yes';
+		$checks      = $diagnostics->get_checks();
 
-		foreach ( $diagnostics->get_checks() as $category => $checks ) {
-			foreach ( $checks as $check ) {
+		foreach ( $checks as $topics ) {
+			foreach ( $topics as $check ) {
 				if ( ! $check['test'] ) {
-					$passed = false;
-					break;
+					$passed = 'no';
+                    break;
 				}
 			}
 		}
-
 		return json_encode( [ 'status' => 200, 'passed' => $passed ] );
 	}
 
