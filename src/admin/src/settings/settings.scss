@@ -58,6 +58,12 @@ toplevel_page_simply-static img {
     .generate-container {
       margin-top: 30px;
 
+      .generate-type {
+        height: 40px;
+        line-height: 40px;
+        max-width: 200px;
+      }
+
       button {
         background: #6804cc;
         border: solid 1px #50059b;

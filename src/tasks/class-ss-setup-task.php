@@ -42,8 +42,13 @@ class Setup_Task extends Task {
 		// sections below.
 		$use_single = get_option( 'simply-static-use-single' );
 		$use_build  = get_option( 'simply-static-use-build' );
+		$type       = $this->options->get( 'generate_type' );
 
-		if ( empty( $use_build ) && empty( $use_single ) ) {
+		if ( ! $type ) {
+			$type = 'export';
+		}
+
+		if ( empty( $use_build ) && empty( $use_single ) && 'export' === $type ) {
 			Page::query()->delete_all();
 		}
 
@@ -192,7 +197,7 @@ class Setup_Task extends Task {
 		$options = Options::instance();
 		$dir     = $options->get( 'temp_files_dir' );
 
-		if ( false === file_exists( $dir ) ) {
+		if ( false === file_exists( $dir ) || 'update' === $options->get('generate_type') ) {
 			return false;
 		}
 

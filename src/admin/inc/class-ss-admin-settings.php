@@ -122,6 +122,7 @@ class Admin_Settings {
 				'temp_files_dir' => trailingslashit( $temp_dir ),
 				'blog_id'        => get_current_blog_id(),
 				'need_upgrade'   => 'no',
+                'builds' => array(),
 			)
 		);
 
@@ -524,10 +525,13 @@ class Admin_Settings {
 	public function start_export( $request ) {
 		$params  = $request->get_params();
 		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
+		$type    = ! empty( $params['type'] ) ? $params['type'] : 'export';
 
 		do_action( 'ss_before_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
 
-		Plugin::instance()->run_static_export( $blog_id );
+        $type = apply_filters( 'ss_export_type', $type );
+
+		Plugin::instance()->run_static_export( $blog_id, $type );
 
 		do_action( 'ss_after_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
 

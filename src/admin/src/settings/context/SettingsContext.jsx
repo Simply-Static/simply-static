@@ -106,6 +106,7 @@ function SettingsContextProvider(props) {
         'disable_embed': false,
         'disable_db_debug': false,
         'disable_wlw_manifest': false,
+        'incremental_export': false,
         'sftp_host': '',
         'sftp_user': '',
         'sftp_pass': '',
