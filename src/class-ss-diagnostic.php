@@ -53,6 +53,7 @@ class Diagnostic {
 			),
 			'WordPress'  => array(
 				__( 'Permalinks', 'simply-static' )         => $this->is_permalink_structure_set(),
+				__( 'Caching', 'simply-static' )            => $this->is_cache_set(),
 				__( 'WP-CRON', 'simply-static' )            => $this->is_wp_cron_running(),
 				__( 'WP REST API', 'simply-static' )        => $this->is_wp_rest_running(),
 				__( 'Requests to itself', 'simply-static' ) => $this->can_wp_make_requests_to_itself(),
@@ -167,6 +168,94 @@ class Diagnostic {
 			'description' => __( 'WordPress cron is available and running', 'simply-static' ),
 			'error'       => __( 'WordPress cron is not available and not running', 'simply-static' ),
 		);
+	}
+
+	public function is_cache_set() {
+		$response = array(
+			'test'        => true,
+			'description' => __( 'Caching is disabled, great!', 'simply-static' ),
+			'error'       => __( 'Please disable caching before running a static export', 'simply-static' ),
+		);
+
+		// W3 Total Cache.
+		if ( defined( 'W3TC_VERSION' ) ) {
+			$response['test']  = false;
+			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'W3 Total Cache' ) );
+		}
+
+		// WP Fastest Cache.
+		if ( defined( 'WPFC_WP_PLUGIN_DIR' ) ) {
+			$response['test']  = false;
+			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'WP Fastest Cache' ) );
+		}
+
+		// WP Rocket.
+		if ( defined( 'WP_ROCKET_VERSION' ) ) {
+			$response['test']  = false;
+			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'WP Rocket' ) );
+		}
+
+		// Litespeed Cache.
+		if ( defined( 'LSCWP_V' ) ) {
+			$response['test']  = false;
+			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'LiteSpeed Cache' ) );
+		}
+
+		// Speed Optimizer (Siteground)
+		if ( defined( 'SiteGround_Optimizer\VERSION' ) ) {
+			$response['test']  = false;
+			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Speed Optimizer' ) );
+		}
+
+		// WP Super Cache.
+		if ( defined( 'WPSC_VERSION' ) ) {
+			$response['test']  = false;
+			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'WP Super Cache' ) );
+		}
+
+		// Hummingbird.
+		if ( defined( 'WPHB_VERSION' ) ) {
+			$response['test']  = false;
+			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Hummingbird' ) );
+		}
+
+		// Autoptimize.
+		if ( defined( 'AUTOPTIMIZE_PLUGIN_VERSION' ) ) {
+			$response['test']  = false;
+			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Autoptimize' ) );
+		}
+
+		// WP Engine.
+		if ( defined( 'WPE_APIKEY' ) ) {
+			$response['test']  = false;
+			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'WP Engine' ) );
+		}
+
+		// Breeze (Cloudways)
+		if ( defined( 'BREEZE_VERSION' ) ) {
+			$response['test']  = false;
+			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Breeze' ) );
+		}
+
+		// Cache Enabler.
+		if ( defined( 'CACHE_ENABLER_VERSION' ) ) {
+			$response['test']  = false;
+			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Cache Enabler' ) );
+		}
+
+		// Redis Object Cache.
+		if ( defined( 'WP_REDIS_VERSION' ) ) {
+			$response['test']  = false;
+			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Redis Object Cache' ) );
+		}
+
+		// Cloudflare.
+		if ( defined( 'CLOUDFLARE_PLUGIN_DIR' ) ) {
+			$response['test']  = false;
+			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Cloudflare' ) );
+		}
+
+		return $response;
 	}
 
 	/**
