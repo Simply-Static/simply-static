@@ -46,7 +46,7 @@ class Generate_404_Task extends Task {
 			$static_page->post_id  = 0;
 			$static_page->id  = 0;
 			$static_page->build_id = 0;
-			$static_page->url      = home_url( (string) $page_slug );
+			$static_page->url      = Util::origin_url() . "/" . $page_slug;
 			$static_page->handler  = Handler_404::class;
 			$static_page->error_message = '';
 			$static_page->found_on_id = 0;
