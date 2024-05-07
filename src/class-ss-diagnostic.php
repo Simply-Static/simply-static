@@ -76,8 +76,7 @@ class Diagnostic {
 				__( 'CREATE', 'simply-static' ) => $this->user_can_create(),
 				__( 'ALTER', 'simply-static' )  => $this->user_can_alter(),
 				__( 'DROP', 'simply-static' )   => $this->user_can_drop(),
-			),
-
+			)
 		);
 
 		if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
@@ -98,7 +97,6 @@ class Diagnostic {
 		foreach ( $additional_files as $file ) {
 			$this->checks['Filesystem'][ $file ] = $this->is_additional_file_valid( $file );
 		}
-
 
 		$plugins           = get_plugins();
 		$active_plugins    = get_option( 'active_plugins' );

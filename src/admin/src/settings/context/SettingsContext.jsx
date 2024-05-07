@@ -117,6 +117,7 @@ function SettingsContextProvider(props) {
     const [settingsSaved, setSettingsSaved] = useState(false);
     const [settings, setSettings] = useState(defaultSettings);
     const [configs, setConfigs] = useState({});
+    const [passedChecks, setPassedChecks] = useState(false);
     const [blogId, setBlogId] = useState(1);
 
     const getSettings = () => {
@@ -191,6 +192,12 @@ function SettingsContextProvider(props) {
         });
     }
 
+    const getStatusPassed = () => {
+        apiFetch({path: '/simplystatic/v1/system-status/passed'}).then((passedChecks) => {
+            setPassedChecks(passedChecks);
+        });
+    }
+
     useInterval(() => {
         checkIfRunning()
     }, isRunning ? 5000 : null);
@@ -198,6 +205,7 @@ function SettingsContextProvider(props) {
     useEffect(() => {
         getSettings();
         getStatus();
+        getStatusPassed();
         checkIfRunning();
         setBlogId(options.blog_id)
     }, []);
@@ -207,6 +215,7 @@ function SettingsContextProvider(props) {
             value={{
                 settings,
                 configs,
+                passedChecks,
                 settingsSaved,
                 setSettingsSaved,
                 updateSetting,

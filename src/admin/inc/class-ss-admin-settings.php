@@ -122,7 +122,7 @@ class Admin_Settings {
 				'temp_files_dir' => trailingslashit( $temp_dir ),
 				'blog_id'        => get_current_blog_id(),
 				'need_upgrade'   => 'no',
-                'builds' => array(),
+				'builds'         => array(),
 			)
 		);
 
@@ -255,6 +255,14 @@ class Admin_Settings {
 			},
 		) );
 
+		register_rest_route( 'simplystatic/v1', '/system-status/passed', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'check_system_status_passed' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'diagnostics' ) );
+			},
+		) );
+
 		register_rest_route( 'simplystatic/v1', '/delete-log', array(
 			'methods'             => 'POST',
 			'callback'            => [ $this, 'clear_log' ],
@@ -325,6 +333,27 @@ class Admin_Settings {
 	}
 
 	/**
+	 * All diagnostics passed?
+	 *
+	 * @return false|string
+	 */
+	public function check_system_status_passed() {
+		$diagnostics = new Diagnostic();
+		$passed      = true;
+
+		foreach ( $diagnostics->get_checks() as $category => $checks ) {
+			foreach ( $checks as $check ) {
+				if ( ! $check['test'] ) {
+					$passed = false;
+					break;
+				}
+			}
+		}
+
+		return json_encode( [ 'status' => 200, 'passed' => $passed ] );
+	}
+
+	/**
 	 * Save settings via rest API.
 	 *
 	 * @param object $request given request.
@@ -335,7 +364,13 @@ class Admin_Settings {
 		if ( $request->get_params() ) {
 			$options = sanitize_option( 'simply-static', $request->get_params() );
 
-			$multiline_fields = [ 'additional_urls', 'additional_files', 'urls_to_exclude', 'search_excludable', 'iframe_urls' ];
+			$multiline_fields = [
+				'additional_urls',
+				'additional_files',
+				'urls_to_exclude',
+				'search_excludable',
+				'iframe_urls'
+			];
 
 			// Sanitize each key/value pair in options.
 			foreach ( $options as $key => $value ) {
@@ -529,7 +564,7 @@ class Admin_Settings {
 
 		do_action( 'ss_before_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
 
-        $type = apply_filters( 'ss_export_type', $type );
+		$type = apply_filters( 'ss_export_type', $type );
 
 		Plugin::instance()->run_static_export( $blog_id, $type );
 

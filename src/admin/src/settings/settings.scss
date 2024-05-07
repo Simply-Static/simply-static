@@ -39,8 +39,18 @@ toplevel_page_simply-static img {
     margin: 0 0 10px 0;
   }
 
+  .diagnostics-notice {
+    margin: 0 0 20px 0 !important;
+    max-width: 800px;
+    border-left: 4px solid var(--wp-components-color-accent, #b32d2e);
+
+     .is-secondary {
+      box-shadow: inset 0 0 0 1px #b32d2e !important;
+      color: #b32d2e !important;
+    }
+  }
   .upgrade-network-notice {
-    margin: 0 0 10px 0;
+    margin: 0 0 0 40px;
   }
 
   /* Navigation */
