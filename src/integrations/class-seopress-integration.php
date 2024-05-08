@@ -18,6 +18,7 @@ class SEOPress_Integration extends Integration {
 	 */
 	public function run() {
 		add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_pages' ] );
+		add_filter( 'ssp_single_export_additional_urls', [ $this, 'add_sitemap_url' ] );
 	}
 
 	/**
@@ -45,6 +46,18 @@ class SEOPress_Integration extends Integration {
 		$static_page->set_status_message( __( 'Sitemap URL', 'simply-static' ) );
 		$static_page->found_on_id = 0;
 		$static_page->save();
+	}
+
+	/**
+	 * Add XML sitemap to single exports.
+	 *
+	 * @param $urls
+	 *
+	 * @return mixed
+	 */
+	public function add_sitemap_url( $urls ) {
+		$urls[] = home_url( 'sitemaps.xml' );
+		return $urls;
 	}
 
 	/**
