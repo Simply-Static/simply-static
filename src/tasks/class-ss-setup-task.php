@@ -37,9 +37,6 @@ class Setup_Task extends Task {
 			}
 		}
 
-		// TODO: Add a way for the user to perform this, optionally, so that we
-		// don't need to do it every time. Then enable the two commented-out
-		// sections below.
 		$use_single = get_option( 'simply-static-use-single' );
 		$use_build  = get_option( 'simply-static-use-build' );
 		$type       = $this->options->get( 'generate_type' );
@@ -51,15 +48,6 @@ class Setup_Task extends Task {
 		if ( empty( $use_build ) && empty( $use_single ) && 'export' === $type ) {
 			Page::query()->delete_all();
 		}
-
-		// clear out any saved error messages on pages
-		//Page::query()
-		//->update_all( 'error_message', null );
-
-		// delete pages that we can't process
-		//Page::query()
-		//->where( 'http_status_code IS NULL OR http_status_code NOT IN (?)', implode( ',', Page::$processable_status_codes ) )
-		//->delete_all();
 
 		// add origin url and additional urls/files to database.
 		$additional_urls = apply_filters( 'ss_setup_task_additional_urls', $this->options->get( 'additional_urls' ) );
@@ -129,6 +117,13 @@ class Setup_Task extends Task {
 
 		if ( isset( $options['ssh_use_forms'] ) ) {
 			$additional_files[] = SIMPLY_STATIC_PATH . '/src/integrations/simply-cdn/assets/ssh-form-webhook.js';
+		}
+
+		// Add robots.txt if exists.
+		$robots_txt = ABSPATH . 'robots.txt';
+
+		if ( file_exists( $robots_txt ) ) {
+			$additional_files[] = $robots_txt;
 		}
 
 		// Convert additional files to URLs and add to queue.
