@@ -15,6 +15,20 @@ class Generate_404_Task extends Task {
 	public static $task_name = 'generate_404';
 
 	/**
+	 * The path to the archive directory.
+	 *
+	 * @var string
+	 */
+	public string $archive_dir;
+
+	/**
+	 * The time the archive was started.
+	 *
+	 * @var string
+	 */
+	public string $archive_start_time;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
