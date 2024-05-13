@@ -37,6 +37,7 @@ function SettingsPage() {
         blogId,
         migrateSettings,
         saveSettings,
+        settings,
         updateFromNetwork,
         passedChecks,
     } = useContext(SettingsContext);
@@ -107,12 +108,6 @@ function SettingsPage() {
         });
     }
 
-    const runMigrateSettings = () => {
-        migrateSettings();
-        saveSettings();
-        location.reload();
-    }
-
     useEffect(function () {
         setDisabledButton(isRunning);
     }, [isRunning]);
@@ -145,18 +140,21 @@ function SettingsPage() {
                                     <p>Version: <b>{options.version}</b></p>
                                 }
                                 <div className={"generate-container"}>
-                                    {'pro' === options.plan && <p>
-                                        <SelectControl
-                                            value={selectedExportType}
-                                            onChange={(value) => {
-                                                setSelectedExportType(value);
-                                            }}
-                                        >
-                                            <option value="export">{__('Export', 'simply-static')}</option>
-                                            <option value="update">{__('Update', 'simply-static')}</option>
-                                            {buildOptions}
-                                        </SelectControl>
-                                    </p>}
+                                    {'pro' === options.plan &&
+                                        <p>
+                                            <SelectControl
+                                                value={selectedExportType}
+                                                onChange={(value) => {
+                                                    setSelectedExportType(value);
+                                                }}
+                                            >
+                                                <option value="export">{__('Export', 'simply-static')}</option>
+                                                {'zip' !== settings.delivery_method && 'tiiny' !== settings.delivery_method &&
+                                                    <option value="update">{__('Update', 'simply-static')}</option>
+                                                }
+                                                {buildOptions}
+                                            </SelectControl>
+                                        </p>}
                                     <Button onClick={() => {
                                         startExport();
                                     }}
@@ -217,7 +215,9 @@ function SettingsPage() {
                                     >
 
                                         <option value="export">{__('Export', 'simply-static')}</option>
-                                        <option value="update">{__('Update', 'simply-static')}</option>
+                                        {'zip' !== settings.delivery_method && 'tiiny' !== settings.delivery_method &&
+                                            <option value="update">{__('Update', 'simply-static')}</option>
+                                        }
                                         {buildOptions}
                                     </SelectControl>}
                                     <Button onClick={() => {
@@ -357,7 +357,8 @@ function SettingsPage() {
                                 <Animate type="slide-in" options={{origin: 'top'}}>
                                     {() => (
 
-                                        <Notice status="notice" isDismissible={false} className={ activeItem == '/' ? 'diagnostics-notice diagnostics-notice-generate' : 'diagnostics-notice'}>
+                                        <Notice status="notice" isDismissible={false}
+                                                className={activeItem == '/' ? 'diagnostics-notice diagnostics-notice-generate' : 'diagnostics-notice'}>
                                             <p>
                                                 {__('There are errors in diagnostics that may negatively affect your static export.', 'simply-static')}<br></br>
                                                 {__('Please review them and get them fixed to avoid problems.', 'simply-static')}
