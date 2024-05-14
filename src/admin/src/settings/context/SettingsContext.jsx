@@ -50,6 +50,7 @@ function SettingsContextProvider(props) {
         'github_branch': 'main',
         'github_webhook_url': '',
         'github_folder_path': '',
+        'github_throttle_requests': false,
         'aws_region': 'us-east-2',
         'aws_access_key': '',
         'aws_access_secret': '',

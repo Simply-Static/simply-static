@@ -23,6 +23,7 @@ function DeploymentSettings() {
     const [githubAccountType, setGithubAccountType] = useState('personal');
     const [githubVisibility, setGithubVisibility] = useState('private');
     const [emptyBucketBeforeExport, setEmptyBucketBeforeExport] = useState(false);
+    const [throttleGitHubRequests, setThrottleGitHubRequests] = useState(false);
     const [useForms, setUseForms] = useState(true);
     const [region, setRegion] = useState('us-east-2');
     const [hasCopied, setHasCopied] = useState(false);
@@ -61,6 +62,10 @@ function DeploymentSettings() {
 
         if (settings.github_repository_visibility) {
             setGithubVisibility(settings.github_repository_visibility);
+        }
+
+        if (settings.github_throttle_requests) {
+            setThrottleGitHubRequests(settings.github_throttle_requests);
         }
 
         if (settings.aws_empty) {
@@ -364,6 +369,20 @@ function DeploymentSettings() {
                                 value={settings.github_webhook_url}
                                 onChange={(webhook) => {
                                     updateSetting('github_webhook_url', webhook);
+                                }}
+                            />
+                            <ToggleControl
+                                label={__('Throttle Requests', 'simply-static')}
+                                help={
+                                    throttleGitHubRequests
+                                        ? __('Throttle API requests', 'simply-static')
+                                        : __('Don\'t throttle API requests', 'simply-static')
+                                }
+                                help={__('Enable this option if you are experiencing issues with the GitHub API rate limit.', 'simply-static')}
+                                checked={throttleGitHubRequests}
+                                onChange={(value) => {
+                                    setThrottleGitHubRequests(value);
+                                    updateSetting('github_throttle_requests', value);
                                 }}
                             />
                         </CardBody>
