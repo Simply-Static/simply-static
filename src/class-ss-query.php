@@ -398,8 +398,7 @@ class Query {
 			$offset = ' OFFSET ' . $this->offset;
 		}
 
-		$query = "{$statement}{$table}{$values}${where}{$order}{$limit}{$offset}";
-		return $query;
+		return "{$statement}{$table}{$values}$where{$order}{$limit}$offset";
 	}
 
 	/**
