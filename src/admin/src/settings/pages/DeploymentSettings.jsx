@@ -315,7 +315,7 @@ function DeploymentSettings() {
                             <Notice status="warning" isDismissible={false}>
                                 <p>
                                     {__('Ensure to create the repository and add a readme file to it before running an export as shown in the docs ', 'simply-static')}
-                                    <a href={"https://simplystatic.com/docs/setting-up-the-github-integration/#GitHub-Repository"} target={"_blank"}>{__('here', 'simply-static')}</a>
+                                    <a href={"https://docs.simplystatic.com/article/33-set-up-the-github-integration/"} target={"_blank"}>{__('here', 'simply-static')}</a>
                                 </p>
                             </Notice>
                             <Spacer margin={5}/>

@@ -158,9 +158,15 @@ You can get the pro version [here](https://simplystatic.com/pro/).
 
 = Tutorials =
 
-I publish new tutorials on how to work with Simply Static and other tools on my blog.
+We publish new tutorials on how to work with Simply Static and other tools on our blog.
 
-You can check the current tutorials [here](https://simplystatic.com/tutorials/)
+You can check the latest tutorials [here](https://simplystatic.com/tutorials/)
+
+= Documentation =
+
+We have a super extensive documentation that covers every aspect of Simply Static and Simply Static Pro.
+
+You can check the documentation [here](https://docs.simplystatic.com)
 
 
 == Installation ==

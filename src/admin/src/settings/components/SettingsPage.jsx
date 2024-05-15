@@ -180,7 +180,7 @@ function SettingsPage() {
                                 <Button href="https://simplystatic.com/changelogs/" target="_blank">
                                     <Dashicon icon="editor-ul"/> {__('Changelog', 'simply-static')}
                                 </Button>
-                                <Button href="https://simplystatic.com/docs/" target="_blank">
+                                <Button href="https://docs.simplystatic.com" target="_blank">
                                     <Dashicon icon="admin-links"/> {__('Documentation', 'simply-static')}
                                 </Button>
                                 {'free' === options.plan &&
@@ -338,7 +338,7 @@ function SettingsPage() {
                                     <Button href="https://simplystatic.com/changelogs/" target="_blank">
                                         <Dashicon icon="editor-ul"/> {__('Changelog', 'simply-static')}
                                     </Button>
-                                    <Button href="https://simplystatic.com/docs/" target="_blank">
+                                    <Button href="https://docs.simplystatic.com" target="_blank">
                                         <Dashicon icon="admin-links"/> {__('Documentation', 'simply-static')}
                                     </Button>
                                     {'free' === options.plan &&
