@@ -19,6 +19,7 @@ class AIO_SEO_Integration extends Integration {
 	public function run() {
         add_filter( 'aioseo_unrecognized_allowed_query_args', [ $this, 'allowed_query_args' ] );
 		add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_pages' ] );
+		add_filter( 'ssp_single_export_additional_urls', [ $this, 'add_sitemap_url' ] );
 	}
 
     /**
@@ -77,6 +78,34 @@ class AIO_SEO_Integration extends Integration {
 		$static_page->set_status_message( __( 'Sitemap URL', 'simply-static' ) );
 		$static_page->found_on_id = 0;
 		$static_page->save();
+	}
+
+	/**
+	 * Add XML sitemap to single exports.
+	 *
+	 * @param $urls
+	 *
+	 * @return mixed
+	 */
+	public function add_sitemap_url( $urls ) {
+		$urls[] = home_url( 'sitemap.xml' );
+
+		if ( function_exists( 'aioseo' ) ) {
+			aioseo()->sitemap->type = 'general';
+			$post_types             = aioseo()->sitemap->helpers->includedPostTypes();
+			foreach ( $post_types as $post_type ) {
+				$post_type_url = home_url( $post_type . '-sitemap.xml' );
+				$urls[] = $post_type_url;
+			}
+
+			$taxonomies = aioseo()->sitemap->helpers->includedTaxonomies();
+			foreach ( $taxonomies as $taxonomy ) {
+				$taxonomy_url = home_url( $taxonomy . '-sitemap.xml' );
+				$urls[] = $taxonomy_url;
+			}
+		}
+
+		return $urls;
 	}
 
 	/**

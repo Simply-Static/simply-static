@@ -15,6 +15,20 @@ class Fetch_Urls_Task extends Task {
 	public static $task_name = 'fetch_urls';
 
 	/**
+	 * The path to the archive directory.
+	 *
+	 * @var string
+	 */
+	public string $archive_dir;
+
+	/**
+	 * The time the archive was started.
+	 *
+	 * @var string
+	 */
+	public string $archive_start_time;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -154,6 +168,7 @@ class Fetch_Urls_Task extends Task {
 		if ( $save_file ) {
 			Util::debug_log( "We're saving this URL; keeping the static file" );
 			$sha1 = sha1_file( $file );
+			Util::debug_log( "SHA1 BINARY: " . sha1_file( $file, true ) );
 
 			// if the content is identical, move on to the next file
 			if ( $static_page->is_content_identical( $sha1 ) ) {
@@ -185,7 +200,6 @@ class Fetch_Urls_Task extends Task {
 		$destination_url = $this->options->get_destination_url();
 		$current_url     = $static_page->url;
 		$redirect_url    = remove_query_arg( 'simply_static_page', $static_page->redirect_url );
-
 
 		Util::debug_log( "redirect_url: " . $redirect_url );
 

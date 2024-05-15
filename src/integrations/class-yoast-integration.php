@@ -18,6 +18,7 @@ class Yoast_Integration extends Integration {
 	 */
 	public function run() {
 		add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_page' ] );
+		add_filter( 'ssp_single_export_additional_urls', [ $this, 'add_sitemap_url' ] );
 
 		$this->include_file( 'handlers/class-ss-yoast-sitemap-handler.php' );
 	}
@@ -46,6 +47,24 @@ class Yoast_Integration extends Integration {
 			$static_page->handler     = Yoast_Sitemap_Handler::class;
 			$static_page->save();
 		}
+	}
+
+	/**
+	 * Add XML sitemap to single exports.
+	 *
+	 * @param $urls
+	 *
+	 * @return mixed
+	 */
+	public function add_sitemap_url( $urls ) {
+		if ( ! class_exists( 'WPSEO_Sitemaps_Router' ) ) {
+			return $urls;
+		}
+
+		$urls[] = \WPSEO_Sitemaps_Router::get_base_url( 'sitemap.xml' );
+		$urls[] = \WPSEO_Sitemaps_Router::get_base_url( 'sitemap_index.xml' );
+
+		return $urls;
 	}
 
 	/**

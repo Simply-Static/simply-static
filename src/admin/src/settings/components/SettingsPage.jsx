@@ -17,7 +17,7 @@ import {
     CardBody,
     Spinner,
     Notice,
-    Animate, __experimentalSpacer as Spacer, SelectControl
+    Animate, __experimentalSpacer as Spacer, SelectControl, ToggleControl
 } from '@wordpress/components';
 import DeploymentSettings from "../pages/DeploymentSettings";
 import FormSettings from "../pages/FormSettings";
@@ -37,7 +37,9 @@ function SettingsPage() {
         blogId,
         migrateSettings,
         saveSettings,
-        updateFromNetwork
+        settings,
+        updateFromNetwork,
+        passedChecks,
     } = useContext(SettingsContext);
     const [activeItem, setActiveItem] = useState({activeItem: "/"});
     const [initialPage, setInitialPage] = useState(options.initial);
@@ -46,6 +48,7 @@ function SettingsPage() {
     const [selectedCopySite, setSelectedCopySite] = useState('current');
     const [selectablesSites, setSelectableSites] = useState([]);
     const [isUpdatingFromNetwork, setIsUpdatingFromNetwork] = useState(false);
+    const [selectedExportType, setSelectedExportType] = useState('export');
 
 
     const runUpdateFromNetwork = (blogId) => {
@@ -75,6 +78,7 @@ function SettingsPage() {
             sites.unshift({label: __('Use current settings', 'simply-static'), value: 'current'});
             setSelectableSites(sites);
         }
+
     }, [options]);
 
     const startExport = () => {
@@ -85,6 +89,7 @@ function SettingsPage() {
             method: 'POST',
             data: {
                 'blog_id': blogId,
+                'type': selectedExportType
             }
         }).then(resp => {
             setIsRunning(true);
@@ -103,33 +108,20 @@ function SettingsPage() {
         });
     }
 
-    const runMigrateSettings = () => {
-        migrateSettings();
-        saveSettings();
-        location.reload();
-    }
-
     useEffect(function () {
         setDisabledButton(isRunning);
-    }, [isRunning])
+    }, [isRunning]);
+
+    let buildOptions = '';
+    if (Object.keys(options.builds).length) {
+        const builds = Object.keys(options.builds).map((id) => <option value={id}>{options.builds[id]}</option>);
+        buildOptions = <optgroup label="Builds">
+            {builds}
+        </optgroup>
+    }
 
     return (
         <div className={"plugin-settings-container"}>
-            {'yes' === options.need_upgrade ?
-                <Animate type="slide-in" options={{origin: 'top'}}>
-                    {() => (
-                        <Notice status="warning" isDismissible={false} className={"migrate-notice"}>
-                            <p>
-                                {__('You have to migrate your settings to version 3.x of Simply Static to ensure everything works smoothly with the new interface.', 'simply-static')}
-                            </p>
-                            <Button onClick={runMigrateSettings}
-                                    variant="primary">{__('Migrate settings', 'simply-static')}</Button>
-                        </Notice>
-                    )}
-                </Animate>
-                :
-                ''
-            }
             <NavigatorProvider initialPath={initialPage}>
                 <Flex>
                     <FlexItem>
@@ -148,6 +140,21 @@ function SettingsPage() {
                                     <p>Version: <b>{options.version}</b></p>
                                 }
                                 <div className={"generate-container"}>
+                                    {'pro' === options.plan &&
+                                        <p>
+                                            <SelectControl
+                                                value={selectedExportType}
+                                                onChange={(value) => {
+                                                    setSelectedExportType(value);
+                                                }}
+                                            >
+                                                <option value="export">{__('Export', 'simply-static')}</option>
+                                                {'zip' !== settings.delivery_method && 'tiiny' !== settings.delivery_method &&
+                                                    <option value="update">{__('Update', 'simply-static')}</option>
+                                                }
+                                                {buildOptions}
+                                            </SelectControl>
+                                        </p>}
                                     <Button onClick={() => {
                                         startExport();
                                     }}
@@ -173,7 +180,7 @@ function SettingsPage() {
                                 <Button href="https://simplystatic.com/changelogs/" target="_blank">
                                     <Dashicon icon="editor-ul"/> {__('Changelog', 'simply-static')}
                                 </Button>
-                                <Button href="https://simplystatic.com/docs/" target="_blank">
+                                <Button href="https://docs.simplystatic.com" target="_blank">
                                     <Dashicon icon="admin-links"/> {__('Documentation', 'simply-static')}
                                 </Button>
                                 {'free' === options.plan &&
@@ -198,6 +205,21 @@ function SettingsPage() {
                                     <p>Version: <b>{options.version}</b></p>
                                 }
                                 <div className={"generate-container"}>
+                                    {'pro' === options.plan && <SelectControl
+                                        className={'generate-type'}
+                                        value={selectedExportType}
+
+                                        onChange={(value) => {
+                                            setSelectedExportType(value);
+                                        }}
+                                    >
+
+                                        <option value="export">{__('Export', 'simply-static')}</option>
+                                        {'zip' !== settings.delivery_method && 'tiiny' !== settings.delivery_method &&
+                                            <option value="update">{__('Update', 'simply-static')}</option>
+                                        }
+                                        {buildOptions}
+                                    </SelectControl>}
                                     <Button onClick={() => {
                                         startExport();
                                     }}
@@ -316,7 +338,7 @@ function SettingsPage() {
                                     <Button href="https://simplystatic.com/changelogs/" target="_blank">
                                         <Dashicon icon="editor-ul"/> {__('Changelog', 'simply-static')}
                                     </Button>
-                                    <Button href="https://simplystatic.com/docs/" target="_blank">
+                                    <Button href="https://docs.simplystatic.com" target="_blank">
                                         <Dashicon icon="admin-links"/> {__('Documentation', 'simply-static')}
                                     </Button>
                                     {'free' === options.plan &&
@@ -329,87 +351,77 @@ function SettingsPage() {
                             </Card>
                         }
                     </FlexItem>
-                    {activeItem === '/' &&
-                        <FlexItem isBlock={true}>
-                            <NavigatorScreen path="/">
-                                <div className={"plugin-settings"}>
+                    <FlexItem isBlock={true}>
+                        <div class={"plugin-settings"}>
+                            {'no' === passedChecks ?
+                                <Animate type="slide-in" options={{origin: 'top'}}>
+                                    {() => (
+
+                                        <Notice status="notice" isDismissible={false}
+                                                className={activeItem == '/' ? 'diagnostics-notice diagnostics-notice-generate' : 'diagnostics-notice'}>
+                                            <p>
+                                                {__('There are errors in diagnostics that may negatively affect your static export.', 'simply-static')}<br></br>
+                                                {__('Please review them and get them fixed to avoid problems.', 'simply-static')}
+                                            </p>
+                                            <NavigatorButton isSecondary onClick={() => setActiveItem('/diagnostics')}
+                                                             className={activeItem === '/diagnostics' ? 'is-active-item' : ''}
+                                                             path="/diagnostics">
+                                                <Dashicon
+                                                    icon="editor-help"/> {__('Visit Diagnostics', 'simply-static')}
+                                            </NavigatorButton>
+                                        </Notice>
+                                    )}
+                                </Animate>
+                                :
+                                ''
+                            }
+                            {activeItem === '/' &&
+                                <NavigatorScreen path="/">
                                     <Generate/>
-                                </div>
-                            </NavigatorScreen>
-                        </FlexItem>
-                    }
-                    {activeItem === '/diagnostics' &&
-                        <FlexItem isBlock={true}>
-                            <NavigatorScreen path="/diagnostics">
-                                <div className={"plugin-settings"}>
+                                </NavigatorScreen>
+                            }
+                            {activeItem === '/diagnostics' &&
+                                <NavigatorScreen path="/diagnostics">
                                     <Diagnostics/>
-                                </div>
-                            </NavigatorScreen>
-                        </FlexItem>
-                    }
-                    {activeItem === '/general' &&
-                        <FlexItem isBlock={true}>
-                            <NavigatorScreen path="/general">
-                                <div className={"plugin-settings"}>
+                                </NavigatorScreen>
+                            }
+                            {activeItem === '/general' &&
+                                <NavigatorScreen path="/general">
                                     <GeneralSettings/>
-                                </div>
-                            </NavigatorScreen>
-                        </FlexItem>
-                    }
-                    {activeItem === '/deployment' &&
-                        <FlexItem isBlock={true}>
-                            <NavigatorScreen path="/deployment">
-                                <div className={"plugin-settings"}>
+                                </NavigatorScreen>
+                            }
+                            {activeItem === '/deployment' &&
+                                <NavigatorScreen path="/deployment">
                                     <DeploymentSettings/>
-                                </div>
-                            </NavigatorScreen>
-                        </FlexItem>
-                    }
-                    {activeItem === '/forms' && 'pro' === options.plan &&
-                        <FlexItem isBlock={true}>
-                            <NavigatorScreen path="/forms">
-                                <div className={"plugin-settings"}>
+                                </NavigatorScreen>
+                            }
+                            {activeItem === '/forms' && 'pro' === options.plan &&
+                                <NavigatorScreen path="/forms">
                                     <FormSettings/>
-                                </div>
-                            </NavigatorScreen>
-                        </FlexItem>
-                    }
-                    {activeItem === '/search' && 'pro' === options.plan &&
-                        <FlexItem isBlock={true}>
-                            <NavigatorScreen path="/search">
-                                <div className={"plugin-settings"}>
+                                </NavigatorScreen>
+                            }
+                            {activeItem === '/search' && 'pro' === options.plan &&
+                                <NavigatorScreen path="/search">
                                     <SearchSettings/>
-                                </div>
-                            </NavigatorScreen>
-                        </FlexItem>
-                    }
-                    {activeItem === '/optimize' && 'pro' === options.plan &&
-                        <FlexItem isBlock={true}>
-                            <NavigatorScreen path="/optimize">
-                                <div className={"plugin-settings"}>
+                                </NavigatorScreen>
+                            }
+                            {activeItem === '/optimize' && 'pro' === options.plan &&
+                                <NavigatorScreen path="/optimize">
                                     <Optimize/>
-                                </div>
-                            </NavigatorScreen>
-                        </FlexItem>
-                    }
-                    {activeItem === '/utilities' &&
-                        <FlexItem isBlock={true}>
-                            <NavigatorScreen path="/utilities">
-                                <div className={"plugin-settings"}>
+                                </NavigatorScreen>
+                            }
+                            {activeItem === '/utilities' &&
+                                <NavigatorScreen path="/utilities">
                                     <Utilities/>
-                                </div>
-                            </NavigatorScreen>
-                        </FlexItem>
-                    }
-                    {activeItem === '/misc' &&
-                        <FlexItem isBlock={true}>
-                            <NavigatorScreen path="/misc">
-                                <div className={"plugin-settings"}>
+                                </NavigatorScreen>
+                            }
+                            {activeItem === '/misc' &&
+                                <NavigatorScreen path="/misc">
                                     <MiscSettings/>
-                                </div>
-                            </NavigatorScreen>
-                        </FlexItem>
-                    }
+                                </NavigatorScreen>
+                            }
+                        </div>
+                    </FlexItem>
                 </Flex>
             </NavigatorProvider>
         </div>

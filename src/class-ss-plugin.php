@@ -142,6 +142,7 @@ class Plugin {
 		require_once $path . 'src/class-ss-url-extractor.php';
 		require_once $path . 'src/class-ss-url-fetcher.php';
 		require_once $path . 'src/class-ss-archive-creation-job.php';
+		require_once $path . 'src/tasks/traits/trait-can-process-pages.php';
 		require_once $path . 'src/tasks/traits/trait-can-transfer.php';
 		require_once $path . 'src/tasks/class-ss-task.php';
 		require_once $path . 'src/tasks/class-ss-setup-task.php';
@@ -184,13 +185,13 @@ class Plugin {
 	 *
 	 * @return void
 	 */
-	public function run_static_export( $blog_id = 0 ) {
+	public function run_static_export( $blog_id = 0, $type = 'export' ) {
 		if ( ! $blog_id ) {
 			$blog_id = get_current_blog_id();
 		}
-		do_action( 'ss_before_static_export', $blog_id );
+		do_action( 'ss_before_static_export', $blog_id, $type );
 
-		$this->archive_creation_job->start( $blog_id );
+		$this->archive_creation_job->start( $blog_id, $type );
 
 		// Exit if Basic Auth but no credentials were provided.
 		if ( isset( $_SERVER['PHP_AUTH_USER'] ) && isset( $_SERVER['PHP_AUTH_PW'] ) ) {

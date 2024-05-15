@@ -24,7 +24,7 @@ function SettingsContextProvider(props) {
         'http_basic_auth_password': '',
         'origin_url': '',
         'version': options.version,
-        'force_replace_url': false,
+        'force_replace_url': true,
         'clear_directory_before_export': false,
         'ssh_security_token': '',
         'ssh_use_forms': true,
@@ -50,6 +50,7 @@ function SettingsContextProvider(props) {
         'github_branch': 'main',
         'github_webhook_url': '',
         'github_folder_path': '',
+        'github_throttle_requests': false,
         'aws_region': 'us-east-2',
         'aws_access_key': '',
         'aws_access_secret': '',
@@ -85,7 +86,7 @@ function SettingsContextProvider(props) {
         'minify_inline_css': false,
         'minify_js': false,
         'minify_inline_js': false,
-        'generate_404': false,
+        'generate_404': true,
         'wp_content_folder': '',
         'wp_includes_folder': '',
         'wp_uploads_folder': '',
@@ -106,6 +107,7 @@ function SettingsContextProvider(props) {
         'disable_embed': false,
         'disable_db_debug': false,
         'disable_wlw_manifest': false,
+        'incremental_export': false,
         'sftp_host': '',
         'sftp_user': '',
         'sftp_pass': '',
@@ -116,6 +118,7 @@ function SettingsContextProvider(props) {
     const [settingsSaved, setSettingsSaved] = useState(false);
     const [settings, setSettings] = useState(defaultSettings);
     const [configs, setConfigs] = useState({});
+    const [passedChecks, setPassedChecks] = useState('yes');
     const [blogId, setBlogId] = useState(1);
 
     const getSettings = () => {
@@ -187,6 +190,16 @@ function SettingsContextProvider(props) {
     const getStatus = () => {
         apiFetch({path: '/simplystatic/v1/system-status'}).then((configs) => {
             setConfigs(configs);
+
+            getStatusPassed();
+
+        });
+    }
+
+    const getStatusPassed = () => {
+        apiFetch({path: '/simplystatic/v1/system-status/passed'}).then((result) => {
+            let test = JSON.parse(result);
+            setPassedChecks(test.passed);
         });
     }
 
@@ -206,6 +219,7 @@ function SettingsContextProvider(props) {
             value={{
                 settings,
                 configs,
+                passedChecks,
                 settingsSaved,
                 setSettingsSaved,
                 updateSetting,

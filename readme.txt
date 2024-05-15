@@ -4,7 +4,7 @@ Tags: HTML, static website generator, static site, secure, fast
 Requires at least: 6.3
 Tested up to: 6.5
 Requires PHP: 7.4
-Stable tag: 3.1.6.3
+Stable tag: 3.1.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -158,9 +158,15 @@ You can get the pro version [here](https://simplystatic.com/pro/).
 
 = Tutorials =
 
-I publish new tutorials on how to work with Simply Static and other tools on my blog.
+We publish new tutorials on how to work with Simply Static and other tools on our blog.
 
-You can check the current tutorials [here](https://simplystatic.com/tutorials/)
+You can check the latest tutorials [here](https://simplystatic.com/tutorials/)
+
+= Documentation =
+
+We have a super extensive documentation that covers every aspect of Simply Static and Simply Static Pro.
+
+You can check the documentation [here](https://docs.simplystatic.com)
 
 
 == Installation ==
@@ -222,6 +228,20 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 3. Diagnostics
 
 == Changelog ==
+
+= 3.1.7 =
+
+* Official PHP 8.2 and 8.3 support + fixes for various PHP notices
+* fixed saving multiline settings savings process
+* improved default settings on first installation + reset
+* extended the match_tags list for better XML support
+* improved URL handling when creating 404 pages
+* automated 404 page handling for various deployment options
+* added cache detection solution as part of diagnostics
+* added incompatible plugin detection as part of diagnostics
+* added notification logic if tests in diagnostics fail
+* improved XML sitemap handling in all SEO integrations
+* auto-include robots.txt file if exists
 
 = 3.1.6.3 =
 
