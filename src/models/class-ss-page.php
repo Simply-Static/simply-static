@@ -74,13 +74,6 @@ class Page extends Model {
 	protected static $primary_key = 'id';
 
 	/**
-	 * The content hash value for comparison.
-	 *
-	 * @var string|null
-	 */
-	public $content_hash;
-
-	/**
 	 * Get the number of pages for each group of status codes, e.g. 1xx, 2xx, 3xx
 	 *
 	 * @return array Assoc. array of status code to number of pages, e.g. '2' => 183
@@ -122,9 +115,9 @@ class Page extends Model {
 	public function is_content_identical( $sha1 ) {
 		$hash = $this->content_hash ?? '';
 
-		Util::debug_log( 'Checking Content Identical:' . $sha1 . '===' . $hash . '. Value: ' . ( strpos( $sha1, $hash ) === 0 ? 'TRUE' : 'FALSE' ) );
+		Util::debug_log( 'Checking Content Identical:' . $sha1 . '===' . $hash . '. Value: ' . ( $hash && strpos( $sha1, $hash ) === 0 ? 'TRUE' : 'FALSE' ) );
 
-		return strpos( $sha1, $hash ) === 0;
+		return $hash && strpos( $sha1, $hash ) === 0;
 	}
 
 	/**

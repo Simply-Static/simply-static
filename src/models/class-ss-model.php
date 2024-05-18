@@ -48,13 +48,6 @@ class Model {
 	protected static $primary_key = null;
 
 	/**
-	 * The content hash value for comparison.
-	 *
-	 * @var string|null
-	 */
-	public $content_hash;
-
-	/**
 	 * The stored data for this instance of the model.
 	 *
 	 * @var array

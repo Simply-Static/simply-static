@@ -140,7 +140,7 @@ class Fetch_Urls_Task extends Task {
 	/**
 	 * Process the response for a 200 response (success)
 	 *
-	 * @param Simply_Static\Page $static_page Record to update.
+	 * @param \Simply_Static\Page $static_page Record to update.
 	 * @param boolean $save_file Save a static copy of the page.
 	 * @param boolean $follow_urls Save found URLs to database.
 	 *
