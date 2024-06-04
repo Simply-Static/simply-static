@@ -280,12 +280,17 @@ function Optimize() {
                     </>
                 }
 
-                <Spacer padding={2}>
-                    <hr/>
-                </Spacer>
 
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <b>{__('Image Optimization', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
                 <ToggleControl
-                    label={__('Optimize Images with Shortpixel?', 'simply-static')}
+                    label={__('Optimize Images with ShortPixel?', 'simply-static')}
                     help={
                         settings.shortpixel_enabled
                             ? __('Optimize images.', 'simply-static')
@@ -299,7 +304,7 @@ function Optimize() {
 
                 {settings.shortpixel_enabled && <>
                     <TextControl
-                        label={__('Shortpixel API Key', 'simply-static')}
+                        label={__('ShortPixel API Key', 'simply-static')}
 
                         type={"password"}
                         value={settings.shortpixel_api_key}
@@ -309,12 +314,7 @@ function Optimize() {
                     />
                     <Spacer padding={1}></Spacer>
                     <ToggleControl
-                        label={__('Backup original images?', 'simply-static')}
-                        help={
-                            settings.shortpixel_backup_enabled
-                                ? __('Backup.', 'simply-static')
-                                : __('Don\'t back up.', 'simply-static')
-                        }
+                        label={__('Backup the original images?', 'simply-static')}
                         checked={settings.shortpixel_backup_enabled}
                         onChange={(value) => {
                             updateSetting('shortpixel_backup_enabled', value);
@@ -331,7 +331,6 @@ function Optimize() {
                         </Button>
                     </>}
                 </>}
-
             </CardBody>
         </Card>
         <Spacer margin={5}/>
