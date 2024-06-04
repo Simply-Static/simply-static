@@ -262,6 +262,54 @@ function Optimize() {
                     </>
                 }
 
+                <Spacer padding={2}>
+                    <hr/>
+                </Spacer>
+
+                <ToggleControl
+                    label={__('Optimize Images with Shortpixel?', 'simply-static')}
+                    help={
+                        settings.shortpixel_enabled
+                            ? __('Optimize images.', 'simply-static')
+                            : __('Don\'t optimize images.', 'simply-static')
+                    }
+                    checked={settings.shortpixel_enabled}
+                    onChange={(value) => {
+                        updateSetting('shortpixel_enabled', value);
+                    }}
+                />
+
+                {settings.shortpixel_enabled && <>
+                    <TextControl
+                        label={__('Shortpixel API Key', 'simply-static')}
+
+                        type={"password"}
+                        value={settings.shortpixel_api_key}
+                        onChange={(apiKey) => {
+                            updateSetting('shortpixel_api_key', apiKey);
+                        }}
+                    />
+                    <Spacer padding={1}>
+
+                    </Spacer>
+                    <ToggleControl
+                        label={__('Backup original images?', 'simply-static')}
+                        help={
+                            settings.shortpixel_backup_enabled
+                                ? __('Backup.', 'simply-static')
+                                : __('Don\'t back up.', 'simply-static')
+                        }
+                        checked={settings.shortpixel_backup_enabled}
+                        onChange={(value) => {
+                            updateSetting('shortpixel_backup_enabled', value);
+                        }}
+                    />
+                    {settings.shortpixel_backup_enabled && <>
+                        <Button onClick={() => alert('Write AJAX to restore backups.')}
+                                variant="primary">{__('Restore Original Images', 'simply-static')}</Button>
+                    </>}
+                </>}
+
             </CardBody>
         </Card>
         <Spacer margin={5}/>
