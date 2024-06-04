@@ -7,10 +7,11 @@ import {
     __experimentalInputControl as InputControl,
     Notice,
     Animate,
-    ToggleControl, TextControl,
+    ToggleControl, TextControl, Dashicon,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
+import apiFetch from "@wordpress/api-fetch";
 
 const {__} = wp.i18n;
 
@@ -45,6 +46,7 @@ function Optimize() {
     const [disableWLW, setDisableWLW] = useState(false);
     const [disableDirectory, setDisableDirectory] = useState(false);
 
+    const [shortPixelResetting, setShortPixelResetting] = useState(false);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -53,6 +55,22 @@ function Optimize() {
         setTimeout(function () {
             setSettingsSaved(false);
         }, 2000);
+    }
+
+    const restoreBackups = () => {
+        setShortPixelResetting(true);
+        apiFetch({
+            path: '/simplystatic/v1/shortpixel-restore',
+            method: 'POST',
+        }).then(resp => {
+            const json = JSON.parse(resp);
+
+            setShortPixelResetting(false);
+            alert(json.message);
+        }).catch((error) => {
+            setShortPixelResetting(false);
+            alert(error.message);
+        });
     }
 
     useEffect(() => {
@@ -289,9 +307,7 @@ function Optimize() {
                             updateSetting('shortpixel_api_key', apiKey);
                         }}
                     />
-                    <Spacer padding={1}>
-
-                    </Spacer>
+                    <Spacer padding={1}></Spacer>
                     <ToggleControl
                         label={__('Backup original images?', 'simply-static')}
                         help={
@@ -305,8 +321,14 @@ function Optimize() {
                         }}
                     />
                     {settings.shortpixel_backup_enabled && <>
-                        <Button onClick={() => alert('Write AJAX to restore backups.')}
-                                variant="primary">{__('Restore Original Images', 'simply-static')}</Button>
+                        <Button disabled={shortPixelResetting} onClick={restoreBackups}
+                                variant="secondary">
+                            {! shortPixelResetting && __('Restore Original Images', 'simply-static')}
+                            {shortPixelResetting && [
+                                <Dashicon icon="update spin"/>,
+                                __('Restoring...', 'simply-static')
+                            ]}
+                        </Button>
                     </>}
                 </>}
 
