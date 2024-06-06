@@ -65,27 +65,27 @@ This allows deploying your static website to:
 * Cloudflare Pages
 * Netlify
 * Vercel
-* SFTP to your server
-
 
 = AWS S3 Integration =
 
 Export directly to Amazon AWS S3 from Simply Static Pro. Connect your bucket and run your export.
 
+= SFTP =
+
+Export directly to a remote SFTP server. Connect your server and run your export.
 
 = BunnyCDN Integration =
 
 Export directly to BunnyCDN and get all the benefits of their CDN - including caching, file optimization and DNS management.
 
 
-= Builds and Single Exports =
+= Incremental-, Builds and Single Exports =
 
-Create builds to export only a subset of pages/posts. You can assign a build to every custom post type in your WordPress admin area and export them.
+Use Incremental Exports to update only changes to your static website. No configuration needed, just choose Update and run the export.
 
-Never sit back and watch a full static export running, instead run a complete export once and then use builds to export the changes as fast as possible.
+Use Build Exports to quickly roll out global changes to your static website. Want to update your style.css file? Or a new plugin? Use a build export.
 
-You can also export single pages/posts after changed something.
-
+Use Single Exports to quickly publish new pages and posts to your static site. This also supports scheduled posts.
 
 = Forms =
 
@@ -126,6 +126,10 @@ Control every option, run different kinds of exports and more with the WP-CLI in
 Automatically minfiy HTML, CSS and JavaScript files on your static site.
 
 We can even minify inline CSS & JavaScript.
+
+= Image Optimization =
+
+Automatically optimize images on your static website with our ShortPixel API integration.
 
 = Optimization =
 
