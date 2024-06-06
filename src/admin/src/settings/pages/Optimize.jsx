@@ -7,10 +7,11 @@ import {
     __experimentalInputControl as InputControl,
     Notice,
     Animate,
-    ToggleControl, TextControl,
+    ToggleControl, TextControl, Dashicon,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
+import apiFetch from "@wordpress/api-fetch";
 
 const {__} = wp.i18n;
 
@@ -45,6 +46,7 @@ function Optimize() {
     const [disableWLW, setDisableWLW] = useState(false);
     const [disableDirectory, setDisableDirectory] = useState(false);
 
+    const [shortPixelResetting, setShortPixelResetting] = useState(false);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -53,6 +55,22 @@ function Optimize() {
         setTimeout(function () {
             setSettingsSaved(false);
         }, 2000);
+    }
+
+    const restoreBackups = () => {
+        setShortPixelResetting(true);
+        apiFetch({
+            path: '/simplystatic/v1/shortpixel-restore',
+            method: 'POST',
+        }).then(resp => {
+            const json = JSON.parse(resp);
+
+            setShortPixelResetting(false);
+            alert(json.message);
+        }).catch((error) => {
+            setShortPixelResetting(false);
+            alert(error.message);
+        });
     }
 
     useEffect(() => {
@@ -262,6 +280,57 @@ function Optimize() {
                     </>
                 }
 
+
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <b>{__('Image Optimization', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
+                <ToggleControl
+                    label={__('Optimize Images with ShortPixel?', 'simply-static')}
+                    help={
+                        settings.shortpixel_enabled
+                            ? __('Optimize images.', 'simply-static')
+                            : __('Don\'t optimize images.', 'simply-static')
+                    }
+                    checked={settings.shortpixel_enabled}
+                    onChange={(value) => {
+                        updateSetting('shortpixel_enabled', value);
+                    }}
+                />
+
+                {settings.shortpixel_enabled && <>
+                    <TextControl
+                        label={__('ShortPixel API Key', 'simply-static')}
+
+                        type={"password"}
+                        value={settings.shortpixel_api_key}
+                        onChange={(apiKey) => {
+                            updateSetting('shortpixel_api_key', apiKey);
+                        }}
+                    />
+                    <Spacer padding={1}></Spacer>
+                    <ToggleControl
+                        label={__('Backup the original images?', 'simply-static')}
+                        checked={settings.shortpixel_backup_enabled}
+                        onChange={(value) => {
+                            updateSetting('shortpixel_backup_enabled', value);
+                        }}
+                    />
+                    {settings.shortpixel_backup_enabled && <>
+                        <Button disabled={shortPixelResetting} onClick={restoreBackups}
+                                variant="secondary">
+                            {! shortPixelResetting && __('Restore Original Images', 'simply-static')}
+                            {shortPixelResetting && [
+                                <Dashicon icon="update spin"/>,
+                                __('Restoring...', 'simply-static')
+                            ]}
+                        </Button>
+                    </>}
+                </>}
             </CardBody>
         </Card>
         <Spacer margin={5}/>
