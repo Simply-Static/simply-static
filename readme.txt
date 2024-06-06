@@ -1,6 +1,6 @@
-=== Simply Static ===
+=== Simply Static - The WordPress Static Site Generator ===
 Contributors: patrickposner
-Tags: HTML, static website generator, static site, secure, fast
+Tags: static site generator, performance, security, jamstack
 Requires at least: 6.3
 Tested up to: 6.5
 Requires PHP: 7.4
