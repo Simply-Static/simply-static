@@ -130,6 +130,7 @@ class Fetch_Urls_Task extends Task {
 
 		// if we haven't processed any additional pages, we're done.
 		if ( $pages_remaining == 0 ) {
+			$this->add_feed_redirect();
 			do_action( 'ss_finished_fetching_pages' );
 		}
 
@@ -361,5 +362,34 @@ class Fetch_Urls_Task extends Task {
 		} else {
 			return null;
 		}
+	}
+
+	/**
+	 * Add a redirect for the feed.
+	 *
+	 * @param $archive_dir
+	 *
+	 * @return void
+	 */
+	public function add_feed_redirect() {
+		$feed_dir             = $this->archive_dir . '/feed';
+		$feed_index_html_file = trailingslashit( $feed_dir ) . 'index.html';
+
+		// Create index.html file
+		file_put_contents( $feed_index_html_file,
+	'<!DOCTYPE html>
+			<html>
+				<head>
+					<title>Redirecting...</title>
+					<meta http-equiv="refresh" content="0;url=index.xml">
+				</head>
+				<body>
+					<script type="text/javascript">
+						window.location = "index.xml";
+					</script>
+					<p>You are being redirected to <a href="index.xml">index.xml</a></p>
+				</body>
+			</html>'
+		);
 	}
 }
