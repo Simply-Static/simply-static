@@ -79,6 +79,30 @@ function MiscSettings() {
                     }}
                 />
 
+                {'pro' === options.plan &&
+                    <>
+                        <ToggleControl
+                            label={__('Use Simply Static Basic Auth', 'simply-static')}
+                            help={
+                                settings.http_basic_auth_on
+                                    ? __('Enable.', 'simply-static')
+                                    : __('Disable.', 'simply-static')
+                            }
+                            checked={settings.http_basic_auth_on}
+                            onChange={(value) => {
+                                updateSetting('http_basic_auth_on', value);
+                            }}
+                        />
+                        {
+                            settings.http_basic_auth_on &&
+                            ( !settings.http_basic_auth_username || !settings.http_basic_auth_password ) &&
+                            <Notice status={"warning"} isDismissible={false}>
+                                {__('Requires Username & Password to work', 'simply-static')}
+                            </Notice>
+                        }
+                    </>
+                }
+
             </CardBody>
         </Card>
         <Spacer margin={5}/>
