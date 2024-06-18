@@ -58,7 +58,9 @@ function MiscSettings() {
                 <b>{__('Basic Auth', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
-                <p>{__('If you\'ve secured WordPress with HTTP Basic Auth you can specify the username and password to use below.', 'simply-static')}</p>
+                <p>
+                    {__('If you\'ve secured WordPress with HTTP Basic Auth you can specify the username and password to use below.', 'simply-static')}
+                </p>
                 <TextControl
                     label={__('Basic Auth Username', 'simply-static')}
                     autoComplete={"off"}
@@ -79,6 +81,26 @@ function MiscSettings() {
                     }}
                 />
 
+                {'pro' === options.plan &&
+                    <p>
+                        <ToggleControl
+                            label={__('Enable Basic Authentification', 'simply-static')}
+                            help={__('Once enabled we will put your entire website behind password protection.', 'simply-static')}
+                            checked={settings.http_basic_auth_on}
+                            onChange={(value) => {
+                                updateSetting('http_basic_auth_on', value);
+                            }}
+                        />
+                        {
+                            settings.http_basic_auth_on &&
+                            (!settings.http_basic_auth_username || !settings.http_basic_auth_password) &&
+                            <Notice status={"warning"} isDismissible={false}>
+                                {__('Requires Username & Password to work', 'simply-static')}
+                            </Notice>
+                        }
+                    </p>
+                }
+
             </CardBody>
         </Card>
         <Spacer margin={5}/>
@@ -89,11 +111,7 @@ function MiscSettings() {
             <CardBody>
                 <ToggleControl
                     label={__('Debugging Mode', 'simply-static')}
-                    help={
-                        debuggingMode
-                            ? __('Enable debugging mode.', 'simply-static')
-                            : __('Disable debugging mode.', 'simply-static')
-                    }
+                    help={__('Once the debugging mode is enabled you can download the debug log from Simply Static -> Generate.', 'simply-static')}
                     checked={debuggingMode}
                     onChange={(value) => {
                         setDebuggingMode(value);

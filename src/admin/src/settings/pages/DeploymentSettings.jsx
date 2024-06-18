@@ -373,11 +373,6 @@ function DeploymentSettings() {
                             />
                             <ToggleControl
                                 label={__('Throttle Requests', 'simply-static')}
-                                help={
-                                    throttleGitHubRequests
-                                        ? __('Throttle API requests', 'simply-static')
-                                        : __('Don\'t throttle API requests', 'simply-static')
-                                }
                                 help={__('Enable this option if you are experiencing issues with the GitHub API rate limit.', 'simply-static')}
                                 checked={throttleGitHubRequests}
                                 onChange={(value) => {
