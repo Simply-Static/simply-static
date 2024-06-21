@@ -169,7 +169,6 @@ class Fetch_Urls_Task extends Task {
 		if ( $save_file ) {
 			Util::debug_log( "We're saving this URL; keeping the static file" );
 			$sha1 = sha1_file( $file );
-			Util::debug_log( "SHA1 BINARY: " . sha1_file( $file, true ) );
 
 			// if the content is identical, move on to the next file
 			if ( $static_page->is_content_identical( $sha1 ) ) {
