@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Plugin {
 
+
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
 	 *
@@ -88,6 +89,9 @@ class Plugin {
 
 			// Maybe clear local directory.
 			add_action( 'ss_after_setup_task', array( self::$instance, 'maybe_clear_directory' ) );
+			add_action( 'ss_after_setup_task', array( self::$instance, 'add_configs' ), 99 );
+
+			add_action( 'wp_head', array( self::$instance, 'add_meta_tags' ) );
 
 			self::$instance->integrations = new Integrations();
 			self::$instance->integrations->load();
@@ -116,6 +120,37 @@ class Plugin {
 		}
 
 		return self::$instance;
+	}
+
+	/**
+	 * Add configs to static export.
+	 *
+	 * @return void
+	 */
+	public function add_configs() {
+		$upload_dir = wp_upload_dir();
+		$config_dir = apply_filters( 'ssp_config_dir', $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'configs' . DIRECTORY_SEPARATOR );
+
+
+		if ( defined( 'SSP_CONFIG_DIR' ) ) {
+			$config_dir = SSP_CONFIG_DIR;
+		}
+
+		if ( is_dir( $config_dir ) ) {
+			$config_files = scandir( $config_dir );
+
+			foreach ( $config_files as $config_file ) {
+				if ( is_file( $config_dir . $config_file ) ) {
+					$url = untrailingslashit( $upload_dir['baseurl'] ) . '/simply-static/configs/' . $config_file;
+					Util::debug_log( 'Adding config file to queue: ' . $url );
+                    /** @var Page $static_page */
+					$static_page = Page::query()->find_or_initialize_by( 'url', $url );
+					$static_page->set_status_message( __( 'Config File', 'simply-static-pro' ) );
+					$static_page->found_on_id = 0;
+					$static_page->save();
+				}
+			}
+		}
 	}
 
 	public function get_integration( $integration ) {
@@ -411,4 +446,53 @@ class Plugin {
 			}
 		}
 	}
+
+	/**
+	 * Add config URL path as meta tag.
+	 *
+	 * @return void
+	 */
+	public function add_meta_tags() {
+
+		// Skip adding meta tags?
+		$skip_meta = apply_filters( 'ssp_skip_meta', false );
+
+		if ( $skip_meta ) {
+			return;
+		}
+
+		$options  = get_option( 'simply-static' );
+
+		// Get the config path.
+		$upload_dir = wp_upload_dir();
+		$config_dir = apply_filters( 'ssp_config_dir', $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'configs' . DIRECTORY_SEPARATOR );
+
+		if ( defined( 'SSP_CONFIG_DIR' ) ) {
+			$config_dir = SSP_CONFIG_DIR;
+		}
+
+		if ( ! is_dir( $config_dir ) ) {
+			return;
+		}
+
+		$replace = '';
+
+		if ( ! empty( $options['relative_path'] ) ) {
+			$replace = untrailingslashit( $options['relative_path'] );
+		}
+
+		// We might have to overwrite base URL based on optimization settings.
+		$base_url = untrailingslashit( $upload_dir['baseurl'] );
+
+		if ( ! empty( $options['wp_uploads_directory'] ) && $options['wp_uploads_directory'] !== 'wp-content/uploads' ) {
+			$base_url = untrailingslashit( str_replace( 'wp-content/uploads', $options['wp_uploads_directory'], $base_url ) );
+		}
+
+		$config_relative_path = apply_filters( 'ssp_config_relative_dir', str_replace( get_site_url(), $replace, $base_url . '/simply-static/configs/' ) );
+		?>
+		<?php if ( is_dir( $config_dir ) ) : ?>
+			<meta name="ssp-config-path" content="<?php echo esc_html( $config_relative_path ); ?>">
+		<?php endif;
+	}
+
 }

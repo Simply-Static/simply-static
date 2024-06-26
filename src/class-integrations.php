@@ -32,7 +32,8 @@ class Integrations {
 			'elementor'     => Elementor_Integration::class,
 			'elementor-pro' => Elementor_Pro_Integration::class,
 			'cookieyes'     => CookieYes_Integration::class,
-			'brizy'         => Brizy_Integration::class
+			'brizy'         => Brizy_Integration::class,
+			'complianz'     => Complianz_Integration::class,
 		] );
 	}
 
@@ -47,6 +48,7 @@ class Integrations {
 		require_once $path . 'class-elementor-pro-integration.php';
 		require_once $path . 'class-cookie-yes-integration.php';
 		require_once $path . 'class-brizy-integration.php';
+		require_once $path . 'class-complianz-integration.php';
 
 		// SimplyCDN.
 		require_once $path . 'simply-cdn/class-simply-cdn-integration.php';

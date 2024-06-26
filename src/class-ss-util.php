@@ -599,4 +599,47 @@ class Util {
 	public static function normalize_slashes( string $path ): string {
 		return strpos( $path, '\\' ) !== false ? str_replace( '\\', '/', $path ) : $path;
 	}
+
+	/**
+	 * Returns the global $wp_filesystem with credentials set.
+	 * Returns null in case of any errors.
+	 *
+	 * @return \WP_Filesystem_Base|null
+	 */
+	public static function get_file_system() {
+		global $wp_filesystem;
+
+		$success = true;
+
+		// Initialize the file system if it has not been done yet.
+		if ( ! $wp_filesystem ) {
+			require_once ABSPATH . '/wp-admin/includes/file.php';
+
+			$constants = array(
+				'hostname'    => 'FTP_HOST',
+				'username'    => 'FTP_USER',
+				'password'    => 'FTP_PASS',
+				'public_key'  => 'FTP_PUBKEY',
+				'private_key' => 'FTP_PRIKEY',
+			);
+
+			$credentials = array();
+
+			// We provide credentials based on wp-config.php constants.
+			// Reference https://developer.wordpress.org/apis/wp-config-php/#wordpress-upgrade-constants
+			foreach ( $constants as $key => $constant ) {
+				if ( defined( $constant ) ) {
+					$credentials[ $key ] = constant( $constant );
+				}
+			}
+
+			$success = WP_Filesystem( $credentials );
+		}
+
+		if ( ! $success || $wp_filesystem->errors->has_errors() ) {
+			return null;
+		}
+
+		return $wp_filesystem;
+	}
 }
