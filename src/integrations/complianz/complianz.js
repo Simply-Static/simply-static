@@ -3,6 +3,26 @@
  * This is an exact copy of complianz-gdpr/cookiebanner/js/complianz.js
  * We change all parts that require a REST API response and either disable it completely, write a static response here in file or through a json format.
  */
+
+let config_element = document.querySelector("meta[name='ssp-config-path']");
+let config_path = config_element.getAttribute("content");
+let config_url = window.location.origin + config_path;
+let cookie_data_url = config_url + 'complianz-cookie-data.json';
+function loadComplianzData(callback) {
+    let xobj = new XMLHttpRequest();
+    xobj.overrideMimeType("application/json");
+    xobj.open('GET', cookie_data_url, false);
+    xobj.onreadystatechange = function () {
+        if (xobj.readyState == 4 && xobj.status == "200") {
+            // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+            callback(xobj.responseText);
+        }
+    };
+    xobj.send(null);
+}
+
+
+
 /*
  * Opt in (e.g. EU):
  * default all scripts disabled.
@@ -93,14 +113,22 @@ function cmplzLoadConsentAreaContent(consentedCategory, consentedService){
         let postId = obj.getAttribute('data-post_id');
         let blockId = obj.getAttribute('data-block_id');
         if ( consentedCategory === category || consentedService === service ) {
+            let consent_area_name = 'complianz-consent-area-' + postId + '-' + blockId + '.html';
+            let consent_url = config_url + consent_area_name;
             //if not stored yet, load. As features in the user object can be changed on updates, we also check for the version
             let request = new XMLHttpRequest();
-            request.open('GET', complianz.url+'consent-area/'+postId+'/'+blockId, true);
+            request.open('GET', consent_url, true);
             request.setRequestHeader('Content-type', 'application/json');
             request.send();
             obj.classList.remove('cmplz-placeholder');
             request.onload = function() {
-                obj.innerHTML = JSON.parse(request.response);
+
+                if ( request.status === 404 ) {
+                    // Config might not be available.
+                    return;
+                }
+
+                obj.innerHTML = request.response;
                 //search for script elements and execute them
                 obj.querySelectorAll('script').forEach(scriptEl => {
                     cmplz_run_script(scriptEl.innerHTML, category, service, 'inline', scriptEl);
@@ -1450,10 +1478,16 @@ if ( complianz.geoip == 1 && (cmplz_user_data.length == 0 || (cmplz_user_data.ve
     let request = new XMLHttpRequest();
     let cmplzUserRegion = cmplz_get_url_parameter(window.location.href, 'cmplz_user_region');
     cmplzUserRegion = cmplzUserRegion ? '&cmplz_user_region=' + cmplzUserRegion : '';
-    request.open('GET', complianz.url+'banner?'+complianz.locale+cmplzUserRegion, true);
+    let banner_url = config_url + 'complianz-banner.json';
+    request.open('GET', banner_url+'?'+complianz.locale+cmplzUserRegion, true);
     request.setRequestHeader('Content-type', 'application/json');
     request.send();
     request.onload = function() {
+        if ( request.status === 404 ) {
+            // Config might not be available.
+            return;
+        }
+
         cmplz_user_data = JSON.parse(request.response);
         sessionStorage.cmplz_user_data = JSON.stringify(cmplz_user_data);
         conditionally_show_banner();
@@ -1763,6 +1797,7 @@ function cmplz_fire_categories_event(){
  */
 
 function cmplz_track_status( status ) {
+
     let cats = [];
     status = typeof status !== 'undefined' ? status : false;
 
@@ -1793,6 +1828,9 @@ function cmplz_track_status( status ) {
     cmplz_set_cookie('saved_categories', JSON.stringify(cats));
     cmplz_set_cookie('saved_services', JSON.stringify(consented_services));
     cmplz_consent_stored_once = true;
+
+    // No way of tracking something like that as we don't have backend.
+    return;
 
     let data;
     let request = new XMLHttpRequest();
@@ -2054,6 +2092,12 @@ function cmplz_start_clean(){
         }
         //if not stored yet, load. As features in the user object can be changed on updates, we also check for the version
         if ( !cmplz_cookie_data || cmplz_cookie_data.length === 0 ) {
+            loadComplianzData(function (response) {
+                cmplz_cookie_data = JSON.parse(response);
+                sessionStorage.setItem('cmplz_cookie_data', JSON.stringify(cmplz_cookie_data) );
+                cmplz_setup_clean_interval();
+            });
+            /* OLD
             let request = new XMLHttpRequest();
             request.open('GET', complianz.url+'cookie_data', true);
             request.setRequestHeader('Content-type', 'application/json');
@@ -2063,6 +2107,7 @@ function cmplz_start_clean(){
                 sessionStorage.setItem('cmplz_cookie_data', JSON.stringify(cmplz_cookie_data) );
                 cmplz_setup_clean_interval();
             };
+            */
         } else {
             cmplz_setup_clean_interval();
         }
@@ -2132,11 +2177,24 @@ function cmplz_load_manage_consent_container() {
     if ( manage_consent_container && !is_block_editor ) {
 
         let request = new XMLHttpRequest();
-        request.open('GET', complianz.url+'manage_consent_html?'+complianz.locale, true);
+        let consent_area_name = 'complianz-consent.html';
+
+        if ( cmplz_do_not_track() ) {
+            consent_area_name = 'complianz-do-not-track.html';
+        }
+
+        let html_consent_url = config_url + consent_area_name;
+
+        request.open('GET', html_consent_url+'?'+complianz.locale, true);
         request.setRequestHeader('Content-type', 'application/json');
         request.send();
         request.onload = function() {
-            let html = JSON.parse(request.response);
+
+            if ( request.status === 404 ) {
+                // Config might not be available.
+                return;
+            }
+            let html = request.response;
             manage_consent_container.insertAdjacentHTML( 'beforeend', html );
             cmplz_sync_category_checkboxes();
             let nojavascript = document.querySelector('#cmplz-manage-consent-container-nojavascript')
