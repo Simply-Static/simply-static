@@ -316,7 +316,10 @@ class Url_Extractor {
 
 					if ( $extracted_url !== '' ) {
 						$updated_extracted_url = $this->add_to_extracted_urls( $extracted_url );
-						$attribute_value       = str_replace( $extracted_url, $updated_extracted_url, $attribute_value );
+
+						if ( ! is_null( $updated_extracted_url ) ) {
+							$attribute_value = str_replace( $extracted_url, $updated_extracted_url, $attribute_value );
+						}
 					}
 				}
 				$tag->$attribute_name = $attribute_value;
