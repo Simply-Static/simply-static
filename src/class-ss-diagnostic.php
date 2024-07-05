@@ -17,8 +17,8 @@ class Diagnostic {
 
 	/** @const */
 	protected static $min_version = array(
-		'php'  => '8.0',
-		'curl' => '7.6'
+		'php'  => '7.4',
+		'curl' => '7.4'
 	);
 
 	/**
@@ -61,7 +61,6 @@ class Diagnostic {
 				__( 'Permalinks', 'simply-static' )         => $this->is_permalink_structure_set(),
 				__( 'Caching', 'simply-static' )            => $this->is_cache_set(),
 				__( 'WP-CRON', 'simply-static' )            => $this->is_wp_cron_running(),
-				__( 'Requests to itself', 'simply-static' ) => $this->can_wp_make_requests_to_itself(),
 			),
 			'Plugins' => array(),
 			'Filesystem'           => array(
@@ -288,25 +287,6 @@ class Diagnostic {
 		}
 
 		return $response;
-	}
-
-	/**
-	 * Check if WP can make requests.
-	 *
-	 * @return array
-	 */
-	public function can_wp_make_requests_to_itself() {
-		$ip_address = getHostByName( getHostName() );
-		$url        = Util::origin_url();
-		$response   = Url_Fetcher::remote_get( $url );
-
-		$infos = $this->check_error_from_response( $response );
-
-		return array(
-			'test'        => $infos['test'],
-			'description' => sprintf( __( "WordPress can make requests to itself from %s", 'simply-static' ), $ip_address ),
-			'error'       => sprintf( __( "WordPress can not make requests to itself from %s", 'simply-static' ), $ip_address ),
-		);
 	}
 
 	/**
