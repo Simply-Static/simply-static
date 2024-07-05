@@ -43,6 +43,7 @@ class Admin_Settings {
 			return;
 		}
 
+		// Generate settings page.
 		add_menu_page(
 			__( 'Simply Static', 'simply-static' ),
 			__( 'Simply Static', 'simply-static' ),
@@ -63,6 +64,32 @@ class Admin_Settings {
 
 		add_action( "admin_print_scripts-{$generate_suffix}", array( $this, 'add_settings_scripts' ) );
 
+		// Diagnostics settings page.
+		$system_status = $this->get_system_status();
+		$failed_tests  = 0;
+
+		foreach ( $system_status as $test ) {
+			foreach ( $test as $key => $value ) {
+				if ( ! $value['test'] ) {
+					$failed_tests ++;
+				}
+			}
+		}
+
+		$notifications = sprintf( '<span class="update-plugins diagnostics-error"><span class="plugin-count" aria-hidden="true">%s</span><span class="screen-reader-text">errors in diagnostics</span></span>', $failed_tests );
+
+		$generate_suffix = add_submenu_page(
+			'simply-static-generate',
+			__( 'Diagnostics', 'simply-static' ),
+            $failed_tests > 0 ? __( 'Diagnostics', 'simply-static' ) . ' ' . wp_kses_post( $notifications ) : __( 'Diagnostics', 'simply-static' ),
+			apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ),
+			'simply-static-diagnostics',
+			array( $this, 'render_settings' )
+		);
+
+		add_action( "admin_print_scripts-{$generate_suffix}", array( $this, 'add_settings_scripts' ) );
+
+		// General settings page.
 		if ( ! is_network_admin() ) {
 			$settings_suffix = add_submenu_page(
 				'simply-static-generate',
@@ -97,6 +124,11 @@ class Admin_Settings {
 
 		if ( 'simply-static_page_simply-static-settings' === $screen->base ) {
 			$initial = '/general';
+		}
+
+		// Maybe switch to Diagnostics.
+		if ( 'simply-static_page_simply-static-diagnostics' === $screen->base ) {
+			$initial = '/diagnostics';
 		}
 
 		// Check if directory exists, if not, create it.
@@ -346,10 +378,11 @@ class Admin_Settings {
 			foreach ( $topics as $check ) {
 				if ( ! $check['test'] ) {
 					$passed = 'no';
-                    break;
+					break;
 				}
 			}
 		}
+
 		return json_encode( [ 'status' => 200, 'passed' => $passed ] );
 	}
 

@@ -61,7 +61,6 @@ class Diagnostic {
 				__( 'Permalinks', 'simply-static' )         => $this->is_permalink_structure_set(),
 				__( 'Caching', 'simply-static' )            => $this->is_cache_set(),
 				__( 'WP-CRON', 'simply-static' )            => $this->is_wp_cron_running(),
-				__( 'WP REST API', 'simply-static' )        => $this->is_wp_rest_running(),
 				__( 'Requests to itself', 'simply-static' ) => $this->can_wp_make_requests_to_itself(),
 			),
 			'Plugins' => array(),
@@ -289,24 +288,6 @@ class Diagnostic {
 		}
 
 		return $response;
-	}
-
-	/**
-	 * Is Rest API up and running.
-	 * @return array
-	 */
-	public function is_wp_rest_running() {
-		if ( empty( $GLOBALS['wp']->query_vars['rest_route'] ) ) {
-			$is_rest = false;
-		} else {
-			$is_rest = true;
-		}
-
-		return array(
-			'test'        => $is_rest,
-			'description' => __( 'Rest API is available and running', 'simply-static' ),
-			'error'       => __( 'Rest API is disabled or blocked', 'simply-static' ),
-		);
 	}
 
 	/**
