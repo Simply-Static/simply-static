@@ -106,7 +106,6 @@ function DeploymentSettings() {
                             {label: __('Bunny CDN', 'simply-static'), value: 'cdn'},
                             {label: __('Tiiny.host', 'simply-static'), value: 'tiiny'},
                             {label: __('Simply CDN (deprecated)', 'simply-static'), value: 'simply-cdn'},
-                            {label: __('Digital Ocean Spaces (deprecated)', 'simply-static'), value: 'digitalocean'},
                         ]}
                         onChange={(method) => {
                             setDeliveryMethod(method);
@@ -643,68 +642,6 @@ function DeploymentSettings() {
                                     updateSetting('aws_empty', value);
                                 }}
                             />
-                        </CardBody>
-                    </Card>
-                }
-                <Spacer margin={5}/>
-                {deliveryMethod === 'digitalocean' &&
-                    <Card>
-                        <CardHeader>
-                            <b>{__('Digital Ocean Spaces', 'simply-static')}</b>
-                        </CardHeader>
-                        <CardBody>
-                            <p>
-                                <b>{__('This integration will be removed in an upcoming update. We no longer recommend using it to avoid disruptions to your static site workflow.', 'simply-static')}</b>
-                            </p>
-                            <TextControl
-                                label={__('Spaces Key', 'simply-static')}
-                                type={"text"}
-                                help={__('Enter your Spaces Key from Digital Ocean.', 'simply-static')}
-                                value={settings.digitalocean_key}
-                                onChange={(api_key) => {
-                                    updateSetting('digitalocean_key', api_key);
-                                }}
-                            />
-
-                            <TextControl
-                                label={__('Secret', 'simply-static')}
-                                type={"password"}
-                                help={__('Enter your Spaces Secret from Digital Ocean.', 'simply-static')}
-                                value={settings.digitalocean_secret}
-                                onChange={(secret) => {
-                                    updateSetting('digitalocean_secret', secret);
-                                }}
-                            />
-
-                            <TextControl
-                                label={__('Bucket Name', 'simply-static')}
-                                help={__('The bucket name for your space.', 'simply-static')}
-                                type={"text"}
-                                placeholder={"my-bucket"}
-                                value={settings.digitalocean_bucket}
-                                onChange={(bucket) => {
-                                    updateSetting('digitalocean_bucket', bucket);
-                                }}
-                            />
-
-                            <TextControl
-                                label={__('Region', 'simply-static')}
-                                type={"text"}
-                                help={__('The region for your space.', 'simply-static')}
-                                placeholder={"ams3"}
-                                value={settings.digitalocean_region}
-                                onChange={(region) => {
-                                    updateSetting('digitalocean_region', region);
-                                }}
-                            />
-                            <p>
-                                {settings.digitalocean_bucket && settings.digitalocean_region &&
-                                    <Notice status="warning" isDismissible={false}>
-                                        {__('Your endpoint will be', 'simply-static')} :
-                                        {'https://' + settings.digitalocean_bucket + '.' + settings.digitalocean_region + '.digitaloceanspaces.com'}
-                                    </Notice>
-                                }
-                            </p>
                         </CardBody>
                     </Card>
                 }
