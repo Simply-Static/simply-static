@@ -17,5 +17,10 @@
   "support": {
       "issues": "https://github.com/patrickposner/simply-static/issues",
       "source": "https://github.com/patrickposner/simply-static/"
+  },
+  "config": {
+    "platform": {
+      "php": "7.4"
+    }
   }
 }
