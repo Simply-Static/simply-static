@@ -31,6 +31,10 @@ class Admin_Settings {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_menu' ) );
 		add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
+		add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_item' ), 100 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'add_admin_bar_scripts' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'add_admin_bar_scripts' ) );
+		add_action( 'wp_ajax_ss_admin_get_status', array( $this, 'get_export_status' ) );
 	}
 
 	/**
@@ -81,7 +85,7 @@ class Admin_Settings {
 		$generate_suffix = add_submenu_page(
 			'simply-static-generate',
 			__( 'Diagnostics', 'simply-static' ),
-            $failed_tests > 0 ? __( 'Diagnostics', 'simply-static' ) . ' ' . wp_kses_post( $notifications ) : __( 'Diagnostics', 'simply-static' ),
+			$failed_tests > 0 ? __( 'Diagnostics', 'simply-static' ) . ' ' . wp_kses_post( $notifications ) : __( 'Diagnostics', 'simply-static' ),
 			apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ),
 			'simply-static-diagnostics',
 			array( $this, 'render_settings' )
@@ -223,6 +227,69 @@ class Admin_Settings {
 		?>
         <div id="simplystatic-settings"></div>
 		<?php
+	}
+
+	public function add_admin_bar_item( $admin_bar ) {
+		// Get settings page.
+		$generate_settings = esc_url( get_admin_url() . 'admin.php?page=simply-static-generate' );
+
+		$admin_bar->add_node( [
+			'id'    => 'ss-admin-bar',
+			'title' => __( 'Static Generation: Waiting..', 'simply-static' ),
+			'href'  => $generate_settings,
+			'meta'  => [
+				'id'    => 'ss-admin-bar',
+				'title' => __( 'Static Generation: Waiting..', 'simply-static' ),
+			],
+		] );
+	}
+
+	/**
+	 * Add scripts for admin bar.
+	 *
+	 * @return void
+	 */
+	public function add_admin_bar_scripts() {
+		// exit if user is not logged in.
+		if ( ! is_user_logged_in() ) {
+			return;
+		}
+
+		wp_enqueue_script( 'ss-admin-bar-script', SIMPLY_STATIC_URL . '/assets/admin-bar.js', [ 'jquery' ], '1.0', true );
+		wp_localize_script( 'ss-admin-bar-script', 'ss_admin_status_object', [
+			'ajax_url'     => admin_url( 'admin-ajax.php' ),
+			'nonce'        => wp_create_nonce( 'ss-admin-bar-nonce' ),
+			'translations' => [
+				'label'   => __( 'Static Generation:', 'simply-static' ),
+				'running' => __( 'Running..', 'simply-static' ),
+				'idle'    => __( 'Idle', 'simply-static' ),
+				'error'   => __( 'Error', 'simply-static' ),
+			]
+		] );
+	}
+
+	/**
+	 * Get information if an export is running.
+	 *
+	 * @return void
+	 */
+	public function get_export_status() {
+		// Validate nonce.
+		if ( ! wp_verify_nonce( $_POST['security'], 'ss-admin-bar-nonce' ) ) {
+			wp_die( 'Security check failed' );
+		}
+
+		// Check if Simply Static is running
+		$status = 'error';
+
+		if ( class_exists( 'Simply_Static\Archive_Creation_Job' ) ) {
+			$job    = new Archive_Creation_Job();
+			$status = ( $job->is_running() ) ? 'running' : 'idle';
+			wp_send_json_success( [ 'status' => $status ] );
+		} else {
+			wp_send_json_error( [ 'status' => $status ] );
+		}
+		wp_send_json_success( [ 'status' => $status ] );
 	}
 
 	/**
