@@ -23,6 +23,7 @@ import DeploymentSettings from "../pages/DeploymentSettings";
 import FormSettings from "../pages/FormSettings";
 import SearchSettings from "../pages/SearchSettings";
 import MiscSettings from "../pages/MiscSettings";
+import IntegrationsSettings from "../pages/IntegrationsSettings";
 import Generate from "../pages/Generate";
 import Optimize from "../pages/Optimize";
 import {SettingsContext} from "../context/SettingsContext";
@@ -332,6 +333,11 @@ function SettingsPage() {
                                                      path="/misc">
                                         <Dashicon icon="block-default"/> {__('Misc', 'simply-static')}
                                     </NavigatorButton>
+                                    <NavigatorButton onClick={() => setActiveItem('/integrations')}
+                                                     className={activeItem === '/integrations' ? 'is-active-item' : ''}
+                                                     path="/integrations">
+                                        <Dashicon icon="admin-plugins"/> {__('Integrations', 'simply-static')}
+                                    </NavigatorButton>
                                 </CardBody>
                                 <CardBody>
                                     <h4 className={"settings-headline"}>Simply Static</h4>
@@ -418,6 +424,11 @@ function SettingsPage() {
                             {activeItem === '/misc' &&
                                 <NavigatorScreen path="/misc">
                                     <MiscSettings/>
+                                </NavigatorScreen>
+                            }
+                            {activeItem === '/integrations' &&
+                                <NavigatorScreen path="/integrations">
+                                    <IntegrationsSettings/>
                                 </NavigatorScreen>
                             }
                         </div>

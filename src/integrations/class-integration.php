@@ -10,6 +10,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class Integration {
 
 	/**
+	 * Integration Name.
+	 * @var string
+	 */
+	protected $name = '';
+
+	/**
+	 * Integration Description.
+	 * @var string
+	 */
+	protected $description = '';
+
+	/**
 	 * A string ID of integration.
 	 *
 	 * @var string
@@ -40,13 +52,39 @@ abstract class Integration {
 	}
 
 	/**
+	 * Check if the integration is active.
+	 *
+	 * @return boolean
+	 */
+	public function is_active() {
+		$options = Options::instance();
+		$integrations = $options->get('integrations');
+
+		// Mainly for backwards compatibility. If there is no such option, it means it's all active.
+		if ( empty( $integrations ) ) {
+			return true;
+		}
+
+		return in_array( $this->id, $integrations, true );
+	}
+
+	/**
 	 * A Check if this integration can run.
 	 * Example: Check if a plugin is activated in DB or a class exists.
 	 *
 	 * @return boolean
 	 */
 	public function can_run() {
-		return true;
+		return $this->is_active();
+	}
+
+	/**
+	 * Set if the integration is pro or not.
+	 *
+	 * @return boolean
+	 */
+	public function is_pro() {
+		return false;
 	}
 
 	/**
@@ -66,5 +104,21 @@ abstract class Integration {
 	 */
 	public function include_file( $path ) {
 		require_once trailingslashit( SIMPLY_STATIC_PATH ) . 'src/' . $path;
+	}
+
+	/**
+	 * Object used for JS part.
+	 *
+	 * @return array
+	 */
+	public function js_object() {
+		return [
+			'id'          => $this->id,
+			'name'        => $this->name,
+			'description' => $this->description,
+			'active'      => $this->is_active(),
+			'pro'         => $this->is_pro(),
+			'can_run'     => $this->can_run(),
+		];
 	}
 }

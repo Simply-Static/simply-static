@@ -118,6 +118,10 @@ class Plugin {
 		return self::$instance;
 	}
 
+	public function get_integrations() {
+		return $this->integrations->get_integrations();
+	}
+
 	public function get_integration( $integration ) {
 		$integrations = $this->integrations->get_integrations();
 		if ( empty( $integrations[ $integration ] ) ) {

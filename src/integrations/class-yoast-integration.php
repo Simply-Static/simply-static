@@ -11,6 +11,11 @@ class Yoast_Integration extends Integration {
 	 */
 	protected $id = 'yoast';
 
+	public function __construct() {
+		$this->name = __( 'Yoast', 'simply-static' );
+		$this->description = __( 'Adds sitemaps to generated static files.', 'simply-static' );
+	}
+
 	/**
 	 * Run the integration.
 	 *
@@ -73,6 +78,10 @@ class Yoast_Integration extends Integration {
 	 * @return bool
 	 */
 	public function can_run() {
-		return defined( 'WPSEO_FILE' );
+		if ( ! defined( 'WPSEO_FILE' ) ) {
+			return false;
+		}
+
+		return parent::can_run();
 	}
 }
