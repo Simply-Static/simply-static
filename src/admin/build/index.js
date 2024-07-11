@@ -396,7 +396,9 @@ function Integration({
   let canUse = options.plan === 'pro' || !isPro;
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, {
     className: 'ss-integration'
-  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("strong", null, integration.name || integration.id), integration.description != '' && [(0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("br", null), integration.description]), !canRun && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("em", null, "Missing Plugin"), !canUse && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("strong", null, integration.name || integration.id), integration.description != '' && [(0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("br", null), integration.description]), !canRun && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
+    className: 'ss-align-right ss-no-shrink'
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("em", null, "Missing Plugin"), !canUse && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
     variant: "link",
     href: "https://simplystatic.com/pricing/"
   }, __('Requires Simply Static Pro also', 'simply-static')))), canRun && canUse && !alwaysActive && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
@@ -2334,8 +2336,6 @@ function IntegrationsSettings() {
     updateSetting('integrations', integrations);
   };
   const toggleIntegration = (integration, value) => {
-    console.log(value);
-    console.log(integration);
     if (value) {
       saveIntegration(integration);
     } else {
@@ -2343,13 +2343,11 @@ function IntegrationsSettings() {
     }
   };
   const canRunIntegrations = Object.keys(options.integrations).filter(item => {
-    return options.integrations[item].can_run;
+    return options.integrations[item].can_run && !options.integrations[item].always_active;
   });
   const canNotRunIntegrations = Object.keys(options.integrations).filter(item => {
-    return !options.integrations[item].can_run;
+    return !options.integrations[item].can_run && !options.integrations[item].always_active;
   });
-  console.log(canRunIntegrations);
-  console.log(canNotRunIntegrations);
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "inner-settings"
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Integrations', 'simply-static'))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, __('Control Integrations that will be active during the export of the static site.', 'simply-static'))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
@@ -2362,8 +2360,6 @@ function IntegrationsSettings() {
       toggleIntegration: toggleIntegration
     });
   }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
-    margin: 5
-  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Missing Plugins', 'simply-static'))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, __('Integrations that can not run due to missing core plugins.', 'simply-static'))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
     margin: 5
   }), canNotRunIntegrations.map(item => {
     const integration = options.integrations[item];

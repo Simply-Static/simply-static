@@ -56,8 +56,7 @@ function IntegrationsSettings() {
     }
 
     const toggleIntegration = ( integration, value ) => {
-        console.log(value);
-        console.log(integration);
+
         if ( value ) {
             saveIntegration(integration);
         } else {
@@ -65,11 +64,8 @@ function IntegrationsSettings() {
         }
     }
 
-    const canRunIntegrations = Object.keys(options.integrations).filter( ( item ) => { return options.integrations[item].can_run } );
-
-    const canNotRunIntegrations = Object.keys(options.integrations).filter( ( item ) => { return !options.integrations[item].can_run  });
-    console.log(canRunIntegrations);
-    console.log(canNotRunIntegrations);
+    const canRunIntegrations = Object.keys(options.integrations).filter( ( item ) => { return options.integrations[item].can_run && !options.integrations[item].always_active } );
+    const canNotRunIntegrations = Object.keys(options.integrations).filter( ( item ) => { return !options.integrations[item].can_run && !options.integrations[item].always_active });
 
     return (<div className={"inner-settings"}>
         <Card>
@@ -87,22 +83,17 @@ function IntegrationsSettings() {
             return <Integration integration={integration} settings={settings} toggleIntegration={toggleIntegration} />
 
         })}
+
         <Spacer margin={5}/>
-        <Card>
-            <CardHeader>
-                <b>{__('Missing Plugins', 'simply-static')}</b>
-            </CardHeader>
-            <CardBody>
-                {__('Integrations that can not run due to missing core plugins.', 'simply-static')}
-            </CardBody>
-        </Card>
-        <Spacer margin={5}/>
+
         {canNotRunIntegrations.map( ( item ) => {
             const integration = options.integrations[item];
             return <Integration integration={integration} settings={settings} toggleIntegration={toggleIntegration} />
 
         })}
+
         <Spacer margin={5}/>
+
         {settingsSaved &&
             <>
                 <Animate type="slide-in" options={{origin: 'top'}}>

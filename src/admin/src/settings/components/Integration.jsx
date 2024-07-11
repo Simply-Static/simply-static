@@ -23,7 +23,7 @@ function Integration({ integration, settings, toggleIntegration }) {
                         integration.description
                     ]}
                 </div>
-                {!canRun && <span><em>Missing Plugin</em>{!canUse && <div><Button variant="link" href={"https://simplystatic.com/pricing/"}>
+                {!canRun && <span className={'ss-align-right ss-no-shrink'}><em>Missing Plugin</em>{!canUse && <div><Button variant="link" href={"https://simplystatic.com/pricing/"}>
                     {__('Requires Simply Static Pro also', 'simply-static')}
                 </Button></div>}</span>}
                 { ( canRun && canUse && !alwaysActive) && <ToggleControl

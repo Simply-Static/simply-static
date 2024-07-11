@@ -58,6 +58,14 @@ toplevel_page_simply-static img {
     margin: 0 0 0 40px;
   }
 
+  .ss-align-right {
+    text-align: right;
+  }
+
+  .ss-no-shrink {
+    flex-shrink: 0;
+  }
+
   .ss-integration {
     align-items: center;
 
