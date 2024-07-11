@@ -10,6 +10,7 @@ import {
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
+import Integration from "../components/Integration";
 
 const {__} = wp.i18n;
 
@@ -64,54 +65,42 @@ function IntegrationsSettings() {
         }
     }
 
-console.log(settings.integrations);
+    const canRunIntegrations = Object.keys(options.integrations).filter( ( item ) => { return options.integrations[item].can_run } );
+
+    const canNotRunIntegrations = Object.keys(options.integrations).filter( ( item ) => { return !options.integrations[item].can_run  });
+    console.log(canRunIntegrations);
+    console.log(canNotRunIntegrations);
+
     return (<div className={"inner-settings"}>
         <Card>
             <CardHeader>
                 <b>{__('Integrations', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
-                <p>{__('Control Integrations that will be active during the export of the static site.', 'simply-static')}</p>
+                {__('Control Integrations that will be active during the export of the static site.', 'simply-static')}
 
             </CardBody>
         </Card>
         <Spacer margin={5}/>
-        {Object.keys( options.integrations ).map( ( item ) => {
-            console.log(settings);
+        {canRunIntegrations.map( ( item ) => {
             const integration = options.integrations[item];
-            let isActive    = integration.active;
-            const isPro     = integration.pro;
+            return <Integration integration={integration} settings={settings} toggleIntegration={toggleIntegration} />
 
-            if (typeof settings.integrations !== 'undefined' && settings.integrations !== false ) {
-                isActive = settings.integrations.indexOf( integration.id ) >= 0;
-            }
+        })}
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <b>{__('Missing Plugins', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
+                {__('Integrations that can not run due to missing core plugins.', 'simply-static')}
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        {canNotRunIntegrations.map( ( item ) => {
+            const integration = options.integrations[item];
+            return <Integration integration={integration} settings={settings} toggleIntegration={toggleIntegration} />
 
-            let canUse = options.plan === 'pro' || !isPro;
-
-            return [<Card>
-                        <CardHeader>
-                            <div>
-                                <strong>{integration.name || integration.id}</strong>
-                                {integration.description != '' && [
-                                    <br/>,
-                                    integration.description
-                                ]}
-                            </div>
-                            {canUse && <ToggleControl
-                                checked={isActive}
-                                onChange={(value) => {
-                                     toggleIntegration(integration.id, value);
-                                }}
-                            />}
-                            {!canUse &&
-                                <Button variant="primary" href={"https://simplystatic.com/pricing/"}>
-                                    {__('Get the Pro version', 'simply-static')}
-                                </Button>
-                            }
-                        </CardHeader>
-            </Card>,
-                <Spacer margin={5}/>
-            ]
         })}
         <Spacer margin={5}/>
         {settingsSaved &&

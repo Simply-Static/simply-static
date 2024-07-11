@@ -54,6 +54,12 @@ toplevel_page_simply-static img {
 .plugin-settings-container .upgrade-network-notice {
   margin: 0 0 0 40px;
 }
+.plugin-settings-container .ss-integration {
+  align-items: center;
+}
+.plugin-settings-container .ss-integration .integration-toggle {
+  margin: 0;
+}
 .plugin-settings-container .plugin-nav {
   padding: 25px 40px;
   height: 100vh;

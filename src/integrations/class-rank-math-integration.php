@@ -12,6 +12,11 @@ class Rank_Math_Integration extends Integration {
 	 */
 	protected $id = 'rank-math';
 
+	public function __construct() {
+		$this->name = __( 'Rank Math', 'simply-static' );
+		$this->description = __( 'Adds sitemaps to generated static files.', 'simply-static' );
+	}
+
 	/**
 	 * Run the integration.
 	 *
@@ -62,11 +67,11 @@ class Rank_Math_Integration extends Integration {
 	}
 
 	/**
-	 * Can this integration run?
+	 * Return if the dependency is active.
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
-	public function can_run() {
+	public function dependency_active() {
 		return class_exists( 'RankMath' );
 	}
 }

@@ -73,15 +73,11 @@ class Yoast_Integration extends Integration {
 	}
 
 	/**
-	 * Can this integration run?
+	 * Return if the dependency is active.
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
-	public function can_run() {
-		if ( ! defined( 'WPSEO_FILE' ) ) {
-			return false;
-		}
-
-		return parent::can_run();
+	public function dependency_active() {
+		return defined( 'WPSEO_FILE' );
 	}
 }

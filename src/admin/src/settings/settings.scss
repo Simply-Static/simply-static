@@ -58,6 +58,14 @@ toplevel_page_simply-static img {
     margin: 0 0 0 40px;
   }
 
+  .ss-integration {
+    align-items: center;
+
+    .integration-toggle {
+      margin: 0;
+    }
+  }
+
   /* Navigation */
   .plugin-nav {
     padding: 25px 40px;

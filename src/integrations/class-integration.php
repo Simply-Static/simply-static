@@ -16,6 +16,11 @@ abstract class Integration {
 	protected $name = '';
 
 	/**
+	 * @var bool
+	 */
+	protected $always_active = false;
+
+	/**
 	 * Integration Description.
 	 * @var string
 	 */
@@ -75,7 +80,24 @@ abstract class Integration {
 	 * @return boolean
 	 */
 	public function can_run() {
+		if ( $this->always_active ) {
+			return true;
+		}
+
+		if ( ! $this->dependency_active() ) {
+			return false;
+		}
+
 		return $this->is_active();
+	}
+
+	/**
+	 * Return if the dependency is active.
+	 *
+	 * @return boolean
+	 */
+	public function dependency_active() {
+		return true;
 	}
 
 	/**
@@ -113,12 +135,13 @@ abstract class Integration {
 	 */
 	public function js_object() {
 		return [
-			'id'          => $this->id,
-			'name'        => $this->name,
-			'description' => $this->description,
-			'active'      => $this->is_active(),
-			'pro'         => $this->is_pro(),
-			'can_run'     => $this->can_run(),
+			'id'            => $this->id,
+			'name'          => $this->name,
+			'description'   => $this->description,
+			'active'        => $this->is_active(),
+			'pro'           => $this->is_pro(),
+			'can_run'       => $this->dependency_active(),
+			'always_active' => $this->always_active
 		];
 	}
 }
