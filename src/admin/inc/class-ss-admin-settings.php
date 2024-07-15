@@ -159,6 +159,10 @@ class Admin_Settings {
 				'blog_id'        => get_current_blog_id(),
 				'need_upgrade'   => 'no',
 				'builds'         => array(),
+                'integrations'   => array_map( function ($item) {
+                    $object = new $item;
+                    return $object->js_object();
+                }, Plugin::instance()->get_integrations() ),
 			)
 		);
 
@@ -430,7 +434,12 @@ class Admin_Settings {
 	 * @return false|mixed|null
 	 */
 	public function get_settings() {
-		return get_option( 'simply-static' );
+        $settings = get_option( 'simply-static' );
+        if ( empty( $settings['integrations'] ) ) {
+            $integrations = Plugin::instance()->get_integrations();
+            $settings['integrations'] = array_keys( $integrations );
+        }
+		return $settings;
 	}
 
 	/**
@@ -485,10 +494,14 @@ class Admin_Settings {
 				'iframe_urls'
 			];
 
+            $array_fields = [ 'integrations' ];
+
 			// Sanitize each key/value pair in options.
 			foreach ( $options as $key => $value ) {
 				if ( in_array( $key, $multiline_fields ) ) {
 					$options[ $key ] = sanitize_textarea_field( $value );
+				} elseif ( in_array( $key, $array_fields ) ) {
+					$options[ $key ] = array_map( 'sanitize_text_field', $value );
 				} else {
 					// Exclude Basic Auth fields from sanitize.
 					if ( $key === 'http_basic_auth_username' || $key === 'http_basic_auth_password' ) {

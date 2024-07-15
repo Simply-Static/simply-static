@@ -12,12 +12,17 @@ class Elementor_Pro_Integration extends Integration {
 	 */
 	protected $id = 'elementor-pro';
 
+	public function __construct() {
+		$this->name = __( 'Elementor Pro', 'simply-static' );
+		$this->description = __( 'Exports assets required for Elementor Pro widgets and prepares data used by them.', 'simply-static' );
+	}
+
 	/**
-	 * Can this integration run?
+	 * Return if the dependency is active.
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
-	public function can_run() {
+	public function dependency_active() {
 		return defined( 'ELEMENTOR_PRO_VERSION' );
 	}
 

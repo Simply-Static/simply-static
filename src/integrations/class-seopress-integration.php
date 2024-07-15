@@ -11,6 +11,11 @@ class SEOPress_Integration extends Integration {
 	 */
 	protected $id = 'seopress';
 
+	public function __construct() {
+		$this->name = __( 'SEOPress', 'simply-static' );
+		$this->description = __( 'Adds sitemaps to generated static files.', 'simply-static' );
+	}
+
 	/**
 	 * Run the integration.
 	 *
@@ -61,11 +66,11 @@ class SEOPress_Integration extends Integration {
 	}
 
 	/**
-	 * Can this integration run?
+	 * Return if the dependency is active.
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
-	public function can_run() {
+	public function dependency_active() {
 		return defined( 'SEOPRESS_VERSION' );
 	}
 }

@@ -13,12 +13,17 @@ class CookieYes_Integration extends Integration {
 	 */
 	protected $id = 'cookieyes';
 
+	public function __construct() {
+		$this->name = __( 'CookieYes | GDPR Cookie Consent', 'simply-static' );
+		$this->description = __( 'Fixes scripts given by CookieYes to work on exported pages.', 'simply-static' );
+	}
+
 	/**
-	 * Can this integration run?
+	 * Return if the dependency is active.
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
-	public function can_run() {
+	public function dependency_active() {
 		return defined( 'CKY_APP_URL' );
 	}
 

@@ -112,7 +112,8 @@ function SettingsContextProvider(props) {
         'sftp_port': 22,
         'shortpixel_enabled': false,
         'shortpixel_api_key': '',
-        'shortpixel_backup_enabled': false
+        'shortpixel_backup_enabled': false,
+        'integrations': false // Will be array when saved.
     }
     const [isRunning, setIsRunning] = useState(false);
     const [settingsSaved, setSettingsSaved] = useState(false);
