@@ -10,6 +10,11 @@ class Jetpack_Integration extends Integration {
 	 */
 	protected $id = 'jetpack';
 
+	public function __construct() {
+		$this->name = __( 'Jetpack', 'simply-static' );
+		$this->description = __( 'Adds scripts for carousels and sliders to the static site.', 'simply-static' );
+	}
+
 	/**
 	 * Run the integration.
 	 *
@@ -42,11 +47,11 @@ class Jetpack_Integration extends Integration {
 	}
 
 	/**
-	 * Can this integration run?
+	 * Return if the dependency is active.
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
-	public function can_run() {
+	public function dependency_active() {
 		return class_exists( 'Jetpack' );
 	}
 }
