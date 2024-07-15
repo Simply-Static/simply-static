@@ -84,7 +84,7 @@ function MiscSettings() {
                 {'pro' === options.plan &&
                     <p>
                         <ToggleControl
-                            label={__('Enable Basic Authentification', 'simply-static')}
+                            label={__('Enable Basic Auth', 'simply-static')}
                             help={__('Once enabled we will put your entire website behind password protection.', 'simply-static')}
                             checked={settings.http_basic_auth_on}
                             onChange={(value) => {

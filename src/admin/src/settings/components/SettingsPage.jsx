@@ -323,6 +323,11 @@ function SettingsPage() {
                                 </CardBody>
                                 <CardBody>
                                     <h4 className={"settings-headline"}> {__('Advanced', 'simply-static')}</h4>
+                                    <NavigatorButton onClick={() => setActiveItem('/integrations')}
+                                                     className={activeItem === '/integrations' ? 'is-active-item' : ''}
+                                                     path="/integrations">
+                                        <Dashicon icon="admin-plugins"/> {__('Integrations', 'simply-static')}
+                                    </NavigatorButton>
                                     <NavigatorButton onClick={() => setActiveItem('/utilities')}
                                                      className={activeItem === '/utilities' ? 'is-active-item' : ''}
                                                      path="/utilities">
@@ -332,11 +337,6 @@ function SettingsPage() {
                                                      className={activeItem === '/misc' ? 'is-active-item' : ''}
                                                      path="/misc">
                                         <Dashicon icon="block-default"/> {__('Misc', 'simply-static')}
-                                    </NavigatorButton>
-                                    <NavigatorButton onClick={() => setActiveItem('/integrations')}
-                                                     className={activeItem === '/integrations' ? 'is-active-item' : ''}
-                                                     path="/integrations">
-                                        <Dashicon icon="admin-plugins"/> {__('Integrations', 'simply-static')}
                                     </NavigatorButton>
                                 </CardBody>
                                 <CardBody>
