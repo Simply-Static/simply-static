@@ -259,23 +259,10 @@ class Admin_Settings {
 			return;
 		}
 
-		// Diagnostics settings page.
-		$system_status = $this->get_system_status();
-		$failed_tests  = 0;
-
-		foreach ( $system_status as $test ) {
-			foreach ( $test as $key => $value ) {
-				if ( ! $value['test'] ) {
-					$failed_tests ++;
-				}
-			}
-		}
-
 		wp_enqueue_script( 'ss-admin-bar-script', SIMPLY_STATIC_URL . '/assets/admin-bar.js', [ 'jquery' ], '1.0', true );
 		wp_localize_script( 'ss-admin-bar-script', 'ss_admin_status_object', [
 			'ajax_url'     => admin_url( 'admin-ajax.php' ),
 			'nonce'        => wp_create_nonce( 'ss-admin-bar-nonce' ),
-			'tests_failed' => max( $failed_tests, 0 ),
 			'translations' => [
 				'label'   => __( 'Static Generation:', 'simply-static' ),
 				'running' => __( 'Running..', 'simply-static' ),
