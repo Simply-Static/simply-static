@@ -165,8 +165,8 @@ class Plugin {
 		require_once $path . 'src/class-ss-sql-permissions.php';
 		require_once $path . 'src/class-ss-upgrade-handler.php';
 		require_once $path . 'src/class-ss-util.php';
-		require_once $path . 'src/class-page-handlers.php';
-		require_once $path . 'src/class-integrations.php';
+		require_once $path . 'src/class-ss-page-handlers.php';
+		require_once $path . 'src/class-ss-integrations.php';
 		require_once $path . 'src/admin/inc/class-ss-admin-settings.php';
 		require_once $path . 'src/admin/inc/class-ss-migrate-settings.php';
 		require_once $path . 'src/class-ss-multisite.php';
