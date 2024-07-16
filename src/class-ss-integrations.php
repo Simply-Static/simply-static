@@ -25,6 +25,7 @@ class Integrations {
 
 	public function get_integrations() {
 		return apply_filters( 'simply_static_integrations', [
+			'ss-adminbar'   => SS_Adminbar_Integration::class,
 			'yoast'         => Yoast_Integration::class,
 			'rank-math'     => Rank_Math_Integration::class,
 			'aio-seo'       => AIO_SEO_Integration::class,
@@ -43,6 +44,11 @@ class Integrations {
 	public function includes() {
 		$path = plugin_dir_path( dirname( __FILE__ ) ) . 'src/integrations/';
 		require_once $path . 'class-integration.php';
+
+		// Core Integrations.
+		require_once $path . 'class-ss-adminbar-integration.php';
+
+		// Third-Party Integrations.
 		require_once $path . 'class-yoast-integration.php';
 		require_once $path . 'class-rank-math-integration.php';
 		require_once $path . 'class-aio-seo-integration.php';
@@ -53,6 +59,7 @@ class Integrations {
 		require_once $path . 'class-brizy-integration.php';
 		require_once $path . 'class-jetpack-integration.php';
 
+		// Simply Static Pro integrations.
 		require_once $path . 'class-pro-integration.php';
 		require_once $path . 'pro/class-github-integration.php';
 		require_once $path . 'pro/class-multilingual-integration.php';
