@@ -89,6 +89,9 @@ class Plugin {
 			// Maybe clear local directory.
 			add_action( 'ss_after_setup_task', array( self::$instance, 'maybe_clear_directory' ) );
 
+			// Add quick link to the plugin page.
+			add_filter( 'plugin_action_links_simply-static/simply-static.php', array( self::$instance, 'add_quick_links' ) );
+
 			self::$instance->integrations = new Integrations();
 			self::$instance->integrations->load();
 
@@ -414,5 +417,22 @@ class Plugin {
 				Transfer_Files_Locally_Task::delete_local_directory_static_files( $local_dir, $this->options );
 			}
 		}
+	}
+
+	/**
+	 * Register quick links in plugins settings page.
+	 *
+	 * @param array $links given list of links.
+	 *
+	 * @return array
+	 */
+	public function add_quick_links( $links ) {
+		$settings_url = esc_url( get_admin_url() . 'admin.php?page=simply-static-settings' );
+		$docs_url     = esc_url( 'https://docs.simplystatic.com' );
+
+		$links[] = '<a href="' . $settings_url . '">' . esc_html__( 'Settings', 'simply-static' ) . '</a>';
+		$links[] = '<a target="_blank" href="' . $docs_url . '">' . esc_html__( 'Docs', 'simply-static' ) . '</a>';
+
+		return $links;
 	}
 }
