@@ -139,22 +139,8 @@ function SettingsPage() {
                                     <p>Version: <b>{options.version}</b></p>
                                 }
                                 <div className={"generate-container"}>
-                                    {'pro' === options.plan &&
-                                        <p>
-                                            <SelectControl
-                                                value={selectedExportType}
-                                                onChange={(value) => {
-                                                    setSelectedExportType(value);
-                                                }}
-                                            >
-                                                <option value="export">{__('Export', 'simply-static')}</option>
-                                                {'zip' !== settings.delivery_method && 'tiiny' !== settings.delivery_method &&
-                                                    <option value="update">{__('Update', 'simply-static')}</option>
-                                                }
-                                                {buildOptions}
-                                            </SelectControl>
-                                        </p>}
                                     <Button onClick={() => {
+                                        setSelectedExportType('export');
                                         startExport();
                                     }}
                                             disabled={disabledButton}

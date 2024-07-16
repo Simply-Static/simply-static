@@ -64,38 +64,8 @@ class Admin_Settings {
 
 		add_action( "admin_print_scripts-{$generate_suffix}", array( $this, 'add_settings_scripts' ) );
 
-		// Diagnostics settings page.
-		if ( get_transient( 'simply_static_failed_tests' ) ) {
-			$failed_tests = get_transient( 'simply_static_failed_tests' );
-		} else {
-			$system_status = $this->get_system_status();
-			$failed_tests  = 0;
-
-			foreach ( $system_status as $test ) {
-				foreach ( $test as $key => $value ) {
-					if ( ! $value['test'] ) {
-						$failed_tests ++;
-					}
-				}
-			}
-			set_transient( 'simply_static_failed_tests', $failed_tests, 5 * MINUTE_IN_SECONDS );
-		}
-
-		$notifications = sprintf( '<span class="update-plugins diagnostics-error"><span class="plugin-count" aria-hidden="true">%s</span><span class="screen-reader-text">errors in diagnostics</span></span>', $failed_tests );
-
-		$generate_suffix = add_submenu_page(
-			'simply-static-generate',
-			__( 'Diagnostics', 'simply-static' ),
-			$failed_tests > 0 ? __( 'Diagnostics', 'simply-static' ) . ' ' . wp_kses_post( $notifications ) : __( 'Diagnostics', 'simply-static' ),
-			apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ),
-			'simply-static-diagnostics',
-			array( $this, 'render_settings' )
-		);
-
-		add_action( "admin_print_scripts-{$generate_suffix}", array( $this, 'add_settings_scripts' ) );
-
-		// General settings page.
 		if ( ! is_network_admin() ) {
+            // Add settings page.
 			$settings_suffix = add_submenu_page(
 				'simply-static-generate',
 				__( 'Settings', 'simply-static' ),
@@ -106,6 +76,37 @@ class Admin_Settings {
 			);
 
 			add_action( "admin_print_scripts-{$settings_suffix}", array( $this, 'add_settings_scripts' ) );
+
+			// Diagnostics settings page.
+			if ( get_transient( 'simply_static_failed_tests' ) ) {
+				$failed_tests = get_transient( 'simply_static_failed_tests' );
+			} else {
+				$system_status = $this->get_system_status();
+				$failed_tests  = 0;
+
+				foreach ( $system_status as $test ) {
+					foreach ( $test as $key => $value ) {
+						if ( ! $value['test'] ) {
+							$failed_tests ++;
+						}
+					}
+				}
+				set_transient( 'simply_static_failed_tests', $failed_tests, 5 * MINUTE_IN_SECONDS );
+			}
+
+			$notifications = sprintf( '<span class="update-plugins diagnostics-error"><span class="plugin-count" aria-hidden="true">%s</span><span class="screen-reader-text">errors in diagnostics</span></span>', $failed_tests );
+
+			// Add diagnostics page.
+			$diagnostics_suffix = add_submenu_page(
+				'simply-static-generate',
+				__( 'Diagnostics', 'simply-static' ),
+				$failed_tests > 0 ? __( 'Diagnostics', 'simply-static' ) . ' ' . wp_kses_post( $notifications ) : __( 'Diagnostics', 'simply-static' ),
+				apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ),
+				'simply-static-diagnostics',
+				array( $this, 'render_settings' )
+			);
+
+			add_action( "admin_print_scripts-{$diagnostics_suffix}", array( $this, 'add_settings_scripts' ) );
 		}
 	}
 
