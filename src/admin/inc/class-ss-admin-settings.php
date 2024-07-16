@@ -69,16 +69,21 @@ class Admin_Settings {
 		add_action( "admin_print_scripts-{$generate_suffix}", array( $this, 'add_settings_scripts' ) );
 
 		// Diagnostics settings page.
-		$system_status = $this->get_system_status();
-		$failed_tests  = 0;
+        if( get_transient('simply_static_failed_tests') ) {
+            $failed_tests = get_transient('simply_static_failed_tests');
+        } else {
+            $system_status = $this->get_system_status();
+            $failed_tests  = 0;
 
-		foreach ( $system_status as $test ) {
-			foreach ( $test as $key => $value ) {
-				if ( ! $value['test'] ) {
-					$failed_tests ++;
-				}
-			}
-		}
+            foreach ( $system_status as $test ) {
+                foreach ( $test as $key => $value ) {
+                    if ( ! $value['test'] ) {
+                        $failed_tests ++;
+                    }
+                }
+            }
+            set_transient('simply_static_failed_tests', $failed_tests,  5 * MINUTE_IN_SECONDS );
+        }
 
 		$notifications = sprintf( '<span class="update-plugins diagnostics-error"><span class="plugin-count" aria-hidden="true">%s</span><span class="screen-reader-text">errors in diagnostics</span></span>', $failed_tests );
 
