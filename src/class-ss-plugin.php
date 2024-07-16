@@ -83,9 +83,6 @@ class Plugin {
 				'filter_task_list'
 			), 10, 2 );
 
-			// Handle Basic Auth.
-			add_filter( 'http_request_args', array( self::$instance, 'add_http_filters' ), 10, 2 );
-
 			// Maybe clear local directory.
 			add_action( 'ss_after_setup_task', array( self::$instance, 'maybe_clear_directory' ) );
 
@@ -323,45 +320,6 @@ class Plugin {
 	 */
 	public function get_archive_creation_job() {
 		return $this->archive_creation_job;
-	}
-
-	/**
-	 * Set HTTP Basic Auth for wp-background-processing
-	 *
-	 * @param array $parsed_args given args.
-	 * @param string $url given URL.
-	 *
-	 * @return array
-	 */
-	public function add_http_filters( $parsed_args, $url ) {
-		// Check for Basic Auth credentials.
-		if ( strpos( $url, get_bloginfo( 'url' ) ) !== false ) {
-			$digest = self::$instance->options->get( 'http_basic_auth_digest' );
-
-			if ( $digest ) {
-				$parsed_args['headers']['Authorization'] = 'Basic ' . $digest;
-			}
-		}
-
-		// Check for Freemius.
-		if ( false === strpos( $url, '://api.freemius.com' ) ) {
-			return $parsed_args;
-		}
-
-		if ( empty( $parsed_args['headers'] ) ) {
-			return $parsed_args;
-		}
-
-		foreach ( $parsed_args['headers'] as $key => $value ) {
-			if ( 'Authorization' === $key ) {
-				$parsed_args['headers']['Authorization2'] = $value;
-			} else if ( 'Authorization2' === $key ) {
-				$parsed_args['headers']['Authorization'] = $value;
-				unset( $parsed_args['headers'][ $key ] );
-			}
-		}
-
-		return $parsed_args;
 	}
 
 	/**
