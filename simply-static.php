@@ -54,18 +54,11 @@ if ( ! function_exists( 'simply_static_run_plugin' ) ) {
 
 		Simply_Static\Plugin::instance();
 
-		// Maybe update excludes.
+		// Server-side cron?
 		$options = get_option( 'simply-static' );
 
-		if ( isset( $options['urls_to_exclude'] ) && is_array( $options['urls_to_exclude'] ) ) {
-			$urls_to_exclude = [];
-
-			foreach ( $options['urls_to_exclude'] as $url => $data ) {
-				$urls_to_exclude[] = $url;
-			}
-
-			$options['urls_to_exclude'] = implode( "\n", $urls_to_exclude );
-			update_option( 'simply-static', $options );
+		if ( $options['server_cron'] ) {
+			define( 'SS_CRON', true );
 		}
 
 		// Generate a secure unique key.

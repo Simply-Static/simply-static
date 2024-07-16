@@ -20,6 +20,7 @@ function SettingsContextProvider(props) {
         'relative_path': '',
         'destination_url_type': 'relative',
         'debugging_mode': true,
+        'server_cron': false,
         'http_basic_auth_username': '',
         'http_basic_auth_password': '',
         'http_basic_auth_on': false,
@@ -146,7 +147,7 @@ function SettingsContextProvider(props) {
         });
     }
 
-    const updateFromNetwork = ( blogId ) => {
+    const updateFromNetwork = (blogId) => {
         apiFetch({
             path: '/simplystatic/v1/update-from-network',
             method: 'POST',

@@ -22,7 +22,7 @@ import {
 import DeploymentSettings from "../pages/DeploymentSettings";
 import FormSettings from "../pages/FormSettings";
 import SearchSettings from "../pages/SearchSettings";
-import MiscSettings from "../pages/MiscSettings";
+import DebugSettings from "../pages/DebugSettings";
 import IntegrationsSettings from "../pages/IntegrationsSettings";
 import Generate from "../pages/Generate";
 import Optimize from "../pages/Optimize";
@@ -36,8 +36,6 @@ function SettingsPage() {
         isRunning,
         setIsRunning,
         blogId,
-        migrateSettings,
-        saveSettings,
         settings,
         updateFromNetwork,
         passedChecks,
@@ -284,7 +282,7 @@ function SettingsPage() {
                                     <NavigatorButton onClick={() => setActiveItem('/diagnostics')}
                                                      className={activeItem === '/diagnostics' ? 'is-active-item' : ''}
                                                      path="/diagnostics">
-                                        <Dashicon icon="editor-help"/> {__('Diagnostics', 'simply-static')}
+                                        <Dashicon icon="bell"/> {__('Diagnostics', 'simply-static')}
                                     </NavigatorButton>
                                 </CardBody>
                                 <CardBody>
@@ -326,17 +324,17 @@ function SettingsPage() {
                                     <NavigatorButton onClick={() => setActiveItem('/integrations')}
                                                      className={activeItem === '/integrations' ? 'is-active-item' : ''}
                                                      path="/integrations">
-                                        <Dashicon icon="admin-plugins"/> {__('Integrations', 'simply-static')}
+                                        <Dashicon icon="block-default"/> {__('Integrations', 'simply-static')}
                                     </NavigatorButton>
                                     <NavigatorButton onClick={() => setActiveItem('/utilities')}
                                                      className={activeItem === '/utilities' ? 'is-active-item' : ''}
                                                      path="/utilities">
                                         <Dashicon icon="admin-tools"/> {__('Utilities', 'simply-static')}
                                     </NavigatorButton>
-                                    <NavigatorButton onClick={() => setActiveItem('/misc')}
-                                                     className={activeItem === '/misc' ? 'is-active-item' : ''}
-                                                     path="/misc">
-                                        <Dashicon icon="block-default"/> {__('Misc', 'simply-static')}
+                                    <NavigatorButton onClick={() => setActiveItem('/debug')}
+                                                     className={activeItem === '/debug' ? 'is-active-item' : ''}
+                                                     path="/debug">
+                                        <Dashicon icon="editor-help"/> {__('Debug', 'simply-static')}
                                     </NavigatorButton>
                                 </CardBody>
                                 <CardBody>
@@ -421,9 +419,9 @@ function SettingsPage() {
                                     <Utilities/>
                                 </NavigatorScreen>
                             }
-                            {activeItem === '/misc' &&
-                                <NavigatorScreen path="/misc">
-                                    <MiscSettings/>
+                            {activeItem === '/debug' &&
+                                <NavigatorScreen path="/debug">
+                                    <DebugSettings/>
                                 </NavigatorScreen>
                             }
                             {activeItem === '/integrations' &&
