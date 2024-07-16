@@ -6,7 +6,7 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl, ToggleControl,
+    TextControl, ToggleControl, TextareaControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -103,6 +103,23 @@ function DebugSettings() {
                     value={settings.temp_files_dir}
                     onChange={(temp_dir) => {
                         updateSetting('temp_files_dir', temp_dir);
+                    }}
+                />
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <b>{__('Whitelist Plugins', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
+                <TextareaControl
+                    label={__('Whitelist plugins in diagnostics', 'simply-static')}
+                    placeholder={"autoptimize\nwp-search-with-algolia\nwp-rocket"}
+                    help={__('If you want to exclude certain plugins from the diagnostics check add the plugin slugs here (one per line).', 'simply-static')}
+                    value={settings.whitelist_plugins}
+                    onChange={(value) => {
+                        updateSetting('whitelist_plugins', value);
                     }}
                 />
             </CardBody>

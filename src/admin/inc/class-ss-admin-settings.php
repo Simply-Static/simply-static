@@ -418,7 +418,8 @@ class Admin_Settings {
 				'additional_files',
 				'urls_to_exclude',
 				'search_excludable',
-				'iframe_urls'
+				'iframe_urls',
+                'whitelist_plugins'
 			];
 
 			$array_fields = [ 'integrations' ];

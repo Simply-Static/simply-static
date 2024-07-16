@@ -49,25 +49,25 @@ class Diagnostic {
 		$this->options = Options::instance();
 
 		$this->checks = array(
-			'URLs'                 => array(
+			'URLs'       => array(
 				__( 'SSL', 'simply-static' ) => $this->is_ssl()
 			),
-			'PHP'                  => array(
+			'PHP'        => array(
 				__( 'VERSION', 'simply-static' ) => $this->php_version(),
 				__( 'php-xml', 'simply-static' ) => $this->is_xml_active(),
 				__( 'cURL', 'simply-static' )    => $this->has_curl(),
 			),
-			'WordPress'            => array(
-				__( 'Permalinks', 'simply-static' )         => $this->is_permalink_structure_set(),
-				__( 'Caching', 'simply-static' )            => $this->is_cache_set(),
-				__( 'WP-CRON', 'simply-static' )            => $this->is_wp_cron_running(),
+			'WordPress'  => array(
+				__( 'Permalinks', 'simply-static' ) => $this->is_permalink_structure_set(),
+				__( 'Caching', 'simply-static' )    => $this->is_cache_set(),
+				__( 'WP-CRON', 'simply-static' )    => $this->is_wp_cron_running(),
 			),
-			'Plugins' => array(),
-			'Filesystem'           => array(
+			'Plugins'    => array(),
+			'Filesystem' => array(
 				__( 'Temp dir readable', 'simply-static' )  => $this->is_temp_files_dir_readable(),
 				__( 'Temp dir writeable', 'simply-static' ) => $this->is_temp_files_dir_writeable(),
 			),
-			'MySQL'                => array(
+			'MySQL'      => array(
 				__( 'DELETE', 'simply-static' ) => $this->user_can_delete(),
 				__( 'INSERT', 'simply-static' ) => $this->user_can_insert(),
 				__( 'SELECT', 'simply-static' ) => $this->user_can_select(),
@@ -112,12 +112,12 @@ class Diagnostic {
 		foreach ( $activated_plugins as $plugin ) {
 			if ( in_array( $plugin['TextDomain'], $this->incompatible_plugins ) ) {
 				$this->checks['Plugins'][ $plugin['Name'] ] = $this->is_incompatible_plugin( $plugin );
-				$plugin_count++;
+				$plugin_count ++;
 			}
 		}
 
-		if( $plugin_count === 0 ) {
-			$this->checks['Plugins'][ 'Incompatible Plugins' ] = array(
+		if ( $plugin_count === 0 ) {
+			$this->checks['Plugins']['Incompatible Plugins'] = array(
 				'test'        => true,
 				'description' => __( 'No incompatible plugins are active on your website!', 'simply-static' ),
 				'error'       => sprintf( __( '%d incompatible plugins are active', 'simply-static' ), $plugin_count )
@@ -202,6 +202,8 @@ class Diagnostic {
 	}
 
 	public function is_cache_set() {
+		$incompatible_plugins = $this->get_incompatible_plugins();
+
 		$response = array(
 			'test'        => true,
 			'description' => __( 'Caching is disabled, great!', 'simply-static' ),
@@ -209,49 +211,49 @@ class Diagnostic {
 		);
 
 		// W3 Total Cache.
-		if ( defined( 'W3TC_VERSION' ) ) {
+		if ( defined( 'W3TC_VERSION' ) && in_array( 'w3-total-cache', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'W3 Total Cache' ) );
 		}
 
 		// WP Fastest Cache.
-		if ( defined( 'WPFC_WP_PLUGIN_DIR' ) ) {
+		if ( defined( 'WPFC_WP_PLUGIN_DIR' ) && in_array( 'wp-fastest-cache', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'WP Fastest Cache' ) );
 		}
 
 		// WP Rocket.
-		if ( defined( 'WP_ROCKET_VERSION' ) ) {
+		if ( defined( 'WP_ROCKET_VERSION' ) && in_array( 'wp-rocket', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'WP Rocket' ) );
 		}
 
 		// Litespeed Cache.
-		if ( defined( 'LSCWP_V' ) ) {
+		if ( defined( 'LSCWP_V' ) && in_array( 'litespeed-cache', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'LiteSpeed Cache' ) );
 		}
 
 		// Speed Optimizer (Siteground)
-		if ( defined( 'SiteGround_Optimizer\VERSION' ) ) {
+		if ( defined( 'SiteGround_Optimizer\VERSION' ) && in_array( 'sg-cachepress', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Speed Optimizer' ) );
 		}
 
 		// WP Super Cache.
-		if ( defined( 'WPSC_VERSION' ) ) {
+		if ( defined( 'WPSC_VERSION' ) && in_array( 'wp-super-cache', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'WP Super Cache' ) );
 		}
 
 		// Hummingbird.
-		if ( defined( 'WPHB_VERSION' ) ) {
+		if ( defined( 'WPHB_VERSION' ) && in_array( 'hummingbird-performance', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Hummingbird' ) );
 		}
 
 		// Autoptimize.
-		if ( defined( 'AUTOPTIMIZE_PLUGIN_VERSION' ) ) {
+		if ( defined( 'AUTOPTIMIZE_PLUGIN_VERSION' ) && in_array( 'autoptimize', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Autoptimize' ) );
 		}
@@ -263,25 +265,25 @@ class Diagnostic {
 		}
 
 		// Breeze (Cloudways)
-		if ( defined( 'BREEZE_VERSION' ) ) {
+		if ( defined( 'BREEZE_VERSION' ) && in_array( 'breeze', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Breeze' ) );
 		}
 
 		// Cache Enabler.
-		if ( defined( 'CACHE_ENABLER_VERSION' ) ) {
+		if ( defined( 'CACHE_ENABLER_VERSION' ) && in_array( 'cache-enabler', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Cache Enabler' ) );
 		}
 
 		// Redis Object Cache.
-		if ( defined( 'WP_REDIS_VERSION' ) ) {
+		if ( defined( 'WP_REDIS_VERSION' ) && in_array( 'wp-redis', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Redis Object Cache' ) );
 		}
 
 		// Cloudflare.
-		if ( defined( 'CLOUDFLARE_PLUGIN_DIR' ) ) {
+		if ( defined( 'CLOUDFLARE_PLUGIN_DIR' ) && in_array( 'cloudflare', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Cloudflare' ) );
 		}
@@ -294,7 +296,9 @@ class Diagnostic {
 	 * @return array
 	 */
 	public function get_incompatible_plugins() {
-		return array(
+		$whitelist_plugins = Util::string_to_array( $this->options->get( 'whitelist_plugins' ) );
+
+		$incompatible_plugins = [
 			'autoptimize',
 			'wp-fastest-cache',
 			'wp-rocket',
@@ -349,7 +353,17 @@ class Diagnostic {
 			'wp-user-frontend',
 			'optinmonster',
 			'mailoptin',
-		);
+		];
+
+		if ( ! empty( $whitelist_plugins ) && is_array( $whitelist_plugins ) ) {
+			// Remove whitelisted plugins from incompatible plugins array.
+			foreach ( $whitelist_plugins as $plugin ) {
+				$key = array_search( $plugin, $incompatible_plugins );
+				unset( $incompatible_plugins[ $key ] );
+			}
+		}
+
+		return $incompatible_plugins;
 	}
 
 	/**

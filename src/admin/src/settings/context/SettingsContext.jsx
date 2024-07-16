@@ -21,6 +21,7 @@ function SettingsContextProvider(props) {
         'destination_url_type': 'relative',
         'debugging_mode': true,
         'server_cron': false,
+        'whitelist_plugins': '',
         'http_basic_auth_username': '',
         'http_basic_auth_password': '',
         'http_basic_auth_on': false,
