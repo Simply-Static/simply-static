@@ -2,9 +2,9 @@
 Contributors: patrickposner
 Tags: static site generator, performance, security, jamstack
 Requires at least: 6.3
-Tested up to: 6.5
+Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 3.1.7.2
+Stable tag: 3.1.7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -232,6 +232,19 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 3. Diagnostics
 
 == Changelog ==
+
+= 3.1.7.3 =
+
+* added new integration settings page
+* added admin bar as integration + toggle to enable/disable it
+* improved performance for diagnostics check (caching)
+* removed unused http_request_args filter
+* MU network page UI fixes
+* added quick links to plugins page
+* added option to whitelist plugins in diagnostics
+* restructed "Misc" settings and renamed to "Debug"
+* added option to use server-side cron job
+* adapted Jetpack integration to new integration class
 
 = 3.1.7.2 =
 
