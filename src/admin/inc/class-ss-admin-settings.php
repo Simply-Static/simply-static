@@ -3,12 +3,12 @@
 namespace Simply_Static;
 
 class Admin_Settings {
-    /**
-     * Contains the number of failed tests.
-     *
-     * @var int
-     */
-    public int $failed_tests = 0;
+	/**
+	 * Contains the number of failed tests.
+	 *
+	 * @var int
+	 */
+	public int $failed_tests = 0;
 
 	/**
 	 * Contains instance or null
@@ -39,7 +39,7 @@ class Admin_Settings {
 		add_action( 'admin_menu', array( $this, 'add_menu' ) );
 		add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
 
-        $this->failed_tests = intval( get_transient('simply_static_failed_tests') );
+		$this->failed_tests = intval( get_transient( 'simply_static_failed_tests' ) );
 	}
 
 	/**
@@ -74,7 +74,7 @@ class Admin_Settings {
 		add_action( "admin_print_scripts-{$generate_suffix}", array( $this, 'add_settings_scripts' ) );
 
 		if ( ! is_network_admin() ) {
-            // Add settings page.
+			// Add settings page.
 			$settings_suffix = add_submenu_page(
 				'simply-static-generate',
 				__( 'Settings', 'simply-static' ),
@@ -368,8 +368,14 @@ class Admin_Settings {
 	 * @return array[]
 	 */
 	public function get_system_status() {
-		$diagnostics = new Diagnostic();
-		return $diagnostics->get_checks();
+		$checks = get_transient( 'simply_static_checks' );
+
+		if ( ! $checks ) {
+			$diagnostics = new Diagnostic();
+			$checks      = $diagnostics->get_checks();
+		}
+
+		return $checks;
 	}
 
 	/**
@@ -411,7 +417,7 @@ class Admin_Settings {
 				'urls_to_exclude',
 				'search_excludable',
 				'iframe_urls',
-                'whitelist_plugins'
+				'whitelist_plugins'
 			];
 
 			$array_fields = [ 'integrations' ];

@@ -124,17 +124,23 @@ class Diagnostic {
 			);
 		}
 
+		// Set transient for checks.
+		if ( ! get_transient( 'simply_static_checks' ) ) {
+			set_transient( 'simply_static_checks', $this->checks, MINUTE_IN_SECONDS );
+		}
+
+		// Set transient for failed tests.
 		if ( ! get_transient( 'simply_static_failed_tests' ) ) {
 			$failed_tests = 0;
 
 			foreach ( $this->checks as $test ) {
 				foreach ( $test as $key => $value ) {
 					if ( ! $value['test'] ) {
-						$failed_tests++;
+						$failed_tests ++;
 					}
 				}
 			}
-			set_transient( 'simply_static_failed_tests', $failed_tests, 2 * MINUTE_IN_SECONDS );
+			set_transient( 'simply_static_failed_tests', $failed_tests, MINUTE_IN_SECONDS );
 		}
 	}
 
