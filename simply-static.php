@@ -57,7 +57,7 @@ if ( ! function_exists( 'simply_static_run_plugin' ) ) {
 		// Server-side cron?
 		$options = get_option( 'simply-static' );
 
-		if ( $options['server_cron'] ) {
+		if ( ! empty( $options['server_cron'] ) && true === $options['server_cron'] ) {
 			define( 'SS_CRON', true );
 		}
 
