@@ -1,9 +1,29 @@
-import {Card, CardBody, CardHeader, __experimentalSpacer as Spacer, Dashicon} from "@wordpress/components";
-import {useContext} from "@wordpress/element";
+import {
+    Card,
+    CardBody,
+    CardHeader,
+    __experimentalSpacer as Spacer,
+    Dashicon,
+    Button,
+    Animate, Notice
+} from "@wordpress/components";
+import {useContext, useState} from "@wordpress/element";
 import {SettingsContext} from "../context/SettingsContext";
 
+const {__} = wp.i18n;
+
 function Diagnostics() {
-    const {configs} = useContext(SettingsContext);
+    const {configs, resetDiagnostics} = useContext(SettingsContext);
+    const [isReset, setIsReset] = useState(false);
+
+    const runResetDiagnostics = () => {
+        resetDiagnostics();
+        setIsReset(true);
+
+        setTimeout(function () {
+            window.location.reload();
+        }, 2000);
+    }
 
     const statusData = () => (
         <div>
@@ -52,6 +72,34 @@ function Diagnostics() {
                     )
                 })
             }
+            <Spacer margin={5}/>
+            <Card>
+                <CardHeader>
+                    <b>{__('Reset Diagnostics', 'simply-static')}</b>
+                </CardHeader>
+                <CardBody>
+                    <p>
+                        {__('Use it to reset diagnostics if you have made recent changes not reflected in the results.', 'simply-static')}
+                    </p>
+                    <p>
+                        <Button  onClick={runResetDiagnostics}
+                                 variant="secondary">{__('Reset Diagnostics', 'simply-static')}</Button>
+                    </p>
+                    {isReset ?
+                        <Animate type="slide-in" options={{origin: 'top'}}>
+                            {() => (
+                                <Notice status="success" isDismissible={false}>
+                                    <p>
+                                        {__('Diagnostics resetted successfully.', 'simply-static')}
+                                    </p>
+                                </Notice>
+                            )}
+                        </Animate>
+                        :
+                        ''
+                    }
+                </CardBody>
+            </Card>
         </div>
     );
 

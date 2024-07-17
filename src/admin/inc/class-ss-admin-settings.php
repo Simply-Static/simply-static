@@ -282,6 +282,14 @@ class Admin_Settings {
 			},
 		) );
 
+		register_rest_route( 'simplystatic/v1', '/reset-diagnostics', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'reset_diagnostics' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+			},
+		) );
+
 		register_rest_route( 'simplystatic/v1', '/system-status', array(
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'get_system_status' ],
@@ -376,6 +384,18 @@ class Admin_Settings {
 		}
 
 		return $checks;
+	}
+
+	/**
+	 * Clear transient for diagnostics.
+	 *
+	 * @return string
+	 */
+	public function reset_diagnostics() {
+		delete_transient( 'simply_static_checks' );
+		delete_transient( 'simply_static_failed_tests' );
+
+		return json_encode( [ 'status' => 200 ] );
 	}
 
 	/**

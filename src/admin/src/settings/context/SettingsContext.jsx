@@ -206,6 +206,14 @@ function SettingsContextProvider(props) {
         });
     }
 
+    const resetDiagnostics = () => {
+        apiFetch({
+            path: '/simplystatic/v1/reset-diagnostics',
+            method: 'POST',
+        });
+    }
+
+
     useInterval(() => {
         checkIfRunning()
     }, isRunning ? 5000 : null);
@@ -232,6 +240,7 @@ function SettingsContextProvider(props) {
                 updateFromNetwork,
                 importSettings,
                 migrateSettings,
+                resetDiagnostics,
                 isRunning,
                 setIsRunning,
                 blogId,
