@@ -3,6 +3,13 @@
 namespace Simply_Static;
 
 class Admin_Settings {
+    /**
+     * Contains the number of failed tests.
+     *
+     * @var int
+     */
+    public int $failed_tests = 0;
+
 	/**
 	 * Contains instance or null
 	 *
@@ -31,6 +38,8 @@ class Admin_Settings {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_menu' ) );
 		add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
+
+        $this->failed_tests = intval( get_transient('simply_static_failed_tests') );
 	}
 
 	/**
@@ -77,30 +86,13 @@ class Admin_Settings {
 
 			add_action( "admin_print_scripts-{$settings_suffix}", array( $this, 'add_settings_scripts' ) );
 
-			// Diagnostics settings page.
-			if ( get_transient( 'simply_static_failed_tests' ) ) {
-				$failed_tests = get_transient( 'simply_static_failed_tests' );
-			} else {
-				$system_status = $this->get_system_status();
-				$failed_tests  = 0;
-
-				foreach ( $system_status as $test ) {
-					foreach ( $test as $key => $value ) {
-						if ( ! $value['test'] ) {
-							$failed_tests ++;
-						}
-					}
-				}
-				set_transient( 'simply_static_failed_tests', $failed_tests, 5 * MINUTE_IN_SECONDS );
-			}
-
-			$notifications = sprintf( '<span class="update-plugins diagnostics-error"><span class="plugin-count" aria-hidden="true">%s</span><span class="screen-reader-text">errors in diagnostics</span></span>', $failed_tests );
+			$notifications = sprintf( '<span class="update-plugins diagnostics-error"><span class="plugin-count" aria-hidden="true">%s</span><span class="screen-reader-text">errors in diagnostics</span></span>', $this->failed_tests );
 
 			// Add diagnostics page.
 			$diagnostics_suffix = add_submenu_page(
 				'simply-static-generate',
 				__( 'Diagnostics', 'simply-static' ),
-				$failed_tests > 0 ? __( 'Diagnostics', 'simply-static' ) . ' ' . wp_kses_post( $notifications ) : __( 'Diagnostics', 'simply-static' ),
+				$this->failed_tests > 0 ? __( 'Diagnostics', 'simply-static' ) . ' ' . wp_kses_post( $notifications ) : __( 'Diagnostics', 'simply-static' ),
 				apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ),
 				'simply-static-diagnostics',
 				array( $this, 'render_settings' )
@@ -377,7 +369,6 @@ class Admin_Settings {
 	 */
 	public function get_system_status() {
 		$diagnostics = new Diagnostic();
-
 		return $diagnostics->get_checks();
 	}
 

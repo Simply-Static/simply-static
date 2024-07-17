@@ -123,6 +123,19 @@ class Diagnostic {
 				'error'       => sprintf( __( '%d incompatible plugins are active', 'simply-static' ), $plugin_count )
 			);
 		}
+
+		if ( ! get_transient( 'simply_static_failed_tests' ) ) {
+			$failed_tests = 0;
+
+			foreach ( $this->checks as $test ) {
+				foreach ( $test as $key => $value ) {
+					if ( ! $value['test'] ) {
+						$failed_tests++;
+					}
+				}
+			}
+			set_transient( 'simply_static_failed_tests', $failed_tests, 2 * MINUTE_IN_SECONDS );
+		}
 	}
 
 	public function get_checks() {

@@ -58,6 +58,7 @@ class SS_Adminbar_Integration extends Integration {
 		wp_localize_script( 'ss-admin-bar-script', 'ss_admin_status_object', [
 			'ajax_url'     => admin_url( 'admin-ajax.php' ),
 			'nonce'        => wp_create_nonce( 'ss-admin-bar-nonce' ),
+			'failed_tests' => intval( get_transient('simply_static_failed_tests') ),
 			'translations' => [
 				'label'   => __( 'Static Generation:', 'simply-static' ),
 				'running' => __( 'Running..', 'simply-static' ),
