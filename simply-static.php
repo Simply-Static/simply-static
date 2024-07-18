@@ -54,10 +54,14 @@ if ( ! function_exists( 'simply_static_run_plugin' ) ) {
 
 		Simply_Static\Plugin::instance();
 
-		// Server-side cron?
 		$options = get_option( 'simply-static' );
 
-		if ( ! empty( $options['server_cron'] ) && true === $options['server_cron'] ) {
+		if( ! is_array( $options ) ) {
+			$options = [];
+		}
+
+		// Server-side cron?
+		if ( isset( $options['server_cron'] ) && true === $options['server_cron'] ) {
 			define( 'SS_CRON', true );
 		}
 

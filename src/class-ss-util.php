@@ -361,11 +361,13 @@ class Util {
 	public static function string_to_array( $textarea ) {
 		// using preg_split to intelligently break at newlines
 		// see: http://stackoverflow.com/questions/1483497/how-to-put-string-in-array-split-by-new-line
-		$lines = preg_split( "/\r\n|\n|\r/", $textarea );
-		array_walk( $lines, 'trim' );
-		$lines = array_filter( $lines );
+		if ( ! is_null( $textarea ) ) {
+			$lines = preg_split( "/\r\n|\n|\r/", $textarea );
+			array_walk( $lines, 'trim' );
+			$lines = array_filter( $lines );
 
-		return $lines;
+			return $lines;
+		}
 	}
 
 	/**
@@ -536,7 +538,7 @@ class Util {
 	 * @return array
 	 */
 	public static function add_archive_status_message( $messages, $task_name, $message ) {
-		if( ! is_array( $messages ) ) {
+		if ( ! is_array( $messages ) ) {
 			$messages = array();
 		}
 

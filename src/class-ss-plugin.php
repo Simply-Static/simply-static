@@ -87,7 +87,13 @@ class Plugin {
 			add_action( 'ss_after_setup_task', array( self::$instance, 'maybe_clear_directory' ) );
 
 			// Add quick link to the plugin page.
-			add_filter( 'plugin_action_links_simply-static/simply-static.php', array( self::$instance, 'add_quick_links' ) );
+			add_filter( 'plugin_action_links_simply-static/simply-static.php', array(
+				self::$instance,
+				'add_quick_links'
+			) );
+
+			// Handle Basic Auth.
+			add_filter( 'http_request_args', array( self::$instance, 'add_http_filters' ), 10, 2 );
 
 			self::$instance->integrations = new Integrations();
 			self::$instance->integrations->load();
@@ -393,4 +399,44 @@ class Plugin {
 
 		return $links;
 	}
+
+	/**
+	 * Set HTTP Basic Auth for wp-background-processing
+	 *
+	 * @param array $parsed_args given args.
+	 * @param string $url given URL.
+	 *
+	 * @return array
+	 */
+	public function add_http_filters( $parsed_args, $url ) {
+		// Check for Basic Auth credentials.
+		if ( strpos( $url, get_bloginfo( 'url' ) ) !== false ) {
+			$digest = self::$instance->options->get( 'http_basic_auth_digest' );
+
+			if ( $digest ) {
+				$parsed_args['headers']['Authorization'] = 'Basic ' . $digest;
+			}
+		}
+
+		// Check for Freemius.
+		if ( false === strpos( $url, '://api.freemius.com' ) ) {
+			return $parsed_args;
+		}
+
+		if ( empty( $parsed_args['headers'] ) ) {
+			return $parsed_args;
+		}
+
+		foreach ( $parsed_args['headers'] as $key => $value ) {
+			if ( 'Authorization' === $key ) {
+				$parsed_args['headers']['Authorization2'] = $value;
+			} else if ( 'Authorization2' === $key ) {
+				$parsed_args['headers']['Authorization'] = $value;
+				unset( $parsed_args['headers'][ $key ] );
+			}
+		}
+
+		return $parsed_args;
+	}
+
 }
