@@ -37,7 +37,8 @@ class Integrations {
 			'jetpack'       => Jetpack_Integration::class,
 			'multilingual'  => Multilingual_Integration::class,
 			'github'        => Github_Integration::class,
-			'shortpixel'    => Shortpixel_Integration::class
+			'shortpixel'    => Shortpixel_Integration::class,
+			'redirection'   => Redirection_Integration::class
 		] );
 	}
 
@@ -58,6 +59,7 @@ class Integrations {
 		require_once $path . 'class-cookie-yes-integration.php';
 		require_once $path . 'class-brizy-integration.php';
 		require_once $path . 'class-jetpack-integration.php';
+		require_once $path . 'class-redirection-integration.php';
 
 		// Simply Static Pro integrations.
 		require_once $path . 'class-pro-integration.php';
