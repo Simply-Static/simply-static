@@ -23,7 +23,6 @@ function Optimize() {
     const [minifyInlineCss, setMinifyInlineCss] = useState(false);
     const [minifyJavascript, setMinifyJavascript] = useState(false);
     const [minifyInlineJavascript, setMinifyInlineJavascript] = useState(false);
-    const [renamePlugin, setRenamePlugin] = useState(false);
     const [wpContentDirectory, setWpContentDirectory] = useState('wp-content');
     const [wpIncludesDirectory, setWpIncludesDirectory] = useState('wp-includes');
     const [wpUploadsDirectory, setWpUploadsDirectory] = useState('wp-content/uploads');
@@ -112,10 +111,6 @@ function Optimize() {
 
         if (settings.wp_plugins_directory) {
             setWpPluginsDirectory(settings.wp_plugins_directory);
-        }
-
-        if (settings.rename_plugins) {
-            setRenamePlugin(settings.rename_plugins);
         }
 
         if (settings.wp_themes_directory) {
@@ -382,20 +377,6 @@ function Optimize() {
                     onChange={(directory) => {
                         setWpPluginsDirectory(directory);
                         updateSetting('wp_plugins_directory', directory);
-                    }}
-                />
-
-                <ToggleControl
-                    label={__('Replace Plugin Names?', 'simply-static')}
-                    help={
-                        renamePlugin
-                            ? __('Replace plugin names with a random string combinations.', 'simply-static')
-                            : __('Keep plugin names.', 'simply-static')
-                    }
-                    checked={renamePlugin}
-                    onChange={(value) => {
-                        setRenamePlugin(value);
-                        updateSetting('rename_plugins', value);
                     }}
                 />
 

@@ -41,7 +41,7 @@ function SettingsPage() {
         passedChecks,
     } = useContext(SettingsContext);
     const [activeItem, setActiveItem] = useState({activeItem: "/"});
-    const [initialPage, setInitialPage] = useState(options.initial);
+    const [initialPage, setInitialPage] = useState(localStorage.getItem('ss-initial-page') ? localStorage.getItem('ss-initial-page') : options.initial);
     const [initialSet, setInitialSet] = useState(false);
     const [disabledButton, setDisabledButton] = useState(false);
     const [selectedCopySite, setSelectedCopySite] = useState('current');
@@ -63,10 +63,22 @@ function SettingsPage() {
     }
 
     useEffect(() => {
+        setDisabledButton(isRunning);
+
+        // Change initial page.
+        let initialPageRedirect = localStorage.getItem('ss-initial-page');
+
         if (!initialSet) {
             setInitialSet(true);
-            setActiveItem(options.initial);
-            setInitialPage(options.initial);
+
+            if (initialPageRedirect) {
+                setActiveItem(initialPageRedirect);
+                setInitialPage(initialPageRedirect);
+                localStorage.removeItem('ss-initial-page');
+            } else {
+                setActiveItem(options.initial);
+                setInitialPage(options.initial);
+            }
         }
 
         if (options.selectable_sites && !options.is_network && options.is_multisite) {
@@ -78,7 +90,7 @@ function SettingsPage() {
             setSelectableSites(sites);
         }
 
-    }, [options]);
+    }, [options, isRunning]);
 
     const startExport = () => {
         setDisabledButton(true);
@@ -106,10 +118,6 @@ function SettingsPage() {
             setIsRunning(false);
         });
     }
-
-    useEffect(function () {
-        setDisabledButton(isRunning);
-    }, [isRunning]);
 
     let buildOptions = '';
     if (Object.keys(options.builds).length) {

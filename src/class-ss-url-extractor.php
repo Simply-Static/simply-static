@@ -194,7 +194,7 @@ class Url_Extractor {
 			$this->replace_encoded_urls();
 
 			// If activated forced string/replace for URLs.
-			if ( $this->options->get( 'force_replace_url' ) ) {
+			if ( $this->options->get( 'force_replace_url' ) && ( ! $this->options->get( 'use_forms' ) && ! $this->options->get( 'use_comments' ) ) ) {
 				$this->force_replace_urls();
 			}
 		}

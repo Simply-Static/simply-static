@@ -14,7 +14,13 @@ import {SettingsContext} from "../context/SettingsContext";
 const {__} = wp.i18n;
 
 function FormSettings() {
-    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
+    const {
+        settings,
+        updateSetting,
+        saveSettings,
+        settingsSaved,
+        setSettingsSaved,
+    } = useContext(SettingsContext);
     const [corsMethod, setCorsMethod] = useState('allowed_http_origins');
     const [useForms, setUseForms] = useState(false);
     const [useComments, setUseComments] = useState(false);
@@ -25,6 +31,11 @@ function FormSettings() {
 
         setTimeout(function () {
             setSettingsSaved(false);
+
+            if (useForms) {
+                localStorage.setItem('ss-initial-page', '/forms');
+                window.location.reload();
+            }
         }, 2000);
     }
 
@@ -61,6 +72,10 @@ function FormSettings() {
                         updateSetting('use_forms', value);
                     }}
                 />
+                {useForms && options.form_connection_url &&
+                    <Button href={options.form_connection_url}
+                            variant="secondary">{__('Create a form connection', 'simply-static')}</Button>
+                }
             </CardBody>
         </Card>
         <Spacer margin={5}/>

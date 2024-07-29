@@ -129,6 +129,7 @@ class Admin_Settings {
 			$initial = '/diagnostics';
 		}
 
+
 		// Check if directory exists, if not, create it.
 		$upload_dir = wp_upload_dir();
 		$temp_dir   = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
@@ -210,6 +211,11 @@ class Admin_Settings {
 
 		if ( floatval( $version ) < floatval( '3.0.4' ) ) {
 			$args['need_upgrade'] = 'yes';
+		}
+
+		// Forms enabled?
+		if ( ! empty( $options->get('use_forms') ) ) {
+			$args['form_connection_url'] = esc_url( get_admin_url() . 'post-new.php?post_type=ssp-form' );
 		}
 
 		wp_localize_script( 'simplystatic-settings', 'options', $args );
