@@ -493,15 +493,15 @@ class Url_Extractor {
 				$convert_to = '/';
 		}
 
-		if ( $this->is_json( $tag->innerText ) ) {
-			$decoded_text = html_entity_decode( $tag->innerText, ENT_NOQUOTES );
+		if ( $this->is_json( $tag->innerhtmlKeep ) ) {
+			$decoded_text = html_entity_decode( $tag->innerhtmlKeep, ENT_NOQUOTES );
 		} else {
-			$decoded_text = html_entity_decode( $tag->innerText );
+			$decoded_text = html_entity_decode( $tag->innerhtmlKeep );
 		}
 
 		$decoded_text = apply_filters( 'simply_static_decoded_text_in_script', $decoded_text, $this->static_page, $convert_to, $tag, $this );
 
-		$tag->innerText = preg_replace( $regex, $convert_to, $decoded_text );
+		$tag->innerhtmlKeep = preg_replace( $regex, $convert_to, $decoded_text );
 
 		return $tag;
 	}

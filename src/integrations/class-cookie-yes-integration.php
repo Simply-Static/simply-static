@@ -49,7 +49,7 @@ class CookieYes_Integration extends Integration {
 				continue;
 			}
 
-			$tag->innertext = preg_replace( '/<\\\/i', '<', $tag->innertext );
+			$tag->innerhtmlKeep = preg_replace( '/<\\\/i', '<', $tag->innerhtmlKeep );
 		}
 	}
 }
