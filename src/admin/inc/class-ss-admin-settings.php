@@ -214,7 +214,7 @@ class Admin_Settings {
 		}
 
 		// Forms enabled?
-		if ( ! empty( $options->get('use_forms') ) ) {
+		if ( ! empty( $options->get( 'use_forms' ) ) ) {
 			$args['form_connection_url'] = esc_url( get_admin_url() . 'post-new.php?post_type=ssp-form' );
 		}
 
@@ -275,6 +275,14 @@ class Admin_Settings {
 		register_rest_route( 'simplystatic/v1', '/pages', array(
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'get_pages' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+			},
+		) );
+
+		register_rest_route( 'simplystatic/v1', '/pages-slugs', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'get_pages_slugs' ],
 			'permission_callback' => function () {
 				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
 			},
@@ -572,6 +580,31 @@ class Admin_Settings {
 
 		foreach ( $pages as $page ) {
 			$selectable_pages[] = array( 'label' => $page->post_title, 'value' => $page->ID );
+		}
+
+		return $selectable_pages;
+	}
+
+	/**
+	 * Get pages slugs for settings.
+	 * @return array
+	 */
+	public function get_pages_slugs() {
+		$args = array(
+			'post_type'   => 'page',
+			'post_status' => 'publish',
+			'numberposts' => - 1,
+		);
+
+		$pages = get_posts( $args );
+
+		// Build selectable pages array.
+		$selectable_pages = array();
+
+		foreach ( $pages as $page ) {
+			$permalink = get_permalink( $page->ID );
+
+			$selectable_pages[] = array( 'label' => $page->post_title, 'value' => $permalink );
 		}
 
 		return $selectable_pages;

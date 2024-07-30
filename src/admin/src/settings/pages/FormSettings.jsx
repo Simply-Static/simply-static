@@ -10,6 +10,7 @@ import {
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
+import apiFetch from "@wordpress/api-fetch";
 
 const {__} = wp.i18n;
 
@@ -24,6 +25,7 @@ function FormSettings() {
     const [corsMethod, setCorsMethod] = useState('allowed_http_origins');
     const [useForms, setUseForms] = useState(false);
     const [useComments, setUseComments] = useState(false);
+    const [pagesSlugs, setPagesSlugs] = useState(false);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -39,7 +41,18 @@ function FormSettings() {
         }, 2000);
     }
 
+    const getPages = () => {
+        apiFetch({path: '/simplystatic/v1/pages-slugs'}).then((fetched_pages) => {
+            let pages = fetched_pages;
+
+            pages.unshift({label: __('No page selected', 'simply-static'), value: 0});
+            setPagesSlugs(pages);
+        });
+    }
+
     useEffect(() => {
+        getPages();
+
         if (settings.fix_cors) {
             setCorsMethod(settings.fix_cors);
         }
@@ -99,16 +112,17 @@ function FormSettings() {
                 />
 
                 {useComments &&
-                    <TextControl
-                        label={__('Redirect URL', 'simply-static')}
-                        type={"url"}
-                        placeholder={'https://static-example.com/thank-you'}
-                        help={__('The page will be generated and committed automatically after a comment was added, but it might take a while so its good practice to redirect the visitor.', 'simply-static')}
-                        value={settings.comment_redirect}
-                        onChange={(redirect) => {
-                            updateSetting('comment_redirect', redirect);
-                        }}
-                    />
+                    <>
+                        <SelectControl
+                            label={__('Select a redirect page', 'content-protector')}
+                            options={pagesSlugs}
+                            help={__('The post will be regenerated after comment submission, but it might take a while so its good practice to redirect the visitor.', 'simply-static')}
+                            value={settings.comment_redirect}
+                            onChange={(value) => {
+                                updateSetting('comment_redirect', value);
+                            }}
+                        />
+                    </>
                 }
             </CardBody>
         </Card>
