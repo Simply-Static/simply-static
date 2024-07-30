@@ -472,13 +472,6 @@ class Admin_Settings {
 				}
 			}
 
-			// Handle basic auth.
-			if ( isset( $options['http_basic_auth_username'] ) && $options['http_basic_auth_username'] && isset( $options['http_basic_auth_password'] ) && $options['http_basic_auth_password'] ) {
-				$options['http_basic_auth_digest'] = base64_encode( $options['http_basic_auth_username'] . ':' . $options['http_basic_auth_password'] );
-			} else {
-				$options['http_basic_auth_digest'] = '';
-			}
-
 			// Maybe update network settings.
 			if ( is_multisite() ) {
 				$blog_id = get_current_blog_id();
@@ -511,13 +504,6 @@ class Admin_Settings {
 
 			// Reset options.
 			$options = sanitize_option( 'simply-static', $request->get_params() );
-
-			// Handle basic auth.
-			if ( isset( $options['http_basic_auth_username'] ) && $options['http_basic_auth_username'] && isset( $options['http_basic_auth_password'] ) && $options['http_basic_auth_password'] ) {
-				$options['http_basic_auth_digest'] = base64_encode( $options['http_basic_auth_username'] . ':' . $options['http_basic_auth_password'] );
-			} else {
-				$options['http_basic_auth_digest'] = '';
-			}
 
 			// Update settings.
 			update_option( 'simply-static', $options );

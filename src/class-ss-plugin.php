@@ -411,7 +411,7 @@ class Plugin {
 	public function add_http_filters( $parsed_args, $url ) {
 		// Check for Basic Auth credentials.
 		if ( strpos( $url, get_bloginfo( 'url' ) ) !== false ) {
-			$digest = self::$instance->options->get( 'http_basic_auth_digest' );
+			$digest = base64_encode( self::$instance->options->get('http_basic_auth_username') . ':' . self::$instance->options->get('http_basic_auth_password') );
 
 			if ( $digest ) {
 				$parsed_args['headers']['Authorization'] = 'Basic ' . $digest;

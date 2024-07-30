@@ -246,7 +246,7 @@ class Url_Fetcher {
 	}
 
 	public static function remote_get( $url, $filename = null ) {
-		$basic_auth_digest = Options::instance()->get( 'http_basic_auth_digest' );
+		$basic_auth_digest = base64_encode( Options::instance()->get('http_basic_auth_username') . ':' . Options::instance()->get('http_basic_auth_password') );
 
 		Util::debug_log( "Fetching URL: " . $url );
 
