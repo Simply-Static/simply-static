@@ -32,6 +32,7 @@ function SettingsContextProvider(props) {
         'ssh_security_token': '',
         'ssh_use_forms': true,
         'iframe_urls': '',
+        'iframe_custom_css': '',
         'ssh_404_page_id': '',
         'ssh_thank_you_page_id': '',
         'tiiny_email': options.admin_email,

@@ -45,7 +45,7 @@ function FormSettings() {
         apiFetch({path: '/simplystatic/v1/pages-slugs'}).then((fetched_pages) => {
             let pages = fetched_pages;
 
-            pages.unshift({label: __('No page selected', 'simply-static'), value: 0});
+            pages.unshift({label: __('No page selected', 'simply-static'), value: ''});
             setPagesSlugs(pages);
         });
     }
@@ -169,7 +169,7 @@ function FormSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('iFrame', 'simply-static')}</b>
+                <b>{__('Embed Dynamic Content (iFrame)', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
                 <p>
@@ -189,6 +189,14 @@ function FormSettings() {
                     value={settings.iframe_urls}
                     onChange={(value) => {
                         updateSetting('iframe_urls', value);
+                    }}
+                />
+                <TextareaControl
+                    label={__('Custom CSS', 'simply-static')}
+                    help={__('These styles will only apply to the embedded pages, not your entire website.', 'simply-static')}
+                    value={settings.iframe_custom_css}
+                    onChange={(value) => {
+                        updateSetting('iframe_custom_css', value);
                     }}
                 />
             </CardBody>

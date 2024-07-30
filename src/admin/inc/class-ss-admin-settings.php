@@ -451,6 +451,7 @@ class Admin_Settings {
 				'urls_to_exclude',
 				'search_excludable',
 				'iframe_urls',
+				'iframe_custom_css',
 				'whitelist_plugins'
 			];
 
