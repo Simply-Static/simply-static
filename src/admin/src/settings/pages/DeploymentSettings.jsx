@@ -8,6 +8,7 @@ import {
     Notice,
     Animate,
     TextControl, SelectControl, ToggleControl,
+    Flex, FlexItem
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -17,7 +18,7 @@ const {__} = wp.i18n;
 
 
 function DeploymentSettings() {
-    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
+    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved, isRunning} = useContext(SettingsContext);
     const [deliveryMethod, setDeliveryMethod] = useState('zip');
     const [clearDirectory, setClearDirectory] = useState(false);
     const [githubAccountType, setGithubAccountType] = useState('personal');
@@ -28,11 +29,14 @@ function DeploymentSettings() {
     const [region, setRegion] = useState('us-east-2');
     const [hasCopied, setHasCopied] = useState(false);
     const [pages, setPages] = useState(false);
+    const [testDisabled, setTestDisabled] = useState(false);
+    const [testRunning, setTestRunning] = useState(false);
 
 
     const setSavingSettings = () => {
         saveSettings();
         setSettingsSaved(true);
+        setTestDisabled(false);
 
         setTimeout(function () {
             setSettingsSaved(false);
@@ -93,6 +97,7 @@ function DeploymentSettings() {
             </CardHeader>
             <CardBody>
                 <p>{__('Choose from a variety of deployment methods. Depending on your selection we either provide a ZIP file, export to a local directory or send your files to a remote destination.', 'simply-static')}</p>
+
                 {'pro' === options.plan ?
                     <SelectControl
                         label={__('Deployment method', 'simply-static')}
@@ -110,6 +115,7 @@ function DeploymentSettings() {
                         onChange={(method) => {
                             setDeliveryMethod(method);
                             updateSetting('delivery_method', method);
+                            setTestDisabled(true);
                         }}
                     />
                     :
@@ -124,9 +130,11 @@ function DeploymentSettings() {
                         onChange={(method) => {
                             setDeliveryMethod(method);
                             updateSetting('delivery_method', method);
+                            setTestDisabled(true);
                         }}
                     />
                 }
+
             </CardBody>
         </Card>
         <Spacer margin={5}/>
@@ -727,6 +735,30 @@ function DeploymentSettings() {
         <div className={"save-settings"}>
             <Button onClick={setSavingSettings}
                     variant="primary">{__('Save Settings', 'simply-static')}</Button>
+            {'pro' === options.plan &&
+            <Button
+                disabled={isRunning || testDisabled || testRunning}
+                variant={'secondary'}
+
+                isBusy={isRunning || testRunning}
+                onClick={() => {
+                    setTestRunning(true);
+                    apiFetch({
+                        path: '/simplystatic/v1/apply-single',
+                        method: 'POST',
+                    }).then(resp => {
+                        if ( parseInt( resp.status )  === 404 ) {
+                            alert(resp.message);
+                        } else {
+                           window.location.reload();
+                        }
+
+                    });
+                }}>
+                { testDisabled && __('Save settings to test', 'simply-static') }
+                { !testDisabled && __('Test Deployment', 'simply-static')}
+            </Button>
+            }
         </div>
     </div>)
 }
