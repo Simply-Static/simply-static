@@ -30,6 +30,14 @@ toplevel_page_simply-static img {
     max-width: 840px;
   }
 
+  .save-settings {
+    button {
+      &:not(:first-child) {
+        margin-left: 10px;
+      }
+    }
+  }
+
   .settings-wide > * {
     max-width: 980px;
   }
