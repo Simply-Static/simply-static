@@ -1,6 +1,6 @@
 {
-  "name": "patrickposner/simply-static",
-  "description": "A simple WordPress static site generator",
+  "name": "simplystatic/simply-static",
+  "description": "Convert your WordPress site into a static one with the free WordPress static site generator plugin, Simply Static.",
   "type": "wordpress-plugin",
   "require": {
       "voku/simple_html_dom": "^4.8.9",
@@ -11,12 +11,12 @@
   "authors": [
     {
       "name": "Patrick Posner",
-      "email": "hello@patrickposner.de"
+      "email": "support@simplystatic.com"
     }
   ],
   "support": {
-      "issues": "https://github.com/patrickposner/simply-static/issues",
-      "source": "https://github.com/patrickposner/simply-static/"
+      "issues": "https://github.com/Simply-Static/simply-static/issues",
+      "source": "https://github.com/Simply-Static/simply-static/"
   },
   "config": {
     "platform": {
