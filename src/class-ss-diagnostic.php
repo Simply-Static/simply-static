@@ -49,9 +49,7 @@ class Diagnostic {
 		$this->options = Options::instance();
 
 		$this->checks = array(
-			'URLs'       => array(
-				__( 'SSL', 'simply-static' ) => $this->is_ssl()
-			),
+			'URLs'       => array(),
 			'PHP'        => array(
 				__( 'VERSION', 'simply-static' ) => $this->php_version(),
 				__( 'php-xml', 'simply-static' ) => $this->is_xml_active(),
@@ -96,6 +94,12 @@ class Diagnostic {
 			$this->checks['Filesystem'][ $file ] = $this->is_additional_file_valid( $file );
 		}
 
+		// Check if URLs checks are empty.
+		if ( empty( $this->checks['URLs'] ) ) {
+			unset( $this->checks['URLs'] );
+		}
+
+		// Check for incompatible plugins.
 		$plugins           = get_plugins();
 		$active_plugins    = get_option( 'active_plugins' );
 		$plugin_count      = 0;
@@ -157,14 +161,6 @@ class Diagnostic {
 			'test'        => filter_var( $destination_url, FILTER_VALIDATE_URL ) !== false,
 			'description' => sprintf( __( 'Destination URL %s is valid', 'simply-static' ), $destination_url ),
 			'error'       => sprintf( __( 'Destination URL %s is not valid', 'simply-static' ), $destination_url )
-		);
-	}
-
-	public function is_ssl() {
-		return array(
-			'test'        => is_ssl(),
-			'description' => __( 'You have a valid SSL certificate.', 'simply-static' ),
-			'error'       => __( 'You need an SSL certificate to connect with external APIs like GitHub or Algolia.', 'simply-static' )
 		);
 	}
 
@@ -277,12 +273,6 @@ class Diagnostic {
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Autoptimize' ) );
 		}
 
-		// WP Engine.
-		if ( defined( 'WPE_APIKEY' ) ) {
-			$response['test']  = false;
-			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'WP Engine' ) );
-		}
-
 		// Breeze (Cloudways)
 		if ( defined( 'BREEZE_VERSION' ) && in_array( 'breeze', $incompatible_plugins ) ) {
 			$response['test']  = false;
@@ -326,14 +316,10 @@ class Diagnostic {
 			'coming-soon',
 			'wp-super-cache',
 			'hummingbird-performance',
-			'wpengine-common',
 			'cache-enabler',
 			'cloudflare',
-			'fluentformpro',
-			'fluentform',
 			'fluentcrm',
 			'happyforms',
-			'wpforms',
 			'real-cookie-banner',
 			'borlabs-cookie',
 			'redis-cache',
@@ -372,6 +358,7 @@ class Diagnostic {
 			'wp-user-frontend',
 			'optinmonster',
 			'mailoptin',
+			'wp-original-media-path',
 		];
 
 		if ( ! empty( $whitelist_plugins ) && is_array( $whitelist_plugins ) ) {
