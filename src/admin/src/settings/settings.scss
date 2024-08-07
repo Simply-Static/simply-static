@@ -18,7 +18,6 @@ toplevel_page_simply-static img {
   display: none;
 }
 
-
 /* Start plugin settings */
 .plugin-settings-container {
   background: #f0f0f1;
@@ -28,11 +27,19 @@ toplevel_page_simply-static img {
   }
 
   .inner-settings > * {
-    max-width: 800px;
+    max-width: 840px;
+  }
+
+  .save-settings {
+    button {
+      &:not(:first-child) {
+        margin-left: 10px;
+      }
+    }
   }
 
   .settings-wide > * {
-    max-width: 90%;
+    max-width: 980px;
   }
 
   .migrate-notice.components-notice.is-warning {
@@ -41,7 +48,7 @@ toplevel_page_simply-static img {
 
   .diagnostics-notice {
     margin: 0 0 20px 0 !important;
-    max-width: 800px;
+    max-width: 840px;
     border-left: 4px solid var(--wp-components-color-accent, #b32d2e);
 
     .is-secondary {
@@ -51,11 +58,27 @@ toplevel_page_simply-static img {
   }
 
   .diagnostics-notice-generate {
-    max-width: 90% !important;
+    max-width: 980px !important;
   }
 
   .upgrade-network-notice {
     margin: 0 0 0 40px;
+  }
+
+  .ss-align-right {
+    text-align: right;
+  }
+
+  .ss-no-shrink {
+    flex-shrink: 0;
+  }
+
+  .ss-integration {
+    align-items: center;
+
+    .integration-toggle {
+      margin: 0;
+    }
   }
 
   /* Navigation */
@@ -159,10 +182,12 @@ toplevel_page_simply-static img {
 
       td.diagnostics-test {
         width: 30%;
+        line-break: anywhere;
       }
 
       td.diagnostics-result {
         width: 55%;
+        line-break: anywhere;
       }
     }
 

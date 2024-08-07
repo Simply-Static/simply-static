@@ -10,14 +10,22 @@ import {
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
+import apiFetch from "@wordpress/api-fetch";
 
 const {__} = wp.i18n;
 
 function FormSettings() {
-    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
+    const {
+        settings,
+        updateSetting,
+        saveSettings,
+        settingsSaved,
+        setSettingsSaved,
+    } = useContext(SettingsContext);
     const [corsMethod, setCorsMethod] = useState('allowed_http_origins');
     const [useForms, setUseForms] = useState(false);
     const [useComments, setUseComments] = useState(false);
+    const [pagesSlugs, setPagesSlugs] = useState(false);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -25,10 +33,26 @@ function FormSettings() {
 
         setTimeout(function () {
             setSettingsSaved(false);
+
+            if (useForms) {
+                localStorage.setItem('ss-initial-page', '/forms');
+                window.location.reload();
+            }
         }, 2000);
     }
 
+    const getPages = () => {
+        apiFetch({path: '/simplystatic/v1/pages-slugs'}).then((fetched_pages) => {
+            let pages = fetched_pages;
+
+            pages.unshift({label: __('No page selected', 'simply-static'), value: ''});
+            setPagesSlugs(pages);
+        });
+    }
+
     useEffect(() => {
+        getPages();
+
         if (settings.fix_cors) {
             setCorsMethod(settings.fix_cors);
         }
@@ -61,6 +85,10 @@ function FormSettings() {
                         updateSetting('use_forms', value);
                     }}
                 />
+                {useForms && options.form_connection_url &&
+                    <Button href={options.form_connection_url}
+                            variant="secondary">{__('Create a form connection', 'simply-static')}</Button>
+                }
             </CardBody>
         </Card>
         <Spacer margin={5}/>
@@ -84,16 +112,17 @@ function FormSettings() {
                 />
 
                 {useComments &&
-                    <TextControl
-                        label={__('Redirect URL', 'simply-static')}
-                        type={"url"}
-                        placeholder={'https://static-example.com/thank-you'}
-                        help={__('The page will be generated and committed automatically after a comment was added, but it might take a while so its good practice to redirect the visitor.', 'simply-static')}
-                        value={settings.comment_redirect}
-                        onChange={(redirect) => {
-                            updateSetting('comment_redirect', redirect);
-                        }}
-                    />
+                    <>
+                        <SelectControl
+                            label={__('Select a redirect page', 'content-protector')}
+                            options={pagesSlugs}
+                            help={__('The post will be regenerated after comment submission, but it might take a while so its good practice to redirect the visitor.', 'simply-static')}
+                            value={settings.comment_redirect}
+                            onChange={(value) => {
+                                updateSetting('comment_redirect', value);
+                            }}
+                        />
+                    </>
                 }
             </CardBody>
         </Card>
@@ -140,7 +169,7 @@ function FormSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('iFrame', 'simply-static')}</b>
+                <b>{__('Embed Dynamic Content (iFrame)', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
                 <p>
@@ -160,6 +189,14 @@ function FormSettings() {
                     value={settings.iframe_urls}
                     onChange={(value) => {
                         updateSetting('iframe_urls', value);
+                    }}
+                />
+                <TextareaControl
+                    label={__('Custom CSS', 'simply-static')}
+                    help={__('These styles will only apply to the embedded pages, not your entire website.', 'simply-static')}
+                    value={settings.iframe_custom_css}
+                    onChange={(value) => {
+                        updateSetting('iframe_custom_css', value);
                     }}
                 />
             </CardBody>

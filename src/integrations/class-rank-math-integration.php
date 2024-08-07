@@ -12,6 +12,11 @@ class Rank_Math_Integration extends Integration {
 	 */
 	protected $id = 'rank-math';
 
+	public function __construct() {
+		$this->name = __( 'Rank Math', 'simply-static' );
+		$this->description = __( 'Automatically includes your XML sitemaps and handles URL replacements in schema.org markup.', 'simply-static' );
+	}
+
 	/**
 	 * Run the integration.
 	 *
@@ -20,6 +25,7 @@ class Rank_Math_Integration extends Integration {
 	public function run() {
 		add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_page' ] );
 		add_filter( 'ssp_single_export_additional_urls', [ $this, 'add_sitemap_url' ] );
+		add_action( 'ss_dom_before_save', [ $this, 'replace_json_schema' ], 10, 2 );
 
 		$this->include_file( 'handlers/class-ss-rank-math-sitemap-handler.php' );
 	}
@@ -62,11 +68,31 @@ class Rank_Math_Integration extends Integration {
 	}
 
 	/**
-	 * Can this integration run?
+	 * Replace JSON schema for schema.org
 	 *
-	 * @return bool
+	 * @param object $dom given dom element.
+	 * @param string $url given URL.
+	 *
+	 * @return object
 	 */
-	public function can_run() {
+	public function replace_json_schema( $dom, $url ) {
+		$options = Options::instance();
+
+		foreach ( $dom->find( 'script.rank-math-schema' ) as $script ) {
+			$decoded_text      = html_entity_decode( $script->outertext, ENT_NOQUOTES );
+			$text              = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $options->get_destination_url(), $decoded_text );
+			$script->outertext = $text;
+		}
+
+		return $dom;
+	}
+
+	/**
+	 * Return if the dependency is active.
+	 *
+	 * @return boolean
+	 */
+	public function dependency_active() {
 		return class_exists( 'RankMath' );
 	}
 }

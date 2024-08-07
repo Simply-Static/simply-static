@@ -11,6 +11,11 @@ class AIO_SEO_Integration extends Integration {
 	 */
 	protected $id = 'aio-seo';
 
+	public function __construct() {
+		$this->name = __( 'All in One SEO', 'simply-static' );
+		$this->description = __( 'Adds sitemaps to generated static files.', 'simply-static' );
+	}
+
 	/**
 	 * Run the integration.
 	 *
@@ -109,11 +114,11 @@ class AIO_SEO_Integration extends Integration {
 	}
 
 	/**
-	 * Can this integration run?
+	 * Return if the dependency is active.
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
-	public function can_run() {
+	public function dependency_active() {
 		return defined( 'AIOSEO_FILE' );
 	}
 }

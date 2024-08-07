@@ -8,6 +8,7 @@ import {
     Notice,
     Animate,
     TextControl, SelectControl, ToggleControl,
+    Flex, FlexItem
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -17,7 +18,7 @@ const {__} = wp.i18n;
 
 
 function DeploymentSettings() {
-    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
+    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved, isRunning} = useContext(SettingsContext);
     const [deliveryMethod, setDeliveryMethod] = useState('zip');
     const [clearDirectory, setClearDirectory] = useState(false);
     const [githubAccountType, setGithubAccountType] = useState('personal');
@@ -28,11 +29,14 @@ function DeploymentSettings() {
     const [region, setRegion] = useState('us-east-2');
     const [hasCopied, setHasCopied] = useState(false);
     const [pages, setPages] = useState(false);
+    const [testDisabled, setTestDisabled] = useState(false);
+    const [testRunning, setTestRunning] = useState(false);
 
 
     const setSavingSettings = () => {
         saveSettings();
         setSettingsSaved(true);
+        setTestDisabled(false);
 
         setTimeout(function () {
             setSettingsSaved(false);
@@ -93,6 +97,7 @@ function DeploymentSettings() {
             </CardHeader>
             <CardBody>
                 <p>{__('Choose from a variety of deployment methods. Depending on your selection we either provide a ZIP file, export to a local directory or send your files to a remote destination.', 'simply-static')}</p>
+
                 {'pro' === options.plan ?
                     <SelectControl
                         label={__('Deployment method', 'simply-static')}
@@ -106,11 +111,11 @@ function DeploymentSettings() {
                             {label: __('Bunny CDN', 'simply-static'), value: 'cdn'},
                             {label: __('Tiiny.host', 'simply-static'), value: 'tiiny'},
                             {label: __('Simply CDN (deprecated)', 'simply-static'), value: 'simply-cdn'},
-                            {label: __('Digital Ocean Spaces (deprecated)', 'simply-static'), value: 'digitalocean'},
                         ]}
                         onChange={(method) => {
                             setDeliveryMethod(method);
                             updateSetting('delivery_method', method);
+                            setTestDisabled(true);
                         }}
                     />
                     :
@@ -125,9 +130,11 @@ function DeploymentSettings() {
                         onChange={(method) => {
                             setDeliveryMethod(method);
                             updateSetting('delivery_method', method);
+                            setTestDisabled(true);
                         }}
                     />
                 }
+
             </CardBody>
         </Card>
         <Spacer margin={5}/>
@@ -647,68 +654,6 @@ function DeploymentSettings() {
                     </Card>
                 }
                 <Spacer margin={5}/>
-                {deliveryMethod === 'digitalocean' &&
-                    <Card>
-                        <CardHeader>
-                            <b>{__('Digital Ocean Spaces', 'simply-static')}</b>
-                        </CardHeader>
-                        <CardBody>
-                            <p>
-                                <b>{__('This integration will be removed in an upcoming update. We no longer recommend using it to avoid disruptions to your static site workflow.', 'simply-static')}</b>
-                            </p>
-                            <TextControl
-                                label={__('Spaces Key', 'simply-static')}
-                                type={"text"}
-                                help={__('Enter your Spaces Key from Digital Ocean.', 'simply-static')}
-                                value={settings.digitalocean_key}
-                                onChange={(api_key) => {
-                                    updateSetting('digitalocean_key', api_key);
-                                }}
-                            />
-
-                            <TextControl
-                                label={__('Secret', 'simply-static')}
-                                type={"password"}
-                                help={__('Enter your Spaces Secret from Digital Ocean.', 'simply-static')}
-                                value={settings.digitalocean_secret}
-                                onChange={(secret) => {
-                                    updateSetting('digitalocean_secret', secret);
-                                }}
-                            />
-
-                            <TextControl
-                                label={__('Bucket Name', 'simply-static')}
-                                help={__('The bucket name for your space.', 'simply-static')}
-                                type={"text"}
-                                placeholder={"my-bucket"}
-                                value={settings.digitalocean_bucket}
-                                onChange={(bucket) => {
-                                    updateSetting('digitalocean_bucket', bucket);
-                                }}
-                            />
-
-                            <TextControl
-                                label={__('Region', 'simply-static')}
-                                type={"text"}
-                                help={__('The region for your space.', 'simply-static')}
-                                placeholder={"ams3"}
-                                value={settings.digitalocean_region}
-                                onChange={(region) => {
-                                    updateSetting('digitalocean_region', region);
-                                }}
-                            />
-                            <p>
-                                {settings.digitalocean_bucket && settings.digitalocean_region &&
-                                    <Notice status="warning" isDismissible={false}>
-                                        {__('Your endpoint will be', 'simply-static')} :
-                                        {'https://' + settings.digitalocean_bucket + '.' + settings.digitalocean_region + '.digitaloceanspaces.com'}
-                                    </Notice>
-                                }
-                            </p>
-                        </CardBody>
-                    </Card>
-                }
-                <Spacer margin={5}/>
                 {deliveryMethod === 'sftp' &&
                     <Card>
                         <CardHeader>
@@ -790,6 +735,30 @@ function DeploymentSettings() {
         <div className={"save-settings"}>
             <Button onClick={setSavingSettings}
                     variant="primary">{__('Save Settings', 'simply-static')}</Button>
+            {'pro' === options.plan &&
+            <Button
+                disabled={isRunning || testDisabled || testRunning}
+                variant={'secondary'}
+
+                isBusy={isRunning || testRunning}
+                onClick={() => {
+                    setTestRunning(true);
+                    apiFetch({
+                        path: '/simplystatic/v1/apply-single',
+                        method: 'POST',
+                    }).then(resp => {
+                        if ( parseInt( resp.status )  === 404 ) {
+                            alert(resp.message);
+                        } else {
+                           window.location.reload();
+                        }
+
+                    });
+                }}>
+                { testDisabled && __('Save settings to test', 'simply-static') }
+                { !testDisabled && __('Test Deployment', 'simply-static')}
+            </Button>
+            }
         </div>
     </div>)
 }

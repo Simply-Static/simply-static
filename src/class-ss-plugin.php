@@ -12,7 +12,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Plugin {
 
-
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
 	 *
@@ -84,14 +83,20 @@ class Plugin {
 				'filter_task_list'
 			), 10, 2 );
 
-			// Handle Basic Auth.
-			add_filter( 'http_request_args', array( self::$instance, 'add_http_filters' ), 10, 2 );
-
 			// Maybe clear local directory.
 			add_action( 'ss_after_setup_task', array( self::$instance, 'maybe_clear_directory' ) );
 			add_action( 'ss_after_setup_task', array( self::$instance, 'add_configs' ), 99 );
 
 			add_action( 'wp_head', array( self::$instance, 'add_meta_tags' ) );
+
+			// Add quick link to the plugin page.
+			add_filter( 'plugin_action_links_simply-static/simply-static.php', array(
+				self::$instance,
+				'add_quick_links'
+			) );
+
+			// Handle Basic Auth.
+			add_filter( 'http_request_args', array( self::$instance, 'add_http_filters' ), 10, 2 );
 
 			self::$instance->integrations = new Integrations();
 			self::$instance->integrations->load();
@@ -120,6 +125,10 @@ class Plugin {
 		}
 
 		return self::$instance;
+	}
+
+	public function get_integrations() {
+		return $this->integrations->get_integrations();
 	}
 
 	/**
@@ -196,8 +205,8 @@ class Plugin {
 		require_once $path . 'src/class-ss-sql-permissions.php';
 		require_once $path . 'src/class-ss-upgrade-handler.php';
 		require_once $path . 'src/class-ss-util.php';
-		require_once $path . 'src/class-page-handlers.php';
-		require_once $path . 'src/class-integrations.php';
+		require_once $path . 'src/class-ss-page-handlers.php';
+		require_once $path . 'src/class-ss-integrations.php';
 		require_once $path . 'src/admin/inc/class-ss-admin-settings.php';
 		require_once $path . 'src/admin/inc/class-ss-migrate-settings.php';
 		require_once $path . 'src/class-ss-multisite.php';
@@ -354,45 +363,6 @@ class Plugin {
 	}
 
 	/**
-	 * Set HTTP Basic Auth for wp-background-processing
-	 *
-	 * @param array $parsed_args given args.
-	 * @param string $url given URL.
-	 *
-	 * @return array
-	 */
-	public function add_http_filters( $parsed_args, $url ) {
-		// Check for Basic Auth credentials.
-		if ( strpos( $url, get_bloginfo( 'url' ) ) !== false ) {
-			$digest = self::$instance->options->get( 'http_basic_auth_digest' );
-
-			if ( $digest ) {
-				$parsed_args['headers']['Authorization'] = 'Basic ' . $digest;
-			}
-		}
-
-		// Check for Freemius.
-		if ( false === strpos( $url, '://api.freemius.com' ) ) {
-			return $parsed_args;
-		}
-
-		if ( empty( $parsed_args['headers'] ) ) {
-			return $parsed_args;
-		}
-
-		foreach ( $parsed_args['headers'] as $key => $value ) {
-			if ( 'Authorization' === $key ) {
-				$parsed_args['headers']['Authorization2'] = $value;
-			} else if ( 'Authorization2' === $key ) {
-				$parsed_args['headers']['Authorization'] = $value;
-				unset( $parsed_args['headers'][ $key ] );
-			}
-		}
-
-		return $parsed_args;
-	}
-
-	/**
 	 * Return the task list for the Archive Creation Job to process
 	 *
 	 * @param array $task_list The list of tasks to process.
@@ -446,6 +416,63 @@ class Plugin {
 			}
 		}
 	}
+
+	/**
+	 * Register quick links in plugins settings page.
+	 *
+	 * @param array $links given list of links.
+	 *
+	 * @return array
+	 */
+	public function add_quick_links( $links ) {
+		$settings_url = esc_url( get_admin_url() . 'admin.php?page=simply-static-settings' );
+		$docs_url     = esc_url( 'https://docs.simplystatic.com' );
+
+		$links[] = '<a href="' . $settings_url . '">' . esc_html__( 'Settings', 'simply-static' ) . '</a>';
+		$links[] = '<a target="_blank" href="' . $docs_url . '">' . esc_html__( 'Docs', 'simply-static' ) . '</a>';
+
+		return $links;
+	}
+
+	/**
+	 * Set HTTP Basic Auth for wp-background-processing
+	 *
+	 * @param array $parsed_args given args.
+	 * @param string $url given URL.
+	 *
+	 * @return array
+	 */
+	public function add_http_filters( $parsed_args, $url ) {
+		// Check for Basic Auth credentials.
+		if ( strpos( $url, get_bloginfo( 'url' ) ) !== false ) {
+			$digest = base64_encode( self::$instance->options->get('http_basic_auth_username') . ':' . self::$instance->options->get('http_basic_auth_password') );
+
+			if ( $digest ) {
+				$parsed_args['headers']['Authorization'] = 'Basic ' . $digest;
+			}
+		}
+
+		// Check for Freemius.
+		if ( false === strpos( $url, '://api.freemius.com' ) ) {
+			return $parsed_args;
+		}
+
+		if ( empty( $parsed_args['headers'] ) ) {
+			return $parsed_args;
+		}
+
+		foreach ( $parsed_args['headers'] as $key => $value ) {
+			if ( 'Authorization' === $key ) {
+				$parsed_args['headers']['Authorization2'] = $value;
+			} else if ( 'Authorization2' === $key ) {
+				$parsed_args['headers']['Authorization'] = $value;
+				unset( $parsed_args['headers'][ $key ] );
+			}
+		}
+
+		return $parsed_args;
+	}
+
 
 	/**
 	 * Add config URL path as meta tag.

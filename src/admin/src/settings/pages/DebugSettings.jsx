@@ -6,16 +6,17 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl, ToggleControl,
+    TextControl, ToggleControl, TextareaControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
 
 const {__} = wp.i18n;
 
-function MiscSettings() {
+function DebugSettings() {
     const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
-    const [debuggingMode, setDebuggingMode] = useState(false);
+    const [activateDebugLog, setActivateDebugLog] = useState(false);
+    const [useServerCron, setUserServerCron] = useState(false);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -28,38 +29,22 @@ function MiscSettings() {
 
     useEffect(() => {
         if (settings.debugging_mode) {
-            setDebuggingMode(settings.debugging_mode);
+            setActivateDebugLog(settings.debugging_mode);
+        }
+
+        if (settings.server_cron) {
+            setUserServerCron(settings.server_cron);
         }
     }, [settings]);
 
     return (<div className={"inner-settings"}>
         <Card>
             <CardHeader>
-                <b>{__('Temporary Files', 'simply-static')}</b>
-            </CardHeader>
-            <CardBody>
-                <p>{__('Your static files are temporarily saved to a directory before being copied to their destination or creating a ZIP.', 'simply-static')}</p>
-                <TextControl
-                    label={__('Temporary Files Directory', 'simply-static')}
-                    type={"text"}
-                    placeholder={options.temp_files_dir}
-                    help={__('Specify the directory to save your temporary files. This directory must exist and be writeable.', 'simply-static')}
-                    value={settings.temp_files_dir}
-                    onChange={(temp_dir) => {
-                        updateSetting('temp_files_dir', temp_dir);
-                    }}
-                />
-
-            </CardBody>
-        </Card>
-        <Spacer margin={5}/>
-        <Card>
-            <CardHeader>
                 <b>{__('Basic Auth', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
                 <p>
-                    {__('If you\'ve secured WordPress with HTTP Basic Auth you can specify the username and password to use below.', 'simply-static')}
+                    {__('If you\'ve secured WordPress with HTTP Basic Auth you need to specify the username and password to use below.', 'simply-static')}
                 </p>
                 <TextControl
                     label={__('Basic Auth Username', 'simply-static')}
@@ -84,7 +69,7 @@ function MiscSettings() {
                 {'pro' === options.plan &&
                     <p>
                         <ToggleControl
-                            label={__('Enable Basic Authentification', 'simply-static')}
+                            label={__('Enable Basic Auth', 'simply-static')}
                             help={__('Once enabled we will put your entire website behind password protection.', 'simply-static')}
                             checked={settings.http_basic_auth_on}
                             onChange={(value) => {
@@ -106,18 +91,45 @@ function MiscSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('Debugging', 'simply-static')}</b>
+                <b>{__('Temporary Files', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
-                <ToggleControl
-                    label={__('Debugging Mode', 'simply-static')}
-                    help={__('Once the debugging mode is enabled you can download the debug log from Simply Static -> Generate.', 'simply-static')}
-                    checked={debuggingMode}
-                    onChange={(value) => {
-                        setDebuggingMode(value);
-                        updateSetting('debugging_mode', value);
+                <p>{__('Your static files are temporarily saved to a directory before being copied to their destination or creating a ZIP.', 'simply-static')}</p>
+                <TextControl
+                    label={__('Temporary Files Directory', 'simply-static')}
+                    type={"text"}
+                    placeholder={options.temp_files_dir}
+                    help={__('Specify the directory to save your temporary files. This directory must exist and be writeable.', 'simply-static')}
+                    value={settings.temp_files_dir}
+                    onChange={(temp_dir) => {
+                        updateSetting('temp_files_dir', temp_dir);
                     }}
                 />
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <b>{__('Whitelist Plugins', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
+                <TextareaControl
+                    label={__('Whitelist plugins in diagnostics', 'simply-static')}
+                    placeholder={"autoptimize\nwp-search-with-algolia\nwp-rocket"}
+                    help={__('If you want to exclude certain plugins from the diagnostics check add the plugin slugs here (one per line).', 'simply-static')}
+                    value={settings.whitelist_plugins}
+                    onChange={(value) => {
+                        updateSetting('whitelist_plugins', value);
+                    }}
+                />
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <b>{__('Proxy Setup', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
                 <TextControl
                     label={__('Origin URL', 'simply-static')}
                     type={"url"}
@@ -127,6 +139,40 @@ function MiscSettings() {
                     value={settings.origin_url}
                     onChange={(origin_url) => {
                         updateSetting('origin_url', origin_url);
+                    }}
+                />
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <b>{__('Debug Log', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
+                <ToggleControl
+                    label={__('Activate Debug Log', 'simply-static')}
+                    help={__('Enable it to download the debug log from Simply Static -> Generate.', 'simply-static')}
+                    checked={activateDebugLog}
+                    onChange={(value) => {
+                        setActivateDebugLog(value);
+                        updateSetting('debugging_mode', value);
+                    }}
+                />
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <b>{__('Cron', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
+                <ToggleControl
+                    label={__('Use server-side cron job', 'simply-static')}
+                    help={__('Enable this if you use a server-side cron job instead of the default WP-Cron.', 'simply-static')}
+                    checked={useServerCron}
+                    onChange={(value) => {
+                        setUserServerCron(value);
+                        updateSetting('server_cron', value);
                     }}
                 />
             </CardBody>
@@ -153,4 +199,4 @@ function MiscSettings() {
     </div>)
 }
 
-export default MiscSettings;
+export default DebugSettings;

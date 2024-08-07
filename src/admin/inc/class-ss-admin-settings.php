@@ -4,6 +4,13 @@ namespace Simply_Static;
 
 class Admin_Settings {
 	/**
+	 * Contains the number of failed tests.
+	 *
+	 * @var int
+	 */
+	public int $failed_tests = 0;
+
+	/**
 	 * Contains instance or null
 	 *
 	 * @var object|null
@@ -31,6 +38,8 @@ class Admin_Settings {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_menu' ) );
 		add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
+
+		$this->failed_tests = intval( get_transient( 'simply_static_failed_tests' ) );
 	}
 
 	/**
@@ -43,6 +52,7 @@ class Admin_Settings {
 			return;
 		}
 
+		// Generate settings page.
 		add_menu_page(
 			__( 'Simply Static', 'simply-static' ),
 			__( 'Simply Static', 'simply-static' ),
@@ -64,6 +74,7 @@ class Admin_Settings {
 		add_action( "admin_print_scripts-{$generate_suffix}", array( $this, 'add_settings_scripts' ) );
 
 		if ( ! is_network_admin() ) {
+			// Add settings page.
 			$settings_suffix = add_submenu_page(
 				'simply-static-generate',
 				__( 'Settings', 'simply-static' ),
@@ -74,6 +85,20 @@ class Admin_Settings {
 			);
 
 			add_action( "admin_print_scripts-{$settings_suffix}", array( $this, 'add_settings_scripts' ) );
+
+			$notifications = sprintf( '<span class="update-plugins diagnostics-error"><span class="plugin-count" aria-hidden="true">%s</span><span class="screen-reader-text">errors in diagnostics</span></span>', $this->failed_tests );
+
+			// Add diagnostics page.
+			$diagnostics_suffix = add_submenu_page(
+				'simply-static-generate',
+				__( 'Diagnostics', 'simply-static' ),
+				$this->failed_tests > 0 ? __( 'Diagnostics', 'simply-static' ) . ' ' . wp_kses_post( $notifications ) : __( 'Diagnostics', 'simply-static' ),
+				apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ),
+				'simply-static-diagnostics',
+				array( $this, 'render_settings' )
+			);
+
+			add_action( "admin_print_scripts-{$diagnostics_suffix}", array( $this, 'add_settings_scripts' ) );
 		}
 	}
 
@@ -99,6 +124,12 @@ class Admin_Settings {
 			$initial = '/general';
 		}
 
+		// Maybe switch to Diagnostics.
+		if ( 'simply-static_page_simply-static-diagnostics' === $screen->base ) {
+			$initial = '/diagnostics';
+		}
+
+
 		// Check if directory exists, if not, create it.
 		$upload_dir = wp_upload_dir();
 		$temp_dir   = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
@@ -123,6 +154,11 @@ class Admin_Settings {
 				'blog_id'        => get_current_blog_id(),
 				'need_upgrade'   => 'no',
 				'builds'         => array(),
+				'integrations'   => array_map( function ( $item ) {
+					$object = new $item;
+
+					return $object->js_object();
+				}, Plugin::instance()->get_integrations() ),
 			)
 		);
 
@@ -175,6 +211,11 @@ class Admin_Settings {
 
 		if ( floatval( $version ) < floatval( '3.0.4' ) ) {
 			$args['need_upgrade'] = 'yes';
+		}
+
+		// Forms enabled?
+		if ( ! empty( $options->get( 'use_forms' ) ) ) {
+			$args['form_connection_url'] = esc_url( get_admin_url() . 'post-new.php?post_type=ssp-form' );
 		}
 
 		wp_localize_script( 'simplystatic-settings', 'options', $args );
@@ -239,9 +280,25 @@ class Admin_Settings {
 			},
 		) );
 
+		register_rest_route( 'simplystatic/v1', '/pages-slugs', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'get_pages_slugs' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+			},
+		) );
+
 		register_rest_route( 'simplystatic/v1', '/migrate', array(
 			'methods'             => 'POST',
 			'callback'            => [ $this, 'migrate_settings' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+			},
+		) );
+
+		register_rest_route( 'simplystatic/v1', '/reset-diagnostics', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'reset_diagnostics' ],
 			'permission_callback' => function () {
 				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
 			},
@@ -318,7 +375,13 @@ class Admin_Settings {
 	 * @return false|mixed|null
 	 */
 	public function get_settings() {
-		return get_option( 'simply-static' );
+		$settings = get_option( 'simply-static' );
+		if ( empty( $settings['integrations'] ) ) {
+			$integrations             = Plugin::instance()->get_integrations();
+			$settings['integrations'] = array_keys( $integrations );
+		}
+
+		return $settings;
 	}
 
 	/**
@@ -327,9 +390,26 @@ class Admin_Settings {
 	 * @return array[]
 	 */
 	public function get_system_status() {
-		$diagnostics = new Diagnostic();
+		$checks = get_transient( 'simply_static_checks' );
 
-		return $diagnostics->get_checks();
+		if ( ! $checks ) {
+			$diagnostics = new Diagnostic();
+			$checks      = $diagnostics->get_checks();
+		}
+
+		return $checks;
+	}
+
+	/**
+	 * Clear transient for diagnostics.
+	 *
+	 * @return string
+	 */
+	public function reset_diagnostics() {
+		delete_transient( 'simply_static_checks' );
+		delete_transient( 'simply_static_failed_tests' );
+
+		return json_encode( [ 'status' => 200 ] );
 	}
 
 	/**
@@ -346,10 +426,11 @@ class Admin_Settings {
 			foreach ( $topics as $check ) {
 				if ( ! $check['test'] ) {
 					$passed = 'no';
-                    break;
+					break;
 				}
 			}
 		}
+
 		return json_encode( [ 'status' => 200, 'passed' => $passed ] );
 	}
 
@@ -369,13 +450,19 @@ class Admin_Settings {
 				'additional_files',
 				'urls_to_exclude',
 				'search_excludable',
-				'iframe_urls'
+				'iframe_urls',
+				'iframe_custom_css',
+				'whitelist_plugins'
 			];
+
+			$array_fields = [ 'integrations' ];
 
 			// Sanitize each key/value pair in options.
 			foreach ( $options as $key => $value ) {
 				if ( in_array( $key, $multiline_fields ) ) {
 					$options[ $key ] = sanitize_textarea_field( $value );
+				} elseif ( in_array( $key, $array_fields ) ) {
+					$options[ $key ] = array_map( 'sanitize_text_field', $value );
 				} else {
 					// Exclude Basic Auth fields from sanitize.
 					if ( $key === 'http_basic_auth_username' || $key === 'http_basic_auth_password' ) {
@@ -383,13 +470,6 @@ class Admin_Settings {
 					}
 					$options[ $key ] = sanitize_text_field( $value );
 				}
-			}
-
-			// Handle basic auth.
-			if ( isset( $options['http_basic_auth_username'] ) && $options['http_basic_auth_username'] && isset( $options['http_basic_auth_password'] ) && $options['http_basic_auth_password'] ) {
-				$options['http_basic_auth_digest'] = base64_encode( $options['http_basic_auth_username'] . ':' . $options['http_basic_auth_password'] );
-			} else {
-				$options['http_basic_auth_digest'] = '';
 			}
 
 			// Maybe update network settings.
@@ -424,13 +504,6 @@ class Admin_Settings {
 
 			// Reset options.
 			$options = sanitize_option( 'simply-static', $request->get_params() );
-
-			// Handle basic auth.
-			if ( isset( $options['http_basic_auth_username'] ) && $options['http_basic_auth_username'] && isset( $options['http_basic_auth_password'] ) && $options['http_basic_auth_password'] ) {
-				$options['http_basic_auth_digest'] = base64_encode( $options['http_basic_auth_username'] . ':' . $options['http_basic_auth_password'] );
-			} else {
-				$options['http_basic_auth_digest'] = '';
-			}
 
 			// Update settings.
 			update_option( 'simply-static', $options );
@@ -494,6 +567,31 @@ class Admin_Settings {
 
 		foreach ( $pages as $page ) {
 			$selectable_pages[] = array( 'label' => $page->post_title, 'value' => $page->ID );
+		}
+
+		return $selectable_pages;
+	}
+
+	/**
+	 * Get pages slugs for settings.
+	 * @return array
+	 */
+	public function get_pages_slugs() {
+		$args = array(
+			'post_type'   => 'page',
+			'post_status' => 'publish',
+			'numberposts' => - 1,
+		);
+
+		$pages = get_posts( $args );
+
+		// Build selectable pages array.
+		$selectable_pages = array();
+
+		foreach ( $pages as $page ) {
+			$permalink = get_permalink( $page->ID );
+
+			$selectable_pages[] = array( 'label' => $page->post_title, 'value' => $permalink );
 		}
 
 		return $selectable_pages;

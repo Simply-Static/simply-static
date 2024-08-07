@@ -283,6 +283,9 @@ class Migrate_Settings {
 			unset( $options['algolia-selector'] );
 		}
 
+		// Set Cron.
+		$options['server_cron'] = false;
+
 		// Set version for upgrade.
 		$options['version'] = SIMPLY_STATIC_VERSION;
 

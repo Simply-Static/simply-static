@@ -16,7 +16,9 @@ const {__} = wp.i18n;
 
 function GeneralSettings() {
     const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
+
     const [replaceType, setReplaceType] = useState('relative');
+    const [useForms, setUseForms] = useState(false);
     const [scheme, setScheme] = useState('https://');
     const [host, setHost] = useState('');
     const [path, setPath] = useState('/');
@@ -48,6 +50,10 @@ function GeneralSettings() {
 
         if (settings.relative_path) {
             setPath(settings.relative_path);
+        }
+
+        if (settings.use_forms || settings.use_comments) {
+            setUseForms(true);
         }
 
         if (settings.force_replace_url) {
@@ -141,19 +147,21 @@ function GeneralSettings() {
                 {replaceType === 'offline' &&
                     <p>{__('Convert all URLs for your WordPress site so that you can browse the site locally on your own computer without hosting it on a web server.', 'simply-static')}</p>
                 }
-                <ToggleControl
-                    label={__('Force URL replacements', 'simply-static')}
-                    help={
-                        forceURLReplacement
-                            ? __('Replace all occurrences of the WordPress URL with the static URL (includes inline CSS and JS).', 'simply-static')
-                            : __('Replace only occurrences of the WordPress URL that match our tag list.', 'simply-static')
-                    }
-                    checked={forceURLReplacement}
-                    onChange={(value) => {
-                        setForceURLReplacement(value);
-                        updateSetting('force_replace_url', value);
-                    }}
-                />
+                {! useForms &&
+                    <ToggleControl
+                        label={__('Force URL replacements', 'simply-static')}
+                        help={
+                            forceURLReplacement
+                                ? __('Replace all occurrences of the WordPress URL with the static URL (includes inline CSS and JS).', 'simply-static')
+                                : __('Replace only occurrences of the WordPress URL that match our tag list.', 'simply-static')
+                        }
+                        checked={forceURLReplacement}
+                        onChange={(value) => {
+                            setForceURLReplacement(value);
+                            updateSetting('force_replace_url', value);
+                        }}
+                    />
+                }
             </CardBody>
         </Card>
         <Spacer margin={5}/>

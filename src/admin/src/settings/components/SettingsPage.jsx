@@ -22,7 +22,8 @@ import {
 import DeploymentSettings from "../pages/DeploymentSettings";
 import FormSettings from "../pages/FormSettings";
 import SearchSettings from "../pages/SearchSettings";
-import MiscSettings from "../pages/MiscSettings";
+import DebugSettings from "../pages/DebugSettings";
+import IntegrationsSettings from "../pages/IntegrationsSettings";
 import Generate from "../pages/Generate";
 import Optimize from "../pages/Optimize";
 import {SettingsContext} from "../context/SettingsContext";
@@ -35,14 +36,12 @@ function SettingsPage() {
         isRunning,
         setIsRunning,
         blogId,
-        migrateSettings,
-        saveSettings,
         settings,
         updateFromNetwork,
         passedChecks,
     } = useContext(SettingsContext);
     const [activeItem, setActiveItem] = useState({activeItem: "/"});
-    const [initialPage, setInitialPage] = useState(options.initial);
+    const [initialPage, setInitialPage] = useState(localStorage.getItem('ss-initial-page') ? localStorage.getItem('ss-initial-page') : options.initial);
     const [initialSet, setInitialSet] = useState(false);
     const [disabledButton, setDisabledButton] = useState(false);
     const [selectedCopySite, setSelectedCopySite] = useState('current');
@@ -64,10 +63,22 @@ function SettingsPage() {
     }
 
     useEffect(() => {
+        setDisabledButton(isRunning);
+
+        // Change initial page.
+        let initialPageRedirect = localStorage.getItem('ss-initial-page');
+
         if (!initialSet) {
             setInitialSet(true);
-            setActiveItem(options.initial);
-            setInitialPage(options.initial);
+
+            if (initialPageRedirect) {
+                setActiveItem(initialPageRedirect);
+                setInitialPage(initialPageRedirect);
+                localStorage.removeItem('ss-initial-page');
+            } else {
+                setActiveItem(options.initial);
+                setInitialPage(options.initial);
+            }
         }
 
         if (options.selectable_sites && !options.is_network && options.is_multisite) {
@@ -79,7 +90,7 @@ function SettingsPage() {
             setSelectableSites(sites);
         }
 
-    }, [options]);
+    }, [options, isRunning]);
 
     const startExport = () => {
         setDisabledButton(true);
@@ -107,10 +118,6 @@ function SettingsPage() {
             setIsRunning(false);
         });
     }
-
-    useEffect(function () {
-        setDisabledButton(isRunning);
-    }, [isRunning]);
 
     let buildOptions = '';
     if (Object.keys(options.builds).length) {
@@ -140,22 +147,8 @@ function SettingsPage() {
                                     <p>Version: <b>{options.version}</b></p>
                                 }
                                 <div className={"generate-container"}>
-                                    {'pro' === options.plan &&
-                                        <p>
-                                            <SelectControl
-                                                value={selectedExportType}
-                                                onChange={(value) => {
-                                                    setSelectedExportType(value);
-                                                }}
-                                            >
-                                                <option value="export">{__('Export', 'simply-static')}</option>
-                                                {'zip' !== settings.delivery_method && 'tiiny' !== settings.delivery_method &&
-                                                    <option value="update">{__('Update', 'simply-static')}</option>
-                                                }
-                                                {buildOptions}
-                                            </SelectControl>
-                                        </p>}
                                     <Button onClick={() => {
+                                        setSelectedExportType('export');
                                         startExport();
                                     }}
                                             disabled={disabledButton}
@@ -283,7 +276,7 @@ function SettingsPage() {
                                     <NavigatorButton onClick={() => setActiveItem('/diagnostics')}
                                                      className={activeItem === '/diagnostics' ? 'is-active-item' : ''}
                                                      path="/diagnostics">
-                                        <Dashicon icon="editor-help"/> {__('Diagnostics', 'simply-static')}
+                                        <Dashicon icon="bell"/> {__('Diagnostics', 'simply-static')}
                                     </NavigatorButton>
                                 </CardBody>
                                 <CardBody>
@@ -322,15 +315,20 @@ function SettingsPage() {
                                 </CardBody>
                                 <CardBody>
                                     <h4 className={"settings-headline"}> {__('Advanced', 'simply-static')}</h4>
+                                    <NavigatorButton onClick={() => setActiveItem('/integrations')}
+                                                     className={activeItem === '/integrations' ? 'is-active-item' : ''}
+                                                     path="/integrations">
+                                        <Dashicon icon="block-default"/> {__('Integrations', 'simply-static')}
+                                    </NavigatorButton>
                                     <NavigatorButton onClick={() => setActiveItem('/utilities')}
                                                      className={activeItem === '/utilities' ? 'is-active-item' : ''}
                                                      path="/utilities">
                                         <Dashicon icon="admin-tools"/> {__('Utilities', 'simply-static')}
                                     </NavigatorButton>
-                                    <NavigatorButton onClick={() => setActiveItem('/misc')}
-                                                     className={activeItem === '/misc' ? 'is-active-item' : ''}
-                                                     path="/misc">
-                                        <Dashicon icon="block-default"/> {__('Misc', 'simply-static')}
+                                    <NavigatorButton onClick={() => setActiveItem('/debug')}
+                                                     className={activeItem === '/debug' ? 'is-active-item' : ''}
+                                                     path="/debug">
+                                        <Dashicon icon="editor-help"/> {__('Debug', 'simply-static')}
                                     </NavigatorButton>
                                 </CardBody>
                                 <CardBody>
@@ -415,9 +413,14 @@ function SettingsPage() {
                                     <Utilities/>
                                 </NavigatorScreen>
                             }
-                            {activeItem === '/misc' &&
-                                <NavigatorScreen path="/misc">
-                                    <MiscSettings/>
+                            {activeItem === '/debug' &&
+                                <NavigatorScreen path="/debug">
+                                    <DebugSettings/>
+                                </NavigatorScreen>
+                            }
+                            {activeItem === '/integrations' &&
+                                <NavigatorScreen path="/integrations">
+                                    <IntegrationsSettings/>
                                 </NavigatorScreen>
                             }
                         </div>

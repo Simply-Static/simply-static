@@ -80,6 +80,8 @@ class Upgrade_Handler {
 			'relative_path'                 => '',
 			'destination_url_type'          => 'relative',
 			'debugging_mode'                => true,
+			'server_cron'                   => false,
+			'whitelist_plugins'             => '',
 			'http_basic_auth_username'      => '',
 			'http_basic_auth_password'      => '',
 			'origin_url'                    => '',
@@ -88,6 +90,7 @@ class Upgrade_Handler {
 			'ssh_security_token'            => '',
 			'ssh_use_forms'                 => true,
 			'iframe_urls'                   => '',
+			'iframe_custom_css'             => '',
 			'ssh_404_page_id'               => '',
 			'ssh_thank_you_page_id'         => '',
 			'tiiny_email'                   => get_bloginfo( 'admin_email' ),
@@ -117,10 +120,6 @@ class Upgrade_Handler {
 			'aws_subdirectory'              => '',
 			'aws_distribution_id'           => '',
 			'aws_empty'                     => false,
-			'digitalocean_key'              => '',
-			'digitalocean_secret'           => '',
-			'digitalocean_bucket'           => '',
-			'digitalocean_region'           => '',
 			'fix_cors'                      => 'allowed_http_origins',
 			'static_url'                    => '',
 			'use_forms'                     => false,
@@ -176,7 +175,6 @@ class Upgrade_Handler {
 			'archive_name'                  => null,
 			'archive_start_time'            => null,
 			'archive_end_time'              => null,
-			'http_basic_auth_digest'        => null,
 		);
 
 		$version = self::$options->get( 'version' );
@@ -185,16 +183,16 @@ class Upgrade_Handler {
 		if ( null === $version ) {
 			Page::create_or_update_table();
 			self::set_default_options();
-		}
+		} else {
+			if ( version_compare( $version, SIMPLY_STATIC_VERSION, '!=' ) ) {
+				// Sync database.
+				Page::create_or_update_table();
 
-		if ( version_compare( $version, SIMPLY_STATIC_VERSION, '!=' ) ) {
-			// Sync database.
-			Page::create_or_update_table();
-
-			// Update version.
-			self::$options
-				->set( 'version', SIMPLY_STATIC_VERSION )
-				->save();
+				// Update version.
+				self::$options
+					->set( 'version', SIMPLY_STATIC_VERSION )
+					->save();
+			}
 		}
 	}
 

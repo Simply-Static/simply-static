@@ -533,9 +533,13 @@ class Util {
 	 * @param string $task_name Name of the task
 	 * @param string $message Message to display about the status of the job
 	 *
-	 * @return void
+	 * @return array
 	 */
 	public static function add_archive_status_message( $messages, $task_name, $message ) {
+		if ( ! is_array( $messages ) ) {
+			$messages = array();
+		}
+
 		// if the state exists, set the datetime and message
 		if ( ! array_key_exists( $task_name, $messages ) ) {
 			$messages[ $task_name ] = array(
