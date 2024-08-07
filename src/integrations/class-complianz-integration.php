@@ -11,17 +11,22 @@ class Complianz_Integration extends Integration {
 	 */
 	protected $id = 'complianz';
 
+	public function __construct() {
+		$this->name = __( 'Complianz | GDPR/CCPA Cookie Consent', 'simply-static' );
+		$this->description = __( 'Integrates Complianz Cookie banner to work on the static site.', 'simply-static' );
+	}
+
 	/**
 	 * @var null|Url_Extractor
 	 */
 	protected $extractor = null;
 
 	/**
-	 * Can this integration run?
+	 * Return if the dependency is active.
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
-	public function can_run() {
+	public function dependency_active() {
 		return class_exists( 'COMPLIANZ' );
 	}
 
