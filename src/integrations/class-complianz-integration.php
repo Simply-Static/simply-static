@@ -40,8 +40,79 @@ class Complianz_Integration extends Integration {
 		add_action( 'ss_after_setup_task', [ $this, 'save_cookie_data' ] );
 		add_action( 'ss_after_setup_task', [ $this, 'save_policy_consent_html' ] );
 		add_action( 'ss_after_setup_task', [ $this, 'save_banner_json' ] );
+		add_action( 'ss_after_setup_task', [ $this, 'register_assets' ] );
 		add_filter( 'simply_static_content_before_save', [ $this, 'maybe_find_block_or_shortcode' ], 99, 2 );
 		add_filter( 'script_loader_src', [ $this, 'change_script' ], 20, 2 );
+	}
+
+
+	/**
+	 * Register Elementor Assets to be added that are loaded conditionally
+	 *
+	 * @return void
+	 */
+	public function register_assets() {
+		$file_urls   = [];
+
+		$file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'js' ) );
+		$file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'css' ) );
+		$file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'images' ) );
+
+		foreach ( $file_urls as $url ) {
+			Util::debug_log( 'Adding Complianz bundle asset to queue: ' . $url );
+			/** @var \Simply_Static\Page $static_page */
+			$static_page = Page::query()->find_or_initialize_by( 'url', $url );
+			$static_page->set_status_message( __( 'Complianz Asset', 'simply-static' ) );
+			$static_page->found_on_id = 0;
+			$static_page->save();
+		}
+	}
+
+	/**
+	 * Move Elementor Files to make sure all assets that might be required are there.
+	 * @return array
+	 */
+	public function get_files_in_url( $asset_dir ) {
+		$uploads = wp_upload_dir();
+		$dir   = trailingslashit( $uploads['basedir'] ) . 'complianz/' . $asset_dir;
+		$files = $this->get_files_in_dir( $dir );
+		$urls  = [];
+
+		foreach ( $files as $file ) {
+			$urls[] = str_replace( trailingslashit( $uploads['basedir'] ), trailingslashit( $uploads['baseurl'] ), $file );
+		}
+
+		return $urls;
+	}
+
+	/**
+	 * Get fields in directory
+	 *
+	 * @param string $source_dir Directory path.
+	 * @param array $files
+	 *
+	 * @return array
+	 */
+	public function get_files_in_dir( string $source_dir, array $files = [] ) {
+		if ( is_dir( $source_dir ) ) {
+			$directory = opendir( $source_dir );
+
+			while ( ( $file = readdir( $directory ) ) !== false ) {
+				if ( $file === '.' || $file === '..' ) {
+					continue;
+				}
+
+				if ( is_dir( "$source_dir/$file" ) === true ) {
+					$files = $this->get_files_in_dir( "$source_dir/$file", $files );
+				} else {
+					$files[] = "$source_dir/$file";
+				}
+			}
+
+			closedir( $directory );
+		}
+
+		return $files;
 	}
 
 	/**
