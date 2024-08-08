@@ -13,7 +13,7 @@ class Yoast_Integration extends Integration {
 
 	public function __construct() {
 		$this->name = __( 'Yoast', 'simply-static' );
-		$this->description = __( 'Automatically includes your XML sitemaps and handles URL replacements in schema.org markup.', 'simply-static' );
+		$this->description = __( 'Automatically includes your XML sitemaps, handles URL replacements in schema.org markup, and creates redirects on your static site for you.', 'simply-static' );
 	}
 
 	/**
