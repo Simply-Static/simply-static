@@ -13,8 +13,8 @@ class Rank_Math_Integration extends Integration {
 	protected $id = 'rank-math';
 
 	public function __construct() {
-		$this->name = __( 'Rank Math', 'simply-static' );
-		$this->description = __( 'Automatically includes your XML sitemaps and handles URL replacements in schema.org markup.', 'simply-static' );
+		$this->name        = __( 'Rank Math', 'simply-static' );
+		$this->description = __( 'Automatically includes your XML sitemaps, handles URL replacements in schema.org markup, and creates redirects on your static site for you.', 'simply-static' );
 	}
 
 	/**
@@ -45,10 +45,11 @@ class Rank_Math_Integration extends Integration {
 			return null;
 		}
 
-		$results = array_map(function ($item) {
-			$item["sources"] = maybe_unserialize($item["sources"]);
+		$results = array_map( function ( $item ) {
+			$item["sources"] = maybe_unserialize( $item["sources"] );
+
 			return $item;
-		}, $results);
+		}, $results );
 
 		return $results;
 	}
@@ -79,10 +80,10 @@ class Rank_Math_Integration extends Integration {
 				}
 
 				$url = home_url( $source['pattern'] );
-				Util::debug_log( 'Adding Yoast redirection URL to queue: ' . $url );
+				Util::debug_log( 'Adding RankMath redirection URL to queue: ' . $url );
 				/** @var \Simply_Static\Page $static_page */
 				$static_page = Page::query()->find_or_initialize_by( 'url', $url );
-				$static_page->set_status_message( __( 'Yoast Redirection URL', 'simply-static' ) );
+				$static_page->set_status_message( __( 'RankMath Redirection URL', 'simply-static' ) );
 				$static_page->found_on_id = 0;
 				$static_page->save();
 			}
