@@ -1,8 +1,7 @@
 /vendor/
 .DS_Store
 /static-files
-/debug.txt
-/composer.lock
+debug.txt
+composer.lock
 node_modules
 package-lock.json
-```
