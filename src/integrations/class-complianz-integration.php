@@ -12,7 +12,7 @@ class Complianz_Integration extends Integration {
 	protected $id = 'complianz';
 
 	public function __construct() {
-		$this->name = __( 'Complianz | GDPR/CCPA Cookie Consent', 'simply-static' );
+		$this->name        = __( 'Complianz | GDPR/CCPA Cookie Consent', 'simply-static' );
 		$this->description = __( 'Integrates Complianz Cookie banner to work on the static site.', 'simply-static' );
 	}
 
@@ -47,16 +47,16 @@ class Complianz_Integration extends Integration {
 
 
 	/**
-	 * Register Elementor Assets to be added that are loaded conditionally
+	 * Register Complianz Assets to be added that are loaded conditionally
 	 *
 	 * @return void
 	 */
 	public function register_assets() {
-		$file_urls   = [];
+		$file_urls = [];
 
-		$file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'js' ) );
-		$file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'css' ) );
-		$file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'images' ) );
+		$file_urls = array_merge( $file_urls, $this->get_files_in_url( 'js' ) );
+		$file_urls = array_merge( $file_urls, $this->get_files_in_url( 'css' ) );
+		$file_urls = array_merge( $file_urls, $this->get_files_in_url( 'images' ) );
 
 		foreach ( $file_urls as $url ) {
 			Util::debug_log( 'Adding Complianz bundle asset to queue: ' . $url );
@@ -69,14 +69,14 @@ class Complianz_Integration extends Integration {
 	}
 
 	/**
-	 * Move Elementor Files to make sure all assets that might be required are there.
+	 * Move Complianz Files to make sure all assets that might be required are there.
 	 * @return array
 	 */
 	public function get_files_in_url( $asset_dir ) {
 		$uploads = wp_upload_dir();
-		$dir   = trailingslashit( $uploads['basedir'] ) . 'complianz/' . $asset_dir;
-		$files = $this->get_files_in_dir( $dir );
-		$urls  = [];
+		$dir     = trailingslashit( $uploads['basedir'] ) . 'complianz/' . $asset_dir;
+		$files   = $this->get_files_in_dir( $dir );
+		$urls    = [];
 
 		foreach ( $files as $file ) {
 			$urls[] = str_replace( trailingslashit( $uploads['basedir'] ), trailingslashit( $uploads['baseurl'] ), $file );
@@ -144,19 +144,23 @@ class Complianz_Integration extends Integration {
 
 		// Copied code START
 		$consent_type = apply_filters( 'cmplz_user_consenttype', \COMPLIANZ::$company->get_default_consenttype() );
-		$path = trailingslashit( cmplz_path ).'cookiebanner/templates/';
-		$banner_html = cmplz_get_template( "cookiebanner.php", array( 'consent_type' => $consent_type ), $path);
-		$banner_html = apply_filters("cmplz_banner_html", $banner_html);
-		if ( preg_match( '/<!-- categories start -->(.*?)<!-- categories end -->/s', $banner_html,  $matches ) ) {
-			$html      = $matches[0];
-			$banner_id = apply_filters( 'cmplz_user_banner_id', cmplz_get_default_banner_id() );
-			$banner = cmplz_get_cookiebanner(  $banner_id );
+		$path         = trailingslashit( cmplz_path ) . 'cookiebanner/templates/';
+		$banner_html  = cmplz_get_template( "cookiebanner.php", array( 'consent_type' => $consent_type ), $path );
+		$banner_html  = apply_filters( "cmplz_banner_html", $banner_html );
+		if ( preg_match( '/<!-- categories start -->(.*?)<!-- categories end -->/s', $banner_html, $matches ) ) {
+			$html            = $matches[0];
+			$banner_id       = apply_filters( 'cmplz_user_banner_id', cmplz_get_default_banner_id() );
+			$banner          = cmplz_get_cookiebanner( $banner_id );
 			$cookie_settings = $banner->get_html_settings();
 
-			foreach($cookie_settings as $fieldname => $value ) {
-				if ( isset($value['text']) ) $value = $value['text'];
-				if ( is_array($value) ) continue;
-				$html = str_replace( '{'.$fieldname.'}', $value, $html );
+			foreach ( $cookie_settings as $fieldname => $value ) {
+				if ( isset( $value['text'] ) ) {
+					$value = $value['text'];
+				}
+				if ( is_array( $value ) ) {
+					continue;
+				}
+				$html = str_replace( '{' . $fieldname . '}', $value, $html );
 			}
 		}
 		// Copied code END
@@ -174,7 +178,7 @@ class Complianz_Integration extends Integration {
 	/**
 	 * Try to find Complianz shortcode or block.
 	 *
-	 * @param string        $content Page content.
+	 * @param string $content Page content.
 	 * @param Url_Extractor $extractor Extractor.
 	 *
 	 * @return string
@@ -196,26 +200,26 @@ class Complianz_Integration extends Integration {
 	/**
 	 * Create config for each block found on the page.
 	 *
-	 * @param string  $content Page content (not used here, but passed).
+	 * @param string $content Page content (not used here, but passed).
 	 * @param integer $post_id Page ID (Post ID).
 	 *
 	 * @return void
 	 */
 	public function create_configs_from_blocks( $content, $post_id ) {
-		if ( has_block('complianz/consent-area', $content ) ) {
+		if ( has_block( 'complianz/consent-area', $content ) ) {
 			$blocks = parse_blocks( $content );
 			foreach ( $blocks as $block ) {
 				if ( $block['blockName'] === 'complianz/consent-area' ) {
 					$consent_block_id = $block['attrs']['blockId'];
-					$output = $block['attrs']['consentedContent'];
-					$config_name = sprintf( 'complianz-consent-area-%d-%s.html', $post_id, $consent_block_id );
+					$output           = $block['attrs']['consentedContent'];
+					$config_name      = sprintf( 'complianz-consent-area-%d-%s.html', $post_id, $consent_block_id );
 					$this->create_config( $config_name, $output );
 					break;
 				}
 			}
 		} else {
-			Util::debug_log('NO COMPLIANZ BLOCK');
-			Util::debug_log($content);
+			Util::debug_log( 'NO COMPLIANZ BLOCK' );
+			Util::debug_log( $content );
 		}
 	}
 
@@ -273,6 +277,7 @@ class Complianz_Integration extends Integration {
 		$cookie_blocker = \COMPLIANZ::$cookie_blocker;
 		$cookie_blocker->load_cookie_data();
 		$response = wp_json_encode( $cookie_blocker->cookie_list );
+
 		return $response;
 	}
 
