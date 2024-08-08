@@ -13,8 +13,8 @@ class Rank_Math_Integration extends Integration {
 	protected $id = 'rank-math';
 
 	public function __construct() {
-		$this->name = __( 'Rank Math', 'simply-static' );
-		$this->description = __( 'Automatically includes your XML sitemaps and handles URL replacements in schema.org markup.', 'simply-static' );
+		$this->name        = __( 'Rank Math', 'simply-static' );
+		$this->description = __( 'Automatically includes your XML sitemaps, handles URL replacements in schema.org markup, and creates redirects on your static site for you.', 'simply-static' );
 	}
 
 	/**
@@ -24,11 +24,74 @@ class Rank_Math_Integration extends Integration {
 	 */
 	public function run() {
 		add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_page' ] );
+		add_action( 'ss_after_setup_task', [ $this, 'register_redirections' ] );
 		add_filter( 'ssp_single_export_additional_urls', [ $this, 'add_sitemap_url' ] );
 		add_action( 'ss_dom_before_save', [ $this, 'replace_json_schema' ], 10, 2 );
 
 		$this->include_file( 'handlers/class-ss-rank-math-sitemap-handler.php' );
 	}
+
+	/**
+	 * Get Redirections.
+	 * @return array|object|\stdClass[]|null
+	 */
+	protected function get_redirects() {
+		global $wpdb;
+
+		$results = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}rank_math_redirections", ARRAY_A );
+
+
+		if ( empty( $results ) ) {
+			return null;
+		}
+
+		$results = array_map( function ( $item ) {
+			$item["sources"] = maybe_unserialize( $item["sources"] );
+
+			return $item;
+		}, $results );
+
+		return $results;
+	}
+
+	/**
+	 * Register all redirections.
+	 *
+	 * @return void
+	 */
+	public function register_redirections() {
+
+		$redirections = $this->get_redirects();
+
+		if ( ! $redirections ) {
+			return;
+		}
+
+		foreach ( $redirections as $redirection ) {
+
+			if ( empty( $redirection['sources'] ) ) {
+				continue;
+			}
+
+			foreach ( $redirection['sources'] as $source ) {
+
+				if ( $source['comparison'] !== 'exact' ) {
+					continue;
+				}
+
+				$url = home_url( $source['pattern'] );
+				Util::debug_log( 'Adding RankMath redirection URL to queue: ' . $url );
+				/** @var \Simply_Static\Page $static_page */
+				$static_page = Page::query()->find_or_initialize_by( 'url', $url );
+				$static_page->set_status_message( __( 'RankMath Redirection URL', 'simply-static' ) );
+				$static_page->found_on_id = 0;
+				$static_page->save();
+			}
+
+		}
+
+	}
+
 
 	/**
 	 * Register sitemap maps for static export.
