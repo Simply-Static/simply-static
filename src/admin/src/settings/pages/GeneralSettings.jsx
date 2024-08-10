@@ -11,6 +11,7 @@ import {
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
+import HelperVideo from "../components/HelperVideo";
 
 const {__} = wp.i18n;
 
@@ -69,7 +70,7 @@ function GeneralSettings() {
     return (<div className={"inner-settings"}>
         <Card>
             <CardHeader>
-                <b>{__('Replacing URLs', 'simply-static')}</b>
+                <b>{__('Replacing URLs', 'simply-static')}<HelperVideo title={__('Replacing URLs', 'simply-static')} videoUrl={'https://youtu.be/zwWM8b16UYM?si=R_LkqLg30y76RWgY'}/></b>
             </CardHeader>
             <CardBody>
                 <p>{__('When exporting your static site, any links to your WordPress site will be replaced by one of the following: absolute URLs, relative URLs, or URLs contructed for offline use.', 'simply-static')}</p>

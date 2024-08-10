@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "react-data-table-component": "^7.6.2",
+    "react-player": "^2.16.0",
     "react-terminal-ui": "^1.2.0"
   }
 }
