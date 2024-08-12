@@ -9,6 +9,7 @@ import {
 } from "@wordpress/components";
 import {useContext, useState} from "@wordpress/element";
 import {SettingsContext} from "../context/SettingsContext";
+import HelperVideo from "../components/HelperVideo";
 
 const {__} = wp.i18n;
 
@@ -27,6 +28,35 @@ function Diagnostics() {
 
     const statusData = () => (
         <div>
+            <Card>
+                <CardHeader>
+                    <b>{__('Diagnostics', 'simply-static')}<HelperVideo
+                        title={__('How to use diagnostics', 'simply-static')}
+                        videoUrl={'https://youtu.be/X59YMlz6F2s'}/></b>
+                </CardHeader>
+                <CardBody>
+                    <p>
+                        {__('Our diagnostics tool provides detailed insights into your WordPress installation and server configuration and tells you exactly what needs to be optimized to get the most out of Simply Static. Click the button below to get the latest results.', 'simply-static')}
+                    </p>
+                    <p>
+                        <Button onClick={runResetDiagnostics} variant="secondary">{__('Reset Diagnostics', 'simply-static')}</Button>
+                    </p>
+                    {isReset ?
+                        <Animate type="slide-in" options={{origin: 'top'}}>
+                            {() => (
+                                <Notice status="success" isDismissible={false}>
+                                    <p>
+                                        {__('Diagnostics resetted successfully.', 'simply-static')}
+                                    </p>
+                                </Notice>
+                            )}
+                        </Animate>
+                        :
+                        ''
+                    }
+                </CardBody>
+            </Card>
+            <Spacer margin={5}/>
             {
                 Object.keys(configs).map(key => {
                     const items = configs[key];
@@ -72,34 +102,6 @@ function Diagnostics() {
                     )
                 })
             }
-            <Spacer margin={5}/>
-            <Card>
-                <CardHeader>
-                    <b>{__('Reset Diagnostics', 'simply-static')}</b>
-                </CardHeader>
-                <CardBody>
-                    <p>
-                        {__('Use it to reset diagnostics if you have made recent changes not reflected in the results.', 'simply-static')}
-                    </p>
-                    <p>
-                        <Button  onClick={runResetDiagnostics}
-                                 variant="secondary">{__('Reset Diagnostics', 'simply-static')}</Button>
-                    </p>
-                    {isReset ?
-                        <Animate type="slide-in" options={{origin: 'top'}}>
-                            {() => (
-                                <Notice status="success" isDismissible={false}>
-                                    <p>
-                                        {__('Diagnostics resetted successfully.', 'simply-static')}
-                                    </p>
-                                </Notice>
-                            )}
-                        </Animate>
-                        :
-                        ''
-                    }
-                </CardBody>
-            </Card>
         </div>
     );
 

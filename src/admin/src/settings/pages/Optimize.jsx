@@ -12,6 +12,7 @@ import {
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
 import apiFetch from "@wordpress/api-fetch";
+import HelperVideo from "../components/HelperVideo";
 
 const {__} = wp.i18n;
 
@@ -182,7 +183,9 @@ function Optimize() {
     return (<div className={"inner-settings"}>
         <Card>
             <CardHeader>
-                <b>{__('Minify', 'simply-static')}</b>
+                <b>{__('Minify', 'simply-static')}<HelperVideo
+                    title={__('How to minify HTML, CSS and JavaScript?', 'simply-static')}
+                    videoUrl={'https://youtu.be/52IKv5ai-i4'}/></b>
             </CardHeader>
             <CardBody>
                 <ToggleControl
@@ -281,7 +284,9 @@ function Optimize() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('Image Optimization', 'simply-static')}</b>
+                <b>{__('Image Optimization', 'simply-static')}<HelperVideo
+                    title={__('How to optimize images with ShortPixel?', 'simply-static')}
+                    videoUrl={'https://youtu.be/OIfKcXz3cxY'}/></b>
             </CardHeader>
             <CardBody>
                 <ToggleControl
@@ -331,7 +336,9 @@ function Optimize() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('Replace', 'simply-static')}</b>
+                <b>{__('Replace', 'simply-static')}<HelperVideo
+                    title={__('How to replace WP default paths', 'simply-static')}
+                    videoUrl={'https://youtu.be/GedyNJJMGaY'}/></b>
             </CardHeader>
             <CardBody>
                 <TextControl
@@ -423,7 +430,9 @@ function Optimize() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('Hide', 'simply-static')}</b>
+                <b>{__('Hide', 'simply-static')}<HelperVideo
+                    title={__('How to hide and disable WP core features', 'simply-static')}
+                    videoUrl={'https://youtu.be/GijIsrfFB8o'}/></b>
             </CardHeader>
             <CardBody>
 
@@ -504,7 +513,9 @@ function Optimize() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('Disable', 'simply-static')}</b>
+                <b>{__('Disable', 'simply-static')}<HelperVideo
+                    title={__('How to hide and disable WP core features', 'simply-static')}
+                    videoUrl={'https://youtu.be/GijIsrfFB8o'}/></b>
             </CardHeader>
             <CardBody>
 

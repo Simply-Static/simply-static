@@ -7,18 +7,25 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl, SelectControl, ToggleControl,
-    Flex, FlexItem
+    TextControl, SelectControl, ToggleControl
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
 import apiFetch from "@wordpress/api-fetch";
+import HelperVideo from "../components/HelperVideo";
 
 const {__} = wp.i18n;
 
 
 function DeploymentSettings() {
-    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved, isRunning} = useContext(SettingsContext);
+    const {
+        settings,
+        updateSetting,
+        saveSettings,
+        settingsSaved,
+        setSettingsSaved,
+        isRunning
+    } = useContext(SettingsContext);
     const [deliveryMethod, setDeliveryMethod] = useState('zip');
     const [clearDirectory, setClearDirectory] = useState(false);
     const [githubAccountType, setGithubAccountType] = useState('personal');
@@ -50,10 +57,6 @@ function DeploymentSettings() {
 
         if (settings.clear_directory_before_export) {
             setClearDirectory(settings.clear_directory_before_export);
-        }
-
-        if (settings.ssh_use_forms) {
-            setUseForms(settings.ssh_use_forms);
         }
 
         if (settings.github_account_type) {
@@ -109,8 +112,7 @@ function DeploymentSettings() {
                             {label: __('GitHub', 'simply-static'), value: 'github'},
                             {label: __('AWS S3', 'simply-static'), value: 'aws-s3'},
                             {label: __('Bunny CDN', 'simply-static'), value: 'cdn'},
-                            {label: __('Tiiny.host', 'simply-static'), value: 'tiiny'},
-                            {label: __('Simply CDN (deprecated)', 'simply-static'), value: 'simply-cdn'},
+                            {label: __('Tiiny.host', 'simply-static'), value: 'tiiny'}
                         ]}
                         onChange={(method) => {
                             setDeliveryMethod(method);
@@ -124,8 +126,7 @@ function DeploymentSettings() {
                         value={deliveryMethod}
                         options={[
                             {label: __('ZIP Archive', 'simply-static'), value: 'zip'},
-                            {label: __('Local Directory', 'simply-static'), value: 'local'},
-                            {label: __('Simply CDN', 'simply-static'), value: 'simply-cdn'},
+                            {label: __('Local Directory', 'simply-static'), value: 'local'}
                         ]}
                         onChange={(method) => {
                             setDeliveryMethod(method);
@@ -141,7 +142,9 @@ function DeploymentSettings() {
         {deliveryMethod === 'local' &&
             <Card>
                 <CardHeader>
-                    <b>{__('Local Directory', 'simply-static')}</b>
+                    <b>{__('Local Directory', 'simply-static')}<HelperVideo
+                        title={__('How to deploy to a local directory', 'simply-static')}
+                        videoUrl={'https://youtu.be/ZRdXQB5slnY'}/></b>
                 </CardHeader>
                 <CardBody>
                     <TextControl
@@ -182,69 +185,14 @@ function DeploymentSettings() {
                 </CardBody>
             </Card>
         }
-        {deliveryMethod === 'simply-cdn' &&
-            <Card>
-                <CardHeader>
-                    <b>{__('Simply CDN (deprecated)', 'simply-static')}</b>
-                </CardHeader>
-                <CardBody>
-                    <b>{__('This integration will be removed in an upcoming update. We no longer recommend using it to avoid disruptions to your static site workflow.', 'simply-static')}</b>
-                    <p>{__('The fast and easy way to bring your static website online. Simply CDN handles hosting, performance, security and form submissions for your static site.', 'simply-static')}</p>
-                    <TextControl
-                        label={__('Security Token', 'simply-static')}
-                        type={"text"}
-                        help={__('Copy and paste the Security Token from your project.', 'simply-static')}
-                        value={settings.ssh_security_token}
-                        onChange={(token) => {
-                            updateSetting('ssh_security_token', token);
-                        }}
-                    />
-                    {settings.ssh_security_token &&
-                        <>
-                            <SelectControl
-                                label={__('Select a 404 page', 'content-protector')}
-                                options={pages}
-                                help={__('We will use that page as a 404 error page on your static website.', 'simply-static')}
-                                value={settings.ssh_404_page_id}
-                                onChange={(value) => {
-                                    updateSetting("ssh_404_page_id", value);
-                                }}
-                            />
-                            <ToggleControl
-                                label={__('Use Forms?', 'simply-static')}
-                                help={
-                                    useForms
-                                        ? __('Proxy form submissions through Simply CDN.', 'simply-static')
-                                        : __('Don\'t proxy form submissions through Simply CDN.', 'simply-static')
-                                }
-                                checked={useForms}
-                                onChange={(value) => {
-                                    setUseForms(value);
-                                    updateSetting('ssh_use_forms', value);
-                                }}
-                            />
-                            {useForms &&
-                                <SelectControl
-                                    label={__('Select a "Thank You" page', 'simply-static')}
-                                    options={pages}
-                                    help={__('We will use that page to redirect your visitors after submitting a form on your static website.', 'simply-static')}
-                                    value={settings.ssh_thank_you_page_id}
-                                    onChange={(value) => {
-                                        updateSetting("ssh_thank_you_page_id", value);
-                                    }}
-                                />
-                            }
-                        </>
-                    }
-                </CardBody>
-            </Card>
-        }
         {'pro' === options.plan &&
             <>
                 {deliveryMethod === 'github' &&
                     <Card>
                         <CardHeader>
-                            <b>{__('GitHub', 'simply-static')}</b>
+                            <b>{__('GitHub', 'simply-static')}<HelperVideo
+                                title={__('How to deploy to a GitHub (2/2)', 'simply-static')}
+                                videoUrl={'https://youtu.be/HqyTKwZuUAM'}/></b>
                         </CardHeader>
                         <CardBody>
                             <p>{__('GitHub enables you to export your static website to one of the common static hosting providers like Netlify, Cloudflare Pages or GitHub Pages.', 'simply-static')}</p>
@@ -295,7 +243,14 @@ function DeploymentSettings() {
                             />
 
                             <TextControl
-                                label={__('Personal Access Token', 'simply-static')}
+                                label={
+                                    <>
+                                        {__('Personal Access Token', 'simply-static')}
+                                        <HelperVideo
+                                            title={__('How to prepare your GitHub account', 'simply-static')}
+                                            videoUrl={'https://youtu.be/fjsJJmPeKuc'}/>
+                                    </>
+                                }
                                 type={"password"}
                                 help={
                                     <>
@@ -313,7 +268,7 @@ function DeploymentSettings() {
                             <TextControl
                                 label={__('Repository', 'simply-static')}
                                 type={"text"}
-                                help= {__('Enter a name for your repository (lowercase without spaces or special characters).', 'simply-static')}
+                                help={__('Enter a name for your repository (lowercase without spaces or special characters).', 'simply-static')}
                                 value={settings.github_repository}
                                 onChange={(repository) => {
                                     updateSetting('github_repository', repository);
@@ -322,7 +277,8 @@ function DeploymentSettings() {
                             <Notice status="warning" isDismissible={false}>
                                 <p>
                                     {__('Ensure to create the repository and add a readme file to it before running an export as shown in the docs ', 'simply-static')}
-                                    <a href={"https://docs.simplystatic.com/article/33-set-up-the-github-integration/"} target={"_blank"}>{__('here', 'simply-static')}</a>
+                                    <a href={"https://docs.simplystatic.com/article/33-set-up-the-github-integration/"}
+                                       target={"_blank"}>{__('here', 'simply-static')}</a>
                                 </p>
                             </Notice>
                             <Spacer margin={5}/>
@@ -394,7 +350,9 @@ function DeploymentSettings() {
                 {deliveryMethod === 'tiiny' &&
                     <Card>
                         <CardHeader>
-                            <b>{__('Tiiny.host', 'simply-static')}</b>
+                            <b>{__('Tiiny.host', 'simply-static')}<HelperVideo
+                                title={__('How to deploy to Tiiny.host', 'simply-static')}
+                                videoUrl={'https://youtu.be/Y9EDaQkGl1Y'}/></b>
                         </CardHeader>
                         <CardBody>
 
@@ -449,7 +407,9 @@ function DeploymentSettings() {
                 {deliveryMethod === 'cdn' &&
                     <Card>
                         <CardHeader>
-                            <b>{__('Bunny CDN', 'simply-static')}</b>
+                            <b>{__('Bunny CDN', 'simply-static')}<HelperVideo
+                                title={__('How to deploy to Bunny CDN', 'simply-static')}
+                                videoUrl={'https://youtu.be/FBRg1BI41VY'}/></b>
                         </CardHeader>
                         <CardBody>
 
@@ -533,7 +493,9 @@ function DeploymentSettings() {
                 {deliveryMethod === 'aws-s3' &&
                     <Card>
                         <CardHeader>
-                            <b>{__('Amazon AWS S3', 'simply-static')}</b>
+                            <b>{__('Amazon AWS S3', 'simply-static')}<HelperVideo
+                                title={__('How to deploy to Amazon AWS S3', 'simply-static')}
+                                videoUrl={'https://youtu.be/rtn21J86Upc'}/></b>
                         </CardHeader>
                         <CardBody>
                             <TextControl
@@ -657,7 +619,9 @@ function DeploymentSettings() {
                 {deliveryMethod === 'sftp' &&
                     <Card>
                         <CardHeader>
-                            <b>{__('SFTP', 'simply-static')}</b>
+                            <b>{__('SFTP', 'simply-static')}<HelperVideo
+                                title={__('How to deploy via SFTP', 'simply-static')}
+                                videoUrl={'https://youtu.be/6-QR9wZA3VQ'}/></b>
                         </CardHeader>
                         <CardBody>
                             <TextControl
@@ -736,28 +700,28 @@ function DeploymentSettings() {
             <Button onClick={setSavingSettings}
                     variant="primary">{__('Save Settings', 'simply-static')}</Button>
             {'pro' === options.plan &&
-            <Button
-                disabled={isRunning || testDisabled || testRunning}
-                variant={'secondary'}
+                <Button
+                    disabled={isRunning || testDisabled || testRunning}
+                    variant={'secondary'}
 
-                isBusy={isRunning || testRunning}
-                onClick={() => {
-                    setTestRunning(true);
-                    apiFetch({
-                        path: '/simplystatic/v1/apply-single',
-                        method: 'POST',
-                    }).then(resp => {
-                        if ( parseInt( resp.status )  === 404 ) {
-                            alert(resp.message);
-                        } else {
-                           window.location.reload();
-                        }
+                    isBusy={isRunning || testRunning}
+                    onClick={() => {
+                        setTestRunning(true);
+                        apiFetch({
+                            path: '/simplystatic/v1/apply-single',
+                            method: 'POST',
+                        }).then(resp => {
+                            if (parseInt(resp.status) === 404) {
+                                alert(resp.message);
+                            } else {
+                                window.location.reload();
+                            }
 
-                    });
-                }}>
-                { testDisabled && __('Save settings to test', 'simply-static') }
-                { !testDisabled && __('Test Deployment', 'simply-static')}
-            </Button>
+                        });
+                    }}>
+                    {testDisabled && __('Save settings to test', 'simply-static')}
+                    {!testDisabled && __('Test Deployment', 'simply-static')}
+                </Button>
             }
         </div>
     </div>)

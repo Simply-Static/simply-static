@@ -70,7 +70,9 @@ function GeneralSettings() {
     return (<div className={"inner-settings"}>
         <Card>
             <CardHeader>
-                <b>{__('Replacing URLs', 'simply-static')}<HelperVideo title={__('Replacing URLs', 'simply-static')} videoUrl={'https://youtu.be/zwWM8b16UYM?si=R_LkqLg30y76RWgY'}/></b>
+                <b>{__('Replacing URLs', 'simply-static')}<HelperVideo
+                    title={__('Run your first static export', 'simply-static')}
+                    videoUrl={'https://youtu.be/lIPiJiTbD0E'}/></b>
             </CardHeader>
             <CardBody>
                 <p>{__('When exporting your static site, any links to your WordPress site will be replaced by one of the following: absolute URLs, relative URLs, or URLs contructed for offline use.', 'simply-static')}</p>
@@ -148,7 +150,7 @@ function GeneralSettings() {
                 {replaceType === 'offline' &&
                     <p>{__('Convert all URLs for your WordPress site so that you can browse the site locally on your own computer without hosting it on a web server.', 'simply-static')}</p>
                 }
-                {! useForms &&
+                {!useForms &&
                     <ToggleControl
                         label={__('Force URL replacements', 'simply-static')}
                         help={
@@ -168,7 +170,9 @@ function GeneralSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('Include', 'simply-static')}</b>
+                <b>{__('Include', 'simply-static')}<HelperVideo
+                    title={__('Include & Exclude files and pages', 'simply-static')}
+                    videoUrl={'https://youtu.be/voAHfwVMLi8'}/></b>
             </CardHeader>
             <CardBody>
                 <TextareaControl
@@ -199,7 +203,13 @@ function GeneralSettings() {
                 </ClipboardButton>
                 <Spacer margin={5}/>
                 <ToggleControl
-                    label={__('Generate 404 Page?', 'simply-static')}
+                    label={
+                        <>
+                            {__('Generate 404 Page?', 'simply-static')}
+                            <HelperVideo title={__('How to manage 404 pages?', 'simply-static')}
+                                         videoUrl={'https://youtu.be/dnRtuQrXG-k'}/>
+                        </>
+                    }
                     help={
                         generate404
                             ? __('Generate a 404 page.', 'simply-static')
@@ -216,7 +226,9 @@ function GeneralSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('Exclude', 'simply-static')}</b>
+                <b>{__('Exclude', 'simply-static')}<HelperVideo
+                    title={__('Include & Exclude files and pages', 'simply-static')}
+                    videoUrl={'https://youtu.be/voAHfwVMLi8'}/></b>
             </CardHeader>
             <CardBody>
                 <TextareaControl

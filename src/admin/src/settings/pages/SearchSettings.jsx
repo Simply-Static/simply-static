@@ -10,6 +10,7 @@ import {
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
+import HelperVideo from "../components/HelperVideo";
 
 const {__} = wp.i18n;
 
@@ -179,7 +180,9 @@ function SearchSettings() {
                 <Spacer margin={5}/>
                 <Card>
                     <CardHeader>
-                        <b>{__('Fuse.js', 'simply-static')}</b>
+                        <b>{__('Fuse.js', 'simply-static')}<HelperVideo
+                            title={__('How to add search with FuseJS', 'simply-static')}
+                            videoUrl={'https://youtu.be/K34l1DXjCHk'}/></b>
                     </CardHeader>
                     <CardBody>
                         <TextControl
@@ -201,7 +204,9 @@ function SearchSettings() {
                 <Spacer margin={5}/>
                 <Card>
                     <CardHeader>
-                        <b>{__('Algolia API', 'simply-static')}</b>
+                        <b>{__('Algolia API', 'simply-static')}<HelperVideo
+                            title={__('How to add search with the Algolia API', 'simply-static')}
+                            videoUrl={'https://youtu.be/H9PNZSl0KnU'}/></b>
                     </CardHeader>
                     <CardBody>
                         <TextControl

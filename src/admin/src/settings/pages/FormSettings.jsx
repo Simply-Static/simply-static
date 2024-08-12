@@ -11,6 +11,7 @@ import {
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
 import apiFetch from "@wordpress/api-fetch";
+import HelperVideo from "../components/HelperVideo";
 
 const {__} = wp.i18n;
 
@@ -129,11 +130,13 @@ function FormSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('CORS', 'simply-static')}</b>
+                <b>{__('CORS', 'simply-static')}<HelperVideo
+                    title={__('How to deal with CORS', 'simply-static')}
+                    videoUrl={'https://youtu.be/fArtvZhkU14'}/></b>
             </CardHeader>
             <CardBody>
                 <p>
-                    {__('When using Forms and Comments in Simply Static Pro you may encouter CORS issues as you make requests from your static website to your original one.', 'simply-static')}
+                    {__('When using Forms and Comments in Simply Static Pro you may encounter CORS issues as you make requests from your static website to your original one.', 'simply-static')}
                 </p>
                 <Notice status="warning" isDismissible={false}>
                     <p>
