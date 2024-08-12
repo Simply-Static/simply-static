@@ -188,7 +188,7 @@ trait canProcessPages {
 		$count = get_transient( 'simply_static_' . static::$task_name . '_total_pages' );
 		if ( false === $count ) {
 			$count = $this->get_total_pages_sql();
-			set_transient( 'simply_static_' . static::$task_name . '_total_pages', $count );
+			set_transient( 'simply_static_' . static::$task_name . '_total_pages', $count, MINUTE_IN_SECONDS );
 		}
 
 		return $count;
