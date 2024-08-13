@@ -75,7 +75,7 @@ function FormSettings() {
                     <FlexItem>
                         <b>{__('Forms', 'simply-static')}</b>
                     </FlexItem>
-                    {'free' === options.plan || !isPro() &&
+                    {('free' === options.plan || !isPro()) &&
                         <FlexItem>
                             <ExternalLink
                                 href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -111,7 +111,7 @@ function FormSettings() {
                     <FlexItem>
                         <b>{__('Comments', 'simply-static')}</b>
                     </FlexItem>
-                    {'free' === options.plan || !isPro() &&
+                    {('free' === options.plan || !isPro()) &&
                         <FlexItem>
                             <ExternalLink
                                 href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -160,7 +160,7 @@ function FormSettings() {
                             title={__('How to deal with CORS', 'simply-static')}
                             videoUrl={'https://youtu.be/fArtvZhkU14'}/></b>
                     </FlexItem>
-                    {'free' === options.plan || !isPro() &&
+                    {('free' === options.plan || !isPro()) &&
                         <FlexItem>
                             <ExternalLink
                                 href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -212,7 +212,7 @@ function FormSettings() {
                     <FlexItem>
                         <b>{__('Embed Dynamic Content (iFrame)', 'simply-static')}</b>
                     </FlexItem>
-                    {'free' === options.plan || !isPro() &&
+                    {('free' === options.plan || !isPro()) &&
                         <FlexItem>
                             <ExternalLink
                                 href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>

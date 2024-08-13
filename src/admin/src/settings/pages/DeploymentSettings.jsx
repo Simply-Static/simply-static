@@ -191,7 +191,7 @@ function DeploymentSettings() {
                                     title={__('How to deploy to a GitHub (2/2)', 'simply-static')}
                                     videoUrl={'https://youtu.be/HqyTKwZuUAM'}/></b>
                             </FlexItem>
-                            {'free' === options.plan || !isPro() &&
+                            {('free' === options.plan || !isPro()) &&
                                 <FlexItem>
                                     <ExternalLink
                                         href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -372,7 +372,7 @@ function DeploymentSettings() {
                                     title={__('How to deploy to Tiiny.host', 'simply-static')}
                                     videoUrl={'https://youtu.be/Y9EDaQkGl1Y'}/></b>
                             </FlexItem>
-                            {'free' === options.plan || !isPro() &&
+                            {('free' === options.plan || !isPro()) &&
                                 <FlexItem>
                                     <ExternalLink
                                         href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -442,7 +442,7 @@ function DeploymentSettings() {
                                     title={__('How to deploy to Bunny CDN', 'simply-static')}
                                     videoUrl={'https://youtu.be/FBRg1BI41VY'}/></b>
                             </FlexItem>
-                            {'free' === options.plan || !isPro() &&
+                            {('free' === options.plan || !isPro()) &&
                                 <FlexItem>
                                     <ExternalLink
                                         href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -544,7 +544,7 @@ function DeploymentSettings() {
                                     title={__('How to deploy to Amazon AWS S3', 'simply-static')}
                                     videoUrl={'https://youtu.be/rtn21J86Upc'}/></b>
                             </FlexItem>
-                            {'free' === options.plan || !isPro() &&
+                            {('free' === options.plan || !isPro()) &&
                                 <FlexItem>
                                     <ExternalLink
                                         href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -687,7 +687,7 @@ function DeploymentSettings() {
                                     title={__('How to deploy via SFTP', 'simply-static')}
                                     videoUrl={'https://youtu.be/6-QR9wZA3VQ'}/></b>
                             </FlexItem>
-                            {'free' === options.plan || !isPro() &&
+                            {('free' === options.plan || !isPro()) &&
                                 <FlexItem>
                                     <ExternalLink
                                         href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>

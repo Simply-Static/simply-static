@@ -189,7 +189,7 @@ function Optimize() {
                             title={__('How to minify HTML, CSS and JavaScript?', 'simply-static')}
                             videoUrl={'https://youtu.be/52IKv5ai-i4'}/></b>
                     </FlexItem>
-                    {'free' === options.plan || !isPro() &&
+                    {('free' === options.plan || !isPro()) &&
                         <FlexItem>
                             <ExternalLink
                                 href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -306,7 +306,7 @@ function Optimize() {
                             title={__('How to optimize images with ShortPixel?', 'simply-static')}
                             videoUrl={'https://youtu.be/OIfKcXz3cxY'}/></b>
                     </FlexItem>
-                    {'free' === options.plan || !isPro() &&
+                    {('free' === options.plan || !isPro()) &&
                         <FlexItem>
                             <ExternalLink
                                 href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -370,7 +370,7 @@ function Optimize() {
                             title={__('How to replace WP default paths', 'simply-static')}
                             videoUrl={'https://youtu.be/GedyNJJMGaY'}/></b>
                     </FlexItem>
-                    {'free' === options.plan || !isPro() &&
+                    {('free' === options.plan || !isPro()) &&
                         <FlexItem>
                             <ExternalLink
                                 href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -481,7 +481,7 @@ function Optimize() {
                             title={__('How to hide and disable WP core features', 'simply-static')}
                             videoUrl={'https://youtu.be/GijIsrfFB8o'}/></b>
                     </FlexItem>
-                    {'free' === options.plan || !isPro() &&
+                    {('free' === options.plan || !isPro()) &&
                         <FlexItem>
                             <ExternalLink
                                 href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -573,7 +573,7 @@ function Optimize() {
                             title={__('How to hide and disable WP core features', 'simply-static')}
                             videoUrl={'https://youtu.be/GijIsrfFB8o'}/></b>
                     </FlexItem>
-                    {'free' === options.plan || !isPro() &&
+                    {('free' === options.plan || !isPro()) &&
                         <FlexItem>
                             <ExternalLink
                                 href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>

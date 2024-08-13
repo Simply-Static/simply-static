@@ -49,7 +49,7 @@ function SearchSettings() {
                     <FlexItem>
                         <b>{__('Search', 'simply-static')}</b>
                     </FlexItem>
-                    {'free' === options.plan || !isPro() &&
+                    {('free' === options.plan || !isPro()) &&
                         <FlexItem>
                             <ExternalLink
                                 href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -118,7 +118,7 @@ function SearchSettings() {
                         <FlexItem>
                             <b>{__('Indexing', 'simply-static')}</b>
                         </FlexItem>
-                        {'free' === options.plan || !isPro() &&
+                        {('free' === options.plan || !isPro()) &&
                             <FlexItem>
                                 <ExternalLink
                                     href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -210,7 +210,7 @@ function SearchSettings() {
                                     title={__('How to add search with FuseJS', 'simply-static')}
                                     videoUrl={'https://youtu.be/K34l1DXjCHk'}/></b>
                             </FlexItem>
-                            {'free' === options.plan || !isPro() &&
+                            {('free' === options.plan || !isPro()) &&
                                 <FlexItem>
                                     <ExternalLink
                                         href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -245,7 +245,7 @@ function SearchSettings() {
                                     title={__('How to add search with the Algolia API', 'simply-static')}
                                     videoUrl={'https://youtu.be/H9PNZSl0KnU'}/></b>
                             </FlexItem>
-                            {'free' === options.plan || !isPro() &&
+                            {('free' === options.plan || !isPro()) &&
                                 <FlexItem>
                                     <ExternalLink
                                         href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
