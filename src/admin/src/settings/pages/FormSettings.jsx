@@ -22,6 +22,7 @@ function FormSettings() {
         saveSettings,
         settingsSaved,
         setSettingsSaved,
+        isPro
     } = useContext(SettingsContext);
     const [corsMethod, setCorsMethod] = useState('allowed_http_origins');
     const [useForms, setUseForms] = useState(false);
@@ -267,7 +268,7 @@ function FormSettings() {
             </>
         }
         <div className={"save-settings"}>
-            {'pro' === options.plan &&
+            {'pro' === options.plan && isPro() &&
             <Button onClick={setSavingSettings}
                     variant="primary">{__('Save Settings', 'simply-static')}</Button>
             }

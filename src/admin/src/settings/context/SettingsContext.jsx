@@ -7,7 +7,6 @@ const {__} = wp.i18n;
 export const SettingsContext = createContext();
 
 function SettingsContextProvider(props) {
-
     const defaultSettings = {
         'destination_scheme': 'https://',
         'destination_host': '',
@@ -214,6 +213,20 @@ function SettingsContextProvider(props) {
         });
     }
 
+    const isPro = () => {
+        // Further checks.
+        if( options.connect.is_active ) {
+            return true;
+        }
+
+        // Is there an encoded license key?
+        if( options.license ) {
+            return true;
+        }
+
+        return false;
+    }
+
 
     useInterval(() => {
         checkIfRunning()
@@ -246,6 +259,7 @@ function SettingsContextProvider(props) {
                 setIsRunning,
                 blogId,
                 setBlogId,
+                isPro,
             }}
         >
             {props.children}

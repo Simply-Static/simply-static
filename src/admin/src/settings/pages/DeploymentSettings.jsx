@@ -24,7 +24,8 @@ function DeploymentSettings() {
         saveSettings,
         settingsSaved,
         setSettingsSaved,
-        isRunning
+        isRunning,
+        isPro
     } = useContext(SettingsContext);
     const [deliveryMethod, setDeliveryMethod] = useState('zip');
     const [clearDirectory, setClearDirectory] = useState(false);
@@ -786,7 +787,7 @@ function DeploymentSettings() {
                 :
                 <Button onClick={setSavingSettings} variant="primary">{__('Save Settings', 'simply-static')}</Button>
             }
-            {'pro' === options.plan &&
+            {'pro' === options.plan && isPro() &&
                 <Button
                     disabled={isRunning || testDisabled || testRunning}
                     variant={'secondary'}

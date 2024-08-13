@@ -1,6 +1,7 @@
 import SettingsContextProvider from './context/SettingsContext';
 import SettingsPage from "./components/SettingsPage";
 import './settings.scss';
+
 function Settings() {
     return (
         <SettingsContextProvider>

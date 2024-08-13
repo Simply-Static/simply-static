@@ -17,7 +17,7 @@ import HelperVideo from "../components/HelperVideo";
 const {__} = wp.i18n;
 
 function Optimize() {
-    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
+    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved, isPro} = useContext(SettingsContext);
     const [minifyFiles, setMinifyFiles] = useState(false);
     const [minifyHtml, setMinifyHtml] = useState(false);
     const [minifyCss, setMinifyCss] = useState(false);
@@ -636,7 +636,7 @@ function Optimize() {
             </>
         }
         <div className={"save-settings"}>
-            {'pro' === options.plan &&
+            {'pro' === options.plan && isPro() &&
                 <Button onClick={setSavingSettings}
                         variant="primary">{__('Save Settings', 'simply-static')}</Button>
             }

@@ -41,7 +41,7 @@ class Admin_Settings {
 
 		$this->failed_tests = intval( get_transient( 'simply_static_failed_tests' ) );
 
-        Admin_Meta::get_instance();
+		Admin_Meta::get_instance();
 	}
 
 	/**
@@ -166,6 +166,19 @@ class Admin_Settings {
 
 		if ( defined( 'SIMPLY_STATIC_PRO_VERSION' ) ) {
 			$args['version_pro'] = SIMPLY_STATIC_PRO_VERSION;
+
+			// Pass in additional data.
+			$data = get_option( 'fs_accounts' );
+
+			if ( ! empty( $data['plugin_data']['simply-static-pro'] ) ) {
+				if ( isset( $data['plugin_data']['simply-static-pro']['connectivity_test'] ) ) {
+					$args['connect'] = $data['plugin_data']['simply-static-pro']['connectivity_test'];
+				}
+
+				if ( isset( $data['plugin_data']['simply-static-pro']['last_license_key'] ) ) {
+					$args['license'] = $data['plugin_data']['simply-static-pro']['last_license_key'];
+				}
+			}
 		}
 
 		// Multisite?

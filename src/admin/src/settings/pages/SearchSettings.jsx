@@ -15,7 +15,7 @@ import HelperVideo from "../components/HelperVideo";
 const {__} = wp.i18n;
 
 function SearchSettings() {
-    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
+    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved, isPro} = useContext(SettingsContext);
     const [useSearch, setUseSearch] = useState(false);
     const [searchType, setSearchType] = useState('fuse');
     const [isMetaModalOpen, setMetaModalOpen] = useState(false);
@@ -332,7 +332,7 @@ function SearchSettings() {
             </>
         }
         <div className={"save-settings"}>
-            {'pro' === options.plan &&
+            {'pro' === options.plan && isPro() &&
                 <Button onClick={setSavingSettings}
                         variant="primary">{__('Save Settings', 'simply-static')}</Button>
             }

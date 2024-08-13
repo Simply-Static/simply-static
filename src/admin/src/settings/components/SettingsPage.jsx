@@ -15,9 +15,8 @@ import {
     Dashicon,
     Card,
     CardBody,
-    Spinner,
     Notice,
-    Animate, __experimentalSpacer as Spacer, SelectControl, ToggleControl
+    Animate, __experimentalSpacer as Spacer, SelectControl
 } from '@wordpress/components';
 import DeploymentSettings from "../pages/DeploymentSettings";
 import FormSettings from "../pages/FormSettings";
@@ -39,6 +38,7 @@ function SettingsPage() {
         settings,
         updateFromNetwork,
         passedChecks,
+        isPro
     } = useContext(SettingsContext);
     const [activeItem, setActiveItem] = useState({activeItem: "/"});
     const [initialPage, setInitialPage] = useState(localStorage.getItem('ss-initial-page') ? localStorage.getItem('ss-initial-page') : options.initial);
@@ -138,7 +138,7 @@ function SettingsPage() {
                                     <img alt="Logo"
                                          src={options.logo}/>
                                 </div>
-                                {'pro' === options.plan ?
+                                {'pro' === options.plan && isPro() ?
                                     <p>
                                         Free: <b>{options.version}</b><br></br>
                                         Pro: <b>{options.version_pro}</b>
@@ -189,7 +189,7 @@ function SettingsPage() {
                                     <img alt="Logo"
                                          src={options.logo}/>
                                 </div>
-                                {'pro' === options.plan ?
+                                {'pro' === options.plan && isPro() ?
                                     <p>
                                         Free: <b>{options.version}</b><br></br>
                                         Pro: <b>{options.version_pro}</b>
@@ -209,7 +209,7 @@ function SettingsPage() {
                                         <option value="export">{__('Export', 'simply-static')}</option>
                                         {'zip' !== settings.delivery_method && 'tiiny' !== settings.delivery_method &&
                                             <>
-                                                {'pro' === options.plan ?
+                                                {'pro' === options.plan && isPro() ?
                                                     <option value="update">{__('Update', 'simply-static')}</option>
                                                     :
                                                     <option disabled
@@ -379,6 +379,24 @@ function SettingsPage() {
                                                     icon="editor-help"/> {__('Visit Diagnostics', 'simply-static')}
                                             </NavigatorButton>
                                         </Notice>
+                                    )}
+                                </Animate>
+                                :
+                                ''
+                            }
+                            {'pro' === options.plan && ! isPro ?
+                                <Animate type="slide-in" options={{origin: 'top'}}>
+                                    {() => (
+                                        <>
+                                            <Notice status="error" isDismissible={false}  className={activeItem == '/' ? 'diagnostics-notice diagnostics-notice-generate' : 'diagnostics-notice'}>
+                                                <p>
+                                                    {__('You are using the pro version without a valid license.', 'simply-static')}<br></br>
+                                                    {__('We have temporarily disabled all the pro features now. Please contact our support to have the problem solved.', 'simply-static')}
+                                                </p>
+                                                <Button isPrimary href={"https://simplystatic.com/support/"} target="_blank">Contact Support</Button>
+                                            </Notice>
+                                            <Spacer margin={"5px"}/>
+                                        </>
                                     )}
                                 </Animate>
                                 :
