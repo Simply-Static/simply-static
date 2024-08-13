@@ -83,7 +83,7 @@ function DebugSettings() {
                                 }
                             </>
                         }
-                        disabled={'free' === options.plan}
+                        disabled={('free' === options.plan || !isPro())}
                         checked={settings.http_basic_auth_on}
                         onChange={(value) => {
                             updateSetting('http_basic_auth_on', value);

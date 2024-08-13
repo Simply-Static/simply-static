@@ -214,19 +214,12 @@ function SettingsContextProvider(props) {
     }
 
     const isPro = () => {
-        // Further checks.
-        if( options.connect.is_active ) {
-            return true;
-        }
-
-        // Is there an encoded license key?
-        if( options.license ) {
-            return true;
+        if (options.connect) {
+            return !!options.connect.is_connected;
         }
 
         return false;
     }
-
 
     useInterval(() => {
         checkIfRunning()

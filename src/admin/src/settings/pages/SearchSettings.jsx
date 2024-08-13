@@ -49,7 +49,7 @@ function SearchSettings() {
                     <FlexItem>
                         <b>{__('Search', 'simply-static')}</b>
                     </FlexItem>
-                    {'free' === options.plan &&
+                    {'free' === options.plan || !isPro() &&
                         <FlexItem>
                             <ExternalLink
                                 href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -65,7 +65,7 @@ function SearchSettings() {
                             ? __('Use search on your static website.', 'simply-static')
                             : __('Don\'t use search on your static website.', 'simply-static')
                     }
-                    disabled={'free' === options.plan}
+                    disabled={('free' === options.plan || !isPro())}
                     checked={useSearch}
                     onChange={(value) => {
                         setUseSearch(value);
@@ -118,7 +118,7 @@ function SearchSettings() {
                         <FlexItem>
                             <b>{__('Indexing', 'simply-static')}</b>
                         </FlexItem>
-                        {'free' === options.plan &&
+                        {'free' === options.plan || !isPro() &&
                             <FlexItem>
                                 <ExternalLink
                                     href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -140,7 +140,7 @@ function SearchSettings() {
                             ]
 
                         }
-                        disabled={'free' === options.plan}
+                        disabled={('free' === options.plan || !isPro())}
                         value={settings.search_index_title}
                         onChange={(title) => {
                             updateSetting('search_index_title', title);
@@ -159,7 +159,7 @@ function SearchSettings() {
                             ]
 
                         }
-                        disabled={'free' === options.plan}
+                        disabled={('free' === options.plan || !isPro())}
                         value={settings.search_index_content}
                         onChange={(content) => {
                             updateSetting('search_index_content', content);
@@ -179,7 +179,7 @@ function SearchSettings() {
                             ]
 
                         }
-                        disabled={'free' === options.plan}
+                        disabled={('free' === options.plan || !isPro())}
                         value={settings.search_index_excerpt}
                         onChange={(excerpt) => {
                             updateSetting('search_index_excerpt', excerpt);
@@ -190,7 +190,7 @@ function SearchSettings() {
                         label={__('Exclude URLs', 'simply-static')}
                         placeholder={"author\narchive\ncategory"}
                         help={__('Exclude URLs from indexing (one per line). You can use full URLs, parts of an URL or plain words (like stop words).', 'simply-static')}
-                        disabled={'free' === options.plan}
+                        disabled={('free' === options.plan || !isPro())}
                         value={settings.search_excludable}
                         onChange={(excludes) => {
                             updateSetting('search_excludable', excludes);
@@ -210,7 +210,7 @@ function SearchSettings() {
                                     title={__('How to add search with FuseJS', 'simply-static')}
                                     videoUrl={'https://youtu.be/K34l1DXjCHk'}/></b>
                             </FlexItem>
-                            {'free' === options.plan &&
+                            {'free' === options.plan || !isPro() &&
                                 <FlexItem>
                                     <ExternalLink
                                         href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -223,7 +223,7 @@ function SearchSettings() {
                             label={__('CSS-Selector', 'simply-static')}
                             type={"text"}
                             help={__('Add the CSS selector of your search element here.', 'simply-static')}
-                            disabled={'free' === options.plan}
+                            disabled={('free' === options.plan || !isPro())}
                             value={settings.fuse_selector}
                             onChange={(selector) => {
                                 updateSetting('fuse_selector', selector);
@@ -245,7 +245,7 @@ function SearchSettings() {
                                     title={__('How to add search with the Algolia API', 'simply-static')}
                                     videoUrl={'https://youtu.be/H9PNZSl0KnU'}/></b>
                             </FlexItem>
-                            {'free' === options.plan &&
+                            {'free' === options.plan || !isPro() &&
                                 <FlexItem>
                                     <ExternalLink
                                         href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
@@ -258,7 +258,7 @@ function SearchSettings() {
                             label={__('Application ID', 'simply-static')}
                             type={"password"}
                             help={__('Add your Algolia App ID.', 'simply-static')}
-                            disabled={'free' === options.plan}
+                            disabled={('free' === options.plan || !isPro())}
                             value={settings.algolia_app_id}
                             onChange={(app_id) => {
                                 updateSetting('algolia_app_id', app_id);
@@ -269,7 +269,7 @@ function SearchSettings() {
                             label={__('Admin API Key', 'simply-static')}
                             type={"password"}
                             help={__('Add your Algolia Admin API Key.', 'simply-static')}
-                            disabled={'free' === options.plan}
+                            disabled={('free' === options.plan || !isPro())}
                             value={settings.algolia_admin_api_key}
                             onChange={(api_key) => {
                                 updateSetting('algolia_admin_api_key', api_key);
@@ -280,7 +280,7 @@ function SearchSettings() {
                             label={__('Search-Only API Key', 'simply-static')}
                             type={"password"}
                             help={__('Add your Algolia Search-Only API Key here. This is the only key that will be visible on your static site.', 'simply-static')}
-                            disabled={'free' === options.plan}
+                            disabled={('free' === options.plan || !isPro())}
                             value={settings.algolia_search_api_key}
                             onChange={(api_key) => {
                                 updateSetting('algolia_search_api_key', api_key);
@@ -291,7 +291,7 @@ function SearchSettings() {
                             label={__('Name for your index', 'simply-static')}
                             type={"text"}
                             help={__('Add your Algolia index name here.', 'simply-static')}
-                            disabled={'free' === options.plan}
+                            disabled={('free' === options.plan || !isPro())}
                             value={settings.algolia_index}
                             onChange={(index) => {
                                 updateSetting('algolia_index', index);
@@ -301,7 +301,7 @@ function SearchSettings() {
                             label={__('CSS-Selector', 'simply-static')}
                             type={"text"}
                             help={__('Add the CSS selector of your search element here.', 'simply-static')}
-                            disabled={'free' === options.plan}
+                            disabled={('free' === options.plan || !isPro())}
                             value={settings.algolia_selector}
                             onChange={(selector) => {
                                 updateSetting('algolia_selector', selector);

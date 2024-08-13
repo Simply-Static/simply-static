@@ -174,10 +174,6 @@ class Admin_Settings {
 				if ( isset( $data['plugin_data']['simply-static-pro']['connectivity_test'] ) ) {
 					$args['connect'] = $data['plugin_data']['simply-static-pro']['connectivity_test'];
 				}
-
-				if ( isset( $data['plugin_data']['simply-static-pro']['last_license_key'] ) ) {
-					$args['license'] = $data['plugin_data']['simply-static-pro']['last_license_key'];
-				}
 			}
 		}
 
