@@ -208,6 +208,7 @@ class Plugin {
 		require_once $path . 'src/class-ss-page-handlers.php';
 		require_once $path . 'src/class-ss-integrations.php';
 		require_once $path . 'src/admin/inc/class-ss-admin-settings.php';
+		require_once $path . 'src/admin/inc/class-ss-admin-meta.php';
 		require_once $path . 'src/admin/inc/class-ss-migrate-settings.php';
 		require_once $path . 'src/class-ss-multisite.php';
 		require_once $path . 'src/class-ss-plugin-compatibility.php';

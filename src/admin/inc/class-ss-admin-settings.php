@@ -40,6 +40,8 @@ class Admin_Settings {
 		add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
 
 		$this->failed_tests = intval( get_transient( 'simply_static_failed_tests' ) );
+
+        Admin_Meta::get_instance();
 	}
 
 	/**
