@@ -212,7 +212,8 @@ function SettingsPage() {
                                                 {'pro' === options.plan ?
                                                     <option value="update">{__('Update', 'simply-static')}</option>
                                                     :
-                                                    <option disabled value="update">{__('Update (only with Pro)', 'simply-static')}</option>
+                                                    <option disabled
+                                                            value="update">{__('Update (Requires Simply Static Pro)', 'simply-static')}</option>
                                                 }
                                             </>
                                         }
@@ -337,17 +338,22 @@ function SettingsPage() {
                                     </NavigatorButton>
                                 </CardBody>
                                 <CardBody>
-                                    <h4 className={"settings-headline"}>Simply Static</h4>
-                                    <Button href="https://simplystatic.com/changelogs/" target="_blank">
-                                        <Dashicon icon="editor-ul"/> {__('Changelog', 'simply-static')}
-                                    </Button>
+                                    <h4 className={"settings-headline"}>Learn</h4>
                                     <Button href="https://docs.simplystatic.com" target="_blank">
                                         <Dashicon icon="admin-links"/> {__('Documentation', 'simply-static')}
                                     </Button>
+                                    <Button
+                                        href="https://www.youtube.com/playlist?list=PLcpe8_rNg8U5g1gCOa0Ge6T17f50nSvmg"
+                                        target="_blank">
+                                        <Dashicon icon="format-video"/> {__('Video Course', 'simply-static')}
+                                    </Button>
+                                    <Button href="https://simplystatic.com/tutorials/" target="_blank">
+                                        <Dashicon icon="edit"/> {__('Tutorials', 'simply-static')}
+                                    </Button>
                                     {'free' === options.plan &&
-                                        <Button href="https://simplystatic.com" target="_blank">
-                                            <Dashicon
-                                                icon="admin-site-alt3"/>Simply Static Pro
+                                        <Button className={"ss-get-pro"} isPrimary
+                                                href="https://simplystatic.com/pricing/" target="_blank">
+                                            Get Simply Static Pro
                                         </Button>
                                     }
                                 </CardBody>

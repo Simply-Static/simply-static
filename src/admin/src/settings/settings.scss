@@ -263,10 +263,11 @@ toplevel_page_simply-static img {
   }
 
   /* Style for disabled settings */
-  input:disabled {
+  input:disabled, textarea:disabled, select:disabled {
     background: #eeeeee;
   }
 }
+
 
 .dashicons.spin {
   animation: dashicons-spin 2s infinite;
@@ -300,4 +301,10 @@ toplevel_page_simply-static img {
   margin-left: 5px;
   line-height: 1.4;
   color: #3858e9;
+}
+
+
+.ss-get-pro {
+  background: #6804cc !important;
+  border: solid 1px #50059b;
 }

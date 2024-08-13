@@ -58,7 +58,6 @@ function DebugSettings() {
                         updateSetting('http_basic_auth_username', username);
                     }}
                 />
-
                 <TextControl
                     label={__('Basic Auth Password', 'simply-static')}
                     type={"password"}
@@ -68,27 +67,36 @@ function DebugSettings() {
                         updateSetting('http_basic_auth_password', username);
                     }}
                 />
-
-                {'pro' === options.plan &&
-                    <p>
-                        <ToggleControl
-                            label={__('Enable Basic Auth', 'simply-static')}
-                            help={__('Once enabled we will put your entire website behind password protection.', 'simply-static')}
-                            checked={settings.http_basic_auth_on}
-                            onChange={(value) => {
-                                updateSetting('http_basic_auth_on', value);
-                            }}
-                        />
-                        {
-                            settings.http_basic_auth_on &&
-                            (!settings.http_basic_auth_username || !settings.http_basic_auth_password) &&
-                            <Notice status={"warning"} isDismissible={false}>
-                                {__('Requires Username & Password to work', 'simply-static')}
-                            </Notice>
+                <p>
+                    <ToggleControl
+                        label={__('Enable Basic Auth', 'simply-static')}
+                        help={
+                            <>
+                                {'free' === options.plan ?
+                                    <>
+                                        {__('Automatically setting up Basic Auth requires Simply Static Pro.', 'simply-static')}
+                                    </>
+                                    :
+                                    <>
+                                        {__('Once enabled we will put your entire website behind password protection.', 'simply-static')}
+                                    </>
+                                }
+                            </>
                         }
-                    </p>
-                }
-
+                        disabled={'free' === options.plan}
+                        checked={settings.http_basic_auth_on}
+                        onChange={(value) => {
+                            updateSetting('http_basic_auth_on', value);
+                        }}
+                    />
+                    {
+                        settings.http_basic_auth_on &&
+                        (!settings.http_basic_auth_username || !settings.http_basic_auth_password) &&
+                        <Notice status={"warning"} isDismissible={false}>
+                            {__('Requires Username & Password to work', 'simply-static')}
+                        </Notice>
+                    }
+                </p>
             </CardBody>
         </Card>
         <Spacer margin={5}/>

@@ -6,7 +6,7 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl, SelectControl, ToggleControl, TextareaControl,
+    TextControl, SelectControl, ToggleControl, TextareaControl, Flex, FlexItem, ExternalLink,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -70,7 +70,17 @@ function FormSettings() {
     return (<div className={"inner-settings"}>
         <Card>
             <CardHeader>
-                <b>{__('Forms', 'simply-static')}</b>
+                <Flex>
+                    <FlexItem>
+                        <b>{__('Forms', 'simply-static')}</b>
+                    </FlexItem>
+                    {'free' === options.plan &&
+                        <FlexItem>
+                            <ExternalLink
+                                href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
+                        </FlexItem>
+                    }
+                </Flex>
             </CardHeader>
             <CardBody>
                 <ToggleControl
@@ -80,13 +90,14 @@ function FormSettings() {
                             ? __('Use Forms on your static website.', 'simply-static')
                             : __('Don\'t use forms on your static website.', 'simply-static')
                     }
+                    disabled={'free' === options.plan}
                     checked={useForms}
                     onChange={(value) => {
                         setUseForms(value);
                         updateSetting('use_forms', value);
                     }}
                 />
-                {useForms && options.form_connection_url &&
+                {useForms && options.form_connection_url && 'free' !== options.plan &&
                     <Button href={options.form_connection_url}
                             variant="secondary">{__('Create a form connection', 'simply-static')}</Button>
                 }
@@ -95,7 +106,17 @@ function FormSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('Comments', 'simply-static')}</b>
+                <Flex>
+                    <FlexItem>
+                        <b>{__('Comments', 'simply-static')}</b>
+                    </FlexItem>
+                    {'free' === options.plan &&
+                        <FlexItem>
+                            <ExternalLink
+                                href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
+                        </FlexItem>
+                    }
+                </Flex>
             </CardHeader>
             <CardBody>
                 <ToggleControl
@@ -105,6 +126,7 @@ function FormSettings() {
                             ? __('Use comments on your static website.', 'simply-static')
                             : __('Don\'t use comments on your static website.', 'simply-static')
                     }
+                    disabled={'free' === options.plan}
                     checked={useComments}
                     onChange={(value) => {
                         setUseComments(value);
@@ -118,6 +140,7 @@ function FormSettings() {
                             label={__('Select a redirect page', 'content-protector')}
                             options={pagesSlugs}
                             help={__('The post will be regenerated after comment submission, but it might take a while so its good practice to redirect the visitor.', 'simply-static')}
+                            disabled={'free' === options.plan}
                             value={settings.comment_redirect}
                             onChange={(value) => {
                                 updateSetting('comment_redirect', value);
@@ -130,9 +153,19 @@ function FormSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('CORS', 'simply-static')}<HelperVideo
-                    title={__('How to deal with CORS', 'simply-static')}
-                    videoUrl={'https://youtu.be/fArtvZhkU14'}/></b>
+                <Flex>
+                    <FlexItem>
+                        <b>{__('CORS', 'simply-static')}<HelperVideo
+                            title={__('How to deal with CORS', 'simply-static')}
+                            videoUrl={'https://youtu.be/fArtvZhkU14'}/></b>
+                    </FlexItem>
+                    {'free' === options.plan &&
+                        <FlexItem>
+                            <ExternalLink
+                                href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
+                        </FlexItem>
+                    }
+                </Flex>
             </CardHeader>
             <CardBody>
                 <p>
@@ -149,6 +182,7 @@ function FormSettings() {
                     type={"url"}
                     placeholder={'https://static-site.com'}
                     help={__('Add the URL of your static website to allow CORS from it.', 'simply-static')}
+                    disabled={'free' === options.plan}
                     value={settings.static_url}
                     onChange={(url) => {
                         updateSetting('static_url', url);
@@ -158,6 +192,7 @@ function FormSettings() {
                     label={__('Select CORS method', 'simply-static')}
                     value={corsMethod}
                     help={__('Choose one of the methods to allow CORS for your website.', 'simply-static')}
+                    disabled={'free' === options.plan}
                     options={[
                         {label: 'allowed_http_origins', value: 'allowed_http_origins'},
                         {label: 'wp_headers', value: 'wp_headers'},
@@ -172,7 +207,17 @@ function FormSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('Embed Dynamic Content (iFrame)', 'simply-static')}</b>
+                <Flex>
+                    <FlexItem>
+                        <b>{__('Embed Dynamic Content (iFrame)', 'simply-static')}</b>
+                    </FlexItem>
+                    {'free' === options.plan &&
+                        <FlexItem>
+                            <ExternalLink
+                                href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
+                        </FlexItem>
+                    }
+                </Flex>
             </CardHeader>
             <CardBody>
                 <p>
@@ -189,6 +234,7 @@ function FormSettings() {
                     label={__('URLs to embed as an iFrame', 'simply-static')}
                     placeholder={options.home + "/my-form-page/"}
                     help={__('If you want to embed specific pages from your WordPress website into your static website, add the URLs here (one per line).', 'simply-static')}
+                    disabled={'free' === options.plan}
                     value={settings.iframe_urls}
                     onChange={(value) => {
                         updateSetting('iframe_urls', value);
@@ -197,6 +243,7 @@ function FormSettings() {
                 <TextareaControl
                     label={__('Custom CSS', 'simply-static')}
                     help={__('These styles will only apply to the embedded pages, not your entire website.', 'simply-static')}
+                    disabled={'free' === options.plan}
                     value={settings.iframe_custom_css}
                     onChange={(value) => {
                         updateSetting('iframe_custom_css', value);
@@ -220,8 +267,10 @@ function FormSettings() {
             </>
         }
         <div className={"save-settings"}>
+            {'pro' === options.plan &&
             <Button onClick={setSavingSettings}
                     variant="primary">{__('Save Settings', 'simply-static')}</Button>
+            }
         </div>
     </div>)
 }
