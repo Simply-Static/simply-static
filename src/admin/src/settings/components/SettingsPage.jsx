@@ -198,7 +198,7 @@ function SettingsPage() {
                                     <p>Version: <b>{options.version}</b></p>
                                 }
                                 <div className={"generate-container"}>
-                                    {'pro' === options.plan && <SelectControl
+                                    <SelectControl
                                         className={'generate-type'}
                                         value={selectedExportType}
 
@@ -206,13 +206,18 @@ function SettingsPage() {
                                             setSelectedExportType(value);
                                         }}
                                     >
-
                                         <option value="export">{__('Export', 'simply-static')}</option>
                                         {'zip' !== settings.delivery_method && 'tiiny' !== settings.delivery_method &&
-                                            <option value="update">{__('Update', 'simply-static')}</option>
+                                            <>
+                                                {'pro' === options.plan ?
+                                                    <option value="update">{__('Update', 'simply-static')}</option>
+                                                    :
+                                                    <option disabled value="update">{__('Update (only with Pro)', 'simply-static')}</option>
+                                                }
+                                            </>
                                         }
                                         {buildOptions}
-                                    </SelectControl>}
+                                    </SelectControl>
                                     <Button onClick={() => {
                                         startExport();
                                     }}
@@ -293,7 +298,7 @@ function SettingsPage() {
                                             <Dashicon icon="migrate"/> {__('Deploy', 'simply-static')}
                                         </NavigatorButton>
                                     }
-                                    {'pro' === options.plan && !options.is_network &&
+                                    {!options.is_network &&
                                         <>
                                             <NavigatorButton onClick={() => setActiveItem('/forms')}
                                                              className={activeItem === '/forms' ? 'is-active-item' : ''}
@@ -393,17 +398,17 @@ function SettingsPage() {
                                     <DeploymentSettings/>
                                 </NavigatorScreen>
                             }
-                            {activeItem === '/forms' && 'pro' === options.plan &&
+                            {activeItem === '/forms' &&
                                 <NavigatorScreen path="/forms">
                                     <FormSettings/>
                                 </NavigatorScreen>
                             }
-                            {activeItem === '/search' && 'pro' === options.plan &&
+                            {activeItem === '/search' &&
                                 <NavigatorScreen path="/search">
                                     <SearchSettings/>
                                 </NavigatorScreen>
                             }
-                            {activeItem === '/optimize' && 'pro' === options.plan &&
+                            {activeItem === '/optimize' &&
                                 <NavigatorScreen path="/optimize">
                                     <Optimize/>
                                 </NavigatorScreen>

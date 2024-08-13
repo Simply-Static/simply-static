@@ -261,6 +261,11 @@ toplevel_page_simply-static img {
       }
     }
   }
+
+  /* Style for disabled settings */
+  input:disabled {
+    background: #eeeeee;
+  }
 }
 
 .dashicons.spin {
