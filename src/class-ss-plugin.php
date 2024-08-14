@@ -218,6 +218,7 @@ class Plugin {
 	 * Old method to include admin menu.
 	 *
 	 * @return void
+     * @deprecated
 	 */
 	public function add_plugin_admin_menu() {
 		// Deprecated, only for upgrade support.
@@ -236,6 +237,10 @@ class Plugin {
 		}
 		do_action( 'ss_before_static_export', $blog_id, $type );
 
+        // Clear transients.
+        Util::clear_transients();
+
+        // Start export.
 		$this->archive_creation_job->start( $blog_id, $type );
 
 		// Exit if Basic Auth but no credentials were provided.

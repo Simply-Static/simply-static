@@ -466,10 +466,20 @@ class Util {
 			'jpeg',
 			'png',
 			'svg',
+			'mp4',
+			'webm',
+			'ogg',
+			'ogv',
+			'mp3',
+			'wav',
 			'json',
 			'js',
 			'css',
 			'xml',
+			'csv',
+			'pdf',
+			'txt',
+			'cur'
 		] );
 
 		$path_info = self::url_path_info( $url );
@@ -645,5 +655,45 @@ class Util {
 		}
 
 		return $wp_filesystem;
+	}
+
+	/**
+	 * Clear all transients used in Simply Static.
+	 *
+	 * @return void
+	 */
+	public static function clear_transients() {
+		// Diagnostics.
+		delete_transient( 'simply_static_checks' );
+		delete_transient( 'simply_static_failed_tests' );
+
+		// Tasks.
+		$tasks = [
+			'fetch_urls',
+			'search',
+			'minify',
+			'optimize_directories',
+			'shortpixel',
+			'shortpixel_download',
+			'aws_empty',
+			'create_zip_archive',
+			'transfer_files_locally',
+			'github_commit',
+			'bunny_deploy',
+			'tiiny_deploy',
+			'aws_deploy',
+			'sftp_deploy',
+			'simply_cdn'
+		];
+
+		foreach( $tasks as $task ) {
+			delete_transient( 'simply_static_' . $task . '_total_pages' );
+		}
+
+		// Misc.
+		delete_transient( 'ssp_sftp_deploy_start_time' );
+		delete_transient( 'ssp_search_index_start_time' );
+		delete_transient( 'ssp_github_blobs' );
+		delete_transient( 'ssp_search_results' );
 	}
 }
