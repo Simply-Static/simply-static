@@ -15,7 +15,7 @@ import HelperVideo from "../components/HelperVideo";
 const {__} = wp.i18n;
 
 function DebugSettings() {
-    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
+    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved, isPro} = useContext(SettingsContext);
     const [activateDebugLog, setActivateDebugLog] = useState(false);
     const [useServerCron, setUserServerCron] = useState(false);
 
