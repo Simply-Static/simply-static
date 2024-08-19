@@ -71,8 +71,8 @@ function GeneralSettings() {
         <Card>
             <CardHeader>
                 <b>{__('Replacing URLs', 'simply-static')}<HelperVideo
-                    title={__('Run your first static export', 'simply-static')}
-                    videoUrl={'https://youtu.be/lIPiJiTbD0E'}/></b>
+                    title={__('How to replace URLs', 'simply-static')}
+                    videoUrl={'https://youtu.be/cb8jAMJlfGI'}/></b>
             </CardHeader>
             <CardBody>
                 <p>{__('When exporting your static site, any links to your WordPress site will be replaced by one of the following: absolute URLs, relative URLs, or URLs contructed for offline use.', 'simply-static')}</p>

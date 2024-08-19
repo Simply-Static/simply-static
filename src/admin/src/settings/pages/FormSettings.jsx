@@ -210,7 +210,9 @@ function FormSettings() {
             <CardHeader>
                 <Flex>
                     <FlexItem>
-                        <b>{__('Embed Dynamic Content (iFrame)', 'simply-static')}</b>
+                        <b>{__('Embed Dynamic Content (iFrame)', 'simply-static')}<HelperVideo
+                            title={__('Embed Dynamic Content (iFrame)', 'simply-static')}
+                            videoUrl={'https://youtu.be/ZGRaG_Jma7E'}/></b>
                     </FlexItem>
                     {('free' === options.plan || !isPro()) &&
                         <FlexItem>
