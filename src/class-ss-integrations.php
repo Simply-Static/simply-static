@@ -2,7 +2,6 @@
 
 namespace Simply_Static;
 
-// Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -60,7 +59,6 @@ class Integrations {
 		require_once $path . 'class-cookie-yes-integration.php';
 		require_once $path . 'class-brizy-integration.php';
 		require_once $path . 'class-jetpack-integration.php';
-		require_once $path . 'class-redirection-integration.php';
 
 		// Simply Static Pro integrations.
 		require_once $path . 'class-pro-integration.php';
@@ -68,6 +66,7 @@ class Integrations {
 		require_once $path . 'pro/class-multilingual-integration.php';
 		require_once $path . 'pro/class-shortpixel-integration.php';
 		require_once $path . 'pro/class-complianz-integration.php';
+		require_once $path . 'pro/class-redirection-integration.php';
 
 		// SimplyCDN.
 		require_once $path . 'simply-cdn/class-simply-cdn-integration.php';
