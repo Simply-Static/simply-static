@@ -7,7 +7,7 @@ class Complianz_Integration extends Pro_Integration {
 	 *
 	 * @var string
 	 */
-	protected $id = 'multilingual';
+	protected $id = 'complianz';
 
 	public function __construct() {
 		$this->name        = __( 'Complianz | GDPR/CCPA Cookie Consent', 'simply-static' );
