@@ -166,9 +166,15 @@ and much more.
 
 You can get the pro version [here](https://simplystatic.com/pro/).
 
-= Learn Simply Static =
+= Simply Static Course =
 
-We released an entire [video course](https://www.youtube.com/playlist?list=PLcpe8_rNg8U5g1gCOa0Ge6T17f50nSvmg) to show you everything related to Static WordPress and Simply Static.
+We created an entire video course about Static WordPress with Simply Static - check out the first video:
+
+[youtube https://youtu.be/Ei_w-Jcq4uQ]
+
+You can watch the entire course entirely for free on YouTube here: [Simply Static Course](https://www.youtube.com/playlist?list=PLcpe8_rNg8U5g1gCOa0Ge6T17f50nSvmg)
+
+= Tutorials =
 
 We also publish new tutorials on our blog every other week on how to work with Simply Static and other static site tools.
 
