@@ -4,7 +4,7 @@ Tags: static site generator, performance, security, jamstack
 Requires at least: 6.3
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 3.1.7.4
+Stable tag: 3.1.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -51,7 +51,7 @@ I highly recommend not to use another tool for local development if you are not 
 
 The pro version of Simply Static enhances the plugin with various features.
 
-[youtube https://www.youtube.com/watch?v=PTuw1ChYCdI]
+[youtube https://youtu.be/Vml537IIwVc]
 
 = GitHub Integration =
 
@@ -89,9 +89,15 @@ Use Single Exports to quickly publish new pages and posts to your static site. T
 
 = Forms =
 
-Simply Static Pro supports Contact Form 7 and Gravity Forms to use on your static website.
+Create and use forms created with your favorite form plugin on your static website with Simply Static Pro. Supported plugins are:
 
-You can decide if you want to use an external service like Zapier and IFTTT or if your original WordPress website should handle the submission and send you an e-mail with all the details.
+* Contact Form 7
+* Gravity Forms
+* WP Forms
+* FluentForms
+* WS Forms
+
+You can decide if you want to use an external service like Zapier and IFTTT to offload the submission (webhook) or embed the form from your WordPress website via iFrame.
 
 
 = Search =
@@ -160,9 +166,11 @@ and much more.
 
 You can get the pro version [here](https://simplystatic.com/pro/).
 
-= Tutorials =
+= Learn Simply Static =
 
-We publish new tutorials on how to work with Simply Static and other tools on our blog.
+We released an entire [video course](https://www.youtube.com/playlist?list=PLcpe8_rNg8U5g1gCOa0Ge6T17f50nSvmg) to show you everything related to Static WordPress and Simply Static.
+
+We also publish new tutorials on our blog every other week on how to work with Simply Static and other static site tools.
 
 You can check the latest tutorials [here](https://simplystatic.com/tutorials/)
 
@@ -232,6 +240,21 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 3. Diagnostics
 
 == Changelog ==
+
+= 3.1.8 =
+
+* several admin UI improvements
+* added tutorial videos for all major features
+* added a new DB column to store JSON data (for future features)
+* improved and fixed transient handling and expiration
+* added support for redirects with Redirection, Yoast and RankMath
+* auto-replace URLs in schema.org JSON-LD data from Yoast and RankMath
+* fixed typos in admin UI
+* removed SSL check from diagnostics (no longer needed)
+* added test deploy function
+* remove deprecated basic_auth_digest function
+* extended match_tags list for SVGs and other tags
+* more failsafe parsing with innerhtmlKeep instead of innerText (crawler)
 
 = 3.1.7.4 =
 
