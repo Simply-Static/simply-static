@@ -384,7 +384,7 @@ function SettingsPage() {
                                 :
                                 ''
                             }
-                            {'pro' === options.plan && ! isPro() && ! options.is_multisite ?
+                            {'pro' === options.plan && ! isPro() ?
                                 <Animate type="slide-in" options={{origin: 'top'}}>
                                     {() => (
                                         <>

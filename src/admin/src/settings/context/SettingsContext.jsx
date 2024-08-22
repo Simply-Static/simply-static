@@ -214,6 +214,10 @@ function SettingsContextProvider(props) {
     }
 
     const isPro = () => {
+        if(options.is_multisite) {
+            return true;
+        }
+
         if (options.connect) {
             return !!options.connect.is_connected;
         }
