@@ -362,7 +362,7 @@ function SettingsPage() {
                     </FlexItem>
                     <FlexItem isBlock={true}>
                         <div class={"plugin-settings"}>
-                            {'no' === passedChecks ?
+                            {'no' === passedChecks && ! options.is_network ?
                                 <Animate type="slide-in" options={{origin: 'top'}}>
                                     {() => (
 
@@ -384,7 +384,7 @@ function SettingsPage() {
                                 :
                                 ''
                             }
-                            {'pro' === options.plan && ! isPro() ?
+                            {'pro' === options.plan && ! isPro() && ! options.is_network ?
                                 <Animate type="slide-in" options={{origin: 'top'}}>
                                     {() => (
                                         <>
