@@ -230,6 +230,18 @@ function Optimize() {
                             }}
                         />
 
+                        {minifyHtml && <ToggleControl
+                            label={__('Leave quotes inside HTML attributes', 'simply-static')}
+                            help={
+                                __('If there are issues with comments or JavaScript when minifying HTML, toggle this ON.', 'simply-static')
+                            }
+                            disabled={('free' === options.plan || !isPro())}
+                            checked={settings.minify_html_leave_quotes}
+                            onChange={(value) => {
+                                updateSetting('minify_html_leave_quotes', value);
+                            }}
+                        />}
+
                         <ToggleControl
                             label={__('Minify CSS', 'simply-static')}
                             help={

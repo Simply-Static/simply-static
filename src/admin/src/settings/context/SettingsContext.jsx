@@ -81,6 +81,7 @@ function SettingsContextProvider(props) {
         'algolia_selector': '.search-field',
         'use_minify': false,
         'minify_html': false,
+        'minify_html_leave_quotes': false,
         'minify_css': false,
         'minify_inline_css': false,
         'minify_js': false,
