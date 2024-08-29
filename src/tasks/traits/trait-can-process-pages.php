@@ -18,6 +18,13 @@ trait canProcessPages {
 	protected $batch_size = 50;
 
 	/**
+	 * Processing Column.
+	 *
+	 * @var string
+	 */
+	protected $processing_column = 'last_transferred_at';
+
+	/**
 	 * Get batch size.
 	 *
 	 * @return mixed
@@ -88,7 +95,7 @@ trait canProcessPages {
 			try {
 				$this->process_page( $static_page );
 
-				$static_page->last_transferred_at = Util::formatted_datetime();
+				$static_page->{$this->processing_column} = Util::formatted_datetime();
 				$static_page->save();
 			} catch (\Exception $e) {
 				Util::debug_log( 'Page URL: ' . $static_page->url . ' not being processed. Error: ' . $e->getMessage() );
@@ -143,19 +150,31 @@ trait canProcessPages {
 	 * @throws \Exception
 	 */
 	public function get_processed_pages() {
+		$query = $this->get_processed_pages_sql();
+
+		return $query->count();
+	}
+
+	/**
+	 * Return the query for processed pages.
+	 *
+	 * @return Query
+	 * @throws \Exception
+	 */
+	public function get_processed_pages_sql() {
 		$start_time = $this->get_start_time();
 		$query      = $this->get_main_query();
 
 		if ( 'export' === $this->get_generate_type() ) {
-			$query->where("last_transferred_at >= ?", $start_time );
+			$query->where("{$this->processing_column} >= ?", $start_time );
 		}
 
 		if ( 'update' === $this->get_generate_type() ) {
-			$query->where("last_transferred_at >= last_modified_at" );
-			$query->where("last_transferred_at >= ?", $start_time );
+			$query->where("{$this->processing_column} >= last_modified_at" );
+			$query->where("{$this->processing_column} >= ?", $start_time );
 		}
 
-		return $query->count();
+		return $query;
 	}
 
 	/**
@@ -165,19 +184,31 @@ trait canProcessPages {
 	 * @throws \Exception
 	 */
 	public function get_pages_to_process() {
-		$start_time = $this->get_start_time();
 		$batch_size = $this->get_batch_size();
+		$query      = $this->get_pages_to_process_sql();
+
+		return $query->limit( $batch_size )->find();
+	}
+
+	/**
+	 * Get the Pages to process SQL.
+	 *
+	 * @return Query
+	 * @throws \Exception
+	 */
+	public function get_pages_to_process_sql() {
+		$start_time = $this->get_start_time();
 		$query      = $this->get_main_query();
 
 		if ( 'export' === $this->get_generate_type() ) {
-			$query->where("( last_transferred_at < ? OR last_transferred_at IS NULL )", $start_time );
+			$query->where("( {$this->processing_column} < ? OR {$this->processing_column} IS NULL )", $start_time );
 		}
 
 		if ( 'update' === $this->get_generate_type() ) {
-			$query->where("( ( last_transferred_at < last_modified_at AND last_transferred_at < ? ) OR last_transferred_at IS NULL )", $start_time );
+			$query->where("( ( {$this->processing_column} < last_modified_at AND {$this->processing_column} < ? ) OR {$this->processing_column} IS NULL )", $start_time );
 		}
 
-		return $query->limit( $batch_size )->find();
+		return $query;
 	}
 
 	public function get_total_pages( $cached = true ) {
@@ -210,7 +241,7 @@ trait canProcessPages {
 
 		// Caching totals so this is fetched on first run (all pages already fetched).
 		if ( 'update' === $this->get_generate_type() ) {
-			$query->where("( ( last_transferred_at < last_modified_at AND last_transferred_at < ? ) OR last_transferred_at IS NULL )", $start_time );
+			$query->where("( ( {$this->processing_column} < last_modified_at AND {$this->processing_column} < ? ) OR {$this->processing_column} IS NULL )", $start_time );
 			Util::debug_log('Total Pages Query: ' . $query->get_raw_sql("COUNT(*)") );
 		}
 
