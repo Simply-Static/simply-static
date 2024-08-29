@@ -7,7 +7,7 @@ import {
     __experimentalInputControl as InputControl,
     Notice,
     Animate,
-    ToggleControl, TextControl, Dashicon, Flex, FlexItem, ExternalLink,
+    ToggleControl, TextControl, Dashicon, Flex, FlexItem, ExternalLink, TextareaControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -256,21 +256,31 @@ function Optimize() {
                                 updateSetting('minify_css', value);
                             }}
                         />
-                        {minifyCss &&
-                            <ToggleControl
-                                label={__('Minify Inline CSS', 'simply-static')}
-                                help={
-                                    minifyInlineCss
-                                        ? __('Minify Inline CSS.', 'simply-static')
-                                        : __('Don\'t minify Inline CSS.', 'simply-static')
-                                }
-                                disabled={('free' === options.plan || !isPro())}
-                                checked={minifyInlineCss}
-                                onChange={(value) => {
-                                    setMinifyInlineCss(value);
-                                    updateSetting('minify_inline_css', value);
-                                }}
-                            />
+                        {minifyCss && <>
+                                <TextareaControl
+                                    label={__('Exclude Stylesheet URLs', 'simply-static')}
+                                    help={__('Exclude URLs from minification (one per line).', 'simply-static')}
+                                    disabled={('free' === options.plan || !isPro())}
+                                    value={settings.minify_css_exclude}
+                                    onChange={(excludes) => {
+                                        updateSetting('minify_css_exclude', excludes);
+                                    }}
+                                />
+                                <ToggleControl
+                                    label={__('Minify Inline CSS', 'simply-static')}
+                                    help={
+                                        minifyInlineCss
+                                            ? __('Minify Inline CSS.', 'simply-static')
+                                            : __('Don\'t minify Inline CSS.', 'simply-static')
+                                    }
+                                    disabled={('free' === options.plan || !isPro())}
+                                    checked={minifyInlineCss}
+                                    onChange={(value) => {
+                                        setMinifyInlineCss(value);
+                                        updateSetting('minify_inline_css', value);
+                                    }}
+                                />
+                            </>
                         }
                         <ToggleControl
                             label={__('Minify JavaScript', 'simply-static')}
@@ -287,7 +297,16 @@ function Optimize() {
                             }}
                         />
 
-                        {minifyJavascript &&
+                        {minifyJavascript && <>
+                            <TextareaControl
+                                label={__('Exclude JavaScript URLs', 'simply-static')}
+                                help={__('Exclude URLs from minification (one per line).', 'simply-static')}
+                                disabled={('free' === options.plan || !isPro())}
+                                value={settings.minify_js_exclude}
+                                onChange={(excludes) => {
+                                    updateSetting('minify_js_exclude', excludes);
+                                }}
+                            />
                             <ToggleControl
                                 label={__('Minify Inline JavaScript', 'simply-static')}
                                 help={
@@ -302,6 +321,8 @@ function Optimize() {
                                     updateSetting('minify_inline_js', value);
                                 }}
                             />
+
+                        </>
                         }
                     </>
                 }

@@ -84,6 +84,8 @@ function SettingsContextProvider(props) {
         'minify_html_leave_quotes': false,
         'minify_css': false,
         'minify_inline_css': false,
+        'minify_css_exclude': '',
+        'minify_js_exclude': '',
         'minify_js': false,
         'minify_inline_js': false,
         'generate_404': true,

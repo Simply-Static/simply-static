@@ -925,6 +925,8 @@ function SettingsContextProvider(props) {
     'minify_html_leave_quotes': false,
     'minify_css': false,
     'minify_inline_css': false,
+    'minify_css_exclude': '',
+    'minify_js_exclude': '',
     'minify_js': false,
     'minify_inline_js': false,
     'generate_404': true,
@@ -2866,7 +2868,15 @@ function Optimize() {
       setMinifyCss(value);
       updateSetting('minify_css', value);
     }
-  }), minifyCss && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+  }), minifyCss && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextareaControl, {
+    label: __('Exclude Stylesheet URLs', 'simply-static'),
+    help: __('Exclude URLs from minification (one per line).', 'simply-static'),
+    disabled: 'free' === options.plan || !isPro(),
+    value: settings.minify_css_exclude,
+    onChange: excludes => {
+      updateSetting('minify_css_exclude', excludes);
+    }
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
     label: __('Minify Inline CSS', 'simply-static'),
     help: minifyInlineCss ? __('Minify Inline CSS.', 'simply-static') : __('Don\'t minify Inline CSS.', 'simply-static'),
     disabled: 'free' === options.plan || !isPro(),
@@ -2875,7 +2885,7 @@ function Optimize() {
       setMinifyInlineCss(value);
       updateSetting('minify_inline_css', value);
     }
-  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+  })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
     label: __('Minify JavaScript', 'simply-static'),
     help: minifyJavascript ? __('Minify JavaScript files.', 'simply-static') : __('Don\'t minify JavaScript files.', 'simply-static'),
     disabled: 'free' === options.plan || !isPro(),
@@ -2884,7 +2894,15 @@ function Optimize() {
       setMinifyJavascript(value);
       updateSetting('minify_js', value);
     }
-  }), minifyJavascript && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+  }), minifyJavascript && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextareaControl, {
+    label: __('Exclude JavaScript URLs', 'simply-static'),
+    help: __('Exclude URLs from minification (one per line).', 'simply-static'),
+    disabled: 'free' === options.plan || !isPro(),
+    value: settings.minify_js_exclude,
+    onChange: excludes => {
+      updateSetting('minify_js_exclude', excludes);
+    }
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
     label: __('Minify Inline JavaScript', 'simply-static'),
     help: minifyInlineJavascript ? __('Minify Inline JavaScript.', 'simply-static') : __('Don\'t minify Inline JavaScript.', 'simply-static'),
     disabled: 'free' === options.plan || !isPro(),
@@ -2893,7 +2911,7 @@ function Optimize() {
       setMinifyInlineJavascript(value);
       updateSetting('minify_inline_js', value);
     }
-  })))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+  }))))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
     margin: 5
   }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Flex, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.FlexItem, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Image Optimization', 'simply-static'), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_HelperVideo__WEBPACK_IMPORTED_MODULE_5__["default"], {
     title: __('How to optimize images with ShortPixel?', 'simply-static'),
