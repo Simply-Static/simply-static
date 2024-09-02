@@ -1,6 +1,6 @@
 /vendor/
 .DS_Store
-/static-files
+/temp-files
 debug.txt
 composer.lock
 node_modules
