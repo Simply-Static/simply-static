@@ -954,6 +954,7 @@ function SettingsContextProvider(props) {
     'sftp_host': '',
     'sftp_user': '',
     'sftp_pass': '',
+    'sftp_private_key': '',
     'sftp_folder': '',
     'sftp_port': 22,
     'shortpixel_enabled': false,
@@ -1869,6 +1870,14 @@ function DeploymentSettings() {
     value: settings.sftp_pass,
     onChange: pass => {
       updateSetting('sftp_pass', pass);
+    }
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextareaControl, {
+    label: __('SFTP private key', 'simply-static'),
+    disabled: 'free' === options.plan || !isPro(),
+    help: __('Enter your SFTP private key if you want password.less upload and the server is configured to allow it. You can set it as a constant in wp-config.php by using define(\'SSP_SFTP_KEY\', \'YOUR_KEY\')', 'simply-static'),
+    value: settings.sftp_private_key,
+    onChange: pass => {
+      updateSetting('sftp_private_key', pass);
     }
   }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
     label: __('SFTP folder', 'simply-static'),
