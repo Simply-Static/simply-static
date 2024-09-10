@@ -274,7 +274,8 @@ class Plugin {
 
 		do_action( 'ss_before_render_export_log', $blog_id );
 
-		$offset = ( intval( $current_page ) - 1 ) * intval( $per_page );
+		$per_page = $per_page ?: 25;
+		$offset   = ( intval( $current_page ) - 1 ) * intval( $per_page );
 
 		$static_pages = apply_filters(
 			'ss_total_pages_log',
