@@ -60,6 +60,13 @@ class Rank_Math_Integration extends Integration {
 	 * @return void
 	 */
 	public function register_redirections() {
+		// Only on full or update exports.
+		$use_single = get_option( 'simply-static-use-single' );
+		$use_build  = get_option( 'simply-static-use-build' );
+
+		if ( ! empty( $use_build ) || ! empty( $use_single ) ) {
+			return;
+		}
 
 		$redirections = $this->get_redirects();
 
