@@ -113,6 +113,7 @@ function SettingsContextProvider(props) {
         'sftp_host': '',
         'sftp_user': '',
         'sftp_pass': '',
+        'sftp_private_key': '',
         'sftp_folder': '',
         'sftp_port': 22,
         'shortpixel_enabled': false,
