@@ -67,9 +67,5 @@ class Integrations {
 		require_once $path . 'pro/class-shortpixel-integration.php';
 		require_once $path . 'pro/class-complianz-integration.php';
 		require_once $path . 'pro/class-redirection-integration.php';
-
-		// SimplyCDN.
-		require_once $path . 'simply-cdn/class-simply-cdn-integration.php';
-		Simply_CDN_Integration::get_instance();
 	}
 }

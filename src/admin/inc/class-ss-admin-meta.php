@@ -51,7 +51,7 @@ class Admin_Meta {
 			add_meta_box( 'single-export-teaser', __( 'Simply Static', 'simply-static-pro' ), array(
 				$this,
 				'render_simply_static_teaser'
-			), apply_filters( 'ssh_single_export_post_types', $post_types ), 'side', 'high' );
+			), apply_filters( 'ss_single_export_post_types', $post_types ), 'side', 'high' );
 		}
 	}
 

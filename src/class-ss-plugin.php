@@ -158,7 +158,6 @@ class Plugin {
 		require_once $path . 'src/tasks/class-ss-setup-task.php';
 		require_once $path . 'src/tasks/class-ss-fetch-urls-task.php';
 		require_once $path . 'src/tasks/class-ss-transfer-files-locally-task.php';
-		require_once $path . 'src/tasks/class-ss-simply-cdn-task.php';
 		require_once $path . 'src/tasks/class-ss-create-zip-archive.php';
 		require_once $path . 'src/tasks/class-ss-wrapup-task.php';
 		require_once $path . 'src/tasks/class-ss-cancel-task.php';
