@@ -108,6 +108,7 @@ function DeploymentSettings() {
                         {label: __('SFTP', 'simply-static'), value: 'sftp'},
                         {label: __('GitHub', 'simply-static'), value: 'github'},
                         {label: __('AWS S3', 'simply-static'), value: 'aws-s3'},
+                        {label: __('S3 Storage', 'simply-static'), value: 's3-storage'},
                         {label: __('Bunny CDN', 'simply-static'), value: 'cdn'},
                         {label: __('Tiiny.host', 'simply-static'), value: 'tiiny'}
                     ]}
@@ -672,6 +673,80 @@ function DeploymentSettings() {
                             onChange={(value) => {
                                 setEmptyBucketBeforeExport(value);
                                 updateSetting('aws_empty', value);
+                            }}
+                        />
+                    </CardBody>
+                </Card>
+            }
+            <Spacer margin={5}/>
+            {deliveryMethod === 's3-storage' &&
+                <Card>
+                    <CardHeader>
+                        <Flex>
+                            <FlexItem>
+                                <b>{__('S3-compatible Storage', 'simply-static')}<HelperVideo
+                                    title={__('How to deploy to S3 compatible storages?', 'simply-static')}
+                                    videoUrl={'https://youtu.be/rtn21J86Upc'}/></b>
+                            </FlexItem>
+                            {('free' === options.plan || !isPro()) &&
+                                <FlexItem>
+                                    <ExternalLink
+                                        href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
+                                </FlexItem>
+                            }
+                        </Flex>
+                    </CardHeader>
+                    <CardBody>
+                        <TextControl
+                            label={__('Access Key ID', 'simply-static')}
+                            type={"text"}
+                            help={__('Enter your Access Key from your S3 provider.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            value={settings.s3_access_key}
+                            onChange={(access_key) => {
+                                updateSetting('s3_access_key', access_key);
+                            }}
+                        />
+
+                        <TextControl
+                            label={__('Secret Access Key', 'simply-static')}
+                            type={"password"}
+                            help= {__('Enter your Secret Key from S3 provider.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            value={settings.s3_access_secret}
+                            onChange={(secret) => {
+                                updateSetting('s3_access_secret', secret);
+                            }}
+                        />
+                        <TextControl
+                            label={__('Base URL', 'simply-static')}
+                            type={"url"}
+                            help={__('Add the base URL of the S3 service.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            value={settings.s3_base_url}
+                            onChange={(baseUrl) => {
+                                updateSetting('s3_base_url', baseUrl);
+                            }}
+                        />
+                        <TextControl
+                            label={__('Bucket', 'simply-static')}
+                            type={"text"}
+                            help={__('Add the name of your bucket here.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            value={settings.s3_bucket}
+                            onChange={(bucket) => {
+                                updateSetting('s3_bucket', bucket);
+                            }}
+                        />
+
+                        <TextControl
+                            label={__('Subdirectory', 'simply-static')}
+                            type={"text"}
+                            help={__('Add an optional subdirectory for your bucket', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            value={settings.s3_subdirectory}
+                            onChange={(subdirectory) => {
+                                updateSetting('s3_subdirectory', subdirectory);
                             }}
                         />
                     </CardBody>

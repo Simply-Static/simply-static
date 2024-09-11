@@ -57,6 +57,11 @@ function SettingsContextProvider(props) {
         'aws_subdirectory': '',
         'aws_distribution_id': '',
         'aws_empty': false,
+        's3_access_key': '',
+        's3_base_url': '',
+        's3_access_secret': '',
+        's3_bucket': '',
+        's3_subdirectory': '',
         'fix_cors': 'allowed_http_origins',
         'static_url': '',
         'use_forms': false,
@@ -214,7 +219,7 @@ function SettingsContextProvider(props) {
     }
 
     const isPro = () => {
-        if(options.is_multisite) {
+        if (options.is_multisite) {
             return true;
         }
 
