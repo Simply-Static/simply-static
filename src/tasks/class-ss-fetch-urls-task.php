@@ -366,17 +366,18 @@ class Fetch_Urls_Task extends Task {
 	/**
 	 * Add a redirect for the feed.
 	 *
-	 * @param $archive_dir
-	 *
 	 * @return void
 	 */
 	public function add_feed_redirect() {
-		$feed_dir             = $this->archive_dir . '/feed';
-		$feed_index_html_file = trailingslashit( $feed_dir ) . 'index.html';
+		$feed_dir = untrailingslashit( $this->archive_dir ) . '/feed/';
 
-		// Create index.html file
-		file_put_contents( $feed_index_html_file,
-	'<!DOCTYPE html>
+		// Directory exists?
+		if ( is_dir( $feed_dir ) ) {
+			$feed_index_html_file = $feed_dir . 'index.html';
+
+			// Create index.html file
+			file_put_contents( $feed_index_html_file,
+				'<!DOCTYPE html>
 			<html>
 				<head>
 					<title>Redirecting...</title>
@@ -389,6 +390,7 @@ class Fetch_Urls_Task extends Task {
 					<p>You are being redirected to <a href="index.xml">index.xml</a></p>
 				</body>
 			</html>'
-		);
+			);
+		}
 	}
 }
