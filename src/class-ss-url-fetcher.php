@@ -246,12 +246,13 @@ class Url_Fetcher {
 	}
 
 	public static function remote_get( $url, $filename = null ) {
-		$basic_auth_digest = base64_encode( Options::instance()->get('http_basic_auth_username') . ':' . Options::instance()->get('http_basic_auth_password') );
+		$basic_auth_digest = base64_encode( Options::instance()->get( 'http_basic_auth_username' ) . ':' . Options::instance()->get( 'http_basic_auth_password' ) );
 
 		Util::debug_log( "Fetching URL: " . $url );
 
 		$args = array(
 			'timeout'     => self::TIMEOUT,
+			'user-agent'  => 'Simply Static/' . SIMPLY_STATIC_VERSION,
 			'sslverify'   => false,
 			'redirection' => 0, // disable redirection.
 			'blocking'    => true,
