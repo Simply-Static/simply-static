@@ -108,7 +108,7 @@ function DeploymentSettings() {
                         {label: __('SFTP', 'simply-static'), value: 'sftp'},
                         {label: __('GitHub', 'simply-static'), value: 'github'},
                         {label: __('AWS S3', 'simply-static'), value: 'aws-s3'},
-                        {label: __('S3 Storage', 'simply-static'), value: 's3-storage'},
+                        //{label: __('S3 Storage', 'simply-static'), value: 's3-storage'},
                         {label: __('Bunny CDN', 'simply-static'), value: 'cdn'},
                         {label: __('Tiiny.host', 'simply-static'), value: 'tiiny'}
                     ]}
