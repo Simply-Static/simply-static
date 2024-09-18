@@ -30,6 +30,6 @@ jQuery(document).ready(function ($) {
     // Initial call
     updateStatus();
 
-    // Update every 5 seconds
-    setInterval(updateStatus, 5000);
+    // Update every 10 seconds
+    setInterval(updateStatus, 10000);
 });
