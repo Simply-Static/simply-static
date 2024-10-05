@@ -27,6 +27,7 @@ import Generate from "../pages/Generate";
 import Optimize from "../pages/Optimize";
 import {SettingsContext} from "../context/SettingsContext";
 import apiFetch from "@wordpress/api-fetch";
+import EnvironmentSidebar from "./EnvironmentSidebar";
 
 const {__} = wp.i18n;
 
@@ -37,8 +38,10 @@ function SettingsPage() {
         blogId,
         settings,
         updateFromNetwork,
+        getSettings,
         passedChecks,
-        isPro
+        isPro,
+        isIntegrationActive
     } = useContext(SettingsContext);
     const [activeItem, setActiveItem] = useState({activeItem: "/"});
     const [initialPage, setInitialPage] = useState(localStorage.getItem('ss-initial-page') ? localStorage.getItem('ss-initial-page') : options.initial);
@@ -48,7 +51,6 @@ function SettingsPage() {
     const [selectablesSites, setSelectableSites] = useState([]);
     const [isUpdatingFromNetwork, setIsUpdatingFromNetwork] = useState(false);
     const [selectedExportType, setSelectedExportType] = useState('export');
-
 
     const runUpdateFromNetwork = (blogId) => {
         // Update settings from selected blog_id.
@@ -241,6 +243,9 @@ function SettingsPage() {
                                     }
                                 </div>
                                 <CardBody>
+                                    {(!options.is_network && isIntegrationActive('environments') ) &&
+                                        <EnvironmentSidebar isRunning={isRunning} getSettings={getSettings} />
+                                    }
                                     {!options.is_network && options.is_multisite &&
                                         <>
                                             <h4 className={"settings-headline"}> {__('Import', 'simply-static')}</h4>
