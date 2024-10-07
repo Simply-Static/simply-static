@@ -346,9 +346,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__);
 
 
+const {
+  __
+} = wp.i18n;
 function EnvironmentDropdown({
   onChange,
-  selectedEnvironment,
+  current,
   environments,
   disabled,
   onDelete
@@ -357,12 +360,10 @@ function EnvironmentDropdown({
     align: 'flex-start'
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.FlexItem, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
     disabled: disabled,
-    value: selectedEnvironment,
+    value: current,
     options: environments,
     help: __('Choose an environment or create a new one to configure settings.', 'simply-static'),
-    onChange: version => {
-      onChange(version);
-    }
+    onChange: onChange
   })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.FlexItem, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
     className: 'environment-delete-button',
     variant: 'tertiary',
