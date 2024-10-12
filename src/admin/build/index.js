@@ -193,7 +193,7 @@ function EnvironmentSidebar({
       path: '/simplystatic/v1/environment',
       method: 'DELETE',
       data: {
-        version: version
+        version: selectedEnvironment
       }
     }).then(resp => {
       getSettings();

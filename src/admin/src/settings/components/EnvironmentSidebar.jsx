@@ -28,7 +28,7 @@ export default function EnvironmentSidebar({ getSettings, isRunning }) {
         apiFetch({
             path: '/simplystatic/v1/environment',
             method: 'DELETE',
-            data: { version: version }
+            data: { version: selectedEnvironment }
         }).then((resp) => {
             getSettings();
             let environments = Object.keys(resp.environments).map(function (version) {
