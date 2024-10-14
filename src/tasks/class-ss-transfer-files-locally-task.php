@@ -70,7 +70,7 @@ class Transfer_Files_Locally_Task extends Task {
 	 * @return string
 	 */
 	protected function processed_pages_message( $processed, $total ) {
-		Util::debug_log('[Transfer] Total Pages:' . $total . '. Processed Pages: ' . $processed );
+		Util::debug_log( '[Transfer] Total Pages:' . $total . '. Processed Pages: ' . $processed );
 		if ( ! $total && 'update' === $this->get_generate_type() ) {
 			return __( 'No new/updated pages to transfer', 'simply-static' );
 		}
@@ -140,7 +140,7 @@ class Transfer_Files_Locally_Task extends Task {
 
 		// TODO: also check for recent modification time
 		// last_modified_at > ? AND
-		$static_pages    =  Page::query()
+		$static_pages    = Page::query()
 		                       ->where( "file_path IS NOT NULL" )
 		                       ->where( "file_path != ''" )
 		                       ->where( "( last_transferred_at < ? OR last_transferred_at IS NULL )", $archive_start_time )
@@ -203,6 +203,11 @@ class Transfer_Files_Locally_Task extends Task {
 	public static function delete_local_directory_static_files( $local_dir, $options ) {
 		$temp_dir = $options->get( 'temp_files_dir' );
 
+		if ( empty( $temp_dir ) ) {
+			$upload_dir = wp_upload_dir();
+			$temp_dir   = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
+		}
+
 		if ( false === file_exists( $temp_dir ) ) {
 			return false;
 		}
@@ -232,13 +237,14 @@ class Transfer_Files_Locally_Task extends Task {
 	 * @return void
 	 */
 	public function transfer_404_page( $local_dir ) {
-		$archive_dir  = $this->options->get_archive_dir();
-		$file_path    = untrailingslashit( $archive_dir ) . DIRECTORY_SEPARATOR . '404'  . DIRECTORY_SEPARATOR . 'index.html';
+		$archive_dir = $this->options->get_archive_dir();
+		$file_path   = untrailingslashit( $archive_dir ) . DIRECTORY_SEPARATOR . '404' . DIRECTORY_SEPARATOR . 'index.html';
 
-		Util::debug_log( 'Transferring 404 Page');
+		Util::debug_log( 'Transferring 404 Page' );
 
 		if ( ! file_exists( $file_path ) ) {
 			Util::debug_log( 'No 404 Page found at ' . $file_path );
+
 			return;
 		}
 
@@ -248,7 +254,7 @@ class Transfer_Files_Locally_Task extends Task {
 			wp_mkdir_p( $folder_404 );
 		}
 
-		$destination_file = $folder_404  . DIRECTORY_SEPARATOR . 'index.html';
+		$destination_file = $folder_404 . DIRECTORY_SEPARATOR . 'index.html';
 
 		if ( file_exists( $destination_file ) ) {
 			return;

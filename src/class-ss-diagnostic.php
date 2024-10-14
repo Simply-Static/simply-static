@@ -387,7 +387,7 @@ class Diagnostic {
 	}
 
 	public function is_temp_files_dir_readable() {
-		$temp_files_dir = $this->options->get( 'temp_files_dir' );
+		$temp_files_dir = Util::get_temp_dir();
 
 		return array(
 			'test'        => is_readable( $temp_files_dir ),
@@ -397,7 +397,7 @@ class Diagnostic {
 	}
 
 	public function is_temp_files_dir_writeable() {
-		$temp_files_dir = $this->options->get( 'temp_files_dir' );
+		$temp_files_dir = Util::get_temp_dir();
 
 		return array(
 			'test'        => is_writable( $temp_files_dir ),

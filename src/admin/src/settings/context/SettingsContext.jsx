@@ -10,10 +10,10 @@ function SettingsContextProvider(props) {
     const defaultSettings = {
         'destination_scheme': 'https://',
         'destination_host': '',
-        'temp_files_dir': options.temp_files_dir,
+        'temp_files_dir': '',
         'additional_urls': '',
         'additional_files': '',
-        'urls_to_exclude': 'wp-json\nwp-login.php',
+        'urls_to_exclude': 'wp-json\n.php',
         'delivery_method': 'zip',
         'local_dir': '',
         'relative_path': '',

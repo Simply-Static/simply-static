@@ -686,7 +686,7 @@ class Util {
 			'simply_cdn'
 		];
 
-		foreach( $tasks as $task ) {
+		foreach ( $tasks as $task ) {
 			delete_transient( 'simply_static_' . $task . '_total_pages' );
 		}
 
@@ -695,5 +695,26 @@ class Util {
 		delete_transient( 'ssp_search_index_start_time' );
 		delete_transient( 'ssp_github_blobs' );
 		delete_transient( 'ssp_search_results' );
+	}
+
+	/*
+	 * Get the absolute path to the temporary file directory.
+	 *
+	 */
+	public static function get_temp_dir() {
+		$options  = get_option( 'simply-static' );
+		$temp_dir = $options['temp_files_dir'];
+
+		if ( empty( $temp_dir ) ) {
+			$upload_dir = wp_upload_dir();
+			$temp_dir   = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
+
+			// Check if directory exists.
+			if ( ! is_dir( $temp_dir ) ) {
+				wp_mkdir_p( $temp_dir );
+			}
+		}
+
+		return trailingslashit( $temp_dir );
 	}
 }

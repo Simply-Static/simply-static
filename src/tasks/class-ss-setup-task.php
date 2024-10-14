@@ -171,6 +171,11 @@ class Setup_Task extends Task {
 		$options = Options::instance();
 		$dir     = $options->get( 'temp_files_dir' );
 
+		if ( empty( $dir ) ) {
+			$upload_dir = wp_upload_dir();
+			$dir        = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
+		}
+
 		if ( false === file_exists( $dir ) || 'update' === $options->get( 'generate_type' ) ) {
 			return false;
 		}
