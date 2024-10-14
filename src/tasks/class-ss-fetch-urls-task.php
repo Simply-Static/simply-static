@@ -279,7 +279,7 @@ class Fetch_Urls_Task extends Task {
 	 * @return bool
 	 */
 	public function find_excludable( $static_page ) {
-		$excluded = apply_filters( 'ss_excluded_by_default', array( 'wp-json', '.php' ) );
+		$excluded = apply_filters( 'ss_excluded_by_default', array( 'wp-json', '.php', 'debug' ) );
 
 		if ( ! empty( $this->options->get( 'urls_to_exclude' ) ) ) {
 			$excluded_by_option = explode( "\n", $this->options->get( 'urls_to_exclude' ) );
