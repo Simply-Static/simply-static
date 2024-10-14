@@ -176,6 +176,7 @@ class Upgrade_Handler {
 			'archive_name'                  => null,
 			'archive_start_time'            => null,
 			'archive_end_time'              => null,
+			'version'                       => SIMPLY_STATIC_VERSION,
 		);
 
 		$version = self::$options->get( 'version' );
