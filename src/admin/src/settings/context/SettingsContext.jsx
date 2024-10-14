@@ -230,6 +230,20 @@ function SettingsContextProvider(props) {
         return false;
     }
 
+    const isIntegrationActive = (integration) => {
+        let integrations = settings.integrations;
+
+        if ( false === integrations ) {
+           return false;
+        }
+
+        if ( integrations.indexOf(integration) >= 0 ) {
+            return true;
+        }
+
+        return false;
+    }
+
     useInterval(() => {
         checkIfRunning()
     }, isRunning ? 5000 : null);
@@ -253,6 +267,7 @@ function SettingsContextProvider(props) {
                 setSettings,
                 saveSettings,
                 resetSettings,
+                getSettings,
                 updateFromNetwork,
                 importSettings,
                 migrateSettings,
@@ -262,6 +277,7 @@ function SettingsContextProvider(props) {
                 blogId,
                 setBlogId,
                 isPro,
+                isIntegrationActive
             }}
         >
             {props.children}
