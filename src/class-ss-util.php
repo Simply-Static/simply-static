@@ -269,7 +269,7 @@ class Util {
 	public static function create_offline_path( $extracted_path, $page_path, $iterations = 0 ) {
 		// We're done if we get a match between the path of the page and the extracted URL
 		// OR if there are no more slashes to remove
-		if ( strpos( $page_path, '/' ) === false || strpos( $extracted_path, $page_path ) === 0 ) {
+		if ( strpos( $page_path, '/' ) === false || strpos( $extracted_path, trailingslashit( $page_path ) ) === 0 ) {
 			$extracted_path = substr( $extracted_path, strlen( $page_path ) );
 			$iterations     = ( $iterations == 0 ) ? 0 : $iterations - 1;
 			$new_path       = '.' . str_repeat( '/..', $iterations ) . self::add_leading_slash( $extracted_path );
