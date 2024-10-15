@@ -105,12 +105,11 @@ function DebugSettings() {
                 <b>{__('Temporary Files', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
-                <p>{__('Your static files are temporarily saved to a directory before being copied to their destination or creating a ZIP.', 'simply-static')}</p>
                 <TextControl
                     label={__('Temporary Files Directory', 'simply-static')}
                     type={"text"}
                     placeholder={options.temp_files_dir}
-                    help={__('Specify the directory to save your temporary files. This directory must exist and be writeable.', 'simply-static')}
+                    help={__('Optionally specify the directory to save your temporary files. This directory must exist and be writeable.', 'simply-static')}
                     value={settings.temp_files_dir}
                     onChange={(temp_dir) => {
                         updateSetting('temp_files_dir', temp_dir);

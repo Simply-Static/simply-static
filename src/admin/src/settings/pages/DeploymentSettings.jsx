@@ -819,6 +819,7 @@ function DeploymentSettings() {
                         <TextareaControl
                             label={__('SFTP private key', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            placeholder={__('OPTIONAL: This is only required if you need to authenticate via a private key to access your SFTP server.', 'simply-static')}
                             help={__('Enter your SFTP private key if you want password.less upload and the server is configured to allow it. You can set it as a constant in wp-config.php by using define(\'SSP_SFTP_KEY\', \'YOUR_KEY\')', 'simply-static')}
                             value={settings.sftp_private_key}
                             onChange={(pass) => {

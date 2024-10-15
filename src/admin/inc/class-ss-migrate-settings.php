@@ -50,19 +50,6 @@ class Migrate_Settings {
 			}
 		}
 
-		if ( isset( $options['temp_files_dir'] ) ) {
-			// Check if directory exists, if not, create it.
-			$upload_dir = wp_upload_dir();
-			$temp_dir   = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
-
-			// Check if directory exists.
-			if ( ! is_dir( $temp_dir ) ) {
-				wp_mkdir_p( $temp_dir );
-			}
-
-			$options['temp_files_dir'] = trailingslashit( $temp_dir );
-		}
-
 		// Migrate options to always underscore instead of dash.
 		if ( isset( $options['deployment-provider'] ) ) {
 			unset( $options['deployment-provider'] );
