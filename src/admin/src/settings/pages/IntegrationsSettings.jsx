@@ -15,7 +15,7 @@ import Integration from "../components/Integration";
 const {__} = wp.i18n;
 
 function IntegrationsSettings() {
-    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
+    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved, maybeQueueIntegration, maybeUnqueueIntegration} = useContext(SettingsContext);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -38,6 +38,7 @@ function IntegrationsSettings() {
 
         integrations.push(integration);
         updateSetting( 'integrations', integrations );
+        maybeQueueIntegration(integration);
     }
 
     const removeIntegration = ( integration ) => {
@@ -53,6 +54,7 @@ function IntegrationsSettings() {
 
         integrations.splice(index, 1);
         updateSetting( 'integrations', integrations );
+        maybeUnqueueIntegration(integration);
     }
 
     const toggleIntegration = ( integration, value ) => {

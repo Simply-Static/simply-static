@@ -41,7 +41,8 @@ function SettingsPage() {
         getSettings,
         passedChecks,
         isPro,
-        isIntegrationActive
+        isIntegrationActive,
+        canRunIntegration
     } = useContext(SettingsContext);
     const [activeItem, setActiveItem] = useState({activeItem: "/"});
     const [initialPage, setInitialPage] = useState(localStorage.getItem('ss-initial-page') ? localStorage.getItem('ss-initial-page') : options.initial);
@@ -243,7 +244,7 @@ function SettingsPage() {
                                     }
                                 </div>
                                 <CardBody>
-                                    {(!options.is_network && isIntegrationActive('environments') ) &&
+                                    {(!options.is_network && canRunIntegration('environments') ) &&
                                         <EnvironmentSidebar isRunning={isRunning} getSettings={getSettings} />
                                     }
                                     {!options.is_network && options.is_multisite &&

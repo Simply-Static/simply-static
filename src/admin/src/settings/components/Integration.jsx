@@ -1,13 +1,18 @@
 import {Button, Card, CardHeader, ToggleControl} from "@wordpress/components";
 import HelperVideo from "./HelperVideo"
+import {SettingsContext} from "../context/SettingsContext";
+import {useContext} from "@wordpress/element";
 
 const {__} = wp.i18n;
 
 function Integration({integration, settings, toggleIntegration}) {
+    const {isQueuedIntegration} = useContext(SettingsContext);
+
     let isActive = integration.active;
     const isPro = integration.pro;
     const canRun = integration.can_run;
     const alwaysActive = integration.always_active;
+    const isQueued = isQueuedIntegration(integration.id);
 
     if (typeof settings.integrations !== 'undefined' && settings.integrations !== false) {
         isActive = settings.integrations.indexOf(integration.id) >= 0;
@@ -20,6 +25,7 @@ function Integration({integration, settings, toggleIntegration}) {
             <div>
                 <strong>
                     {integration.name || integration.id}
+                    {(canRun && isQueued ) && <em class={"ss-text-notice"}>{__('Requires saving settings', 'simply-static')}</em>}
                     { integration.id === 'redirection' &&
                         <HelperVideo
                             title={__('Automated Redirects with Redirection', 'simply-static')}

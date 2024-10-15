@@ -176,17 +176,20 @@ function EnvironmentSidebar({
   const [showingEnvironmentForm, setShowingEnvironmentForm] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)(false);
   const [changingEnvironment, setChangingEnvironment] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)(false);
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useEffect)(() => {
-    if (options.environments) {
-      let environments = Object.keys(options.environments).map(function (version) {
+    _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_5___default()({
+      path: '/simplystatic/v1/environment',
+      method: 'GET'
+    }).then(resp => {
+      let environments = Object.keys(resp.environments).map(function (version) {
         return {
-          label: options.environments[version],
+          label: resp.environments[version],
           value: version
         };
       });
       setSelectableEnvironments(environments);
-      setSelectedEnvironment(options.current_environment);
-    }
-  }, [options]);
+      setSelectedEnvironment(resp.current_environment);
+    });
+  }, []);
   const deleteCurrentVersion = () => {
     setChangingEnvironment(true);
     _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_5___default()({
@@ -557,6 +560,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _HelperVideo__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./HelperVideo */ "./src/settings/components/HelperVideo.jsx");
+/* harmony import */ var _context_SettingsContext__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../context/SettingsContext */ "./src/settings/context/SettingsContext.jsx");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_4__);
+
+
 
 
 
@@ -568,17 +576,23 @@ function Integration({
   settings,
   toggleIntegration
 }) {
+  const {
+    isQueuedIntegration
+  } = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.useContext)(_context_SettingsContext__WEBPACK_IMPORTED_MODULE_3__.SettingsContext);
   let isActive = integration.active;
   const isPro = integration.pro;
   const canRun = integration.can_run;
   const alwaysActive = integration.always_active;
+  const isQueued = isQueuedIntegration(integration.id);
   if (typeof settings.integrations !== 'undefined' && settings.integrations !== false) {
     isActive = settings.integrations.indexOf(integration.id) >= 0;
   }
   let canUse = options.plan === 'pro' || !isPro;
   return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, {
     className: 'ss-integration'
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("strong", null, integration.name || integration.id, integration.id === 'redirection' && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_HelperVideo__WEBPACK_IMPORTED_MODULE_2__["default"], {
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("strong", null, integration.name || integration.id, canRun && isQueued && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("em", {
+    class: "ss-text-notice"
+  }, __('Requires saving settings', 'simply-static')), integration.id === 'redirection' && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_HelperVideo__WEBPACK_IMPORTED_MODULE_2__["default"], {
     title: __('Automated Redirects with Redirection', 'simply-static'),
     videoUrl: 'https://youtu.be/sS4BQcZ4dN8'
   }), integration.id === 'complianz' && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_HelperVideo__WEBPACK_IMPORTED_MODULE_2__["default"], {
@@ -726,7 +740,8 @@ function SettingsPage() {
     getSettings,
     passedChecks,
     isPro,
-    isIntegrationActive
+    isIntegrationActive,
+    canRunIntegration
   } = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.useContext)(_context_SettingsContext__WEBPACK_IMPORTED_MODULE_13__.SettingsContext);
   const [activeItem, setActiveItem] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.useState)({
     activeItem: "/"
@@ -893,7 +908,7 @@ function SettingsPage() {
       cancelExport();
     },
     className: "cancel-button"
-  }, __('Cancel Export', 'simply-static'))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.CardBody, null, !options.is_network && isIntegrationActive('environments') && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_EnvironmentSidebar__WEBPACK_IMPORTED_MODULE_15__["default"], {
+  }, __('Cancel Export', 'simply-static'))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.CardBody, null, !options.is_network && canRunIntegration('environments') && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_EnvironmentSidebar__WEBPACK_IMPORTED_MODULE_15__["default"], {
     isRunning: isRunning,
     getSettings: getSettings
   }), !options.is_network && options.is_multisite && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("h4", {
@@ -1217,6 +1232,7 @@ function SettingsContextProvider(props) {
   const [configs, setConfigs] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)({});
   const [passedChecks, setPassedChecks] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)('yes');
   const [blogId, setBlogId] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(1);
+  const [queuedIntegrations, setQueuedIntegrations] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
   const getSettings = () => {
     _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2___default()({
       path: '/simplystatic/v1/settings'
@@ -1229,6 +1245,8 @@ function SettingsContextProvider(props) {
       path: '/simplystatic/v1/settings',
       method: 'POST',
       data: settings
+    }).then(resp => {
+      setQueuedIntegrations([]);
     });
   };
   const resetSettings = () => {
@@ -1309,6 +1327,54 @@ function SettingsContextProvider(props) {
     }
     return false;
   };
+  const integrationRequiresSaving = integration => {
+    /**
+     * @todo make it defined inside integration classes when more come.
+     * @type {string[]}
+     */
+    const integrations = ['environments'];
+    return integrations.indexOf(integration) >= 0;
+  };
+  const maybeQueueIntegration = integration => {
+    if (!integrationRequiresSaving(integration)) {
+      return;
+    }
+
+    // Already queued.
+    if (isQueuedIntegration(integration)) {
+      return;
+    }
+    queuedIntegrations.push(integration);
+    setQueuedIntegrations(queuedIntegrations);
+  };
+  const maybeUnqueueIntegration = integration => {
+    if (!integrationRequiresSaving(integration)) {
+      return;
+    }
+
+    // Already queued.
+    if (!isQueuedIntegration(integration)) {
+      return;
+    }
+    const index = queuedIntegrations.indexOf(integration);
+    if (index < 0) {
+      return;
+    }
+    queuedIntegrations.splice(index, 1);
+    setQueuedIntegrations(queuedIntegrations);
+  };
+  const canRunIntegration = integration => {
+    if (!isIntegrationActive(integration)) {
+      return false;
+    }
+    if (isQueuedIntegration(integration)) {
+      return false;
+    }
+    return true;
+  };
+  const isQueuedIntegration = integration => {
+    return queuedIntegrations.indexOf(integration) >= 0;
+  };
   const isIntegrationActive = integration => {
     let integrations = settings.integrations;
     if (false === integrations) {
@@ -1349,7 +1415,11 @@ function SettingsContextProvider(props) {
       blogId,
       setBlogId,
       isPro,
-      isIntegrationActive
+      isIntegrationActive,
+      canRunIntegration,
+      maybeQueueIntegration,
+      maybeUnqueueIntegration,
+      isQueuedIntegration
     }
   }, props.children);
 }
@@ -2895,7 +2965,9 @@ function IntegrationsSettings() {
     updateSetting,
     saveSettings,
     settingsSaved,
-    setSettingsSaved
+    setSettingsSaved,
+    maybeQueueIntegration,
+    maybeUnqueueIntegration
   } = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useContext)(_context_SettingsContext__WEBPACK_IMPORTED_MODULE_3__.SettingsContext);
   const setSavingSettings = () => {
     saveSettings();
@@ -2914,6 +2986,7 @@ function IntegrationsSettings() {
     }
     integrations.push(integration);
     updateSetting('integrations', integrations);
+    maybeQueueIntegration(integration);
   };
   const removeIntegration = integration => {
     let integrations = settings.integrations;
@@ -2926,6 +2999,7 @@ function IntegrationsSettings() {
     }
     integrations.splice(index, 1);
     updateSetting('integrations', integrations);
+    maybeUnqueueIntegration(integration);
   };
   const toggleIntegration = (integration, value) => {
     if (value) {

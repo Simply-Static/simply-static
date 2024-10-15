@@ -76,6 +76,13 @@ toplevel_page_simply-static img {
   .ss-integration {
     align-items: center;
 
+    .ss-text-notice {
+      text-transform: uppercase;
+      font-size: 10px;
+      color: rgb(104, 4, 204);
+      margin-left: 10px;
+    }
+
     .integration-toggle {
       margin: 0;
     }
