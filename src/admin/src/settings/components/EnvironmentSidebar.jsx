@@ -13,15 +13,19 @@ export default function EnvironmentSidebar({ getSettings, isRunning }) {
     const [changingEnvironment, setChangingEnvironment] = useState(false);
 
     useEffect(() => {
-        if (options.environments) {
-            let environments = Object.keys(options.environments).map(function (version) {
-                return {label: options.environments[version], value: version}
+        apiFetch({
+            path: '/simplystatic/v1/environment',
+            method: 'GET',
+        }).then((resp) => {
+            let environments = Object.keys(resp.environments).map(function (version) {
+                return {label: resp.environments[version], value: version}
             });
 
             setSelectableEnvironments( environments );
-            setSelectedEnvironment( options.current_environment );
-        }
-    }, [options]);
+            setSelectedEnvironment(resp.current_environment);
+
+        })
+    }, []);
 
     const deleteCurrentVersion = () => {
         setChangingEnvironment(true);

@@ -128,6 +128,7 @@ function SettingsContextProvider(props) {
     const [configs, setConfigs] = useState({});
     const [passedChecks, setPassedChecks] = useState('yes');
     const [blogId, setBlogId] = useState(1);
+    const [queuedIntegrations, setQueuedIntegrations] = useState([]);
 
     const getSettings = () => {
         apiFetch({path: '/simplystatic/v1/settings'}).then((options) => {
@@ -140,6 +141,8 @@ function SettingsContextProvider(props) {
             path: '/simplystatic/v1/settings',
             method: 'POST',
             data: settings,
+        }).then(resp => {
+            setQueuedIntegrations([]);
         });
     }
 
@@ -149,7 +152,7 @@ function SettingsContextProvider(props) {
         apiFetch({
             path: '/simplystatic/v1/settings/reset',
             method: 'POST',
-            data: defaultSettings,
+            data: defaultSettings
         });
     }
 
@@ -166,7 +169,7 @@ function SettingsContextProvider(props) {
     const checkIfRunning = () => {
         apiFetch({
             path: '/simplystatic/v1/is-running',
-            method: 'GET'
+            method: 'GET'  
         }).then(resp => {
             var json = JSON.parse(resp);
             setIsRunning(json.running);
@@ -230,6 +233,67 @@ function SettingsContextProvider(props) {
         return false;
     }
 
+    const integrationRequiresSaving = (integration) => {
+        /**
+         * @todo make it defined inside integration classes when more come.
+         * @type {string[]}
+         */
+        const integrations = [
+            'environments'
+        ]
+
+        return integrations.indexOf(integration) >= 0;
+    }
+
+    const maybeQueueIntegration = (integration) => {
+        if ( ! integrationRequiresSaving(integration) ) {
+            return;
+        }
+
+        // Already queued.
+        if ( isQueuedIntegration(integration) ) {
+            return;
+        }
+
+        queuedIntegrations.push(integration);
+        setQueuedIntegrations(queuedIntegrations);
+    }
+
+    const maybeUnqueueIntegration = (integration) => {
+        if ( ! integrationRequiresSaving(integration) ) {
+            return;
+        }
+
+        // Already queued.
+        if ( ! isQueuedIntegration(integration) ) {
+            return;
+        }
+
+        const index = queuedIntegrations.indexOf(integration);
+        if ( index < 0 ) {
+            return;
+        }
+
+        queuedIntegrations.splice(index, 1);
+        setQueuedIntegrations(queuedIntegrations);
+    }
+
+    const canRunIntegration = (integration) => {
+        if ( ! isIntegrationActive(integration) ) {
+            return false;
+        }
+
+        if ( isQueuedIntegration(integration) ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    const isQueuedIntegration = (integration) => {
+        return queuedIntegrations.indexOf(integration) >= 0;
+    }
+
     const isIntegrationActive = (integration) => {
         let integrations = settings.integrations;
 
@@ -277,7 +341,11 @@ function SettingsContextProvider(props) {
                 blogId,
                 setBlogId,
                 isPro,
-                isIntegrationActive
+                isIntegrationActive,
+                canRunIntegration,
+                maybeQueueIntegration,
+                maybeUnqueueIntegration,
+                isQueuedIntegration
             }}
         >
             {props.children}

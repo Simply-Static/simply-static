@@ -34,6 +34,13 @@ abstract class Integration {
 	protected $id = '';
 
 	/**
+	 * Active by default.
+	 *
+	 * @var bool
+	 */
+	protected $active_by_default = true;
+
+	/**
 	 * Load the integration.
 	 *
 	 * @return void
@@ -66,7 +73,7 @@ abstract class Integration {
 		$integrations = $options->get('integrations');
 
 		// Mainly for backwards compatibility. If there is no such option, it means it's all active.
-		if ( empty( $integrations ) ) {
+		if ( empty( $integrations ) && $this->active_by_default ) {
 			return true;
 		}
 
