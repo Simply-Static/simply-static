@@ -22,6 +22,10 @@ toplevel_page_simply-static img {
 .plugin-settings-container {
   background: #f0f0f1;
 
+  .components-flex {
+    align-items:flex-start;
+  }
+
   .components-flex-item {
     margin-left: 0;
   }
@@ -91,7 +95,7 @@ toplevel_page_simply-static img {
   /* Navigation */
   .plugin-nav {
     padding: 25px 40px;
-    height: 100vh;
+    height: auto;
     max-width: 260px;
     margin: 0;
 
