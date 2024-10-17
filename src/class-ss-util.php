@@ -687,10 +687,9 @@ class Util {
 	 *
 	 */
 	public static function get_temp_dir() {
-		$options  = get_option( 'simply-static' );
-		$temp_dir = $options['temp_files_dir'];
+		$options = get_option( 'simply-static' );
 
-		if ( empty( $temp_dir ) ) {
+		if ( empty( $options['temp_files_dir'] ) ) {
 			$upload_dir = wp_upload_dir();
 			$temp_dir   = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
 
@@ -698,6 +697,9 @@ class Util {
 			if ( ! is_dir( $temp_dir ) ) {
 				wp_mkdir_p( $temp_dir );
 			}
+
+		} else {
+			$temp_dir = $options['temp_files_dir'];
 		}
 
 		return trailingslashit( $temp_dir );
