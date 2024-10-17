@@ -256,6 +256,7 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 * added version number in default settings in upgrade handler
 * enhanced integrations implementation to allow deactivated integrations by default
 * improved wording around SFTP integration
+* improved default values for excludes
 
 
 = 3.1.9 =
