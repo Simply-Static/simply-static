@@ -244,8 +244,12 @@ function SettingsPage() {
                                     }
                                 </div>
                                 <CardBody>
-                                    {(!options.is_network && canRunIntegration('environments') ) &&
-                                        <EnvironmentSidebar isRunning={isRunning} getSettings={getSettings} />
+                                    {'pro' === options.plan && isPro() &&
+                                        <>
+                                            {(!options.is_network && canRunIntegration('environments')) &&
+                                                <EnvironmentSidebar isRunning={isRunning} getSettings={getSettings}/>
+                                            }
+                                        </>
                                     }
                                     {!options.is_network && options.is_multisite &&
                                         <>
@@ -368,7 +372,7 @@ function SettingsPage() {
                     </FlexItem>
                     <FlexItem isBlock={true}>
                         <div class={"plugin-settings"}>
-                            {'no' === passedChecks && ! options.is_network ?
+                            {'no' === passedChecks && !options.is_network ?
                                 <Animate type="slide-in" options={{origin: 'top'}}>
                                     {() => (
 
@@ -390,16 +394,18 @@ function SettingsPage() {
                                 :
                                 ''
                             }
-                            {'pro' === options.plan && ! isPro() ?
+                            {'pro' === options.plan && !isPro() ?
                                 <Animate type="slide-in" options={{origin: 'top'}}>
                                     {() => (
                                         <>
-                                            <Notice status="error" isDismissible={false}  className={activeItem == '/' ? 'diagnostics-notice diagnostics-notice-generate' : 'diagnostics-notice'}>
+                                            <Notice status="error" isDismissible={false}
+                                                    className={activeItem == '/' ? 'diagnostics-notice diagnostics-notice-generate' : 'diagnostics-notice'}>
                                                 <p>
                                                     {__('You are using the pro version without a valid license.', 'simply-static')}<br></br>
                                                     {__('We have temporarily disabled all the pro features now. Please contact our support to have the problem solved.', 'simply-static')}
                                                 </p>
-                                                <Button isPrimary href={"https://simplystatic.com/support/"} target="_blank">Contact Support</Button>
+                                                <Button isPrimary href={"https://simplystatic.com/support/"}
+                                                        target="_blank">Contact Support</Button>
                                             </Notice>
                                             <Spacer margin={"5px"}/>
                                         </>
