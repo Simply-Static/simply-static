@@ -381,8 +381,20 @@ class Admin_Settings {
 	public function get_settings() {
 		$settings = get_option( 'simply-static' );
 		if ( empty( $settings['integrations'] ) ) {
-			$integrations             = Plugin::instance()->get_integrations();
-			$settings['integrations'] = array_keys( $integrations );
+			$integrations         = Plugin::instance()->get_integrations();
+			$enabled_integrations = [];
+
+            foreach ( $integrations as $integration => $class ) {
+                $object = new $class;
+
+                if ( ! $object->is_enabled() ) {
+                    continue;
+                }
+
+                $enabled_integrations[] = $integration;
+            }
+
+			$settings['integrations'] = $enabled_integrations;
 		}
 
 		return $settings;
