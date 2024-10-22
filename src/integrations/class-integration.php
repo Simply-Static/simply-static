@@ -69,8 +69,8 @@ abstract class Integration {
 	 * @return boolean
 	 */
 	public function is_active() {
-		$options = Options::instance();
-		$integrations = $options->get('integrations');
+		$options      = Options::instance();
+		$integrations = $options->get( 'integrations' );
 
 		// Mainly for backwards compatibility. If there is no such option, it means it's all active.
 		if ( empty( $integrations ) && $this->active_by_default ) {

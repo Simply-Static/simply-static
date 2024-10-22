@@ -13,7 +13,7 @@ function SettingsContextProvider(props) {
         'temp_files_dir': '',
         'additional_urls': '',
         'additional_files': '',
-        'urls_to_exclude': 'wp-json\n.php',
+        'urls_to_exclude': '',
         'delivery_method': 'zip',
         'local_dir': '',
         'relative_path': '',
