@@ -1114,10 +1114,10 @@ function SettingsContextProvider(props) {
   const defaultSettings = {
     'destination_scheme': 'https://',
     'destination_host': '',
-    'temp_files_dir': options.temp_files_dir,
+    'temp_files_dir': '',
     'additional_urls': '',
     'additional_files': '',
-    'urls_to_exclude': 'wp-json\nwp-login.php',
+    'urls_to_exclude': 'wp-json\n.php',
     'delivery_method': 'zip',
     'local_dir': '',
     'relative_path': '',
@@ -1514,11 +1514,11 @@ function DebugSettings() {
     isDismissible: false
   }, __('Requires Username & Password to work', 'simply-static'))))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
     margin: 5
-  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Temporary Files', 'simply-static'))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, __('Your static files are temporarily saved to a directory before being copied to their destination or creating a ZIP.', 'simply-static')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Temporary Files', 'simply-static'))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
     label: __('Temporary Files Directory', 'simply-static'),
     type: "text",
     placeholder: options.temp_files_dir,
-    help: __('Specify the directory to save your temporary files. This directory must exist and be writeable.', 'simply-static'),
+    help: __('Optionally specify the directory to save your temporary files. This directory must exist and be writeable.', 'simply-static'),
     value: settings.temp_files_dir,
     onChange: temp_dir => {
       updateSetting('temp_files_dir', temp_dir);
@@ -2259,6 +2259,7 @@ function DeploymentSettings() {
   }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextareaControl, {
     label: __('SFTP private key', 'simply-static'),
     disabled: 'free' === options.plan || !isPro(),
+    placeholder: __('OPTIONAL: This is only required if you need to authenticate via a private key to access your SFTP server.', 'simply-static'),
     help: __('Enter your SFTP private key if you want password.less upload and the server is configured to allow it. You can set it as a constant in wp-config.php by using define(\'SSP_SFTP_KEY\', \'YOUR_KEY\')', 'simply-static'),
     value: settings.sftp_private_key,
     onChange: pass => {

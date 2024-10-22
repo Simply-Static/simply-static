@@ -77,6 +77,10 @@ abstract class Integration {
 			return true;
 		}
 
+		if ( ! is_array( $integrations ) ) {
+			$integrations = [];
+		}
+
 		return in_array( $this->id, $integrations, true );
 	}
 
