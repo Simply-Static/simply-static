@@ -663,12 +663,12 @@ class Util {
 			'aws_empty',
 			'create_zip_archive',
 			'transfer_files_locally',
+			'github_blobs',
 			'github_commit',
 			'bunny_deploy',
 			'tiiny_deploy',
 			'aws_deploy',
 			'sftp_deploy',
-			'simply_cdn'
 		];
 
 		foreach ( $tasks as $task ) {
