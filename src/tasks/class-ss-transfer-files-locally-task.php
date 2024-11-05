@@ -55,7 +55,7 @@ class Transfer_Files_Locally_Task extends Task {
 
 			do_action( 'ss_finished_transferring_files_locally', $this->destination_dir );
 
-			self::delete_transients();
+			self::delete_total_pages();
 		}
 
 		return $done;
