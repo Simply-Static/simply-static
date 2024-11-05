@@ -672,14 +672,8 @@ class Util {
 		];
 
 		foreach ( $tasks as $task ) {
-			delete_transient( 'simply_static_' . $task . '_total_pages' );
+			delete_option( 'simply_static_' . $task . '_total_pages' );
 		}
-
-		// Misc.
-		delete_transient( 'ssp_sftp_deploy_start_time' );
-		delete_transient( 'ssp_search_index_start_time' );
-		delete_transient( 'ssp_github_blobs' );
-		delete_transient( 'ssp_search_results' );
 	}
 
 	/*

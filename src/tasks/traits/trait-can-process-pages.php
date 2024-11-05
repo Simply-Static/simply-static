@@ -216,17 +216,17 @@ trait canProcessPages {
 			return $this->get_total_pages_sql();
 		}
 
-		$count = get_transient( 'simply_static_' . static::$task_name . '_total_pages' );
+		$count = get_option( 'simply_static_' . static::$task_name . '_total_pages' );
 		if ( false === $count ) {
 			$count = $this->get_total_pages_sql();
-			set_transient( 'simply_static_' . static::$task_name . '_total_pages', $count, MINUTE_IN_SECONDS );
+			update_option( 'simply_static_' . static::$task_name . '_total_pages', $count );
 		}
 
 		return $count;
 	}
 
 	public static function delete_transients() {
-		delete_transient( 'simply_static_' . static::$task_name . '_total_pages' );
+		delete_option( 'simply_static_' . static::$task_name . '_total_pages' );
 	}
 
 	/**
