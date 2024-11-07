@@ -210,11 +210,6 @@ trait canProcessPages {
 		return $count;
 	}
 
-	/** @deprecated since 3.2.1 */
-	public static function delete_transients() {
-		delete_option( 'simply_static_' . static::$task_name . '_total_pages' );
-	}
-
 	public static function delete_total_pages() {
 		delete_option( 'simply_static_' . static::$task_name . '_total_pages' );
 	}
