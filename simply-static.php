@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Plugin Name:       Simply Static
  * Plugin URI:        https://patrickposner.dev
  * Description:       A static site generator to create fast and secure static versions of your WordPress website.
- * Version:           3.2.2
+ * Version:           3.2.3
  * Author:            Patrick Posner
  * Author URI:        https://patrickposner.dev
  * License:           GPL-2.0+
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'SIMPLY_STATIC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SIMPLY_STATIC_URL', untrailingslashit( plugin_dir_url( __FILE__ ) ) );
-define( 'SIMPLY_STATIC_VERSION', '3.2.2' );
+define( 'SIMPLY_STATIC_VERSION', '3.2.3' );
 
 // Check PHP version.
 if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
@@ -73,12 +73,12 @@ if ( ! function_exists( 'simply_static_run_plugin' ) ) {
 	}
 
 	// Update required?
-	if ( defined( 'SIMPLY_STATIC_PRO_VERSION' ) && version_compare( SIMPLY_STATIC_PRO_VERSION, '1.4', '<' ) ) {
+	if ( defined( 'SIMPLY_STATIC_PRO_VERSION' ) && version_compare( SIMPLY_STATIC_PRO_VERSION, '1.6.3.2', '<' ) ) {
 		// Site notice.
 		add_action(
 			'admin_notices',
 			function () {
-				$message = esc_html__( 'You need to update Simply Static Pro to version 1.4 before continuing to use Simply Static, as we made significant changes requiring an upgrade.', 'simply-static' );
+				$message = esc_html__( 'You need to update Simply Static Pro to version 1.6.3.2 before continuing to use Simply Static, as we made significant changes requiring an upgrade.', 'simply-static' );
 				echo wp_kses_post( '<div class="notice notice-error"><p>' . $message . '</p></div>' );
 			}
 		);
