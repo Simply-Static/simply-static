@@ -89,7 +89,7 @@ if ( ! function_exists( 'simply_static_run_plugin' ) ) {
 				add_action(
 					'network_admin_notices',
 					function () {
-						$message = esc_html__( 'You need to update Simply Static Pro to version 1.4 before continuing to use Simply Static, as we made significant changes requiring an upgrade.', 'simply-static' );
+						$message = esc_html__( 'You need to update Simply Static Pro to version  1.6.3.2 before continuing to use Simply Static, as we made significant changes requiring an upgrade.', 'simply-static' );
 						echo wp_kses_post( '<div class="notice notice-error"><p>' . $message . '</p></div>' );
 					}
 				);
