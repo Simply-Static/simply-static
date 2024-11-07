@@ -79,18 +79,6 @@ class Transfer_Files_Locally_Task extends Task {
 	}
 
 	/**
-	 * Message to see when starting to process new pages.
-	 *
-	 * @param integer $to_process Number of pages to process.
-	 * @param integer $total Total of pages.
-	 *
-	 * @return string
-	 */
-	protected function processing_pages_message( $to_process, $total ) {
-		return sprintf( __( "Transferring %d of %d files", 'simply-static' ), $to_process, $total );
-	}
-
-	/**
 	 * @param Page $static_page Page object.
 	 *
 	 * @return void
