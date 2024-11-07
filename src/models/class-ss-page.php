@@ -190,6 +190,8 @@ class Page extends Model {
 		if ( ! is_null( $this->content_type ) ) {
 			return stripos( $this->content_type, $content_type ) !== false;
 		}
+
+		return false;
 	}
 
 	/**
@@ -198,7 +200,19 @@ class Page extends Model {
 	 * @return bool
 	 */
 	public function is_binary_file() {
-		return $this->is_type( 'application/octet-stream' ) || $this->is_type( 'image' );
+		if ( $this->is_type( 'application/octet-stream' ) ) {
+			return true;
+		}
+
+		if ( $this->is_type( 'image' ) ) {
+			return true;
+		}
+
+		if ( null === $this->content_type && $this->get_handler_class() === Additional_File_Handler::class ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public function get_handler_class() {
