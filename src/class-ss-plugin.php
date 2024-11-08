@@ -127,7 +127,7 @@ class Plugin {
 	public function get_integrations() {
 		return $this->integrations->get_integrations();
 	}
-    
+
 	public function get_integration( $integration ) {
 		$integrations = $this->integrations->get_integrations();
 		if ( empty( $integrations[ $integration ] ) ) {
@@ -183,7 +183,7 @@ class Plugin {
 	 * Old method to include admin menu.
 	 *
 	 * @return void
-     * @deprecated
+	 * @deprecated
 	 */
 	public function add_plugin_admin_menu() {
 		// Deprecated, only for upgrade support.
@@ -202,10 +202,10 @@ class Plugin {
 		}
 		do_action( 'ss_before_static_export', $blog_id, $type );
 
-        // Clear transients.
-        Util::clear_transients();
+		// Clear transients.
+		Util::clear_transients();
 
-        // Start export.
+		// Start export.
 		$this->archive_creation_job->start( $blog_id, $type );
 
 		// Exit if Basic Auth but no credentials were provided.
@@ -415,31 +415,12 @@ class Plugin {
 	 * @return array
 	 */
 	public function add_http_filters( $parsed_args, $url ) {
-		// Check for Basic Auth credentials.
-		if ( strpos( $url, get_bloginfo( 'url' ) ) !== false ) {
-			$digest = base64_encode( self::$instance->options->get('http_basic_auth_username') . ':' . self::$instance->options->get('http_basic_auth_password') );
+		// Basic Auth?
+		$basic_auth_user = self::$instance->options->get( 'http_basic_auth_username' );
+		$basic_auth_pass = self::$instance->options->get( 'http_basic_auth_password' );
 
-			if ( $digest ) {
-				$parsed_args['headers']['Authorization'] = 'Basic ' . $digest;
-			}
-		}
-
-		// Check for Freemius.
-		if ( false === strpos( $url, '://api.freemius.com' ) ) {
-			return $parsed_args;
-		}
-
-		if ( empty( $parsed_args['headers'] ) ) {
-			return $parsed_args;
-		}
-
-		foreach ( $parsed_args['headers'] as $key => $value ) {
-			if ( 'Authorization' === $key ) {
-				$parsed_args['headers']['Authorization2'] = $value;
-			} else if ( 'Authorization2' === $key ) {
-				$parsed_args['headers']['Authorization'] = $value;
-				unset( $parsed_args['headers'][ $key ] );
-			}
+		if ( ! empty( $basic_auth_user ) && ! empty( $basic_auth_pass ) ) {
+			$parsed_args['headers']['Authorization'] = 'Basic ' . base64_encode( $basic_auth_user . ':' . $basic_auth_pass );
 		}
 
 		return $parsed_args;
