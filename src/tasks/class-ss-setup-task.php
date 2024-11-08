@@ -119,6 +119,7 @@ class Setup_Task extends Task {
 					$static_page->set_status_message( __( "Additional File", 'simply-static' ) );
 					// setting found_on_id to 0 since this was user-specified
 					$static_page->found_on_id = 0;
+					$static_page->handler = Additional_File_Handler::class;
 					$static_page->save();
 				} else {
 					Util::debug_log( "Adding files from directory: " . $item );
@@ -129,6 +130,7 @@ class Setup_Task extends Task {
 						Util::debug_log( "Adding file " . $file_name . ' to queue as: ' . $url );
 						$static_page = Page::query()->find_or_initialize_by( 'url', $url );
 						$static_page->set_status_message( __( "Additional Dir", 'simply-static' ) );
+						$static_page->handler = Additional_File_Handler::class;
 						$static_page->found_on_id = 0;
 						$static_page->save();
 					}
