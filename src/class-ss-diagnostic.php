@@ -50,13 +50,15 @@ class Diagnostic {
 
 		$this->checks = array(
 			'URLs'       => array(),
-			'PHP'        => array(
-				__( 'VERSION', 'simply-static' ) => $this->php_version(),
-				__( 'php-xml', 'simply-static' ) => $this->is_xml_active(),
-				__( 'cURL', 'simply-static' )    => $this->has_curl(),
+			'Server'     => array(
+				__( 'PHP Version', 'simply-static' ) => $this->php_version(),
+				__( 'Basic Auth', 'simply-static' )  => $this->check_basic_auth_status(),
+				__( 'php-xml', 'simply-static' )     => $this->is_xml_active(),
+				__( 'cURL', 'simply-static' )        => $this->has_curl(),
 			),
 			'WordPress'  => array(
 				__( 'Permalinks', 'simply-static' ) => $this->is_permalink_structure_set(),
+				__( 'Indexable', 'simply-static' )  => $this->is_set_to_index(),
 				__( 'Caching', 'simply-static' )    => $this->is_cache_set(),
 				__( 'WP-CRON', 'simply-static' )    => $this->is_wp_cron_running(),
 			),
@@ -199,6 +201,14 @@ class Diagnostic {
 			'test'        => strlen( get_option( 'permalink_structure' ) ) !== 0,
 			'description' => __( 'WordPress permalink structure is set', 'simply-static' ),
 			'error'       => __( 'WordPress permalink structure is not set', 'simply-static' ),
+		);
+	}
+
+	public function is_set_to_index() {
+		return array(
+			'test'        => get_option( 'blog_public' ) === '1',
+			'description' => __( 'Discourage search engines from indexing this site is disabled', 'simply-static' ),
+			'error'       => __( 'Discourage search engines from indexing this site is enabled', 'simply-static' ),
 		);
 	}
 
@@ -492,6 +502,29 @@ class Diagnostic {
 			'test'        => $test,
 			'description' => __( 'cURL is available', 'simply-static' ),
 			'error'       => sprintf( __( 'cURL version < %s', 'simply-static' ), self::$min_version['curl'] )
+		);
+	}
+
+	public function check_basic_auth_status() {
+		$test    = true;
+		$message = __( 'Basic Auth is not enabled.', 'simply-static' );
+
+		if ( isset( $_SERVER['PHP_AUTH_USER'] ) && isset( $_SERVER['PHP_AUTH_PW'] ) ) {
+			$basic_auth_user = $this->options->get( 'http_basic_auth_username' );
+			$basic_auth_pass = $this->options->get( 'http_basic_auth_password' );
+
+			if ( empty( $basic_auth_user ) && empty( $basic_auth_pass ) ) {
+				$test    = false;
+				$message = __( 'Basic Auth is enabled, but no username or password is set in Simply Static -> Settings -> Debug -> Basic Auth', 'simply-static' );
+			} else {
+				$message = __( 'Basic Auth is enabled, and username and password are set in Simply Static -> Settings -> Debug -> Basic Auth', 'simply-static' );
+			}
+		}
+
+		return array(
+			'test'        => $test,
+			'description' => $message,
+			'error'       => $message
 		);
 	}
 
