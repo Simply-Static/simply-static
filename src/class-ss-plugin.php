@@ -300,10 +300,15 @@ class Plugin {
 				$display_url = Util::get_path_from_local_url( $parent_static_page->url );
 				$msg         .= "<a href='" . $parent_static_page->url . "'>" . sprintf( __( 'Found on %s', 'simply-static' ), $display_url ) . "</a>";
 			}
+
+			// Combine status messages.
 			if ( $msg !== '' && $static_page->status_message ) {
-				$msg .= '; ';
+				$msg .= ' ';
 			}
-			$msg .= $static_page->status_message;
+
+			// Avoid duplicate status messages.
+			$cleaned = implode( '', array_unique( explode( '; ', $static_page->status_message ) ) );
+			$msg     .= $cleaned;
 
 			$information = [
 				'id'          => $static_page->id,
