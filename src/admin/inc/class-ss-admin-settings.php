@@ -268,6 +268,14 @@ class Admin_Settings {
 			},
 		) );
 
+		register_rest_route( 'simplystatic/v1', '/settings/reset-database', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'reset_database' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+			},
+		) );
+
 		register_rest_route( 'simplystatic/v1', '/update-from-network', array(
 			'methods'             => 'POST',
 			'callback'            => [ $this, 'update_from_network' ],
@@ -384,15 +392,15 @@ class Admin_Settings {
 			$integrations         = Plugin::instance()->get_integrations();
 			$enabled_integrations = [];
 
-            foreach ( $integrations as $integration => $class ) {
-                $object = new $class;
+			foreach ( $integrations as $integration => $class ) {
+				$object = new $class;
 
-                if ( ! $object->is_enabled() ) {
-                    continue;
-                }
+				if ( ! $object->is_enabled() ) {
+					continue;
+				}
 
-                $enabled_integrations[] = $integration;
-            }
+				$enabled_integrations[] = $integration;
+			}
 
 			$settings['integrations'] = $enabled_integrations;
 		}
@@ -528,6 +536,24 @@ class Admin_Settings {
 		}
 
 		return json_encode( [ 'status' => 400, 'message' => "No options updated." ] );
+	}
+
+
+	/**
+	 * Reset database via rest API.
+	 *
+	 * @return false|string
+	 */
+	public function reset_database() {
+		// Drop Simply Static database table.
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'simply_static_pages';
+		$wpdb->query( "DROP TABLE IF EXISTS $table_name" );
+
+		// Check table.
+		Page::create_or_update_table();
+
+		return json_encode( [ 'status' => 200, 'message' => "Ok" ] );
 	}
 
 	/**

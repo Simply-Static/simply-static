@@ -16,10 +16,11 @@ const {__} = wp.i18n;
 
 function Utilities() {
 
-    const {settings, importSettings, saveSettings, resetSettings, migrateSettings} = useContext(SettingsContext);
+    const {settings, importSettings, saveSettings, resetSettings, migrateSettings, resetDatabase} = useContext(SettingsContext);
     const [isExport, setIsExport] = useState(false);
     const [isImport, setIsImport] = useState(false);
     const [isReset, setIsReset] = useState(false);
+    const [isResetDatabase, setIsResetDatabase] = useState(false);
     const [isMigrate, setIsMigrate] = useState(false);
     const [hasCopied, setHasCopied] = useState(false);
     const [importData, setImportData] = useState(false);
@@ -43,6 +44,15 @@ function Utilities() {
 
         setTimeout(function () {
             setIsReset(false);
+        }, 2000);
+    }
+
+    const runResetDatabase = () => {
+        resetDatabase();
+        setIsResetDatabase(true);
+
+        setTimeout(function () {
+            setIsResetDatabase(false);
         }, 2000);
     }
 
@@ -153,13 +163,16 @@ function Utilities() {
             <Spacer margin={5}/>
             <Card>
                 <CardHeader>
-                    <b>{__('Reset Plugin Data', 'simply-static')}</b>
+                    <b>{__('Reset', 'simply-static')}</b>
                 </CardHeader>
                 <CardBody>
-                    <p>{__('By clicking the following button, you will reset all plugin settings. This can be useful if you want to import a new set of settings or you want a fresh start.', 'simply-static')}</p>
+                    <p>{__('By clicking the "Reset Plugin Settings", you will reset all plugin settings. This can be useful if you want to import a new set of settings or you want a fresh start.', 'simply-static')}</p>
+                    <p>{__('If you click the "Reset Database Table" button instead, you will keep all your settings, and we will only recreate our DB table.', 'simply-static')}</p>
                     <p>
                         <Button onClick={runResetSettings}
                                 variant="secondary">{__('Reset Plugin Settings', 'simply-static')}</Button>
+                        <Button onClick={runResetDatabase} style={{marginLeft: "10px"}}
+                                variant="primary">{__('Reset Database Table', 'simply-static')}</Button>
                     </p>
                     {isReset ?
                         <Animate type="slide-in" options={{origin: 'top'}}>
@@ -167,6 +180,19 @@ function Utilities() {
                                 <Notice status="success" isDismissible={false}>
                                     <p>
                                         {__('Settings resetted successfully.', 'simply-static')}
+                                    </p>
+                                </Notice>
+                            )}
+                        </Animate>
+                        :
+                        ''
+                    }
+                    {isResetDatabase ?
+                        <Animate type="slide-in" options={{origin: 'top'}}>
+                            {() => (
+                                <Notice status="success" isDismissible={false}>
+                                    <p>
+                                        {__('Database table resetted successfully.', 'simply-static')}
                                     </p>
                                 </Notice>
                             )}

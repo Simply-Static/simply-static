@@ -156,6 +156,13 @@ function SettingsContextProvider(props) {
         });
     }
 
+    const resetDatabase = () => {
+        apiFetch({
+            path: '/simplystatic/v1/settings/reset-database',
+            method: 'POST',
+        });
+    }
+
     const updateFromNetwork = (blogId) => {
         apiFetch({
             path: '/simplystatic/v1/update-from-network',
@@ -331,6 +338,7 @@ function SettingsContextProvider(props) {
                 setSettings,
                 saveSettings,
                 resetSettings,
+                resetDatabase,
                 getSettings,
                 updateFromNetwork,
                 importSettings,
