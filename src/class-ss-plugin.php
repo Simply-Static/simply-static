@@ -307,8 +307,16 @@ class Plugin {
 			}
 
 			// Avoid duplicate status messages.
-			$cleaned = implode( '', array_unique( explode( '; ', $static_page->status_message ) ) );
-			$msg     .= $cleaned;
+			if ( ! empty ( $static_page->status_message ) ) {
+				if ( strpos( $static_page->status_message, ';' ) !== false ) {
+					$cleaned = implode( '', array_unique( explode( '; ', $static_page->status_message ) ) );
+					$msg     .= $cleaned;
+				} else {
+					$msg .= $static_page->status_message;
+				}
+			} else {
+				$msg .= $static_page->status_message;
+			}
 
 			$information = [
 				'id'          => $static_page->id,
