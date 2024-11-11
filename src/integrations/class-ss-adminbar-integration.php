@@ -14,7 +14,7 @@ class SS_Adminbar_Integration extends Integration {
 	protected $active_by_default = false;
 
 	public function __construct() {
-		$this->name        = __( 'Simply Static (Admin Bar)', 'simply-static' );
+		$this->name        = __( 'Admin Bar (Core)', 'simply-static' );
 		$this->description = __( 'Adds an admin bar integration for Simply Static to see the current status of static exports.', 'simply-static' );
 	}
 
