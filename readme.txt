@@ -250,6 +250,15 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 = 3.2.3 =
 
 * removed processing_pages_message method
+* added the ability to include files without a file extension (_headers, _redirects..)
+* added UI to reset database table
+* included diagnostics check for no-index setting
+* included diagnostics check for Basic Auth without proper configuration in settings
+* tweak to avoid duplicate notes in export log
+* renamed Simply Static (Admin Bar) to Admin Bar (Core)
+* renamed Environments to Environment (Core)
+* simplified http_request_args filter implementation
+* added notice to upgrade both (pro and free) because of removing deprecated methods
 
 = 3.2.2 =
 
