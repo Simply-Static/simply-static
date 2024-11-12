@@ -41,6 +41,12 @@ class Transfer_Files_Locally_Task extends Task {
 		$this->destination_dir = apply_filters( 'ss_local_dir', $this->options->get( 'local_dir' ) );
 		$this->archive_dir     = $this->options->get_archive_dir();
 
+		$create_dir = $this->maybe_create_local_directory();
+
+		if ( ! $create_dir ) {
+			return true; // Make sure we're out of the loop and finish it.
+		}
+
 		$done = $this->process_pages();
 
 		if ( $done ) {
@@ -59,6 +65,20 @@ class Transfer_Files_Locally_Task extends Task {
 		}
 
 		return $done;
+	}
+
+	public function maybe_create_local_directory() {
+		if ( is_dir( $this->destination_dir ) ) {
+			return true;
+		}
+
+		if ( wp_mkdir_p( $this->destination_dir ) === false ) {
+			Util::debug_log( "Cannot create directory: " . $this->destination_dir );
+			$this->save_status_message( 'Unable to create destination directory: ' . $this->destination_dir );
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
