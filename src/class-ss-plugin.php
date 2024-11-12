@@ -428,6 +428,11 @@ class Plugin {
 	 * @return array
 	 */
 	public function add_http_filters( $parsed_args, $url ) {
+
+		if ( ! Util::is_local_url( $url ) ) {
+			return $parsed_args;
+		}
+
 		// Basic Auth?
 		$basic_auth_user = self::$instance->options->get( 'http_basic_auth_username' );
 		$basic_auth_pass = self::$instance->options->get( 'http_basic_auth_password' );
