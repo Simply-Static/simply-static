@@ -16,7 +16,7 @@ import HelperVideo from "../components/HelperVideo";
 const {__} = wp.i18n;
 
 function GeneralSettings() {
-    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved} = useContext(SettingsContext);
+    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved, isPro} = useContext(SettingsContext);
 
     const [replaceType, setReplaceType] = useState('relative');
     const [useForms, setUseForms] = useState(false);
@@ -26,6 +26,7 @@ function GeneralSettings() {
     const [forceURLReplacement, setForceURLReplacement] = useState(false);
     const [hasCopied, setHasCopied] = useState(false);
     const [generate404, setGenerate404] = useState(false);
+    const [scanAll, setScanAll] = useState(false);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -63,6 +64,10 @@ function GeneralSettings() {
 
         if (settings.generate_404) {
             setGenerate404(settings.generate_404);
+        }
+
+        if (settings.scan_all) {
+            setScanAll(settings.scan_all);
         }
 
     }, [settings]);
@@ -221,6 +226,26 @@ function GeneralSettings() {
                         updateSetting('generate_404', value);
                     }}
                 />
+                <Spacer margin={5}/>
+                <ToggleControl
+                    label={
+                        <>
+                            {__('Scan and include all static assets found?', 'simply-static')}
+                        </>
+                    }
+                    disabled={('free' === options.plan || !isPro())}
+                    help={
+                        scanAll
+                            ? __('Scan and include.', 'simply-static')
+                            : __('Don\'t scan and include.', 'simply-static')
+                    }
+                    checked={scanAll}
+                    onChange={(value) => {
+                        setScanAll(value);
+                        updateSetting('scan_all', value);
+                    }}
+                />
+                <p>{ __('Use this option in case some files are missing from a theme or plugin. It will find all JavaScript, CSS and image files.', 'simple-static' ) }</p>
             </CardBody>
         </Card>
         <Spacer margin={5}/>
