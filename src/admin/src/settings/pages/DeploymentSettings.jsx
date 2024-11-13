@@ -147,7 +147,7 @@ function DeploymentSettings() {
                     <TextControl
                         label={__('Path', 'simply-static')}
                         type={"text"}
-                        help={__('This is the directory where your static files will be saved. The directory must exist and be writeable by the webserver', 'simply-static')}
+                        help={__("This is the directory where your static files will be saved. We will create it automatically on the first export if it doesn't exist.", 'simply-static')}
                         placeholder={options.home_path + "public_static/"}
                         value={settings.local_dir}
                         onChange={(path) => {
