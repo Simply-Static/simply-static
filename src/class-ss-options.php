@@ -118,7 +118,7 @@ class Options {
 	public function get( $name = '' ) {
 		return array_key_exists( $name, $this->options ) ?
 			(
-			defined( 'SIMPLY_STATIC_' . strtoupper( $name ) ) ?
+			'VERSION' !== strtoupper( $name ) && defined( 'SIMPLY_STATIC_' . strtoupper( $name ) ) ?
 				constant( 'SIMPLY_STATIC_' . strtoupper( $name ) ) :
 				apply_filters( 'ss_get_option_' . strtolower( $name ), $this->options[ $name ], $this )
 			)
