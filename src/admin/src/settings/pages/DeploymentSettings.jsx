@@ -360,6 +360,17 @@ function DeploymentSettings() {
                                 updateSetting('github_throttle_requests', value);
                             }}
                         />
+
+                        <TextControl
+                            label={__('Batch size', 'simply-static')}
+                            type={"number"}
+                            help={__('Enter the number of files you want to be processed in a single batch. If current export fails to deploy, lower the number.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            value={settings.github_batch_size ?? 100}
+                            onChange={(size) => {
+                                updateSetting('github_batch_size', size);
+                            }}
+                        />
                     </CardBody>
                 </Card>
             }
