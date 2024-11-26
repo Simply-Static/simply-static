@@ -244,4 +244,13 @@ trait canProcessPages {
 		           ->where( "file_path IS NOT NULL" )
 		           ->where( "file_path != ''" );
 	}
+
+	/**
+	 * Cleanup
+	 *
+	 * @return void
+	 */
+	public function cleanup() {
+		self::delete_total_pages();
+	}
 }
