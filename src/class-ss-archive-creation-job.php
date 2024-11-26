@@ -188,6 +188,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 				return false;
 			} else {
 				Util::debug_log( "We've found our next task: " . $next_task );
+
 				$this->task_cleanup( $next_task );
 
 				// start the next task
@@ -212,10 +213,11 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 *
 	 * @return void
 	 */
-	protected function task_cleanup( $task_name) {
+	protected function task_cleanup( $task_name ) {
 		$task = $this->get_task_object( $task_name );
 
 		if ( method_exists( $task, 'cleanup' ) ) {
+			Util::debug_log( "Cleaning on first run for task: " . $task_name );
 			$task->cleanup();
 		}
 	}
