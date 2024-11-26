@@ -44,13 +44,27 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 * @param string $option_key The options key name
 	 */
 	public function __construct() {
-		$this->options   = Options::instance();
+		$this->options = Options::instance();
 
 		if ( ! $this->is_job_done() ) {
 			register_shutdown_function( array( $this, 'shutdown_handler' ) );
 		}
 
+		// Set the cron interval for the job
+		add_filter( 'wp_archive_creation_job_cron_interval', array( $this, 'set_job_interval' ) );
+
 		parent::__construct();
+	}
+
+	/**
+	 * Set the interval for the job
+	 *
+	 * @param int $interval The interval in seconds
+	 *
+	 * @return int The interval in seconds
+	 */
+	public function set_job_interval( $interval ) {
+		return 1;    // default 5.
 	}
 
 	public function get_task_list() {
@@ -85,7 +99,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 
 			do_action( 'ss_archive_creation_job_before_start_queue', $blog_id, $this );
 
-			$first_task   = $task_list[0];
+			$first_task = $task_list[0];
 
 			if ( 'update' !== $type ) {
 				$archive_name = join( '-', array( Plugin::SLUG, $blog_id, time() ) );
@@ -316,13 +330,13 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 *
 	 * @return void
 	 */
-    public function save_status_message( $message, $key = null ) {
-        $task_name = $key ?: $this->get_current_task();
-        $this->options
-            ->add_status_message($message, $task_name)
-            ->save();
-        Util::debug_log( 'Status message: [' . $task_name . '] ' . $message );
-    }
+	public function save_status_message( $message, $key = null ) {
+		$task_name = $key ?: $this->get_current_task();
+		$this->options
+			->add_status_message( $message, $task_name )
+			->save();
+		Util::debug_log( 'Status message: [' . $task_name . '] ' . $message );
+	}
 
 	/**
 	 * Add a status message about the exception and cancel the job
@@ -393,7 +407,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 *
 	 * @return string
 	 */
-	public function maybe_wp_die( $return = null) {
+	public function maybe_wp_die( $return = null ) {
 		return 'cancel';
 	}
 }
