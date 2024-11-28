@@ -132,6 +132,28 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	}
 
 	/**
+	 * Get the task object or false if doesn't exist.
+	 *
+	 * @param $task_name
+	 *
+	 * @return false|mixed
+	 */
+	public function get_task_object( $task_name ) {
+		// convert 'an_example' to 'An_Example_Task'
+		$class_name = 'Simply_Static\\' . ucwords( $task_name ) . '_Task';
+		$class_name = apply_filters( 'simply_static_class_name', $class_name, $task_name );
+
+		// this shouldn't ever happen, but just in case...
+		if ( ! class_exists( $class_name ) ) {
+			$this->save_status_message( "Class doesn't exist: " . $class_name, 'error' );
+
+			return false;
+		}
+
+		return new $class_name();
+	}
+
+	/**
 	 * Perform the task at hand
 	 *
 	 * The way Archive_Creation_Job works is by taking a task name, performing
@@ -149,18 +171,11 @@ class Archive_Creation_Job extends \WP_Background_Process {
 
 		Util::debug_log( "Current task: " . $task_name );
 
-		// convert 'an_example' to 'An_Example_Task'
-		$class_name = 'Simply_Static\\' . ucwords( $task_name ) . '_Task';
-		$class_name = apply_filters( 'simply_static_class_name', $class_name, $task_name );
+		$task = $this->get_task_object( $task_name );
 
-		// this shouldn't ever happen, but just in case...
-		if ( ! class_exists( $class_name ) ) {
-			$this->save_status_message( "Class doesn't exist: " . $class_name, 'error' );
-
+		if ( false === $task ) {
 			return false;
 		}
-
-		$task = new $class_name();
 
 		// attempt to perform the task
 		try {
@@ -188,6 +203,8 @@ class Archive_Creation_Job extends \WP_Background_Process {
 			} else {
 				Util::debug_log( "We've found our next task: " . $next_task );
 
+				$this->task_cleanup( $next_task );
+
 				// start the next task
 				return $next_task;
 			}
@@ -201,6 +218,22 @@ class Archive_Creation_Job extends \WP_Background_Process {
 		Util::debug_log( "We shouldn't have gotten here; returning false to remove the " . $task_name . " task from the queue" );
 
 		return false; // remove item from queue
+	}
+
+	/**
+	 * Cleanup the task.
+	 *
+	 * @param string $task_name Task name.
+	 *
+	 * @return void
+	 */
+	protected function task_cleanup( $task_name ) {
+		$task = $this->get_task_object( $task_name );
+
+		if ( method_exists( $task, 'cleanup' ) ) {
+			Util::debug_log( "Cleaning on first run for task: " . $task_name );
+			$task->cleanup();
+		}
 	}
 
 	/**
