@@ -94,6 +94,11 @@ trait canProcessPages {
 
 				$static_page->{$this->processing_column} = Util::formatted_datetime();
 				$static_page->save();
+			} catch (Skip_Further_Processing_Exception $e) {
+				Util::debug_log( 'Encountered Processing Error. We are skipping further until next iteration. Error: ' . $e->getMessage() );
+				$static_page->set_error_message( $e->getMessage() );
+				$static_page->save();
+				break;
 			} catch (\Exception $e) {
 				Util::debug_log( 'Page URL: ' . $static_page->url . ' not being processed. Error: ' . $e->getMessage() );
 				$static_page->set_error_message( $e->getMessage() );

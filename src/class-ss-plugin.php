@@ -152,6 +152,7 @@ class Plugin {
 		require_once $path . 'src/class-ss-url-extractor.php';
 		require_once $path . 'src/class-ss-url-fetcher.php';
 		require_once $path . 'src/class-ss-archive-creation-job.php';
+		require_once $path . 'src/tasks/traits/class-skip-further-processing-exception.php';
 		require_once $path . 'src/tasks/traits/trait-can-process-pages.php';
 		require_once $path . 'src/tasks/traits/trait-can-transfer.php';
 		require_once $path . 'src/tasks/class-ss-task.php';
