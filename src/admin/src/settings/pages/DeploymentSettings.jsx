@@ -38,6 +38,16 @@ function DeploymentSettings() {
     const [pages, setPages] = useState(false);
     const [testDisabled, setTestDisabled] = useState(false);
     const [testRunning, setTestRunning] = useState(false);
+    const [deploymentOptions] = useState([
+        {label: __('ZIP Archive', 'simply-static'), value: 'zip'},
+        {label: __('Local Directory', 'simply-static'), value: 'local'},
+        {label: __('SFTP', 'simply-static'), value: 'sftp'},
+        {label: __('GitHub', 'simply-static'), value: 'github'},
+        {label: __('AWS S3', 'simply-static'), value: 'aws-s3'},
+        //{label: __('S3 Storage', 'simply-static'), value: 's3-storage'},
+        {label: __('Bunny CDN', 'simply-static'), value: 'cdn'},
+        {label: __('Tiiny.host', 'simply-static'), value: 'tiiny'}
+    ]);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -90,6 +100,11 @@ function DeploymentSettings() {
             setPages(pages);
         });
 
+        // Maybe include studio.
+        if (options.home.includes('static.studio')) {
+            deploymentOptions.push({label: __('Simply Static Studio', 'simply-static'), value: 'simply-static-studio'});
+        }
+
     }, [settings]);
 
     return (<div className={"inner-settings"}>
@@ -102,16 +117,7 @@ function DeploymentSettings() {
                 <SelectControl
                     label={__('Deployment method', 'simply-static')}
                     value={deliveryMethod}
-                    options={[
-                        {label: __('ZIP Archive', 'simply-static'), value: 'zip'},
-                        {label: __('Local Directory', 'simply-static'), value: 'local'},
-                        {label: __('SFTP', 'simply-static'), value: 'sftp'},
-                        {label: __('GitHub', 'simply-static'), value: 'github'},
-                        {label: __('AWS S3', 'simply-static'), value: 'aws-s3'},
-                        //{label: __('S3 Storage', 'simply-static'), value: 's3-storage'},
-                        {label: __('Bunny CDN', 'simply-static'), value: 'cdn'},
-                        {label: __('Tiiny.host', 'simply-static'), value: 'tiiny'}
-                    ]}
+                    options={deploymentOptions}
                     onChange={(method) => {
                         setDeliveryMethod(method);
                         updateSetting('delivery_method', method);
@@ -121,6 +127,20 @@ function DeploymentSettings() {
             </CardBody>
         </Card>
         <Spacer margin={5}/>
+        {deliveryMethod === 'simply-static-studio' &&
+            <Card>
+                <CardHeader>
+                    <b>{__('Simply Static Studio', 'simply-static')}<HelperVideo
+                        title={__('What is Simply Static Studio?', 'simply-static')}
+                        videoUrl={'https://youtu.be/WHaFjDte6zI'}/></b>
+                </CardHeader>
+                <CardBody>
+                    <p>
+                        {__('The static site hosting platform for your Static Studio powered WordPress websites.', 'simply-static')}
+                    </p>
+                </CardBody>
+            </Card>
+        }
         {deliveryMethod === 'zip' &&
             <Card>
                 <CardHeader>
@@ -722,7 +742,7 @@ function DeploymentSettings() {
                         <TextControl
                             label={__('Secret Access Key', 'simply-static')}
                             type={"password"}
-                            help= {__('Enter your Secret Key from S3 provider.', 'simply-static')}
+                            help={__('Enter your Secret Key from S3 provider.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             value={settings.s3_access_secret}
                             onChange={(secret) => {
