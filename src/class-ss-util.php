@@ -127,9 +127,9 @@ class Util {
 		$options = get_option( 'simply-static' );
 
 		if ( isset( $options['encryption_key'] ) ) {
-			return $simply_static_dir . $options['encryption_key'] . '-debug.txt';
+			return apply_filters( 'ss_debug_log_file', $simply_static_dir . $options['encryption_key'] . '-debug.txt', $options['encryption_key'] );
 		} else {
-			return $simply_static_dir . 'debug.txt';
+			return apply_filters( 'ss_debug_log_file', $simply_static_dir . 'debug.txt', '' );
 		}
 	}
 
