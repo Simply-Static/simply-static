@@ -250,6 +250,7 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 = 3.2.5.1-beta =
 
 * XML sitemap inclusion optional for single exports
+* fixed _load_textdomain_just_in_time error
 
 = 3.2.5 =
 
