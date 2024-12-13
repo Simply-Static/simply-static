@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Simply Static 2.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simply-static\n"
-"POT-Creation-Date: 2024-02-05 11:59+0100\n"
+"POT-Creation-Date: 2024-12-13 13:07+0100\n"
 "PO-Revision-Date: 2017-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.5\n"
 "X-Poedit-KeywordsList: __;_e;_x:1,2c;_ex:1,2c;_n:1,2;_nx:1,2,4c;_n_noop:1,2;"
 "_nx_noop:1,2,3c;esc_attr__;esc_html__;esc_attr_e;esc_html_e;esc_attr_x:1,2c;"
 "esc_html_x:1,2c\n"
@@ -33,1678 +33,2123 @@ msgstr ""
 msgid "Simply Static requires PHP 7.4 or higher."
 msgstr ""
 
-#: simply-static.php:102 simply-static.php:113
+#: simply-static.php:73
 msgid ""
-"You need to update Simply Static Pro to version 1.4 before continuing to use "
-"Simply Static, as we made significant changes requiring an upgrade."
+"You need to update Simply Static Pro to version 1.6.3.2 before continuing to "
+"use Simply Static, as we made significant changes requiring an upgrade."
 msgstr ""
 
-#: src/admin/build/index.js:186 src/admin/build/index.js:600
+#: simply-static.php:84
+msgid ""
+"You need to update Simply Static Pro to version  1.6.3.2 before continuing "
+"to use Simply Static, as we made significant changes requiring an upgrade."
+msgstr ""
+
+#: src/admin/build/index.js:252 src/admin/build/index.js:1066
 msgid "Activity Log"
 msgstr ""
 
-#: src/admin/build/index.js:347
-msgid "Download Log"
+#: src/admin/build/index.js:353
+msgid "Changing ..."
 msgstr ""
 
-#: src/admin/build/index.js:350
-msgid "Clear Log"
+#: src/admin/build/index.js:361
+msgid "Environment"
 msgstr ""
 
-#: src/admin/build/index.js:358
-msgid "Log file cleared."
+#: src/admin/build/index.js:442
+msgid "A new environment will be created with the current configuration."
+msgstr ""
+
+#: src/admin/build/index.js:448
+msgid "Creating..."
+msgstr ""
+
+#: src/admin/build/index.js:448
+msgid "Create"
 msgstr ""
 
 #: src/admin/build/index.js:451
+msgid "Cancel"
+msgstr ""
+
+#: src/admin/build/index.js:489
+msgid "Choose an environment or create a new one to configure settings."
+msgstr ""
+
+#: src/admin/build/index.js:494
+msgid "Delete selected environment"
+msgstr ""
+
+#: src/admin/build/index.js:716
+msgid "Requires saving settings"
+msgstr ""
+
+#: src/admin/build/index.js:717
+msgid "Automated Redirects with Redirection"
+msgstr ""
+
+#: src/admin/build/index.js:720
+msgid "Cookie Consent with Complianz"
+msgstr ""
+
+#: src/admin/build/index.js:727 src/admin/build/index.js:1901
+#: src/admin/build/index.js:2050 src/admin/build/index.js:2090
+#: src/admin/build/index.js:2158 src/admin/build/index.js:2321
+#: src/admin/build/index.js:2373 src/admin/build/index.js:2653
+#: src/admin/build/index.js:2669 src/admin/build/index.js:2694
+#: src/admin/build/index.js:2732 src/admin/build/index.js:3386
+#: src/admin/build/index.js:3471 src/admin/build/index.js:3509
+#: src/admin/build/index.js:3593 src/admin/build/index.js:3664
+#: src/admin/build/index.js:3779 src/admin/build/index.js:3810
+#: src/admin/build/index.js:3865 src/admin/build/index.js:3881
+msgid "Requires Simply Static Pro"
+msgstr ""
+
+#: src/admin/build/index.js:736
+msgid "Get the Pro version"
+msgstr ""
+
+#: src/admin/build/index.js:787
+msgid "Download Log"
+msgstr ""
+
+#: src/admin/build/index.js:790
+msgid "Clear Log"
+msgstr ""
+
+#: src/admin/build/index.js:798
+msgid "Log file cleared."
+msgstr ""
+
+#: src/admin/build/index.js:910
 msgid "Use current settings"
 msgstr ""
 
-#: src/admin/build/index.js:499
-msgid ""
-"You have to migrate your settings to version 3.x of Simply Static to ensure "
-"everything works smoothly with the new interface."
-msgstr ""
-
-#: src/admin/build/index.js:502 src/admin/build/index.js:2837
-msgid "Migrate settings"
-msgstr ""
-
-#: src/admin/build/index.js:521 src/admin/build/index.js:562
+#: src/admin/build/index.js:971 src/admin/build/index.js:1025
 msgid "Generate Static Files"
 msgstr ""
 
-#: src/admin/build/index.js:523 src/admin/build/index.js:564
+#: src/admin/build/index.js:973 src/admin/build/index.js:1027
 msgid "Generating..."
 msgstr ""
 
-#: src/admin/build/index.js:528 src/admin/build/index.js:569
+#: src/admin/build/index.js:978 src/admin/build/index.js:1032
 msgid "Cancel Export"
 msgstr ""
 
-#: src/admin/build/index.js:535 src/admin/build/index.js:659
+#: src/admin/build/index.js:985
 msgid "Changelog"
 msgstr ""
 
-#: src/admin/build/index.js:540 src/admin/build/index.js:664
+#: src/admin/build/index.js:990 src/admin/build/index.js:1131
 msgid "Documentation"
 msgstr ""
 
-#: src/admin/build/index.js:571 src/admin/build/index.js:2857
+#: src/admin/build/index.js:1012 src/admin/build/index.js:4043
+msgid "Export"
+msgstr ""
+
+#: src/admin/build/index.js:1014
+msgid "Update"
+msgstr ""
+
+#: src/admin/build/index.js:1017
+msgid "Update (Requires Simply Static Pro)"
+msgstr ""
+
+#: src/admin/build/index.js:1037 src/admin/build/index.js:4056
 msgid "Import"
 msgstr ""
 
-#: src/admin/build/index.js:574
+#: src/admin/build/index.js:1040
 msgid "Choose a subsite to import settings from."
 msgstr ""
 
-#: src/admin/build/index.js:583 src/admin/build/index.js:2865
+#: src/admin/build/index.js:1049 src/admin/build/index.js:4067
 msgid "Import Settings"
 msgstr ""
 
-#: src/admin/build/index.js:592
+#: src/admin/build/index.js:1058
 msgid "Settings successfully imported."
 msgstr ""
 
-#: src/admin/build/index.js:594
+#: src/admin/build/index.js:1060
 msgid "Tools"
 msgstr ""
 
-#: src/admin/build/index.js:606
+#: src/admin/build/index.js:1072 src/admin/build/index.js:2515
+#: src/admin/inc/class-ss-admin-settings.php:96
+#: src/admin/inc/class-ss-admin-settings.php:97
 msgid "Diagnostics"
 msgstr ""
 
-#: src/admin/build/index.js:608 src/admin/inc/class-ss-admin-settings.php:68
-#: src/admin/inc/class-ss-admin-settings.php:69
+#: src/admin/build/index.js:1074 src/admin/inc/class-ss-admin-settings.php:82
+#: src/admin/inc/class-ss-admin-settings.php:83 src/class-ss-plugin.php:417
 msgid "Settings"
 msgstr ""
 
-#: src/admin/build/index.js:614
+#: src/admin/build/index.js:1080
 msgid "General"
 msgstr ""
 
-#: src/admin/build/index.js:620
+#: src/admin/build/index.js:1086
 msgid "Deploy"
 msgstr ""
 
-#: src/admin/build/index.js:626 src/admin/build/index.js:1680
+#: src/admin/build/index.js:1092 src/admin/build/index.js:2651
 msgid "Forms"
 msgstr ""
 
-#: src/admin/build/index.js:632 src/admin/build/index.js:2617
+#: src/admin/build/index.js:1098 src/admin/build/index.js:3777
 msgid "Search"
 msgstr ""
 
-#: src/admin/build/index.js:638
+#: src/admin/build/index.js:1104
 msgid "Optimize"
 msgstr ""
 
-#: src/admin/build/index.js:640
+#: src/admin/build/index.js:1106
 msgid "Advanced"
 msgstr ""
 
-#: src/admin/build/index.js:646
+#: src/admin/build/index.js:1112 src/admin/build/index.js:3171
+msgid "Integrations"
+msgstr ""
+
+#: src/admin/build/index.js:1118
 msgid "Utilities"
 msgstr ""
 
-#: src/admin/build/index.js:652
-msgid "Misc"
+#: src/admin/build/index.js:1124
+msgid "Debug"
 msgstr ""
 
-#: src/admin/build/index.js:1046
+#: src/admin/build/index.js:1136
+msgid "Video Course"
+msgstr ""
+
+#: src/admin/build/index.js:1141
+msgid "Tutorials"
+msgstr ""
+
+#: src/admin/build/index.js:1159
+msgid ""
+"There are errors in diagnostics that may negatively affect your static "
+"export."
+msgstr ""
+
+#: src/admin/build/index.js:1159
+msgid "Please review them and get them fixed to avoid problems."
+msgstr ""
+
+#: src/admin/build/index.js:1166
+msgid "Visit Diagnostics"
+msgstr ""
+
+#: src/admin/build/index.js:1175
+msgid "You are using the pro version without a valid license."
+msgstr ""
+
+#: src/admin/build/index.js:1175
+msgid ""
+"We have temporarily disabled all the pro features now. Please contact our "
+"support to have the problem solved."
+msgstr ""
+
+#: src/admin/build/index.js:1614 src/class-ss-diagnostic.php:55
+msgid "Basic Auth"
+msgstr ""
+
+#: src/admin/build/index.js:1615
+msgid "How to set up basic auth"
+msgstr ""
+
+#: src/admin/build/index.js:1617
+msgid ""
+"If you've secured WordPress with HTTP Basic Auth you need to specify the "
+"username and password to use below."
+msgstr ""
+
+#: src/admin/build/index.js:1618
+msgid "Basic Auth Username"
+msgstr ""
+
+#: src/admin/build/index.js:1626
+msgid "Basic Auth Password"
+msgstr ""
+
+#: src/admin/build/index.js:1634
+msgid "Enable Basic Auth"
+msgstr ""
+
+#: src/admin/build/index.js:1635
+msgid "Automatically setting up Basic Auth requires Simply Static Pro."
+msgstr ""
+
+#: src/admin/build/index.js:1635
+msgid ""
+"Once enabled we will put your entire website behind password protection."
+msgstr ""
+
+#: src/admin/build/index.js:1644
+msgid "Requires Username & Password to work"
+msgstr ""
+
+#: src/admin/build/index.js:1646
+msgid "Temporary Files"
+msgstr ""
+
+#: src/admin/build/index.js:1647
+msgid "Temporary Files Directory"
+msgstr ""
+
+#: src/admin/build/index.js:1650
+msgid ""
+"Optionally specify the directory to save your temporary files. This "
+"directory must exist and be writeable."
+msgstr ""
+
+#: src/admin/build/index.js:1657
+msgid "Whitelist Plugins"
+msgstr ""
+
+#: src/admin/build/index.js:1658
+msgid "Whitelist plugins in diagnostics"
+msgstr ""
+
+#: src/admin/build/index.js:1660
+msgid ""
+"If you want to exclude certain plugins from the diagnostics check add the "
+"plugin slugs here (one per line)."
+msgstr ""
+
+#: src/admin/build/index.js:1667
+msgid "Proxy Setup"
+msgstr ""
+
+#: src/admin/build/index.js:1668 src/tasks/class-ss-setup-task.php:74
+msgid "Origin URL"
+msgstr ""
+
+#: src/admin/build/index.js:1670
+msgid ""
+"If the URL of your WordPress installation differs from the public-facing URL "
+"(Proxy Setup), add the public URL here."
+msgstr ""
+
+#: src/admin/build/index.js:1679
+msgid "Debug Log"
+msgstr ""
+
+#: src/admin/build/index.js:1680
+msgid "Activate Debug Log"
+msgstr ""
+
+#: src/admin/build/index.js:1681
+msgid "Enable it to download the debug log from Simply Static -> Generate."
+msgstr ""
+
+#: src/admin/build/index.js:1689
+msgid "Cron"
+msgstr ""
+
+#: src/admin/build/index.js:1690
+msgid "Use server-side cron job"
+msgstr ""
+
+#: src/admin/build/index.js:1691
+msgid ""
+"Enable this if you use a server-side cron job instead of the default WP-Cron."
+msgstr ""
+
+#: src/admin/build/index.js:1707 src/admin/build/index.js:2439
+#: src/admin/build/index.js:2764 src/admin/build/index.js:2988
+#: src/admin/build/index.js:3199 src/admin/build/index.js:3706
+#: src/admin/build/index.js:3939
+msgid "Settings saved successfully."
+msgstr ""
+
+#: src/admin/build/index.js:1714 src/admin/build/index.js:2446
+#: src/admin/build/index.js:2449 src/admin/build/index.js:2452
+#: src/admin/build/index.js:2771 src/admin/build/index.js:2995
+#: src/admin/build/index.js:3206 src/admin/build/index.js:3713
+#: src/admin/build/index.js:3946
+msgid "Save Settings"
+msgstr ""
+
+#: src/admin/build/index.js:1773
+msgid "ZIP Archive"
+msgstr ""
+
+#: src/admin/build/index.js:1776 src/admin/build/index.js:1871
+msgid "Local Directory"
+msgstr ""
+
+#: src/admin/build/index.js:1779 src/admin/build/index.js:2368
+msgid "SFTP"
+msgstr ""
+
+#: src/admin/build/index.js:1782 src/admin/build/index.js:1896
+msgid "GitHub"
+msgstr ""
+
+#: src/admin/build/index.js:1785
+msgid "AWS S3"
+msgstr ""
+
+#: src/admin/build/index.js:1790 src/admin/build/index.js:2085
+msgid "Bunny CDN"
+msgstr ""
+
+#: src/admin/build/index.js:1793 src/admin/build/index.js:2045
+msgid "Tiiny.host"
+msgstr ""
+
+#: src/admin/build/index.js:1836 src/admin/build/index.js:2631
 msgid "No page selected"
 msgstr ""
 
-#: src/admin/build/index.js:1054
+#: src/admin/build/index.js:1845 src/admin/build/index.js:1863
+msgid "Simply Static Studio"
+msgstr ""
+
+#: src/admin/build/index.js:1852
 msgid "Deployment Settings"
 msgstr ""
 
-#: src/admin/build/index.js:1054
+#: src/admin/build/index.js:1852
 msgid ""
 "Choose from a variety of deployment methods. Depending on your selection we "
 "either provide a ZIP file, export to a local directory or send your files to "
 "a remote destination."
 msgstr ""
 
-#: src/admin/build/index.js:1055 src/admin/build/index.js:1087
+#: src/admin/build/index.js:1853
 msgid "Deployment method"
 msgstr ""
 
-#: src/admin/build/index.js:1058 src/admin/build/index.js:1090
-msgid "ZIP Archive"
+#: src/admin/build/index.js:1864
+msgid "What is Simply Static Studio?"
 msgstr ""
 
-#: src/admin/build/index.js:1061 src/admin/build/index.js:1159
-msgid "GitHub"
+#: src/admin/build/index.js:1866
+msgid ""
+"The static site hosting platform for your Static Studio powered WordPress "
+"websites."
 msgstr ""
 
-#: src/admin/build/index.js:1064
-msgid "AWS S3"
+#: src/admin/build/index.js:1866
+msgid "ZIP"
 msgstr ""
 
-#: src/admin/build/index.js:1067 src/admin/build/index.js:1261
-msgid "Tiiny.host"
+#: src/admin/build/index.js:1867
+msgid "How to export a ZIP file"
 msgstr ""
 
-#: src/admin/build/index.js:1070 src/admin/build/index.js:1293
-msgid "Bunny CDN"
+#: src/admin/build/index.js:1869
+msgid ""
+"Get a download link in the activity log once the static export has finished."
 msgstr ""
 
-#: src/admin/build/index.js:1073 src/admin/build/index.js:1096
-#: src/admin/build/index.js:1127
-msgid "Simply CDN"
+#: src/admin/build/index.js:1872
+msgid "How to deploy to a local directory"
 msgstr ""
 
-#: src/admin/build/index.js:1076 src/admin/build/index.js:1093
-#: src/admin/build/index.js:1105
-msgid "Local Directory"
-msgstr ""
-
-#: src/admin/build/index.js:1079 src/admin/build/index.js:1498
-msgid "Digital Ocean Spaces"
-msgstr ""
-
-#: src/admin/build/index.js:1106 src/admin/build/index.js:1882
+#: src/admin/build/index.js:1875 src/admin/build/index.js:2907
 msgid "Path"
 msgstr ""
 
-#: src/admin/build/index.js:1108
+#: src/admin/build/index.js:1877
 msgid ""
-"This is the directory where your static files will be saved. The directory "
-"must exist and be writeable by the webserver"
+"This is the directory where your static files will be saved. We will create "
+"it automatically on the first export if it doesn't exist."
 msgstr ""
 
-#: src/admin/build/index.js:1119 src/admin/build/index.js:1924
+#: src/admin/build/index.js:1888 src/admin/build/index.js:2952
 msgid "Copied home path"
 msgstr ""
 
-#: src/admin/build/index.js:1119 src/admin/build/index.js:1924
+#: src/admin/build/index.js:1888 src/admin/build/index.js:2952
 msgid "Copy home path"
 msgstr ""
 
-#: src/admin/build/index.js:1120
+#: src/admin/build/index.js:1889
 msgid "Clear Local Directory"
 msgstr ""
 
-#: src/admin/build/index.js:1121
+#: src/admin/build/index.js:1890
 msgid "Clear local directory before running an export."
 msgstr ""
 
-#: src/admin/build/index.js:1121
+#: src/admin/build/index.js:1890
 msgid "Don't clear local directory before running an export."
 msgstr ""
 
-#: src/admin/build/index.js:1127
-msgid ""
-"The fast and easy way to bring your static website online. Simply CDN "
-"handles hosting, performance, security and form submissions for your static "
-"site."
+#: src/admin/build/index.js:1897
+msgid "How to deploy to a GitHub (2/2)"
 msgstr ""
 
-#: src/admin/build/index.js:1128
-msgid "Security Token"
-msgstr ""
-
-#: src/admin/build/index.js:1130
-msgid "Copy and paste the Security Token from your project."
-msgstr ""
-
-#: src/admin/build/index.js:1136
-msgid "Select a 404 page"
-msgstr ""
-
-#: src/admin/build/index.js:1138
-msgid "We will use that page as a 404 error page on your static website."
-msgstr ""
-
-#: src/admin/build/index.js:1144
-msgid "Use Forms?"
-msgstr ""
-
-#: src/admin/build/index.js:1145
-msgid "Proxy form submissions through Simply CDN."
-msgstr ""
-
-#: src/admin/build/index.js:1145
-msgid "Don't proxy form submissions through Simply CDN."
-msgstr ""
-
-#: src/admin/build/index.js:1152
-msgid "Select a \"Thank You\" page"
-msgstr ""
-
-#: src/admin/build/index.js:1154
-msgid ""
-"We will use that page to redirect your visitors after submitting a form on "
-"your static website."
-msgstr ""
-
-#: src/admin/build/index.js:1159
+#: src/admin/build/index.js:1901
 msgid ""
 "GitHub enables you to export your static website to one of the common static "
 "hosting providers like Netlify, Cloudflare Pages or GitHub Pages."
 msgstr ""
 
-#: src/admin/build/index.js:1160
+#: src/admin/build/index.js:1902
 msgid "Account Type"
 msgstr ""
 
-#: src/admin/build/index.js:1162
+#: src/admin/build/index.js:1904
 msgid "Depending on the account type the settings fields will change."
 msgstr ""
 
-#: src/admin/build/index.js:1164
+#: src/admin/build/index.js:1907
 msgid "Personal"
 msgstr ""
 
-#: src/admin/build/index.js:1167 src/admin/build/index.js:1175
+#: src/admin/build/index.js:1910 src/admin/build/index.js:1918
 msgid "Organization"
 msgstr ""
 
-#: src/admin/build/index.js:1177
+#: src/admin/build/index.js:1920
 msgid "Enter the name of your organization."
 msgstr ""
 
-#: src/admin/build/index.js:1183
+#: src/admin/build/index.js:1927
 msgid "Username"
 msgstr ""
 
-#: src/admin/build/index.js:1185
+#: src/admin/build/index.js:1929
 msgid "Enter your GitHub username."
 msgstr ""
 
-#: src/admin/build/index.js:1191 src/admin/build/index.js:1263
+#: src/admin/build/index.js:1936 src/admin/build/index.js:2052
 msgid "E-Mail"
 msgstr ""
 
-#: src/admin/build/index.js:1193
+#: src/admin/build/index.js:1938
 msgid ""
 "Enter your GitHub email address. This will be used to commit files to your "
 "repository."
 msgstr ""
 
-#: src/admin/build/index.js:1199
+#: src/admin/build/index.js:1945
 msgid "Personal Access Token"
 msgstr ""
 
-#: src/admin/build/index.js:1201
-msgid "You need a personal access token from GitHub."
+#: src/admin/build/index.js:1946
+msgid "How to prepare your GitHub account"
 msgstr ""
 
-#: src/admin/build/index.js:1207
+#: src/admin/build/index.js:1950
+msgid "You need a personal access token from GitHub. Learn how to get one "
+msgstr ""
+
+#: src/admin/build/index.js:1953 src/admin/build/index.js:1974
+#: src/admin/build/index.js:2096 src/admin/build/index.js:2108
+#: src/admin/build/index.js:2164 src/admin/build/index.js:2176
+msgid "here"
+msgstr ""
+
+#: src/admin/build/index.js:1960
 msgid "Repository"
 msgstr ""
 
-#: src/admin/build/index.js:1209
+#: src/admin/build/index.js:1962
 msgid ""
-"Enter a name for your repository. This should be lowercase and without any "
-"spaces or special characters."
+"Enter a name for your repository (lowercase without spaces or special "
+"characters)."
 msgstr ""
 
-#: src/admin/build/index.js:1215
+#: src/admin/build/index.js:1971
+msgid ""
+"Ensure to create the repository and add a readme file to it before running "
+"an export as shown in the docs "
+msgstr ""
+
+#: src/admin/build/index.js:1977
 msgid "Folder"
 msgstr ""
 
-#: src/admin/build/index.js:1217
+#: src/admin/build/index.js:1979
 msgid ""
 "Enter a relative path to a folder if you want to push files under it. "
 "Example: for github.com/USER/REPOSITORY/folder1, enter folder1"
 msgstr ""
 
-#: src/admin/build/index.js:1225
+#: src/admin/build/index.js:1988
 msgid ""
 "You need to create the repository manually within your organization before "
 "connecting it."
 msgstr ""
 
-#: src/admin/build/index.js:1228
+#: src/admin/build/index.js:1991
 msgid "Visiblity"
 msgstr ""
 
-#: src/admin/build/index.js:1230
+#: src/admin/build/index.js:1993
 msgid "Decide if you want to make your repository public or private."
 msgstr ""
 
-#: src/admin/build/index.js:1232
+#: src/admin/build/index.js:1996
 msgid "Public"
 msgstr ""
 
-#: src/admin/build/index.js:1235
+#: src/admin/build/index.js:1999
 msgid "Private"
 msgstr ""
 
-#: src/admin/build/index.js:1243
+#: src/admin/build/index.js:2007
 msgid "Branch"
 msgstr ""
 
-#: src/admin/build/index.js:1246
+#: src/admin/build/index.js:2010
 msgid ""
 "Simply Static automatically uses \"main\" as branch. You may want to modify "
 "that for example to gh-pages. for GitHub Pages."
 msgstr ""
 
-#: src/admin/build/index.js:1252
+#: src/admin/build/index.js:2017
 msgid "Webhook URL"
 msgstr ""
 
-#: src/admin/build/index.js:1254
+#: src/admin/build/index.js:2019
 msgid ""
 "Enter your Webhook URL here and Simply Static will send a POST request after "
 "all files are commited to GitHub."
 msgstr ""
 
-#: src/admin/build/index.js:1261
+#: src/admin/build/index.js:2026
+msgid "Throttle Requests"
+msgstr ""
+
+#: src/admin/build/index.js:2027
+msgid ""
+"Enable this option if you are experiencing issues with the GitHub API rate "
+"limit."
+msgstr ""
+
+#: src/admin/build/index.js:2035
+msgid "Batch size"
+msgstr ""
+
+#: src/admin/build/index.js:2037
+msgid ""
+"Enter the number of files you want to be processed in a single batch. If "
+"current export fails to deploy, lower the number."
+msgstr ""
+
+#: src/admin/build/index.js:2046
+msgid "How to deploy to Tiiny.host"
+msgstr ""
+
+#: src/admin/build/index.js:2050
 msgid ""
 "Deploying to Tiiny.host is the easiest and fastest deployment option "
 "available in Simply Static Pro."
 msgstr ""
 
-#: src/admin/build/index.js:1265
+#: src/admin/build/index.js:2054
 msgid ""
 "This field is auto-filled with the e-mail address used for activating Simply "
-"Static Pro. An account will be created automatically on your first "
-"deployment."
+"Static Pro."
 msgstr ""
 
-#: src/admin/build/index.js:1268
+#: src/admin/build/index.js:2054
+msgid "An account will be created automatically on your first deployment."
+msgstr ""
+
+#: src/admin/build/index.js:2057
 msgid "Subdomain"
 msgstr ""
 
-#: src/admin/build/index.js:1270
+#: src/admin/build/index.js:2059
 msgid ""
 "That's the part before your TLD. Your full URL is the combination of the "
 "subdomain plus the domain suffix."
 msgstr ""
 
-#: src/admin/build/index.js:1276
+#: src/admin/build/index.js:2066
 msgid "Domain Suffix"
 msgstr ""
 
-#: src/admin/build/index.js:1278
+#: src/admin/build/index.js:2068
 msgid ""
 "This defaults to tiiny.site. If you have a custom domain configured in Tiiny."
 "host, you can also use  that one."
 msgstr ""
 
-#: src/admin/build/index.js:1284
+#: src/admin/build/index.js:2075
 msgid "Password Protection"
 msgstr ""
 
-#: src/admin/build/index.js:1286
+#: src/admin/build/index.js:2077
 msgid ""
 "Adding a password will activate password protection on your static site. The "
 "website is only visible with the password."
 msgstr ""
 
-#: src/admin/build/index.js:1293
+#: src/admin/build/index.js:2086
+msgid "How to deploy to Bunny CDN"
+msgstr ""
+
+#: src/admin/build/index.js:2090
 msgid ""
 "Bunny CDN is a fast and reliable CDN provider that you can run your static "
 "website on."
 msgstr ""
 
-#: src/admin/build/index.js:1294
+#: src/admin/build/index.js:2091
 msgid "Bunny CDN API Key"
 msgstr ""
 
-#: src/admin/build/index.js:1296
+#: src/admin/build/index.js:2093
 msgid ""
 "Enter your API Key from Bunny CDN. You can find your API-Key as described "
-"here."
 msgstr ""
 
-#: src/admin/build/index.js:1302
+#: src/admin/build/index.js:2103
 msgid "Storage Host"
 msgstr ""
 
-#: src/admin/build/index.js:1304
+#: src/admin/build/index.js:2105
 msgid ""
 "Depending on your location, you have a different storage host. You find out "
-"which URL to use here."
+"which URL to use "
 msgstr ""
 
-#: src/admin/build/index.js:1310
+#: src/admin/build/index.js:2115
 msgid "Bunny CDN Access Key"
 msgstr ""
 
-#: src/admin/build/index.js:1312
+#: src/admin/build/index.js:2117
 msgid ""
 "Enter your Acess Key from Bunny CDN. You will find it within your storage "
 "zone setttings within FTP & API Access -> Password."
 msgstr ""
 
-#: src/admin/build/index.js:1318
+#: src/admin/build/index.js:2124
 msgid "Pull Zone"
 msgstr ""
 
-#: src/admin/build/index.js:1320
+#: src/admin/build/index.js:2126
 msgid ""
 "A pull zone is the connection of your CDN to the internet. Simply Static "
 "will try to find an existing pull zone with the provided name, if there is "
 "none it creates a new pull zone."
 msgstr ""
 
-#: src/admin/build/index.js:1326
+#: src/admin/build/index.js:2133
 msgid "Storage Zone"
 msgstr ""
 
-#: src/admin/build/index.js:1328
+#: src/admin/build/index.js:2135
 msgid ""
 "A storage zone contains your static files. Simply Static will try to find an "
 "existing storage zone with the provided name, if there is none it creates a "
 "new storage zone."
 msgstr ""
 
-#: src/admin/build/index.js:1334 src/admin/build/index.js:1473
+#: src/admin/build/index.js:2142 src/admin/build/index.js:2288
+#: src/admin/build/index.js:2358
 msgid "Subdirectory"
 msgstr ""
 
-#: src/admin/build/index.js:1337
+#: src/admin/build/index.js:2145
 msgid ""
 "If you want to transfer the files to a specific subdirectory on your storage "
 "zone add the name of that directory here."
 msgstr ""
 
-#: src/admin/build/index.js:1343
-msgid "404 Page"
-msgstr ""
-
-#: src/admin/build/index.js:1346
-msgid "Relative path to your custom 404 page."
-msgstr ""
-
-#: src/admin/build/index.js:1353
+#: src/admin/build/index.js:2153
 msgid "Amazon AWS S3"
 msgstr ""
 
-#: src/admin/build/index.js:1354
+#: src/admin/build/index.js:2154
+msgid "How to deploy to Amazon AWS S3"
+msgstr ""
+
+#: src/admin/build/index.js:2159 src/admin/build/index.js:2322
 msgid "Access Key ID"
 msgstr ""
 
-#: src/admin/build/index.js:1356
-msgid "Enter your Access Key from AWS."
+#: src/admin/build/index.js:2161
+msgid "Enter your Access Key from AWS. Learn how to get one "
 msgstr ""
 
-#: src/admin/build/index.js:1362
+#: src/admin/build/index.js:2171 src/admin/build/index.js:2331
 msgid "Secret Access Key"
 msgstr ""
 
-#: src/admin/build/index.js:1364
-msgid "Enter your Secret Key from AWS."
+#: src/admin/build/index.js:2173
+msgid "Enter your Secret Key from AWS. Learn how to get one "
 msgstr ""
 
-#: src/admin/build/index.js:1370 src/admin/build/index.js:1524
+#: src/admin/build/index.js:2183
 msgid "Region"
 msgstr ""
 
-#: src/admin/build/index.js:1373
+#: src/admin/build/index.js:2186
 msgid "US East (Ohio)"
 msgstr ""
 
-#: src/admin/build/index.js:1376
+#: src/admin/build/index.js:2189
 msgid "US East (N. Virginia)"
 msgstr ""
 
-#: src/admin/build/index.js:1379
+#: src/admin/build/index.js:2192
 msgid "US West (N. California)"
 msgstr ""
 
-#: src/admin/build/index.js:1382
+#: src/admin/build/index.js:2195
 msgid "US West (Oregon)"
 msgstr ""
 
-#: src/admin/build/index.js:1385
+#: src/admin/build/index.js:2198
 msgid "Africa (Cape Town)"
 msgstr ""
 
-#: src/admin/build/index.js:1388
+#: src/admin/build/index.js:2201
 msgid "Asia Pacific (Hong Kong)"
 msgstr ""
 
-#: src/admin/build/index.js:1391
+#: src/admin/build/index.js:2204
 msgid "Asia Pacific (Hyderabad)"
 msgstr ""
 
-#: src/admin/build/index.js:1394
+#: src/admin/build/index.js:2207
 msgid "Asia Pacific (Jakarta)"
 msgstr ""
 
-#: src/admin/build/index.js:1397
+#: src/admin/build/index.js:2210
 msgid "Asia Pacific (Melbourne)"
 msgstr ""
 
-#: src/admin/build/index.js:1400
+#: src/admin/build/index.js:2213
 msgid "Asia Pacific (Mumbai)"
 msgstr ""
 
-#: src/admin/build/index.js:1403
+#: src/admin/build/index.js:2216
 msgid "Asia Pacific (Osaka)"
 msgstr ""
 
-#: src/admin/build/index.js:1406
+#: src/admin/build/index.js:2219
 msgid "Asia Pacific (Seoul)"
 msgstr ""
 
-#: src/admin/build/index.js:1409
+#: src/admin/build/index.js:2222
 msgid "Asia Pacific (Singapore)"
 msgstr ""
 
-#: src/admin/build/index.js:1412
+#: src/admin/build/index.js:2225
 msgid "Asia Pacific (Sydney)"
 msgstr ""
 
-#: src/admin/build/index.js:1415
+#: src/admin/build/index.js:2228
 msgid "Asia Pacific (Tokyo)"
 msgstr ""
 
-#: src/admin/build/index.js:1418
+#: src/admin/build/index.js:2231
 msgid "Canada (Central)"
 msgstr ""
 
-#: src/admin/build/index.js:1421
+#: src/admin/build/index.js:2234
 msgid "Europe (Frankfurt)"
 msgstr ""
 
-#: src/admin/build/index.js:1424
+#: src/admin/build/index.js:2237
 msgid "Europe (Ireland)"
 msgstr ""
 
-#: src/admin/build/index.js:1427
+#: src/admin/build/index.js:2240
 msgid "Europe (London)"
 msgstr ""
 
-#: src/admin/build/index.js:1430
+#: src/admin/build/index.js:2243
 msgid "Europe (Milan)"
 msgstr ""
 
-#: src/admin/build/index.js:1433
+#: src/admin/build/index.js:2246
 msgid "Europe (Paris)"
 msgstr ""
 
-#: src/admin/build/index.js:1436
+#: src/admin/build/index.js:2249
 msgid "Europe (Spain)"
 msgstr ""
 
-#: src/admin/build/index.js:1439
+#: src/admin/build/index.js:2252
 msgid "Europe (Stockholm)"
 msgstr ""
 
-#: src/admin/build/index.js:1442
+#: src/admin/build/index.js:2255
 msgid "Europe (Zurich)"
 msgstr ""
 
-#: src/admin/build/index.js:1445
+#: src/admin/build/index.js:2258
 msgid "Middle East (Bahrain)"
 msgstr ""
 
-#: src/admin/build/index.js:1448
+#: src/admin/build/index.js:2261
 msgid "Middle East (UAE)"
 msgstr ""
 
-#: src/admin/build/index.js:1451
+#: src/admin/build/index.js:2264
 msgid "South America (São Paulo)"
 msgstr ""
 
-#: src/admin/build/index.js:1454
+#: src/admin/build/index.js:2267
 msgid "AWS GovCloud (US-East)"
 msgstr ""
 
-#: src/admin/build/index.js:1457
+#: src/admin/build/index.js:2270
 msgid "AWS GovCloud (US-West)"
 msgstr ""
 
-#: src/admin/build/index.js:1465
+#: src/admin/build/index.js:2279 src/admin/build/index.js:2349
 msgid "Bucket"
 msgstr ""
 
-#: src/admin/build/index.js:1467
+#: src/admin/build/index.js:2281 src/admin/build/index.js:2351
 msgid "Add the name of your bucket here."
 msgstr ""
 
-#: src/admin/build/index.js:1475
+#: src/admin/build/index.js:2290 src/admin/build/index.js:2360
 msgid "Add an optional subdirectory for your bucket"
 msgstr ""
 
-#: src/admin/build/index.js:1481
+#: src/admin/build/index.js:2297
 msgid "Cloudfront Distribution ID"
 msgstr ""
 
-#: src/admin/build/index.js:1483
+#: src/admin/build/index.js:2299
 msgid "We automatically invalidate the cache after each export."
 msgstr ""
 
-#: src/admin/build/index.js:1489
+#: src/admin/build/index.js:2306
 msgid "Empty bucket before new export?"
 msgstr ""
 
-#: src/admin/build/index.js:1490
+#: src/admin/build/index.js:2307
 msgid "Clear bucket before new export."
 msgstr ""
 
-#: src/admin/build/index.js:1490
+#: src/admin/build/index.js:2307
 msgid "Don't clear bucket before new export."
 msgstr ""
 
-#: src/admin/build/index.js:1499
-msgid "Spaces Key"
+#: src/admin/build/index.js:2316
+msgid "S3-compatible Storage"
 msgstr ""
 
-#: src/admin/build/index.js:1501
-msgid "Enter your Spaces Key from Digital Ocean."
+#: src/admin/build/index.js:2317
+msgid "How to deploy to S3 compatible storages?"
 msgstr ""
 
-#: src/admin/build/index.js:1507
-msgid "Secret"
+#: src/admin/build/index.js:2324
+msgid "Enter your Access Key from your S3 provider."
 msgstr ""
 
-#: src/admin/build/index.js:1509
-msgid "Enter your Spaces Secret from Digital Ocean."
+#: src/admin/build/index.js:2333
+msgid "Enter your Secret Key from S3 provider."
 msgstr ""
 
-#: src/admin/build/index.js:1515
-msgid "Bucket Name"
+#: src/admin/build/index.js:2340
+msgid "Base URL"
 msgstr ""
 
-#: src/admin/build/index.js:1516
-msgid "The bucket name for your space."
+#: src/admin/build/index.js:2342
+msgid "Add the base URL of the S3 service."
 msgstr ""
 
-#: src/admin/build/index.js:1526
-msgid "The region for your space."
+#: src/admin/build/index.js:2369
+msgid "How to deploy via SFTP"
 msgstr ""
 
-#: src/admin/build/index.js:1535
-msgid "Your endpoint will be"
+#: src/admin/build/index.js:2374 src/admin/build/index.js:2898
+msgid "Host"
 msgstr ""
 
-#: src/admin/build/index.js:1545 src/admin/build/index.js:1748
-#: src/admin/build/index.js:1954 src/admin/build/index.js:2158
-#: src/admin/build/index.js:2549 src/admin/build/index.js:2754
-msgid "Settings saved successfully."
+#: src/admin/build/index.js:2376
+msgid "Enter your SFTP host."
 msgstr ""
 
-#: src/admin/build/index.js:1552 src/admin/build/index.js:1755
-#: src/admin/build/index.js:1961 src/admin/build/index.js:2165
-#: src/admin/build/index.js:2556 src/admin/build/index.js:2761
-msgid "Save Settings"
+#: src/admin/build/index.js:2383
+msgid "Port"
 msgstr ""
 
-#: src/admin/build/index.js:1681
+#: src/admin/build/index.js:2386
+msgid "Enter your SFTP port."
+msgstr ""
+
+#: src/admin/build/index.js:2392
+msgid "SFTP username"
+msgstr ""
+
+#: src/admin/build/index.js:2393
+msgid "Enter your SFTP username."
+msgstr ""
+
+#: src/admin/build/index.js:2402
+msgid "SFTP password"
+msgstr ""
+
+#: src/admin/build/index.js:2405
+msgid "Enter your SFTP password."
+msgstr ""
+
+#: src/admin/build/index.js:2411
+msgid "SFTP private key"
+msgstr ""
+
+#: src/admin/build/index.js:2413
+msgid ""
+"OPTIONAL: This is only required if you need to authenticate via a private "
+"key to access your SFTP server."
+msgstr ""
+
+#: src/admin/build/index.js:2414
+msgid ""
+"Enter your SFTP private key if you want password.less upload and the server "
+"is configured to allow it. You can set it as a constant in wp-config.php by "
+"using define('SSP_SFTP_KEY', 'YOUR_KEY')"
+msgstr ""
+
+#: src/admin/build/index.js:2420
+msgid "SFTP folder"
+msgstr ""
+
+#: src/admin/build/index.js:2421
+msgid ""
+"Leave empty to upload to the default SFTP folder. Enter a folder path where "
+"you want the static files to be uploaded to (example: \"uploads\" will "
+"upload to uploads folder. \"uploads/new-folder\" will upload files to \"new-"
+"folder\"). "
+msgstr ""
+
+#: src/admin/build/index.js:2469
+msgid "Save settings to test"
+msgstr ""
+
+#: src/admin/build/index.js:2469
+msgid "Test Deployment"
+msgstr ""
+
+#: src/admin/build/index.js:2516
+msgid "How to use diagnostics"
+msgstr ""
+
+#: src/admin/build/index.js:2518
+msgid ""
+"Our diagnostics tool provides detailed insights into your WordPress "
+"installation and server configuration and tells you exactly what needs to be "
+"optimized to get the most out of Simply Static. Click the button below to "
+"get the latest results."
+msgstr ""
+
+#: src/admin/build/index.js:2521
+msgid "Reset Diagnostics"
+msgstr ""
+
+#: src/admin/build/index.js:2529
+msgid "Diagnostics resetted successfully."
+msgstr ""
+
+#: src/admin/build/index.js:2654
 msgid "Use forms?"
 msgstr ""
 
-#: src/admin/build/index.js:1682
+#: src/admin/build/index.js:2655
 msgid "Use Forms on your static website."
 msgstr ""
 
-#: src/admin/build/index.js:1682
+#: src/admin/build/index.js:2655
 msgid "Don't use forms on your static website."
 msgstr ""
 
-#: src/admin/build/index.js:1690
+#: src/admin/build/index.js:2665
+msgid "Create a form connection"
+msgstr ""
+
+#: src/admin/build/index.js:2667
 msgid "Comments"
 msgstr ""
 
-#: src/admin/build/index.js:1691
+#: src/admin/build/index.js:2670
 msgid "Use comments?"
 msgstr ""
 
-#: src/admin/build/index.js:1692
+#: src/admin/build/index.js:2671
 msgid "Use comments on your static website."
 msgstr ""
 
-#: src/admin/build/index.js:1692
+#: src/admin/build/index.js:2671
 msgid "Don't use comments on your static website."
 msgstr ""
 
-#: src/admin/build/index.js:1699
-msgid "Redirect URL"
+#: src/admin/build/index.js:2679
+msgid "Select a redirect page"
 msgstr ""
 
-#: src/admin/build/index.js:1702
+#: src/admin/build/index.js:2681
 msgid ""
-"The page will be generated and committed automatically after a comment was "
-"added, but it might take a while so its good practice to redirect the "
-"visitor."
+"The post will be regenerated after comment submission, but it might take a "
+"while so its good practice to redirect the visitor."
 msgstr ""
 
-#: src/admin/build/index.js:1709
+#: src/admin/build/index.js:2689
 msgid "CORS"
 msgstr ""
 
-#: src/admin/build/index.js:1709
+#: src/admin/build/index.js:2690
+msgid "How to deal with CORS"
+msgstr ""
+
+#: src/admin/build/index.js:2694
 msgid ""
-"When using Forms and Comments in Simply Static Pro you may encouter CORS "
+"When using Forms and Comments in Simply Static Pro you may encounter CORS "
 "issues as you make requests from your static website to your original one."
 msgstr ""
 
-#: src/admin/build/index.js:1712
+#: src/admin/build/index.js:2697
 msgid ""
 "Due to the variety of server setups out there, you may need to make changes "
 "on your server."
 msgstr ""
 
-#: src/admin/build/index.js:1715
+#: src/admin/build/index.js:2700
 msgid "Static URL"
 msgstr ""
 
-#: src/admin/build/index.js:1718
+#: src/admin/build/index.js:2703
 msgid "Add the URL of your static website to allow CORS from it."
 msgstr ""
 
-#: src/admin/build/index.js:1724
+#: src/admin/build/index.js:2710
 msgid "Select CORS method"
 msgstr ""
 
-#: src/admin/build/index.js:1726
+#: src/admin/build/index.js:2712
 msgid "Choose one of the methods to allow CORS for your website."
 msgstr ""
 
-#: src/admin/build/index.js:1830 src/admin/build/index.js:1831
+#: src/admin/build/index.js:2727 src/admin/build/index.js:2728
+msgid "Embed Dynamic Content (iFrame)"
+msgstr ""
+
+#: src/admin/build/index.js:2732
+msgid ""
+"We replace the HTML of the URLs with an iFrame that embeds the content "
+"directly from your WordPress website."
+msgstr ""
+
+#: src/admin/build/index.js:2732
+msgid ""
+"This way you can use dynamic elements on your static website without the "
+"need of a specific integration."
+msgstr ""
+
+#: src/admin/build/index.js:2735
+msgid "This requires your WordPress website to be online all the time."
+msgstr ""
+
+#: src/admin/build/index.js:2738
+msgid "URLs to embed as an iFrame"
+msgstr ""
+
+#: src/admin/build/index.js:2740
+msgid ""
+"If you want to embed specific pages from your WordPress website into your "
+"static website, add the URLs here (one per line)."
+msgstr ""
+
+#: src/admin/build/index.js:2747
+msgid "Custom CSS"
+msgstr ""
+
+#: src/admin/build/index.js:2748
+msgid ""
+"These styles will only apply to the embedded pages, not your entire website."
+msgstr ""
+
+#: src/admin/build/index.js:2852 src/admin/build/index.js:2856
 msgid "Replacing URLs"
 msgstr ""
 
-#: src/admin/build/index.js:1830
+#: src/admin/build/index.js:2853
+msgid "How to replace URLs"
+msgstr ""
+
+#: src/admin/build/index.js:2855
 msgid ""
 "When exporting your static site, any links to your WordPress site will be "
 "replaced by one of the following: absolute URLs, relative URLs, or URLs "
 "contructed for offline use."
 msgstr ""
 
-#: src/admin/build/index.js:1834
+#: src/admin/build/index.js:2859
 msgid "Absolute URLs"
 msgstr ""
 
-#: src/admin/build/index.js:1837
+#: src/admin/build/index.js:2862
 msgid "Relative Path"
 msgstr ""
 
-#: src/admin/build/index.js:1840
+#: src/admin/build/index.js:2865
 msgid "Offline Usage"
 msgstr ""
 
-#: src/admin/build/index.js:1852
+#: src/admin/build/index.js:2877
 msgid "Scheme"
 msgstr ""
 
-#: src/admin/build/index.js:1873
-msgid "Host"
-msgstr ""
-
-#: src/admin/build/index.js:1881
+#: src/admin/build/index.js:2906
 msgid ""
 "Convert all URLs for your WordPress site to absolute URLs at the domain "
 "specified above."
 msgstr ""
 
-#: src/admin/build/index.js:1890
+#: src/admin/build/index.js:2915
 msgid ""
 "Convert all URLs for your WordPress site to relative URLs that will work at "
 "any domain."
 msgstr ""
 
-#: src/admin/build/index.js:1890
+#: src/admin/build/index.js:2915
 msgid ""
 "Optionally specify a path above if you intend to place the files in a "
 "subdirectory."
 msgstr ""
 
-#: src/admin/build/index.js:1893
+#: src/admin/build/index.js:2918
 msgid "Example"
 msgstr ""
 
-#: src/admin/build/index.js:1893
+#: src/admin/build/index.js:2918
 msgid ""
 "enter /path above if you wanted to serve your files at www.example.com/path/"
 msgstr ""
 
-#: src/admin/build/index.js:1893
+#: src/admin/build/index.js:2918
 msgid ""
 "Convert all URLs for your WordPress site so that you can browse the site "
 "locally on your own computer without hosting it on a web server."
 msgstr ""
 
-#: src/admin/build/index.js:1894
+#: src/admin/build/index.js:2919
 msgid "Force URL replacements"
 msgstr ""
 
-#: src/admin/build/index.js:1895
+#: src/admin/build/index.js:2920
 msgid ""
 "Replace all occurrences of the WordPress URL with the static URL (includes "
 "inline CSS and JS)."
 msgstr ""
 
-#: src/admin/build/index.js:1895
+#: src/admin/build/index.js:2920
 msgid "Replace only occurrences of the WordPress URL that match our tag list."
 msgstr ""
 
-#: src/admin/build/index.js:1903
+#: src/admin/build/index.js:2928
 msgid "Include"
 msgstr ""
 
-#: src/admin/build/index.js:1904
+#: src/admin/build/index.js:2929 src/admin/build/index.js:2968
+msgid "Include & Exclude files and pages"
+msgstr ""
+
+#: src/admin/build/index.js:2932
 msgid "Additional URLs"
 msgstr ""
 
-#: src/admin/build/index.js:1906
+#: src/admin/build/index.js:2934
 msgid ""
 "If you want to create static copies of pages or files that aren't linked to, "
 "add the URLs here (one per line)."
 msgstr ""
 
-#: src/admin/build/index.js:1912
+#: src/admin/build/index.js:2940
 msgid "Additional Files and Directories"
 msgstr ""
 
-#: src/admin/build/index.js:1914
+#: src/admin/build/index.js:2942
 msgid ""
 "Sometimes you may want to include additional files (such as files referenced "
 "via AJAX) or directories. Add the paths to those files or directories here "
 "(one per line)."
 msgstr ""
 
-#: src/admin/build/index.js:1927
+#: src/admin/build/index.js:2955
 msgid "Generate 404 Page?"
 msgstr ""
 
-#: src/admin/build/index.js:1928
+#: src/admin/build/index.js:2956
+msgid "How to manage 404 pages?"
+msgstr ""
+
+#: src/admin/build/index.js:2959
 msgid "Generate a 404 page."
 msgstr ""
 
-#: src/admin/build/index.js:1928
+#: src/admin/build/index.js:2959
 msgid "Don't generate a 404 page."
 msgstr ""
 
-#: src/admin/build/index.js:1936
+#: src/admin/build/index.js:2967
 msgid "Exclude"
 msgstr ""
 
-#: src/admin/build/index.js:1937
+#: src/admin/build/index.js:2971
 msgid "Urls to exclude"
 msgstr ""
 
-#: src/admin/build/index.js:1939
+#: src/admin/build/index.js:2973
 msgid ""
 "Specify URLs (or parts of URLs) you want to exclude from the processing (one "
 "per line)."
 msgstr ""
 
-#: src/admin/build/index.js:2014
+#: src/admin/build/index.js:3048
 msgid "Multisite"
 msgstr ""
 
-#: src/admin/build/index.js:2015
+#: src/admin/build/index.js:3049
 msgid "Choose a site to export"
 msgstr ""
 
-#: src/admin/build/index.js:2045 src/admin/build/index.js:2130
+#: src/admin/build/index.js:3079
 msgid "Debugging"
 msgstr ""
 
-#: src/admin/build/index.js:2047
+#: src/admin/build/index.js:3081
 msgid "Export Log"
 msgstr ""
 
-#: src/admin/build/index.js:2101
-msgid "Temporary Files"
-msgstr ""
-
-#: src/admin/build/index.js:2101
+#: src/admin/build/index.js:3171
 msgid ""
-"Your static files are temporarily saved to a directory before being copied "
-"to their destination or creating a ZIP."
+"Control Integrations that will be active during the export of the static "
+"site."
 msgstr ""
 
-#: src/admin/build/index.js:2102
-msgid "Temporary Files Directory"
-msgstr ""
-
-#: src/admin/build/index.js:2105
-msgid ""
-"Specify the directory to save your temporary files. This directory must "
-"exist and be writeable."
-msgstr ""
-
-#: src/admin/build/index.js:2112
-msgid "Basic Auth"
-msgstr ""
-
-#: src/admin/build/index.js:2112
-msgid ""
-"If you've secured WordPress with HTTP Basic Auth you can specify the "
-"username and password to use below."
-msgstr ""
-
-#: src/admin/build/index.js:2113
-msgid "Basic Auth Username"
-msgstr ""
-
-#: src/admin/build/index.js:2121
-msgid "Basic Auth Password"
-msgstr ""
-
-#: src/admin/build/index.js:2131
-msgid "Debugging Mode"
-msgstr ""
-
-#: src/admin/build/index.js:2132
-msgid "Enable debugging mode."
-msgstr ""
-
-#: src/admin/build/index.js:2132
-msgid "Disable debugging mode."
-msgstr ""
-
-#: src/admin/build/index.js:2139 src/tasks/class-ss-setup-task.php:81
-msgid "Origin URL"
-msgstr ""
-
-#: src/admin/build/index.js:2141
-msgid ""
-"If the URL of your WordPress installation differs from the public-facing URL "
-"(Proxy Setup), add the public URL here."
-msgstr ""
-
-#: src/admin/build/index.js:2323
+#: src/admin/build/index.js:3381
 msgid "Minify"
 msgstr ""
 
-#: src/admin/build/index.js:2324
+#: src/admin/build/index.js:3382
+msgid "How to minify HTML, CSS and JavaScript?"
+msgstr ""
+
+#: src/admin/build/index.js:3387
 msgid "Minify Files?"
 msgstr ""
 
-#: src/admin/build/index.js:2325
+#: src/admin/build/index.js:3388
 msgid "Enable minify files on your static website."
 msgstr ""
 
-#: src/admin/build/index.js:2325
+#: src/admin/build/index.js:3388
 msgid "Don't enable minify files on your static website."
 msgstr ""
 
-#: src/admin/build/index.js:2332
+#: src/admin/build/index.js:3396
 msgid "Minify HTML"
 msgstr ""
 
-#: src/admin/build/index.js:2333
+#: src/admin/build/index.js:3397
 msgid "Minify HTML files."
 msgstr ""
 
-#: src/admin/build/index.js:2333
+#: src/admin/build/index.js:3397
 msgid "Don't minify HTML files."
 msgstr ""
 
-#: src/admin/build/index.js:2340
+#: src/admin/build/index.js:3405
+msgid "Leave quotes inside HTML attributes"
+msgstr ""
+
+#: src/admin/build/index.js:3406
+msgid ""
+"If there are issues with comments or JavaScript when minifying HTML, toggle "
+"this ON."
+msgstr ""
+
+#: src/admin/build/index.js:3413
 msgid "Minify CSS"
 msgstr ""
 
-#: src/admin/build/index.js:2341
+#: src/admin/build/index.js:3414
 msgid "Minify CSS files."
 msgstr ""
 
-#: src/admin/build/index.js:2341
+#: src/admin/build/index.js:3414
 msgid "Don't minify CSS files."
 msgstr ""
 
-#: src/admin/build/index.js:2348
+#: src/admin/build/index.js:3422
+msgid "Exclude Stylesheet URLs"
+msgstr ""
+
+#: src/admin/build/index.js:3423 src/admin/build/index.js:3449
+msgid "Exclude URLs from minification (one per line)."
+msgstr ""
+
+#: src/admin/build/index.js:3430
 msgid "Minify Inline CSS"
 msgstr ""
 
-#: src/admin/build/index.js:2349
+#: src/admin/build/index.js:3431
 msgid "Minify Inline CSS."
 msgstr ""
 
-#: src/admin/build/index.js:2349
+#: src/admin/build/index.js:3431
 msgid "Don't minify Inline CSS."
 msgstr ""
 
-#: src/admin/build/index.js:2356
+#: src/admin/build/index.js:3439
 msgid "Minify JavaScript"
 msgstr ""
 
-#: src/admin/build/index.js:2357
+#: src/admin/build/index.js:3440
 msgid "Minify JavaScript files."
 msgstr ""
 
-#: src/admin/build/index.js:2357
+#: src/admin/build/index.js:3440
 msgid "Don't minify JavaScript files."
 msgstr ""
 
-#: src/admin/build/index.js:2364
+#: src/admin/build/index.js:3448
+msgid "Exclude JavaScript URLs"
+msgstr ""
+
+#: src/admin/build/index.js:3456
 msgid "Minify Inline JavaScript"
 msgstr ""
 
-#: src/admin/build/index.js:2365
+#: src/admin/build/index.js:3457
 msgid "Minify Inline JavaScript."
 msgstr ""
 
-#: src/admin/build/index.js:2365
+#: src/admin/build/index.js:3457
 msgid "Don't minify Inline JavaScript."
 msgstr ""
 
-#: src/admin/build/index.js:2373
+#: src/admin/build/index.js:3466
+msgid "Image Optimization"
+msgstr ""
+
+#: src/admin/build/index.js:3467
+msgid "How to optimize images with ShortPixel?"
+msgstr ""
+
+#: src/admin/build/index.js:3472
+msgid "Optimize Images with ShortPixel?"
+msgstr ""
+
+#: src/admin/build/index.js:3473
+msgid "Optimize images."
+msgstr ""
+
+#: src/admin/build/index.js:3473
+msgid "Don't optimize images."
+msgstr ""
+
+#: src/admin/build/index.js:3480
+msgid "ShortPixel API Key"
+msgstr ""
+
+#: src/admin/build/index.js:3490
+msgid "Backup the original images?"
+msgstr ""
+
+#: src/admin/build/index.js:3500
+msgid "Restore Original Images"
+msgstr ""
+
+#: src/admin/build/index.js:3502
+msgid "Restoring..."
+msgstr ""
+
+#: src/admin/build/index.js:3504
 msgid "Replace"
 msgstr ""
 
-#: src/admin/build/index.js:2374
+#: src/admin/build/index.js:3505
+msgid "How to replace WP default paths"
+msgstr ""
+
+#: src/admin/build/index.js:3510
 msgid "wp-content directory"
 msgstr ""
 
-#: src/admin/build/index.js:2375
+#: src/admin/build/index.js:3511
 msgid "Replace the \"wp-content\" directory."
 msgstr ""
 
-#: src/admin/build/index.js:2383
+#: src/admin/build/index.js:3520
 msgid "wp-includes directory"
 msgstr ""
 
-#: src/admin/build/index.js:2384
+#: src/admin/build/index.js:3521
 msgid "Replace the \"wp-includes\" directory."
 msgstr ""
 
-#: src/admin/build/index.js:2392
+#: src/admin/build/index.js:3530
 msgid "uploads directory"
 msgstr ""
 
-#: src/admin/build/index.js:2393
+#: src/admin/build/index.js:3531
 msgid "Replace the \"wp-content/uploads\" directory."
 msgstr ""
 
-#: src/admin/build/index.js:2402
+#: src/admin/build/index.js:3541
 msgid "plugins directory"
 msgstr ""
 
-#: src/admin/build/index.js:2403
+#: src/admin/build/index.js:3542
 msgid "Replace the \"wp-content/plugins\" directory."
 msgstr ""
 
-#: src/admin/build/index.js:2412
-msgid "Replace Plugin Names?"
-msgstr ""
-
-#: src/admin/build/index.js:2413
-msgid "Replace plugin names with a random string combinations."
-msgstr ""
-
-#: src/admin/build/index.js:2413
-msgid "Keep plugin names."
-msgstr ""
-
-#: src/admin/build/index.js:2420
+#: src/admin/build/index.js:3552
 msgid "themes directory"
 msgstr ""
 
-#: src/admin/build/index.js:2421
+#: src/admin/build/index.js:3553
 msgid "Replace the \"wp-content/themes\" directory."
 msgstr ""
 
-#: src/admin/build/index.js:2430
+#: src/admin/build/index.js:3563
 msgid "Theme style name"
 msgstr ""
 
-#: src/admin/build/index.js:2431
+#: src/admin/build/index.js:3564
 msgid "Replace the style.css filename."
 msgstr ""
 
-#: src/admin/build/index.js:2442
+#: src/admin/build/index.js:3576
 msgid "Author URL"
 msgstr ""
 
-#: src/admin/build/index.js:2443
+#: src/admin/build/index.js:3577
 msgid "Replace the author url."
 msgstr ""
 
-#: src/admin/build/index.js:2453
+#: src/admin/build/index.js:3588
 msgid "Hide"
 msgstr ""
 
-#: src/admin/build/index.js:2454
+#: src/admin/build/index.js:3589 src/admin/build/index.js:3660
+msgid "How to hide and disable WP core features"
+msgstr ""
+
+#: src/admin/build/index.js:3594
 msgid "Hide REST API URLs"
 msgstr ""
 
-#: src/admin/build/index.js:2461
+#: src/admin/build/index.js:3602
 msgid "Hide Style/Script IDs"
 msgstr ""
 
-#: src/admin/build/index.js:2468
+#: src/admin/build/index.js:3610
 msgid "Hide HTML Comments"
 msgstr ""
 
-#: src/admin/build/index.js:2475
+#: src/admin/build/index.js:3618
 msgid "Hide WordPress Version"
 msgstr ""
 
-#: src/admin/build/index.js:2482
+#: src/admin/build/index.js:3626
 msgid "Hide WordPress Generator Meta"
 msgstr ""
 
-#: src/admin/build/index.js:2489
+#: src/admin/build/index.js:3634
 msgid "Hide DNS Prefetch WordPress link"
 msgstr ""
 
-#: src/admin/build/index.js:2496
+#: src/admin/build/index.js:3642
 msgid "Hide RSD Header"
 msgstr ""
 
-#: src/admin/build/index.js:2503
+#: src/admin/build/index.js:3650
 msgid "Hide Emojis if you don't use them"
 msgstr ""
 
-#: src/admin/build/index.js:2511
+#: src/admin/build/index.js:3659
 msgid "Disable"
 msgstr ""
 
-#: src/admin/build/index.js:2512
+#: src/admin/build/index.js:3665
 msgid "Disable XML-RPC"
 msgstr ""
 
-#: src/admin/build/index.js:2519
+#: src/admin/build/index.js:3673
 msgid "Disable Embed Scripts"
 msgstr ""
 
-#: src/admin/build/index.js:2526
+#: src/admin/build/index.js:3681
 msgid "Disable DB Debug in Frontend"
 msgstr ""
 
-#: src/admin/build/index.js:2533
+#: src/admin/build/index.js:3689
 msgid "Disable WLW Manifest Scripts"
 msgstr ""
 
-#: src/admin/build/index.js:2618
+#: src/admin/build/index.js:3780
 msgid "Use search?"
 msgstr ""
 
-#: src/admin/build/index.js:2619
+#: src/admin/build/index.js:3781
 msgid "Use search on your static website."
 msgstr ""
 
-#: src/admin/build/index.js:2619
+#: src/admin/build/index.js:3781
 msgid "Don't use search on your static website."
 msgstr ""
 
-#: src/admin/build/index.js:2626
+#: src/admin/build/index.js:3789
 msgid "Search Type"
 msgstr ""
 
-#: src/admin/build/index.js:2628
+#: src/admin/build/index.js:3791
 msgid ""
 "Decide wich search type you want to use. Fuse runs locally based on file and "
 "Algolia is an external API service."
 msgstr ""
 
-#: src/admin/build/index.js:2641
+#: src/admin/build/index.js:3804
 msgid "How to select data with meta tags"
 msgstr ""
 
-#: src/admin/build/index.js:2643
+#: src/admin/build/index.js:3806
 msgid "Targeting for excerpt in the meta description tag."
 msgstr ""
 
-#: src/admin/build/index.js:2643
+#: src/admin/build/index.js:3806
 msgid "Adding such meta in the excerpt field would be:"
 msgstr ""
 
-#: src/admin/build/index.js:2643
+#: src/admin/build/index.js:3806
 msgid "Targeting for title in the property meta tag."
 msgstr ""
 
-#: src/admin/build/index.js:2643
+#: src/admin/build/index.js:3806
 msgid ""
 "If the second item (after | ) is not <code>content</code>, we'll use it as "
 "value of that attribute (<code>property=\"og:title\"</code> in this example) "
 "and use <code>content</code> for value."
 msgstr ""
 
-#: src/admin/build/index.js:2643
+#: src/admin/build/index.js:3806
 msgid "Caution: Use meta tags that exist everywhere for title."
 msgstr ""
 
-#: src/admin/build/index.js:2645
+#: src/admin/build/index.js:3808
 msgid "Indexing"
 msgstr ""
 
-#: src/admin/build/index.js:2646
+#: src/admin/build/index.js:3811
 msgid "CSS-Selector for Title"
 msgstr ""
 
-#: src/admin/build/index.js:2649
+#: src/admin/build/index.js:3814
 msgid "Add the CSS selector which contains the title of the page/post"
 msgstr ""
 
-#: src/admin/build/index.js:2652 src/admin/build/index.js:2664
-#: src/admin/build/index.js:2676
+#: src/admin/build/index.js:3817 src/admin/build/index.js:3830
+#: src/admin/build/index.js:3843
 msgid "Or meta tags. Click for more information."
 msgstr ""
 
-#: src/admin/build/index.js:2658
+#: src/admin/build/index.js:3824
 msgid "CSS-Selector for Content"
 msgstr ""
 
-#: src/admin/build/index.js:2661
+#: src/admin/build/index.js:3827
 msgid "Add the CSS selector which contains the content of the page/post."
 msgstr ""
 
-#: src/admin/build/index.js:2670
+#: src/admin/build/index.js:3837
 msgid "CSS-Selector for Excerpt"
 msgstr ""
 
-#: src/admin/build/index.js:2673
+#: src/admin/build/index.js:3840
 msgid "Add the CSS selector which contains the excerpt of the page/post."
 msgstr ""
 
-#: src/admin/build/index.js:2682
+#: src/admin/build/index.js:3850
 msgid "Exclude URLs"
 msgstr ""
 
-#: src/admin/build/index.js:2684
+#: src/admin/build/index.js:3852
 msgid ""
 "Exclude URLs from indexing (one per line). You can use full URLs, parts of "
 "an URL or plain words (like stop words)."
 msgstr ""
 
-#: src/admin/build/index.js:2691
+#: src/admin/build/index.js:3860
 msgid "Fuse.js"
 msgstr ""
 
-#: src/admin/build/index.js:2692 src/admin/build/index.js:2734
+#: src/admin/build/index.js:3861
+msgid "How to add search with FuseJS"
+msgstr ""
+
+#: src/admin/build/index.js:3866 src/admin/build/index.js:3918
 msgid "CSS-Selector"
 msgstr ""
 
-#: src/admin/build/index.js:2694 src/admin/build/index.js:2736
+#: src/admin/build/index.js:3868 src/admin/build/index.js:3920
 msgid "Add the CSS selector of your search element here."
 msgstr ""
 
-#: src/admin/build/index.js:2701
+#: src/admin/build/index.js:3876
 msgid "Algolia API"
 msgstr ""
 
-#: src/admin/build/index.js:2702
+#: src/admin/build/index.js:3877
+msgid "How to add search with the Algolia API"
+msgstr ""
+
+#: src/admin/build/index.js:3882
 msgid "Application ID"
 msgstr ""
 
-#: src/admin/build/index.js:2704
+#: src/admin/build/index.js:3884
 msgid "Add your Algolia App ID."
 msgstr ""
 
-#: src/admin/build/index.js:2710
+#: src/admin/build/index.js:3891
 msgid "Admin API Key"
 msgstr ""
 
-#: src/admin/build/index.js:2712
+#: src/admin/build/index.js:3893
 msgid "Add your Algolia Admin API Key."
 msgstr ""
 
-#: src/admin/build/index.js:2718
+#: src/admin/build/index.js:3900
 msgid "Search-Only API Key"
 msgstr ""
 
-#: src/admin/build/index.js:2720
+#: src/admin/build/index.js:3902
 msgid ""
 "Add your Algolia Search-Only API Key here. This is the only key that will be "
 "visible on your static site."
 msgstr ""
 
-#: src/admin/build/index.js:2726
+#: src/admin/build/index.js:3909
 msgid "Name for your index"
 msgstr ""
 
-#: src/admin/build/index.js:2728
+#: src/admin/build/index.js:3911
 msgid "Add your Algolia index name here."
 msgstr ""
 
-#: src/admin/build/index.js:2744
+#: src/admin/build/index.js:3929
 msgid ""
 "If you have multiple search elements with different CSS selectors, separate "
 "them by a comma (,) such as: .search-field, .search-field2"
 msgstr ""
 
-#: src/admin/build/index.js:2834
+#: src/admin/build/index.js:4030
 msgid "Migrate Settings"
 msgstr ""
 
-#: src/admin/build/index.js:2834
+#: src/admin/build/index.js:4030
 msgid "Migrate all of your settings to Simply Static 3.0"
 msgstr ""
 
-#: src/admin/build/index.js:2845
+#: src/admin/build/index.js:4033
+msgid "Migrate settings"
+msgstr ""
+
+#: src/admin/build/index.js:4041
 msgid "Settings migration successfully."
 msgstr ""
 
-#: src/admin/build/index.js:2847
-msgid "Export"
+#: src/admin/build/index.js:4044 src/admin/build/index.js:4057
+msgid "Export & Import settings"
 msgstr ""
 
-#: src/admin/build/index.js:2850
+#: src/admin/build/index.js:4049
 msgid "Export Settings"
 msgstr ""
 
-#: src/admin/build/index.js:2855
+#: src/admin/build/index.js:4054
 msgid "Copied!"
 msgstr ""
 
-#: src/admin/build/index.js:2855
+#: src/admin/build/index.js:4054
 msgid "Copy export data"
 msgstr ""
 
-#: src/admin/build/index.js:2857
+#: src/admin/build/index.js:4059
 msgid ""
 "Paste in the JSON string you got from your export to import all settings for "
 "the plugin."
 msgstr ""
 
-#: src/admin/build/index.js:2873
+#: src/admin/build/index.js:4075
 msgid "Settings imported successfully."
 msgstr ""
 
-#: src/admin/build/index.js:2875
-msgid "Reset Plugin Data"
+#: src/admin/build/index.js:4077
+msgid "Reset"
 msgstr ""
 
-#: src/admin/build/index.js:2875
+#: src/admin/build/index.js:4077
 msgid ""
-"By clicking the following button, you will reset all plugin settings. This "
-"can be useful if you want to import a new set of settings or you want a "
-"fresh start."
+"By clicking the \"Reset Plugin Settings\", you will reset all plugin "
+"settings. This can be useful if you want to import a new set of settings or "
+"you want a fresh start."
 msgstr ""
 
-#: src/admin/build/index.js:2878
+#: src/admin/build/index.js:4077
+msgid ""
+"If you click the \"Reset Database Table\" button instead, you will keep all "
+"your settings, and we will only recreate our DB table."
+msgstr ""
+
+#: src/admin/build/index.js:4080
 msgid "Reset Plugin Settings"
 msgstr ""
 
-#: src/admin/build/index.js:2886
+#: src/admin/build/index.js:4086
+msgid "Reset Database Table"
+msgstr ""
+
+#: src/admin/build/index.js:4094
 msgid "Settings resetted successfully."
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-settings.php:47
-#: src/admin/inc/class-ss-admin-settings.php:48
+#: src/admin/build/index.js:4102
+msgid "Database table resetted successfully."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-meta.php:51
+#: src/admin/inc/class-ss-admin-settings.php:59
+#: src/admin/inc/class-ss-admin-settings.php:60
 msgid "Simply Static"
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-settings.php:57
-#: src/admin/inc/class-ss-admin-settings.php:58
+#: src/admin/inc/class-ss-admin-meta.php:72
+msgid "Export static page"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-meta.php:74
+msgid "Export posts and pages directly with "
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-settings.php:69
+#: src/admin/inc/class-ss-admin-settings.php:70
 msgid "Generate"
 msgstr ""
 
-#: src/class-ss-archive-creation-job.php:204
+#: src/class-ss-archive-creation-job.php:255
 #, php-format
 msgid "Done! Finished in %s"
 msgstr ""
 
-#: src/class-ss-archive-creation-job.php:333
+#: src/class-ss-archive-creation-job.php:384
 #, php-format
 msgid "An exception occurred: %s"
 msgstr ""
 
-#: src/class-ss-archive-creation-job.php:350 src/class-ss-url-fetcher.php:85
+#: src/class-ss-archive-creation-job.php:401 src/class-ss-url-fetcher.php:85
 #: src/class-ss-url-fetcher.php:109
 #, php-format
 msgid "An error occurred: %s"
 msgstr ""
 
-#: src/class-ss-archive-creation-job.php:379
+#: src/class-ss-archive-creation-job.php:430
 #, php-format
 msgid "Error: %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:47
-msgid "SSL"
-msgstr ""
-
-#: src/class-ss-diagnostic.php:50
-msgid "VERSION"
-msgstr ""
-
-#: src/class-ss-diagnostic.php:51
-msgid "php-xml"
-msgstr ""
-
-#: src/class-ss-diagnostic.php:52
-msgid "cURL"
-msgstr ""
-
-#: src/class-ss-diagnostic.php:55
-msgid "Permalinks"
+#: src/class-ss-diagnostic.php:54
+msgid "PHP Version"
 msgstr ""
 
 #: src/class-ss-diagnostic.php:56
-msgid "WP-CRON"
+msgid "php-xml"
 msgstr ""
 
 #: src/class-ss-diagnostic.php:57
-msgid "WP REST API"
+msgid "cURL"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:58
-msgid "Requests to itself"
+#: src/class-ss-diagnostic.php:60
+msgid "Permalinks"
 msgstr ""
 
 #: src/class-ss-diagnostic.php:61
-msgid "Temp dir readable"
+msgid "Indexable"
 msgstr ""
 
 #: src/class-ss-diagnostic.php:62
-msgid "Temp dir writeable"
+msgid "Caching"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:65
-msgid "DELETE"
-msgstr ""
-
-#: src/class-ss-diagnostic.php:66
-msgid "INSERT"
+#: src/class-ss-diagnostic.php:63
+msgid "WP-CRON"
 msgstr ""
 
 #: src/class-ss-diagnostic.php:67
-msgid "SELECT"
+msgid "Temp dir readable"
 msgstr ""
 
 #: src/class-ss-diagnostic.php:68
+msgid "Temp dir writeable"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:71
+msgid "DELETE"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:72
+msgid "INSERT"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:73
+msgid "SELECT"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:74
 msgid "CREATE"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:69
+#: src/class-ss-diagnostic.php:75
 msgid "ALTER"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:70
+#: src/class-ss-diagnostic.php:76
 msgid "DROP"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:76
+#: src/class-ss-diagnostic.php:81
 msgid "Destination URL"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:80
+#: src/class-ss-diagnostic.php:85
 msgid "Local Dir"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:107
+#: src/class-ss-diagnostic.php:128
+msgid "No incompatible plugins are active on your website!"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:129
+#, php-format
+msgid "%d incompatible plugins are active"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:164
 #, php-format
 msgid "Destination URL %s is valid"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:108
+#: src/class-ss-diagnostic.php:165
 #, php-format
 msgid "Destination URL %s is not valid"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:115
-msgid "You have a valid SSL certificate."
-msgstr ""
-
-#: src/class-ss-diagnostic.php:116
-msgid ""
-"You need an SSL certificate to connect with external APIs like GitHub or "
-"Algolia."
-msgstr ""
-
-#: src/class-ss-diagnostic.php:126
+#: src/class-ss-diagnostic.php:175
 msgid "Is a valid URL."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:127
+#: src/class-ss-diagnostic.php:176
 msgid "Is not a valid URL."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:134
+#: src/class-ss-diagnostic.php:183
 msgid "Not a valid path"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:137
+#: src/class-ss-diagnostic.php:186
 msgid "Not readable"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:145
+#: src/class-ss-diagnostic.php:194
 #, php-format
 msgid "Additional File/Dir %s is valid"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:153
+#: src/class-ss-diagnostic.php:202
 msgid "WordPress permalink structure is set"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:154
+#: src/class-ss-diagnostic.php:203
 msgid "WordPress permalink structure is not set"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:167
+#: src/class-ss-diagnostic.php:210
+msgid "Discourage search engines from indexing this site is disabled"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:211
+msgid "Discourage search engines from indexing this site is enabled"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:224
 msgid "WordPress cron is available and running"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:168
+#: src/class-ss-diagnostic.php:225
 msgid "WordPress cron is not available and not running"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:185
-msgid "Rest API is available and running"
+#: src/class-ss-diagnostic.php:234
+msgid "Caching is disabled, great!"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:186
-msgid "Rest API is disabled or blocked"
+#: src/class-ss-diagnostic.php:235
+msgid "Please disable caching before running a static export"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:204
+#: src/class-ss-diagnostic.php:241 src/class-ss-diagnostic.php:247
+#: src/class-ss-diagnostic.php:253 src/class-ss-diagnostic.php:259
+#: src/class-ss-diagnostic.php:265 src/class-ss-diagnostic.php:271
+#: src/class-ss-diagnostic.php:277 src/class-ss-diagnostic.php:283
+#: src/class-ss-diagnostic.php:289 src/class-ss-diagnostic.php:295
+#: src/class-ss-diagnostic.php:301 src/class-ss-diagnostic.php:307
 #, php-format
-msgid "WordPress can make requests to itself from %s"
+msgid "Please disable caching (%s) before running a static export."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:205
+#: src/class-ss-diagnostic.php:395
 #, php-format
-msgid "WordPress can not make requests to itself from %s"
+msgid "%s is not compatible with Simply Static."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:214
+#: src/class-ss-diagnostic.php:404
 #, php-format
 msgid "Web server can read from Temp Files Directory: %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:215
+#: src/class-ss-diagnostic.php:405
 #, php-format
 msgid "Web server can't read from Temp Files Directory: %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:224
+#: src/class-ss-diagnostic.php:414
 #, php-format
 msgid "Web server can write to Temp Files Directory: %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:225
+#: src/class-ss-diagnostic.php:415
 #, php-format
 msgid "Web server can't write to Temp Files Directory: %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:234
+#: src/class-ss-diagnostic.php:424
 #, php-format
 msgid "Web server can write to Local Directory: %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:235
+#: src/class-ss-diagnostic.php:425
 #, php-format
 msgid "Web server can not write to Local Directory: %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:242
+#: src/class-ss-diagnostic.php:432
 msgid "MySQL user has DELETE privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:243
+#: src/class-ss-diagnostic.php:433
 msgid "MySQL user has no DELETE privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:250
+#: src/class-ss-diagnostic.php:440
 msgid "MySQL user has INSERT privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:251
+#: src/class-ss-diagnostic.php:441
 msgid "MySQL user has no INSERT privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:258
+#: src/class-ss-diagnostic.php:448
 msgid "MySQL user has SELECT privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:259
+#: src/class-ss-diagnostic.php:449
 msgid "MySQL user has no SELECT privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:266
+#: src/class-ss-diagnostic.php:456
 msgid "MySQL user has CREATE privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:267
+#: src/class-ss-diagnostic.php:457
 msgid "MySQL user has no CREATE privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:274
+#: src/class-ss-diagnostic.php:464
 msgid "MySQL user has ALTER privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:275
+#: src/class-ss-diagnostic.php:465
 msgid "MySQL user has no ALTER privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:282
+#: src/class-ss-diagnostic.php:472
 msgid "MySQL user has DROP privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:283
+#: src/class-ss-diagnostic.php:473
 msgid "MySQL user has no DROP privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:290
+#: src/class-ss-diagnostic.php:480
 #, php-format
 msgid "PHP version is >= %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:291
+#: src/class-ss-diagnostic.php:481
 #, php-format
 msgid "PHP version < %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:298
+#: src/class-ss-diagnostic.php:488
 msgid "php-xml is available"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:299
+#: src/class-ss-diagnostic.php:489
 msgid "php-xml is not available"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:313
+#: src/class-ss-diagnostic.php:503
 msgid "cURL is available"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:314
+#: src/class-ss-diagnostic.php:504
 #, php-format
 msgid "cURL version < %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:328
+#: src/class-ss-diagnostic.php:510
+msgid "Basic Auth is not enabled."
+msgstr ""
+
+#: src/class-ss-diagnostic.php:518
+msgid ""
+"Basic Auth is enabled, but no username or password is set in Simply Static -"
+"> Settings -> Debug -> Basic Auth"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:520
+msgid ""
+"Basic Auth is enabled, and username and password are set in Simply Static -> "
+"Settings -> Debug -> Basic Auth"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:541
 msgid "Not a valid url."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:337
+#: src/class-ss-diagnostic.php:550
 #, php-format
 msgid "Received a %s response. This might indicate a problem."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:340
+#: src/class-ss-diagnostic.php:553
 #, php-format
 msgid "Received a %s response."
 msgstr ""
@@ -1726,9 +2171,20 @@ msgstr ""
 msgid "Simply Static Compatible"
 msgstr ""
 
-#: src/class-ss-plugin.php:262
+#: src/class-ss-plugin.php:220
+msgid ""
+"Missing Basic Auth credentials - you need to configure the Basic Auth "
+"credentials in Simply Static -> Settings -> Misc -> Basic Auth to continue "
+"the export."
+msgstr ""
+
+#: src/class-ss-plugin.php:302
 #, php-format
 msgid "Found on %s"
+msgstr ""
+
+#: src/class-ss-plugin.php:418
+msgid "Docs"
 msgstr ""
 
 #: src/class-ss-url-fetcher.php:85
@@ -1755,65 +2211,231 @@ msgstr ""
 msgid "Locations Sitemap %1$s %2$s"
 msgstr ""
 
-#: src/integrations/class-aio-seo-integration.php:77
-#: src/integrations/class-rank-math-integration.php:40
-#: src/integrations/class-seopress-integration.php:45
-#: src/integrations/class-yoast-integration.php:44
+#: src/integrations/class-aio-seo-integration.php:15
+msgid "All in One SEO"
+msgstr ""
+
+#: src/integrations/class-aio-seo-integration.php:16
+#: src/integrations/class-seopress-integration.php:16
+msgid "Adds sitemaps to generated static files."
+msgstr ""
+
+#: src/integrations/class-aio-seo-integration.php:83
+#: src/integrations/class-rank-math-integration.php:123
+#: src/integrations/class-seopress-integration.php:57
+#: src/integrations/class-yoast-integration.php:95
 msgid "Sitemap URL"
 msgstr ""
 
-#: src/integrations/class-elementor-integration.php:217
+#: src/integrations/class-brizy-integration.php:15
+msgid "Brizy"
+msgstr ""
+
+#: src/integrations/class-brizy-integration.php:16
+msgid "Makes sure images optimized by Brizy are exported as well."
+msgstr ""
+
+#: src/integrations/class-cookie-yes-integration.php:17
+msgid "CookieYes | GDPR Cookie Consent"
+msgstr ""
+
+#: src/integrations/class-cookie-yes-integration.php:18
+msgid "Fixes scripts given by CookieYes to work on exported pages."
+msgstr ""
+
+#: src/integrations/class-elementor-integration.php:21
+msgid "Elementor"
+msgstr ""
+
+#: src/integrations/class-elementor-integration.php:22
+msgid ""
+"Exports assets required for Elementor widgets and prepares data used by them."
+msgstr ""
+
+#: src/integrations/class-elementor-integration.php:222
 msgid "Elementor Asset"
 msgstr ""
 
-#: src/integrations/class-elementor-pro-integration.php:64
+#: src/integrations/class-elementor-pro-integration.php:16
+msgid "Elementor Pro"
+msgstr ""
+
+#: src/integrations/class-elementor-pro-integration.php:17
+msgid ""
+"Exports assets required for Elementor Pro widgets and prepares data used by "
+"them."
+msgstr ""
+
+#: src/integrations/class-elementor-pro-integration.php:69
 msgid "Elementor Pro Asset"
 msgstr ""
 
-#: src/integrations/class-elementor-pro-integration.php:197
+#: src/integrations/class-elementor-pro-integration.php:202
 msgid "Elementor Pro Lottie"
+msgstr ""
+
+#: src/integrations/class-jetpack-integration.php:14
+msgid "Jetpack"
+msgstr ""
+
+#: src/integrations/class-jetpack-integration.php:15
+msgid "Adds scripts for carousels and sliders to the static site."
+msgstr ""
+
+#: src/integrations/class-jetpack-integration.php:43
+msgid "Jetpack Integration"
+msgstr ""
+
+#: src/integrations/class-rank-math-integration.php:16
+msgid "Rank Math"
+msgstr ""
+
+#: src/integrations/class-rank-math-integration.php:17
+#: src/integrations/class-yoast-integration.php:16
+msgid ""
+"Automatically includes your XML sitemaps, handles URL replacements in schema."
+"org markup, and creates redirects on your static site for you."
+msgstr ""
+
+#: src/integrations/class-rank-math-integration.php:99
+msgid "RankMath Redirection URL"
+msgstr ""
+
+#: src/integrations/class-seopress-integration.php:15
+msgid "SEOPress"
+msgstr ""
+
+#: src/integrations/class-ss-adminbar-integration.php:17
+msgid "Admin Bar (Core)"
+msgstr ""
+
+#: src/integrations/class-ss-adminbar-integration.php:18
+msgid ""
+"Adds an admin bar integration for Simply Static to see the current status of "
+"static exports."
+msgstr ""
+
+#: src/integrations/class-ss-adminbar-integration.php:39
+#: src/integrations/class-ss-adminbar-integration.php:43
+msgid "Static Generation: Waiting.."
+msgstr ""
+
+#: src/integrations/class-ss-adminbar-integration.php:65
+msgid "Static Generation:"
+msgstr ""
+
+#: src/integrations/class-ss-adminbar-integration.php:66
+msgid "Running.."
+msgstr ""
+
+#: src/integrations/class-ss-adminbar-integration.php:67
+msgid "Idle"
+msgstr ""
+
+#: src/integrations/class-ss-adminbar-integration.php:68
+msgid "Error"
+msgstr ""
+
+#: src/integrations/class-yoast-integration.php:15
+msgid "Yoast"
+msgstr ""
+
+#: src/integrations/class-yoast-integration.php:69
+msgid "Yoast Redirection URL"
+msgstr ""
+
+#: src/integrations/pro/class-complianz-integration.php:13
+msgid "Complianz | GDPR/CCPA Cookie Consent"
+msgstr ""
+
+#: src/integrations/pro/class-complianz-integration.php:14
+msgid "Integrates Complianz Cookie banner to work on the static site."
+msgstr ""
+
+#: src/integrations/pro/class-environments-integration.php:9
+msgid "Environments (Core)"
+msgstr ""
+
+#: src/integrations/pro/class-environments-integration.php:10
+msgid ""
+"Define multiple environments of Simply Static so you can easily change "
+"between saved configurations."
+msgstr ""
+
+#: src/integrations/pro/class-github-integration.php:10
+msgid "Github"
+msgstr ""
+
+#: src/integrations/pro/class-github-integration.php:11
+msgid "Used when deploying the exported sites to Github"
+msgstr ""
+
+#: src/integrations/pro/class-multilingual-integration.php:13
+msgid "WPML - Multilingual"
+msgstr ""
+
+#: src/integrations/pro/class-multilingual-integration.php:14
+msgid "Integrates WPML to work with exported sites."
+msgstr ""
+
+#: src/integrations/pro/class-redirection-integration.php:13
+msgid "Redirection"
+msgstr ""
+
+#: src/integrations/pro/class-redirection-integration.php:14
+msgid ""
+"Integrates redirections from the \"Redirection\" Plugin automatically on "
+"each export."
+msgstr ""
+
+#: src/integrations/pro/class-shortpixel-integration.php:11
+msgid "Shortpixel"
+msgstr ""
+
+#: src/integrations/pro/class-shortpixel-integration.php:12
+msgid "Optimizes Images before exporting them for static sites."
 msgstr ""
 
 #: src/tasks/class-ss-cancel-task.php:22
 msgid "Cancelling job"
 msgstr ""
 
-#: src/tasks/class-ss-create-zip-archive.php:29
+#: src/tasks/class-ss-create-zip-archive.php:30
 msgid "ZIP archive created: "
 msgstr ""
 
-#: src/tasks/class-ss-create-zip-archive.php:33
+#: src/tasks/class-ss-create-zip-archive.php:34
 msgid "Click here to download"
 msgstr ""
 
-#: src/tasks/class-ss-create-zip-archive.php:83
+#: src/tasks/class-ss-create-zip-archive.php:90
 msgid "Unable to create ZIP archive"
 msgstr ""
 
-#: src/tasks/class-ss-fetch-urls-task.php:77
+#: src/tasks/class-ss-fetch-urls-task.php:91
 msgid "Do not save or follow"
 msgstr ""
 
-#: src/tasks/class-ss-fetch-urls-task.php:114
+#: src/tasks/class-ss-fetch-urls-task.php:128
 #, php-format
 msgid "Fetched %d of %d pages/files"
 msgstr ""
 
-#: src/tasks/class-ss-fetch-urls-task.php:150
-#: src/tasks/class-ss-fetch-urls-task.php:221
+#: src/tasks/class-ss-fetch-urls-task.php:165
+#: src/tasks/class-ss-fetch-urls-task.php:235
 msgid "Do not follow"
 msgstr ""
 
-#: src/tasks/class-ss-fetch-urls-task.php:168
-#: src/tasks/class-ss-fetch-urls-task.php:252
+#: src/tasks/class-ss-fetch-urls-task.php:183
+#: src/tasks/class-ss-fetch-urls-task.php:266
 msgid "Do not save"
 msgstr ""
 
-#: src/tasks/class-ss-generate-404-task.php:39
+#: src/tasks/class-ss-generate-404-task.php:53
 msgid "Generating 404 Page."
 msgstr ""
 
-#: src/tasks/class-ss-generate-404-task.php:82
+#: src/tasks/class-ss-generate-404-task.php:96
 msgid "404 Page generated"
 msgstr ""
 
@@ -1826,47 +2448,45 @@ msgstr ""
 msgid "Cannot create archive directory %s"
 msgstr ""
 
-#: src/tasks/class-ss-setup-task.php:104
+#: src/tasks/class-ss-setup-task.php:84
 msgid "Additional URL"
 msgstr ""
 
-#: src/tasks/class-ss-setup-task.php:140
+#: src/tasks/class-ss-setup-task.php:119
 msgid "Additional File"
 msgstr ""
 
-#: src/tasks/class-ss-setup-task.php:152
+#: src/tasks/class-ss-setup-task.php:132
 msgid "Additional Dir"
 msgstr ""
 
-#: src/tasks/class-ss-simply-cdn-task.php:61
-#, php-format
-msgid "Uploading %d of %d pages/files"
-msgstr ""
-
-#: src/tasks/class-ss-simply-cdn-task.php:68
-#: src/tasks/class-ss-transfer-files-locally-task.php:36
+#: src/tasks/class-ss-transfer-files-locally-task.php:58
 msgid "Destination URL:"
 msgstr ""
 
-#: src/tasks/class-ss-simply-cdn-task.php:71
-#, php-format
-msgid "Uploaded %d of %d pages/files"
+#: src/tasks/class-ss-transfer-files-locally-task.php:95
+msgid "No new/updated pages to transfer"
 msgstr ""
 
-#: src/tasks/class-ss-transfer-files-locally-task.php:29
+#: src/tasks/class-ss-transfer-files-locally-task.php:98
 #, php-format
-msgid "Copied %d of %d files"
+msgid "Transferred %d of %d files"
 msgstr ""
 
 #: src/tasks/class-ss-wrapup-task.php:23
 msgid "Wrapping up"
 msgstr ""
 
-#: vendor/a5hleyrich/wp-background-processing/classes/wp-background-process.php:658
+#: src/tasks/traits/trait-can-process-pages.php:133
+#, php-format
+msgid "Uploaded %d of %d files"
+msgstr ""
+
+#: vendor/a5hleyrich/wp-background-processing/classes/wp-background-process.php:685
 msgid "Every Minute"
 msgstr ""
 
-#: vendor/a5hleyrich/wp-background-processing/classes/wp-background-process.php:660
+#: vendor/a5hleyrich/wp-background-processing/classes/wp-background-process.php:687
 #, php-format
 msgid "Every %d Minutes"
 msgstr ""
