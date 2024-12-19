@@ -64,7 +64,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 * @return int The interval in seconds
 	 */
 	public function set_job_interval( $interval ) {
-		return 1;    // default 5.
+		return 2;    // default 5.
 	}
 
 	public function get_task_list() {
