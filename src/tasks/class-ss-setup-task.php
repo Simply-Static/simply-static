@@ -52,8 +52,8 @@ class Setup_Task extends Task {
 		// add origin url and additional urls/files to database.
 		$additional_urls = apply_filters( 'ss_setup_task_additional_urls', $this->options->get( 'additional_urls' ) );
 
-		self::add_origin_and_additional_urls_to_db( $additional_urls );
-		self::add_additional_files_to_db( $this->options->get( 'additional_files' ) );
+		$this->add_origin_and_additional_urls_to_db( $additional_urls );
+		$this->add_additional_files_to_db( $this->options->get( 'additional_files' ) );
 
 		do_action( 'ss_after_setup_task' );
 
@@ -67,7 +67,7 @@ class Setup_Task extends Task {
 	 *
 	 * @return void
 	 */
-	public static function add_origin_and_additional_urls_to_db( $additional_urls ) {
+	public function add_origin_and_additional_urls_to_db( $additional_urls ) {
 		$origin_url = trailingslashit( Util::origin_url() );
 		Util::debug_log( 'Adding origin URL to queue: ' . $origin_url );
 		$static_page = Page::query()->find_or_initialize_by( 'url', $origin_url );
@@ -95,7 +95,7 @@ class Setup_Task extends Task {
 	 *
 	 * @return void
 	 */
-	public static function add_additional_files_to_db( $additional_files ) {
+	public function add_additional_files_to_db( $additional_files ) {
 		$additional_files = apply_filters( 'ss_additional_files', Util::string_to_array( $additional_files ) );
 
 		// Add robots.txt if exists.
@@ -104,6 +104,33 @@ class Setup_Task extends Task {
 		if ( file_exists( $robots_txt ) ) {
 			$additional_files[] = $robots_txt;
 		}
+
+		// Create feed directory it doesn't exist.
+		$feed_directory = untrailingslashit( $this->options->get_archive_dir() ) . '/feed';
+
+		if ( ! file_exists( $feed_directory ) ) {
+			wp_mkdir_p( $feed_directory );
+		}
+
+		// Create index.html file for feed directory.
+		file_put_contents( $feed_directory . '/index.html',
+			'<!DOCTYPE html>
+			<html>
+				<head>
+					<title>Redirecting...</title>
+					<meta http-equiv="refresh" content="0;url=index.xml">
+				</head>
+				<body>
+					<script type="text/javascript">
+						window.location = "index.xml";
+					</script>
+					<p>You are being redirected to <a href="index.xml">index.xml</a></p>
+				</body>
+			</html>'
+		);
+
+		// Add feed redirect file to additional files.
+		$additional_files[] = $feed_directory . '/index.html';
 
 		// Convert additional files to URLs and add to queue.
 		foreach ( $additional_files as $item ) {
@@ -119,7 +146,7 @@ class Setup_Task extends Task {
 					$static_page->set_status_message( __( "Additional File", 'simply-static' ) );
 					// setting found_on_id to 0 since this was user-specified
 					$static_page->found_on_id = 0;
-					$static_page->handler = Additional_File_Handler::class;
+					$static_page->handler     = Additional_File_Handler::class;
 					$static_page->save();
 				} else {
 					Util::debug_log( "Adding files from directory: " . $item );
@@ -130,7 +157,7 @@ class Setup_Task extends Task {
 						Util::debug_log( "Adding file " . $file_name . ' to queue as: ' . $url );
 						$static_page = Page::query()->find_or_initialize_by( 'url', $url );
 						$static_page->set_status_message( __( "Additional Dir", 'simply-static' ) );
-						$static_page->handler = Additional_File_Handler::class;
+						$static_page->handler     = Additional_File_Handler::class;
 						$static_page->found_on_id = 0;
 						$static_page->save();
 					}
