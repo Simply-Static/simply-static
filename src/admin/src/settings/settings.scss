@@ -23,7 +23,7 @@ toplevel_page_simply-static img {
   background: #f0f0f1;
 
   .components-flex {
-    align-items:flex-start;
+    align-items: flex-start;
   }
 
   .components-flex-item {
@@ -31,7 +31,8 @@ toplevel_page_simply-static img {
   }
 
   .inner-settings > * {
-    max-width: 840px;
+    width: 100%;
+    max-width: 850px;
   }
 
   .save-settings {
@@ -43,7 +44,8 @@ toplevel_page_simply-static img {
   }
 
   .settings-wide > * {
-    max-width: 980px;
+    width: 100%;
+    max-width: 1050px;
   }
 
   .migrate-notice.components-notice.is-warning {
@@ -62,7 +64,7 @@ toplevel_page_simply-static img {
   }
 
   .diagnostics-notice-generate {
-    max-width: 980px !important;
+    max-width: 100% !important;
   }
 
   .upgrade-network-notice {
@@ -71,6 +73,10 @@ toplevel_page_simply-static img {
 
   .ss-align-right {
     text-align: right;
+  }
+
+  textarea {
+    width: 100%;
   }
 
   .ss-no-shrink {
@@ -94,9 +100,11 @@ toplevel_page_simply-static img {
 
   /* Navigation */
   .plugin-nav {
-    padding: 25px 40px;
+    padding: 25px;
+    box-sizing: border-box;
     height: auto;
-    max-width: 260px;
+    max-width: 200px;
+    min-height: 100vh;
     margin: 0;
 
     button:focus, button:focus-visible, button:hover {
@@ -179,7 +187,8 @@ toplevel_page_simply-static img {
 
   /* Settings */
   .plugin-settings {
-    padding: 25px 40px;
+    padding: 25px;
+    box-sizing: border-box;
     height: 100vh;
     background: #f0f0f1;
 
@@ -318,6 +327,7 @@ toplevel_page_simply-static img {
 .components-modal__frame.simply-static-video-modal {
   border-radius: 0;
 }
+
 .dashicons.spin {
   animation: dashicons-spin 2s infinite;
   animation-timing-function: linear;
@@ -330,4 +340,130 @@ toplevel_page_simply-static img {
   100% {
     transform: rotate(360deg);
   }
+}
+
+.reset-db-btn {
+  margin-left: 10px;
+}
+
+/* Responsive Design */
+a.show-nav {
+  display: none;
+}
+
+@media screen and (max-width: 640px) {
+  div#wpwrap {
+    background: white;
+  }
+
+  .toggle-nav {
+    display: none;
+  }
+
+  .plugin-settings-container .components-flex {
+    flex-direction: column;
+    align-items: center;
+    background: white;
+  }
+
+  .plugin-logo {
+    display: none;
+  }
+
+  p.version-number {
+    display: none;
+  }
+
+  .plugin-nav .generate-container {
+    margin-top: 0;
+  }
+
+
+  .plugin-settings-container .plugin-settings {
+    padding: 0;
+  }
+
+  .components-flex {
+    gap: 0;
+  }
+
+  .auto-fold #wpcontent {
+    padding-left: 0;
+  }
+
+  .plugin-settings-container .plugin-nav {
+    padding: 0;
+    min-height: auto;
+    max-width: 205px;
+    box-shadow: none;
+  }
+
+  .react-terminal {
+    height: 160px !important;
+  }
+
+  .react-terminal-wrapper {
+    padding: 50px 15px 0;
+  }
+
+  .react-terminal-line {
+    font-size: 13px;
+  }
+
+  .plugin-settings-container .plugin-nav .components-card__body {
+    padding: 0;
+  }
+
+  a.show-nav {
+    text-align: center;
+    display: block;
+    color: #1e1e1e;
+    width: 100%;
+    background: #f0f0f1;
+    padding: 20px;
+  }
+
+  span.components-form-toggle {
+    margin: 10px 0 10px 0;
+  }
+
+  a.components-button.is-secondary {
+    margin: 0px auto;
+    display: block;
+    max-width: 180px;
+    line-height: 1.5;
+  }
+
+  select, textarea::placeholder, input::placeholder {
+    font-size: 13px !important;
+  }
+
+  .components-text-control__input, .components-text-control__input[type=color], .components-text-control__input[type=date], .components-text-control__input[type=datetime-local], .components-text-control__input[type=datetime], .components-text-control__input[type=email], .components-text-control__input[type=month], .components-text-control__input[type=number], .components-text-control__input[type=password], .components-text-control__input[type=tel], .components-text-control__input[type=text] {
+    font-size: 13px;
+  }
+
+  .save-settings {
+    margin: 5px auto 15px auto;
+    display: block;
+    width: 180px;
+
+    button.components-button.is-primary {
+      width: 60%;
+      text-align: center;
+      display: block;
+      margin: 0px auto;
+    }
+
+    button.components-button.is-secondary {
+      width: 60%;
+      text-align: center;
+      display: block;
+      margin: 10px auto;
+    }
+  }
+
+  .reset-db-btn {
+    margin: 10px 0 0 0;
+  }
+
 }
