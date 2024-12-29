@@ -130,6 +130,7 @@ function SettingsContextProvider(props) {
     const [passedChecks, setPassedChecks] = useState('yes');
     const [blogId, setBlogId] = useState(1);
     const [queuedIntegrations, setQueuedIntegrations] = useState([]);
+    const [showMobileNav, setShowMobileNav] = useState(true);
 
     const getSettings = () => {
         apiFetch({path: '/simplystatic/v1/settings'}).then((options) => {
@@ -354,7 +355,9 @@ function SettingsContextProvider(props) {
                 canRunIntegration,
                 maybeQueueIntegration,
                 maybeUnqueueIntegration,
-                isQueuedIntegration
+                isQueuedIntegration,
+                showMobileNav,
+                setShowMobileNav
             }}
         >
             {props.children}

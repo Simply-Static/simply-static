@@ -41,8 +41,9 @@ function SettingsPage() {
         getSettings,
         passedChecks,
         isPro,
-        isIntegrationActive,
-        canRunIntegration
+        canRunIntegration,
+        showMobileNav,
+        setShowMobileNav
     } = useContext(SettingsContext);
     const [activeItem, setActiveItem] = useState({activeItem: "/"});
     const [initialPage, setInitialPage] = useState(localStorage.getItem('ss-initial-page') ? localStorage.getItem('ss-initial-page') : options.initial);
@@ -134,7 +135,10 @@ function SettingsPage() {
         <div className={"plugin-settings-container"}>
             <NavigatorProvider initialPath={initialPage}>
                 <Flex>
-                    <FlexItem>
+                    <a onClick={() => {
+                        setShowMobileNav(!showMobileNav);
+                    }} className={"show-nav"}><Dashicon icon="align-center"/> {__('Toggle menu', 'simply-static')}</a>
+                    <FlexItem className={showMobileNav ? 'toggle-nav' : ''}>
                         {options.is_network ?
                             <Card className={"plugin-nav"}>
                                 <div className={"plugin-logo"}>
@@ -142,12 +146,12 @@ function SettingsPage() {
                                          src={options.logo}/>
                                 </div>
                                 {'pro' === options.plan && isPro() ?
-                                    <p>
+                                    <p className={"version-number"}>
                                         Free: <b>{options.version}</b><br></br>
                                         Pro: <b>{options.version_pro}</b>
                                     </p>
                                     :
-                                    <p>Version: <b>{options.version}</b></p>
+                                    <p className={"version-number"}>Version: <b>{options.version}</b></p>
                                 }
                                 <div className={"generate-container"}>
                                     <Button onClick={() => {
@@ -158,7 +162,7 @@ function SettingsPage() {
                                             className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
                                     >
                                         {!disabledButton && [<Dashicon icon="update"/>,
-                                            __('Generate Static Files', 'simply-static')
+                                            __('Generate', 'simply-static')
                                         ]}
                                         {disabledButton && [<Dashicon icon="update spin"/>,
                                             __('Generating...', 'simply-static'),
@@ -168,7 +172,7 @@ function SettingsPage() {
                                         <span onClick={() => {
                                             cancelExport();
                                         }} className={"cancel-button"}>
-                                            {__('Cancel Export', 'simply-static')}
+                                            {__('Cancel', 'simply-static')}
                                         </span>
                                     }
                                 </div>
@@ -193,12 +197,12 @@ function SettingsPage() {
                                          src={options.logo}/>
                                 </div>
                                 {'pro' === options.plan && isPro() ?
-                                    <p>
+                                    <p className={"version-number"}>
                                         Free: <b>{options.version}</b><br></br>
                                         Pro: <b>{options.version_pro}</b>
                                     </p>
                                     :
-                                    <p>Version: <b>{options.version}</b></p>
+                                    <p className={"version-number"}>Version: <b>{options.version}</b></p>
                                 }
                                 <div className={"generate-container"}>
                                     <SelectControl
@@ -229,7 +233,7 @@ function SettingsPage() {
                                             className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
                                     >
                                         {!disabledButton && [<Dashicon icon="update"/>,
-                                            __('Generate Static Files', 'simply-static')
+                                            __('Generate', 'simply-static')
                                         ]}
                                         {disabledButton && [<Dashicon icon="update spin"/>,
                                             __('Generating...', 'simply-static'),
@@ -239,7 +243,7 @@ function SettingsPage() {
                                         <span onClick={() => {
                                             cancelExport();
                                         }} className={"cancel-button"}>
-                                            {__('Cancel Export', 'simply-static')}
+                                            {__('Cancel', 'simply-static')}
                                         </span>
                                     }
                                 </div>
@@ -284,12 +288,18 @@ function SettingsPage() {
                                         </>
                                     }
                                     <h4 className={"settings-headline"}> {__('Tools', 'simply-static')}</h4>
-                                    <NavigatorButton onClick={() => setActiveItem('/')}
+                                    <NavigatorButton onClick={() => {
+                                        setActiveItem('/')
+                                        setShowMobileNav(!showMobileNav);
+                                    }}
                                                      className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
                                                      path="/">
                                         <Dashicon icon="update"/> {__('Activity Log', 'simply-static')}
                                     </NavigatorButton>
-                                    <NavigatorButton onClick={() => setActiveItem('/diagnostics')}
+                                    <NavigatorButton onClick={() => {
+                                        setActiveItem('/diagnostics')
+                                        setShowMobileNav(!showMobileNav);
+                                    }}
                                                      className={activeItem === '/diagnostics' ? 'is-active-item' : ''}
                                                      path="/diagnostics">
                                         <Dashicon icon="bell"/> {__('Diagnostics', 'simply-static')}
@@ -297,13 +307,19 @@ function SettingsPage() {
                                 </CardBody>
                                 <CardBody>
                                     <h4 className={"settings-headline"}> {__('Settings', 'simply-static')}</h4>
-                                    <NavigatorButton onClick={() => setActiveItem('/general')}
+                                    <NavigatorButton onClick={() => {
+                                        setActiveItem('/general')
+                                        setShowMobileNav(!showMobileNav);
+                                    }}
                                                      className={activeItem === '/general' ? 'is-active-item' : ''}
                                                      path="/general">
                                         <Dashicon icon="admin-generic"/> {__('General', 'simply-static')}
                                     </NavigatorButton>
                                     {!options.is_network &&
-                                        <NavigatorButton onClick={() => setActiveItem('/deployment')}
+                                        <NavigatorButton onClick={() => {
+                                            setActiveItem('/deployment')
+                                            setShowMobileNav(!showMobileNav);
+                                        }}
                                                          className={activeItem === '/deployment' ? 'is-active-item' : ''}
                                                          path="/deployment">
                                             <Dashicon icon="migrate"/> {__('Deploy', 'simply-static')}
@@ -311,17 +327,26 @@ function SettingsPage() {
                                     }
                                     {!options.is_network &&
                                         <>
-                                            <NavigatorButton onClick={() => setActiveItem('/forms')}
+                                            <NavigatorButton onClick={() => {
+                                                setActiveItem('/forms')
+                                                setShowMobileNav(!showMobileNav);
+                                            }}
                                                              className={activeItem === '/forms' ? 'is-active-item' : ''}
                                                              path="/forms">
                                                 <Dashicon icon="align-center"/> {__('Forms', 'simply-static')}
                                             </NavigatorButton>
-                                            <NavigatorButton onClick={() => setActiveItem('/search')}
+                                            <NavigatorButton onClick={() => {
+                                                setActiveItem('/search')
+                                                setShowMobileNav(!showMobileNav);
+                                            }}
                                                              className={activeItem === '/search' ? 'is-active-item' : ''}
                                                              path="/search">
                                                 <Dashicon icon="search"/> {__('Search', 'simply-static')}
                                             </NavigatorButton>
-                                            <NavigatorButton onClick={() => setActiveItem('/optimize')}
+                                            <NavigatorButton onClick={() => {
+                                                setActiveItem('/optimize')
+                                                setShowMobileNav(!showMobileNav);
+                                            }}
                                                              className={activeItem === '/optimize' ? 'is-active-item' : ''}
                                                              path="/optimize">
                                                 <Dashicon icon="dashboard"/> {__('Optimize', 'simply-static')}
@@ -331,17 +356,26 @@ function SettingsPage() {
                                 </CardBody>
                                 <CardBody>
                                     <h4 className={"settings-headline"}> {__('Advanced', 'simply-static')}</h4>
-                                    <NavigatorButton onClick={() => setActiveItem('/integrations')}
+                                    <NavigatorButton onClick={() => {
+                                        setActiveItem('/integrations')
+                                        setShowMobileNav(!showMobileNav);
+                                    }}
                                                      className={activeItem === '/integrations' ? 'is-active-item' : ''}
                                                      path="/integrations">
                                         <Dashicon icon="block-default"/> {__('Integrations', 'simply-static')}
                                     </NavigatorButton>
-                                    <NavigatorButton onClick={() => setActiveItem('/utilities')}
+                                    <NavigatorButton onClick={() => {
+                                        setActiveItem('/utilities')
+                                        setShowMobileNav(!showMobileNav);
+                                    }}
                                                      className={activeItem === '/utilities' ? 'is-active-item' : ''}
                                                      path="/utilities">
                                         <Dashicon icon="admin-tools"/> {__('Utilities', 'simply-static')}
                                     </NavigatorButton>
-                                    <NavigatorButton onClick={() => setActiveItem('/debug')}
+                                    <NavigatorButton onClick={() => {
+                                        setActiveItem('/debug')
+                                        setShowMobileNav(!showMobileNav);
+                                    }}
                                                      className={activeItem === '/debug' ? 'is-active-item' : ''}
                                                      path="/debug">
                                         <Dashicon icon="editor-help"/> {__('Debug', 'simply-static')}
@@ -370,7 +404,7 @@ function SettingsPage() {
                             </Card>
                         }
                     </FlexItem>
-                    <FlexItem isBlock={true}>
+                    <FlexItem isBlock={true} className={!showMobileNav ? 'toggle-nav' : ''}>
                         <div class={"plugin-settings"}>
                             {'no' === passedChecks && !options.is_network ?
                                 <Animate type="slide-in" options={{origin: 'top'}}>
@@ -382,7 +416,10 @@ function SettingsPage() {
                                                 {__('There are errors in diagnostics that may negatively affect your static export.', 'simply-static')}<br></br>
                                                 {__('Please review them and get them fixed to avoid problems.', 'simply-static')}
                                             </p>
-                                            <NavigatorButton isSecondary onClick={() => setActiveItem('/diagnostics')}
+                                            <NavigatorButton isSecondary onClick={() => {
+                                                setActiveItem('/diagnostics')
+                                                setShowMobileNav(!showMobileNav);
+                                            }}
                                                              className={activeItem === '/diagnostics' ? 'is-active-item' : ''}
                                                              path="/diagnostics">
                                                 <Dashicon

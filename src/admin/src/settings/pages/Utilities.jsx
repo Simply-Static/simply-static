@@ -16,7 +16,14 @@ const {__} = wp.i18n;
 
 function Utilities() {
 
-    const {settings, importSettings, saveSettings, resetSettings, migrateSettings, resetDatabase} = useContext(SettingsContext);
+    const {
+        settings,
+        importSettings,
+        saveSettings,
+        resetSettings,
+        migrateSettings,
+        resetDatabase
+    } = useContext(SettingsContext);
     const [isExport, setIsExport] = useState(false);
     const [isImport, setIsImport] = useState(false);
     const [isReset, setIsReset] = useState(false);
@@ -138,9 +145,7 @@ function Utilities() {
                     <p>
                         {__('Paste in the JSON string you got from your export to import all settings for the plugin.', 'simply-static')}
                     </p>
-                    <p>
-                        <textarea rows="8" cols="60" name="import-data" onChange={setImportDataValue}></textarea>
-                    </p>
+                    <textarea rows="8" name="import-data" onChange={setImportDataValue}></textarea>
                     <p>
                         <Button onClick={runImportSettings}
                                 variant="primary">{__('Import Settings', 'simply-static')}</Button>
@@ -171,7 +176,7 @@ function Utilities() {
                     <p>
                         <Button onClick={runResetSettings}
                                 variant="secondary">{__('Reset Plugin Settings', 'simply-static')}</Button>
-                        <Button onClick={runResetDatabase} style={{marginLeft: "10px"}}
+                        <Button onClick={runResetDatabase} className={"reset-db-btn"}
                                 variant="primary">{__('Reset Database Table', 'simply-static')}</Button>
                     </p>
                     {isReset ?
