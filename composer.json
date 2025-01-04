@@ -4,8 +4,8 @@
   "type": "wordpress-plugin",
   "require": {
       "voku/simple_html_dom": "^4.8.10",
-      "deliciousbrains/wp-background-processing": "^1.4.0",
-      "voku/portable-utf8": "^6.0.13"
+      "voku/portable-utf8": "^6.0.13",
+    "deliciousbrains/wp-background-processing": "1.3.1"
   },
   "license": "GPL-3.0-or-later",
   "authors": [
