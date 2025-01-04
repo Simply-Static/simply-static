@@ -209,8 +209,30 @@ class Plugin {
 		// Start export.
 		$this->archive_creation_job->start( $blog_id, $type );
 
+		// Determine server type for basic auth check.
+		$server_type   = esc_html( $_SERVER['SERVER_SOFTWARE'] );
+		$basic_auth_on = false;
+
+		switch ( $server_type ) {
+			case ( strpos( $server_type, 'Apache' ) !== false ) :
+				if ( isset( $_SERVER['PHP_AUTH_USER'] ) ) {
+					$basic_auth_on = true;
+				}
+				break;
+			case ( strpos( $server_type, 'nginx' ) !== false ) :
+				if ( isset( $_SERVER['REMOTE_USER'] ) ) {
+					$basic_auth_on = true;
+				}
+				break;
+			case ( strpos( $server_type, 'IIS' ) !== false ) :
+				if ( isset( $_SERVER['AUTH_USER'] ) ) {
+					$basic_auth_on = true;
+				}
+				break;
+		}
+
 		// Exit if Basic Auth but no credentials were provided.
-		if ( isset( $_SERVER['PHP_AUTH_USER'] ) && isset( $_SERVER['PHP_AUTH_PW'] ) ) {
+		if ( $basic_auth_on ) {
 			$options         = get_option( 'simply-static' );
 			$basic_auth_user = $options['http_basic_auth_username'];
 			$basic_auth_pass = $options['http_basic_auth_password'];

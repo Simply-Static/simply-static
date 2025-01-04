@@ -509,7 +509,30 @@ class Diagnostic {
 		$test    = true;
 		$message = __( 'Basic Auth is not enabled.', 'simply-static' );
 
-		if ( isset( $_SERVER['PHP_AUTH_USER'] ) && isset( $_SERVER['PHP_AUTH_PW'] ) ) {
+		// Determine server type for basic auth check.
+		$server_type   = esc_html( $_SERVER['SERVER_SOFTWARE'] );
+		$basic_auth_on = false;
+
+		switch ( $server_type ) {
+			case ( strpos( $server_type, 'Apache' ) !== false ) :
+				if ( isset( $_SERVER['PHP_AUTH_USER'] ) ) {
+					$basic_auth_on = true;
+				}
+				break;
+			case ( strpos( $server_type, 'nginx' ) !== false ) :
+				if ( isset( $_SERVER['REMOTE_USER'] ) ) {
+					$basic_auth_on = true;
+				}
+				break;
+			case ( strpos( $server_type, 'IIS' ) !== false ) :
+				if ( isset( $_SERVER['AUTH_USER'] ) ) {
+					$basic_auth_on = true;
+				}
+				break;
+		}
+
+		// Check for NGINX, Apache, and IIS basic auth.
+		if ( $basic_auth_on ) {
 			$basic_auth_user = $this->options->get( 'http_basic_auth_username' );
 			$basic_auth_pass = $this->options->get( 'http_basic_auth_password' );
 
