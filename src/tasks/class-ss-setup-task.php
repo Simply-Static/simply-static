@@ -105,16 +105,18 @@ class Setup_Task extends Task {
 			$additional_files[] = $robots_txt;
 		}
 
-		// Create feed directory it doesn't exist.
-		$feed_directory = untrailingslashit( $this->options->get_archive_dir() ) . '/feed';
+		// Add feeds if enabled.
+		if ( $this->options->get( 'add_feeds' ) ) {
+			// Create feed directory it doesn't exist.
+			$feed_directory = untrailingslashit( $this->options->get_archive_dir() ) . '/feed';
 
-		if ( ! file_exists( $feed_directory ) ) {
-			wp_mkdir_p( $feed_directory );
-		}
+			if ( ! file_exists( $feed_directory ) ) {
+				wp_mkdir_p( $feed_directory );
+			}
 
-		// Create index.html file for feed directory.
-		file_put_contents( $feed_directory . '/index.html',
-			'<!DOCTYPE html>
+			// Create index.html file for feed directory.
+			file_put_contents( $feed_directory . '/index.html',
+				'<!DOCTYPE html>
 			<html>
 				<head>
 					<title>Redirecting...</title>
@@ -127,10 +129,11 @@ class Setup_Task extends Task {
 					<p>You are being redirected to <a href="index.xml">index.xml</a></p>
 				</body>
 			</html>'
-		);
+			);
 
-		// Add feed redirect file to additional files.
-		$additional_files[] = $feed_directory . '/index.html';
+			// Add feed redirect file to additional files.
+			$additional_files[] = $feed_directory . '/index.html';
+		}
 
 		// Convert additional files to URLs and add to queue.
 		foreach ( $additional_files as $item ) {

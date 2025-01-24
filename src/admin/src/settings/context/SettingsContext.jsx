@@ -91,6 +91,7 @@ function SettingsContextProvider(props) {
         'minify_js': false,
         'minify_inline_js': false,
         'generate_404': false,
+        'add_feeds': false,
         'wp_content_folder': '',
         'wp_includes_folder': '',
         'wp_uploads_folder': '',
@@ -178,7 +179,7 @@ function SettingsContextProvider(props) {
     const checkIfRunning = () => {
         apiFetch({
             path: '/simplystatic/v1/is-running',
-            method: 'GET'  
+            method: 'GET'
         }).then(resp => {
             var json = JSON.parse(resp);
             setIsRunning(json.running);
@@ -255,12 +256,12 @@ function SettingsContextProvider(props) {
     }
 
     const maybeQueueIntegration = (integration) => {
-        if ( ! integrationRequiresSaving(integration) ) {
+        if (!integrationRequiresSaving(integration)) {
             return;
         }
 
         // Already queued.
-        if ( isQueuedIntegration(integration) ) {
+        if (isQueuedIntegration(integration)) {
             return;
         }
 
@@ -269,17 +270,17 @@ function SettingsContextProvider(props) {
     }
 
     const maybeUnqueueIntegration = (integration) => {
-        if ( ! integrationRequiresSaving(integration) ) {
+        if (!integrationRequiresSaving(integration)) {
             return;
         }
 
         // Already queued.
-        if ( ! isQueuedIntegration(integration) ) {
+        if (!isQueuedIntegration(integration)) {
             return;
         }
 
         const index = queuedIntegrations.indexOf(integration);
-        if ( index < 0 ) {
+        if (index < 0) {
             return;
         }
 
@@ -288,11 +289,11 @@ function SettingsContextProvider(props) {
     }
 
     const canRunIntegration = (integration) => {
-        if ( ! isIntegrationActive(integration) ) {
+        if (!isIntegrationActive(integration)) {
             return false;
         }
 
-        if ( isQueuedIntegration(integration) ) {
+        if (isQueuedIntegration(integration)) {
             return false;
         }
 
@@ -306,11 +307,11 @@ function SettingsContextProvider(props) {
     const isIntegrationActive = (integration) => {
         let integrations = settings.integrations;
 
-        if ( false === integrations ) {
-           return false;
+        if (false === integrations) {
+            return false;
         }
 
-        if ( integrations.indexOf(integration) >= 0 ) {
+        if (integrations.indexOf(integration) >= 0) {
             return true;
         }
 

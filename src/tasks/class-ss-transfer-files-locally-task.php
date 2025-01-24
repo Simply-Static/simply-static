@@ -52,7 +52,10 @@ class Transfer_Files_Locally_Task extends Task {
 		if ( $done ) {
 
 			$this->transfer_404_page( $this->destination_dir );
-			$this->transfer_feed_redirect( $this->destination_dir );
+
+			if ( $this->options->get( 'add_feeds' ) ) {
+				$this->transfer_feed_redirect( $this->destination_dir );
+			}
 
 			if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
 				$destination_url = trailingslashit( $this->options->get_destination_url() );
