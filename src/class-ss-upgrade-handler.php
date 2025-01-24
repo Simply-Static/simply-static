@@ -139,7 +139,7 @@ class Upgrade_Handler {
 			'minify_inline_css'             => false,
 			'minify_js'                     => false,
 			'minify_inline_js'              => false,
-			'generate_404'                  => true,
+			'generate_404'                  => false,
 			'wp_content_folder'             => '',
 			'wp_includes_folder'            => '',
 			'wp_uploads_folder'             => '',

@@ -90,7 +90,7 @@ function SettingsContextProvider(props) {
         'minify_js_exclude': '',
         'minify_js': false,
         'minify_inline_js': false,
-        'generate_404': true,
+        'generate_404': false,
         'wp_content_folder': '',
         'wp_includes_folder': '',
         'wp_uploads_folder': '',
