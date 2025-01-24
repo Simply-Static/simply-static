@@ -52,6 +52,7 @@ function SettingsContextProvider(props) {
         'github_throttle_requests': false,
         'github_batch_size': 100,
         'aws_region': 'us-east-2',
+        'aws_auth_method': 'aws-iam-key',
         'aws_access_key': '',
         'aws_access_secret': '',
         'aws_bucket': '',
