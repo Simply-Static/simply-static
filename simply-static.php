@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'SIMPLY_STATIC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SIMPLY_STATIC_URL', untrailingslashit( plugin_dir_url( __FILE__ ) ) );
-define( 'SIMPLY_STATIC_VERSION', ' 3.2.5.4' );
+define( 'SIMPLY_STATIC_VERSION', '3.2.5.4' );
 
 // Check PHP version.
 if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
