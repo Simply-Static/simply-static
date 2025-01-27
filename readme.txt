@@ -251,6 +251,7 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 
 * added option to optionally include feed URLs (default is off)
 * set generate_404 page to off on default settings
+* extended Elementor integration to auto-include missing CSS files
 
 = 3.2.5.3 =
 
