@@ -113,7 +113,7 @@ class Transfer_Files_Locally_Task extends Task {
 		$path_info = Util::url_path_info( $file_path );
 		$path      = Util::combine_path( $this->destination_dir, $path_info['dirname'] );
 
-		Util::debug_log( "Trying to transfer: " . $path );
+		Util::debug_log( "Trying to transfer: " . $file_path );
 
 		if ( wp_mkdir_p( $path ) === false ) {
 			Util::debug_log( "Cannot create directory: " . $path );
