@@ -103,6 +103,7 @@ class Upgrade_Handler {
 			'github_webhook_url'            => '',
 			'github_folder_path'            => '',
 			'github_throttle_requests'      => false,
+			'aws_auth_method'               => 'aws-iam-key',
 			'aws_region'                    => 'us-east-2',
 			'aws_access_key'                => '',
 			'aws_access_secret'             => '',
