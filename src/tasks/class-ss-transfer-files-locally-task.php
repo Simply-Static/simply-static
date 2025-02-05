@@ -112,7 +112,9 @@ class Transfer_Files_Locally_Task extends Task {
 		$file_path = $this->get_page_file_path( $static_page );
 		$path_info = Util::url_path_info( $file_path );
 		$path      = Util::combine_path( $this->destination_dir, $path_info['dirname'] );
+
 		Util::debug_log( "Trying to transfer: " . $path );
+
 		if ( wp_mkdir_p( $path ) === false ) {
 			Util::debug_log( "Cannot create directory: " . $path );
 			$static_page->set_error_message( 'Unable to create destination directory' );
@@ -123,23 +125,20 @@ class Transfer_Files_Locally_Task extends Task {
 
 			// Check if origin file exists.
 			if ( file_exists( $origin_file_path ) ) {
-				// Check if destination file exists and is writeable.
-				if ( ! file_exists( $destination_file_path ) || is_writable( $destination_file_path ) ) {
-					$copy = copy( $origin_file_path, $destination_file_path );
+				$copy = copy( $origin_file_path, $destination_file_path );
 
-					if ( $copy === false ) {
-						Util::debug_log( "Cannot copy " . $origin_file_path . " to " . $destination_file_path );
-						$static_page->set_error_message( 'Unable to copy file to destination' );
-					} else {
-						$static_page->last_transferred_at = Util::formatted_datetime();
-						$static_page->save();
+				if ( $copy === false ) {
+					Util::debug_log( "Cannot copy " . $origin_file_path . " to " . $destination_file_path );
+					$static_page->set_error_message( 'Unable to copy file to destination' );
+				} else {
+					$static_page->last_transferred_at = Util::formatted_datetime();
+					$static_page->save();
 
-						Util::debug_log( 'Successfully transferred: ' . $path );
-					}
+					Util::debug_log( 'Successfully transferred: ' . $path );
 				}
 			} else {
-				Util::debug_log( "File exists and is unwriteable: " . $destination_file_path );
-				$static_page->set_error_message( 'Destination file exists and is unwriteable' );
+				Util::debug_log( "Cannot find file: " . $origin_file_path );
+				$static_page->set_error_message( 'Unable to find file in archive' );
 			}
 		}
 
