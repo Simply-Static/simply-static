@@ -126,6 +126,12 @@ function SettingsPage() {
     let buildOptions = '';
     if (Object.keys(options.builds).length) {
         const builds = Object.keys(options.builds).map((id) => <option value={id}>{options.builds[id]}</option>);
+
+       // Sort builds alphabetically
+        builds.sort((a, b) => {
+            return a.props.children.localeCompare(b.props.children);
+        });
+
         buildOptions = <optgroup label="Builds">
             {builds}
         </optgroup>
