@@ -4,7 +4,7 @@ Tags: static site generator, performance, security, jamstack
 Requires at least: 6.5
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag:  3.2.5.4
+Stable tag:  3.2.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -46,6 +46,12 @@ Develop your site locally and only push the static exported website on a server.
 * [lando](https://docs.lando.dev/)
 
 I highly recommend not to use another tool for local development if you are not a programmer as in most cases manual package installation is required.
+
+= Simply Static Studio =
+
+We created a new service called Simply Static Studio that allows you to create a static website without any technical knowledge.
+
+We are currently preparing for early-access - if you want to participate and give feedback, join today: [Simply Static Studio - Early Access](https://simplystatic.com/simply-static-studio/#early-access)
 
 == Simply Static Pro ==
 
@@ -246,6 +252,14 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 3. Diagnostics
 
 == Changelog ==
+
+= 3.2.6 =
+
+* clear WP object cache on start + cancel export
+* simplified and improved transfer_files_locally task
+* improved logging for transfer_files_locally task
+* extended UI for AWS updates
+* sort builds alphabetically in export type UI
 
 =  3.2.5.4 =
 
