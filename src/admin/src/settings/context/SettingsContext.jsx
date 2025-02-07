@@ -58,6 +58,7 @@ function SettingsContextProvider(props) {
         'aws_bucket': '',
         'aws_subdirectory': '',
         'aws_distribution_id': '',
+        'aws_webhook_url': '',
         'aws_empty': false,
         's3_access_key': '',
         's3_base_url': '',

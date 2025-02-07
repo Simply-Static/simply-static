@@ -711,6 +711,17 @@ function DeploymentSettings() {
                             }}
                         />
 
+                        <TextControl
+                            label={__('Webhook URL', 'simply-static')}
+                            type={"url"}
+                            help={__('Enter your Webhook URL here and Simply Static will send a POST request after all files are transferred to AWS S3.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            value={settings.github_webhook_url}
+                            onChange={(webhook) => {
+                                updateSetting('aws_webhook_url', webhook);
+                            }}
+                        />
+
                         <ToggleControl
                             label={__('Empty bucket before new export?', 'simply-static')}
                             help={
