@@ -278,7 +278,7 @@ class Fetch_Urls_Task extends Task {
 	 * @return bool
 	 */
 	public function find_excludable( $static_page ) {
-		$excluded = apply_filters( 'ss_excluded_by_default', array( 'wp-json', '.php', 'debug' ) );
+		$excluded = array( 'wp-json', '.php', 'debug' );
 
 		// Exclude feeds if add_feeds is not true.
 		if ( ! $this->options->get( 'add_feeds' ) ) {
@@ -292,6 +292,8 @@ class Fetch_Urls_Task extends Task {
 				$excluded = array_merge( $excluded, $excluded_by_option );
 			}
 		}
+
+		$excluded = apply_filters( 'ss_excluded_by_default', $excluded );
 
 		if ( $excluded ) {
 			$excluded = array_filter( $excluded );
