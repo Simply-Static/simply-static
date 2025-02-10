@@ -316,7 +316,7 @@ class Plugin {
 		);
 
 		$http_status_codes  = Page::get_http_status_codes_summary();
-		$total_static_pages = array_sum( array_values( $http_status_codes ) );
+		$total_static_pages = apply_filters( 'ss_total_pages', array_sum( array_values( $http_status_codes ) ) );
 		$total_pages        = ceil( $total_static_pages / $per_page );
 
 		do_action( 'ss_after_render_export_log', $blog_id );
