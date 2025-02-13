@@ -399,9 +399,8 @@ class Plugin {
 			$task_list[] = 'create_zip_archive';
 		} elseif ( 'local' === $delivery_method ) {
 			$task_list[] = 'transfer_files_locally';
-		} elseif ( 'simply-cdn' === $delivery_method ) {
-			$task_list[] = 'simply_cdn';
 		}
+
 		$task_list[] = 'wrapup';
 
 		return $task_list;
