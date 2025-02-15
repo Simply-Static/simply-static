@@ -126,14 +126,6 @@ function Optimize() {
             setAuthorUrl(settings.author_url);
         }
 
-        if (settings.hide_rest_api) {
-            setHideRESTAPI(settings.hide_rest_api);
-        }
-
-        if (settings.hide_style_id) {
-            setHideStyleId(settings.hide_style_id);
-        }
-
         if (settings.hide_comments) {
             setHideComments(settings.hide_comments);
         }
@@ -523,24 +515,6 @@ function Optimize() {
                 </Flex>
             </CardHeader>
             <CardBody>
-                <ToggleControl
-                    label={__('Hide REST API URLs', 'simply-static')}
-                    checked={hideRESTAPI}
-                    disabled={('free' === options.plan || !isPro())}
-                    onChange={(value) => {
-                        setHideRESTAPI(value);
-                        updateSetting('hide_rest_api', value);
-                    }}
-                />
-                <ToggleControl
-                    label={__('Hide Style/Script IDs', 'simply-static')}
-                    checked={hideStyleId}
-                    disabled={('free' === options.plan || !isPro())}
-                    onChange={(value) => {
-                        setHideStyleId(value);
-                        updateSetting('hide_style_id', value);
-                    }}
-                />
                 <ToggleControl
                     label={__('Hide HTML Comments', 'simply-static')}
                     checked={hideComments}

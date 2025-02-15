@@ -102,8 +102,6 @@ function SettingsContextProvider(props) {
         'theme_style_name': 'style',
         'rename_plugin_folders': false,
         'author_url': '',
-        'hide_rest_api': false,
-        'hide_style_id': false,
         'hide_comments': false,
         'hide_version': false,
         'hide_generator': false,
