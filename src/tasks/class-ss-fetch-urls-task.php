@@ -44,13 +44,10 @@ class Fetch_Urls_Task extends Task {
 	 * @return boolean|WP_Error true if done, false if not done, WP_Error if error.
 	 */
 	public function perform() {
-		$batch_size = apply_filters( 'simply_static_fetch_urls_batch_size', 50 );
-
 		$static_pages = apply_filters(
 			'ss_static_pages',
 			Page::query()
 			    ->where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time )
-			    ->limit( $batch_size )
 			    ->find(),
 			$this->archive_start_time
 		);
