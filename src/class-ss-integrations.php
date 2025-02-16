@@ -32,7 +32,6 @@ class Integrations {
 			'elementor'     => Elementor_Integration::class,
 			'elementor-pro' => Elementor_Pro_Integration::class,
 			'cookieyes'     => CookieYes_Integration::class,
-			'brizy'         => Brizy_Integration::class,
 			'complianz'     => Complianz_Integration::class,
 			'jetpack'       => Jetpack_Integration::class,
 			'multilingual'  => Multilingual_Integration::class,
@@ -58,7 +57,6 @@ class Integrations {
 		require_once $path . 'class-elementor-integration.php';
 		require_once $path . 'class-elementor-pro-integration.php';
 		require_once $path . 'class-cookie-yes-integration.php';
-		require_once $path . 'class-brizy-integration.php';
 		require_once $path . 'class-jetpack-integration.php';
 
 		// Simply Static Pro integrations.
