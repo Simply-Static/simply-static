@@ -62,6 +62,7 @@ class Admin_Settings {
 			'simply-static-generate',
 			array( $this, 'render_settings' ),
 			SIMPLY_STATIC_URL . '/assets/simply-static-icon.svg',
+            apply_filters( 'ss_menu_position', 100 )
 		);
 
 		$generate_suffix = add_submenu_page(
