@@ -105,7 +105,7 @@ function DeploymentSettings() {
         });
 
         // Maybe include studio.
-        if (options.home.includes('static.studio')) {
+        if (options.home.includes('static.studio') || options.home.includes('static1.studio') || options.home.includes('static2.studio')) {
             deploymentOptions.push({label: __('Simply Static Studio', 'simply-static'), value: 'simply-static-studio'});
         }
 
