@@ -16,7 +16,7 @@ trait canProcessPages {
 	 *
 	 * @var int
 	 */
-	protected $batch_size = 100;
+	protected $batch_size = 50;
 
 	/**
 	 * Processing Column.
