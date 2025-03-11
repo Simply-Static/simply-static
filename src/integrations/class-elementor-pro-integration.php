@@ -82,6 +82,11 @@ class Elementor_Pro_Integration extends Integration {
 		$urls = [];
 
 		foreach ( $only_bundle_min as $minified_file ) {
+			// If file size is empty, skip it.
+			if ( ! filesize( $minified_file ) ) {
+				continue;
+			}
+
 			$urls[] = trailingslashit( ELEMENTOR_PRO_URL ) . 'assets/js/' . $minified_file;
 		}
 
@@ -98,6 +103,11 @@ class Elementor_Pro_Integration extends Integration {
 		$urls  = [];
 
 		foreach ( $files as $file ) {
+			// If file size is empty, skip it.
+			if ( ! filesize( $file ) ) {
+				continue;
+			}
+
 			$urls[] = str_replace( trailingslashit( ELEMENTOR_PRO_PATH ), trailingslashit( ELEMENTOR_PRO_URL ), $file );
 		}
 
