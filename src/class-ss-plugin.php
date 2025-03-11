@@ -206,9 +206,6 @@ class Plugin {
 		// Clear transients.
 		Util::clear_transients();
 
-		// Clear WP object cache.
-		wp_cache_flush();
-
 		// Start export.
 		$this->archive_creation_job->start( $blog_id, $type );
 
