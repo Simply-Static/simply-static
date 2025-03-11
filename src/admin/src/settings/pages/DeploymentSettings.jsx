@@ -134,9 +134,7 @@ function DeploymentSettings() {
         {deliveryMethod === 'simply-static-studio' &&
             <Card>
                 <CardHeader>
-                    <b>{__('Simply Static Studio', 'simply-static')}<HelperVideo
-                        title={__('What is Simply Static Studio?', 'simply-static')}
-                        videoUrl={'https://youtu.be/WHaFjDte6zI'}/></b>
+                    <b>{__('Simply Static Studio', 'simply-static')}</b>
                 </CardHeader>
                 <CardBody>
                     <p>
