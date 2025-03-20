@@ -30,7 +30,7 @@ class Url_Extractor {
 	protected static $match_tags = array(
 		'a'       => array( 'href', 'urn', 'style' ),
 		'base'    => array( 'href' ),
-		'img'     => array( 'src', 'usemap', 'longdesc', 'dynsrc', 'lowsrc', 'srcset', 'data-src', 'data-bg' ),
+		'img'     => array( 'src', 'usemap', 'longdesc', 'dynsrc', 'lowsrc', 'srcset', 'data-src', 'data-srcset', 'data-bg' ),
 		'picture' => array( 'src', 'srcset' ),
 		'amp-img' => array( 'src', 'srcset' ),
 
@@ -301,7 +301,7 @@ class Url_Extractor {
 					}
 				} else {
 					// srcset is a fair bit different from most html
-					if ( $attribute_name === 'srcset' ) {
+					if ( $attribute_name === 'srcset' || $attribute_name === 'data-srcset' ) {
 						$extracted_urls = $this->extract_urls_from_srcset( $attribute_value );
 					} else {
 						$extracted_urls[] = $attribute_value;
