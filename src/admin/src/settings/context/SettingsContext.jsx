@@ -78,6 +78,7 @@ function SettingsContextProvider(props) {
         'search_excludable': '',
         'search_metadata': '',
         'fuse_selector': '.search-field',
+        'fuse_threshold': 0.1,
         'algolia_app_id': '',
         'algolia_admin_api_key': '',
         'algolia_search_api_key': '',
