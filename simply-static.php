@@ -27,6 +27,12 @@ if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
 	wp_die( esc_html__( 'Simply Static requires PHP 7.4 or higher.', 'simply-static' ), 'Plugin dependency check', array( 'back_link' => true ) );
 }
 
+// Check WordPress version.
+if ( version_compare( get_bloginfo( 'version' ), '6.5', '<' ) ) {
+	deactivate_plugins( plugin_basename( __FILE__ ) );
+	wp_die( esc_html__( 'Simply Static requires WordPress 6.5 or higher.', 'simply-static' ), 'Plugin dependency check', array( 'back_link' => true ) );
+}
+
 // Run autoloader.
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) && ! class_exists( 'Simply_Static\Plugin' ) ) {
 	require __DIR__ . '/vendor/autoload.php';
