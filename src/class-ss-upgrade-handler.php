@@ -150,7 +150,6 @@ class Upgrade_Handler {
 			'wp_plugins_folder'             => '',
 			'wp_themes_folder'              => '',
 			'theme_style_name'              => 'style',
-			'rename_plugin_folders'         => false,
 			'author_url'                    => '',
 			'hide_comments'                 => false,
 			'hide_version'                  => false,
