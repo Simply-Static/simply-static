@@ -30,8 +30,18 @@ class Url_Extractor {
 	protected static $match_tags = array(
 		'a'       => array( 'href', 'urn', 'style' ),
 		'base'    => array( 'href' ),
-		'img'     => array( 'src', 'usemap', 'longdesc', 'dynsrc', 'lowsrc', 'srcset', 'data-src', 'data-srcset', 'data-bg' ),
-		'picture' => array( 'src', 'srcset' ),
+		'img'     => array(
+			'src',
+			'usemap',
+			'longdesc',
+			'dynsrc',
+			'lowsrc',
+			'srcset',
+			'data-src',
+			'data-srcset',
+			'data-bg'
+		),
+		'picture' => array( 'src', 'srcset', 'data-src', 'data-srcset', 'data-bg' ),
 		'amp-img' => array( 'src', 'srcset' ),
 
 		'applet' => array( 'code', 'codebase', 'archive', 'object' ),
@@ -56,12 +66,12 @@ class Url_Extractor {
 		'html'         => array( 'manifest', 'background', 'xmlns' ),
 		'source'       => array( 'src', 'srcset' ),
 		'video'        => array( 'src', 'poster', 'srcset' ),
-		'image'        => array( 'href', 'xlink:href', 'src', 'style' ),
+		'image'        => array( 'href', 'xlink:href', 'src', 'style', 'srcset' ),
 
 		'bgsound' => array( 'src' ),
-		'div'     => array( 'href', 'src', 'style' ),
-		'span'    => array( 'href', 'src', 'style' ),
-		'section' => array( 'style' ),
+		'div'     => array( 'href', 'src', 'style', 'data-bg' ),
+		'span'    => array( 'href', 'src', 'style', 'data-bg' ),
+		'section' => array( 'style', 'data-bg' ),
 		'footer'  => array( 'style' ),
 		'header'  => array( 'style' ),
 		'ilayer'  => array( 'src' ),
