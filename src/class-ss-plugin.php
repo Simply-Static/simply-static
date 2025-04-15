@@ -151,6 +151,8 @@ class Plugin {
 		require_once $path . 'src/class-ss-view.php';
 		require_once $path . 'src/class-ss-url-extractor.php';
 		require_once $path . 'src/class-ss-url-fetcher.php';
+		require_once $path . 'src/background/class-ss-async-request.php';
+		require_once $path . 'src/background/class-ss-background-process.php';
 		require_once $path . 'src/class-ss-archive-creation-job.php';
 		require_once $path . 'src/tasks/traits/class-skip-further-processing-exception.php';
 		require_once $path . 'src/tasks/traits/trait-can-process-pages.php';

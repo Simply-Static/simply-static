@@ -12,7 +12,7 @@ require_once( ABSPATH . 'wp-admin/includes/admin.php' );
 /**
  * Simply Static archive manager class
  */
-class Archive_Creation_Job extends \WP_Background_Process {
+class Archive_Creation_Job extends Background_Process {
 
 	/**
 	 * The name of the job/action
@@ -181,7 +181,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 		try {
 			Util::debug_log( 'Performing task: ' . $task_name );
 			$is_done = $task->perform();
-		} catch ( SimplerStaticException $e ) {
+		} catch ( \Exception $e ) {
 			Util::debug_log( 'Caught an exception' );
 
 			return $this->exception_occurred( $e );
@@ -374,7 +374,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	/**
 	 * Add a status message about the exception and cancel the job
 	 *
-	 * @param Exception $exception The exception that occurred
+	 * @param \Exception $exception The exception that occurred
 	 *
 	 * @return void
 	 */
