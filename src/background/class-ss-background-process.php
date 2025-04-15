@@ -938,7 +938,10 @@ abstract class Background_Process extends Async_Request {
 	 * @return string
 	 */
 	public function get_chain_id() {
-		if ( empty( $this->chain_id ) && wp_doing_ajax() ) {
+		if ( empty( $this->chain_id )
+		     && wp_doing_ajax()
+		     && isset( $_REQUEST['action'] )
+		     && $_REQUEST['action'] === $this->identifier ) {
 			check_ajax_referer( $this->identifier, 'nonce' );
 
 			if ( ! empty( $_GET[ $this->get_chain_id_arg_name() ] ) ) {
