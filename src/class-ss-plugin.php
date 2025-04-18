@@ -256,6 +256,32 @@ class Plugin {
 	}
 
 	/**
+	 * Handle pause archive job.
+	 *
+	 * @return void
+	 */
+	public function pause_static_export() {
+		// Clear WP object cache.
+		wp_cache_flush();
+
+		// Cancel export.
+		$this->archive_creation_job->pause();
+	}
+
+	/**
+	 * Handle resume archive job.
+	 *
+	 * @return void
+	 */
+	public function resume_static_export() {
+		// Clear WP object cache.
+		wp_cache_flush();
+
+		// Cancel export.
+		$this->archive_creation_job->resume();
+	}
+
+	/**
 	 * Handle cancel archive job.
 	 *
 	 * @return void
