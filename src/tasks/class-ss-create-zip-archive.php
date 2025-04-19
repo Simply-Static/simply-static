@@ -27,9 +27,11 @@ class Create_Zip_Archive_Task extends Task {
 		if ( is_wp_error( $download_url ) ) {
 			return $download_url;
 		} else {
-			// Force download link to be SSL.
-			if ( strpos( $download_url, 'http://' ) !== false ) {
-				$download_url = str_replace( 'http://', 'https://', $download_url );
+			if ( defined( 'SS_WASM' ) ) {
+				// Force download link to be SSL.
+				if ( strpos( $download_url, 'http://' ) !== false ) {
+					$download_url = str_replace( 'http://', 'https://', $download_url );
+				}
 			}
 
 			$message = __( 'ZIP archive created: ', 'simply-static' );
