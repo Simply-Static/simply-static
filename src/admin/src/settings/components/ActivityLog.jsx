@@ -6,7 +6,7 @@ import useInterval from "../../hooks/useInterval";
 
 const {__} = wp.i18n;
 function ActivityLog() {
-    const {isRunning, blogId} = useContext(SettingsContext);
+    const {isRunning, isResumed, blogId} = useContext(SettingsContext);
     const [terminalLineData, setTerminalLineData] = useState([
         <TerminalOutput>Waiting for new export..</TerminalOutput>
     ]);
@@ -36,8 +36,11 @@ function ActivityLog() {
     }, isRunning ? 2500 : null);
 
     useEffect(() => {
-        if (isRunning) {
+        if (isRunning && !isResumed) {
             setTerminalLineData([<TerminalOutput>Waiting for new export..</TerminalOutput>]);
+        }
+        if (isRunning && isResumed) {
+            setTerminalLineData([<TerminalOutput>Resuming the export..</TerminalOutput>]);
         }
         refreshActivityLog();
     }, [isRunning]);

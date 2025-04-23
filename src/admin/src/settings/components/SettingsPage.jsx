@@ -35,6 +35,10 @@ function SettingsPage() {
     const {
         isRunning,
         setIsRunning,
+        isResumed,
+        setIsResumed,
+        isPaused,
+        setIsPaused,
         blogId,
         settings,
         updateFromNetwork,
@@ -67,7 +71,7 @@ function SettingsPage() {
     }
 
     useEffect(() => {
-        setDisabledButton(isRunning);
+        setDisabledButton(isRunning || isPaused);
 
         // Change initial page.
         let initialPageRedirect = localStorage.getItem('ss-initial-page');
@@ -94,10 +98,12 @@ function SettingsPage() {
             setSelectableSites(sites);
         }
 
-    }, [options, isRunning]);
+    }, [options, isRunning, isPaused]);
 
     const startExport = () => {
         setDisabledButton(true);
+        setIsResumed(false);
+        setIsPaused(false);
 
         apiFetch({
             path: '/simplystatic/v1/start-export',
@@ -119,7 +125,37 @@ function SettingsPage() {
                 'blog_id': blogId,
             }
         }).then(resp => {
+            setIsResumed(false);
+            setIsPaused(false)
             setIsRunning(false);
+        });
+    }
+
+    const pauseExport = () => {
+        apiFetch({
+            path: '/simplystatic/v1/pause-export',
+            method: 'POST',
+            data: {
+                'blog_id': blogId,
+            }
+        }).then(resp => {
+            setIsRunning(false);
+            setIsResumed(false);
+            setIsPaused(true);
+        });
+    }
+
+    const resumeExport = () => {
+        apiFetch({
+            path: '/simplystatic/v1/resume-export',
+            method: 'POST',
+            data: {
+                'blog_id': blogId,
+            }
+        }).then(resp => {
+            setIsResumed(true);
+            setIsPaused(false);
+            setIsRunning(true);
         });
     }
 
@@ -159,7 +195,7 @@ function SettingsPage() {
                                     :
                                     <p className={"version-number"}>Version: <b>{options.version}</b></p>
                                 }
-                                <div className={"generate-container"}>
+                                <div className={`generate-container ${disabledButton ? 'generating' : '' }`}>
                                     <Button onClick={() => {
                                         setSelectedExportType('export');
                                         startExport();
@@ -174,13 +210,33 @@ function SettingsPage() {
                                             __('Generating...', 'simply-static'),
                                         ]}
                                     </Button>
-                                    {disabledButton &&
-                                        <span onClick={() => {
-                                            cancelExport();
-                                        }} className={"cancel-button"}>
-                                            {__('Cancel', 'simply-static')}
-                                        </span>
-                                    }
+                                    {disabledButton && <>
+                                        {!isPaused && <Button
+                                            label={__('Pause', 'simply-static')}
+                                            showToolTip={true}
+                                            className={"ss-generate-media-button"}
+                                            onClick={() => pauseExport()}>
+                                            <Dashicon icon={"controls-pause"} />
+                                        </Button>
+                                        }
+                                        {isPaused && <Button
+                                            label={__('Resume', 'simply-static')}
+                                            showToolTip={true}
+                                            className={"ss-generate-media-button"}
+                                            onClick={() => resumeExport()}>
+                                            <Dashicon icon={"controls-play"} />
+                                        </Button>
+                                        }
+                                        <Button
+                                            onClick={() =>  cancelExport()}
+                                            label={__('Cancel', 'simply-static')}
+                                            className={"ss-generate-cancel-button"}
+                                            showToolTip={true}
+                                        >
+                                            <Dashicon icon={'no'} />
+                                        </Button>
+                                    </>}
+
                                 </div>
                                 <Spacer margin={5}/>
                                 <Button href="https://simplystatic.com/changelogs/" target="_blank">
@@ -210,7 +266,7 @@ function SettingsPage() {
                                     :
                                     <p className={"version-number"}>Version: <b>{options.version}</b></p>
                                 }
-                                <div className={"generate-container"}>
+                                <div className={`generate-container ${disabledButton ? 'generating' : '' }`}>
                                     <SelectControl
                                         className={'generate-type'}
                                         value={selectedExportType}
@@ -232,26 +288,45 @@ function SettingsPage() {
                                         }
                                         {buildOptions}
                                     </SelectControl>
-                                    <Button onClick={() => {
-                                        startExport();
-                                    }}
-                                            disabled={disabledButton}
-                                            className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
-                                    >
-                                        {!disabledButton && [<Dashicon icon="update"/>,
-                                            __('Generate', 'simply-static')
-                                        ]}
-                                        {disabledButton && [<Dashicon icon="update spin"/>,
-                                            __('Generating...', 'simply-static'),
-                                        ]}
-                                    </Button>
-                                    {disabledButton &&
-                                        <span onClick={() => {
-                                            cancelExport();
-                                        }} className={"cancel-button"}>
-                                            {__('Cancel', 'simply-static')}
-                                        </span>
-                                    }
+                                    <div className="generate-buttons-container">
+                                        <Button onClick={() => {
+                                            startExport();
+                                        }}
+                                                disabled={disabledButton}
+                                                className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
+                                        >
+                                            {!disabledButton && [<Dashicon icon="update"/>,
+                                                __('Generate', 'simply-static')
+                                            ]}
+                                            {disabledButton && <Dashicon icon="update spin"/>}
+                                        </Button>
+                                        {disabledButton && <>
+                                            {!isPaused && <Button
+                                                label={__('Pause', 'simply-static')}
+                                                className={"ss-generate-media-button"}
+                                                showToolTip={true}
+                                                onClick={() => pauseExport()}>
+                                                <Dashicon icon={"controls-pause"} />
+                                            </Button>
+                                            }
+                                            {isPaused && <Button
+                                                label={__('Resume', 'simply-static')}
+                                                className={"ss-generate-media-button"}
+                                                showToolTip={true}
+                                                onClick={() => resumeExport()}>
+                                                <Dashicon icon={"controls-play"} />
+                                            </Button>
+                                            }
+                                            <Button
+                                                onClick={() =>  cancelExport()}
+                                                label={__('Cancel', 'simply-static')}
+                                                className={"ss-generate-cancel-button"}
+                                                showToolTip={true}
+                                            >
+                                                <Dashicon icon={'no'} />
+                                            </Button>
+                                        </>}
+                                    </div>
                                 </div>
                                 <CardBody>
                                     {'pro' === options.plan && isPro() &&

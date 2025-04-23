@@ -121,6 +121,22 @@ toplevel_page_simply-static img {
         max-width: 200px;
       }
 
+      &.generating {
+        .generate-buttons-container {
+          display: flex;
+          gap: 5px;
+
+          button {
+            width: 100%;
+            padding: 20px 0;
+
+            &.components-button > .dashicon {
+              margin: 0 auto;
+            }
+          }
+        }
+      }
+
       button {
         background: #6804cc;
         border: solid 1px #50059b;
@@ -128,6 +144,16 @@ toplevel_page_simply-static img {
         text-decoration: none;
         padding: 20px;
         max-width: 200px;
+
+        &.ss-generate-media-button {
+          background: #6fa4df;
+          border-color: #5080b3;
+        }
+
+        &.ss-generate-cancel-button {
+          background: #b32d2e;
+          border-color: #9b2626;
+        }
       }
 
       .cancel-button {

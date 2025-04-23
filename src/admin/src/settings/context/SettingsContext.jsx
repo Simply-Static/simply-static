@@ -125,6 +125,8 @@ function SettingsContextProvider(props) {
         'integrations': false // Will be array when saved.
     }
     const [isRunning, setIsRunning] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
+    const [isResumed, setIsResumed] = useState(false);
     const [settingsSaved, setSettingsSaved] = useState(false);
     const [settings, setSettings] = useState(defaultSettings);
     const [configs, setConfigs] = useState({});
@@ -183,6 +185,7 @@ function SettingsContextProvider(props) {
         }).then(resp => {
             var json = JSON.parse(resp);
             setIsRunning(json.running);
+            setIsPaused(json.paused);
         });
     }
 
@@ -349,6 +352,10 @@ function SettingsContextProvider(props) {
                 resetDiagnostics,
                 isRunning,
                 setIsRunning,
+                isPaused,
+                setIsPaused,
+                setIsResumed,
+                isResumed,
                 blogId,
                 setBlogId,
                 isPro,

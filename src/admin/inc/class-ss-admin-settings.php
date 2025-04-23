@@ -758,7 +758,8 @@ class Admin_Settings {
 	public function is_running( $request ) {
 		return json_encode( [
 			'status'  => 200,
-			'running' => Plugin::instance()->get_archive_creation_job()->is_running()
+			'running' => Plugin::instance()->get_archive_creation_job()->is_running(),
+            'paused'  => Plugin::instance()->get_archive_creation_job()->is_paused(),
 		] );
 	}
 
