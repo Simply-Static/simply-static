@@ -145,11 +145,6 @@ toplevel_page_simply-static img {
         padding: 20px;
         max-width: 200px;
 
-        &.ss-generate-media-button {
-          background: #6fa4df;
-          border-color: #5080b3;
-        }
-
         &.ss-generate-cancel-button {
           background: #b32d2e;
           border-color: #9b2626;
@@ -288,7 +283,15 @@ toplevel_page_simply-static img {
       margin-bottom: 10px;
     }
 
-    .react-terminal-line a {
+    .react-terminal-line .is-error {
+      color: #ca4242;
+    }
+
+    .react-terminal-line .is-success {
+      color: #51aa51;
+    }
+
+      .react-terminal-line a {
       color: #6fa4df;
     }
 

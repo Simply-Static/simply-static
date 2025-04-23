@@ -54,6 +54,28 @@ class Archive_Creation_Job extends Background_Process {
 		add_filter( 'wp_archive_creation_job_cron_interval', array( $this, 'set_job_interval' ) );
 
 		parent::__construct();
+
+		// Marking on REST API for now.
+		//add_action( $this->identifier . '_paused', [ $this, 'mark_as_paused' ] );
+		//add_action( $this->identifier . '_resumed', [ $this, 'mark_as_resumed' ] );
+	}
+
+	/**
+	 * Mark as Paused.
+	 *
+	 * @return void
+	 */
+	public function mark_as_paused() {
+		$this->save_status_message( "Export paused.", 'pause', true );
+	}
+
+	/**
+	 * Mark as resumed.
+	 *
+	 * @return void
+	 */
+	public function mark_as_resumed() {
+		$this->save_status_message( "Export resumed.", 'resume', true );
 	}
 
 	/**
@@ -162,7 +184,7 @@ class Archive_Creation_Job extends Background_Process {
 	 * task name if we're done with the current one, or (c) returning false if
 	 * we're done with our job, which then runs complete().
 	 *
-	 * @param string $task Task name to process
+	 * @param string $task_name Task name to process
 	 *
 	 * @return false|string       task name to process, or false if done
 	 */
@@ -177,10 +199,17 @@ class Archive_Creation_Job extends Background_Process {
 			return false;
 		}
 
+		if ( $this->is_paused() ) {
+			return $task_name;
+		}
+
 		// attempt to perform the task
 		try {
 			Util::debug_log( 'Performing task: ' . $task_name );
 			$is_done = $task->perform();
+		} catch (Pause_Exception $e ) {
+			// If it's a pause execption, just return task since we've paused the execution of tha tasks.
+			return $task_name;
 		} catch ( \Exception $e ) {
 			Util::debug_log( 'Caught an exception' );
 
@@ -366,13 +395,14 @@ class Archive_Creation_Job extends Background_Process {
 	 *
 	 * @param string $message Message to display about the status of the job
 	 * @param string $key Unique key for the message
+	 * @param boolean $unique If unique, the key, if exists, will get a suffix.
 	 *
 	 * @return void
 	 */
-	public function save_status_message( $message, $key = null ) {
+	public function save_status_message( $message, $key = null, $unique = false ) {
 		$task_name = $key ?: $this->get_current_task();
 		$this->options
-			->add_status_message( $message, $task_name )
+			->add_status_message( $message, $task_name, $unique )
 			->save();
 		Util::debug_log( 'Status message: [' . $task_name . '] ' . $message );
 	}

@@ -196,7 +196,7 @@ function SettingsPage() {
                                     <p className={"version-number"}>Version: <b>{options.version}</b></p>
                                 }
                                 <div className={`generate-container ${disabledButton ? 'generating' : '' }`}>
-                                    <Button onClick={() => {
+                                    {! disabledButton && <Button onClick={() => {
                                         setSelectedExportType('export');
                                         startExport();
                                     }}
@@ -206,10 +206,11 @@ function SettingsPage() {
                                         {!disabledButton && [<Dashicon icon="update"/>,
                                             __('Generate', 'simply-static')
                                         ]}
+
                                         {disabledButton && [<Dashicon icon="update spin"/>,
                                             __('Generating...', 'simply-static'),
                                         ]}
-                                    </Button>
+                                    </Button>}
                                     {disabledButton && <>
                                         {!isPaused && <Button
                                             label={__('Pause', 'simply-static')}
@@ -270,7 +271,7 @@ function SettingsPage() {
                                     <SelectControl
                                         className={'generate-type'}
                                         value={selectedExportType}
-
+                                        disabled={disabledButton}
                                         onChange={(value) => {
                                             setSelectedExportType(value);
                                         }}
@@ -289,7 +290,7 @@ function SettingsPage() {
                                         {buildOptions}
                                     </SelectControl>
                                     <div className="generate-buttons-container">
-                                        <Button onClick={() => {
+                                        {!disabledButton && <Button onClick={() => {
                                             startExport();
                                         }}
                                                 disabled={disabledButton}
@@ -299,7 +300,7 @@ function SettingsPage() {
                                                 __('Generate', 'simply-static')
                                             ]}
                                             {disabledButton && <Dashicon icon="update spin"/>}
-                                        </Button>
+                                        </Button>}
                                         {disabledButton && <>
                                             {!isPaused && <Button
                                                 label={__('Pause', 'simply-static')}

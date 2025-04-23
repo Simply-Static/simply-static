@@ -123,10 +123,6 @@ toplevel_page_simply-static img {
   padding: 20px;
   max-width: 200px;
 }
-.plugin-settings-container .plugin-nav .generate-container button.ss-generate-media-button {
-  background: #6fa4df;
-  border-color: #5080b3;
-}
 .plugin-settings-container .plugin-nav .generate-container button.ss-generate-cancel-button {
   background: #b32d2e;
   border-color: #9b2626;
@@ -236,6 +232,12 @@ toplevel_page_simply-static img {
 }
 .plugin-settings-container .plugin-settings .react-terminal-line {
   margin-bottom: 10px;
+}
+.plugin-settings-container .plugin-settings .react-terminal-line .is-error {
+  color: #ca4242;
+}
+.plugin-settings-container .plugin-settings .react-terminal-line .is-success {
+  color: #51aa51;
 }
 .plugin-settings-container .plugin-settings .react-terminal-line a {
   color: #6fa4df;

@@ -153,6 +153,7 @@ class Plugin {
 		require_once $path . 'src/class-ss-url-fetcher.php';
 		require_once $path . 'src/background/class-ss-async-request.php';
 		require_once $path . 'src/background/class-ss-background-process.php';
+		require_once $path . 'src/tasks/exceptions/class-ss-pause-exception.php';
 		require_once $path . 'src/class-ss-archive-creation-job.php';
 		require_once $path . 'src/tasks/traits/class-skip-further-processing-exception.php';
 		require_once $path . 'src/tasks/traits/trait-can-process-pages.php';
@@ -266,6 +267,8 @@ class Plugin {
 
 		// Cancel export.
 		$this->archive_creation_job->pause();
+
+		$this->get_archive_creation_job()->save_status_message( "Export paused.", 'pause', true );
 	}
 
 	/**
@@ -276,6 +279,8 @@ class Plugin {
 	public function resume_static_export() {
 		// Clear WP object cache.
 		wp_cache_flush();
+
+		$this->get_archive_creation_job()->save_status_message( "Export resumed.", 'resume', true );
 
 		// Cancel export.
 		$this->archive_creation_job->resume();

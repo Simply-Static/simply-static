@@ -97,6 +97,7 @@ function ActivityLog() {
   const {
     isRunning,
     isResumed,
+    isPaused,
     blogId
   } = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useContext)(_context_SettingsContext__WEBPACK_IMPORTED_MODULE_2__.SettingsContext);
   const [terminalLineData, setTerminalLineData] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)([(0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react_terminal_ui__WEBPACK_IMPORTED_MODULE_3__.TerminalOutput, null, "Waiting for new export..")]);
@@ -110,7 +111,10 @@ function ActivityLog() {
       for (var message in json.data) {
         var date = json.data[message].datetime;
         var text = json.data[message].message;
+        var error = message.includes('pause_');
+        var success = message.includes('resume_');
         terminal.push((0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react_terminal_ui__WEBPACK_IMPORTED_MODULE_3__.TerminalOutput, null, "[", date, "] ", (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
+          className: `${error ? 'is-error' : ''} ${success ? 'is-success' : ''}`,
           dangerouslySetInnerHTML: {
             __html: text
           }
@@ -895,7 +899,7 @@ function SettingsPage() {
     className: "version-number"
   }, "Version: ", (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, options.version)), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: `generate-container ${disabledButton ? 'generating' : ''}`
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Button, {
+  }, !disabledButton && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Button, {
     onClick: () => {
       setSelectedExportType('export');
       startExport();
@@ -960,6 +964,7 @@ function SettingsPage() {
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.SelectControl, {
     className: 'generate-type',
     value: selectedExportType,
+    disabled: disabledButton,
     onChange: value => {
       setSelectedExportType(value);
     }
@@ -972,7 +977,7 @@ function SettingsPage() {
     value: "update"
   }, __('Update (Requires Simply Static Pro)', 'simply-static'))), buildOptions), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "generate-buttons-container"
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Button, {
+  }, !disabledButton && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Button, {
     onClick: () => {
       startExport();
     },

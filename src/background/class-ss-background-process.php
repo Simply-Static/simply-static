@@ -409,7 +409,7 @@ abstract class Background_Process extends Async_Request {
 		}
 
 		// Cancel requested.
-		if ( $this->is_cancelled() ) {Util::debug_log("Cancelled");
+		if ( $this->is_cancelled() ) {
 			$this->clear_scheduled_event();
 			$this->delete_all();
 
@@ -418,14 +418,12 @@ abstract class Background_Process extends Async_Request {
 
 		// Pause requested.
 		if ( $this->is_paused() ) {
-			Util::debug_log("Paused");
 			$this->clear_scheduled_event();
 			$this->paused();
 
 			return $this->maybe_wp_die();
 		}
 
-		Util::debug_log("here");
 		// No data to process.
 		if ( $this->is_queue_empty() ) {
 			return $this->maybe_wp_die();
