@@ -128,6 +128,7 @@ function SettingsPage() {
             setIsResumed(false);
             setIsPaused(false)
             setIsRunning(false);
+            setDisabledButton(false);
         });
     }
 

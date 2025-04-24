@@ -109,7 +109,6 @@ class Transfer_Files_Locally_Task extends Task {
 	 * @return void
 	 */
 	protected function process_page( $static_page ) {
-		$this->throw_if_paused();
 		$file_path = $this->get_page_file_path( $static_page );
 		$path_info = Util::url_path_info( $file_path );
 		$path      = Util::combine_path( $this->destination_dir, $path_info['dirname'] );

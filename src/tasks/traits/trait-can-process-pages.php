@@ -91,6 +91,10 @@ trait canProcessPages {
 		}
 
 		while ( $static_page = array_shift( $pages_to_process ) ) {
+			if ( method_exists( $this, 'check_if_running' ) ) {
+				$this->check_if_running();
+			}
+
 			try {
 				$this->process_page( $static_page );
 

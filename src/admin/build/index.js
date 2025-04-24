@@ -111,8 +111,8 @@ function ActivityLog() {
       for (var message in json.data) {
         var date = json.data[message].datetime;
         var text = json.data[message].message;
-        var error = message.includes('pause_');
-        var success = message.includes('resume_');
+        var error = message.includes('pause') || message.includes('cancel');
+        var success = message.includes('resume');
         terminal.push((0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react_terminal_ui__WEBPACK_IMPORTED_MODULE_3__.TerminalOutput, null, "[", date, "] ", (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
           className: `${error ? 'is-error' : ''} ${success ? 'is-success' : ''}`,
           dangerouslySetInnerHTML: {
@@ -831,6 +831,7 @@ function SettingsPage() {
       setIsResumed(false);
       setIsPaused(false);
       setIsRunning(false);
+      setDisabledButton(false);
     });
   };
   const pauseExport = () => {

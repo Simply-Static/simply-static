@@ -21,8 +21,8 @@ function ActivityLog() {
             for( var message in json.data ) {
                 var date = json.data[message].datetime;
                 var text = json.data[message].message;
-                var error = message.includes('pause_');
-                var success = message.includes('resume_');
+                var error = message.includes('pause') || message.includes('cancel');
+                var success = message.includes('resume');
 
                 terminal.push(
                     <TerminalOutput>[{date}] <span className={`${error ? 'is-error' : '' } ${success ? 'is-success' : '' }`} dangerouslySetInnerHTML={{__html: text}}></span></TerminalOutput>

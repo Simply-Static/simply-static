@@ -69,7 +69,7 @@ class Fetch_Urls_Task extends Task {
 		Util::debug_log( "Total pages: " . $total_pages . '; Pages remaining: ' . $pages_remaining );
 
 		while ( $static_page = array_shift( $static_pages ) ) {
-			$this->throw_if_paused();
+			$this->check_if_running();
 			Util::debug_log( "URL: " . $static_page->url );
 			$this->save_pages_status( count( $static_pages ) + 1, intval( $total_pages ) );
 

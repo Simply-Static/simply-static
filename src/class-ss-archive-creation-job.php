@@ -292,12 +292,12 @@ class Archive_Creation_Job extends Background_Process {
 	 * Cancel the currently running job
 	 * @return void
 	 */
-	public function cancel( $message = '' ) {
+	public function cancel() {
 		if ( ! $this->is_job_done() ) {
 			if ( $this->is_paused() ) {
 				$this->resume();
 			}
-			Util::debug_log( "Cancelling job; job is not done" );
+			/*Util::debug_log( "Cancelling job; job is not done" );
 
 			if ( $this->is_queue_empty() ) {
 				Util::debug_log( "The queue is empty, pushing the cancel task" );
@@ -316,13 +316,16 @@ class Archive_Creation_Job extends Background_Process {
 				$batch       = $this->get_batch();
 				$batch->data = array( 'cancel' );
 				$this->update( $batch->key, $batch->data );
-			}
+			}*/
 
-			if ( $message ) {
-				$this->save_status_message( $message );
-			}
+			$end_time    = Util::formatted_datetime();
+			$this->options->set( 'archive_end_time', $end_time );
 
-			$this->dispatch();
+
+			$cancel_task = new Cancel_Task();
+			$cancel_task->perform();
+
+			parent::cancel();
 		} else {
 			Util::debug_log( "Can't cancel; job is done" );
 		}
@@ -342,6 +345,10 @@ class Archive_Creation_Job extends Background_Process {
 
 	public function is_running() {
 		if ( $this->is_paused() ) {
+			return false;
+		}
+
+		if ( $this->is_cancelled() ) {
 			return false;
 		}
 		$start_time = $this->options->get( 'archive_start_time' );

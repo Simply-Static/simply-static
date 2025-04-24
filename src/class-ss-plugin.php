@@ -295,6 +295,8 @@ class Plugin {
 		// Clear WP object cache.
 		wp_cache_flush();
 
+		$this->get_archive_creation_job()->save_status_message( "Export cancelled.", 'cancel', true );
+
 		// Cancel export.
 		$this->archive_creation_job->cancel();
 	}
