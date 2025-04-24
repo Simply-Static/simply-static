@@ -200,7 +200,11 @@ class Url_Extractor {
 			$this->save_body( $this->extract_and_replace_urls_in_xml() );
 		}
 
-		if ( $this->static_page->is_type( 'html' ) || $this->static_page->is_type( 'css' ) || $this->static_page->is_type( 'xml' ) ) {
+		if ( $this->static_page->is_type( 'json' ) ) {
+			$this->save_body( $this->extract_and_replace_urls_in_json() );
+		}
+
+		if ( $this->static_page->is_type( 'html' ) || $this->static_page->is_type( 'css' ) || $this->static_page->is_type( 'xml' ) || $this->static_page->is_type( 'json' ) ) {
 			// Replace encoded URLs.
 			$this->replace_encoded_urls();
 
@@ -579,6 +583,20 @@ class Url_Extractor {
 	}
 
 	/**
+	 * Use regex to extract URLs from JSON files (e.g. /feed/)
+	 * @return string The JSON with all of the URLs converted
+	 */
+	private function extract_and_replace_urls_in_json() {
+		$json_string = $this->get_body();
+		// match anything starting with http/s plus all following characters
+		// except: [space] " ' <
+		$pattern = "/https?:\/\/[^\s\"'<]+/";
+		$text    = preg_replace_callback( $pattern, array( $this, 'json_matches' ), $json_string );
+
+		return $text;
+	}
+
+	/**
 	 * Callback function for preg_replace in extract_and_replace_urls_in_xml
 	 *
 	 * Takes the match, adds it to the list of URLs, converts the URL to a
@@ -589,6 +607,26 @@ class Url_Extractor {
 	 * @return string         The extracted, converted URL
 	 */
 	private function xml_matches( $matches ) {
+		$extracted_url = $matches[0];
+
+		if ( isset( $extracted_url ) && $extracted_url !== '' ) {
+			$updated_extracted_url = $this->add_to_extracted_urls( $extracted_url );
+		}
+
+		return $updated_extracted_url;
+	}
+
+	/**
+	 * Callback function for preg_replace in extract_and_replace_urls_in_json
+	 *
+	 * Takes the match, adds it to the list of URLs, converts the URL to a
+	 * destination URL.
+	 *
+	 * @param array $matches Array of regex matches found in the JSON file
+	 *
+	 * @return string         The extracted, converted URL
+	 */
+	private function json_matches( $matches ) {
 		$extracted_url = $matches[0];
 
 		if ( isset( $extracted_url ) && $extracted_url !== '' ) {
