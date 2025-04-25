@@ -95,6 +95,7 @@ function SettingsContextProvider(props) {
         'minify_inline_js': false,
         'generate_404': false,
         'add_feeds': false,
+        'add_rest_api': false,
         'wp_content_directory': '',
         'wp_includes_directory': '',
         'wp_uploads_directory': '',
