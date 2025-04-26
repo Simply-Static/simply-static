@@ -41,6 +41,7 @@ class Url_Extractor {
 			'data-srcset',
 			'data-bg'
 		),
+		'use'     => array( 'href' ),
 		'picture' => array( 'src', 'srcset', 'data-src', 'data-srcset', 'data-bg' ),
 		'amp-img' => array( 'src', 'srcset' ),
 
