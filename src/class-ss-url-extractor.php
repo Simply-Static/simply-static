@@ -70,7 +70,7 @@ class Url_Extractor {
 		'image'        => array( 'href', 'xlink:href', 'src', 'style', 'srcset' ),
 
 		'bgsound' => array( 'src' ),
-		'div'     => array( 'href', 'src', 'style', 'data-bg' ),
+		'div'     => array( 'href', 'src', 'style', 'data-bg', 'data-thumbnail' ),
 		'span'    => array( 'href', 'src', 'style', 'data-bg' ),
 		'section' => array( 'style', 'data-bg' ),
 		'footer'  => array( 'style' ),
