@@ -185,16 +185,19 @@ class Options {
 		return './';
 	}
 
-    /**
-     * Add status message
-     * @param $message
-     * @param $task_name
-     * @return $this
-     */
-    public function add_status_message( $message, $task_name ) : self
-    {
-        $messages = $this->get( 'archive_status_messages' );
-        $messages = Util::add_archive_status_message( $messages, $task_name, $message );
-        return $this->set( 'archive_status_messages', $messages );
-    }
+	/**
+	 * Add status message
+	 *
+	 * @param string $message The status message to add.
+	 * @param string $task_name The name of the task associated with the status message.
+	 * @param bool $unique Whether the status message should be unique (default: false).
+	 *
+	 * @return $this
+	 */
+	public function add_status_message( $message, $task_name, $unique = false ) : self
+	{
+		$messages = $this->get( 'archive_status_messages' );
+		$messages = Util::add_archive_status_message( $messages, $task_name, $message, $unique );
+		return $this->set( 'archive_status_messages', $messages );
+	}
 }

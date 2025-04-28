@@ -527,16 +527,20 @@ class Util {
 	 * @param array $messages Array of messages to add the message to
 	 * @param string $task_name Name of the task
 	 * @param string $message Message to display about the status of the job
+	 * @param boolean $unique If unique, the task_name/key will get a prefix if the same exists.
 	 *
 	 * @return array
 	 */
-	public static function add_archive_status_message( $messages, $task_name, $message ) {
+	public static function add_archive_status_message( $messages, $task_name, $message, $unique = false ) {
 		if ( ! is_array( $messages ) ) {
 			$messages = array();
 		}
 
 		// if the state exists, set the datetime and message
-		if ( ! array_key_exists( $task_name, $messages ) ) {
+		if ( ! array_key_exists( $task_name, $messages ) || $unique ) {
+			if ( $unique ) {
+				$task_name = $task_name . '_' . uniqid();
+			}
 			$messages[ $task_name ] = array(
 				'message'  => $message,
 				'datetime' => self::formatted_datetime()

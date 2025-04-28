@@ -6,7 +6,7 @@ import useInterval from "../../hooks/useInterval";
 
 const {__} = wp.i18n;
 function ActivityLog() {
-    const {isRunning, blogId} = useContext(SettingsContext);
+    const {isRunning, isResumed, isPaused, blogId} = useContext(SettingsContext);
     const [terminalLineData, setTerminalLineData] = useState([
         <TerminalOutput>Waiting for new export..</TerminalOutput>
     ]);
@@ -21,9 +21,11 @@ function ActivityLog() {
             for( var message in json.data ) {
                 var date = json.data[message].datetime;
                 var text = json.data[message].message;
+                var error = message.includes('pause') || message.includes('cancel');
+                var success = message.includes('resume');
 
                 terminal.push(
-                    <TerminalOutput>[{date}] <span dangerouslySetInnerHTML={{__html: text}}></span></TerminalOutput>
+                    <TerminalOutput>[{date}] <span className={`${error ? 'is-error' : '' } ${success ? 'is-success' : '' }`} dangerouslySetInnerHTML={{__html: text}}></span></TerminalOutput>
                 );
             }
 
@@ -36,9 +38,13 @@ function ActivityLog() {
     }, isRunning ? 2500 : null);
 
     useEffect(() => {
-        if (isRunning) {
+        if (isRunning && !isResumed) {
             setTerminalLineData([<TerminalOutput>Waiting for new export..</TerminalOutput>]);
         }
+        if (isRunning && isResumed) {
+            setTerminalLineData([<TerminalOutput>Resuming the export..</TerminalOutput>]);
+        }
+
         refreshActivityLog();
     }, [isRunning]);
 
