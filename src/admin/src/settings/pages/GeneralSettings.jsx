@@ -27,6 +27,7 @@ function GeneralSettings() {
     const [hasCopied, setHasCopied] = useState(false);
     const [generate404, setGenerate404] = useState(false);
     const [addFeeds, setAddFeeds] = useState(false);
+    const [addRestApi, setAddRestApi] = useState(false);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -68,6 +69,10 @@ function GeneralSettings() {
 
         if (settings.add_feeds) {
             setAddFeeds(settings.add_feeds);
+        }
+
+        if (settings.add_rest_api) {
+            setAddRestApi(settings.add_rest_api);
         }
 
     }, [settings]);
@@ -241,6 +246,23 @@ function GeneralSettings() {
                     onChange={(value) => {
                         setAddFeeds(value);
                         updateSetting('add_feeds', value);
+                    }}
+                />
+                <ToggleControl
+                    label={
+                        <>
+                            {__('Include Rest API?', 'simply-static')}
+                        </>
+                    }
+                    help={
+                        addFeeds
+                            ? __('Include all Rest API endpoints (JSON files).', 'simply-static')
+                            : __('Don\'t include Rest API endpoints (JSON files).', 'simply-static')
+                    }
+                    checked={addRestApi}
+                    onChange={(value) => {
+                        setAddRestApi(value);
+                        updateSetting('add_rest_api', value);
                     }}
                 />
             </CardBody>
