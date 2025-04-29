@@ -11,14 +11,14 @@ use Simply_Static\Util;
 /**
  * Class which handles GitHub commits.
  */
-class Scan_All_Task extends Simply_Static\Task {
+class Scan_Themes_Plugins_Dir_Task extends Simply_Static\Task {
 
 	/**
 	 * The task name.
 	 *
 	 * @var string
 	 */
-	protected static $task_name = 'scan_all';
+	protected static $task_name = 'scan_themes_plugins_dir';
 
 	/**
 	 * Constructor

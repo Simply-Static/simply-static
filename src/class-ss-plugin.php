@@ -420,13 +420,13 @@ class Plugin {
 	 */
 	public function filter_task_list( $task_list, $delivery_method ): array {
 
-		$generate_404 = $this->options->get( 'generate_404' );
-		$scan_all     = $this->options->get( 'scan_all' );
+		$generate_404            = $this->options->get( 'generate_404' );
+		$scan_themes_plugins_dir = $this->options->get( 'scan_themes_plugins_dir' );
 
 		$task_list[] = 'setup';
 
-		if ( $scan_all ) {
-			$task_list[] = 'scan_all';
+		if ( $scan_themes_plugins_dir ) {
+			$task_list[] = 'scan_themes_plugins_dir';
 		}
 
 		$task_list[] = 'fetch_urls';

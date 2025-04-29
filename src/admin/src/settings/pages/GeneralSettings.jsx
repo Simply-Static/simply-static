@@ -26,7 +26,7 @@ function GeneralSettings() {
     const [forceURLReplacement, setForceURLReplacement] = useState(false);
     const [hasCopied, setHasCopied] = useState(false);
     const [generate404, setGenerate404] = useState(false);
-    const [scanAll, setScanAll] = useState(false);
+    const [scanThemePluginsDir, setScanThemePluginsDir] = useState(false);
     const [addFeeds, setAddFeeds] = useState(false);
     const [addRestApi, setAddRestApi] = useState(false);
 
@@ -76,8 +76,8 @@ function GeneralSettings() {
             setAddRestApi(settings.add_rest_api);
         }
 
-        if (settings.scan_all) {
-            setScanAll(settings.scan_all);
+        if (settings.scan_themes_plugins_dir) {
+            setScanThemePluginsDir(settings.scan_themes_plugins_dir);
         }
 
     }, [settings]);
@@ -261,8 +261,8 @@ function GeneralSettings() {
                     }
                     help={
                         addFeeds
-                            ? __('Include all Rest API endpoints (JSON files).', 'simply-static')
-                            : __('Don\'t include Rest API endpoints (JSON files).', 'simply-static')
+                            ? __('Include all Rest API endpoints as JSON files.', 'simply-static')
+                            : __('Don\'t include Rest API endpoints as JSON files.', 'simply-static')
                     }
                     checked={addRestApi}
                     onChange={(value) => {
@@ -274,21 +274,20 @@ function GeneralSettings() {
                 <ToggleControl
                     label={
                         <>
-                            {__('Scan and include all static assets found?', 'simply-static')}
+                            {__('Include all Theme and Plugins assets?', 'simply-static')}
                         </>
                     }
                     help={
-                        scanAll
-                            ? __('Scan and include.', 'simply-static')
-                            : __('Don\'t scan and include.', 'simply-static')
+                        scanThemePluginsDir
+                            ? __('Include all assets from active theme and plugins.', 'simply-static')
+                            : __('Don\'t include all assets from active theme and plugins.', 'simply-static')
                     }
-                    checked={scanAll}
+                    checked={scanThemePluginsDir}
                     onChange={(value) => {
-                        setScanAll(value);
-                        updateSetting('scan_all', value);
+                        setScanThemePluginsDir(value);
+                        updateSetting('scan_themes_plugins_dir', value);
                     }}
                 />
-                <p>{ __('Use this option in case some files are missing from a theme or plugin. It will find all JavaScript, CSS and image files.', 'simple-static' ) }</p>
             </CardBody>
         </Card>
         <Spacer margin={5}/>
