@@ -78,6 +78,7 @@ class Scan_Themes_Plugins_Dir_Task extends Simply_Static\Task {
 				/** @var \Simply_Static\Page $static_page */
 				$static_page = Page::query()->find_or_initialize_by( 'url', $url );
 				$static_page->found_on_id = 0;
+				$static_page->set_status_message("Plugin/Theme Asset");
 				$static_page->save();
 			}
 
