@@ -27,7 +27,7 @@ class Wrapup_Task extends Task {
 		wp_clear_scheduled_hook( 'simply_static_site_export_cron' );
 
 		// Clear WP object cache.
-		$flush_cashe = add_filter( 'ss_flush_cache', true );
+		$flush_cashe = apply_filters( 'ss_flush_cache', true );
 
 		if ( $flush_cashe ) {
 			wp_cache_flush();

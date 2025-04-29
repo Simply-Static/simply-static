@@ -156,6 +156,7 @@ abstract class Background_Process extends Async_Request {
 		$cancel = apply_filters( $this->identifier . '_pre_dispatch', false, $this->get_chain_id() );
 
 		if ( $cancel ) {
+
 			return false;
 		}
 

@@ -69,6 +69,7 @@ class Fetch_Urls_Task extends Task {
 		Util::debug_log( "Total pages: " . $total_pages . '; Pages remaining: ' . $pages_remaining );
 
 		while ( $static_page = array_shift( $static_pages ) ) {
+			$this->check_if_running();
 			Util::debug_log( "URL: " . $static_page->url );
 			$this->save_pages_status( count( $static_pages ) + 1, intval( $total_pages ) );
 
@@ -278,11 +279,16 @@ class Fetch_Urls_Task extends Task {
 	 * @return bool
 	 */
 	public function find_excludable( $static_page ) {
-		$excluded = array( 'wp-json', '.php', 'debug' );
+		$excluded = array( '.php', 'debug' );
 
 		// Exclude feeds if add_feeds is not true.
 		if ( ! $this->options->get( 'add_feeds' ) ) {
 			$excluded[] = 'feed';
+		}
+
+		// Exclude Rest API if add_rest_api is not true.
+		if ( ! $this->options->get( 'add_rest_api' ) ) {
+			$excluded[] = 'wp-json';
 		}
 
 		if ( ! empty( $this->options->get( 'urls_to_exclude' ) ) ) {

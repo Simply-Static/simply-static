@@ -71,4 +71,14 @@ abstract class Task {
     protected function is_wp_cli_running() {
         return defined( 'WP_CLI' ) && WP_CLI;
     }
+
+	protected function check_if_running() {
+		if ( Plugin::instance()->get_archive_creation_job()->is_paused() ) {
+			throw new Pause_Exception( 'Job paused' );
+		}
+
+		if ( Plugin::instance()->get_archive_creation_job()->is_cancelled() ) {
+			throw new Pause_Exception( 'Job cancelled' );
+		}
+	}
 }
