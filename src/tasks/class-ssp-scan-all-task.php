@@ -121,8 +121,6 @@ class Scan_Themes_Plugins_Dir_Task extends Simply_Static\Task {
 			'apng',
 			'avif',
 			'bmp',
-			'sh',
-			'yml',
 		]);
 
 		foreach ( $files as $file ) {
