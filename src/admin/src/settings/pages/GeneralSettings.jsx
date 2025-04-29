@@ -233,7 +233,6 @@ function GeneralSettings() {
                             {__('Scan and include all static assets found?', 'simply-static')}
                         </>
                     }
-                    disabled={('free' === options.plan || !isPro())}
                     help={
                         scanAll
                             ? __('Scan and include.', 'simply-static')

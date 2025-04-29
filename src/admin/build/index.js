@@ -2828,7 +2828,6 @@ function GeneralSettings() {
     margin: 5
   }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
     label: (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, __('Scan and include all static assets found?', 'simply-static')),
-    disabled: 'free' === options.plan || !isPro(),
     help: scanAll ? __('Scan and include.', 'simply-static') : __('Don\'t scan and include.', 'simply-static'),
     checked: scanAll,
     onChange: value => {

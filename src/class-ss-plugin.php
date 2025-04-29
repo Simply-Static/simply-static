@@ -162,6 +162,7 @@ class Plugin {
 		require_once $path . 'src/tasks/class-ss-wrapup-task.php';
 		require_once $path . 'src/tasks/class-ss-cancel-task.php';
 		require_once $path . 'src/tasks/class-ss-generate-404-task.php';
+		require_once $path . 'src/tasks/class-ssp-scan-all-task.php';
 		require_once $path . 'src/handlers/class-ss-page-handler.php';
 		require_once $path . 'src/class-ss-query.php';
 		require_once $path . 'src/models/class-ss-model.php';
@@ -356,9 +357,17 @@ class Plugin {
 	 * @return array The list of tasks to process.
 	 */
 	public function filter_task_list( $task_list, $delivery_method ): array {
-		array_push( $task_list, 'setup', 'fetch_urls' );
 
 		$generate_404 = $this->options->get( 'generate_404' );
+		$scan_all     = $this->options->get( 'scan_all' );
+
+		$task_list[] = 'setup';
+
+		if ( $scan_all ) {
+			$task_list[] = 'scan_all';
+		}
+
+		$task_list[] = 'fetch_urls';
 
 		// Add 404 task
 		if ( $generate_404 ) {
