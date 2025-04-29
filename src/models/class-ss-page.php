@@ -172,11 +172,7 @@ class Page extends Model {
 	 * @param string $message The status message.
 	 */
 	public function set_status_message( $message ) {
-		if ( $this->status_message ) {
-			$this->status_message = $this->status_message . '; ' . $message;
-		} else {
-			$this->status_message = $message;
-		}
+		$this->status_message = $message;
 	}
 
 	/**

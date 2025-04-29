@@ -87,15 +87,12 @@ function IntegrationsSettings() {
         })}
 
         <Spacer margin={5}/>
-
         {canNotRunIntegrations.map( ( item ) => {
             const integration = options.integrations[item];
             return <Integration integration={integration} settings={settings} toggleIntegration={toggleIntegration} />
-
         })}
 
         <Spacer margin={5}/>
-
         {settingsSaved &&
             <>
                 <Animate type="slide-in" options={{origin: 'top'}}>

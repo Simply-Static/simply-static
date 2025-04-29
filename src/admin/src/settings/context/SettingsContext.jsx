@@ -50,12 +50,15 @@ function SettingsContextProvider(props) {
         'github_webhook_url': '',
         'github_folder_path': '',
         'github_throttle_requests': false,
+        'github_batch_size': 100,
         'aws_region': 'us-east-2',
+        'aws_auth_method': 'aws-iam-key',
         'aws_access_key': '',
         'aws_access_secret': '',
         'aws_bucket': '',
         'aws_subdirectory': '',
         'aws_distribution_id': '',
+        'aws_webhook_url': '',
         'aws_empty': false,
         's3_access_key': '',
         's3_base_url': '',
@@ -75,6 +78,7 @@ function SettingsContextProvider(props) {
         'search_excludable': '',
         'search_metadata': '',
         'fuse_selector': '.search-field',
+        'fuse_threshold': 0.1,
         'algolia_app_id': '',
         'algolia_admin_api_key': '',
         'algolia_search_api_key': '',
@@ -89,17 +93,15 @@ function SettingsContextProvider(props) {
         'minify_js_exclude': '',
         'minify_js': false,
         'minify_inline_js': false,
-        'generate_404': true,
-        'wp_content_folder': '',
-        'wp_includes_folder': '',
-        'wp_uploads_folder': '',
-        'wp_plugins_folder': '',
-        'wp_themes_folder': '',
+        'generate_404': false,
+        'add_feeds': false,
+        'wp_content_directory': '',
+        'wp_includes_directory': '',
+        'wp_uploads_directory': '',
+        'wp_plugins_directory': '',
+        'wp_themes_directory': '',
         'theme_style_name': 'style',
-        'rename_plugin_folders': false,
         'author_url': '',
-        'hide_rest_api': false,
-        'hide_style_id': false,
         'hide_comments': false,
         'hide_version': false,
         'hide_generator': false,
@@ -130,6 +132,7 @@ function SettingsContextProvider(props) {
     const [passedChecks, setPassedChecks] = useState('yes');
     const [blogId, setBlogId] = useState(1);
     const [queuedIntegrations, setQueuedIntegrations] = useState([]);
+    const [showMobileNav, setShowMobileNav] = useState(true);
 
     const getSettings = () => {
         apiFetch({path: '/simplystatic/v1/settings'}).then((options) => {
@@ -177,7 +180,7 @@ function SettingsContextProvider(props) {
     const checkIfRunning = () => {
         apiFetch({
             path: '/simplystatic/v1/is-running',
-            method: 'GET'  
+            method: 'GET'
         }).then(resp => {
             var json = JSON.parse(resp);
             setIsRunning(json.running);
@@ -254,12 +257,12 @@ function SettingsContextProvider(props) {
     }
 
     const maybeQueueIntegration = (integration) => {
-        if ( ! integrationRequiresSaving(integration) ) {
+        if (!integrationRequiresSaving(integration)) {
             return;
         }
 
         // Already queued.
-        if ( isQueuedIntegration(integration) ) {
+        if (isQueuedIntegration(integration)) {
             return;
         }
 
@@ -268,17 +271,17 @@ function SettingsContextProvider(props) {
     }
 
     const maybeUnqueueIntegration = (integration) => {
-        if ( ! integrationRequiresSaving(integration) ) {
+        if (!integrationRequiresSaving(integration)) {
             return;
         }
 
         // Already queued.
-        if ( ! isQueuedIntegration(integration) ) {
+        if (!isQueuedIntegration(integration)) {
             return;
         }
 
         const index = queuedIntegrations.indexOf(integration);
-        if ( index < 0 ) {
+        if (index < 0) {
             return;
         }
 
@@ -287,11 +290,11 @@ function SettingsContextProvider(props) {
     }
 
     const canRunIntegration = (integration) => {
-        if ( ! isIntegrationActive(integration) ) {
+        if (!isIntegrationActive(integration)) {
             return false;
         }
 
-        if ( isQueuedIntegration(integration) ) {
+        if (isQueuedIntegration(integration)) {
             return false;
         }
 
@@ -305,11 +308,11 @@ function SettingsContextProvider(props) {
     const isIntegrationActive = (integration) => {
         let integrations = settings.integrations;
 
-        if ( false === integrations ) {
-           return false;
+        if (false === integrations) {
+            return false;
         }
 
-        if ( integrations.indexOf(integration) >= 0 ) {
+        if (integrations.indexOf(integration) >= 0) {
             return true;
         }
 
@@ -354,7 +357,9 @@ function SettingsContextProvider(props) {
                 canRunIntegration,
                 maybeQueueIntegration,
                 maybeUnqueueIntegration,
-                isQueuedIntegration
+                isQueuedIntegration,
+                showMobileNav,
+                setShowMobileNav
             }}
         >
             {props.children}

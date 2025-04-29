@@ -1,10 +1,10 @@
 === Simply Static - The WordPress Static Site Generator ===
 Contributors: patrickposner
 Tags: static site generator, performance, security, jamstack
-Requires at least: 6.3
+Requires at least: 6.5
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 3.2.4
+Stable tag:  3.2.7.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -46,6 +46,12 @@ Develop your site locally and only push the static exported website on a server.
 * [lando](https://docs.lando.dev/)
 
 I highly recommend not to use another tool for local development if you are not a programmer as in most cases manual package installation is required.
+
+= Simply Static Studio =
+
+We created a new service called Simply Static Studio that allows you to create a static website without any technical knowledge.
+
+We are currently preparing for early-access - if you want to participate and give feedback, join today: [Simply Static Studio - Early Access](https://simplystatic.com/simply-static-studio/#early-access)
 
 == Simply Static Pro ==
 
@@ -246,6 +252,82 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 3. Diagnostics
 
 == Changelog ==
+
+= 3.2.7.2 =
+
+* Bring back simply_static_fetch_urls_batch_size filter
+* Extended img attribute list with "data-srcset" and "data-bg"
+* added threshold option for Fuse.js
+* allow subitems in admin bar integration
+
+= 3.2.7.1 =
+
+* Elementor integration: check for file size before including
+* added filter to control wp_flush_cache execution
+* reverted default batch size back to 50
+* added srcset attributes for video and audio HTML5 tags
+* added filter for menu position
+
+= 3.2.7 =
+
+* simplified batch size filtering:https://docs.simplystatic.com/article/135-simplystatictasknamebatchsize
+* removed unused options from optimization page
+* removed unused conditions in tasks checkups
+* fixed exclude filter position to handle feed URLs that aren't RSS
+* re-added ss_total_pages filter for total pages count
+* added post_id checkup for processing calculation
+* removed duplicated status messages in export log
+* removed Brizy integration (no longer needed)
+
+= 3.2.6 =
+
+* clear WP object cache on start + cancel export
+* simplified and improved transfer_files_locally task
+* improved logging for transfer_files_locally task
+* extended UI for AWS updates
+* sort builds alphabetically in export type UI
+
+=  3.2.5.4 =
+
+* added option to optionally include feed URLs (default is off)
+* set generate_404 page to off on default settings
+* extended Elementor integration to auto-include missing CSS files
+
+= 3.2.5.3 =
+
+* downgraded WP Background Processing package to 1.3.1 again (issues with ajax)
+* responsive design for admin UI
+* improved Basic Auth Handling for different server types (NGINX, Apache, Windows IIS)
+* fixed automated feed handling on running exports
+
+= 3.2.5.2 =
+
+* upgraded WP Background Processing package
+* fixed typo in admin UI
+* increased interval between batches to 2 seconds (from 1 second)
+
+= 3.2.5.1 =
+
+* XML sitemap inclusion optional for single exports
+* fixed _load_textdomain_just_in_time error
+
+= 3.2.5 =
+
+* added filter to modify log file location
+* small UI factor to fix weird WP default border styles in admin UI
+* trait to make tasks skippable
+* implemented cleanup method that can be extended in tasks
+* decreased default job interval to 1 second instead of 5
+
+= 3.2.4.2 =
+
+* small UI changes related to GitHub
+* improved filter handling to increase batch size
+* allow tasks to define their own batch size
+
+= 3.2.4.1 =
+
+* fixed dbDelta migration for new JSON column
 
 = 3.2.4 =
 

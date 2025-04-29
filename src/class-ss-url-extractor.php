@@ -30,8 +30,18 @@ class Url_Extractor {
 	protected static $match_tags = array(
 		'a'       => array( 'href', 'urn', 'style' ),
 		'base'    => array( 'href' ),
-		'img'     => array( 'src', 'usemap', 'longdesc', 'dynsrc', 'lowsrc', 'srcset', 'data-src', 'data-bg' ),
-		'picture' => array( 'src', 'srcset' ),
+		'img'     => array(
+			'src',
+			'usemap',
+			'longdesc',
+			'dynsrc',
+			'lowsrc',
+			'srcset',
+			'data-src',
+			'data-srcset',
+			'data-bg'
+		),
+		'picture' => array( 'src', 'srcset', 'data-src', 'data-srcset', 'data-bg' ),
 		'amp-img' => array( 'src', 'srcset' ),
 
 		'applet' => array( 'code', 'codebase', 'archive', 'object' ),
@@ -48,28 +58,28 @@ class Url_Extractor {
 		'q'          => array( 'cite' ),
 		'script'     => array( 'src' ),
 
-		'audio'        => array( 'src' ),
-		'figure'       => array( 'src' ),
+		'audio'        => array( 'src', 'srcset' ),
+		'figure'       => array( 'src', 'srcset' ),
 		'command'      => array( 'icon' ),
 		'embed'        => array( 'src', 'code', 'pluginspage' ),
 		'event-source' => array( 'src' ),
 		'html'         => array( 'manifest', 'background', 'xmlns' ),
 		'source'       => array( 'src', 'srcset' ),
-		'video'        => array( 'src', 'poster' ),
-		'image'        => array( 'href', 'xlink:href', 'src', 'style' ),
+		'video'        => array( 'src', 'poster', 'srcset' ),
+		'image'        => array( 'href', 'xlink:href', 'src', 'style', 'srcset' ),
 
-		'bgsound'      => array( 'src' ),
-		'div'          => array( 'href', 'src', 'style' ),
-		'span'         => array( 'href', 'src', 'style' ),
-		'section'      => array( 'style' ),
-		'footer'       => array( 'style' ),
-		'header'       => array( 'style' ),
-		'ilayer'       => array( 'src' ),
-		'table'        => array( 'background' ),
-		'td'           => array( 'background' ),
-		'th'           => array( 'background' ),
-		'layer'        => array( 'src' ),
-		'xml'          => array( 'src' ),
+		'bgsound' => array( 'src' ),
+		'div'     => array( 'href', 'src', 'style', 'data-bg' ),
+		'span'    => array( 'href', 'src', 'style', 'data-bg' ),
+		'section' => array( 'style', 'data-bg' ),
+		'footer'  => array( 'style' ),
+		'header'  => array( 'style' ),
+		'ilayer'  => array( 'src' ),
+		'table'   => array( 'background' ),
+		'td'      => array( 'background' ),
+		'th'      => array( 'background' ),
+		'layer'   => array( 'src' ),
+		'xml'     => array( 'src' ),
 
 		'button'   => array( 'formaction', 'style' ),
 		'datalist' => array( 'data' ),
@@ -301,7 +311,7 @@ class Url_Extractor {
 					}
 				} else {
 					// srcset is a fair bit different from most html
-					if ( $attribute_name === 'srcset' ) {
+					if ( $attribute_name === 'srcset' || $attribute_name === 'data-srcset' ) {
 						$extracted_urls = $this->extract_urls_from_srcset( $attribute_value );
 					} else {
 						$extracted_urls[] = $attribute_value;

@@ -4,6 +4,7 @@ import {
     CardBody,
     CardHeader,
     __experimentalSpacer as Spacer,
+    __experimentalNumberControl as NumberControl,
     Notice,
     Animate,
     TextControl, SelectControl, TextareaControl, ToggleControl, Modal, Flex, FlexItem, ExternalLink
@@ -11,6 +12,7 @@ import {
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
 import HelperVideo from "../components/HelperVideo";
+
 
 const {__} = wp.i18n;
 
@@ -227,6 +229,20 @@ function SearchSettings() {
                             value={settings.fuse_selector}
                             onChange={(selector) => {
                                 updateSetting('fuse_selector', selector);
+                            }}
+                        />
+                        <NumberControl
+                            label={__('Threshold', 'simply-static')}
+                            isShiftStepEnabled={ true }
+                            step={ 0.1 }
+                            min={0.1}
+                            max={1}
+                            help={__(' A threshold of 0.0 requires a perfect match, a threshold of 1.0 would match anything.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            value={settings.fuse_threshold}
+                            placeholder={0.1}
+                            onChange={(threshold) => {
+                                updateSetting('fuse_threshold', threshold);
                             }}
                         />
                     </CardBody>

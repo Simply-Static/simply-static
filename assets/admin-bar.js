@@ -22,7 +22,7 @@ jQuery(document).ready(function ($) {
                 }
 
                 // render html
-                $('#wp-admin-bar-ss-admin-bar .ab-item').html(ss_admin_status_object.translations.label + ' ' + message);
+                $('#wp-admin-bar-ss-admin-bar .ab-item:first').html(ss_admin_status_object.translations.label + ' ' + message);
             }
         });
     }

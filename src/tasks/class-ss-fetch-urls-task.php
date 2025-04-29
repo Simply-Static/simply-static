@@ -50,8 +50,8 @@ class Fetch_Urls_Task extends Task {
 			'ss_static_pages',
 			Page::query()
 			    ->where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time )
-			    ->limit( $batch_size )
-			    ->find(),
+				->limit( $batch_size )
+				->find(),
 			$this->archive_start_time
 		);
 
@@ -130,7 +130,6 @@ class Fetch_Urls_Task extends Task {
 
 		// if we haven't processed any additional pages, we're done.
 		if ( $pages_remaining == 0 ) {
-			$this->add_feed_redirect();
 			do_action( 'ss_finished_fetching_pages' );
 		}
 
@@ -279,7 +278,12 @@ class Fetch_Urls_Task extends Task {
 	 * @return bool
 	 */
 	public function find_excludable( $static_page ) {
-		$excluded = apply_filters( 'ss_excluded_by_default', array( 'wp-json', '.php', 'debug' ) );
+		$excluded = array( 'wp-json', '.php', 'debug' );
+
+		// Exclude feeds if add_feeds is not true.
+		if ( ! $this->options->get( 'add_feeds' ) ) {
+			$excluded[] = 'feed';
+		}
 
 		if ( ! empty( $this->options->get( 'urls_to_exclude' ) ) ) {
 			$excluded_by_option = explode( "\n", $this->options->get( 'urls_to_exclude' ) );
@@ -288,6 +292,8 @@ class Fetch_Urls_Task extends Task {
 				$excluded = array_merge( $excluded, $excluded_by_option );
 			}
 		}
+
+		$excluded = apply_filters( 'ss_excluded_by_default', $excluded );
 
 		if ( $excluded ) {
 			$excluded = array_filter( $excluded );
@@ -360,37 +366,6 @@ class Fetch_Urls_Task extends Task {
 			}
 		} else {
 			return null;
-		}
-	}
-
-	/**
-	 * Add a redirect for the feed.
-	 *
-	 * @return void
-	 */
-	public function add_feed_redirect() {
-		$feed_dir = untrailingslashit( $this->archive_dir ) . '/feed/';
-
-		// Directory exists?
-		if ( is_dir( $feed_dir ) ) {
-			$feed_index_html_file = $feed_dir . 'index.html';
-
-			// Create index.html file
-			file_put_contents( $feed_index_html_file,
-				'<!DOCTYPE html>
-			<html>
-				<head>
-					<title>Redirecting...</title>
-					<meta http-equiv="refresh" content="0;url=index.xml">
-				</head>
-				<body>
-					<script type="text/javascript">
-						window.location = "index.xml";
-					</script>
-					<p>You are being redirected to <a href="index.xml">index.xml</a></p>
-				</body>
-			</html>'
-			);
 		}
 	}
 }

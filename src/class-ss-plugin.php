@@ -151,7 +151,10 @@ class Plugin {
 		require_once $path . 'src/class-ss-view.php';
 		require_once $path . 'src/class-ss-url-extractor.php';
 		require_once $path . 'src/class-ss-url-fetcher.php';
+		require_once $path . 'src/background/class-ss-async-request.php';
+		require_once $path . 'src/background/class-ss-background-process.php';
 		require_once $path . 'src/class-ss-archive-creation-job.php';
+		require_once $path . 'src/tasks/traits/class-skip-further-processing-exception.php';
 		require_once $path . 'src/tasks/traits/trait-can-process-pages.php';
 		require_once $path . 'src/tasks/traits/trait-can-transfer.php';
 		require_once $path . 'src/tasks/class-ss-task.php';
@@ -209,8 +212,30 @@ class Plugin {
 		// Start export.
 		$this->archive_creation_job->start( $blog_id, $type );
 
+		// Determine server type for basic auth check.
+		$server_type   = esc_html( $_SERVER['SERVER_SOFTWARE'] );
+		$basic_auth_on = false;
+
+		switch ( $server_type ) {
+			case ( strpos( $server_type, 'Apache' ) !== false ) :
+				if ( isset( $_SERVER['PHP_AUTH_USER'] ) ) {
+					$basic_auth_on = true;
+				}
+				break;
+			case ( strpos( $server_type, 'nginx' ) !== false ) :
+				if ( isset( $_SERVER['REMOTE_USER'] ) ) {
+					$basic_auth_on = true;
+				}
+				break;
+			case ( strpos( $server_type, 'IIS' ) !== false ) :
+				if ( isset( $_SERVER['AUTH_USER'] ) ) {
+					$basic_auth_on = true;
+				}
+				break;
+		}
+
 		// Exit if Basic Auth but no credentials were provided.
-		if ( isset( $_SERVER['PHP_AUTH_USER'] ) && isset( $_SERVER['PHP_AUTH_PW'] ) ) {
+		if ( $basic_auth_on ) {
 			$options         = get_option( 'simply-static' );
 			$basic_auth_user = $options['http_basic_auth_username'];
 			$basic_auth_pass = $options['http_basic_auth_password'];
@@ -237,6 +262,10 @@ class Plugin {
 	 * @return void
 	 */
 	public function cancel_static_export() {
+		// Clear WP object cache.
+		wp_cache_flush();
+
+		// Cancel export.
 		$this->archive_creation_job->cancel();
 	}
 
@@ -287,7 +316,7 @@ class Plugin {
 		);
 
 		$http_status_codes  = Page::get_http_status_codes_summary();
-		$total_static_pages = array_sum( array_values( $http_status_codes ) );
+		$total_static_pages = apply_filters( 'ss_total_pages', array_sum( array_values( $http_status_codes ) ) );
 		$total_pages        = ceil( $total_static_pages / $per_page );
 
 		do_action( 'ss_after_render_export_log', $blog_id );
@@ -378,9 +407,8 @@ class Plugin {
 			$task_list[] = 'create_zip_archive';
 		} elseif ( 'local' === $delivery_method ) {
 			$task_list[] = 'transfer_files_locally';
-		} elseif ( 'simply-cdn' === $delivery_method ) {
-			$task_list[] = 'simply_cdn';
 		}
+
 		$task_list[] = 'wrapup';
 
 		return $task_list;

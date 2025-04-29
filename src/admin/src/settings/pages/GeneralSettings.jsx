@@ -27,6 +27,7 @@ function GeneralSettings() {
     const [hasCopied, setHasCopied] = useState(false);
     const [generate404, setGenerate404] = useState(false);
     const [scanAll, setScanAll] = useState(false);
+    const [addFeeds, setAddFeeds] = useState(false);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -64,6 +65,10 @@ function GeneralSettings() {
 
         if (settings.generate_404) {
             setGenerate404(settings.generate_404);
+        }
+
+        if (settings.add_feeds) {
+            setAddFeeds(settings.add_feeds);
         }
 
         if (settings.scan_all) {
@@ -217,13 +222,30 @@ function GeneralSettings() {
                     }
                     help={
                         generate404
-                            ? __('Generate a 404 page.', 'simply-static')
+                            ? __('Generate a 404 page based on your theme template.', 'simply-static')
                             : __('Don\'t generate a 404 page.', 'simply-static')
                     }
                     checked={generate404}
                     onChange={(value) => {
                         setGenerate404(value);
                         updateSetting('generate_404', value);
+                    }}
+                />
+                <ToggleControl
+                    label={
+                        <>
+                            {__('Include Feeds?', 'simply-static')}
+                        </>
+                    }
+                    help={
+                        addFeeds
+                            ? __('Include feed URLs of all your posts.', 'simply-static')
+                            : __('Don\'t include feed URLs for all your posts.', 'simply-static')
+                    }
+                    checked={addFeeds}
+                    onChange={(value) => {
+                        setAddFeeds(value);
+                        updateSetting('add_feeds', value);
                     }}
                 />
                 <Spacer margin={5}/>

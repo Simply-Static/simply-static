@@ -23,7 +23,13 @@ class SEOPress_Integration extends Integration {
 	 */
 	public function run() {
 		add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_pages' ] );
-		add_filter( 'ssp_single_export_additional_urls', [ $this, 'add_sitemap_url' ] );
+
+		// Maybe update sitemap on single export.
+		$add_sitemap_single_export = apply_filters( 'ssp_single_export_add_xml_sitemap', false );
+
+		if ( $add_sitemap_single_export ) {
+			add_filter( 'ssp_single_export_additional_urls', [ $this, 'add_sitemap_url' ] );
+		}
 	}
 
 	/**

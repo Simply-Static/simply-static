@@ -12,7 +12,7 @@ require_once( ABSPATH . 'wp-admin/includes/admin.php' );
 /**
  * Simply Static archive manager class
  */
-class Archive_Creation_Job extends \WP_Background_Process {
+class Archive_Creation_Job extends Background_Process {
 
 	/**
 	 * The name of the job/action
@@ -44,13 +44,27 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 * @param string $option_key The options key name
 	 */
 	public function __construct() {
-		$this->options   = Options::instance();
+		$this->options = Options::instance();
 
 		if ( ! $this->is_job_done() ) {
 			register_shutdown_function( array( $this, 'shutdown_handler' ) );
 		}
 
+		// Set the cron interval for the job
+		add_filter( 'wp_archive_creation_job_cron_interval', array( $this, 'set_job_interval' ) );
+
 		parent::__construct();
+	}
+
+	/**
+	 * Set the interval for the job
+	 *
+	 * @param int $interval The interval in seconds
+	 *
+	 * @return int The interval in seconds
+	 */
+	public function set_job_interval( $interval ) {
+		return 2;    // default 5.
 	}
 
 	public function get_task_list() {
@@ -85,7 +99,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 
 			do_action( 'ss_archive_creation_job_before_start_queue', $blog_id, $this );
 
-			$first_task   = $task_list[0];
+			$first_task = $task_list[0];
 
 			if ( 'update' !== $type ) {
 				$archive_name = join( '-', array( Plugin::SLUG, $blog_id, time() ) );
@@ -118,6 +132,28 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	}
 
 	/**
+	 * Get the task object or false if doesn't exist.
+	 *
+	 * @param $task_name
+	 *
+	 * @return false|mixed
+	 */
+	public function get_task_object( $task_name ) {
+		// convert 'an_example' to 'An_Example_Task'
+		$class_name = 'Simply_Static\\' . ucwords( $task_name ) . '_Task';
+		$class_name = apply_filters( 'simply_static_class_name', $class_name, $task_name );
+
+		// this shouldn't ever happen, but just in case...
+		if ( ! class_exists( $class_name ) ) {
+			$this->save_status_message( "Class doesn't exist: " . $class_name, 'error' );
+
+			return false;
+		}
+
+		return new $class_name();
+	}
+
+	/**
 	 * Perform the task at hand
 	 *
 	 * The way Archive_Creation_Job works is by taking a task name, performing
@@ -135,24 +171,17 @@ class Archive_Creation_Job extends \WP_Background_Process {
 
 		Util::debug_log( "Current task: " . $task_name );
 
-		// convert 'an_example' to 'An_Example_Task'
-		$class_name = 'Simply_Static\\' . ucwords( $task_name ) . '_Task';
-		$class_name = apply_filters( 'simply_static_class_name', $class_name, $task_name );
+		$task = $this->get_task_object( $task_name );
 
-		// this shouldn't ever happen, but just in case...
-		if ( ! class_exists( $class_name ) ) {
-			$this->save_status_message( "Class doesn't exist: " . $class_name, 'error' );
-
+		if ( false === $task ) {
 			return false;
 		}
-
-		$task = new $class_name();
 
 		// attempt to perform the task
 		try {
 			Util::debug_log( 'Performing task: ' . $task_name );
 			$is_done = $task->perform();
-		} catch ( SimplerStaticException $e ) {
+		} catch ( \Exception $e ) {
 			Util::debug_log( 'Caught an exception' );
 
 			return $this->exception_occurred( $e );
@@ -174,6 +203,8 @@ class Archive_Creation_Job extends \WP_Background_Process {
 			} else {
 				Util::debug_log( "We've found our next task: " . $next_task );
 
+				$this->task_cleanup( $next_task );
+
 				// start the next task
 				return $next_task;
 			}
@@ -187,6 +218,22 @@ class Archive_Creation_Job extends \WP_Background_Process {
 		Util::debug_log( "We shouldn't have gotten here; returning false to remove the " . $task_name . " task from the queue" );
 
 		return false; // remove item from queue
+	}
+
+	/**
+	 * Cleanup the task.
+	 *
+	 * @param string $task_name Task name.
+	 *
+	 * @return void
+	 */
+	protected function task_cleanup( $task_name ) {
+		$task = $this->get_task_object( $task_name );
+
+		if ( method_exists( $task, 'cleanup' ) ) {
+			Util::debug_log( "Cleaning on first run for task: " . $task_name );
+			$task->cleanup();
+		}
 	}
 
 	/**
@@ -316,18 +363,18 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 *
 	 * @return void
 	 */
-    public function save_status_message( $message, $key = null ) {
-        $task_name = $key ?: $this->get_current_task();
-        $this->options
-            ->add_status_message($message, $task_name)
-            ->save();
-        Util::debug_log( 'Status message: [' . $task_name . '] ' . $message );
-    }
+	public function save_status_message( $message, $key = null ) {
+		$task_name = $key ?: $this->get_current_task();
+		$this->options
+			->add_status_message( $message, $task_name )
+			->save();
+		Util::debug_log( 'Status message: [' . $task_name . '] ' . $message );
+	}
 
 	/**
 	 * Add a status message about the exception and cancel the job
 	 *
-	 * @param Exception $exception The exception that occurred
+	 * @param \Exception $exception The exception that occurred
 	 *
 	 * @return void
 	 */
@@ -393,7 +440,7 @@ class Archive_Creation_Job extends \WP_Background_Process {
 	 *
 	 * @return string
 	 */
-	public function maybe_wp_die( $return = null) {
+	public function maybe_wp_die( $return = null ) {
 		return 'cancel';
 	}
 }

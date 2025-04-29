@@ -34,10 +34,20 @@ function DeploymentSettings() {
     const [emptyBucketBeforeExport, setEmptyBucketBeforeExport] = useState(false);
     const [throttleGitHubRequests, setThrottleGitHubRequests] = useState(false);
     const [region, setRegion] = useState('us-east-2');
+    const [awsAuthMethod, setAwsAuthMethod] = useState('aws-iam-key');
     const [hasCopied, setHasCopied] = useState(false);
     const [pages, setPages] = useState(false);
     const [testDisabled, setTestDisabled] = useState(false);
     const [testRunning, setTestRunning] = useState(false);
+    const [deploymentOptions] = useState([
+        {label: __('ZIP Archive', 'simply-static'), value: 'zip'},
+        {label: __('Local Directory', 'simply-static'), value: 'local'},
+        {label: __('SFTP', 'simply-static'), value: 'sftp'},
+        {label: __('GitHub', 'simply-static'), value: 'github'},
+        {label: __('AWS S3', 'simply-static'), value: 'aws-s3'},
+        {label: __('Bunny CDN', 'simply-static'), value: 'cdn'},
+        {label: __('Tiiny.host', 'simply-static'), value: 'tiiny'}
+    ]);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -78,6 +88,10 @@ function DeploymentSettings() {
             setEmptyBucketBeforeExport(settings.aws_empty);
         }
 
+        if (settings.aws_auth_method) {
+            setAwsAuthMethod(settings.aws_auth_method);
+        }
+
         if (settings.aws_region) {
             setRegion(settings.aws_region);
         }
@@ -89,6 +103,11 @@ function DeploymentSettings() {
             pages.unshift({label: __('No page selected', 'simply-static'), value: 0});
             setPages(pages);
         });
+
+        // Maybe include studio.
+        if (options.home.includes('static.studio') || options.home.includes('static1.studio') || options.home.includes('static2.studio')) {
+            deploymentOptions.push({label: __('Simply Static Studio', 'simply-static'), value: 'simply-static-studio'});
+        }
 
     }, [settings]);
 
@@ -102,16 +121,7 @@ function DeploymentSettings() {
                 <SelectControl
                     label={__('Deployment method', 'simply-static')}
                     value={deliveryMethod}
-                    options={[
-                        {label: __('ZIP Archive', 'simply-static'), value: 'zip'},
-                        {label: __('Local Directory', 'simply-static'), value: 'local'},
-                        {label: __('SFTP', 'simply-static'), value: 'sftp'},
-                        {label: __('GitHub', 'simply-static'), value: 'github'},
-                        {label: __('AWS S3', 'simply-static'), value: 'aws-s3'},
-                        //{label: __('S3 Storage', 'simply-static'), value: 's3-storage'},
-                        {label: __('Bunny CDN', 'simply-static'), value: 'cdn'},
-                        {label: __('Tiiny.host', 'simply-static'), value: 'tiiny'}
-                    ]}
+                    options={deploymentOptions}
                     onChange={(method) => {
                         setDeliveryMethod(method);
                         updateSetting('delivery_method', method);
@@ -121,6 +131,18 @@ function DeploymentSettings() {
             </CardBody>
         </Card>
         <Spacer margin={5}/>
+        {deliveryMethod === 'simply-static-studio' &&
+            <Card>
+                <CardHeader>
+                    <b>{__('Simply Static Studio', 'simply-static')}</b>
+                </CardHeader>
+                <CardBody>
+                    <p>
+                        {__('The static site hosting platform for your Static Studio powered WordPress websites.', 'simply-static')}
+                    </p>
+                </CardBody>
+            </Card>
+        }
         {deliveryMethod === 'zip' &&
             <Card>
                 <CardHeader>
@@ -360,6 +382,17 @@ function DeploymentSettings() {
                                 updateSetting('github_throttle_requests', value);
                             }}
                         />
+
+                        <TextControl
+                            label={__('Batch size', 'simply-static')}
+                            type={"number"}
+                            help={__('Enter the number of files you want to be processed in a single batch. If current export fails to deploy, lower the number.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            value={settings.github_batch_size ?? 100}
+                            onChange={(size) => {
+                                updateSetting('github_batch_size', size);
+                            }}
+                        />
                     </CardBody>
                 </Card>
             }
@@ -554,40 +587,55 @@ function DeploymentSettings() {
                         </Flex>
                     </CardHeader>
                     <CardBody>
-                        <TextControl
-                            label={__('Access Key ID', 'simply-static')}
-                            type={"text"}
-                            help={
-                                <>
-                                    {__('Enter your Access Key from AWS. Learn how to get one ', 'simply-static')}
-                                    <a href={"https://docs.aws.amazon.com/en_en/IAM/latest/UserGuide/id_credentials_access-keys.html"}
-                                       target={"_blank"}>{__('here', 'simply-static')}</a>
-                                </>
-                            }
+                        <SelectControl
+                            label={__('Authentication Method', 'simply-static')}
+                            value={awsAuthMethod}
+                            options={[
+                                {label: __('AWS IAM Access Key', 'simply-static'), value: 'aws-iam-key'},
+                                {label: __('AWS EC2', 'simply-static'), value: 'aws-ec2'},
+                            ]}
                             disabled={('free' === options.plan || !isPro())}
-                            value={settings.aws_access_key}
-                            onChange={(access_key) => {
-                                updateSetting('aws_access_key', access_key);
+                            onChange={(method) => {
+                                setAwsAuthMethod(method);
+                                updateSetting('aws_auth_method', method);
                             }}
                         />
-
-                        <TextControl
-                            label={__('Secret Access Key', 'simply-static')}
-                            type={"password"}
-                            help={
-                                <>
-                                    {__('Enter your Secret Key from AWS. Learn how to get one ', 'simply-static')}
-                                    <a href={"https://docs.aws.amazon.com/en_en/IAM/latest/UserGuide/id_credentials_access-keys.html"}
-                                       target={"_blank"}>{__('here', 'simply-static')}</a>
-                                </>
-                            }
-                            disabled={('free' === options.plan || !isPro())}
-                            value={settings.aws_access_secret}
-                            onChange={(secret) => {
-                                updateSetting('aws_access_secret', secret);
-                            }}
-                        />
-
+                        {awsAuthMethod === 'aws-iam-key' &&
+                            <>
+                                <TextControl
+                                    label={__('Access Key ID', 'simply-static')}
+                                    type={"text"}
+                                    help={
+                                        <>
+                                            {__('Enter your Access Key from AWS. Learn how to get one ', 'simply-static')}
+                                            <a href={"https://docs.aws.amazon.com/en_en/IAM/latest/UserGuide/id_credentials_access-keys.html"}
+                                               target={"_blank"}>{__('here', 'simply-static')}</a>
+                                        </>
+                                    }
+                                    disabled={('free' === options.plan || !isPro())}
+                                    value={settings.aws_access_key}
+                                    onChange={(access_key) => {
+                                        updateSetting('aws_access_key', access_key);
+                                    }}
+                                />
+                                <TextControl
+                                    label={__('Secret Access Key', 'simply-static')}
+                                    type={"password"}
+                                    help={
+                                        <>
+                                            {__('Enter your Secret Key from AWS. Learn how to get one ', 'simply-static')}
+                                            <a href={"https://docs.aws.amazon.com/en_en/IAM/latest/UserGuide/id_credentials_access-keys.html"}
+                                               target={"_blank"}>{__('here', 'simply-static')}</a>
+                                        </>
+                                    }
+                                    disabled={('free' === options.plan || !isPro())}
+                                    value={settings.aws_access_secret}
+                                    onChange={(secret) => {
+                                        updateSetting('aws_access_secret', secret);
+                                    }}
+                                />
+                            </>
+                        }
                         <SelectControl
                             label={__('Region', 'simply-static')}
                             value={region}
@@ -661,6 +709,17 @@ function DeploymentSettings() {
                             }}
                         />
 
+                        <TextControl
+                            label={__('Webhook URL', 'simply-static')}
+                            type={"url"}
+                            help={__('Enter your Webhook URL here and Simply Static will send a POST request after all files are transferred to AWS S3.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            value={settings.github_webhook_url}
+                            onChange={(webhook) => {
+                                updateSetting('aws_webhook_url', webhook);
+                            }}
+                        />
+
                         <ToggleControl
                             label={__('Empty bucket before new export?', 'simply-static')}
                             help={
@@ -673,80 +732,6 @@ function DeploymentSettings() {
                             onChange={(value) => {
                                 setEmptyBucketBeforeExport(value);
                                 updateSetting('aws_empty', value);
-                            }}
-                        />
-                    </CardBody>
-                </Card>
-            }
-            <Spacer margin={5}/>
-            {deliveryMethod === 's3-storage' &&
-                <Card>
-                    <CardHeader>
-                        <Flex>
-                            <FlexItem>
-                                <b>{__('S3-compatible Storage', 'simply-static')}<HelperVideo
-                                    title={__('How to deploy to S3 compatible storages?', 'simply-static')}
-                                    videoUrl={'https://youtu.be/rtn21J86Upc'}/></b>
-                            </FlexItem>
-                            {('free' === options.plan || !isPro()) &&
-                                <FlexItem>
-                                    <ExternalLink
-                                        href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
-                                </FlexItem>
-                            }
-                        </Flex>
-                    </CardHeader>
-                    <CardBody>
-                        <TextControl
-                            label={__('Access Key ID', 'simply-static')}
-                            type={"text"}
-                            help={__('Enter your Access Key from your S3 provider.', 'simply-static')}
-                            disabled={('free' === options.plan || !isPro())}
-                            value={settings.s3_access_key}
-                            onChange={(access_key) => {
-                                updateSetting('s3_access_key', access_key);
-                            }}
-                        />
-
-                        <TextControl
-                            label={__('Secret Access Key', 'simply-static')}
-                            type={"password"}
-                            help= {__('Enter your Secret Key from S3 provider.', 'simply-static')}
-                            disabled={('free' === options.plan || !isPro())}
-                            value={settings.s3_access_secret}
-                            onChange={(secret) => {
-                                updateSetting('s3_access_secret', secret);
-                            }}
-                        />
-                        <TextControl
-                            label={__('Base URL', 'simply-static')}
-                            type={"url"}
-                            help={__('Add the base URL of the S3 service.', 'simply-static')}
-                            disabled={('free' === options.plan || !isPro())}
-                            value={settings.s3_base_url}
-                            onChange={(baseUrl) => {
-                                updateSetting('s3_base_url', baseUrl);
-                            }}
-                        />
-                        <TextControl
-                            label={__('Bucket', 'simply-static')}
-                            type={"text"}
-                            help={__('Add the name of your bucket here.', 'simply-static')}
-                            disabled={('free' === options.plan || !isPro())}
-                            value={settings.s3_bucket}
-                            onChange={(bucket) => {
-                                updateSetting('s3_bucket', bucket);
-                            }}
-                        />
-
-                        <TextControl
-                            label={__('Subdirectory', 'simply-static')}
-                            type={"text"}
-                            help={__('Add an optional subdirectory for your bucket', 'simply-static')}
-                            disabled={('free' === options.plan || !isPro())}
-                            value={settings.s3_subdirectory}
-                            onChange={(subdirectory) => {
-                                updateSetting('s3_subdirectory', subdirectory);
                             }}
                         />
                     </CardBody>
@@ -820,7 +805,7 @@ function DeploymentSettings() {
                             label={__('SFTP private key', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             placeholder={__('OPTIONAL: This is only required if you need to authenticate via a private key to access your SFTP server.', 'simply-static')}
-                            help={__('Enter your SFTP private key if you want password.less upload and the server is configured to allow it. You can set it as a constant in wp-config.php by using define(\'SSP_SFTP_KEY\', \'YOUR_KEY\')', 'simply-static')}
+                            help={__('Enter your SFTP private key if you want passwordless upload and the server is configured to allow it. You can set it as a constant in wp-config.php by using define(\'SSP_SFTP_KEY\', \'YOUR_KEY\')', 'simply-static')}
                             value={settings.sftp_private_key}
                             onChange={(pass) => {
                                 updateSetting('sftp_private_key', pass);

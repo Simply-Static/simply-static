@@ -18,7 +18,7 @@ class Elementor_Integration extends Integration {
 	protected $extractor = null;
 
 	public function __construct() {
-		$this->name = __( 'Elementor', 'simply-static' );
+		$this->name        = __( 'Elementor', 'simply-static' );
 		$this->description = __( 'Exports assets required for Elementor widgets and prepares data used by them.', 'simply-static' );
 	}
 
@@ -142,6 +142,11 @@ class Elementor_Integration extends Integration {
 		$urls  = [];
 
 		foreach ( $files as $file ) {
+			// If file size is empty, skip it.
+			if ( ! filesize( $file ) ) {
+				continue;
+			}
+
 			$urls[] = str_replace( trailingslashit( ELEMENTOR_PATH ), trailingslashit( ELEMENTOR_URL ), $file );
 		}
 
@@ -190,6 +195,11 @@ class Elementor_Integration extends Integration {
 		$urls = [];
 
 		foreach ( $only_bundle_min as $minified_file ) {
+			// If file size is empty, skip it.
+			if ( ! filesize( $minified_file ) ) {
+				continue;
+			}
+
 			$urls[] = trailingslashit( ELEMENTOR_URL ) . 'assets/js/' . $minified_file;
 		}
 
@@ -203,17 +213,18 @@ class Elementor_Integration extends Integration {
 	 */
 	public function register_assets() {
 
-		$file_urls = [];
-		//$bundle_urls = $this->get_bundle_files();
-		$lib_urls = $this->get_lib_files();
-		//$file_urls   = array_merge( $file_urls, $bundle_urls );
-		$file_urls = array_merge( $file_urls, $lib_urls );
-		$file_urls = array_merge( $file_urls, $this->get_files_in_url( 'js' ) );
-		$file_urls = array_merge( $file_urls, $this->get_files_in_url( 'images' ) );
-		$file_urls = array_merge( $file_urls, $this->get_files_in_url( 'shapes' ) );
-		$file_urls = array_merge( $file_urls, $this->get_files_in_url( 'mask-shapes' ) );
-		$file_urls = array_merge( $file_urls, $this->get_files_in_url( 'svg-paths' ) );
-		$file_urls = array_merge( $file_urls, $this->get_files_in_url( 'data' ) );
+		$file_urls   = [];
+		$bundle_urls = $this->get_bundle_files();
+		$lib_urls    = $this->get_lib_files();
+		$file_urls   = array_merge( $file_urls, $bundle_urls );
+		$file_urls   = array_merge( $file_urls, $lib_urls );
+		$file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'css' ) );
+		$file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'js' ) );
+		$file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'images' ) );
+		$file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'shapes' ) );
+		$file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'mask-shapes' ) );
+		$file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'svg-paths' ) );
+		$file_urls   = array_merge( $file_urls, $this->get_files_in_url( 'data' ) );
 
 		foreach ( $file_urls as $url ) {
 			Util::debug_log( 'Adding elementor bundle asset to queue: ' . $url );

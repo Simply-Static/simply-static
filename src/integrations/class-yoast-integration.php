@@ -24,8 +24,14 @@ class Yoast_Integration extends Integration {
 	public function run() {
 		add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_page' ] );
 		add_action( 'ss_after_setup_task', [ $this, 'register_redirections' ] );
-		add_filter( 'ssp_single_export_additional_urls', [ $this, 'add_sitemap_url' ] );
 		add_action( 'ss_dom_before_save', [ $this, 'replace_json_schema' ], 10, 2 );
+
+		// Maybe update sitemap on single export.
+		$add_sitemap_single_export = apply_filters( 'ssp_single_export_add_xml_sitemap', false );
+
+		if ( $add_sitemap_single_export ) {
+			add_filter( 'ssp_single_export_additional_urls', [ $this, 'add_sitemap_url' ] );
+		}
 
 		$this->include_file( 'handlers/class-ss-yoast-sitemap-handler.php' );
 	}
