@@ -299,6 +299,10 @@ class Fetch_Urls_Task extends Task {
 			}
 		}
 
+		if ( apply_filters( 'simply_static_exclude_temp_dir', true ) ) {
+			$excluded[] = Util::get_temp_dir_url();
+		}
+
 		$excluded = apply_filters( 'ss_excluded_by_default', $excluded );
 
 		if ( $excluded ) {
