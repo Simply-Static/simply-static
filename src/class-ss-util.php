@@ -680,6 +680,12 @@ class Util {
 		}
 	}
 
+	public static function get_temp_dir_url() {
+		$dir = self::get_temp_dir();
+
+		return self::abs_path_to_url( $dir );
+	}
+
 	/*
 	 * Get the absolute path to the temporary file directory.
 	 *
