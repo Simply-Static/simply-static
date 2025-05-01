@@ -4,7 +4,7 @@ Tags: static site generator, performance, security, jamstack
 Requires at least: 6.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag:  3.2.7.3-beta
+Stable tag:  3.2.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -253,7 +253,7 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 
 == Changelog ==
 
-= 3.2.7.3-beta =
+= 3.2.8 =
 
 * removed deprecated option labels in WPML config file
 * latest updates for WPBP package and moved to our own maintained version (fewer dependencies)
@@ -264,6 +264,8 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 * WP tested up to 6.8
 * added <use> tag with href attribute (match_tags)
 * added uploads directory handler for Elementor integrations
+* added feature to allow full scans of theme and plugins directory on exports
+
 
 = 3.2.7.2 =
 
