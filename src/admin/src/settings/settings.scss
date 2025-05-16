@@ -36,9 +36,21 @@ toplevel_page_simply-static img {
   }
 
   .save-settings {
+    position: sticky;
+    bottom: 0;
+    padding: 15px 0;
+    text-align: right;
+    box-sizing: border-box;
+
     button {
       &:not(:first-child) {
         margin-left: 10px;
+        background: #f0f0f1;
+      }
+
+      &:disabled {
+        cursor: not-allowed;
+        background-color: #ddd;
       }
     }
   }
