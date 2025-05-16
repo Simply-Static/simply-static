@@ -95,30 +95,35 @@ class Plugin {
 			// Handle Basic Auth.
 			add_filter( 'http_request_args', array( self::$instance, 'add_http_filters' ), 10, 2 );
 
-			self::$instance->integrations = new Integrations();
-			self::$instance->integrations->load();
+			add_action( 'init', function () {
+				// Set up integrations.
+				self::$instance->integrations = new Integrations();
+				self::$instance->integrations->load();
 
-			self::$instance->options              = Options::instance();
-			self::$instance->view                 = new View();
-			self::$instance->archive_creation_job = new Archive_Creation_Job();
-			self::$instance->page_handlers        = new Page_Handlers();
+				// Set up defaults.
+				self::$instance->options              = Options::instance();
+				self::$instance->view                 = new View();
+				self::$instance->archive_creation_job = new Archive_Creation_Job();
+				self::$instance->page_handlers        = new Page_Handlers();
 
-			$page                         = isset( $_GET['page'] ) ? $_GET['page'] : '';
-			self::$instance->current_page = $page;
+				// Set up pagination.
+				$page                         = isset( $_GET['page'] ) ? $_GET['page'] : '';
+				self::$instance->current_page = $page;
 
-			// Maybe run upgrade.
-			Upgrade_Handler::run();
+				// Maybe run upgrade.
+				Upgrade_Handler::run();
 
-			// Multisite.
-			if ( is_multisite() ) {
-				Multisite::get_instance();
-			}
+				// Multisite.
+				if ( is_multisite() ) {
+					Multisite::get_instance();
+				}
 
-			// Plugin compatibility.
-			Plugin_Compatibility::get_instance();
+				// Plugin compatibility.
+				Plugin_Compatibility::get_instance();
 
-			// Boot up admin.
-			Admin_Settings::get_instance();
+				// Boot up admin.
+				Admin_Settings::get_instance();
+			} );
 		}
 
 		return self::$instance;
