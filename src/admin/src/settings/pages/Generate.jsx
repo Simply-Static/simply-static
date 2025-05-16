@@ -18,7 +18,7 @@ function Generate() {
     const [selectedSiteUrl, setSelectedSiteURL] = useState('');
     const [selectedSiteActivityUrl, setSelectedSiteActivityUrl] = useState('');
 
-    return (<div className={"inner-settings settings-wide"}>
+    return (<div className={"inner-settings"}>
         {!options.is_network &&
             <>
                 <ActivityLog/>

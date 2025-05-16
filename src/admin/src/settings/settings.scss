@@ -24,10 +24,12 @@ toplevel_page_simply-static img {
 
   .components-flex {
     align-items: flex-start;
+    height: 100%;
   }
 
   .components-flex-item {
     margin-left: 0;
+    width:100%;
   }
 
   .inner-settings > * {
@@ -53,11 +55,6 @@ toplevel_page_simply-static img {
         background-color: #ddd;
       }
     }
-  }
-
-  .settings-wide > * {
-    width: 100%;
-    max-width: 1050px;
   }
 
   .migrate-notice.components-notice.is-warning {
@@ -110,14 +107,20 @@ toplevel_page_simply-static img {
     }
   }
 
-  /* Navigation */
-  .plugin-nav {
+  .sidebar {
     padding: 25px;
+    background: white;
     box-sizing: border-box;
-    height: auto;
+    height: 100%;
     max-width: 220px;
-    min-height: 100vh;
     margin: 0;
+  }
+
+  /* Navigation */
+
+  .plugin-nav {
+    height:100%;
+    box-shadow: none;
 
     button:focus, button:focus-visible, button:hover {
       box-shadow: none;
@@ -222,7 +225,7 @@ toplevel_page_simply-static img {
   .plugin-settings {
     padding: 25px;
     box-sizing: border-box;
-    height: 100vh;
+    height: auto;
     background: #f0f0f1;
 
     /* Tables */
@@ -396,7 +399,6 @@ a.show-nav {
   div#wpwrap {
     background: white;
   }
-
   .toggle-nav {
     display: none;
   }
@@ -417,6 +419,10 @@ a.show-nav {
 
   .plugin-nav .generate-container {
     margin-top: 0;
+  }
+
+  .log-table-container {
+    max-width:300px;
   }
 
 

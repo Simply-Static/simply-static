@@ -181,7 +181,7 @@ function SettingsPage() {
                     <a onClick={() => {
                         setShowMobileNav(!showMobileNav);
                     }} className={"show-nav"}><Dashicon icon="align-center"/> {__('Toggle menu', 'simply-static')}</a>
-                    <FlexItem className={showMobileNav ? 'toggle-nav' : ''}>
+                    <FlexItem className={showMobileNav ? 'toggle-nav sidebar' : 'sidebar'}>
                         {options.is_network ?
                             <Card className={"plugin-nav"}>
                                 <div className={"plugin-logo"}>

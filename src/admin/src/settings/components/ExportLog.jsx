@@ -37,13 +37,13 @@ function ExportLog() {
 
     const handlePerRowsChange = (newPerPage, page) => {
         setPerPageExportLog(newPerPage);
-        getExportLog( page, true );
+        getExportLog(page, true);
     };
 
-    function getExportLog( page, force = false ) {
+    function getExportLog(page, force = false) {
         page = page ?? 1;
 
-        if ( page !== exportPage || force ) {
+        if (page !== exportPage || force) {
             setLoadingExportLog(true);
         }
 
@@ -51,16 +51,16 @@ function ExportLog() {
             path: `/simplystatic/v1/export-log?page=${page}&per_page=${perPageExportLog}&blog_id=${blogId}&is_network_admin=${options.is_network}`,
             method: 'GET',
         }).then(resp => {
-            var json = JSON.parse( resp );
-            if ( page !== exportPage || force ) {
-                setExportLog( json.data );
+            var json = JSON.parse(resp);
+            if (page !== exportPage || force) {
+                setExportLog(json.data);
                 setLoadingExportLog(false);
             } else {
                 exportLog.total_static_pages = json.data.total_static_pages;
                 setExportLog(exportLog);
             }
             setExportPage(page);
-        } );
+        });
     }
 
     useInterval(() => {
@@ -68,22 +68,24 @@ function ExportLog() {
     }, isRunning ? 5000 : null);
 
     useEffect(() => {
-        getExportLog( 1, true);
+        getExportLog(1, true);
     }, [isRunning]);
 
     return (
-        <DataTable
-            columns={columns}
-            data={exportLog.static_pages}
-            pagination
-            paginationServer
-            paginationTotalRows={exportLog.total_static_pages}
-            paginationPerPage={25}
-            paginationRowsPerPageOptions={[25, 50, 100, 200]}
-            progressPending={loadingExportLog}
-            onChangeRowsPerPage={handlePerRowsChange}
-            onChangePage={handlePageChange}
-        />
+        <div className={"log-table-container"}>
+            <DataTable
+                columns={columns}
+                data={exportLog.static_pages}
+                pagination
+                paginationServer
+                paginationTotalRows={exportLog.total_static_pages}
+                paginationPerPage={25}
+                paginationRowsPerPageOptions={[25, 50, 100, 200]}
+                progressPending={loadingExportLog}
+                onChangeRowsPerPage={handlePerRowsChange}
+                onChangePage={handlePageChange}
+            />
+        </div>
     )
 }
 
