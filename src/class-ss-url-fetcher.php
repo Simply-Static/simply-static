@@ -267,9 +267,7 @@ class Url_Fetcher {
 			$args['headers'] = array( 'Authorization' => 'Basic ' . $basic_auth_digest );
 		}
 
-		$response = wp_remote_get( $url, apply_filters( 'ss_remote_get_args', $args ) );
-
-		return $response;
+		return wp_remote_get( $url, apply_filters( 'ss_remote_get_args', $args ) );
 	}
 
 }
