@@ -74,28 +74,29 @@ class Plugin {
 			self::$instance = new self();
 			self::$instance->includes();
 
-			// Run export via WP-Cron.
-			add_action( 'simply_static_site_export_cron', array( self::$instance, 'run_static_export' ) );
-
-			// Filters.
-			add_filter( 'simplystatic.archive_creation_job.task_list', array(
-				self::$instance,
-				'filter_task_list'
-			), 10, 2 );
-
-			// Maybe clear local directory.
-			add_action( 'ss_after_setup_task', array( self::$instance, 'maybe_clear_directory' ) );
-
-			// Add quick link to the plugin page.
-			add_filter( 'plugin_action_links_simply-static/simply-static.php', array(
-				self::$instance,
-				'add_quick_links'
-			) );
-
-			// Handle Basic Auth.
-			add_filter( 'http_request_args', array( self::$instance, 'add_http_filters' ), 10, 2 );
-
+			// Apply hooks after init to avoid loading issues.
 			add_action( 'init', function () {
+				// Run export via WP-Cron.
+				add_action( 'simply_static_site_export_cron', array( self::$instance, 'run_static_export' ) );
+
+				// Filters.
+				add_filter( 'simplystatic.archive_creation_job.task_list', array(
+					self::$instance,
+					'filter_task_list'
+				), 10, 2 );
+
+				// Maybe clear local directory.
+				add_action( 'ss_after_setup_task', array( self::$instance, 'maybe_clear_directory' ) );
+
+				// Add quick link to the plugin page.
+				add_filter( 'plugin_action_links_simply-static/simply-static.php', array(
+					self::$instance,
+					'add_quick_links'
+				) );
+
+				// Handle Basic Auth.
+				add_filter( 'http_request_args', array( self::$instance, 'add_http_filters' ), 10, 2 );
+
 				// Set up integrations.
 				self::$instance->integrations = new Integrations();
 				self::$instance->integrations->load();
