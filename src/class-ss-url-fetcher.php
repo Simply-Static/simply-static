@@ -255,7 +255,7 @@ class Url_Fetcher {
 			'user-agent'  => 'Simply Static/' . SIMPLY_STATIC_VERSION,
 			'sslverify'   => false,
 			'redirection' => 0, // disable redirection.
-			'blocking'    => true,
+			'blocking'    => false,
 		);
 
 		if ( $filename ) {
