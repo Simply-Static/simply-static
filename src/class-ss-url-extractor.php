@@ -202,12 +202,19 @@ class Url_Extractor {
 		}
 
 		if ( $this->static_page->is_type( 'json' ) ) {
-			$this->save_body( $this->extract_and_replace_urls_in_json() );
+			// Check if the URL includes 'simply-static/configs'
+			if ( strpos( $this->static_page->file_path, 'simply-static/configs' ) === false ) {
+				// Proceed to replace the URL.
+				$this->save_body( $this->extract_and_replace_urls_in_json() );
+			}
 		}
 
 		if ( $this->static_page->is_type( 'html' ) || $this->static_page->is_type( 'css' ) || $this->static_page->is_type( 'xml' ) || $this->static_page->is_type( 'json' ) ) {
-			// Replace encoded URLs.
-			$this->replace_encoded_urls();
+			// Check if the URL includes 'simply-static/configs'
+			if ( strpos( $this->static_page->file_path, 'simply-static/configs' ) === false ) {
+				// Replace encoded URLs.
+				$this->replace_encoded_urls();
+			}
 
 			// If activated forced string/replace for URLs.
 			if ( $this->options->get( 'force_replace_url' ) && ( ! $this->options->get( 'use_forms' ) && ! $this->options->get( 'use_comments' ) ) ) {
