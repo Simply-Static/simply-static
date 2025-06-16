@@ -255,6 +255,26 @@ class Url_Extractor {
 	}
 
 	/**
+	 * Force Replace the origin URL from the content with the destination URL.
+	 *
+	 * @param string $content Content.
+	 *
+	 * @return array|string|string[]
+	 */
+	public function force_replace( $content ) {
+		$destination_url = $this->options->get_destination_url();
+
+		// replace any instance of the origin url, whether it starts with https://, http://, or //.
+		$content = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $destination_url, $content );
+
+		// replace wp_json_encode'd urls, as used by WP's `concatemoji`.
+		// e.g. {"concatemoji":"http:\/\/www.example.org\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.6.1"}.
+		$content = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $content );
+
+		return $content;
+	}
+
+	/**
 	 * Replaces origin URL with destination URL in response body
 	 *
 	 * This is a function of last resort for URL replacement. Ideally it was
@@ -278,16 +298,8 @@ class Url_Extractor {
 		even more ideally, we'd only have a single preg_replace.
 		 */
 
-		$destination_url = $this->options->get_destination_url();
-		$response_body   = $this->get_body();
-
-		// replace any instance of the origin url, whether it starts with https://, http://, or //.
-		$response_body = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $destination_url, $response_body );
-
-		// replace wp_json_encode'd urls, as used by WP's `concatemoji`.
-		// e.g. {"concatemoji":"http:\/\/www.example.org\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.6.1"}.
-		$response_body = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
-
+		$response_body = $this->get_body();
+		$response_body = $this->force_replace( $response_body );
 		$response_body = apply_filters( 'simply_static_force_replaced_urls_body', $response_body, $this->static_page );
 
 		$this->save_body( $response_body );
