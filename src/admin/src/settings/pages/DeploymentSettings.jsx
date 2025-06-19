@@ -714,7 +714,7 @@ function DeploymentSettings() {
                             type={"url"}
                             help={__('Enter your Webhook URL here and Simply Static will send a POST request after all files are transferred to AWS S3.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
-                            value={settings.github_webhook_url}
+                            value={settings.aws_webhook_url}
                             onChange={(webhook) => {
                                 updateSetting('aws_webhook_url', webhook);
                             }}
