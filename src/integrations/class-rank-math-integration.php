@@ -105,7 +105,6 @@ class Rank_Math_Integration extends Integration {
 
 	}
 
-
 	/**
 	 * Register sitemap maps for static export.
 	 *
@@ -116,14 +115,21 @@ class Rank_Math_Integration extends Integration {
 			return;
 		}
 
-		$url = Router::get_base_url( 'sitemap_index.xml' );
-		Util::debug_log( 'Adding sitemap URL to queue: ' . $url );
-		/** @var \Simply_Static\Page $static_page */
-		$static_page = Page::query()->find_or_initialize_by( 'url', $url );
-		$static_page->set_status_message( __( 'Sitemap URL', 'simply-static' ) );
-		$static_page->found_on_id = 0;
-		$static_page->handler     = Rank_Math_Sitemap_Handler::class;
-		$static_page->save();
+		$urls = array(
+			Router::get_base_url( 'sitemap_index.xml' ),
+			Router::get_base_url( 'main-sitemap.xsl' )
+	);
+
+		foreach ( $urls as $url ) {
+			Util::debug_log( 'Adding sitemap URL to queue: ' . $url );
+
+			/** @var \Simply_Static\Page $static_page */
+			$static_page = Page::query()->find_or_initialize_by( 'url', $url );
+			$static_page->set_status_message( __( 'Sitemap URL', 'simply-static' ) );
+			$static_page->found_on_id = 0;
+			$static_page->handler     = Rank_Math_Sitemap_Handler::class;
+			$static_page->save();
+		}
 	}
 
 	/**

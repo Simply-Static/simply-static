@@ -95,7 +95,7 @@ class Url_Extractor {
 
 		'meta' => array( 'content' ),
 		'link' => array( 'href' ),
-		'atom' => array( 'href' )
+		'atom' => array( 'href' ),
 	);
 
 	// /** @const */
@@ -197,7 +197,7 @@ class Url_Extractor {
 			$this->save_body( $this->extract_and_replace_urls_in_css( $this->get_body() ) );
 		}
 
-		if ( $this->static_page->is_type( 'xml' ) ) {
+		if ( $this->static_page->is_type( 'xml' ) || $this->static_page->is_type( 'xsl' ) ) {
 			$this->save_body( $this->extract_and_replace_urls_in_xml() );
 		}
 
@@ -594,9 +594,9 @@ class Url_Extractor {
 	 */
 	private function extract_and_replace_urls_in_xml() {
 		$xml_string = $this->get_body();
-		// match anything starting with http/s plus all following characters
+		// match anything starting with http/s or // plus all following characters
 		// except: [space] " ' <
-		$pattern = "/https?:\/\/[^\s\"'<]+/";
+		$pattern = '/(?:https?:)?\/\/[^\s"\'\<\>]+/';
 		$text    = preg_replace_callback( $pattern, array( $this, 'xml_matches' ), $xml_string );
 
 		return $text;
@@ -608,10 +608,12 @@ class Url_Extractor {
 	 */
 	private function extract_and_replace_urls_in_json() {
 		$json_string = $this->get_body();
-		// match anything starting with http/s plus all following characters
+		// match anything starting with http/s or // plus all following characters
 		// except: [space] " ' <
-		$pattern = "/https?:\/\/[^\s\"'<]+/";
-		$text    = preg_replace_callback( $pattern, array( $this, 'json_matches' ), $json_string );
+		$pattern = '/(?:https?:)?\/\/[^\s"\'\<\>]+/';
+
+
+		$text = preg_replace_callback( $pattern, array( $this, 'json_matches' ), $json_string );
 
 		return $text;
 	}

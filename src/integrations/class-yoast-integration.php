@@ -86,6 +86,7 @@ class Yoast_Integration extends Integration {
 		$urls = array(
 			\WPSEO_Sitemaps_Router::get_base_url( 'sitemap.xml' ),
 			\WPSEO_Sitemaps_Router::get_base_url( 'sitemap_index.xml' ),
+			\WPSEO_Sitemaps_Router::get_base_url( 'main-sitemap.xsl' ),
 		);
 
 		foreach ( $urls as $url ) {
