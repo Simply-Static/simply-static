@@ -2,8 +2,6 @@
 
 namespace Simply_Static;
 
-use voku\helper\HtmlDomParser;
-
 class Elementor_Integration extends Integration {
 	/**
 	 * Given plugin handler ID.
@@ -42,22 +40,84 @@ class Elementor_Integration extends Integration {
 	}
 
 	/**
-	 * @param HtmlDomParser $dom DOM object.
+	 * @param string|object $html_content HTML content or DOM object.
 	 * @param Url_Extractor $extractor Extractor.
 	 *
-	 * @return void
+	 * @return void|string
 	 */
-	public function extract_elementor_settings( $dom, $extractor ) {
-		$settings        = $dom->find( '[data-settings]' );
+	public function extract_elementor_settings( $html_content, $extractor ) {
 		$this->extractor = $extractor;
 
-		foreach ( $settings as $node ) {
-			$json                    = $node->{'data-settings'};
-			$decoded                 = htmlspecialchars_decode( $json );
-			$decoded                 = json_decode( $decoded, true );
-			$decoded                 = $this->replace_urls_array( $decoded );
-			$node->{'data-settings'} = esc_attr( wp_json_encode( $decoded ) );
+		// Check if WP_HTML_Tag_Processor class exists (WordPress 6.2+)
+		if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+			// Log a notice that we're using a fallback
+			error_log( 'Simply Static: WP_HTML_Tag_Processor not available in Elementor integration. Using fallback method.' );
+
+			// For WordPress versions before 6.2, we'll use a simple regex-based approach
+			return $this->extract_elementor_settings_fallback( $html_content );
 		}
+
+		// Create a new processor for the HTML content
+		$processor = new \WP_HTML_Tag_Processor( $html_content );
+		$updated_html = $html_content;
+
+		// Find all elements with data-settings attribute
+		while ( $processor->next_tag( array( 'data_attributes' => 'settings' ) ) ) {
+			$json = $processor->get_attribute( 'data-settings' );
+
+			if ( $json ) {
+				$decoded = htmlspecialchars_decode( $json );
+				$decoded = json_decode( $decoded, true );
+				$decoded = $this->replace_urls_array( $decoded );
+				$processor->set_attribute( 'data-settings', esc_attr( wp_json_encode( $decoded ) ) );
+			}
+		}
+
+		return $processor->get_updated_html();
+	}
+
+	/**
+	 * Fallback method for extracting Elementor settings using regex
+	 * 
+	 * @param string $html_content HTML content
+	 * @return string Updated HTML content
+	 */
+	private function extract_elementor_settings_fallback( $html_content ) {
+		// Pattern to match elements with data-settings attribute
+		$pattern = '/<([a-z0-9]+)([^>]*?data-settings=[\'"]([^\'"]*?)[\'"][^>]*?)>/is';
+
+		return preg_replace_callback(
+			$pattern,
+			function( $matches ) {
+				$tag = $matches[1];
+				$attrs = $matches[2];
+				$settings_json = $matches[3];
+
+				if ( empty( $settings_json ) ) {
+					return $matches[0];
+				}
+
+				$decoded = htmlspecialchars_decode( $settings_json );
+				$decoded = json_decode( $decoded, true );
+
+				if ( ! is_array( $decoded ) ) {
+					return $matches[0];
+				}
+
+				$decoded = $this->replace_urls_array( $decoded );
+				$new_settings = esc_attr( wp_json_encode( $decoded ) );
+
+				// Replace the data-settings attribute value
+				$updated_attrs = preg_replace(
+					'/data-settings=[\'"]' . preg_quote( $settings_json, '/' ) . '[\'"]/',
+					'data-settings="' . $new_settings . '"',
+					$attrs
+				);
+
+				return '<' . $tag . $updated_attrs . '>';
+			},
+			$html_content
+		);
 	}
 
 	/**

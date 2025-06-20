@@ -3,7 +3,6 @@
   "description": "Convert your WordPress site into a static one with the free WordPress static site generator plugin, Simply Static.",
   "type": "wordpress-plugin",
   "require": {
-      "voku/simple_html_dom": "^4.8.10",
       "voku/portable-utf8": "^6.0.13"
   },
   "license": "GPL-3.0-or-later",

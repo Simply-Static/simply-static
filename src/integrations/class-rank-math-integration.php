@@ -152,21 +152,189 @@ class Rank_Math_Integration extends Integration {
 	/**
 	 * Replace JSON schema for schema.org
 	 *
-	 * @param object $dom given dom element.
+	 * @param string|object $html_content HTML content or DOM object.
 	 * @param string $url given URL.
 	 *
-	 * @return object
+	 * @return string|object
 	 */
-	public function replace_json_schema( $dom, $url ) {
+	public function replace_json_schema( $html_content, $url ) {
 		$options = Options::instance();
 
-		foreach ( $dom->find( 'script.rank-math-schema' ) as $script ) {
-			$decoded_text      = html_entity_decode( $script->outertext, ENT_NOQUOTES );
-			$text              = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $options->get_destination_url(), $decoded_text );
-			$script->outertext = $text;
+		// Check if WP_HTML_Tag_Processor class exists (WordPress 6.2+)
+		if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+			// Log a notice that we're using a fallback
+			error_log( 'Simply Static: WP_HTML_Tag_Processor not available in Rank Math integration. Using fallback method.' );
+
+			// For WordPress versions before 6.2, we'll use a simple regex-based approach
+			return $this->replace_json_schema_fallback( $html_content );
 		}
 
-		return $dom;
+		// Create a new processor for the HTML content
+		$processor = new \WP_HTML_Tag_Processor( $html_content );
+
+		// Find all script tags with class rank-math-schema
+		while ( $processor->next_tag( array( 'tag_name' => 'script', 'class_name' => 'rank-math-schema' ) ) ) {
+			// Extract the script content
+			$script_content = $this->extract_tag_content( $html_content, 'script', $processor );
+
+			if ( $script_content ) {
+				// Decode the HTML entities in the script content
+				$decoded_text = html_entity_decode( $script_content, ENT_NOQUOTES );
+
+				// Try to decode the JSON to handle it properly
+				$json_data = json_decode($decoded_text, true);
+
+				if (json_last_error() === JSON_ERROR_NONE && is_array($json_data)) {
+					// If valid JSON, recursively replace URLs in the array
+					$json_data = $this->replace_urls_in_array($json_data, $options);
+
+					// Encode back to JSON without escaping slashes
+					$updated_text = wp_json_encode($json_data, JSON_UNESCAPED_SLASHES);
+				} else {
+					// Fallback to simple string replacement if not valid JSON
+					$updated_text = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $options->get_destination_url(), $decoded_text );
+				}
+
+				// Replace the content in the HTML
+				$html_content = $this->replace_tag_content( $html_content, 'script', $script_content, $updated_text );
+			}
+		}
+
+		return $html_content;
+	}
+
+	/**
+	 * Fallback method for replacing JSON schema using regex
+	 * 
+	 * @param string $html_content HTML content
+	 * @return string Updated HTML content
+	 */
+	private function replace_json_schema_fallback( $html_content ) {
+		$options = Options::instance();
+
+		// Pattern to match script tags with class rank-math-schema
+		$pattern = '/<script[^>]*class=[\'"]rank-math-schema[\'"][^>]*>(.*?)<\/script>/is';
+
+		return preg_replace_callback(
+			$pattern,
+			function( $matches ) use ( $options ) {
+				$script_content = $matches[1];
+
+				// Decode the HTML entities in the script content
+				$decoded_text = html_entity_decode( $script_content, ENT_NOQUOTES );
+
+				// Try to decode the JSON to handle it properly
+				$json_data = json_decode($decoded_text, true);
+
+				if (json_last_error() === JSON_ERROR_NONE && is_array($json_data)) {
+					// If valid JSON, recursively replace URLs in the array
+					$json_data = $this->replace_urls_in_array($json_data, $options);
+
+					// Encode back to JSON without escaping slashes
+					$updated_text = wp_json_encode($json_data, JSON_UNESCAPED_SLASHES);
+				} else {
+					// Fallback to simple string replacement if not valid JSON
+					$updated_text = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $options->get_destination_url(), $decoded_text );
+				}
+
+				// Replace only the script content part, preserving the script tags
+				return str_replace( $script_content, $updated_text, $matches[0] );
+			},
+			$html_content
+		);
+	}
+
+	/**
+	 * Extract content between opening and closing tags
+	 *
+	 * @param string $html The HTML content
+	 * @param string $tag_name The tag name
+	 * @param \WP_HTML_Tag_Processor $processor The processor at the position of the tag
+	 * @return string|null The content between tags or null if not found
+	 */
+	private function extract_tag_content( $html, $tag_name, $processor ) {
+		// Get the position of the current tag
+		$tag_pos = $processor->get_tag();
+
+		if ( $tag_pos === null ) {
+			return null;
+		}
+
+		// Use regex to extract the content between the opening and closing tags
+		$pattern = "/<{$tag_name}[^>]*>(.*?)<\/{$tag_name}>/is";
+		if ( preg_match_all( $pattern, $html, $matches ) ) {
+			// Return the content of the current tag
+			// This is a simplification and might not work perfectly for nested tags
+			return $matches[1][0] ?? null;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Replace content between opening and closing tags
+	 *
+	 * @param string $html The HTML content
+	 * @param string $tag_name The tag name
+	 * @param string $old_content The old content to replace
+	 * @param string $new_content The new content
+	 * @return string The updated HTML
+	 */
+	private function replace_tag_content( $html, $tag_name, $old_content, $new_content ) {
+		// Escape special characters for regex
+		$old_content_escaped = preg_quote( $old_content, '/' );
+
+		// Replace the content between the tags
+		$pattern = "/(<{$tag_name}[^>]*>)$old_content_escaped(<\/{$tag_name}>)/is";
+		return preg_replace( $pattern, "$1$new_content$2", $html );
+	}
+
+	/**
+	 * Recursively replace URLs in an array
+	 *
+	 * @param array $data The array to process
+	 * @param Options $options The options instance
+	 * @return array The processed array
+	 */
+	private function replace_urls_in_array($data, $options) {
+		if (!is_array($data)) {
+			return $data;
+		}
+
+		// Store these values to avoid repeated function calls
+		$origin_host = Util::origin_host();
+		$destination_url = $options->get_destination_url();
+
+		// Extract the static path from the destination URL (e.g., "/static")
+		$static_path = '';
+		$url_parts = parse_url($destination_url);
+		if (isset($url_parts['path'])) {
+			$static_path = trim($url_parts['path'], '/');
+		}
+
+		// Create a pattern that matches the origin host exactly
+		$pattern = '/(https?:)?\/\/' . preg_quote($origin_host, '/') . '(?!\/(' . preg_quote($static_path, '/') . ')\/)/i';
+
+		foreach ($data as $key => $value) {
+			if (is_array($value)) {
+				// Recursively process nested arrays
+				$data[$key] = $this->replace_urls_in_array($value, $options);
+			} elseif (is_string($value)) {
+				// Only process strings that contain the origin host
+				if (strpos($value, $origin_host) !== false) {
+					// Count how many times the static path appears in the URL
+					$static_path_count = substr_count($value, '/' . $static_path . '/');
+
+					// Only replace if the static path doesn't already exist or appears only once (as part of the destination URL)
+					if ($static_path_count === 0) {
+						// Replace the URL exactly once, making sure we don't match paths that already contain the static path
+						$data[$key] = preg_replace($pattern, $destination_url, $value, 1);
+					}
+				}
+			}
+		}
+
+		return $data;
 	}
 
 	/**
