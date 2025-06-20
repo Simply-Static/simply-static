@@ -1,7 +1,7 @@
 === Simply Static - The WordPress Static Site Generator ===
 Contributors: patrickposner
 Tags: static site generator, performance, security, jamstack
-Requires at least: 6.5
+Requires at least: 6.2
 Tested up to: 6.8
 Requires PHP: 7.4
 Stable tag:  3.3.0
