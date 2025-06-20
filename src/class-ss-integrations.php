@@ -24,21 +24,22 @@ class Integrations {
 
 	public function get_integrations() {
 		return apply_filters( 'simply_static_integrations', [
-			'ss-adminbar'   => SS_Adminbar_Integration::class,
-			'yoast'         => Yoast_Integration::class,
-			'rank-math'     => Rank_Math_Integration::class,
-			'aio-seo'       => AIO_SEO_Integration::class,
-			'seopress'      => SEOPress_Integration::class,
-			'elementor'     => Elementor_Integration::class,
-			'elementor-pro' => Elementor_Pro_Integration::class,
-			'cookieyes'     => CookieYes_Integration::class,
-			'complianz'     => Complianz_Integration::class,
-			'jetpack'       => Jetpack_Integration::class,
-			'multilingual'  => Multilingual_Integration::class,
-			'github'        => Github_Integration::class,
-			'shortpixel'    => Shortpixel_Integration::class,
-			'redirection'   => Redirection_Integration::class,
-			'environments'  => Environments_Integration::class
+			'ss-adminbar'       => SS_Adminbar_Integration::class,
+			'yoast'             => Yoast_Integration::class,
+			'rank-math'         => Rank_Math_Integration::class,
+			'aio-seo'           => AIO_SEO_Integration::class,
+			'seopress'          => SEOPress_Integration::class,
+			'elementor'         => Elementor_Integration::class,
+			'elementor-pro'     => Elementor_Pro_Integration::class,
+			'cookieyes'         => CookieYes_Integration::class,
+			'complianz'         => Complianz_Integration::class,
+			'search-and-filter' => SearchAndFilter_Integration::class,
+			'jetpack'           => Jetpack_Integration::class,
+			'multilingual'      => Multilingual_Integration::class,
+			'github'            => Github_Integration::class,
+			'shortpixel'        => Shortpixel_Integration::class,
+			'redirection'       => Redirection_Integration::class,
+			'environments'      => Environments_Integration::class
 		] );
 	}
 
@@ -65,6 +66,7 @@ class Integrations {
 		require_once $path . 'pro/class-multilingual-integration.php';
 		require_once $path . 'pro/class-shortpixel-integration.php';
 		require_once $path . 'pro/class-complianz-integration.php';
+		require_once $path . 'pro/class-search-and-filter-integration.php';
 		require_once $path . 'pro/class-redirection-integration.php';
 		require_once $path . 'pro/class-environments-integration.php';
 	}
