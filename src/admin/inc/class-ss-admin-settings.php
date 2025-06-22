@@ -62,7 +62,7 @@ class Admin_Settings {
 			'simply-static-generate',
 			array( $this, 'render_settings' ),
 			SIMPLY_STATIC_URL . '/assets/simply-static-icon.svg',
-            apply_filters( 'ss_menu_position', 100 )
+			apply_filters( 'ss_menu_position', 100 )
 		);
 
 		$generate_suffix = add_submenu_page(
@@ -507,6 +507,20 @@ class Admin_Settings {
 				} else {
 					// Exclude Basic Auth fields from sanitize.
 					if ( $key === 'http_basic_auth_username' || $key === 'http_basic_auth_password' ) {
+						// If they are empty, also clear $_SERVER['PHP_AUTH_USER'] and $_SERVER['PHP_AUTH_PW']
+						if ( $key === 'http_basic_auth_username' && empty( $value ) ) {
+							if ( isset( $_SERVER['PHP_AUTH_USER'] ) ) {
+								unset( $_SERVER['PHP_AUTH_USER'] );
+							}
+						}
+
+						if ( $key === 'http_basic_auth_password' && empty( $value ) ) {
+							if ( isset( $_SERVER['PHP_AUTH_PW'] ) ) {
+								unset( $_SERVER['PHP_AUTH_PW'] );
+							}
+						}
+
+						// Continue with other options.
 						continue;
 					}
 					$options[ $key ] = sanitize_text_field( $value );
@@ -759,7 +773,7 @@ class Admin_Settings {
 		return json_encode( [
 			'status'  => 200,
 			'running' => Plugin::instance()->get_archive_creation_job()->is_running(),
-            'paused'  => Plugin::instance()->get_archive_creation_job()->is_paused(),
+			'paused'  => Plugin::instance()->get_archive_creation_job()->is_paused(),
 		] );
 	}
 
