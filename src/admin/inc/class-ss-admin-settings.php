@@ -138,19 +138,20 @@ class Admin_Settings {
 		$args = apply_filters(
 			'ss_settings_args',
 			array(
-				'screen'         => 'simplystatic-settings',
-				'version'        => SIMPLY_STATIC_VERSION,
-				'logo'           => SIMPLY_STATIC_URL . '/assets/simply-static-logo.svg',
-				'plan'           => 'free',
-				'initial'        => $initial,
-				'home'           => home_url(),
-				'home_path'      => get_home_path(),
-				'admin_email'    => get_bloginfo( 'admin_email' ),
-				'temp_files_dir' => $temp_dir,
-				'blog_id'        => get_current_blog_id(),
-				'need_upgrade'   => 'no',
-				'builds'         => array(),
-				'integrations'   => array_map( function ( $item ) {
+				'screen'          => 'simplystatic-settings',
+				'version'         => SIMPLY_STATIC_VERSION,
+				'logo'            => SIMPLY_STATIC_URL . '/assets/simply-static-logo.svg',
+				'plan'            => 'free',
+				'initial'         => $initial,
+				'home'            => home_url(),
+				'home_path'       => get_home_path(),
+				'admin_email'     => get_bloginfo( 'admin_email' ),
+				'temp_files_dir'  => $temp_dir,
+				'blog_id'         => get_current_blog_id(),
+				'need_upgrade'    => 'no',
+				'builds'          => array(),
+				'hidden_settings' => apply_filters( 'ss_hidden_settings', array() ),
+				'integrations'    => array_map( function ( $item ) {
 					$object = new $item;
 
 					return $object->js_object();
@@ -169,6 +170,10 @@ class Admin_Settings {
 					$args['connect'] = $data['plugin_data']['simply-static-pro']['connectivity_test'];
 				}
 			}
+		}
+
+		if ( defined( 'SSS_VERSION' ) ) {
+			$args['version_studio'] = SSS_VERSION;
 		}
 
 		// Multisite?
