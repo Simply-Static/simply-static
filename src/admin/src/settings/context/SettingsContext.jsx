@@ -248,6 +248,14 @@ function SettingsContextProvider(props) {
         return false;
     }
 
+    const isStudio = () => {
+        if (options.home.includes('static.studio') || options.home.includes('static1.studio') || options.home.includes('static2.studio')) {
+            return true;
+        }
+
+        return false;
+    }
+
     const integrationRequiresSaving = (integration) => {
         /**
          * @todo make it defined inside integration classes when more come.
@@ -324,7 +332,7 @@ function SettingsContextProvider(props) {
     }
 
     useInterval(() => {
-        checkIfRunning()
+        checkIfRunning();
     }, isRunning ? 5000 : null);
 
     useEffect(() => {
@@ -361,6 +369,7 @@ function SettingsContextProvider(props) {
                 blogId,
                 setBlogId,
                 isPro,
+                isStudio,
                 isIntegrationActive,
                 canRunIntegration,
                 maybeQueueIntegration,

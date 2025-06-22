@@ -25,7 +25,8 @@ function DeploymentSettings() {
         settingsSaved,
         setSettingsSaved,
         isRunning,
-        isPro
+        isPro,
+        isStudio
     } = useContext(SettingsContext);
     const [deliveryMethod, setDeliveryMethod] = useState('zip');
     const [clearDirectory, setClearDirectory] = useState(false);
@@ -105,7 +106,7 @@ function DeploymentSettings() {
         });
 
         // Maybe include studio.
-        if (options.home.includes('static.studio') || options.home.includes('static1.studio') || options.home.includes('static2.studio')) {
+        if (isStudio()) {
             deploymentOptions.push({label: __('Simply Static Studio', 'simply-static'), value: 'simply-static-studio'});
         }
 

@@ -45,6 +45,7 @@ function SettingsPage() {
         getSettings,
         passedChecks,
         isPro,
+        isStudio,
         canRunIntegration,
         showMobileNav,
         setShowMobileNav
@@ -164,7 +165,7 @@ function SettingsPage() {
     if (Object.keys(options.builds).length) {
         const builds = Object.keys(options.builds).map((id) => <option value={id}>{options.builds[id]}</option>);
 
-       // Sort builds alphabetically
+        // Sort builds alphabetically
         builds.sort((a, b) => {
             return a.props.children.localeCompare(b.props.children);
         });
@@ -196,13 +197,13 @@ function SettingsPage() {
                                     :
                                     <p className={"version-number"}>Version: <b>{options.version}</b></p>
                                 }
-                                <div className={`generate-container ${disabledButton ? 'generating' : '' }`}>
-                                    {! disabledButton && <Button onClick={() => {
+                                <div className={`generate-container ${disabledButton ? 'generating' : ''}`}>
+                                    {!disabledButton && <Button onClick={() => {
                                         setSelectedExportType('export');
                                         startExport();
                                     }}
-                                            disabled={disabledButton}
-                                            className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
+                                                                disabled={disabledButton}
+                                                                className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
                                     >
                                         {!disabledButton && [<Dashicon icon="update"/>,
                                             __('Generate', 'simply-static')
@@ -218,7 +219,7 @@ function SettingsPage() {
                                             showToolTip={true}
                                             className={"ss-generate-media-button"}
                                             onClick={() => pauseExport()}>
-                                            <Dashicon icon={"controls-pause"} />
+                                            <Dashicon icon={"controls-pause"}/>
                                         </Button>
                                         }
                                         {isPaused && <Button
@@ -226,16 +227,16 @@ function SettingsPage() {
                                             showToolTip={true}
                                             className={"ss-generate-media-button"}
                                             onClick={() => resumeExport()}>
-                                            <Dashicon icon={"controls-play"} />
+                                            <Dashicon icon={"controls-play"}/>
                                         </Button>
                                         }
                                         <Button
-                                            onClick={() =>  cancelExport()}
+                                            onClick={() => cancelExport()}
                                             label={__('Cancel', 'simply-static')}
                                             className={"ss-generate-cancel-button"}
                                             showToolTip={true}
                                         >
-                                            <Dashicon icon={'no'} />
+                                            <Dashicon icon={'no'}/>
                                         </Button>
                                     </>}
 
@@ -260,7 +261,7 @@ function SettingsPage() {
                                     <img alt="Logo"
                                          src={options.logo}/>
                                 </div>
-                                {'pro' === options.plan && isPro() ?
+                                {'pro' === options.plan && isPro() && !isStudio() ?
                                     <p className={"version-number"}>
                                         Free: <b>{options.version}</b><br></br>
                                         Pro: <b>{options.version_pro}</b>
@@ -268,7 +269,16 @@ function SettingsPage() {
                                     :
                                     <p className={"version-number"}>Version: <b>{options.version}</b></p>
                                 }
-                                <div className={`generate-container ${disabledButton ? 'generating' : '' }`}>
+                                {isStudio() ?
+                                    <p className={"version-number"}>
+                                        Free: <b>{options.version}</b><br></br>
+                                        Pro: <b>{options.version_pro}</b><br></br>
+                                        Studio: <b>{options.version_studio}</b>
+                                    </p>
+                                    :
+                                    <p className={"version-number"}>Version: <b>{options.version}</b></p>
+                                }
+                                <div className={`generate-container ${disabledButton ? 'generating' : ''}`}>
                                     <SelectControl
                                         className={'generate-type'}
                                         value={selectedExportType}
@@ -294,8 +304,8 @@ function SettingsPage() {
                                         {!disabledButton && <Button onClick={() => {
                                             startExport();
                                         }}
-                                                disabled={disabledButton}
-                                                className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
+                                                                    disabled={disabledButton}
+                                                                    className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
                                         >
                                             {!disabledButton && [<Dashicon icon="update"/>,
                                                 __('Generate', 'simply-static')
@@ -308,7 +318,7 @@ function SettingsPage() {
                                                 className={"ss-generate-media-button"}
                                                 showToolTip={true}
                                                 onClick={() => pauseExport()}>
-                                                <Dashicon icon={"controls-pause"} />
+                                                <Dashicon icon={"controls-pause"}/>
                                             </Button>
                                             }
                                             {isPaused && <Button
@@ -316,16 +326,16 @@ function SettingsPage() {
                                                 className={"ss-generate-media-button"}
                                                 showToolTip={true}
                                                 onClick={() => resumeExport()}>
-                                                <Dashicon icon={"controls-play"} />
+                                                <Dashicon icon={"controls-play"}/>
                                             </Button>
                                             }
                                             <Button
-                                                onClick={() =>  cancelExport()}
+                                                onClick={() => cancelExport()}
                                                 label={__('Cancel', 'simply-static')}
                                                 className={"ss-generate-cancel-button"}
                                                 showToolTip={true}
                                             >
-                                                <Dashicon icon={'no'} />
+                                                <Dashicon icon={'no'}/>
                                             </Button>
                                         </>}
                                     </div>
@@ -398,7 +408,7 @@ function SettingsPage() {
                                                      path="/general">
                                         <Dashicon icon="admin-generic"/> {__('General', 'simply-static')}
                                     </NavigatorButton>
-                                    {!options.is_network &&
+                                    {!options.is_network && !options.hidden_settings.includes('deployment') &&
                                         <NavigatorButton onClick={() => {
                                             setActiveItem('/deployment')
                                             setShowMobileNav(!showMobileNav);

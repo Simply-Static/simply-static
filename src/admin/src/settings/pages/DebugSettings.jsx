@@ -15,7 +15,15 @@ import HelperVideo from "../components/HelperVideo";
 const {__} = wp.i18n;
 
 function DebugSettings() {
-    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved, isPro} = useContext(SettingsContext);
+    const {
+        settings,
+        updateSetting,
+        saveSettings,
+        settingsSaved,
+        setSettingsSaved,
+        isPro,
+        isStudio
+    } = useContext(SettingsContext);
     const [activateDebugLog, setActivateDebugLog] = useState(false);
     const [useServerCron, setUserServerCron] = useState(false);
 
@@ -100,23 +108,25 @@ function DebugSettings() {
             </CardBody>
         </Card>
         <Spacer margin={5}/>
-        <Card>
-            <CardHeader>
-                <b>{__('Temporary Files', 'simply-static')}</b>
-            </CardHeader>
-            <CardBody>
-                <TextControl
-                    label={__('Temporary Files Directory', 'simply-static')}
-                    type={"text"}
-                    placeholder={options.temp_files_dir}
-                    help={__('Optionally specify the directory to save your temporary files. This directory must exist and be writeable.', 'simply-static')}
-                    value={settings.temp_files_dir}
-                    onChange={(temp_dir) => {
-                        updateSetting('temp_files_dir', temp_dir);
-                    }}
-                />
-            </CardBody>
-        </Card>
+        {!isStudio() &&
+            <Card>
+                <CardHeader>
+                    <b>{__('Temporary Files', 'simply-static')}</b>
+                </CardHeader>
+                <CardBody>
+                    <TextControl
+                        label={__('Temporary Files Directory', 'simply-static')}
+                        type={"text"}
+                        placeholder={options.temp_files_dir}
+                        help={__('Optionally specify the directory to save your temporary files. This directory must exist and be writeable.', 'simply-static')}
+                        value={settings.temp_files_dir}
+                        onChange={(temp_dir) => {
+                            updateSetting('temp_files_dir', temp_dir);
+                        }}
+                    />
+                </CardBody>
+            </Card>
+        }
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
@@ -135,24 +145,26 @@ function DebugSettings() {
             </CardBody>
         </Card>
         <Spacer margin={5}/>
-        <Card>
-            <CardHeader>
-                <b>{__('Proxy Setup', 'simply-static')}</b>
-            </CardHeader>
-            <CardBody>
-                <TextControl
-                    label={__('Origin URL', 'simply-static')}
-                    type={"url"}
-                    help={__('If the URL of your WordPress installation differs from the public-facing URL (Proxy Setup), add the public URL here.', 'simply-static')}
-                    placeholder={options.home}
-                    autoComplete={"off"}
-                    value={settings.origin_url}
-                    onChange={(origin_url) => {
-                        updateSetting('origin_url', origin_url);
-                    }}
-                />
-            </CardBody>
-        </Card>
+        {!isStudio() &&
+            <Card>
+                <CardHeader>
+                    <b>{__('Proxy Setup', 'simply-static')}</b>
+                </CardHeader>
+                <CardBody>
+                    <TextControl
+                        label={__('Origin URL', 'simply-static')}
+                        type={"url"}
+                        help={__('If the URL of your WordPress installation differs from the public-facing URL (Proxy Setup), add the public URL here.', 'simply-static')}
+                        placeholder={options.home}
+                        autoComplete={"off"}
+                        value={settings.origin_url}
+                        onChange={(origin_url) => {
+                            updateSetting('origin_url', origin_url);
+                        }}
+                    />
+                </CardBody>
+            </Card>
+        }
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
@@ -171,22 +183,24 @@ function DebugSettings() {
             </CardBody>
         </Card>
         <Spacer margin={5}/>
-        <Card>
-            <CardHeader>
-                <b>{__('Cron', 'simply-static')}</b>
-            </CardHeader>
-            <CardBody>
-                <ToggleControl
-                    label={__('Use server-side cron job', 'simply-static')}
-                    help={__('Enable this if you use a server-side cron job instead of the default WP-Cron.', 'simply-static')}
-                    checked={useServerCron}
-                    onChange={(value) => {
-                        setUserServerCron(value);
-                        updateSetting('server_cron', value);
-                    }}
-                />
-            </CardBody>
-        </Card>
+        {!isStudio() &&
+            <Card>
+                <CardHeader>
+                    <b>{__('Cron', 'simply-static')}</b>
+                </CardHeader>
+                <CardBody>
+                    <ToggleControl
+                        label={__('Use server-side cron job', 'simply-static')}
+                        help={__('Enable this if you use a server-side cron job instead of the default WP-Cron.', 'simply-static')}
+                        checked={useServerCron}
+                        onChange={(value) => {
+                            setUserServerCron(value);
+                            updateSetting('server_cron', value);
+                        }}
+                    />
+                </CardBody>
+            </Card>
+        }
         <Spacer margin={5}/>
         {settingsSaved &&
             <>
