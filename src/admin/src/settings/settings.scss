@@ -37,6 +37,11 @@ toplevel_page_simply-static img {
     max-width: 850px;
   }
 
+  a.components-external-link {
+    display: block;
+    text-align: right;
+  }
+
   .save-settings {
     position: sticky;
     bottom: 0;

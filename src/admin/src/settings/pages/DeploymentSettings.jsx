@@ -43,6 +43,7 @@ function DeploymentSettings() {
     const [deploymentOptions] = useState([
         {label: __('ZIP Archive', 'simply-static'), value: 'zip'},
         {label: __('Local Directory', 'simply-static'), value: 'local'},
+        {label: __('Static Studio', 'simply-static'), value: 'simply-static-studio'},
         {label: __('SFTP', 'simply-static'), value: 'sftp'},
         {label: __('GitHub', 'simply-static'), value: 'github'},
         {label: __('AWS S3', 'simply-static'), value: 'aws-s3'},
@@ -105,11 +106,6 @@ function DeploymentSettings() {
             setPages(pages);
         });
 
-        // Maybe include studio.
-        if (isStudio()) {
-            deploymentOptions.push({label: __('Simply Static Studio', 'simply-static'), value: 'simply-static-studio'});
-        }
-
     }, [settings]);
 
     return (<div className={"inner-settings"}>
@@ -135,11 +131,17 @@ function DeploymentSettings() {
         {deliveryMethod === 'simply-static-studio' &&
             <Card>
                 <CardHeader>
-                    <b>{__('Simply Static Studio', 'simply-static')}</b>
+                    <b>{__('Static Studio', 'simply-static')}</b>
                 </CardHeader>
                 <CardBody>
                     <p>
-                        {__('The static site hosting platform for your Static Studio powered WordPress websites.', 'simply-static')}
+                        {__('The all-in-one Static WordPress cloud-hosting platform.', 'simply-static')}
+                    </p>
+                    <p>
+                        {__('Enjoy secure WordPress, the fastest exports, and the best-performing static site hosting in one package.', 'simply-static')}
+                    </p>
+                    <p>
+                    <a class={"button button-primary"} href={"https://simplystatic.com/simply-static-studio/"} target={"_blank"}>Check out Static Studio</a>
                     </p>
                 </CardBody>
             </Card>

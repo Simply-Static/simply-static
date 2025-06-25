@@ -84,7 +84,8 @@ class Admin_Settings {
 				__( 'Settings', 'simply-static' ),
 				apply_filters( 'ss_user_capability', 'manage_options', 'settings' ),
 				'simply-static-settings',
-				array( $this, 'render_settings' )
+				array( $this, 'render_settings' ),
+				5
 			);
 
 			add_action( "admin_print_scripts-{$settings_suffix}", array( $this, 'add_settings_scripts' ) );
@@ -98,10 +99,38 @@ class Admin_Settings {
 				$this->failed_tests > 0 ? __( 'Diagnostics', 'simply-static' ) . ' ' . wp_kses_post( $notifications ) : __( 'Diagnostics', 'simply-static' ),
 				apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ),
 				'simply-static-diagnostics',
-				array( $this, 'render_settings' )
+				array( $this, 'render_settings' ),
+				10
 			);
 
 			add_action( "admin_print_scripts-{$diagnostics_suffix}", array( $this, 'add_settings_scripts' ) );
+		}
+
+		if ( ! defined( 'SIMPLY_STATIC_PRO_VERSION' ) ) {
+			// Add Simply Static Studio submenu that links to external URL
+			add_submenu_page(
+				'simply-static-generate',
+				__( 'Static Studio', 'simply-static' ),
+				__( 'Static Studio<i class="dashicons dashicons-external" style="font-size:12px;vertical-align:-2px;height:10px;"></i>', 'simply-static' ),
+				apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ),
+				'simply-static-studio',
+				function () {
+					exit;
+				},
+				100
+			);
+
+			// Add JavaScript to open the Studio link in a new tab
+			add_action( 'admin_footer', function () {
+				?>
+                <script type="text/javascript">
+                    jQuery(document).ready(function ($) {
+                        // Find the Simply Static Studio menu item and modify its behavior
+                        $('a[href="admin.php?page=simply-static-studio"]').attr('href', 'https://simplystatic.com/simply-static-studio/').attr('target', '_blank');
+                    });
+                </script>
+				<?php
+			} );
 		}
 	}
 
