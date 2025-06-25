@@ -47,11 +47,19 @@ Develop your site locally and only push the static exported website on a server.
 
 I highly recommend not to use another tool for local development if you are not a programmer as in most cases manual package installation is required.
 
-= Simply Static Studio =
+= Static Studio =
 
-We created a new service called Simply Static Studio that allows you to create a static website without any technical knowledge.
+Static Studio is our all-in-one Static WordPress cloud hosting solution - here is why you want it:
 
-We are currently preparing for early-access - if you want to participate and give feedback, join today: [Simply Static Studio - Early Access](https://simplystatic.com/simply-static-studio/#early-access)
+* Secure WordPress hosting protected from public access (Firewall, Basic Auth, and WebAssembly)
+* High-performance static site hosting powered by BunnyCDN Enterprise
+* Ultra-fast exports because of our optimized server stack (NGINX, auto-scalable workers)
+* Backups, SSL, unlimited file storage, and bandwidth included
+* Devs: WP-CLI, SSH, SFT,P and hands-on code support
+
+$19/month/site - no additional charges.
+
+[Start your 7-day free trial](https://simplystatic.com/simply-static-studio/)
 
 == Simply Static Pro ==
 
@@ -257,6 +265,7 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 
 * clear PHP_AUTH_USER and PHP_AUTH_PW on disabling/clearing basic auth options
 * improved version output in admin UI
+* fixed position for pro recommendation (top-right instead of center of the card header)
 
 = 3.3.1 =
 
