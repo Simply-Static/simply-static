@@ -260,7 +260,7 @@ function GeneralSettings() {
                         </>
                     }
                     help={
-                        addFeeds
+                        addRestApi
                             ? __('Include all Rest API endpoints as JSON files.', 'simply-static')
                             : __('Don\'t include Rest API endpoints as JSON files.', 'simply-static')
                     }
