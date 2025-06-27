@@ -527,7 +527,9 @@ class Admin_Settings {
 				'search_excludable',
 				'iframe_urls',
 				'iframe_custom_css',
-				'whitelist_plugins'
+				'whitelist_plugins',
+                'minify_css_exclude',
+                'minify_js_exclude'
 			];
 
 			$array_fields = [ 'integrations' ];
