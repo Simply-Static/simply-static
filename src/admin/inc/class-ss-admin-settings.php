@@ -180,6 +180,7 @@ class Admin_Settings {
 				'need_upgrade'    => 'no',
 				'builds'          => array(),
 				'hidden_settings' => apply_filters( 'ss_hidden_settings', array() ),
+				'last_export_end' => $options->get( 'archive_end_time' ),
 				'integrations'    => array_map( function ( $item ) {
 					$object = new $item;
 
@@ -528,8 +529,8 @@ class Admin_Settings {
 				'iframe_urls',
 				'iframe_custom_css',
 				'whitelist_plugins',
-                'minify_css_exclude',
-                'minify_js_exclude'
+				'minify_css_exclude',
+				'minify_js_exclude'
 			];
 
 			$array_fields = [ 'integrations' ];

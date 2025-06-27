@@ -99,6 +99,11 @@ function SettingsPage() {
             setSelectableSites(sites);
         }
 
+        // Maybe set to update.
+        if (options.last_export_end) {
+            setSelectedExportType('update');
+        }
+
     }, [options, isRunning, isPaused]);
 
     const startExport = () => {
@@ -293,10 +298,10 @@ function SettingsPage() {
                                         {'zip' !== settings.delivery_method && 'tiiny' !== settings.delivery_method &&
                                             <>
                                                 {'pro' === options.plan && isPro() ?
-                                                    <option value="update">{__('Update', 'simply-static')}</option>
+                                                    <option value="update">{__('Export Changes', 'simply-static')}</option>
                                                     :
                                                     <option disabled
-                                                            value="update">{__('Update (Requires Simply Static Pro)', 'simply-static')}</option>
+                                                            value="update">{__('Export Changes (Requires Simply Static Pro)', 'simply-static')}</option>
                                                 }
                                             </>
                                         }
@@ -489,10 +494,11 @@ function SettingsPage() {
                                     <Button href="https://simplystatic.com/tutorials/" target="_blank">
                                         <Dashicon icon="edit"/> {__('Tutorials', 'simply-static')}
                                     </Button>
-                                    { ! isStudio() &&
+                                    {!isStudio() &&
                                         <>
                                             <Button className={"ss-get-pro"} isPrimary
-                                                    href="https://simplystatic.com/simply-static-studio/" target="_blank">
+                                                    href="https://simplystatic.com/simply-static-studio/"
+                                                    target="_blank">
                                                 Try Simply Static Studio
                                             </Button>
                                         </>
