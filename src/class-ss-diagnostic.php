@@ -213,7 +213,9 @@ class Diagnostic {
 	}
 
 	public function is_wp_cron_running() {
-		if ( ! defined( 'DISABLE_WP_CRON' ) || DISABLE_WP_CRON !== true || defined( 'SS_CRON' ) ) {
+		$server_cron = $this->options->get( 'server_cron' );
+
+		if ( ! defined( 'DISABLE_WP_CRON' ) || DISABLE_WP_CRON !== true || defined( 'SS_CRON' ) || $server_cron ) {
 			$is_cron = true;
 		} else {
 			$is_cron = false;
@@ -515,17 +517,17 @@ class Diagnostic {
 
 		switch ( $server_type ) {
 			case ( strpos( $server_type, 'Apache' ) !== false ) :
-				if ( isset( $_SERVER['PHP_AUTH_USER'] ) ) {
+				if ( isset( $_SERVER['PHP_AUTH_USER'] ) && ! empty( $_SERVER['PHP_AUTH_USER'] ) ) {
 					$basic_auth_on = true;
 				}
 				break;
 			case ( strpos( $server_type, 'nginx' ) !== false ) :
-				if ( isset( $_SERVER['REMOTE_USER'] ) ) {
+				if ( isset( $_SERVER['REMOTE_USER'] ) && ! empty( $_SERVER['REMOTE_USER'] ) ) {
 					$basic_auth_on = true;
 				}
 				break;
 			case ( strpos( $server_type, 'IIS' ) !== false ) :
-				if ( isset( $_SERVER['AUTH_USER'] ) ) {
+				if ( isset( $_SERVER['AUTH_USER'] ) && ! empty( $_SERVER['AUTH_USER'] ) ) {
 					$basic_auth_on = true;
 				}
 				break;
