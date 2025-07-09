@@ -200,8 +200,13 @@ class Setup_Task extends Task {
 	 * @return true|\WP_Error True on success, WP_Error otherwise.
 	 */
 	public function delete_temp_static_files() {
-		$options = Options::instance();
-		$dir     = $options->get( 'temp_files_dir' );
+		$options           = Options::instance();
+		$dir               = $options->get( 'temp_files_dir' );
+		$delete_temp_files = apply_filters( 'ss_delete_temp_files', true );
+
+		if ( ! $delete_temp_files ) {
+			return false;
+		}
 
 		if ( empty( $dir ) ) {
 			$upload_dir = wp_upload_dir();
