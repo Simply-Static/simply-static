@@ -264,6 +264,8 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 = 3.3.2 =
 
 * fixed typo in search settings
+* fixed AIO SEO sitemap parsing
+* improved srcset extraction
 
 = 3.3.1.2 =
 
