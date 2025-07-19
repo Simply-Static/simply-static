@@ -450,11 +450,19 @@ class Url_Extractor {
 	 */
 	private function extract_urls_from_srcset( $srcset ) {
 		$extracted_urls = array();
-
+		
 		foreach ( explode( ',', $srcset ) as $url_and_descriptor ) {
 			// remove the (optional) descriptor
 			// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-srcset
-			$extracted_urls[] = trim( preg_replace( '/[\d\.]+[xw]\s*$/', '', $url_and_descriptor ) );
+			$url_without_descriptor = trim( preg_replace( '/[\d\.]+[xw]\s*$/', '', $url_and_descriptor ) );
+			// Check if the URL consists of only numbers - this fixes issue where SS detects srcset descriptor such as 100 150w as a URL which
+			// is then replaced with relative URL for current post, this creates 5-10 additional "URLs" to be exported per article
+			if ( preg_match( '/^\d+$/', trim( $url_without_descriptor ) ) ) {
+				// If it does, skip it
+				continue;
+			}
+
+			$extracted_urls[] = $url_without_descriptor;
 		}
 
 		return $extracted_urls;
