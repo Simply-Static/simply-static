@@ -3,7 +3,6 @@
 namespace Simply_Static;
 
 use Exception;
-use voku\helper\HtmlDomParser;
 use function WPML\FP\apply;
 
 // Exit if accessed directly
@@ -308,25 +307,25 @@ class Url_Extractor {
 	/**
 	 * Extract URLs and convert URLs to absolute URLs for each tag
 	 *
-	 * The tag is passed by reference, so it's updated directly and nothing is
-	 * returned from this function.
-	 *
-	 * @param simple_html_dom_node $tag SHDP dom node
+	 * @param WP_HTML_Tag_Processor $processor WordPress HTML Tag Processor
 	 * @param string $tag_name name of the tag
 	 * @param array $attributes array of attribute notes
 	 *
 	 * @return void
 	 */
-	private function extract_urls_and_update_tag( &$tag, $tag_name, $attributes ) {
-		if ( isset( $tag->style ) ) {
-			$updated_css = $this->extract_and_replace_urls_in_css( $tag->style );
-			$tag->style  = $updated_css;
+	private function extract_urls_and_update_tag( $processor, $tag_name, $attributes ) {
+		// Handle style attribute if present
+		$style_attr = $processor->get_attribute( 'style' );
+		if ( $style_attr ) {
+			$updated_css = $this->extract_and_replace_urls_in_css( $style_attr );
+			$processor->set_attribute( 'style', $updated_css );
 		}
 
 		foreach ( $attributes as $attribute_name ) {
-			if ( isset( $tag->$attribute_name ) ) {
-				$extracted_urls  = array();
-				$attribute_value = $tag->$attribute_name;
+			$attribute_value = $processor->get_attribute( $attribute_name );
+
+			if ( $attribute_value ) {
+				$extracted_urls = array();
 
 				// we need to verify that the meta tag is a URL.
 				if ( 'meta' === $tag_name ) {
@@ -357,10 +356,9 @@ class Url_Extractor {
 						}
 					}
 				}
-				$tag->$attribute_name = $attribute_value;
+				$processor->set_attribute( $attribute_name, $attribute_value );
 			}
 		}
-
 	}
 
 	/**
@@ -376,69 +374,269 @@ class Url_Extractor {
 		$html_string = $this->get_body();
 		$match_tags  = apply_filters( 'ss_match_tags', self::$match_tags );
 
-		$dom = HtmlDomParser::str_get_html( $html_string );
+		// Check if WP_HTML_Tag_Processor class exists (WordPress 6.2+)
+		if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+			// Log a notice that we're using a fallback
+			error_log( 'Simply Static: WP_HTML_Tag_Processor not available. Using fallback method for HTML processing.' );
 
-		// return the original html string if dom is blank or boolean (unparseable)
-		if ( $dom == '' || is_bool( $dom ) ) {
-			return $html_string;
-		} else {
-			// handle tags with attributes
+			// For WordPress versions before 6.2, we'll use a simple regex-based approach
+			// This won't be as robust as the HTML API but should handle basic cases
+
+			// Process URLs in HTML attributes
 			foreach ( $match_tags as $tag_name => $attributes ) {
-				$tags = $dom->find( $tag_name );
-
-				foreach ( $tags as $tag ) {
-					$this->extract_urls_and_update_tag( $tag, $tag_name, $attributes );
+				foreach ( $attributes as $attribute ) {
+					$html_string = $this->regex_replace_urls_in_html( $html_string, $tag_name, $attribute );
 				}
 			}
 
-			// handle 'style' tag differently, since we need to parse the content.
-			$parse_inline_style = apply_filters( 'ss_parse_inline_style', true );
+			// Process style tags
+			if ( apply_filters( 'ss_parse_inline_style', true ) ) {
+				// Process regular style tags
+				$html_string = preg_replace_callback(
+					'/<style[^>]*>(.*?)<\/style>/is',
+					function( $matches ) {
+						return '<style>' . $this->extract_and_replace_urls_in_css( $matches[1] ) . '</style>';
+					},
+					$html_string
+				);
 
-			if ( $parse_inline_style ) {
-				$style_tags = $dom->find( 'style' );
-
-				foreach ( $style_tags as $tag ) {
-					// Check if valid content exists.
-					try {
-						$updated_css        = $this->extract_and_replace_urls_in_css( $tag->innerhtmlKeep );
-						$tag->innerhtmlKeep = $updated_css;
-					} catch ( Exception $e ) {
-						// If not skip the result.
-						continue;
-					}
-				}
+				// Process style tags with class="wp-fonts-local" separately
+				$html_string = preg_replace_callback(
+					'/<style[^>]*class=[\'"]wp-fonts-local[\'"][^>]*>(.*?)<\/style>/is',
+					function( $matches ) {
+						return '<style class="wp-fonts-local">' . $this->extract_and_replace_urls_in_css( $matches[1] ) . '</style>';
+					},
+					$html_string
+				);
 			}
 
-			// handle 'script' tag differently, since we need to parse the content.
-			$parse_inline_script = apply_filters( 'ss_parse_inline_script', true );
-
-			if ( $parse_inline_script ) {
-				$script_tags = $dom->find( 'script' );
-
-				foreach ( $script_tags as $tag ) {
-					// Check if valid content exists.
-					try {
-						$updated_script     = $this->extract_and_replace_urls_in_script( $tag->innerhtmlKeep );
-						$tag->innerhtmlKeep = $updated_script;
-						$this->extract_and_replace_urls_in_script_inner_text( $tag );
-					} catch ( Exception $e ) {
-						// If not skip the result.
-						continue;
-					}
-				}
+			// Process script tags
+			if ( apply_filters( 'ss_parse_inline_script', true ) ) {
+				$html_string = preg_replace_callback(
+					'/<script[^>]*>(.*?)<\/script>/is',
+					function( $matches ) {
+						$updated_script = $this->extract_and_replace_urls_in_script( $matches[1] );
+						return '<script>' . $this->process_script_content( $updated_script ) . '</script>';
+					},
+					$html_string
+				);
 			}
 
-			do_action(
-				'ss_after_extract_and_replace_urls_in_html',
-				$dom,
-				$this
-			);
-
-			// Further manipulate Dom?
-			$dom = apply_filters( 'ss_dom_before_save', $dom, $this->static_page->url );
-
-			return $dom->save();
+			return $html_string;
 		}
+
+		// Create a new processor for the HTML content
+		$processor = new \WP_HTML_Tag_Processor( $html_string );
+		$updated_html = $html_string;
+
+		// Process tags with attributes
+		foreach ( $match_tags as $tag_name => $attributes ) {
+			// Reset the processor to the beginning of the document for each tag type
+			$processor = new \WP_HTML_Tag_Processor( $updated_html );
+
+			// Find all instances of the current tag
+			while ( $processor->next_tag( $tag_name ) ) {
+				// Process the tag and its attributes
+				$this->extract_urls_and_update_tag( $processor, $tag_name, $attributes );
+			}
+
+			// Get the updated HTML after processing this tag type
+			$updated_html = $processor->get_updated_html();
+		}
+
+		// Handle 'style' tag differently, since we need to parse the content
+		$parse_inline_style = apply_filters( 'ss_parse_inline_style', true );
+
+		if ( $parse_inline_style ) {
+			$processor = new \WP_HTML_Tag_Processor( $updated_html );
+
+			while ( $processor->next_tag( 'style' ) ) {
+				// We need to extract the content between the style tags
+				// This is a limitation of WP_HTML_Tag_Processor as it doesn't provide direct access to tag content
+				// We'll use a regex approach to extract and update the content
+				$style_content = $this->extract_tag_content( $updated_html, 'style', $processor );
+
+				if ( $style_content ) {
+					try {
+						$updated_css = $this->extract_and_replace_urls_in_css( $style_content );
+						$updated_html = $this->replace_tag_content( $updated_html, 'style', $style_content, $updated_css );
+					} catch ( Exception $e ) {
+						// If not skip the result
+						continue;
+					}
+				}
+			}
+
+			// Process style tags with class="wp-fonts-local" separately
+			// These contain @font-face declarations that need special handling
+			$processor = new \WP_HTML_Tag_Processor( $updated_html );
+
+			while ( $processor->next_tag( array( 'tag_name' => 'style', 'class_name' => 'wp-fonts-local' ) ) ) {
+				$style_content = $this->extract_tag_content( $updated_html, 'style', $processor );
+
+				if ( $style_content ) {
+					try {
+						// Process the CSS content to replace URLs in @font-face declarations
+						$updated_css = $this->extract_and_replace_urls_in_css( $style_content );
+						$updated_html = $this->replace_tag_content( $updated_html, 'style', $style_content, $updated_css );
+					} catch ( Exception $e ) {
+						// If not skip the result
+						continue;
+					}
+				}
+			}
+		}
+
+		// Handle 'script' tag differently, since we need to parse the content
+		$parse_inline_script = apply_filters( 'ss_parse_inline_script', true );
+
+		if ( $parse_inline_script ) {
+			$processor = new \WP_HTML_Tag_Processor( $updated_html );
+
+			while ( $processor->next_tag( 'script' ) ) {
+				// Extract script content
+				$script_content = $this->extract_tag_content( $updated_html, 'script', $processor );
+
+				if ( $script_content ) {
+					try {
+						// First process with extract_and_replace_urls_in_script
+						$updated_script = $this->extract_and_replace_urls_in_script( $script_content );
+						// Then process with process_script_content for additional URL replacements
+						$updated_script = $this->process_script_content( $updated_script );
+						$updated_html = $this->replace_tag_content( $updated_html, 'script', $script_content, $updated_script );
+					} catch ( Exception $e ) {
+						// If not skip the result
+						continue;
+					}
+				}
+			}
+		}
+
+		do_action(
+			'ss_after_extract_and_replace_urls_in_html',
+			$updated_html,
+			$this
+		);
+
+		// Further manipulate HTML?
+		$updated_html = apply_filters( 'ss_dom_before_save', $updated_html, $this->static_page->url );
+
+		return $updated_html;
+	}
+
+	/**
+	 * Extract content between opening and closing tags
+	 *
+	 * @param string $html The HTML content
+	 * @param string $tag_name The tag name
+	 * @param \WP_HTML_Tag_Processor $processor The processor at the position of the tag
+	 * @return string|null The content between tags or null if not found
+	 */
+	private function extract_tag_content( $html, $tag_name, $processor ) {
+		// Get the position of the current tag
+		$tag_pos = $processor->get_tag();
+
+		if ( $tag_pos === null ) {
+			return null;
+		}
+
+		// Use regex to extract the content between the opening and closing tags
+		$pattern = "/<{$tag_name}[^>]*>(.*?)<\/{$tag_name}>/is";
+		if ( preg_match_all( $pattern, $html, $matches ) ) {
+			// Return the content of the current tag
+			// This is a simplification and might not work perfectly for nested tags
+			return $matches[1][0] ?? null;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Replace content between opening and closing tags
+	 *
+	 * @param string $html The HTML content
+	 * @param string $tag_name The tag name
+	 * @param string $old_content The old content to replace
+	 * @param string $new_content The new content
+	 * @return string The updated HTML
+	 */
+	private function replace_tag_content( $html, $tag_name, $old_content, $new_content ) {
+		// Escape special characters for regex
+		$old_content_escaped = preg_quote( $old_content, '/' );
+
+		// Replace the content between the tags
+		$pattern = "/(<{$tag_name}[^>]*>)$old_content_escaped(<\/{$tag_name}>)/is";
+		return preg_replace( $pattern, "$1$new_content$2", $html );
+	}
+
+	/**
+	 * Replace URLs in HTML attributes using regex
+	 * 
+	 * This is a fallback method for WordPress versions before 6.2
+	 * that don't have the WP_HTML_Tag_Processor class.
+	 *
+	 * @param string $html The HTML content
+	 * @param string $tag_name The tag name
+	 * @param string $attribute The attribute name
+	 * @return string The updated HTML
+	 */
+	private function regex_replace_urls_in_html( $html, $tag_name, $attribute ) {
+		// Pattern to match the tag with the specified attribute
+		$pattern = "/<{$tag_name}([^>]*?{$attribute}=['\"]([^'\"]*?)['\"][^>]*?)>/is";
+
+		return preg_replace_callback(
+			$pattern,
+			function( $matches ) use ( $attribute, $tag_name ) {
+				$tag_attrs = $matches[1];
+				$attr_value = $matches[2];
+
+				// Skip empty values
+				if ( empty( $attr_value ) ) {
+					return $matches[0];
+				}
+
+				$extracted_urls = array();
+
+				// Handle srcset differently
+				if ( $attribute === 'srcset' || $attribute === 'data-srcset' ) {
+					$extracted_urls = $this->extract_urls_from_srcset( $attr_value );
+				} else if ( $tag_name === 'meta' ) {
+					// Verify meta tag URL
+					if ( filter_var( $attr_value, FILTER_VALIDATE_URL ) ) {
+						$extracted_urls[] = $attr_value;
+					}
+				} else {
+					$extracted_urls[] = $attr_value;
+				}
+
+				$strict_url_validation = apply_filters( 'simply_static_strict_url_validation', false );
+				$updated_attr_value = $attr_value;
+
+				foreach ( $extracted_urls as $extracted_url ) {
+					if ( $strict_url_validation && ! filter_var( $extracted_url, FILTER_VALIDATE_URL ) ) {
+						continue;
+					}
+
+					if ( $extracted_url !== '' ) {
+						$updated_extracted_url = $this->add_to_extracted_urls( $extracted_url );
+
+						if ( ! is_null( $updated_extracted_url ) ) {
+							$updated_attr_value = str_replace( $extracted_url, $updated_extracted_url, $updated_attr_value );
+						}
+					}
+				}
+
+				// Replace the attribute value in the tag
+				$updated_tag = str_replace(
+					"{$attribute}=\"{$attr_value}\"",
+					"{$attribute}=\"{$updated_attr_value}\"",
+					$matches[0]
+				);
+
+				return $updated_tag;
+			},
+			$html
+		);
 	}
 
 	/**
@@ -486,7 +684,7 @@ class Url_Extractor {
 	private function extract_and_replace_urls_in_css( $text ) {
 		$text     = html_entity_decode( $text );
 		$patterns = array(
-			"/url\(\s*[\"']?([^)\"']+)/", // url()
+			"/url\(\s*[\"']?([^\"')]+)[\"']?\s*\)/", // url() with optional quotes
 			"/@import\s+[\"']([^\"']+)/"
 		); // @import w/o url()
 
@@ -512,41 +710,43 @@ class Url_Extractor {
 	}
 
 	/**
-	 * @param \ $tag
+	 * Process script content to replace URLs
 	 *
-	 * @return array|string|string[]|null
+	 * @param string $script_content The script content
+	 * @param string $convert_to The URL to convert to
+	 *
+	 * @return string The processed script content
 	 */
-	private function extract_and_replace_urls_in_script_inner_text( $tag ) {
-
+	private function process_script_content( $script_content, $convert_to = null ) {
 		$regex = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i';
 
-		switch ( $this->options->get( 'destination_url_type' ) ) {
-			case 'absolute':
-				$convert_to = $this->options->get_destination_url();
-				break;
-			case 'relative':
-				// Adding \/? before end of regex pattern to convert url.com/ & url.com to relative path, ex. /path/.
-				$regex      = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '\/?/i';
-				$convert_to = $this->options->get( 'relative_path' );
-				break;
-			default:
-				// Offline mode.
-				// Adding \/? before end of regex pattern to convert url.com/ & url.com to relative path, ex. /path/.
-				$regex      = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '\/?/i';
-				$convert_to = '/';
+		if ( $convert_to === null ) {
+			switch ( $this->options->get( 'destination_url_type' ) ) {
+				case 'absolute':
+					$convert_to = $this->options->get_destination_url();
+					break;
+				case 'relative':
+					// Adding \/? before end of regex pattern to convert url.com/ & url.com to relative path, ex. /path/.
+					$regex      = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '\/?/i';
+					$convert_to = $this->options->get( 'relative_path' );
+					break;
+				default:
+					// Offline mode.
+					// Adding \/? before end of regex pattern to convert url.com/ & url.com to relative path, ex. /path/.
+					$regex      = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '\/?/i';
+					$convert_to = '/';
+			}
 		}
 
-		if ( $this->is_json( $tag->innerhtmlKeep ) ) {
-			$decoded_text = html_entity_decode( $tag->innerhtmlKeep, ENT_NOQUOTES );
+		if ( $this->is_json( $script_content ) ) {
+			$decoded_text = html_entity_decode( $script_content, ENT_NOQUOTES );
 		} else {
-			$decoded_text = html_entity_decode( $tag->innerhtmlKeep );
+			$decoded_text = html_entity_decode( $script_content );
 		}
 
-		$decoded_text = apply_filters( 'simply_static_decoded_text_in_script', $decoded_text, $this->static_page, $convert_to, $tag, $this );
+		$decoded_text = apply_filters( 'simply_static_decoded_text_in_script', $decoded_text, $this->static_page, $convert_to, null, $this );
 
-		$tag->innerhtmlKeep = preg_replace( $regex, $convert_to, $decoded_text );
-
-		return $tag;
+		return preg_replace( $regex, $convert_to, $decoded_text );
 	}
 
 	/**
@@ -590,7 +790,21 @@ class Url_Extractor {
 
 		if ( isset( $extracted_url ) && $extracted_url !== '' ) {
 			$updated_extracted_url = $this->add_to_extracted_urls( $extracted_url );
-			$full_match            = str_ireplace( $extracted_url, $updated_extracted_url, $full_match );
+
+			// Only replace if we got a valid updated URL
+			if ( ! is_null( $updated_extracted_url ) ) {
+				// Use a more precise replacement to avoid partial matches
+				if ( strpos( $full_match, "url(" . $extracted_url . ")" ) !== false ) {
+					$full_match = str_replace( "url(" . $extracted_url . ")", "url(" . $updated_extracted_url . ")", $full_match );
+				} else if ( strpos( $full_match, "url('" . $extracted_url . "')" ) !== false ) {
+					$full_match = str_replace( "url('" . $extracted_url . "')", "url('" . $updated_extracted_url . "')", $full_match );
+				} else if ( strpos( $full_match, "url(\"" . $extracted_url . "\")" ) !== false ) {
+					$full_match = str_replace( "url(\"" . $extracted_url . "\")", "url(\"" . $updated_extracted_url . "\")", $full_match );
+				} else {
+					// Fallback to the original replacement method
+					$full_match = str_ireplace( $extracted_url, $updated_extracted_url, $full_match );
+				}
+			}
 		}
 
 		return $full_match;
