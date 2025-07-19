@@ -77,7 +77,7 @@ function SearchSettings() {
                 <SelectControl
                     label={__('Search Type', 'simply-static')}
                     value={searchType}
-                    help={__('Decide wich search type you want to use. Fuse runs locally based on file and Algolia is an external API service.', 'simply-static')}
+                    help={__('Decide which search type you want to use. Fuse runs locally based on a file, and Algolia is an external API service.', 'simply-static')}
                     options={[
                         {label: 'Fuse JS', value: 'fuse'},
                         {label: 'Algolia API', value: 'algolia'},
