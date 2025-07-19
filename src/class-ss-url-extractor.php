@@ -394,7 +394,7 @@ class Url_Extractor {
 				// Process regular style tags
 				$html_string = preg_replace_callback(
 					'/<style[^>]*>(.*?)<\/style>/is',
-					function( $matches ) {
+					function ( $matches ) {
 						return '<style>' . $this->extract_and_replace_urls_in_css( $matches[1] ) . '</style>';
 					},
 					$html_string
@@ -403,7 +403,7 @@ class Url_Extractor {
 				// Process style tags with class="wp-fonts-local" separately
 				$html_string = preg_replace_callback(
 					'/<style[^>]*class=[\'"]wp-fonts-local[\'"][^>]*>(.*?)<\/style>/is',
-					function( $matches ) {
+					function ( $matches ) {
 						return '<style class="wp-fonts-local">' . $this->extract_and_replace_urls_in_css( $matches[1] ) . '</style>';
 					},
 					$html_string
@@ -414,8 +414,9 @@ class Url_Extractor {
 			if ( apply_filters( 'ss_parse_inline_script', true ) ) {
 				$html_string = preg_replace_callback(
 					'/<script[^>]*>(.*?)<\/script>/is',
-					function( $matches ) {
+					function ( $matches ) {
 						$updated_script = $this->extract_and_replace_urls_in_script( $matches[1] );
+
 						return '<script>' . $this->process_script_content( $updated_script ) . '</script>';
 					},
 					$html_string
@@ -426,7 +427,7 @@ class Url_Extractor {
 		}
 
 		// Create a new processor for the HTML content
-		$processor = new \WP_HTML_Tag_Processor( $html_string );
+		$processor    = new \WP_HTML_Tag_Processor( $html_string );
 		$updated_html = $html_string;
 
 		// Process tags with attributes
@@ -458,7 +459,7 @@ class Url_Extractor {
 
 				if ( $style_content ) {
 					try {
-						$updated_css = $this->extract_and_replace_urls_in_css( $style_content );
+						$updated_css  = $this->extract_and_replace_urls_in_css( $style_content );
 						$updated_html = $this->replace_tag_content( $updated_html, 'style', $style_content, $updated_css );
 					} catch ( Exception $e ) {
 						// If not skip the result
@@ -477,7 +478,7 @@ class Url_Extractor {
 				if ( $style_content ) {
 					try {
 						// Process the CSS content to replace URLs in @font-face declarations
-						$updated_css = $this->extract_and_replace_urls_in_css( $style_content );
+						$updated_css  = $this->extract_and_replace_urls_in_css( $style_content );
 						$updated_html = $this->replace_tag_content( $updated_html, 'style', $style_content, $updated_css );
 					} catch ( Exception $e ) {
 						// If not skip the result
@@ -503,7 +504,7 @@ class Url_Extractor {
 						$updated_script = $this->extract_and_replace_urls_in_script( $script_content );
 						// Then process with process_script_content for additional URL replacements
 						$updated_script = $this->process_script_content( $updated_script );
-						$updated_html = $this->replace_tag_content( $updated_html, 'script', $script_content, $updated_script );
+						$updated_html   = $this->replace_tag_content( $updated_html, 'script', $script_content, $updated_script );
 					} catch ( Exception $e ) {
 						// If not skip the result
 						continue;
@@ -530,6 +531,7 @@ class Url_Extractor {
 	 * @param string $html The HTML content
 	 * @param string $tag_name The tag name
 	 * @param \WP_HTML_Tag_Processor $processor The processor at the position of the tag
+	 *
 	 * @return string|null The content between tags or null if not found
 	 */
 	private function extract_tag_content( $html, $tag_name, $processor ) {
@@ -558,6 +560,7 @@ class Url_Extractor {
 	 * @param string $tag_name The tag name
 	 * @param string $old_content The old content to replace
 	 * @param string $new_content The new content
+	 *
 	 * @return string The updated HTML
 	 */
 	private function replace_tag_content( $html, $tag_name, $old_content, $new_content ) {
@@ -566,18 +569,20 @@ class Url_Extractor {
 
 		// Replace the content between the tags
 		$pattern = "/(<{$tag_name}[^>]*>)$old_content_escaped(<\/{$tag_name}>)/is";
+
 		return preg_replace( $pattern, "$1$new_content$2", $html );
 	}
 
 	/**
 	 * Replace URLs in HTML attributes using regex
-	 * 
+	 *
 	 * This is a fallback method for WordPress versions before 6.2
 	 * that don't have the WP_HTML_Tag_Processor class.
 	 *
 	 * @param string $html The HTML content
 	 * @param string $tag_name The tag name
 	 * @param string $attribute The attribute name
+	 *
 	 * @return string The updated HTML
 	 */
 	private function regex_replace_urls_in_html( $html, $tag_name, $attribute ) {
@@ -586,8 +591,8 @@ class Url_Extractor {
 
 		return preg_replace_callback(
 			$pattern,
-			function( $matches ) use ( $attribute, $tag_name ) {
-				$tag_attrs = $matches[1];
+			function ( $matches ) use ( $attribute, $tag_name ) {
+				$tag_attrs  = $matches[1];
 				$attr_value = $matches[2];
 
 				// Skip empty values
@@ -610,7 +615,7 @@ class Url_Extractor {
 				}
 
 				$strict_url_validation = apply_filters( 'simply_static_strict_url_validation', false );
-				$updated_attr_value = $attr_value;
+				$updated_attr_value    = $attr_value;
 
 				foreach ( $extracted_urls as $extracted_url ) {
 					if ( $strict_url_validation && ! filter_var( $extracted_url, FILTER_VALIDATE_URL ) ) {
@@ -648,7 +653,7 @@ class Url_Extractor {
 	 */
 	private function extract_urls_from_srcset( $srcset ) {
 		$extracted_urls = array();
-		
+
 		foreach ( explode( ',', $srcset ) as $url_and_descriptor ) {
 			// remove the (optional) descriptor
 			// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-srcset
