@@ -596,7 +596,7 @@ class Url_Extractor {
 		$xml_string = $this->get_body();
 		// match anything starting with http/s or // plus all following characters
 		// except: [space] " ' <
-		$pattern = '/(?:https?:)?\/\/[^\s"\'\<\>]+/';
+		$pattern = "/https?:\/\/[^\s\"'<]+?(?=(\s|\"|'|<|$|]]>))/";
 		$text    = preg_replace_callback( $pattern, array( $this, 'xml_matches' ), $xml_string );
 
 		return $text;
