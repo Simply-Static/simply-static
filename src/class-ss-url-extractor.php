@@ -821,9 +821,9 @@ class Url_Extractor {
 	 */
 	private function extract_and_replace_urls_in_xml() {
 		$xml_string = $this->get_body();
-		// match anything starting with http/s or // plus all following characters
-		// except: [space] " ' <
-		$pattern = "/https?:\/\/[^\s\"'<]+?(?=(\s|\"|'|<|$|]]>))/";
+
+		// Updated pattern to match both http/https URLs and protocol-relative URLs (starting with //)
+		$pattern = "/(https?:\/\/|\/\/)[^\s\"'<]+?(?=(\s|\"|'|<|$|]]>))/";
 		$text    = preg_replace_callback( $pattern, array( $this, 'xml_matches' ), $xml_string );
 
 		return $text;
