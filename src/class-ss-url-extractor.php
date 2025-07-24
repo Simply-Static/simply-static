@@ -374,13 +374,14 @@ class Url_Extractor {
 		$html_string = $this->get_body();
 		$match_tags  = apply_filters( 'ss_match_tags', self::$match_tags );
 
-		// Check if WP_HTML_Tag_Processor class exists (WordPress 6.2+)
-		if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
-			// Log a notice that we're using a fallback
-			error_log( 'Simply Static: WP_HTML_Tag_Processor not available. Using fallback method for HTML processing.' );
-
-			// For WordPress versions before 6.2, we'll use a simple regex-based approach
-			// This won't be as robust as the HTML API but should handle basic cases
+		// Use regex-based approach when destination_url_type is set to "offline" or WP_HTML_Tag_Processor is not available
+		if ( $this->options->get( 'destination_url_type' ) === 'offline' || ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+			// Log a notice that we're using regex method
+			if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+				error_log( 'Simply Static: WP_HTML_Tag_Processor not available. Using fallback method for HTML processing.' );
+			} else {
+				error_log( 'Simply Static: Using regex method for offline URL processing.' );
+			}
 
 			// Process URLs in HTML attributes
 			foreach ( $match_tags as $tag_name => $attributes ) {
