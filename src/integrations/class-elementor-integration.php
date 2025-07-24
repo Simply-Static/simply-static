@@ -2,7 +2,6 @@
 
 namespace Simply_Static;
 
-use voku\helper\HtmlDomParser;
 
 class Elementor_Integration extends Integration {
 	/**
@@ -42,22 +41,42 @@ class Elementor_Integration extends Integration {
 	}
 
 	/**
-	 * @param HtmlDomParser $dom DOM object.
+	 * @param string|object $html_content HTML content or DOM object.
 	 * @param Url_Extractor $extractor Extractor.
 	 *
-	 * @return void
+	 * @return string|object Modified HTML content or DOM object
 	 */
-	public function extract_elementor_settings( $dom, $extractor ) {
-		$settings        = $dom->find( '[data-settings]' );
+	public function extract_elementor_settings( $html_content, $extractor ) {
 		$this->extractor = $extractor;
 
-		foreach ( $settings as $node ) {
-			$json                    = $node->{'data-settings'};
-			$decoded                 = htmlspecialchars_decode( $json );
-			$decoded                 = json_decode( $decoded, true );
-			$decoded                 = $this->replace_urls_array( $decoded );
-			$node->{'data-settings'} = esc_attr( wp_json_encode( $decoded ) );
+		// If we're passed a string (HTML content), process it with regex
+		if (is_string($html_content)) {
+			// Find all elements with data-settings attribute
+			$pattern = '/<[^>]*\sdata-settings=(["\'])([^"\']*)\1[^>]*>/i';
+
+			return preg_replace_callback($pattern, function($matches) {
+				$full_tag = $matches[0];
+				$json = $matches[2];
+
+				// Process the JSON data
+				$decoded = htmlspecialchars_decode($json);
+				$decoded = json_decode($decoded, true);
+
+				if ($decoded) {
+					$decoded = $this->replace_urls_array($decoded);
+					$new_json = esc_attr(wp_json_encode($decoded));
+
+					// Replace the old JSON with the new one
+					return str_replace('data-settings="' . $json . '"', 'data-settings="' . $new_json . '"', $full_tag);
+				}
+
+				return $full_tag;
+			}, $html_content);
 		}
+
+		// For backward compatibility, if we're passed an object (old DOM object)
+		// just return it unchanged
+		return $html_content;
 	}
 
 	/**

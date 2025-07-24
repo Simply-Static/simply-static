@@ -3,8 +3,8 @@
 namespace Simply_Static;
 
 use Exception;
-use voku\helper\HtmlDomParser;
-use function WPML\FP\apply;
+use DOMDocument;
+use DOMXPath;
 
 // Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) {
@@ -126,6 +126,12 @@ class Url_Extractor {
 	public $extracted_urls = array();
 
 	/**
+	 * Stores script tags extracted from HTML
+	 * @var array
+	 */
+	private $script_tags = array();
+
+	/**
 	 * Constructor
 	 *
 	 * @param string $static_page Simply_Static\Page to extract URLs from
@@ -163,6 +169,21 @@ class Url_Extractor {
 	 */
 	public function save_body( $content ) {
 		$content = apply_filters( 'simply_static_content_before_save', $content, $this );
+
+		// Restore script tags if they exist and there are placeholders in the content
+		if (!empty($this->script_tags) && strpos($content, 'SCRIPT_PLACEHOLDER') !== false) {
+			error_log('Simply Static: Restoring script tags in save_body');
+			$content = preg_replace_callback('/<!-- SCRIPT_PLACEHOLDER_(\d+) -->/', function($matches) {
+				$index = (int)$matches[1];
+				if (isset($this->script_tags[$index])) {
+					error_log('Simply Static: Restoring script tag ' . $index . ' in save_body');
+					return $this->script_tags[$index];
+				} else {
+					error_log('Simply Static: Script tag ' . $index . ' not found in save_body');
+					return '';
+				}
+			}, $content);
+		}
 
 		return file_put_contents( $this->options->get_archive_dir() . $this->static_page->file_path, $content );
 	}
@@ -311,22 +332,24 @@ class Url_Extractor {
 	 * The tag is passed by reference, so it's updated directly and nothing is
 	 * returned from this function.
 	 *
-	 * @param simple_html_dom_node $tag SHDP dom node
+	 * @param DOMElement $tag DOM element node
 	 * @param string $tag_name name of the tag
 	 * @param array $attributes array of attribute notes
 	 *
 	 * @return void
 	 */
 	private function extract_urls_and_update_tag( &$tag, $tag_name, $attributes ) {
-		if ( isset( $tag->style ) ) {
-			$updated_css = $this->extract_and_replace_urls_in_css( $tag->style );
-			$tag->style  = $updated_css;
+		// Handle style attribute
+		if ( $tag->hasAttribute( 'style' ) ) {
+			$style_value = $tag->getAttribute( 'style' );
+			$updated_css = $this->extract_and_replace_urls_in_css( $style_value );
+			$tag->setAttribute( 'style', $updated_css );
 		}
 
 		foreach ( $attributes as $attribute_name ) {
-			if ( isset( $tag->$attribute_name ) ) {
+			if ( $tag->hasAttribute( $attribute_name ) ) {
 				$extracted_urls  = array();
-				$attribute_value = $tag->$attribute_name;
+				$attribute_value = $tag->getAttribute( $attribute_name );
 
 				// we need to verify that the meta tag is a URL.
 				if ( 'meta' === $tag_name ) {
@@ -357,10 +380,9 @@ class Url_Extractor {
 						}
 					}
 				}
-				$tag->$attribute_name = $attribute_value;
+				$tag->setAttribute( $attribute_name, $attribute_value );
 			}
 		}
-
 	}
 
 	/**
@@ -376,18 +398,53 @@ class Url_Extractor {
 		$html_string = $this->get_body();
 		$match_tags  = apply_filters( 'ss_match_tags', self::$match_tags );
 
-		$dom = HtmlDomParser::str_get_html( $html_string );
+		// First, extract and save all script tags using regex to ensure they're preserved
+		$this->script_tags = []; // Reset the array for each call
+		$script_placeholder = '<!-- SCRIPT_PLACEHOLDER_%d -->';
+		$script_regex = '/<script\b[^>]*>.*?<\/script>/is';
 
-		// return the original html string if dom is blank or boolean (unparseable)
-		if ( $dom == '' || is_bool( $dom ) ) {
+		// Log that we're using regex method to ensure script tags are preserved
+		error_log('Simply Static: Using regex method to ensure script tags are preserved.');
+
+		// Extract script tags and replace them with placeholders
+		$html_string = preg_replace_callback($script_regex, function($matches) use (&$script_placeholder) {
+			$index = count($this->script_tags);
+			$this->script_tags[] = $matches[0]; // Save the entire script tag
+			return sprintf($script_placeholder, $index);
+		}, $html_string);
+
+		// Use PHP's native DOMDocument
+		$dom = new DOMDocument();
+
+		// Suppress errors from malformed HTML
+		libxml_use_internal_errors( true );
+
+		// Load the HTML, preserving whitespace and handling UTF-8
+		$dom->preserveWhiteSpace = true;
+		$dom->formatOutput = false;
+
+		// Use a wrapper to preserve HTML5 elements
+		$html_wrapper = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>' . $html_string . '</body></html>';
+		$dom->loadHTML( $html_wrapper, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
+
+		// Clear any errors
+		libxml_clear_errors();
+
+		// Create a DOMXPath object to query the DOM
+		$xpath = new DOMXPath( $dom );
+
+		// return the original html string if dom is blank or couldn't be parsed
+		if ( !$dom->documentElement ) {
 			return $html_string;
 		} else {
 			// handle tags with attributes
 			foreach ( $match_tags as $tag_name => $attributes ) {
-				$tags = $dom->find( $tag_name );
+				$elements = $xpath->query( '//' . $tag_name );
 
-				foreach ( $tags as $tag ) {
-					$this->extract_urls_and_update_tag( $tag, $tag_name, $attributes );
+				if ( $elements ) {
+					foreach ( $elements as $element ) {
+						$this->extract_urls_and_update_tag( $element, $tag_name, $attributes );
+					}
 				}
 			}
 
@@ -395,35 +452,19 @@ class Url_Extractor {
 			$parse_inline_style = apply_filters( 'ss_parse_inline_style', true );
 
 			if ( $parse_inline_style ) {
-				$style_tags = $dom->find( 'style' );
+				$style_tags = $xpath->query( '//style' );
 
-				foreach ( $style_tags as $tag ) {
-					// Check if valid content exists.
-					try {
-						$updated_css        = $this->extract_and_replace_urls_in_css( $tag->innerhtmlKeep );
-						$tag->innerhtmlKeep = $updated_css;
-					} catch ( Exception $e ) {
-						// If not skip the result.
-						continue;
-					}
-				}
-			}
-
-			// handle 'script' tag differently, since we need to parse the content.
-			$parse_inline_script = apply_filters( 'ss_parse_inline_script', true );
-
-			if ( $parse_inline_script ) {
-				$script_tags = $dom->find( 'script' );
-
-				foreach ( $script_tags as $tag ) {
-					// Check if valid content exists.
-					try {
-						$updated_script     = $this->extract_and_replace_urls_in_script( $tag->innerhtmlKeep );
-						$tag->innerhtmlKeep = $updated_script;
-						$this->extract_and_replace_urls_in_script_inner_text( $tag );
-					} catch ( Exception $e ) {
-						// If not skip the result.
-						continue;
+				if ( $style_tags ) {
+					foreach ( $style_tags as $tag ) {
+						// Check if valid content exists.
+						try {
+							$content = $tag->textContent;
+							$updated_css = $this->extract_and_replace_urls_in_css( $content );
+							$tag->textContent = $updated_css;
+						} catch ( Exception $e ) {
+							// If not skip the result.
+							continue;
+						}
 					}
 				}
 			}
@@ -437,7 +478,40 @@ class Url_Extractor {
 			// Further manipulate Dom?
 			$dom = apply_filters( 'ss_dom_before_save', $dom, $this->static_page->url );
 
-			return $dom->save();
+			// Check if $dom is still a DOMDocument object after filters
+			if ( is_string( $dom ) ) {
+				// If $dom has been converted to a string by a filter, return it directly
+				return $dom;
+			}
+
+			// Get only the content inside the body tag
+			$body = $dom->getElementsByTagName('body')->item(0);
+
+			// If we have a body element, get its inner HTML
+			if ( $body ) {
+				// Save the modified HTML
+				$html = '';
+				foreach ( $body->childNodes as $node ) {
+					$html .= $dom->saveHTML( $node );
+				}
+
+				// Restore script tags
+				$html = preg_replace_callback('/<!-- SCRIPT_PLACEHOLDER_(\d+) -->/', function($matches) {
+					$index = (int)$matches[1];
+					if (isset($this->script_tags[$index])) {
+						error_log('Simply Static: Restoring script tag ' . $index);
+						return $this->script_tags[$index];
+					} else {
+						error_log('Simply Static: Script tag ' . $index . ' not found');
+						return '';
+					}
+				}, $html);
+
+				return $html;
+			} else {
+				// Fallback to the original HTML if no body found
+				return $html_string;
+			}
 		}
 	}
 
@@ -450,7 +524,7 @@ class Url_Extractor {
 	 */
 	private function extract_urls_from_srcset( $srcset ) {
 		$extracted_urls = array();
-		
+
 		foreach ( explode( ',', $srcset ) as $url_and_descriptor ) {
 			// remove the (optional) descriptor
 			// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-srcset
@@ -512,7 +586,7 @@ class Url_Extractor {
 	}
 
 	/**
-	 * @param \ $tag
+	 * @param DOMElement $tag
 	 *
 	 * @return array|string|string[]|null
 	 */
@@ -536,15 +610,17 @@ class Url_Extractor {
 				$convert_to = '/';
 		}
 
-		if ( $this->is_json( $tag->innerhtmlKeep ) ) {
-			$decoded_text = html_entity_decode( $tag->innerhtmlKeep, ENT_NOQUOTES );
+		$content = $tag->textContent;
+
+		if ( $this->is_json( $content ) ) {
+			$decoded_text = html_entity_decode( $content, ENT_NOQUOTES );
 		} else {
-			$decoded_text = html_entity_decode( $tag->innerhtmlKeep );
+			$decoded_text = html_entity_decode( $content );
 		}
 
 		$decoded_text = apply_filters( 'simply_static_decoded_text_in_script', $decoded_text, $this->static_page, $convert_to, $tag, $this );
 
-		$tag->innerhtmlKeep = preg_replace( $regex, $convert_to, $decoded_text );
+		$tag->textContent = preg_replace( $regex, $convert_to, $decoded_text );
 
 		return $tag;
 	}
