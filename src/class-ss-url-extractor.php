@@ -433,9 +433,8 @@ class Url_Extractor {
 		$dom->preserveWhiteSpace = true;
 		$dom->formatOutput       = false;
 
-		// Use a wrapper to preserve HTML5 elements
-		$html_wrapper = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>' . $html_string . '</body></html>';
-		$dom->loadHTML( $html_wrapper, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
+		// Load the HTML directly without a wrapper
+		$dom->loadHTML( $html_string, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
 
 		// Clear any errors
 		libxml_clear_errors();
@@ -494,29 +493,20 @@ class Url_Extractor {
 				return $dom;
 			}
 
-			// Ensure we have a valid DOM structure
-			$body = $dom->getElementsByTagName( 'body' )->item( 0 );
+			// Save the HTML document
+			$html = $dom->saveHTML();
 
-			// If we have a valid DOM structure, save the complete HTML document
-			if ( $body ) {
-				// Save the complete HTML document with proper structure
-				$html = $dom->saveHTML();
+			// Restore script tags
+			$html = preg_replace_callback( '/<!-- SCRIPT_PLACEHOLDER_(\d+) -->/', function ( $matches ) {
+				$index = (int) $matches[1];
+				if ( isset( $this->script_tags[ $index ] ) ) {
+					return $this->script_tags[ $index ];
+				} else {
+					return '';
+				}
+			}, $html );
 
-				// Restore script tags
-				$html = preg_replace_callback( '/<!-- SCRIPT_PLACEHOLDER_(\d+) -->/', function ( $matches ) {
-					$index = (int) $matches[1];
-					if ( isset( $this->script_tags[ $index ] ) ) {
-						return $this->script_tags[ $index ];
-					} else {
-						return '';
-					}
-				}, $html );
-
-				return $html;
-			} else {
-				// Fallback to the original HTML if no body found
-				return $html_string;
-			}
+			return $html;
 		}
 	}
 
