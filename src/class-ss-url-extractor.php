@@ -397,10 +397,39 @@ class Url_Extractor {
 		// Log that we're using regex method to ensure script tags are preserved
 		error_log('Simply Static: Using regex method to ensure script tags are preserved.');
 
-		// Extract script tags and replace them with placeholders
+		// Extract script tags, process them for URL replacement, and replace them with placeholders
 		$html_string = preg_replace_callback($script_regex, function($matches) use (&$script_placeholder) {
 			$index = count($this->script_tags);
-			$this->script_tags[] = $matches[0]; // Save the entire script tag
+			$script_tag = $matches[0]; // The entire script tag
+
+			// Process script tag for URL replacement
+			// Replace URLs in src attribute
+			$script_tag = preg_replace_callback('/<script\b([^>]*)src=(["\'])([^"\']+)(["\'])([^>]*)>/i', function($src_matches) {
+				$before_src = $src_matches[1];
+				$quote_start = $src_matches[2];
+				$src_url = $src_matches[3];
+				$quote_end = $src_matches[4];
+				$after_src = $src_matches[5];
+
+				// Process the URL
+				$updated_url = $this->add_to_extracted_urls($src_url);
+
+				return "<script{$before_src}src={$quote_start}{$updated_url}{$quote_end}{$after_src}>";
+			}, $script_tag);
+
+			// Replace URLs in script content
+			$script_tag = preg_replace_callback('/<script\b[^>]*>(.*?)<\/script>/is', function($content_matches) {
+				$script_content = $content_matches[1];
+				if (!empty($script_content)) {
+					// Process the script content
+					$updated_content = $this->extract_and_replace_urls_in_script($script_content);
+					return str_replace($script_content, $updated_content, $content_matches[0]);
+				}
+				return $content_matches[0];
+			}, $script_tag);
+
+			// Save the processed script tag
+			$this->script_tags[] = $script_tag;
 			return sprintf($script_placeholder, $index);
 		}, $html_string);
 
@@ -571,50 +600,32 @@ class Url_Extractor {
 
 		$decoded_text = apply_filters( 'simply_static_decoded_urls_in_script', $decoded_text, $this->static_page, $this );
 
-		$text = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $this->options->get_destination_url(), $decoded_text );
-
-		return $text;
-	}
-
-	/**
-	 * @param DOMElement $tag
-	 *
-	 * @return array|string|string[]|null
-	 */
-	private function extract_and_replace_urls_in_script_inner_text( $tag ) {
-
-		$regex = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i';
-
+		// Get the appropriate replacement URL based on destination URL type
 		switch ( $this->options->get( 'destination_url_type' ) ) {
 			case 'absolute':
 				$convert_to = $this->options->get_destination_url();
 				break;
 			case 'relative':
-				// Adding \/? before end of regex pattern to convert url.com/ & url.com to relative path, ex. /path/.
-				$regex      = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '\/?/i';
 				$convert_to = $this->options->get( 'relative_path' );
 				break;
 			default:
-				// Offline mode.
-				// Adding \/? before end of regex pattern to convert url.com/ & url.com to relative path, ex. /path/.
-				$regex      = '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '\/?/i';
+				// Offline mode
 				$convert_to = '/';
 		}
 
-		$content = $tag->textContent;
+		// Replace URLs in the script content
+		// First, replace protocol-relative URLs (//example.com)
+		$text = preg_replace( '/(["\'(])\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', '$1' . $convert_to, $decoded_text );
 
-		if ( $this->is_json( $content ) ) {
-			$decoded_text = html_entity_decode( $content, ENT_NOQUOTES );
-		} else {
-			$decoded_text = html_entity_decode( $content );
-		}
+		// Then replace absolute URLs (http://example.com or https://example.com)
+		$text = preg_replace( '/(["\'(])(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', '$1' . $convert_to, $text );
 
-		$decoded_text = apply_filters( 'simply_static_decoded_text_in_script', $decoded_text, $this->static_page, $convert_to, $tag, $this );
+		// Also replace JSON-encoded URLs
+		$text = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $convert_to, '/' ), $text );
 
-		$tag->textContent = preg_replace( $regex, $convert_to, $decoded_text );
-
-		return $tag;
+		return $text;
 	}
+
 
 	/**
 	 * Check whether a given string is a valid JSON representation.
