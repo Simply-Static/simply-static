@@ -100,7 +100,7 @@ function SettingsPage() {
         }
 
         // Maybe set to update.
-        if (options.last_export_end) {
+        if (options.last_export_end && ! isRunning) {
             setSelectedExportType('update');
         }
 
