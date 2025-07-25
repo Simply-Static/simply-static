@@ -2,7 +2,8 @@
 
 namespace Simply_Static;
 
-use voku\helper\SimpleHtmlDom;
+use DOMDocument;
+use DOMXPath;
 
 class CookieYes_Integration extends Integration {
 
@@ -37,19 +38,31 @@ class CookieYes_Integration extends Integration {
 	}
 
 	/**
-	 * @param SimpleHtmlDom $dom
+	 * @param DOMDocument $dom
 	 *
 	 * @return void
 	 */
 	public function fix_cookieyes_template( $dom ) {
-		$tags = $dom->find( 'script' );
+		// Create a DOMXPath object to query the DOM
+		$xpath = new DOMXPath( $dom );
 
-		foreach ( $tags as $tag ) {
-			if ( 'ckyBannerTemplate' !== $tag->getAttribute( 'id' ) ) {
-				continue;
+		// Find all script tags
+		$script_tags = $xpath->query( '//script' );
+
+		if ( $script_tags ) {
+			foreach ( $script_tags as $tag ) {
+				// Check if the script tag has the specific ID
+				if ( $tag->hasAttribute( 'id' ) && 'ckyBannerTemplate' === $tag->getAttribute( 'id' ) ) {
+					// Get the content of the script tag
+					$content = $tag->textContent;
+
+					// Apply the regex replacement
+					$updated_content = preg_replace( '/<\\\/i', '<', $content );
+
+					// Update the content of the script tag
+					$tag->textContent = $updated_content;
+				}
 			}
-
-			$tag->innerhtmlKeep = preg_replace( '/<\\\/i', '<', $tag->innerhtmlKeep );
 		}
 	}
 }

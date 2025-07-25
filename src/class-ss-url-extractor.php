@@ -98,15 +98,6 @@ class Url_Extractor {
 		'atom' => array( 'href' ),
 	);
 
-	// /** @const */
-	// protected static $match_metas = array(
-	//	 'content-base',
-	//	 'content-location',
-	//	 'referer',
-	//	 'location',
-	//	 'refresh',
-	// );
-
 	/**
 	 * The static page to extract URLs from
 	 * @var \Simply_Static\Page
