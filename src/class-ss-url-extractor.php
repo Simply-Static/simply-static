@@ -501,16 +501,13 @@ class Url_Extractor {
 				return $dom;
 			}
 
-			// Get only the content inside the body tag
+			// Ensure we have a valid DOM structure
 			$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 
-			// If we have a body element, get its inner HTML
+			// If we have a valid DOM structure, save the complete HTML document
 			if ( $body ) {
-				// Save the modified HTML
-				$html = '';
-				foreach ( $body->childNodes as $node ) {
-					$html .= $dom->saveHTML( $node );
-				}
+				// Save the complete HTML document with proper structure
+				$html = $dom->saveHTML();
 
 				// Restore script tags
 				$html = preg_replace_callback( '/<!-- SCRIPT_PLACEHOLDER_(\d+) -->/', function ( $matches ) {
