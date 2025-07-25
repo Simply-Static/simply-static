@@ -160,10 +160,16 @@ class Rank_Math_Integration extends Integration {
 	public function replace_json_schema( $dom, $url ) {
 		$options = Options::instance();
 
-		foreach ( $dom->find( 'script.rank-math-schema' ) as $script ) {
-			$decoded_text      = html_entity_decode( $script->outertext, ENT_NOQUOTES );
-			$text              = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $options->get_destination_url(), $decoded_text );
-			$script->outertext = $text;
+		// Use DOMXPath to find script elements with class 'rank-math-schema'
+		$xpath = new \DOMXPath( $dom );
+		$scripts = $xpath->query( '//script[contains(@class, "rank-math-schema")]' );
+
+		if ( $scripts ) {
+			foreach ( $scripts as $script ) {
+				$decoded_text = html_entity_decode( $script->nodeValue, ENT_NOQUOTES );
+				$text = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $options->get_destination_url(), $decoded_text );
+				$script->nodeValue = $text;
+			}
 		}
 
 		return $dom;

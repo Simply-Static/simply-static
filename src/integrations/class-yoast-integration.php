@@ -129,10 +129,16 @@ class Yoast_Integration extends Integration {
 	public function replace_json_schema( $dom, $url ) {
 		$options = Options::instance();
 
-		foreach ( $dom->find( 'script.yoast-schema-graph' ) as $script ) {
-			$decoded_text      = html_entity_decode( $script->outertext, ENT_NOQUOTES );
-			$text              = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $options->get_destination_url(), $decoded_text );
-			$script->outertext = $text;
+		// Use DOMXPath to find script elements with class 'yoast-schema-graph'
+		$xpath = new \DOMXPath( $dom );
+		$scripts = $xpath->query( '//script[contains(@class, "yoast-schema-graph")]' );
+
+		if ( $scripts ) {
+			foreach ( $scripts as $script ) {
+				$decoded_text = html_entity_decode( $script->nodeValue, ENT_NOQUOTES );
+				$text = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $options->get_destination_url(), $decoded_text );
+				$script->nodeValue = $text;
+			}
 		}
 
 		return $dom;
