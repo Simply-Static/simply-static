@@ -302,14 +302,6 @@ class Url_Extractor {
 	 * @return void
 	 */
 	public function force_replace_urls() {
-		/*
-		TODO:
-		Can we get it to work with offline URLs via preg_replace_callback
-		+ convert_url? To do that we'd need to grab the entire URL. Ideally
-		that would also work with escaped URLs / inside of JavaScript. And
-		even more ideally, we'd only have a single preg_replace.
-		 */
-
 		$response_body = $this->get_body();
 		$response_body = $this->force_replace( $response_body );
 		$response_body = apply_filters( 'simply_static_force_replaced_urls_body', $response_body, $this->static_page );
