@@ -163,16 +163,11 @@ class Url_Extractor {
 
 		// Restore script tags if they exist and there are placeholders in the content
 		if ( ! empty( $this->script_tags ) && strpos( $content, 'SCRIPT_PLACEHOLDER' ) !== false ) {
-			error_log( 'Simply Static: Restoring script tags in save_body' );
 			$content = preg_replace_callback( '/<!-- SCRIPT_PLACEHOLDER_(\d+) -->/', function ( $matches ) {
 				$index = (int) $matches[1];
 				if ( isset( $this->script_tags[ $index ] ) ) {
-					error_log( 'Simply Static: Restoring script tag ' . $index . ' in save_body' );
-
 					return $this->script_tags[ $index ];
 				} else {
-					error_log( 'Simply Static: Script tag ' . $index . ' not found in save_body' );
-
 					return '';
 				}
 			}, $content );
@@ -388,9 +383,7 @@ class Url_Extractor {
 		$script_placeholder = '<!-- SCRIPT_PLACEHOLDER_%d -->';
 		$script_regex       = '/<script\b[^>]*>.*?<\/script>/is';
 
-		// Log that we're using regex method to ensure script tags are preserved
-		error_log( 'Simply Static: Using regex method to ensure script tags are preserved.' );
-
+		// Use regex method to ensure script tags are preserved
 		// Extract script tags, process them for URL replacement, and replace them with placeholders
 		$html_string = preg_replace_callback( $script_regex, function ( $matches ) use ( &$script_placeholder ) {
 			$index      = count( $this->script_tags );
@@ -513,12 +506,8 @@ class Url_Extractor {
 				$html = preg_replace_callback( '/<!-- SCRIPT_PLACEHOLDER_(\d+) -->/', function ( $matches ) {
 					$index = (int) $matches[1];
 					if ( isset( $this->script_tags[ $index ] ) ) {
-						error_log( 'Simply Static: Restoring script tag ' . $index );
-
 						return $this->script_tags[ $index ];
 					} else {
-						error_log( 'Simply Static: Script tag ' . $index . ' not found' );
-
 						return '';
 					}
 				}, $html );
