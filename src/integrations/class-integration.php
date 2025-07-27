@@ -60,7 +60,7 @@ abstract class Integration {
 	 * @return mixed|null
 	 */
 	public function is_enabled() {
-		return apply_filters( 'simply_static_integration_' . $this->id . 'enabled', $this->can_run() );
+		return apply_filters( 'simply_static_integration_' . $this->id . '_enabled', $this->can_run() );
 	}
 
 	/**
@@ -152,7 +152,8 @@ abstract class Integration {
 			'active'        => $this->is_active(),
 			'pro'           => $this->is_pro(),
 			'can_run'       => $this->dependency_active(),
-			'always_active' => $this->always_active
+			'always_active' => $this->always_active,
+			'hidden'        => $this->hidden
 		];
 	}
 }

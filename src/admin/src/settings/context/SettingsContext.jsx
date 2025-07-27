@@ -127,6 +127,7 @@ function SettingsContextProvider(props) {
         'integrations': false // Will be array when saved.
     }
     const [isRunning, setIsRunning] = useState(false);
+    const [isDelayed, setIsDelayed] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
     const [isResumed, setIsResumed] = useState(false);
     const [settingsSaved, setSettingsSaved] = useState(false);
@@ -188,6 +189,9 @@ function SettingsContextProvider(props) {
             var json = JSON.parse(resp);
             setIsRunning(json.running);
             setIsPaused(json.paused);
+            if ( json.delayed ) {
+              setIsDelayed(json.delayed_until);
+            }
         });
     }
 
@@ -331,9 +335,14 @@ function SettingsContextProvider(props) {
         return false;
     }
 
-    useInterval(() => {
+  useInterval(() => {
+      setIsDelayed(isDelayed - 1);
+    }, isDelayed > 0 ? 1000 : null);
+
+
+  useInterval(() => {
         checkIfRunning();
-    }, isRunning ? 5000 : null);
+    }, isRunning || isDelayed ? 5000 : null);
 
     useEffect(() => {
         getSettings();
@@ -376,7 +385,8 @@ function SettingsContextProvider(props) {
                 maybeUnqueueIntegration,
                 isQueuedIntegration,
                 showMobileNav,
-                setShowMobileNav
+                setShowMobileNav,
+                isDelayed
             }}
         >
             {props.children}

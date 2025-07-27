@@ -770,17 +770,27 @@ class Admin_Settings {
 		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
 		$type    = ! empty( $params['type'] ) ? $params['type'] : 'export';
 
-		do_action( 'ss_before_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
+        try {
+            do_action( 'ss_before_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
 
-		$type = apply_filters( 'ss_export_type', $type );
+            $type = apply_filters( 'ss_export_type', $type );
 
-		Plugin::instance()->run_static_export( $blog_id, $type );
+            Plugin::instance()->run_static_export( $blog_id, $type );
 
-		do_action( 'ss_after_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
+            do_action( 'ss_after_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
 
-		return json_encode( [
-			'status' => 200,
-		] );
+            return json_encode( [
+                'status' => 200,
+            ] );
+
+        } catch (\Exception $e) {
+
+	        return json_encode( [
+		        'status' => 500,
+                'message' => $e->getMessage()
+	        ] );
+
+        }
 	}
 
 	/**
@@ -807,11 +817,15 @@ class Admin_Settings {
 	 * @return false|string
 	 */
 	public function is_running( $request ) {
-		return json_encode( [
-			'status'  => 200,
-			'running' => Plugin::instance()->get_archive_creation_job()->is_running(),
-			'paused'  => Plugin::instance()->get_archive_creation_job()->is_paused(),
-		] );
+        $stats = [
+	        'status'  => 200,
+	        'running' => Plugin::instance()->get_archive_creation_job()->is_running(),
+	        'paused'  => Plugin::instance()->get_archive_creation_job()->is_paused()
+        ];
+
+        $stats = apply_filters( 'ss_is_running_statuses', $stats );
+
+		return json_encode( $stats );
 	}
 
 	/**
