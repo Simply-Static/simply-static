@@ -145,6 +145,9 @@ toplevel_page_simply-static img {
   background: #b32d2e;
   border-color: #9b2626;
 }
+.plugin-settings-container .plugin-nav .generate-container button:disabled {
+  opacity: 0.5;
+}
 .plugin-settings-container .plugin-nav .generate-container .cancel-button {
   text-align: center;
   display: block;

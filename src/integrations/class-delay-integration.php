@@ -1,5 +1,4 @@
 <?php
-
 namespace Simply_Static;
 
 class Delay_Integration extends Integration {
@@ -9,19 +8,19 @@ class Delay_Integration extends Integration {
 	protected $always_active = true;
 
 	public function __construct() {
-		$this->name        = __( 'Delay', 'simply-static' );
+		$this->name = __( 'Delay', 'simply-static' );
 		$this->description = __( 'Adds a delay to the static site generation.', 'simply-static' );
 	}
 
 	/**
 	 * Disabled by default.
 	 *
-	 * Set add_filter( 'simply_static_integration_delay_enabled', '__return_true' ); to enable it.
+	 * Set add_filter( 'simply_static_integration_delay_enabled', true ); to enable it.
 	 *
 	 * @return false
 	 */
 	public function can_run() {
-		return apply_filters( 'simply_static_integration_delay_enabled', false );
+		return false;
 	}
 
 	/**
@@ -36,9 +35,8 @@ class Delay_Integration extends Integration {
 	}
 
 	public function add_delayed_status( $statuses ) {
-		$statuses['delayed']       = $this->is_delayed();
+		$statuses['delayed'] = $this->is_delayed();
 		$statuses['delayed_until'] = absint( $this->get_delayed_until_seconds() );
-
 		return $statuses;
 	}
 
@@ -48,7 +46,6 @@ class Delay_Integration extends Integration {
 		if ( ! $delayed ) {
 			return 0;
 		}
-
 		return $delayed - time();
 	}
 
@@ -64,7 +61,7 @@ class Delay_Integration extends Integration {
 		$delay_time = $this->get_delayed_time();
 		$left       = $delay_time - time();
 
-		throw new \Exception( sprintf( __( 'You can export again in about %s second(s)', 'simply-static' ), $left ) );
+		throw new \Exception( sprintf( __( 'You can export again in about %s second(s)', 'simply-static'), $left ) );
 	}
 
 
@@ -76,7 +73,7 @@ class Delay_Integration extends Integration {
 	 * @return void
 	 */
 	public function set_delayed( $delay = 60 ) {
-		update_option( 'simply_static_delayed_until', time() + intval( $delay ) );
+		update_option( 'simply_static_delayed_until', time() + $delay );
 	}
 
 	/**

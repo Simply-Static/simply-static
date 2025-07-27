@@ -757,7 +757,8 @@ function SettingsPage() {
     isStudio,
     canRunIntegration,
     showMobileNav,
-    setShowMobileNav
+    setShowMobileNav,
+    isDelayed
   } = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.useContext)(_context_SettingsContext__WEBPACK_IMPORTED_MODULE_13__.SettingsContext);
   const [activeItem, setActiveItem] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.useState)({
     activeItem: "/"
@@ -825,6 +826,12 @@ function SettingsPage() {
         'type': selectedExportType
       }
     }).then(resp => {
+      var json = JSON.parse(resp);
+      if (json.status === 500) {
+        alert(json.message);
+        setDisabledButton(false);
+        return;
+      }
       setIsRunning(true);
     });
   };
@@ -913,11 +920,11 @@ function SettingsPage() {
       setSelectedExportType('export');
       startExport();
     },
-    disabled: disabledButton,
+    disabled: disabledButton || isDelayed,
     className: activeItem === '/' ? 'is-active-item generate' : 'generate'
   }, !disabledButton && [(0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Dashicon, {
     icon: "update"
-  }), __('Generate', 'simply-static')], disabledButton && [(0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Dashicon, {
+  }), __('Generate', 'simply-static')], !disabledButton && isDelayed > 0 && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, isDelayed, "s"), disabledButton && [(0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Dashicon, {
     icon: "update spin"
   }), __('Generating...', 'simply-static')]), disabledButton && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, !isPaused && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Button, {
     label: __('Pause', 'simply-static'),
@@ -992,11 +999,11 @@ function SettingsPage() {
     onClick: () => {
       startExport();
     },
-    disabled: disabledButton,
+    disabled: disabledButton || isDelayed,
     className: activeItem === '/' ? 'is-active-item generate' : 'generate'
   }, !disabledButton && [(0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Dashicon, {
     icon: "update"
-  }), __('Generate', 'simply-static')], disabledButton && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Dashicon, {
+  }), __('Generate', 'simply-static')], !disabledButton && isDelayed > 0 && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, " ", isDelayed, "s"), disabledButton && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Dashicon, {
     icon: "update spin"
   })), disabledButton && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, !isPaused && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Button, {
     label: __('Pause', 'simply-static'),
@@ -1376,6 +1383,7 @@ function SettingsContextProvider(props) {
     'integrations': false // Will be array when saved.
   };
   const [isRunning, setIsRunning] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
+  const [isDelayed, setIsDelayed] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(0);
   const [isPaused, setIsPaused] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
   const [isResumed, setIsResumed] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
   const [settingsSaved, setSettingsSaved] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
@@ -1432,6 +1440,9 @@ function SettingsContextProvider(props) {
       var json = JSON.parse(resp);
       setIsRunning(json.running);
       setIsPaused(json.paused);
+      if (json.delayed) {
+        setIsDelayed(json.delayed_until);
+      }
     });
   };
   const importSettings = newSettings => {
@@ -1551,8 +1562,11 @@ function SettingsContextProvider(props) {
     return false;
   };
   (0,_hooks_useInterval__WEBPACK_IMPORTED_MODULE_3__["default"])(() => {
+    setIsDelayed(isDelayed - 1);
+  }, isDelayed > 0 ? 1000 : null);
+  (0,_hooks_useInterval__WEBPACK_IMPORTED_MODULE_3__["default"])(() => {
     checkIfRunning();
-  }, isRunning ? 5000 : null);
+  }, isRunning || isDelayed ? 5000 : null);
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
     getSettings();
     getStatus();
@@ -1592,7 +1606,8 @@ function SettingsContextProvider(props) {
       maybeUnqueueIntegration,
       isQueuedIntegration,
       showMobileNav,
-      setShowMobileNav
+      setShowMobileNav,
+      isDelayed
     }
   }, props.children);
 }
