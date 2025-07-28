@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  */
-class Search_Widget extends Widget_Base {
+class Elementor_Search_Widget extends Widget_Base {
 
 	/**
 	 * Get widget name.
@@ -117,28 +117,6 @@ class Search_Widget extends Widget_Base {
 			]
 		);
 
-		$this->add_control(
-			'button_text',
-			[
-				'label' => __( 'Button Text', 'simply-static' ),
-				'type' => Controls_Manager::TEXT,
-				'default' => __( 'Search', 'simply-static' ),
-				'placeholder' => __( 'Enter button text', 'simply-static' ),
-			]
-		);
-
-		$this->add_control(
-			'show_button',
-			[
-				'label' => __( 'Show Button', 'simply-static' ),
-				'type' => Controls_Manager::SWITCHER,
-				'label_on' => __( 'Show', 'simply-static' ),
-				'label_off' => __( 'Hide', 'simply-static' ),
-				'return_value' => 'yes',
-				'default' => 'yes',
-			]
-		);
-
 		$this->end_controls_section();
 
 		$this->start_controls_section(
@@ -191,13 +169,14 @@ class Search_Widget extends Widget_Base {
 		$settings = $this->get_settings_for_display();
 
 		$placeholder_text = ! empty( $settings['placeholder_text'] ) ? $settings['placeholder_text'] : __( 'Search...', 'simply-static' );
-		$button_text = ! empty( $settings['button_text'] ) ? $settings['button_text'] : __( 'Search', 'simply-static' );
-		$show_button = $settings['show_button'] === 'yes';
-        $search_type = Options::instance()->get('search_type');
+        $options          = Options::instance();
+		$search_type      = $options->get('search_type');
+
         if ( ! $search_type ) {
             $search_type = 'fuse';
         }
-        $search_class = 'fuse' === $search_type ? Options::instance()->get('fuse_selector') : Options::instance()->get('algolia_selector');
+
+        $search_class = 'fuse' === $search_type ? $options->get('fuse_selector') : $options->get('algolia_selector');
 
         if ( ! $search_class ) {
             $search_class = '.search-field';
@@ -208,23 +187,18 @@ class Search_Widget extends Widget_Base {
         $search_class = ltrim( $search_class, '.' );
 		?>
 		<div class="simply-static-search-widget">
-			<form role="search" method="get" class="simply-static-search-form" action="<?php echo esc_url( home_url( '/' ) ); ?>">
-				<div class="simply-static-search-wrapper">
-					<input 
-						type="search" 
-						class="<?php echo esc_attr( $search_class ); ?>"
-						placeholder="<?php echo esc_attr( $placeholder_text ); ?>" 
-						value="<?php echo get_search_query(); ?>" 
-						name="s" 
-						title="<?php echo esc_attr( $placeholder_text ); ?>"
-					/>
-					<?php if ( $show_button ) : ?>
-						<button type="submit" class="simply-static-search-button">
-							<?php echo esc_html( $button_text ); ?>
-						</button>
-					<?php endif; ?>
-				</div>
-			</form>
+			<div class="simply-static-search-wrapper">
+                <input
+                    type="search"
+                    class="<?php echo esc_attr( $search_class ); ?>"
+                    placeholder="<?php echo esc_attr( $placeholder_text ); ?>"
+                    value="<?php echo get_search_query(); ?>"
+                    name="s"
+                    title="<?php echo esc_attr( $placeholder_text ); ?>"
+                />
+
+            </div>
+
 		</div>
 		<?php
 	}
@@ -238,11 +212,14 @@ class Search_Widget extends Widget_Base {
 	 * @access protected
 	 */
 	protected function content_template() {
-		$search_type = Options::instance()->get('search_type');
+		$options     = Options::instance();
+		$search_type = $options->get('search_type');
+
 		if ( ! $search_type ) {
 			$search_type = 'fuse';
 		}
-		$search_class = 'fuse' === $search_type ? Options::instance()->get('fuse_selector') : Options::instance()->get('algolia_selector');
+
+		$search_class = 'fuse' === $search_type ? $options->get('fuse_selector') : $options->get('algolia_selector');
 
 		if ( ! $search_class ) {
 			$search_class = '.search-field';
@@ -255,26 +232,17 @@ class Search_Widget extends Widget_Base {
 		?>
 		<#
 		var placeholder_text = settings.placeholder_text || '<?php echo __( 'Search...', 'simply-static' ); ?>';
-		var button_text = settings.button_text || '<?php echo __( 'Search', 'simply-static' ); ?>';
-		var show_button = settings.show_button === 'yes';
 		#>
 		<div class="simply-static-search-widget">
-			<form role="search" method="get" class="simply-static-search-form">
-				<div class="simply-static-search-wrapper">
-					<input 
-						type="search"
-                        class="<?php echo esc_attr( $search_class ); ?>"
-						placeholder="{{ placeholder_text }}" 
-						name="s" 
-						title="{{ placeholder_text }}"
-					/>
-					<# if ( show_button ) { #>
-						<button type="submit" class="simply-static-search-button">
-							{{ button_text }}
-						</button>
-					<# } #>
-				</div>
-			</form>
+			<div class="simply-static-search-wrapper">
+                <input
+                    type="search"
+                    class="<?php echo esc_attr( $search_class ); ?>"
+                    placeholder="{{ placeholder_text }}"
+                    name="s"
+                    title="{{ placeholder_text }}"
+                />
+            </div>
 		</div>
 		<?php
 	}
