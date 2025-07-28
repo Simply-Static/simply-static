@@ -292,6 +292,6 @@ class Elementor_Integration extends Integration {
 		require_once __DIR__ . '/elementor/class-search-widget.php';
 
 		// Register the widget
-		$widgets_manager->register( new Search_Widget() );
+		$widgets_manager->register( new Elementor_Search_Widget() );
 	}
 }
