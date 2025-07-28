@@ -38,6 +38,10 @@ class Elementor_Integration extends Integration {
 	public function run() {
 		add_action( 'ss_after_setup_task', [ $this, 'register_assets' ] );
 		add_action( 'ss_after_extract_and_replace_urls_in_html', [ $this, 'extract_elementor_settings' ], 20, 2 );
+
+		// Register Elementor widgets
+		add_action( 'elementor/widgets/register', [ $this, 'register_widgets' ] );
+		add_action( 'elementor/elements/categories_registered', [ $this, 'register_widget_categories' ] );
 	}
 
 	/**
@@ -261,5 +265,33 @@ class Elementor_Integration extends Integration {
 			$static_page->found_on_id = 0;
 			$static_page->save();
 		}
+	}
+
+	/**
+	 * Register widget categories.
+	 *
+	 * @param \Elementor\Elements_Manager $elements_manager Elementor elements manager.
+	 */
+	public function register_widget_categories( $elements_manager ) {
+		$elements_manager->add_category(
+			'simply-static',
+			[
+				'title' => __( 'Simply Static', 'simply-static' ),
+				'icon' => 'fa fa-plug',
+			]
+		);
+	}
+
+	/**
+	 * Register widgets.
+	 *
+	 * @param \Elementor\Widgets_Manager $widgets_manager Elementor widgets manager.
+	 */
+	public function register_widgets( $widgets_manager ) {
+		// Include the widget file
+		require_once __DIR__ . '/elementor/class-search-widget.php';
+
+		// Register the widget
+		$widgets_manager->register( new Search_Widget() );
 	}
 }
