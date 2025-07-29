@@ -434,7 +434,7 @@ class Url_Extractor {
 		$dom->formatOutput       = false;
 
 		// Load the HTML directly without a wrapper
-		$dom->loadHTML( $html_string, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
+		$dom->loadHTML( mb_convert_encoding( $html_string, 'HTML-ENTITIES', 'UTF-8' ) );
 
 		// Clear any errors
 		libxml_clear_errors();
