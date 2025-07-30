@@ -41,6 +41,13 @@ abstract class Integration {
 	protected $active_by_default = true;
 
 	/**
+	 * Hidden from UI.
+	 *
+	 * @var bool
+	 */
+	protected $hidden = false;
+
+	/**
 	 * Load the integration.
 	 *
 	 * @return void
