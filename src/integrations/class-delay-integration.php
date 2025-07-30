@@ -15,7 +15,7 @@ class Delay_Integration extends Integration {
 	/**
 	 * Disabled by default.
 	 *
-	 * Set add_filter( 'simply_static_integration_delay_enabled', true ); to enable it.
+	 * Set add_filter( 'simply_static_integration_delay_enabled', '__return_true' ); to enable it.
 	 *
 	 * @return false
 	 */
