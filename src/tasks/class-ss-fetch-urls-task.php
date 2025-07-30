@@ -279,11 +279,20 @@ class Fetch_Urls_Task extends Task {
 	 * @return bool
 	 */
 	public function find_excludable( $static_page ) {
-		$excluded = array( '.php', 'debug' );
+		$excluded = array( '.php' );
+		$url = $static_page->url;
+
+		// Exclude debug files (.log, .txt)
+		if ( preg_match( '/\.(log|txt)$/i', $url ) && strpos( $url, 'debug' ) !== false ) {
+			return true;
+		}
 
 		// Exclude feeds if add_feeds is not true.
 		if ( ! $this->options->get( 'add_feeds' ) ) {
-			$excluded[] = 'feed';
+			// Only exclude WordPress XML feeds (ending with /feed/ or ?feed= parameter)
+			if ( preg_match( '/(\/feed\/?$|\?feed=|\/feed\/|\/rss\/?$|\/atom\/?$)/i', $url ) ) {
+				return true;
+			}
 		}
 
 		// Exclude Rest API if add_rest_api is not true.
@@ -311,8 +320,6 @@ class Fetch_Urls_Task extends Task {
 
 		if ( ! empty( $excluded ) ) {
 			foreach ( $excluded as $excludable ) {
-				$url = $static_page->url;
-
 				if ( strpos( $url, $excludable ) !== false ) {
 					return true;
 				}
