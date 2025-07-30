@@ -4,7 +4,7 @@ Tags: static site generator, performance, security, jamstack
 Requires at least: 6.2
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag:  3.3.3.2
+Stable tag:  3.3.3.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -260,6 +260,14 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 3. Diagnostics
 
 == Changelog ==
+
+= 3.3.3.3 =
+
+* adding a hidden delay integration to auto-pause between exports (disabled by default)
+* refactored UTF-8 handling to properly encode Arabic characters and German Umlauts
+* added support for conditional comments being extracted without modifying the structure
+* improved "feed" and "debug" checks inside exclude handler with regex to avoid false-positives
+* added custom Elementor widget for search
 
 = 3.3.3.2 =
 
