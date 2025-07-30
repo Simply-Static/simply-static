@@ -383,6 +383,15 @@ class Url_Extractor {
 		$script_placeholder = '<!-- SCRIPT_PLACEHOLDER_%d -->';
 		$script_regex       = '/<script\b[^>]*>.*?<\/script>/is';
 
+		// Extract and preserve conditional comments
+		$conditional_comments = [];
+		$conditional_placeholder = '<!-- CONDITIONAL_COMMENT_PLACEHOLDER_%d -->';
+		// Match conditional comments with a simpler, more direct approach
+		// First pattern: match complete conditional comments (with closing tags)
+		$complete_conditional_regex = '/<!--\[if[^\]]*\]>.*?<!\[endif\]-->/s';
+		// Second pattern: match incomplete conditional comments (without closing tags)
+		$incomplete_conditional_regex = '/<!--\[if[^\]]*\]>((?!<!--\[if).)*?(?=<!--|$)/s';
+
 		// Use regex method to ensure script tags are preserved
 		// Extract script tags, process them for URL replacement, and replace them with placeholders
 		$html_string = preg_replace_callback( $script_regex, function ( $matches ) use ( &$script_placeholder ) {
@@ -421,6 +430,65 @@ class Url_Extractor {
 			$this->script_tags[] = $script_tag;
 
 			return sprintf( $script_placeholder, $index );
+		}, $html_string );
+
+		// First, extract and preserve complete conditional comments
+		$html_string = preg_replace_callback( $complete_conditional_regex, function ( $matches ) use ( &$conditional_placeholder, &$conditional_comments ) {
+			$index = count( $conditional_comments );
+			$conditional_comment = $matches[0]; // The complete conditional comment
+
+			// Process URLs in the conditional comment if needed
+			$conditional_comment = preg_replace_callback( '/<script\b([^>]*)src=(["\'])([^"\']+)(["\'])([^>]*)>/i', function ( $src_matches ) {
+				$before_src  = $src_matches[1];
+				$quote_start = $src_matches[2];
+				$src_url     = $src_matches[3];
+				$quote_end   = $src_matches[4];
+				$after_src   = $src_matches[5];
+
+				// Process the URL
+				$updated_url = $this->add_to_extracted_urls( $src_url );
+
+				return "<script{$before_src}src={$quote_start}{$updated_url}{$quote_end}{$after_src}>";
+			}, $conditional_comment );
+
+			// Save the processed conditional comment
+			$conditional_comments[] = $conditional_comment;
+
+			return sprintf( $conditional_placeholder, $index );
+		}, $html_string );
+
+		// Then, extract and fix incomplete conditional comments
+		$html_string = preg_replace_callback( $incomplete_conditional_regex, function ( $matches ) use ( &$conditional_placeholder, &$conditional_comments ) {
+			$index = count( $conditional_comments );
+			$conditional_comment = $matches[0]; // The incomplete conditional comment
+
+			// Check if this is actually an incomplete conditional comment
+			if (strpos($conditional_comment, '<!--[if') === 0 && strpos($conditional_comment, '<![endif]-->') === false) {
+				// Process URLs in the conditional comment if needed
+				$conditional_comment = preg_replace_callback( '/<script\b([^>]*)src=(["\'])([^"\']+)(["\'])([^>]*)>/i', function ( $src_matches ) {
+					$before_src  = $src_matches[1];
+					$quote_start = $src_matches[2];
+					$src_url     = $src_matches[3];
+					$quote_end   = $src_matches[4];
+					$after_src   = $src_matches[5];
+
+					// Process the URL
+					$updated_url = $this->add_to_extracted_urls( $src_url );
+
+					return "<script{$before_src}src={$quote_start}{$updated_url}{$quote_end}{$after_src}>";
+				}, $conditional_comment );
+
+				// Add the missing closing tag
+				$conditional_comment .= '<![endif]-->';
+
+				// Save the processed and fixed conditional comment
+				$conditional_comments[] = $conditional_comment;
+
+				return sprintf( $conditional_placeholder, $index );
+			}
+
+			// If it's not actually an incomplete conditional comment, return it unchanged
+			return $conditional_comment;
 		}, $html_string );
 
 		// Use PHP's native DOMDocument
@@ -501,6 +569,16 @@ class Url_Extractor {
 				$index = (int) $matches[1];
 				if ( isset( $this->script_tags[ $index ] ) ) {
 					return $this->script_tags[ $index ];
+				} else {
+					return '';
+				}
+			}, $html );
+
+			// Restore conditional comments
+			$html = preg_replace_callback( '/<!-- CONDITIONAL_COMMENT_PLACEHOLDER_(\d+) -->/', function ( $matches ) use ( $conditional_comments ) {
+				$index = (int) $matches[1];
+				if ( isset( $conditional_comments[ $index ] ) ) {
+					return $conditional_comments[ $index ];
 				} else {
 					return '';
 				}
@@ -665,7 +743,7 @@ class Url_Extractor {
 
 	/**
 	 * Use regex to extract URLs from JSON files (e.g. /feed/)
-	 * @return string The JSON with all of the URLs converted
+	 * @return string The JSON with all the URLs converted
 	 */
 	private function extract_and_replace_urls_in_json() {
 		$json_string = $this->get_body();
