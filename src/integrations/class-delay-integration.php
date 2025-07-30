@@ -73,7 +73,7 @@ class Delay_Integration extends Integration {
 	 * @return void
 	 */
 	public function set_delayed( $delay = 60 ) {
-		update_option( 'simply_static_delayed_until', time() + $delay );
+		update_option( 'simply_static_delayed_until', time() + intval($delay) );
 	}
 
 	/**
