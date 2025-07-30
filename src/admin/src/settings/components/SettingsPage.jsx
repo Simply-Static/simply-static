@@ -48,7 +48,8 @@ function SettingsPage() {
         isStudio,
         canRunIntegration,
         showMobileNav,
-        setShowMobileNav
+        setShowMobileNav,
+        isDelayed
     } = useContext(SettingsContext);
     const [activeItem, setActiveItem] = useState({activeItem: "/"});
     const [initialPage, setInitialPage] = useState(localStorage.getItem('ss-initial-page') ? localStorage.getItem('ss-initial-page') : options.initial);
@@ -119,6 +120,12 @@ function SettingsPage() {
                 'type': selectedExportType
             }
         }).then(resp => {
+            var json = JSON.parse(resp);
+            if (json.status === 500 ) {
+                alert(json.message);
+                setDisabledButton(false);
+                return;
+            }
             setIsRunning(true);
         });
     }
@@ -202,17 +209,20 @@ function SettingsPage() {
                                     :
                                     <p className={"version-number"}>Version: <b>{options.version}</b></p>
                                 }
+
                                 <div className={`generate-container ${disabledButton ? 'generating' : ''}`}>
                                     {!disabledButton && <Button onClick={() => {
                                         setSelectedExportType('export');
                                         startExport();
                                     }}
-                                                                disabled={disabledButton}
-                                                                className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
+                                    disabled={disabledButton || isDelayed}
+                                    className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
                                     >
                                         {!disabledButton && [<Dashicon icon="update"/>,
                                             __('Generate', 'simply-static')
                                         ]}
+
+                                        {!disabledButton && isDelayed>0 && <>{isDelayed}s</>}
 
                                         {disabledButton && [<Dashicon icon="update spin"/>,
                                             __('Generating...', 'simply-static'),
@@ -311,12 +321,15 @@ function SettingsPage() {
                                         {!disabledButton && <Button onClick={() => {
                                             startExport();
                                         }}
-                                                                    disabled={disabledButton}
+                                                                    disabled={disabledButton || isDelayed}
                                                                     className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
                                         >
                                             {!disabledButton && [<Dashicon icon="update"/>,
                                                 __('Generate', 'simply-static')
                                             ]}
+
+                                            {!disabledButton && isDelayed>0 && <> {isDelayed}s</>}
+
                                             {disabledButton && <Dashicon icon="update spin"/>}
                                         </Button>}
                                         {disabledButton && <>

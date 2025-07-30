@@ -1,1 +1,242 @@
-(globalThis.webpackChunksimplystatic_settings=globalThis.webpackChunksimplystatic_settings||[]).push([[723],{553:(e,t,n)=>{var r,s=Object.create,i=Object.defineProperty,a=Object.getOwnPropertyDescriptor,o=Object.getOwnPropertyNames,l=Object.getPrototypeOf,p=Object.prototype.hasOwnProperty,h=(e,t,n,r)=>{if(t&&"object"==typeof t||"function"==typeof t)for(let s of o(t))p.call(e,s)||s===n||i(e,s,{get:()=>t[s],enumerable:!(r=a(t,s))||r.enumerable});return e},u=(e,t,n)=>(((e,t,n)=>{t in e?i(e,t,{enumerable:!0,configurable:!0,writable:!0,value:n}):e[t]=n})(e,"symbol"!=typeof t?t+"":t,n),n),c={};((e,t)=>{for(var n in t)i(e,n,{get:t[n],enumerable:!0})})(c,{default:()=>m}),e.exports=(r=c,h(i({},"__esModule",{value:!0}),r));var d=((e,t,n)=>(n=null!=e?s(l(e)):{},h(e&&e.__esModule?n:i(n,"default",{value:e,enumerable:!0}),e)))(n(609)),y=n(327);class m extends d.Component{constructor(){super(...arguments),u(this,"onReady",((...e)=>this.props.onReady(...e))),u(this,"onPlay",((...e)=>this.props.onPlay(...e))),u(this,"onBuffer",((...e)=>this.props.onBuffer(...e))),u(this,"onBufferEnd",((...e)=>this.props.onBufferEnd(...e))),u(this,"onPause",((...e)=>this.props.onPause(...e))),u(this,"onEnded",((...e)=>this.props.onEnded(...e))),u(this,"onError",((...e)=>this.props.onError(...e))),u(this,"onPlayBackRateChange",(e=>this.props.onPlaybackRateChange(e.target.playbackRate))),u(this,"onEnablePIP",((...e)=>this.props.onEnablePIP(...e))),u(this,"onSeek",(e=>{this.props.onSeek(e.target.currentTime)})),u(this,"onDurationChange",(()=>{const e=this.getDuration();this.props.onDuration(e)})),u(this,"mute",(()=>{this.player.muted=!0})),u(this,"unmute",(()=>{this.player.muted=!1})),u(this,"ref",(e=>{this.player=e}))}componentDidMount(){this.props.onMount&&this.props.onMount(this),this.addListeners(this.player);const e=this.getPlaybackId(this.props.url);e&&(this.player.playbackId=e)}componentWillUnmount(){this.player.playbackId=null,this.removeListeners(this.player)}addListeners(e){const{playsinline:t}=this.props;e.addEventListener("play",this.onPlay),e.addEventListener("waiting",this.onBuffer),e.addEventListener("playing",this.onBufferEnd),e.addEventListener("pause",this.onPause),e.addEventListener("seeked",this.onSeek),e.addEventListener("ended",this.onEnded),e.addEventListener("error",this.onError),e.addEventListener("ratechange",this.onPlayBackRateChange),e.addEventListener("enterpictureinpicture",this.onEnablePIP),e.addEventListener("leavepictureinpicture",this.onDisablePIP),e.addEventListener("webkitpresentationmodechanged",this.onPresentationModeChange),e.addEventListener("canplay",this.onReady),t&&e.setAttribute("playsinline","")}removeListeners(e){e.removeEventListener("canplay",this.onReady),e.removeEventListener("play",this.onPlay),e.removeEventListener("waiting",this.onBuffer),e.removeEventListener("playing",this.onBufferEnd),e.removeEventListener("pause",this.onPause),e.removeEventListener("seeked",this.onSeek),e.removeEventListener("ended",this.onEnded),e.removeEventListener("error",this.onError),e.removeEventListener("ratechange",this.onPlayBackRateChange),e.removeEventListener("enterpictureinpicture",this.onEnablePIP),e.removeEventListener("leavepictureinpicture",this.onDisablePIP),e.removeEventListener("canplay",this.onReady)}async load(e){var t;const{onError:n,config:r}=this.props;if(!(null==(t=globalThis.customElements)?void 0:t.get("mux-player")))try{const e="https://cdn.jsdelivr.net/npm/@mux/mux-player@VERSION/dist/mux-player.mjs".replace("VERSION",r.version);await import(`${e}`),this.props.onLoaded()}catch(e){n(e)}const[,s]=e.match(y.MATCH_URL_MUX);this.player.playbackId=s}play(){const e=this.player.play();e&&e.catch(this.props.onError)}pause(){this.player.pause()}stop(){this.player.playbackId=null}seekTo(e,t=!0){this.player.currentTime=e,t||this.pause()}setVolume(e){this.player.volume=e}enablePIP(){this.player.requestPictureInPicture&&document.pictureInPictureElement!==this.player&&this.player.requestPictureInPicture()}disablePIP(){document.exitPictureInPicture&&document.pictureInPictureElement===this.player&&document.exitPictureInPicture()}setPlaybackRate(e){try{this.player.playbackRate=e}catch(e){this.props.onError(e)}}getDuration(){if(!this.player)return null;const{duration:e,seekable:t}=this.player;return e===1/0&&t.length>0?t.end(t.length-1):e}getCurrentTime(){return this.player?this.player.currentTime:null}getSecondsLoaded(){if(!this.player)return null;const{buffered:e}=this.player;if(0===e.length)return 0;const t=e.end(e.length-1),n=this.getDuration();return t>n?n:t}getPlaybackId(e){const[,t]=e.match(y.MATCH_URL_MUX);return t}render(){const{url:e,playing:t,loop:n,controls:r,muted:s,config:i,width:a,height:o}=this.props,l={width:"auto"===a?a:"100%",height:"auto"===o?o:"100%"};return!1===r&&(l["--controls"]="none"),d.default.createElement("mux-player",{ref:this.ref,"playback-id":this.getPlaybackId(e),style:l,preload:"auto",autoPlay:t||void 0,muted:s?"":void 0,loop:n?"":void 0,...i.attributes})}}u(m,"displayName","Mux"),u(m,"canPlay",y.canPlay.mux)}}]);
+(self["webpackChunksimplystatic_settings"] = self["webpackChunksimplystatic_settings"] || []).push([["reactPlayerMux"],{
+
+/***/ "./node_modules/react-player/lib/players/Mux.js":
+/*!******************************************************!*\
+  !*** ./node_modules/react-player/lib/players/Mux.js ***!
+  \******************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var __publicField = (obj, key, value) => {
+  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
+var Mux_exports = {};
+__export(Mux_exports, {
+  default: () => Mux
+});
+module.exports = __toCommonJS(Mux_exports);
+var import_react = __toESM(__webpack_require__(/*! react */ "react"));
+var import_patterns = __webpack_require__(/*! ../patterns */ "./node_modules/react-player/lib/patterns.js");
+const SDK_URL = "https://cdn.jsdelivr.net/npm/@mux/mux-player@VERSION/dist/mux-player.mjs";
+class Mux extends import_react.Component {
+  constructor() {
+    super(...arguments);
+    // Proxy methods to prevent listener leaks
+    __publicField(this, "onReady", (...args) => this.props.onReady(...args));
+    __publicField(this, "onPlay", (...args) => this.props.onPlay(...args));
+    __publicField(this, "onBuffer", (...args) => this.props.onBuffer(...args));
+    __publicField(this, "onBufferEnd", (...args) => this.props.onBufferEnd(...args));
+    __publicField(this, "onPause", (...args) => this.props.onPause(...args));
+    __publicField(this, "onEnded", (...args) => this.props.onEnded(...args));
+    __publicField(this, "onError", (...args) => this.props.onError(...args));
+    __publicField(this, "onPlayBackRateChange", (event) => this.props.onPlaybackRateChange(event.target.playbackRate));
+    __publicField(this, "onEnablePIP", (...args) => this.props.onEnablePIP(...args));
+    __publicField(this, "onSeek", (e) => {
+      this.props.onSeek(e.target.currentTime);
+    });
+    __publicField(this, "onDurationChange", () => {
+      const duration = this.getDuration();
+      this.props.onDuration(duration);
+    });
+    __publicField(this, "mute", () => {
+      this.player.muted = true;
+    });
+    __publicField(this, "unmute", () => {
+      this.player.muted = false;
+    });
+    __publicField(this, "ref", (player) => {
+      this.player = player;
+    });
+  }
+  componentDidMount() {
+    this.props.onMount && this.props.onMount(this);
+    this.addListeners(this.player);
+    const playbackId = this.getPlaybackId(this.props.url);
+    if (playbackId) {
+      this.player.playbackId = playbackId;
+    }
+  }
+  componentWillUnmount() {
+    this.player.playbackId = null;
+    this.removeListeners(this.player);
+  }
+  addListeners(player) {
+    const { playsinline } = this.props;
+    player.addEventListener("play", this.onPlay);
+    player.addEventListener("waiting", this.onBuffer);
+    player.addEventListener("playing", this.onBufferEnd);
+    player.addEventListener("pause", this.onPause);
+    player.addEventListener("seeked", this.onSeek);
+    player.addEventListener("ended", this.onEnded);
+    player.addEventListener("error", this.onError);
+    player.addEventListener("ratechange", this.onPlayBackRateChange);
+    player.addEventListener("enterpictureinpicture", this.onEnablePIP);
+    player.addEventListener("leavepictureinpicture", this.onDisablePIP);
+    player.addEventListener("webkitpresentationmodechanged", this.onPresentationModeChange);
+    player.addEventListener("canplay", this.onReady);
+    if (playsinline) {
+      player.setAttribute("playsinline", "");
+    }
+  }
+  removeListeners(player) {
+    player.removeEventListener("canplay", this.onReady);
+    player.removeEventListener("play", this.onPlay);
+    player.removeEventListener("waiting", this.onBuffer);
+    player.removeEventListener("playing", this.onBufferEnd);
+    player.removeEventListener("pause", this.onPause);
+    player.removeEventListener("seeked", this.onSeek);
+    player.removeEventListener("ended", this.onEnded);
+    player.removeEventListener("error", this.onError);
+    player.removeEventListener("ratechange", this.onPlayBackRateChange);
+    player.removeEventListener("enterpictureinpicture", this.onEnablePIP);
+    player.removeEventListener("leavepictureinpicture", this.onDisablePIP);
+    player.removeEventListener("canplay", this.onReady);
+  }
+  async load(url) {
+    var _a;
+    const { onError, config } = this.props;
+    if (!((_a = globalThis.customElements) == null ? void 0 : _a.get("mux-player"))) {
+      try {
+        const sdkUrl = SDK_URL.replace("VERSION", config.version);
+        await import(
+          /* webpackIgnore: true */
+          `${sdkUrl}`
+        );
+        this.props.onLoaded();
+      } catch (error) {
+        onError(error);
+      }
+    }
+    const [, id] = url.match(import_patterns.MATCH_URL_MUX);
+    this.player.playbackId = id;
+  }
+  play() {
+    const promise = this.player.play();
+    if (promise) {
+      promise.catch(this.props.onError);
+    }
+  }
+  pause() {
+    this.player.pause();
+  }
+  stop() {
+    this.player.playbackId = null;
+  }
+  seekTo(seconds, keepPlaying = true) {
+    this.player.currentTime = seconds;
+    if (!keepPlaying) {
+      this.pause();
+    }
+  }
+  setVolume(fraction) {
+    this.player.volume = fraction;
+  }
+  enablePIP() {
+    if (this.player.requestPictureInPicture && document.pictureInPictureElement !== this.player) {
+      this.player.requestPictureInPicture();
+    }
+  }
+  disablePIP() {
+    if (document.exitPictureInPicture && document.pictureInPictureElement === this.player) {
+      document.exitPictureInPicture();
+    }
+  }
+  setPlaybackRate(rate) {
+    try {
+      this.player.playbackRate = rate;
+    } catch (error) {
+      this.props.onError(error);
+    }
+  }
+  getDuration() {
+    if (!this.player)
+      return null;
+    const { duration, seekable } = this.player;
+    if (duration === Infinity && seekable.length > 0) {
+      return seekable.end(seekable.length - 1);
+    }
+    return duration;
+  }
+  getCurrentTime() {
+    if (!this.player)
+      return null;
+    return this.player.currentTime;
+  }
+  getSecondsLoaded() {
+    if (!this.player)
+      return null;
+    const { buffered } = this.player;
+    if (buffered.length === 0) {
+      return 0;
+    }
+    const end = buffered.end(buffered.length - 1);
+    const duration = this.getDuration();
+    if (end > duration) {
+      return duration;
+    }
+    return end;
+  }
+  getPlaybackId(url) {
+    const [, id] = url.match(import_patterns.MATCH_URL_MUX);
+    return id;
+  }
+  render() {
+    const { url, playing, loop, controls, muted, config, width, height } = this.props;
+    const style = {
+      width: width === "auto" ? width : "100%",
+      height: height === "auto" ? height : "100%"
+    };
+    if (controls === false) {
+      style["--controls"] = "none";
+    }
+    return /* @__PURE__ */ import_react.default.createElement(
+      "mux-player",
+      {
+        ref: this.ref,
+        "playback-id": this.getPlaybackId(url),
+        style,
+        preload: "auto",
+        autoPlay: playing || void 0,
+        muted: muted ? "" : void 0,
+        loop: loop ? "" : void 0,
+        ...config.attributes
+      }
+    );
+  }
+}
+__publicField(Mux, "displayName", "Mux");
+__publicField(Mux, "canPlay", import_patterns.canPlay.mux);
+
+
+/***/ })
+
+}]);
+//# sourceMappingURL=reactPlayerMux.js.map

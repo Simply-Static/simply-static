@@ -169,6 +169,10 @@ toplevel_page_simply-static img {
           background: #b32d2e;
           border-color: #9b2626;
         }
+
+        &:disabled {
+          opacity: 0.5;
+        }
       }
 
       .cancel-button {

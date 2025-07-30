@@ -39,7 +39,8 @@ class Integrations {
 			'github'            => Github_Integration::class,
 			'shortpixel'        => Shortpixel_Integration::class,
 			'redirection'       => Redirection_Integration::class,
-			'environments'      => Environments_Integration::class
+			'environments'      => Environments_Integration::class,
+			'delay'             => Delay_Integration::class,
 		] );
 	}
 
@@ -49,6 +50,7 @@ class Integrations {
 
 		// Core Integrations.
 		require_once $path . 'class-ss-adminbar-integration.php';
+		require_once $path . 'class-delay-integration.php';
 
 		// Third-Party Integrations.
 		require_once $path . 'class-yoast-integration.php';
