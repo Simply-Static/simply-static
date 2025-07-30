@@ -384,7 +384,7 @@ class Url_Extractor {
 		$script_regex       = '/<script\b[^>]*>.*?<\/script>/is';
 
 		// Extract and preserve conditional comments
-		$conditional_comments = [];
+		$conditional_comments    = [];
 		$conditional_placeholder = '<!-- CONDITIONAL_COMMENT_PLACEHOLDER_%d -->';
 		// Match conditional comments with a simpler, more direct approach
 		// First pattern: match complete conditional comments (with closing tags)
@@ -434,7 +434,7 @@ class Url_Extractor {
 
 		// First, extract and preserve complete conditional comments
 		$html_string = preg_replace_callback( $complete_conditional_regex, function ( $matches ) use ( &$conditional_placeholder, &$conditional_comments ) {
-			$index = count( $conditional_comments );
+			$index               = count( $conditional_comments );
 			$conditional_comment = $matches[0]; // The complete conditional comment
 
 			// Process URLs in the conditional comment if needed
@@ -459,11 +459,11 @@ class Url_Extractor {
 
 		// Then, extract and fix incomplete conditional comments
 		$html_string = preg_replace_callback( $incomplete_conditional_regex, function ( $matches ) use ( &$conditional_placeholder, &$conditional_comments ) {
-			$index = count( $conditional_comments );
+			$index               = count( $conditional_comments );
 			$conditional_comment = $matches[0]; // The incomplete conditional comment
 
 			// Check if this is actually an incomplete conditional comment
-			if (strpos($conditional_comment, '<!--[if') === 0 && strpos($conditional_comment, '<![endif]-->') === false) {
+			if ( strpos( $conditional_comment, '<!--[if' ) === 0 && strpos( $conditional_comment, '<![endif]-->' ) === false ) {
 				// Process URLs in the conditional comment if needed
 				$conditional_comment = preg_replace_callback( '/<script\b([^>]*)src=(["\'])([^"\']+)(["\'])([^>]*)>/i', function ( $src_matches ) {
 					$before_src  = $src_matches[1];
@@ -502,7 +502,15 @@ class Url_Extractor {
 		$dom->formatOutput       = false;
 
 		// Load the HTML directly without a wrapper
-		$dom->loadHTML( mb_convert_encoding( $html_string, 'HTML-ENTITIES', 'UTF-8' ) );
+		$utf8_html_string = htmlspecialchars_decode( htmlentities( $html_string, ENT_COMPAT, 'utf-8', false ) );
+
+		// Check if the HTML string is empty to prevent ValueError
+		if ( empty( $utf8_html_string ) ) {
+			// Return the original HTML string if the processed string is empty
+			return $html_string;
+		}
+
+		$dom->loadHTML( $utf8_html_string );
 
 		// Clear any errors
 		libxml_clear_errors();
