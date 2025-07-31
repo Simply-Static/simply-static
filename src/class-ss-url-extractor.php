@@ -252,12 +252,25 @@ class Url_Extractor {
 	}
 
 	/**
-	 * Preserve JSON attributes in HTML content
+	 * Flag for preserving attributes.
+	 *
+	 * @return mixed|null
+	 */
+	protected function can_preserve_attributes() {
+		return apply_filters(' ss_extract_html_preserve_attributes', true );
+	}
+
+	/**
+	 * Preserve attributes in HTML content
 	 *
 	 * @param string $content The HTML content
 	 * @return array An array containing the modified content and the preserved JSON attributes
 	 */
 	private function preserve_attributes($content) {
+
+		if ( ! $this->can_preserve_attributes() ) {
+			return $content;
+		}
 
 		$entities = [
 			'quote' => '&quot;',
@@ -279,13 +292,18 @@ class Url_Extractor {
 	}
 
 	/**
-	 * Restore JSON attributes in HTML content
+	 * Restore attributes in HTML content
 	 *
 	 * @param string $content The HTML content with placeholders
-	 * @param array $preserved_json_attributes The preserved JSON attributes
-	 * @return string The HTML content with restored JSON attributes
+	 *
+	 * @return string The HTML content with restored attributes
 	 */
 	private function restore_attributes($content) {
+
+		if ( ! $this->can_preserve_attributes() ) {
+			return $content;
+		}
+
 		$entities = [
 			'quote' => '&quot;',
 			'apos' => '&apos;',
