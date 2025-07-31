@@ -254,11 +254,38 @@ class Url_Extractor {
 		$destination_url = $this->options->get_destination_url();
 		$response_body   = $this->get_body();
 
+		// Preserve Elementor data-settings JSON attributes before replacement
+		$preserved_data_settings = [];
+		// Find all div tags with data-settings attributes
+		if (preg_match_all('/<div\b[^>]*\bdata-settings=(["\'])([^"\']*)\1[^>]*>/is', $response_body, $matches, PREG_SET_ORDER)) {
+			foreach ($matches as $match_index => $match) {
+				$full_tag = $match[0];
+				$quote = $match[1];
+				$data_settings_value = $match[2];
+
+				// Decode the attribute value to check if it's valid JSON
+				$decoded_value = htmlspecialchars_decode($data_settings_value);
+				$json_data = json_decode($decoded_value, true);
+
+				// If it's valid JSON, preserve it
+				if ($json_data !== null) {
+					$placeholder = "<!-- DIV_DATA_SETTINGS_PLACEHOLDER_{$match_index} -->";
+					$preserved_data_settings[$match_index] = $full_tag;
+					$response_body = str_replace($full_tag, $placeholder, $response_body);
+				}
+			}
+		}
+
 		// replace wp_json_encode'd urls, as used by WP's `concatemoji`
 		$response_body = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
 
 		// replace encoded URLs, as found in query params
 		$response_body = preg_replace( '/(https?%3A)?%2F%2F' . addcslashes( urlencode( Util::origin_host() ), '.' ) . '/i', urlencode( $destination_url ), $response_body );
+
+		// Restore preserved data-settings attributes
+		foreach ($preserved_data_settings as $index => $data_settings) {
+			$response_body = str_replace("<!-- DIV_DATA_SETTINGS_PLACEHOLDER_{$index} -->", $data_settings, $response_body);
+		}
 
 		$this->save_body( $response_body );
 	}
@@ -273,12 +300,39 @@ class Url_Extractor {
 	public function force_replace( $content ) {
 		$destination_url = $this->options->get_destination_url();
 
+		// Preserve Elementor data-settings JSON attributes before replacement
+		$preserved_data_settings = [];
+		// Find all div tags with data-settings attributes
+		if (preg_match_all('/<div\b[^>]*\bdata-settings=(["\'])([^"\']*)\1[^>]*>/is', $content, $matches, PREG_SET_ORDER)) {
+			foreach ($matches as $match_index => $match) {
+				$full_tag = $match[0];
+				$quote = $match[1];
+				$data_settings_value = $match[2];
+
+				// Decode the attribute value to check if it's valid JSON
+				$decoded_value = htmlspecialchars_decode($data_settings_value);
+				$json_data = json_decode($decoded_value, true);
+
+				// If it's valid JSON, preserve it
+				if ($json_data !== null) {
+					$placeholder = "<!-- DIV_DATA_SETTINGS_PLACEHOLDER_{$match_index} -->";
+					$preserved_data_settings[$match_index] = $full_tag;
+					$content = str_replace($full_tag, $placeholder, $content);
+				}
+			}
+		}
+
 		// replace any instance of the origin url, whether it starts with https://, http://, or //.
 		$content = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $destination_url, $content );
 
 		// replace wp_json_encode'd urls, as used by WP's `concatemoji`.
 		// e.g. {"concatemoji":"http:\/\/www.example.org\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.6.1"}.
 		$content = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $content );
+
+		// Restore preserved data-settings attributes
+		foreach ($preserved_data_settings as $index => $data_settings) {
+			$content = str_replace("<!-- DIV_DATA_SETTINGS_PLACEHOLDER_{$index} -->", $data_settings, $content);
+		}
 
 		return $content;
 	}
@@ -331,6 +385,18 @@ class Url_Extractor {
 				$extracted_urls  = array();
 				$attribute_value = $tag->getAttribute( $attribute_name );
 
+				// Skip processing data-settings attribute for Elementor divs to prevent breaking JSON structure
+				if ( $attribute_name === 'data-settings' && $tag_name === 'div' ) {
+					// Decode the attribute value to check if it's valid JSON
+					$decoded_value = htmlspecialchars_decode($attribute_value);
+					$json_data = json_decode($decoded_value, true);
+
+					// If it's valid JSON, don't process it as a URL
+					if ($json_data !== null) {
+						continue;
+					}
+				}
+
 				// we need to verify that the meta tag is a URL.
 				if ( 'meta' === $tag_name ) {
 					if ( filter_var( $attribute_value, FILTER_VALIDATE_URL ) ) {
@@ -378,7 +444,28 @@ class Url_Extractor {
 		$html_string = $this->get_body();
 		$match_tags  = apply_filters( 'ss_match_tags', self::$match_tags );
 
-		// First, extract and save all script tags using regex to ensure they're preserved
+		// First, extract and save all div tags with data-settings attributes to preserve JSON structure
+		$data_settings_tags = [];
+		$data_settings_placeholder = '<!-- DATA_SETTINGS_PLACEHOLDER_%d -->';
+		$data_settings_regex = '/<div\b[^>]*\bdata-settings=(["\'])([^"\']*)\1[^>]*>/is';
+
+		$html_string = preg_replace_callback($data_settings_regex, function($matches) use (&$data_settings_tags, $data_settings_placeholder) {
+			$full_tag = $matches[0];
+			$quote = $matches[1];
+			$data_settings_value = $matches[2];
+
+			// Only preserve if it contains valid JSON
+			$decoded_value = htmlspecialchars_decode($data_settings_value);
+			if (substr(trim($decoded_value), 0, 1) === '{') {
+				$index = count($data_settings_tags);
+				$data_settings_tags[] = $full_tag;
+				return sprintf($data_settings_placeholder, $index);
+			}
+
+			return $full_tag;
+		}, $html_string);
+
+		// Next, extract and save all script tags using regex to ensure they're preserved
 		$this->script_tags  = []; // Reset the array for each call
 		$script_placeholder = '<!-- SCRIPT_PLACEHOLDER_%d -->';
 		$script_regex       = '/<script\b[^>]*>.*?<\/script>/is';
@@ -587,6 +674,16 @@ class Url_Extractor {
 				$index = (int) $matches[1];
 				if ( isset( $conditional_comments[ $index ] ) ) {
 					return $conditional_comments[ $index ];
+				} else {
+					return '';
+				}
+			}, $html );
+
+			// Restore data-settings tags
+			$html = preg_replace_callback( '/<!-- DATA_SETTINGS_PLACEHOLDER_(\d+) -->/', function ( $matches ) use ( $data_settings_tags ) {
+				$index = (int) $matches[1];
+				if ( isset( $data_settings_tags[ $index ] ) ) {
+					return $data_settings_tags[ $index ];
 				} else {
 					return '';
 				}
