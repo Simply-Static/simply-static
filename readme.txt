@@ -178,7 +178,7 @@ and much more.
 
 = Get the Pro version =
 
-You can get the pro version [here](https://simplystatic.com/pro/).
+You can get the pro version [here](https://simplystatic.com/pricing/).
 
 = Simply Static Course =
 
