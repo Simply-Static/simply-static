@@ -235,6 +235,94 @@ class Url_Extractor {
 	}
 
 	/**
+	 * Check if a string is valid JSON
+	 *
+	 * @param string $string The string to check
+	 * @return bool Whether the string is valid JSON
+	 */
+	private function is_valid_json($string) {
+		if (!is_string($string)) {
+			return false;
+		}
+
+		$decoded_value = htmlspecialchars_decode($string);
+		$json_data = json_decode($decoded_value, true);
+
+		return $json_data !== null;
+	}
+
+	/**
+	 * Flag for preserving attributes.
+	 *
+	 * @return mixed|null
+	 */
+	protected function can_preserve_attributes() {
+		return apply_filters(' ss_extract_html_preserve_attributes', true );
+	}
+
+	/**
+	 * Preserve attributes in HTML content
+	 *
+	 * @param string $content The HTML content
+	 * @return array An array containing the modified content and the preserved JSON attributes
+	 */
+	private function preserve_attributes($content) {
+
+		if ( ! $this->can_preserve_attributes() ) {
+			return $content;
+		}
+
+		$entities = [
+			'quote' => '&quot;',
+			'apos' => '&apos;',
+			'lessthan' => '&lt;',
+			'greatthan' => '&gt;',
+			'ampersand' => '&amp;'
+		];
+
+		foreach ($entities as $placehoder_name => $entity) {
+			if (strpos($content, $entity) !== false) {
+				$placeholder =  strtoupper( $placehoder_name ) . "_PLACEHOLDER";
+				$content = str_replace($entity, $placeholder, $content);
+			}
+		}
+
+
+		return $content;
+	}
+
+	/**
+	 * Restore attributes in HTML content
+	 *
+	 * @param string $content The HTML content with placeholders
+	 *
+	 * @return string The HTML content with restored attributes
+	 */
+	private function restore_attributes($content) {
+
+		if ( ! $this->can_preserve_attributes() ) {
+			return $content;
+		}
+
+		$entities = [
+			'quote' => '&quot;',
+			'apos' => '&apos;',
+			'lessthan' => '&lt;',
+			'greatthan' => '&gt;',
+			'ampersand' => '&amp;'
+		];
+
+		foreach ($entities as $placehoder_name => $entity) {
+			$placeholder =  strtoupper( $placehoder_name ) . "_PLACEHOLDER";
+			if (strpos($content, $placeholder) !== false) {
+				$content = str_replace($placeholder, $entity, $content);
+			}
+		}
+
+		return $content;
+	}
+
+	/**
 	 * Replaces origin URL with destination URL in response body
 	 *
 	 * This is a function of last resort for URL replacement. Ideally it was
@@ -250,15 +338,20 @@ class Url_Extractor {
 	 * @return void
 	 */
 	public function replace_encoded_urls() {
-
 		$destination_url = $this->options->get_destination_url();
 		$response_body   = $this->get_body();
+
+		// Preserve JSON attributes before replacement
+		$response_body = $this->preserve_attributes($response_body);
 
 		// replace wp_json_encode'd urls, as used by WP's `concatemoji`
 		$response_body = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
 
 		// replace encoded URLs, as found in query params
 		$response_body = preg_replace( '/(https?%3A)?%2F%2F' . addcslashes( urlencode( Util::origin_host() ), '.' ) . '/i', urlencode( $destination_url ), $response_body );
+
+		// Restore preserved JSON attributes
+		$response_body = $this->restore_attributes($response_body);
 
 		$this->save_body( $response_body );
 	}
@@ -273,12 +366,18 @@ class Url_Extractor {
 	public function force_replace( $content ) {
 		$destination_url = $this->options->get_destination_url();
 
+		// Preserve JSON attributes before replacement
+		$content = $this->preserve_attributes($content);
+
 		// replace any instance of the origin url, whether it starts with https://, http://, or //.
 		$content = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $destination_url, $content );
 
 		// replace wp_json_encode'd urls, as used by WP's `concatemoji`.
 		// e.g. {"concatemoji":"http:\/\/www.example.org\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.6.1"}.
 		$content = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $content );
+
+		// Restore preserved JSON attributes
+		$content = $this->restore_attributes($content);
 
 		return $content;
 	}
@@ -331,6 +430,12 @@ class Url_Extractor {
 				$extracted_urls  = array();
 				$attribute_value = $tag->getAttribute( $attribute_name );
 
+				// Skip processing any attribute that contains valid JSON to prevent breaking JSON structure
+				if ( $this->is_valid_json($attribute_value) ) {
+					// This attribute contains JSON, don't process it as a URL
+					continue;
+				}
+
 				// we need to verify that the meta tag is a URL.
 				if ( 'meta' === $tag_name ) {
 					if ( filter_var( $attribute_value, FILTER_VALIDATE_URL ) ) {
@@ -378,7 +483,10 @@ class Url_Extractor {
 		$html_string = $this->get_body();
 		$match_tags  = apply_filters( 'ss_match_tags', self::$match_tags );
 
-		// First, extract and save all script tags using regex to ensure they're preserved
+		// Preserve JSON attributes before processing
+		$html_string = $this->preserve_attributes($html_string);
+
+		// Next, extract and save all script tags using regex to ensure they're preserved
 		$this->script_tags  = []; // Reset the array for each call
 		$script_placeholder = '<!-- SCRIPT_PLACEHOLDER_%d -->';
 		$script_regex       = '/<script\b[^>]*>.*?<\/script>/is';
@@ -592,6 +700,11 @@ class Url_Extractor {
 				}
 			}, $html );
 
+			// Restore JSON attributes
+			$html = $this->restore_attributes($html);
+
+			$html = apply_filters( 'ss_html_after_restored_attributes', $html, $this );
+
 			return $html;
 		}
 	}
@@ -653,7 +766,7 @@ class Url_Extractor {
 	}
 
 	private function extract_and_replace_urls_in_script( $text ) {
-		if ( $this->is_json( $text ) ) {
+		if ( $this->is_valid_json( $text ) ) {
 			$decoded_text = html_entity_decode( $text, ENT_NOQUOTES );
 		} else {
 			$decoded_text = html_entity_decode( $text );
@@ -690,9 +803,10 @@ class Url_Extractor {
 
 	/**
 	 * Check whether a given string is a valid JSON representation.
+	 * 
+	 * This is a legacy method, use is_valid_json() instead.
 	 *
-	 * Copied from: WP CLI, https://github.com/wp-cli/wp-cli/blob/f3e4b0785aa3d3132ee73be30aedca8838a8fa06/php/utils.php#L1600-L1612
-	 *
+	 * @deprecated Use is_valid_json() instead
 	 * @param string $argument String to evaluate.
 	 * @param bool $ignore_scalars Optional. Whether to ignore scalar values.
 	 *                               Defaults to true.
@@ -700,17 +814,16 @@ class Url_Extractor {
 	 * @return bool Whether the provided string is a valid JSON representation.
 	 */
 	protected function is_json( $argument, $ignore_scalars = true ) {
+		// For backward compatibility, maintain the original behavior
 		if ( ! is_string( $argument ) || '' === $argument ) {
 			return false;
 		}
-		$arg = $argument[0];
+
 		if ( $ignore_scalars && ! in_array( $argument[0], [ '{', '[' ], true ) ) {
 			return false;
 		}
 
-		json_decode( $argument, $assoc = true );
-
-		return json_last_error() === JSON_ERROR_NONE;
+		return $this->is_valid_json($argument);
 	}
 
 	/**
