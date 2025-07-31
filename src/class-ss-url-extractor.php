@@ -235,6 +235,74 @@ class Url_Extractor {
 	}
 
 	/**
+	 * Check if a string is valid JSON
+	 *
+	 * @param string $string The string to check
+	 * @return bool Whether the string is valid JSON
+	 */
+	private function is_valid_json($string) {
+		if (!is_string($string)) {
+			return false;
+		}
+
+		$decoded_value = htmlspecialchars_decode($string);
+		$json_data = json_decode($decoded_value, true);
+
+		return $json_data !== null;
+	}
+
+	/**
+	 * Preserve Elementor data-settings attributes in HTML content
+	 *
+	 * @param string $content The HTML content
+	 * @return array An array containing the modified content and the preserved data-settings
+	 */
+	private function preserve_elementor_data_settings($content) {
+		$preserved_data_settings = [];
+
+		// Find all div tags with data-settings attributes
+		if (preg_match_all('/<div\b[^>]*\bdata-settings=(["\'])([^"\']*)\1[^>]*>/is', $content, $matches, PREG_SET_ORDER)) {
+			foreach ($matches as $match_index => $match) {
+				$full_tag = $match[0];
+				$quote = $match[1]; // " or '
+				$data_settings_value = $match[2];
+
+				// If it's valid JSON, preserve it
+				if ($this->is_valid_json($data_settings_value)) {
+					// Create a placeholder for just the data-settings attribute
+					$placeholder = "data-settings-placeholder=\"{$match_index}\"";
+					// Store the original attribute
+					$preserved_data_settings[$match_index] = "data-settings={$quote}{$data_settings_value}{$quote}";
+					// Replace just the data-settings attribute with the placeholder
+					$modified_tag = preg_replace('/data-settings=(["\'])[^"\']*\1/i', $placeholder, $full_tag);
+					$content = str_replace($full_tag, $modified_tag, $content);
+				}
+			}
+		}
+
+		return [
+			'content' => $content,
+			'preserved_data_settings' => $preserved_data_settings
+		];
+	}
+
+	/**
+	 * Restore Elementor data-settings attributes in HTML content
+	 *
+	 * @param string $content The HTML content with placeholders
+	 * @param array $preserved_data_settings The preserved data-settings
+	 * @return string The HTML content with restored data-settings
+	 */
+	private function restore_elementor_data_settings($content, $preserved_data_settings) {
+		foreach ($preserved_data_settings as $index => $data_settings) {
+			// Replace the placeholder attribute with the original data-settings attribute
+			$content = preg_replace('/data-settings-placeholder="' . $index . '"/i', $data_settings, $content);
+		}
+
+		return $content;
+	}
+
+	/**
 	 * Replaces origin URL with destination URL in response body
 	 *
 	 * This is a function of last resort for URL replacement. Ideally it was
@@ -250,31 +318,13 @@ class Url_Extractor {
 	 * @return void
 	 */
 	public function replace_encoded_urls() {
-
 		$destination_url = $this->options->get_destination_url();
 		$response_body   = $this->get_body();
 
 		// Preserve Elementor data-settings JSON attributes before replacement
-		$preserved_data_settings = [];
-		// Find all div tags with data-settings attributes
-		if (preg_match_all('/<div\b[^>]*\bdata-settings=(["\'])([^"\']*)\1[^>]*>/is', $response_body, $matches, PREG_SET_ORDER)) {
-			foreach ($matches as $match_index => $match) {
-				$full_tag = $match[0];
-				$quote = $match[1];
-				$data_settings_value = $match[2];
-
-				// Decode the attribute value to check if it's valid JSON
-				$decoded_value = htmlspecialchars_decode($data_settings_value);
-				$json_data = json_decode($decoded_value, true);
-
-				// If it's valid JSON, preserve it
-				if ($json_data !== null) {
-					$placeholder = "<!-- DIV_DATA_SETTINGS_PLACEHOLDER_{$match_index} -->";
-					$preserved_data_settings[$match_index] = $full_tag;
-					$response_body = str_replace($full_tag, $placeholder, $response_body);
-				}
-			}
-		}
+		$result = $this->preserve_elementor_data_settings($response_body);
+		$response_body = $result['content'];
+		$preserved_data_settings = $result['preserved_data_settings'];
 
 		// replace wp_json_encode'd urls, as used by WP's `concatemoji`
 		$response_body = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
@@ -283,9 +333,7 @@ class Url_Extractor {
 		$response_body = preg_replace( '/(https?%3A)?%2F%2F' . addcslashes( urlencode( Util::origin_host() ), '.' ) . '/i', urlencode( $destination_url ), $response_body );
 
 		// Restore preserved data-settings attributes
-		foreach ($preserved_data_settings as $index => $data_settings) {
-			$response_body = str_replace("<!-- DIV_DATA_SETTINGS_PLACEHOLDER_{$index} -->", $data_settings, $response_body);
-		}
+		$response_body = $this->restore_elementor_data_settings($response_body, $preserved_data_settings);
 
 		$this->save_body( $response_body );
 	}
@@ -301,26 +349,9 @@ class Url_Extractor {
 		$destination_url = $this->options->get_destination_url();
 
 		// Preserve Elementor data-settings JSON attributes before replacement
-		$preserved_data_settings = [];
-		// Find all div tags with data-settings attributes
-		if (preg_match_all('/<div\b[^>]*\bdata-settings=(["\'])([^"\']*)\1[^>]*>/is', $content, $matches, PREG_SET_ORDER)) {
-			foreach ($matches as $match_index => $match) {
-				$full_tag = $match[0];
-				$quote = $match[1];
-				$data_settings_value = $match[2];
-
-				// Decode the attribute value to check if it's valid JSON
-				$decoded_value = htmlspecialchars_decode($data_settings_value);
-				$json_data = json_decode($decoded_value, true);
-
-				// If it's valid JSON, preserve it
-				if ($json_data !== null) {
-					$placeholder = "<!-- DIV_DATA_SETTINGS_PLACEHOLDER_{$match_index} -->";
-					$preserved_data_settings[$match_index] = $full_tag;
-					$content = str_replace($full_tag, $placeholder, $content);
-				}
-			}
-		}
+		$result = $this->preserve_elementor_data_settings($content);
+		$content = $result['content'];
+		$preserved_data_settings = $result['preserved_data_settings'];
 
 		// replace any instance of the origin url, whether it starts with https://, http://, or //.
 		$content = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $destination_url, $content );
@@ -330,9 +361,7 @@ class Url_Extractor {
 		$content = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $content );
 
 		// Restore preserved data-settings attributes
-		foreach ($preserved_data_settings as $index => $data_settings) {
-			$content = str_replace("<!-- DIV_DATA_SETTINGS_PLACEHOLDER_{$index} -->", $data_settings, $content);
-		}
+		$content = $this->restore_elementor_data_settings($content, $preserved_data_settings);
 
 		return $content;
 	}
@@ -386,15 +415,9 @@ class Url_Extractor {
 				$attribute_value = $tag->getAttribute( $attribute_name );
 
 				// Skip processing data-settings attribute for Elementor divs to prevent breaking JSON structure
-				if ( $attribute_name === 'data-settings' && $tag_name === 'div' ) {
-					// Decode the attribute value to check if it's valid JSON
-					$decoded_value = htmlspecialchars_decode($attribute_value);
-					$json_data = json_decode($decoded_value, true);
-
-					// If it's valid JSON, don't process it as a URL
-					if ($json_data !== null) {
-						continue;
-					}
+				if ( $attribute_name === 'data-settings' && $tag_name === 'div' && $this->is_valid_json($attribute_value) ) {
+					// This is an Elementor data-settings JSON attribute, don't process it as a URL
+					continue;
 				}
 
 				// we need to verify that the meta tag is a URL.
@@ -446,20 +469,20 @@ class Url_Extractor {
 
 		// First, extract and save all div tags with data-settings attributes to preserve JSON structure
 		$data_settings_tags = [];
-		$data_settings_placeholder = '<!-- DATA_SETTINGS_PLACEHOLDER_%d -->';
 		$data_settings_regex = '/<div\b[^>]*\bdata-settings=(["\'])([^"\']*)\1[^>]*>/is';
 
-		$html_string = preg_replace_callback($data_settings_regex, function($matches) use (&$data_settings_tags, $data_settings_placeholder) {
+		$html_string = preg_replace_callback($data_settings_regex, function($matches) use (&$data_settings_tags) {
 			$full_tag = $matches[0];
-			$quote = $matches[1];
+			$quote = $matches[1]; // " or '
 			$data_settings_value = $matches[2];
 
 			// Only preserve if it contains valid JSON
-			$decoded_value = htmlspecialchars_decode($data_settings_value);
-			if (substr(trim($decoded_value), 0, 1) === '{') {
+			if ($this->is_valid_json($data_settings_value)) {
 				$index = count($data_settings_tags);
-				$data_settings_tags[] = $full_tag;
-				return sprintf($data_settings_placeholder, $index);
+				// Store the original attribute
+				$data_settings_tags[$index] = "data-settings={$quote}{$data_settings_value}{$quote}";
+				// Replace just the data-settings attribute with a placeholder
+				return preg_replace('/data-settings=(["\'])[^"\']*\1/i', "data-settings-placeholder=\"{$index}\"", $full_tag);
 			}
 
 			return $full_tag;
@@ -680,14 +703,7 @@ class Url_Extractor {
 			}, $html );
 
 			// Restore data-settings tags
-			$html = preg_replace_callback( '/<!-- DATA_SETTINGS_PLACEHOLDER_(\d+) -->/', function ( $matches ) use ( $data_settings_tags ) {
-				$index = (int) $matches[1];
-				if ( isset( $data_settings_tags[ $index ] ) ) {
-					return $data_settings_tags[ $index ];
-				} else {
-					return '';
-				}
-			}, $html );
+			$html = $this->restore_elementor_data_settings($html, $data_settings_tags);
 
 			return $html;
 		}
@@ -750,7 +766,7 @@ class Url_Extractor {
 	}
 
 	private function extract_and_replace_urls_in_script( $text ) {
-		if ( $this->is_json( $text ) ) {
+		if ( $this->is_valid_json( $text ) ) {
 			$decoded_text = html_entity_decode( $text, ENT_NOQUOTES );
 		} else {
 			$decoded_text = html_entity_decode( $text );
@@ -787,9 +803,10 @@ class Url_Extractor {
 
 	/**
 	 * Check whether a given string is a valid JSON representation.
+	 * 
+	 * This is a legacy method, use is_valid_json() instead.
 	 *
-	 * Copied from: WP CLI, https://github.com/wp-cli/wp-cli/blob/f3e4b0785aa3d3132ee73be30aedca8838a8fa06/php/utils.php#L1600-L1612
-	 *
+	 * @deprecated Use is_valid_json() instead
 	 * @param string $argument String to evaluate.
 	 * @param bool $ignore_scalars Optional. Whether to ignore scalar values.
 	 *                               Defaults to true.
@@ -797,17 +814,16 @@ class Url_Extractor {
 	 * @return bool Whether the provided string is a valid JSON representation.
 	 */
 	protected function is_json( $argument, $ignore_scalars = true ) {
+		// For backward compatibility, maintain the original behavior
 		if ( ! is_string( $argument ) || '' === $argument ) {
 			return false;
 		}
-		$arg = $argument[0];
+
 		if ( $ignore_scalars && ! in_array( $argument[0], [ '{', '[' ], true ) ) {
 			return false;
 		}
 
-		json_decode( $argument, $assoc = true );
-
-		return json_last_error() === JSON_ERROR_NONE;
+		return $this->is_valid_json($argument);
 	}
 
 	/**
