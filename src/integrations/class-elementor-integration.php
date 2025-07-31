@@ -37,7 +37,7 @@ class Elementor_Integration extends Integration {
 	 */
 	public function run() {
 		add_action( 'ss_after_setup_task', [ $this, 'register_assets' ] );
-		add_filter( 'ss_html_after_restored_attributes', [ $this, 'extract_elementor_settings' ], 20, 2 );
+		//add_filter( 'ss_html_after_restored_attributes', [ $this, 'extract_elementor_settings' ], 20, 2 );
 
 		// Register Elementor widgets
 		add_action( 'elementor/widgets/register', [ $this, 'register_widgets' ] );

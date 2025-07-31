@@ -275,7 +275,7 @@ class Url_Extractor {
 		}
 
 
-		$content;
+		return $content;
 	}
 
 	/**
@@ -285,7 +285,7 @@ class Url_Extractor {
 	 * @param array $preserved_json_attributes The preserved JSON attributes
 	 * @return string The HTML content with restored JSON attributes
 	 */
-	private function restore_attributes($content, $preserved_json_attributes) {
+	private function restore_attributes($content) {
 		$entities = [
 			'quote' => '&quot;',
 			'apos' => '&apos;',
