@@ -257,39 +257,25 @@ class Url_Extractor {
 	 * @param string $content The HTML content
 	 * @return array An array containing the modified content and the preserved JSON attributes
 	 */
-	private function preserve_json_attributes($content) {
-		$preserved_json_attributes = [];
+	private function preserve_attributes($content) {
 
-		// Find all tags with attributes that might contain JSON
-		// This pattern matches any HTML tag with any attribute
-		if (preg_match_all('/<([a-z][a-z0-9]*)\b[^>]*\b([a-z0-9\-_]+)=(["\'])([^"\']*)\3[^>]*>/is', $content, $matches, PREG_SET_ORDER)) {
-			foreach ($matches as $match_index => $match) {
-				$full_tag = $match[0];
-				$tag_name = $match[1];
-				$attribute_name = $match[2];
-				$quote = $match[3]; // " or '
-				$attribute_value = $match[4];
+		$entities = [
+			'quote' => '&quot;',
+			'apos' => '&apos;',
+			'lessthan' => '&lt;',
+			'greatthan' => '&gt;',
+			'ampersand' => '&amp;'
+		];
 
-				// If it's valid JSON, preserve it
-				if ($this->is_valid_json($attribute_value)) {
-					// Create a unique key for this tag/attribute combination
-					$key = "{$tag_name}-{$attribute_name}-{$match_index}";
-					// Create a placeholder for the attribute
-					$placeholder = "{$attribute_name}-json-placeholder=\"{$key}\"";
-					// Store the original attribute
-					$preserved_json_attributes[$key] = "{$attribute_name}={$quote}{$attribute_value}{$quote}";
-					// Replace just the attribute with the placeholder
-					$pattern = "/{$attribute_name}=([\"'])[^\"']*\\1/i";
-					$modified_tag = preg_replace($pattern, $placeholder, $full_tag);
-					$content = str_replace($full_tag, $modified_tag, $content);
-				}
+		foreach ($entities as $placehoder_name => $entity) {
+			if (strpos($content, $entity) !== false) {
+				$placeholder =  strtoupper( $placehoder_name ) . "_PLACEHOLDER";
+				$content = str_replace($entity, $placeholder, $content);
 			}
 		}
 
-		return [
-			'content' => $content,
-			'preserved_json_attributes' => $preserved_json_attributes
-		];
+
+		$content;
 	}
 
 	/**
@@ -299,12 +285,20 @@ class Url_Extractor {
 	 * @param array $preserved_json_attributes The preserved JSON attributes
 	 * @return string The HTML content with restored JSON attributes
 	 */
-	private function restore_json_attributes($content, $preserved_json_attributes) {
-		foreach ($preserved_json_attributes as $key => $attribute) {
-			// Extract the attribute name from the key
-			$attribute_name = explode('-', $key)[1];
-			// Replace the placeholder attribute with the original attribute
-			$content = preg_replace('/' . $attribute_name . '-json-placeholder="' . preg_quote($key, '/') . '"/i', $attribute, $content);
+	private function restore_attributes($content, $preserved_json_attributes) {
+		$entities = [
+			'quote' => '&quot;',
+			'apos' => '&apos;',
+			'lessthan' => '&lt;',
+			'greatthan' => '&gt;',
+			'ampersand' => '&amp;'
+		];
+
+		foreach ($entities as $placehoder_name => $entity) {
+			$placeholder =  strtoupper( $placehoder_name ) . "_PLACEHOLDER";
+			if (strpos($content, $placeholder) !== false) {
+				$content = str_replace($placeholder, $entity, $content);
+			}
 		}
 
 		return $content;
@@ -330,9 +324,7 @@ class Url_Extractor {
 		$response_body   = $this->get_body();
 
 		// Preserve JSON attributes before replacement
-		$result = $this->preserve_json_attributes($response_body);
-		$response_body = $result['content'];
-		$preserved_json_attributes = $result['preserved_json_attributes'];
+		$response_body = $this->preserve_attributes($response_body);
 
 		// replace wp_json_encode'd urls, as used by WP's `concatemoji`
 		$response_body = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
@@ -341,7 +333,7 @@ class Url_Extractor {
 		$response_body = preg_replace( '/(https?%3A)?%2F%2F' . addcslashes( urlencode( Util::origin_host() ), '.' ) . '/i', urlencode( $destination_url ), $response_body );
 
 		// Restore preserved JSON attributes
-		$response_body = $this->restore_json_attributes($response_body, $preserved_json_attributes);
+		$response_body = $this->restore_attributes($response_body);
 
 		$this->save_body( $response_body );
 	}
@@ -357,9 +349,7 @@ class Url_Extractor {
 		$destination_url = $this->options->get_destination_url();
 
 		// Preserve JSON attributes before replacement
-		$result = $this->preserve_json_attributes($content);
-		$content = $result['content'];
-		$preserved_json_attributes = $result['preserved_json_attributes'];
+		$content = $this->preserve_attributes($content);
 
 		// replace any instance of the origin url, whether it starts with https://, http://, or //.
 		$content = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $destination_url, $content );
@@ -369,7 +359,7 @@ class Url_Extractor {
 		$content = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $content );
 
 		// Restore preserved JSON attributes
-		$content = $this->restore_json_attributes($content, $preserved_json_attributes);
+		$content = $this->restore_attributes($content);
 
 		return $content;
 	}
@@ -476,9 +466,7 @@ class Url_Extractor {
 		$match_tags  = apply_filters( 'ss_match_tags', self::$match_tags );
 
 		// Preserve JSON attributes before processing
-		$result = $this->preserve_json_attributes($html_string);
-		$html_string = $result['content'];
-		$preserved_json_attributes = $result['preserved_json_attributes'];
+		$html_string = $this->preserve_attributes($html_string);
 
 		// Next, extract and save all script tags using regex to ensure they're preserved
 		$this->script_tags  = []; // Reset the array for each call
@@ -695,7 +683,9 @@ class Url_Extractor {
 			}, $html );
 
 			// Restore JSON attributes
-			$html = $this->restore_json_attributes($html, $preserved_json_attributes);
+			$html = $this->restore_attributes($html);
+
+			$html = apply_filters( 'ss_html_after_restored_attributes', $html, $this );
 
 			return $html;
 		}

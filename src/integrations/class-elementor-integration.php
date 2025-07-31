@@ -37,7 +37,7 @@ class Elementor_Integration extends Integration {
 	 */
 	public function run() {
 		add_action( 'ss_after_setup_task', [ $this, 'register_assets' ] );
-		add_action( 'ss_after_extract_and_replace_urls_in_html', [ $this, 'extract_elementor_settings' ], 20, 2 );
+		add_filter( 'ss_html_after_restored_attributes', [ $this, 'extract_elementor_settings' ], 20, 2 );
 
 		// Register Elementor widgets
 		add_action( 'elementor/widgets/register', [ $this, 'register_widgets' ] );
@@ -61,7 +61,7 @@ class Elementor_Integration extends Integration {
 			return preg_replace_callback($pattern, function($matches) {
 				$full_tag = $matches[0];
 				$json = $matches[2];
-
+Util::debug_log('extract_elementor_settings: ' . $json);
 				// Process the JSON data
 				$decoded = htmlspecialchars_decode($json);
 				$decoded = json_decode($decoded, true);
@@ -69,7 +69,7 @@ class Elementor_Integration extends Integration {
 				if ($decoded) {
 					$decoded = $this->replace_urls_array($decoded);
 					$new_json = esc_attr(wp_json_encode($decoded));
-
+					Util::debug_log('extract_elementor_settings: ' . $decoded);
 					// Replace the old JSON with the new one
 					return str_replace('data-settings="' . $json . '"', 'data-settings="' . $new_json . '"', $full_tag);
 				}
