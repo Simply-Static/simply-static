@@ -280,9 +280,9 @@ class Url_Extractor {
 			'ampersand' => '&amp;'
 		];
 
-		foreach ($entities as $placehoder_name => $entity) {
+		foreach ($entities as $placeholder_name => $entity) {
 			if (strpos($content, $entity) !== false) {
-				$placeholder =  strtoupper( $placehoder_name ) . "_PLACEHOLDER";
+				$placeholder =  strtoupper( $placeholder_name ) . "_PLACEHOLDER";
 				$content = str_replace($entity, $placeholder, $content);
 			}
 		}
@@ -312,8 +312,8 @@ class Url_Extractor {
 			'ampersand' => '&amp;'
 		];
 
-		foreach ($entities as $placehoder_name => $entity) {
-			$placeholder =  strtoupper( $placehoder_name ) . "_PLACEHOLDER";
+		foreach ($entities as $placeholder_name => $entity) {
+			$placeholder =  strtoupper( $placeholder_name ) . "_PLACEHOLDER";
 			if (strpos($content, $placeholder) !== false) {
 				$content = str_replace($placeholder, $entity, $content);
 			}
