@@ -774,6 +774,9 @@ class Url_Extractor {
 
 		$decoded_text = apply_filters( 'simply_static_decoded_urls_in_script', $decoded_text, $this->static_page, $this );
 
+		// Check if this is an importmap script
+		$is_importmap = $this->is_valid_json( $decoded_text ) && strpos( $decoded_text, '"imports"' ) !== false;
+
 		// Get the appropriate replacement URL based on destination URL type
 		switch ( $this->options->get( 'destination_url_type' ) ) {
 			case 'absolute':
@@ -785,6 +788,11 @@ class Url_Extractor {
 			default:
 				// Offline mode
 				$convert_to = '/';
+
+				// For importmap scripts in offline mode, we need to add './' prefix
+				if ( $is_importmap ) {
+					$convert_to = './' . $convert_to;
+				}
 		}
 
 		// Replace URLs in the script content
