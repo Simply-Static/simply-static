@@ -225,7 +225,7 @@ class Model {
 		$sql = 'CREATE TABLE ' . self::table_name() . ' (' . "\n";
 
 		foreach ( static::$columns as $column_name => $column_definition ) {
-			$sql .= $column_name . ' ' . $column_definition . ', ' . "\n";
+			$sql .= '`' . $column_name . '` ' . $column_definition . ', ' . "\n";
 		}
 		foreach ( static::$indexes as $index ) {
 			$sql .= $index . ', ' . "\n";
