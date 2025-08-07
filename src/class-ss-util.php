@@ -560,10 +560,29 @@ class Util {
 	 * @return string
 	 */
 	public static function abs_path_to_url( $path = '' ) {
+		$normalized_path = wp_normalize_path( $path );
+
+		// Check if the path is within WP_CONTENT_DIR
+		if ( defined( 'WP_CONTENT_DIR' ) && defined( 'WP_CONTENT_URL' ) ) {
+			$normalized_content_dir = wp_normalize_path( untrailingslashit( WP_CONTENT_DIR ) );
+
+			// If the path starts with the content directory, use WP_CONTENT_URL for replacement
+			if ( strpos( $normalized_path, $normalized_content_dir ) === 0 ) {
+				$url = str_replace(
+					$normalized_content_dir,
+					untrailingslashit( WP_CONTENT_URL ),
+					$normalized_path
+				);
+
+				return esc_url_raw( $url );
+			}
+		}
+
+		// Default behavior for paths not in WP_CONTENT_DIR
 		$url = str_replace(
 			wp_normalize_path( untrailingslashit( ABSPATH ) ),
 			site_url(),
-			wp_normalize_path( $path )
+			$normalized_path
 		);
 
 		return esc_url_raw( $url );
