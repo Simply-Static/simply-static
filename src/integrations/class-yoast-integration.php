@@ -129,6 +129,13 @@ class Yoast_Integration extends Integration {
 	public function replace_json_schema( $dom, $url ) {
 		$options = Options::instance();
 
+		// Check if $dom is a string and convert it to a DOMDocument if needed
+		if ( is_string( $dom ) ) {
+			$doc = new \DOMDocument();
+			@$doc->loadHTML( $dom );
+			$dom = $doc;
+		}
+
 		// Use DOMXPath to find script elements with class 'yoast-schema-graph'
 		$xpath = new \DOMXPath( $dom );
 		$scripts = $xpath->query( '//script[contains(@class, "yoast-schema-graph")]' );
