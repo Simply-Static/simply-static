@@ -435,6 +435,8 @@ class Plugin {
 			$task_list[] = 'scan_themes_plugins_dir';
 		}
 
+		$task_list[] = 'discover_urls';
+
 		$task_list[] = 'fetch_urls';
 
 		// Add 404 task
