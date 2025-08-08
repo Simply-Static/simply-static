@@ -496,9 +496,11 @@ class Url_Extractor {
 		$conditional_placeholder = '<!-- CONDITIONAL_COMMENT_PLACEHOLDER_%d -->';
 		// Match conditional comments with a simpler, more direct approach
 		// First pattern: match complete conditional comments (with closing tags)
-		$complete_conditional_regex = '/<!--\[if[^\]]*\]>.*?<!\[endif\]-->/s';
+		// Accept both '<![endif]-->' and '<![endif]>' variants, case-insensitive; dot matches newlines
+		$complete_conditional_regex = '/<!--\[if[^\]]*\]>.*?<\!\[endif\](?:-->)?/is';
 		// Second pattern: match incomplete conditional comments (without closing tags)
-		$incomplete_conditional_regex = '/<!--\[if[^\]]*\]>((?!<!--\[if).)*?(?=<!--|$)/s';
+		// Be case-insensitive and allow any content (including newlines) until the next comment or end of string
+		$incomplete_conditional_regex = '/<!--\[if[^\]]*\]>.*?(?=<!--|$)/is';
 
 		// Use regex method to ensure script tags are preserved
 		// Extract script tags, process them for URL replacement, and replace them with placeholders
@@ -571,7 +573,7 @@ class Url_Extractor {
 			$conditional_comment = $matches[0]; // The incomplete conditional comment
 
 			// Check if this is actually an incomplete conditional comment
-			if ( strpos( $conditional_comment, '<!--[if' ) === 0 && strpos( $conditional_comment, '<![endif]-->' ) === false ) {
+			if ( stripos( $conditional_comment, '<!--[if' ) === 0 && stripos( $conditional_comment, '<![endif]-->' ) === false && stripos( $conditional_comment, '<![endif]>' ) === false ) {
 				// Process URLs in the conditional comment if needed
 				$conditional_comment = preg_replace_callback( '/<script\b([^>]*)src=(["\'])([^"\']+)(["\'])([^>]*)>/i', function ( $src_matches ) {
 					$before_src  = $src_matches[1];
