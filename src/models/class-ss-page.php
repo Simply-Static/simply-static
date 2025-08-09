@@ -107,6 +107,15 @@ class Page extends Model {
 	}
 
 	/**
+	 * Delete this page.
+	 *
+	 * @return int|null
+	 */
+	public function delete() {
+		return self::query()->delete_by_id( $this->id );
+	}
+
+	/**
 	 * Check if the hash for the content matches the prior hash for the page
 	 *
 	 * @param string $sha1 The content of the page/file.
