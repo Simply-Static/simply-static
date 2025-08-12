@@ -234,6 +234,10 @@ class Elementor_Pro_Integration extends Integration {
 	 */
 	protected function flatten_data( $data, $flat_array = [] ) {
 
+		if ( ! is_array( $data ) ) {
+			return $flat_array;
+		}
+
 		if ( ! empty( $data['elements'] ) ) {
 			$flat_array = $this->flatten_data( $data['elements'], $flat_array );
 			unset( $data['elements'] );
