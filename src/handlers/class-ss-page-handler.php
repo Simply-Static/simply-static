@@ -34,7 +34,22 @@ class Page_Handler {
 	 * @return mixed
 	 */
 	public function prepare_url( $url ) {
-		$url = add_query_arg( 'simply_static_page', $this->page->id, $url );
+		// Parse the URL to check if it already has query parameters
+		$parsed_url = parse_url( $url );
+
+		// If the URL already has query parameters, append with & instead of ?
+		if ( isset( $parsed_url['query'] ) && ! empty( $parsed_url['query'] ) ) {
+			// Check if the URL already ends with a query parameter
+			if ( substr( $url, -1 ) === '&' ) {
+				$url .= 'simply_static_page=' . $this->page->id;
+			} else {
+				$url .= '&simply_static_page=' . $this->page->id;
+			}
+		} else {
+			// No existing query parameters, use add_query_arg
+			$url = add_query_arg( 'simply_static_page', $this->page->id, $url );
+		}
+
 		Util::debug_log( 'URL Prepared:' . $url );
 
 		return $url;

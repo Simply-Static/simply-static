@@ -202,6 +202,21 @@ class Query {
 	}
 
 	/**
+	 * Delete a record by ID
+	 * @param  int $id The ID of the record to delete
+	 * @return int|null   The number of rows deleted, or null if failure
+	 */
+	public function delete_by_id( $id ) {
+		global $wpdb;
+
+		$this->where( array( 'id' => $id ) );
+		$query = $this->compose_query( 'DELETE FROM ' );
+		$rows_deleted = $wpdb->query( $query );
+
+		return $rows_deleted;
+	}
+
+	/**
 	 * Execute the query and return a count of records
 	 * @return int|null
 	 */
