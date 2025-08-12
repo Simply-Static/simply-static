@@ -6,7 +6,7 @@ import DataTable from "react-data-table-component";
 import {Flex, FlexItem, Spinner} from "@wordpress/components";
 
 function ExportLog() {
-    const {isRunning, blogId} = useContext(SettingsContext);
+    const {isRunning, blogId, isPro} = useContext(SettingsContext);
     const [exportLog, setExportLog] = useState([]);
     const [loadingExportLog, setLoadingExportLog] = useState(false);
     const [perPageExportLog, setPerPageExportLog] = useState(25);
@@ -15,8 +15,36 @@ function ExportLog() {
     const [allData, setAllData] = useState([]);
     const [loadingAllData, setLoadingAllData] = useState(false);
     const [totalPages, setTotalPages] = useState(0);
+    const [exportType, setExportType] = useState('Export');
+    const [exportTypeId, setExportTypeId] = useState(null);
 
-    const columns = [
+    // Determine export type based on available information
+    useEffect(() => {
+        // Use the new export-type endpoint to get the export type information
+        apiFetch({
+            path: '/simplystatic/v1/export-type',
+            method: 'GET',
+        })
+        .then(response => {
+            const json = JSON.parse(response);
+            if (json.status === 200 && json.data) {
+                setExportType(json.data.export_type);
+                setExportTypeId(json.data.export_type_id);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching export type:', error);
+            // Fallback to using options.last_export_end
+            if (options.last_export_end) {
+                setExportType('Update');
+            } else {
+                setExportType('Export');
+            }
+        });
+    }, []);
+
+    // Define base columns
+    const baseColumns = [
         {
             name: 'Code',
             selector: row => row.code,
@@ -25,23 +53,49 @@ function ExportLog() {
         },
         {
             name: 'URL',
-            selector: row => <a target={'_blank'} href={row.url}>{row.url}</a>,
+            selector: row => {
+                // Strip domain from URL for display
+                const url = new URL(row.url);
+                const pathOnly = url.pathname + url.search + url.hash;
+                return <a target={'_blank'} href={row.url}>{pathOnly}</a>;
+            },
             sortable: true,
             sortFunction: (rowA, rowB) => rowA.url.localeCompare(rowB.url)
-        },
-        {
-            name: 'Notes',
-            wrap: true,
-            selector: row => <span dangerouslySetInnerHTML={{__html: row.notes}}></span>,
-            sortable: true,
-            sortFunction: (rowA, rowB) => {
-                // Remove HTML tags for sorting
-                const notesA = rowA.notes.replace(/<[^>]*>/g, '');
-                const notesB = rowB.notes.replace(/<[^>]*>/g, '');
-                return notesA.localeCompare(notesB);
-            }
-        },
+        }
     ];
+
+    // Define Export-Type column (only included if Pro is activated)
+    const exportTypeColumn = {
+        name: 'Export-Type',
+        selector: row => {
+            // Display the export type and ID if it's a Build or Single export
+            if (exportType === 'Build' || exportType === 'Single') {
+                return `${exportType} (ID: ${exportTypeId})`;
+            }
+            return exportType;
+        },
+        sortable: true,
+        maxWidth: '200px'
+    };
+
+    // Define Notes column
+    const notesColumn = {
+        name: 'Notes',
+        wrap: true,
+        selector: row => <span dangerouslySetInnerHTML={{__html: row.notes}}></span>,
+        sortable: true,
+        sortFunction: (rowA, rowB) => {
+            // Remove HTML tags for sorting
+            const notesA = rowA.notes.replace(/<[^>]*>/g, '');
+            const notesB = rowB.notes.replace(/<[^>]*>/g, '');
+            return notesA.localeCompare(notesB);
+        }
+    };
+
+    // Combine columns based on whether Pro is activated
+    const columns = isPro() 
+        ? [...baseColumns, exportTypeColumn, notesColumn]
+        : [...baseColumns, notesColumn];
 
     const handlePageChange = page => {
         getExportLog(page);
@@ -150,6 +204,24 @@ function ExportLog() {
 
     useEffect(() => {
         getExportLog(1, true);
+
+        // Fetch the export type when isRunning changes
+        if (isRunning) {
+            apiFetch({
+                path: '/simplystatic/v1/export-type',
+                method: 'GET',
+            })
+            .then(response => {
+                const json = JSON.parse(response);
+                if (json.status === 200 && json.data) {
+                    setExportType(json.data.export_type);
+                    setExportTypeId(json.data.export_type_id);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching export type:', error);
+            });
+        }
     }, [isRunning]);
 
     // Filter data based on search term
