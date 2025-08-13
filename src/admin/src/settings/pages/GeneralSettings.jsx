@@ -26,7 +26,7 @@ function GeneralSettings() {
     const [forceURLReplacement, setForceURLReplacement] = useState(false);
     const [hasCopied, setHasCopied] = useState(false);
     const [generate404, setGenerate404] = useState(false);
-    const [scanThemePluginsDir, setScanThemePluginsDir] = useState(false);
+    const [enableSmartCrawl, setEnableSmartCrawl] = useState(false);
     const [addFeeds, setAddFeeds] = useState(false);
     const [addRestApi, setAddRestApi] = useState(false);
 
@@ -76,8 +76,8 @@ function GeneralSettings() {
             setAddRestApi(settings.add_rest_api);
         }
 
-        if (settings.scan_themes_plugins_dir) {
-            setScanThemePluginsDir(settings.scan_themes_plugins_dir);
+        if (settings.smart_crawl) {
+            setEnableSmartCrawl(settings.smart_crawl);
         }
 
     }, [settings]);
@@ -220,6 +220,23 @@ function GeneralSettings() {
                 <ToggleControl
                     label={
                         <>
+                            {__('Enable Smart Crawl', 'simply-static')}
+                        </>
+                    }
+                    help={
+                        enableSmartCrawl
+                            ? __('Collect pages and files via Smart Crawl.', 'simply-static')
+                            : __('Don\'t collect pages and files via Smart Crawl.', 'simply-static')
+                    }
+                    checked={enableSmartCrawl}
+                    onChange={(value) => {
+                        setEnableSmartCrawl(value);
+                        updateSetting('smart_crawl', value);
+                    }}
+                />
+                <ToggleControl
+                    label={
+                        <>
                             {__('Generate 404 Page?', 'simply-static')}
                             <HelperVideo title={__('How to manage 404 pages?', 'simply-static')}
                                          videoUrl={'https://youtu.be/dnRtuQrXG-k'}/>
@@ -239,7 +256,7 @@ function GeneralSettings() {
                 <ToggleControl
                     label={
                         <>
-                            {__('Include Feeds?', 'simply-static')}
+                            {__('Include RSS Feeds?', 'simply-static')}
                         </>
                     }
                     help={
@@ -268,24 +285,6 @@ function GeneralSettings() {
                     onChange={(value) => {
                         setAddRestApi(value);
                         updateSetting('add_rest_api', value);
-                    }}
-                />
-                <Spacer margin={5}/>
-                <ToggleControl
-                    label={
-                        <>
-                            {__('Include all Theme and Plugins assets?', 'simply-static')}
-                        </>
-                    }
-                    help={
-                        scanThemePluginsDir
-                            ? __('Include all assets from active theme and plugins.', 'simply-static')
-                            : __('Don\'t include all assets from active theme and plugins.', 'simply-static')
-                    }
-                    checked={scanThemePluginsDir}
-                    onChange={(value) => {
-                        setScanThemePluginsDir(value);
-                        updateSetting('scan_themes_plugins_dir', value);
                     }}
                 />
             </CardBody>

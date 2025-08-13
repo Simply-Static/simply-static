@@ -94,6 +94,7 @@ function SettingsContextProvider(props) {
         'minify_js': false,
         'minify_inline_js': false,
         'generate_404': false,
+        'smart_crawl': true,
         'add_feeds': false,
         'add_rest_api': false,
         'wp_content_directory': '',

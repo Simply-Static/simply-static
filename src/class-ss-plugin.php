@@ -435,7 +435,9 @@ class Plugin {
 			$task_list[] = 'scan_themes_plugins_dir';
 		}
 
-		$task_list[] = 'discover_urls';
+		if ( $this->options->get( 'smart_crawl' ) ) {
+			$task_list[] = 'discover_urls';
+		}
 
 		$task_list[] = 'fetch_urls';
 
