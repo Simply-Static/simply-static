@@ -94,6 +94,7 @@ function SettingsContextProvider(props) {
         'minify_js': false,
         'minify_inline_js': false,
         'generate_404': false,
+        'smart_crawl': true,
         'add_feeds': false,
         'add_rest_api': false,
         'wp_content_directory': '',
@@ -123,7 +124,6 @@ function SettingsContextProvider(props) {
         'shortpixel_enabled': false,
         'shortpixel_api_key': '',
         'shortpixel_backup_enabled': false,
-        'scan_themes_plugins_dir': false,
         'integrations': false // Will be array when saved.
     }
     const [isRunning, setIsRunning] = useState(false);

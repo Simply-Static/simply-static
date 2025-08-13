@@ -181,7 +181,33 @@ class Page extends Model {
 	 * @param string $message The status message.
 	 */
 	public function set_status_message( $message ) {
-		$this->status_message = $message;
+		// Already has the same message.
+		if ( $this->has_status_message( $message ) ) {
+			return;
+		}
+
+		if ( $this->status_message ) {
+			$this->status_message = $this->status_message . '; ' . $message;
+		} else {
+			$this->status_message = $message;
+		}
+	}
+
+	/**
+	 * Check if the page already has a specific status message
+	 *
+	 * @param string $message The status message to check for.
+	 * @return boolean Whether the page already has the status message.
+	 */
+	protected function has_status_message( $message ) {
+		if ( ! $this->status_message ) {
+			return false;
+		}
+
+		$statuses = explode( '; ', $this->status_message );
+		$index  = array_search( $message, $statuses, true );
+
+		return false !== $index && $index >= 0;
 	}
 
 	/**
