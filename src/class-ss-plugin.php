@@ -166,6 +166,7 @@ class Plugin {
 		require_once $path . 'src/tasks/traits/trait-can-transfer.php';
 		require_once $path . 'src/tasks/class-ss-task.php';
 		require_once $path . 'src/tasks/class-ss-setup-task.php';
+		require_once $path . 'src/tasks/class-ss-discover-urls-task.php';
 		require_once $path . 'src/tasks/class-ss-fetch-urls-task.php';
 		require_once $path . 'src/tasks/class-ss-transfer-files-locally-task.php';
 		require_once $path . 'src/tasks/class-ss-create-zip-archive.php';
