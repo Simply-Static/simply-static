@@ -340,6 +340,24 @@ toplevel_page_simply-static img {
     }
   }
 
+  .ss-export-log-search {
+    width: 100%;
+    display: block;
+    background: #f0f0f1;
+    border: none;
+    border-radius: 1px;
+    padding: 4px 10px;
+    margin-bottom: 10px;
+
+    :focus {
+      outline: none;
+      box-shadow: none;
+      border-color: #3858e9;
+    }
+  }
+
+
+
   /* Style for disabled settings */
   input:disabled, textarea:disabled, select:disabled {
     background: #eeeeee;
@@ -433,7 +451,6 @@ a.show-nav {
   .log-table-container {
     max-width:300px;
   }
-
 
   .plugin-settings-container .plugin-settings {
     padding: 0;

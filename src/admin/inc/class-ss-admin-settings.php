@@ -280,6 +280,14 @@ class Admin_Settings {
 	 * @return void
 	 */
 	public function rest_api_init() {
+		register_rest_route( 'simplystatic/v1', '/export-type', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'get_export_type' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'activity-log' ) );
+			},
+		) );
+
 		register_rest_route( 'simplystatic/v1', '/settings', array(
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'get_settings' ],
@@ -761,6 +769,40 @@ class Admin_Settings {
 	}
 
 	/**
+	 * Get Export Type
+	 *
+	 * @return false|string
+	 */
+	public function get_export_type() {
+		// Check the export type.
+		$use_single = get_option( 'simply-static-use-single' );
+		$use_build  = get_option( 'simply-static-use-build' );
+
+		$options = Options::reinstance();
+
+		$export_type    = 'Export';
+		$export_type_id = null;
+
+		if ( ! empty( $use_single ) ) {
+			$export_type    = 'Single';
+			$export_type_id = $use_single;
+		} else if ( ! empty( $use_build ) ) {
+			$export_type    = 'Build';
+			$export_type_id = $use_build;
+		} else if ( $options->get( 'generate_type' ) === 'update' ) {
+			$export_type = 'Update';
+		}
+
+		return json_encode( [
+			'status' => 200,
+			'data'   => [
+				'export_type'    => $export_type,
+				'export_type_id' => $export_type_id,
+			],
+		] );
+	}
+
+	/**
 	 * Start Export
 	 *
 	 * @return false|string
@@ -770,27 +812,27 @@ class Admin_Settings {
 		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
 		$type    = ! empty( $params['type'] ) ? $params['type'] : 'export';
 
-        try {
-            do_action( 'ss_before_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
+		try {
+			do_action( 'ss_before_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
 
-            $type = apply_filters( 'ss_export_type', $type );
+			$type = apply_filters( 'ss_export_type', $type );
 
-            Plugin::instance()->run_static_export( $blog_id, $type );
+			Plugin::instance()->run_static_export( $blog_id, $type );
 
-            do_action( 'ss_after_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
+			do_action( 'ss_after_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
 
-            return json_encode( [
-                'status' => 200,
-            ] );
+			return json_encode( [
+				'status' => 200,
+			] );
 
-        } catch (\Exception $e) {
+		} catch ( \Exception $e ) {
 
-	        return json_encode( [
-		        'status' => 500,
-                'message' => $e->getMessage()
-	        ] );
+			return json_encode( [
+				'status'  => 500,
+				'message' => $e->getMessage()
+			] );
 
-        }
+		}
 	}
 
 	/**
@@ -817,13 +859,13 @@ class Admin_Settings {
 	 * @return false|string
 	 */
 	public function is_running( $request ) {
-        $stats = [
-	        'status'  => 200,
-	        'running' => Plugin::instance()->get_archive_creation_job()->is_running(),
-	        'paused'  => Plugin::instance()->get_archive_creation_job()->is_paused()
-        ];
+		$stats = [
+			'status'  => 200,
+			'running' => Plugin::instance()->get_archive_creation_job()->is_running(),
+			'paused'  => Plugin::instance()->get_archive_creation_job()->is_paused()
+		];
 
-        $stats = apply_filters( 'ss_is_running_statuses', $stats );
+		$stats = apply_filters( 'ss_is_running_statuses', $stats );
 
 		return json_encode( $stats );
 	}
