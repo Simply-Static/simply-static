@@ -24,7 +24,7 @@ class Plugin_Assets_Crawler extends Crawler {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->name = __( 'Plugin Assets', 'simply-static' );
+		$this->name        = __( 'Plugin Assets', 'simply-static' );
 		$this->description = __( 'Detects URLs for assets (CSS, JS, images) used by plugins.', 'simply-static' );
 	}
 
@@ -33,7 +33,7 @@ class Plugin_Assets_Crawler extends Crawler {
 	 *
 	 * @return array List of plugin asset URLs
 	 */
-	public function detect() : array {
+	public function detect(): array {
 		$asset_urls = [];
 
 		// Get the plugin directory URL and path
@@ -41,22 +41,22 @@ class Plugin_Assets_Crawler extends Crawler {
 		$plugins_dir = WP_PLUGIN_DIR;
 
 		// Get all active plugins
-		$active_plugins = get_option('active_plugins');
+		$active_plugins = get_option( 'active_plugins' );
 
-		foreach ($active_plugins as $plugin) {
+		foreach ( $active_plugins as $plugin ) {
 			// Get the plugin directory
-			$plugin_dir = dirname($plugin);
+			$plugin_dir  = dirname( $plugin );
 			$plugin_path = $plugins_dir . '/' . $plugin_dir;
 
 			// Skip if the plugin directory doesn't exist
-			if (!is_dir($plugin_path)) {
+			if ( ! is_dir( $plugin_path ) ) {
 				continue;
 			}
 
 			// Scan the plugin directory for asset files
 			$asset_urls = array_merge(
 				$asset_urls,
-				$this->scan_directory_for_assets($plugin_path, $plugins_url . '/' . $plugin_dir)
+				$this->scan_directory_for_assets( $plugin_path, $plugins_url . '/' . $plugin_dir )
 			);
 		}
 
@@ -68,58 +68,80 @@ class Plugin_Assets_Crawler extends Crawler {
 	 *
 	 * @param string $dir Directory path
 	 * @param string $url_base Base URL for the directory
+	 *
 	 * @return array List of asset URLs
 	 */
-	private function scan_directory_for_assets($dir, $url_base) : array {
+	private function scan_directory_for_assets( $dir, $url_base ): array {
 		$urls = [];
 
 		// Asset file extensions to look for
 		$asset_extensions = [
-			'css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 
-			'woff', 'woff2', 'ttf', 'eot', 'otf', 'ico', 'json'
+			'css',
+			'js',
+			'png',
+			'jpg',
+			'jpeg',
+			'gif',
+			'svg',
+			'webp',
+			'woff',
+			'woff2',
+			'ttf',
+			'eot',
+			'otf',
+			'ico',
+			'json'
 		];
 
 		// Skip these directories
-		$skip_dirs = ['.git', 'node_modules', 'vendor/bin', 'vendor/composer', 'tests', 'languages'];
+		$skip_dirs = apply_filters( 'ss_skip_crawl_plugin_directories', [
+			'.git',
+			'node_modules',
+			'vendor/bin',
+			'vendor/composer',
+			'tests',
+			'languages',
+			'admin'
+		] );
 
 		// Get all files in the directory
 		$files = new \RecursiveIteratorIterator(
-			new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
+			new \RecursiveDirectoryIterator( $dir, \RecursiveDirectoryIterator::SKIP_DOTS ),
 			\RecursiveIteratorIterator::SELF_FIRST
 		);
 
-		foreach ($files as $file) {
+		foreach ( $files as $file ) {
 			// Skip directories
-			if ($file->isDir()) {
+			if ( $file->isDir() ) {
 				continue;
 			}
 
 			// Skip files in directories we want to ignore
-			$relative_path = str_replace($dir, '', $file->getPathname());
-			$should_skip = false;
+			$relative_path = str_replace( $dir, '', $file->getPathname() );
+			$should_skip   = false;
 
-			foreach ($skip_dirs as $skip_dir) {
-				if (strpos($relative_path, '/' . $skip_dir . '/') !== false) {
+			foreach ( $skip_dirs as $skip_dir ) {
+				if ( strpos( $relative_path, '/' . $skip_dir . '/' ) !== false ) {
 					$should_skip = true;
 					break;
 				}
 			}
 
 			// Skip JSON files in the languages directory (used for admin translations)
-			if (!$should_skip && strtolower($file->getExtension()) === 'json' && strpos($relative_path, '/languages/') !== false) {
+			if ( ! $should_skip && strtolower( $file->getExtension() ) === 'json' && strpos( $relative_path, '/languages/' ) !== false ) {
 				$should_skip = true;
 			}
 
-			if ($should_skip) {
+			if ( $should_skip ) {
 				continue;
 			}
 
 			// Check if the file has an asset extension
-			$extension = strtolower($file->getExtension());
-			if (in_array($extension, $asset_extensions)) {
+			$extension = strtolower( $file->getExtension() );
+			if ( in_array( $extension, $asset_extensions ) ) {
 				// Convert the file path to a URL
-				$relative_url = str_replace('\\', '/', $relative_path);
-				$url = $url_base . $relative_url;
+				$relative_url = str_replace( '\\', '/', $relative_path );
+				$url          = $url_base . $relative_url;
 
 				$urls[] = $url;
 			}
