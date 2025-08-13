@@ -111,7 +111,8 @@ function ExportLog() {
         setFilterText(searchTerm);
 
         // If search term is not empty and we don't have all data yet, fetch all data
-        if (searchTerm && allData.length === 0) {
+        // But only if we're not running a Build or Single export
+        if (searchTerm && allData.length === 0 && exportType !== 'Build' && exportType !== 'Single') {
             await fetchAllData();
         }
     };
@@ -200,6 +201,11 @@ function ExportLog() {
 
     useInterval(() => {
         getExportLog();
+
+        // If we have a search term and already have all data, refresh the all data
+        if (filterText && allData.length > 0) {
+            fetchAllData();
+        }
     }, isRunning ? 5000 : null);
 
     useEffect(() => {
@@ -225,7 +231,10 @@ function ExportLog() {
     }, [isRunning]);
 
     // Filter data based on search term
-    const dataToFilter = (filterText && allData.length > 0) ? allData : (exportLog.static_pages || []);
+    // When running a Build or Single export, only search in the current export log data
+    const dataToFilter = (filterText && allData.length > 0 && exportType !== 'Build' && exportType !== 'Single') 
+        ? allData 
+        : (exportLog.static_pages || []);
     const filteredData = dataToFilter.filter(
         item => {
             if (!filterText) return true;
