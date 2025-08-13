@@ -133,6 +133,11 @@ class Plugin_Assets_Crawler extends Crawler {
 				$should_skip = true;
 			}
 
+			// Skip composer.json files
+			if ( ! $should_skip && strtolower( $file->getBasename() ) === 'composer.json' ) {
+				$should_skip = true;
+			}
+
 			if ( $should_skip ) {
 				continue;
 			}
