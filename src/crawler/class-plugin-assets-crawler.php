@@ -101,7 +101,8 @@ class Plugin_Assets_Crawler extends Crawler {
 			'vendor/composer',
 			'tests',
 			'languages',
-			'admin'
+			'admin/build',
+			'install-plugins'
 		] );
 
 		// Get all files in the directory
