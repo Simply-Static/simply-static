@@ -199,7 +199,20 @@ class Fetch_Urls_Task extends Task {
 		$origin_url      = Util::origin_url();
 		$destination_url = $this->options->get_destination_url();
 		$current_url     = $static_page->url;
-		$redirect_url    = remove_query_arg( 'simply_static_page', $static_page->redirect_url );
+
+		// Remove simply_static_page parameter from the redirect URL
+		$redirect_url = $static_page->redirect_url;
+
+		// First try standard removal for normal query parameters
+		$redirect_url = remove_query_arg( 'simply_static_page', $redirect_url );
+
+		// Also handle cases where simply_static_page is embedded in another parameter
+		// Look for patterns like %3Fsimply_static_page%3D12345 (URL-encoded ?simply_static_page=12345)
+		$redirect_url = preg_replace( '/%3Fsimply_static_page%3D\d+/i', '', $redirect_url );
+
+		// Handle standard query string formats
+		$redirect_url = preg_replace( '/\?simply_static_page=\d+/i', '', $redirect_url );
+		$redirect_url = preg_replace( '/&simply_static_page=\d+/i', '', $redirect_url );
 
 		Util::debug_log( "redirect_url: " . $redirect_url );
 
