@@ -172,7 +172,6 @@ class Plugin {
 		require_once $path . 'src/tasks/class-ss-wrapup-task.php';
 		require_once $path . 'src/tasks/class-ss-cancel-task.php';
 		require_once $path . 'src/tasks/class-ss-generate-404-task.php';
-		require_once $path . 'src/tasks/class-ss-scan-all-task.php';
 		require_once $path . 'src/handlers/class-ss-page-handler.php';
 		require_once $path . 'src/class-ss-query.php';
 		require_once $path . 'src/models/class-ss-model.php';
@@ -425,15 +424,9 @@ class Plugin {
 	 * @return array The list of tasks to process.
 	 */
 	public function filter_task_list( $task_list, $delivery_method ): array {
-
-		$generate_404            = $this->options->get( 'generate_404' );
-		$scan_themes_plugins_dir = $this->options->get( 'scan_themes_plugins_dir' );
+		$generate_404 = $this->options->get( 'generate_404' );
 
 		$task_list[] = 'setup';
-
-		if ( $scan_themes_plugins_dir ) {
-			$task_list[] = 'scan_themes_plugins_dir';
-		}
 
 		if ( $this->options->get( 'smart_crawl' ) ) {
 			$task_list[] = 'discover_urls';
