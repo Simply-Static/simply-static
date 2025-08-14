@@ -133,7 +133,6 @@ class Archive_Creation_Job extends Background_Process {
 				->set( 'archive_start_time', Util::formatted_datetime() )
 				->set( 'archive_end_time', null )
 				->set( 'generate_type', $type )
-				->set( 'crawling_archive_start_time', null ) // Clear any previous crawling_archive_start_time
 				->save();
 
 			Util::debug_log( "Pushing first task to queue: " . $first_task );
@@ -280,8 +279,6 @@ class Archive_Creation_Job extends Background_Process {
 		$duration    = strtotime( $end_time ) - strtotime( $start_time );
 		$time_string = gmdate( "H:i:s", $duration );
 
-		// Clear the stored crawling_archive_start_time to ensure it's not used by the next export
-		$this->options->set( 'crawling_archive_start_time', null );
 		$this->options->set( 'archive_end_time', $end_time );
 
 		$this->save_status_message( sprintf( __( 'Done! Finished in %s', 'simply-static' ), $time_string ) );
@@ -322,9 +319,6 @@ class Archive_Creation_Job extends Background_Process {
 			}*/
 
 			$end_time    = Util::formatted_datetime();
-
-			// Clear the stored crawling_archive_start_time to ensure it's not used by the next export
-			$this->options->set( 'crawling_archive_start_time', null );
 			$this->options->set( 'archive_end_time', $end_time );
 
 			$cancel_task = new Cancel_Task();
@@ -430,9 +424,6 @@ class Archive_Creation_Job extends Background_Process {
 		Util::debug_log( "An exception occurred: " . $exception->getMessage() );
 		Util::debug_log( $exception );
 
-		// Clear the stored crawling_archive_start_time to ensure it's not used by the next export
-		$this->options->set( 'crawling_archive_start_time', null );
-
 		$message = sprintf( __( "An exception occurred: %s", 'simply-static' ), $exception->getMessage() );
 		$this->save_status_message( $message, 'error' );
 		do_action( 'ss_completed', 'exception', $message );
@@ -450,9 +441,6 @@ class Archive_Creation_Job extends Background_Process {
 	protected function error_occurred( $wp_error ) {
 		Util::debug_log( "An error occurred: " . $wp_error->get_error_message() );
 		Util::debug_log( $wp_error );
-
-		// Clear the stored crawling_archive_start_time to ensure it's not used by the next export
-		$this->options->set( 'crawling_archive_start_time', null );
 
 		$message = sprintf( __( "An error occurred: %s", 'simply-static' ), $wp_error->get_error_message() );
 		$this->save_status_message( $message, 'error' );
@@ -476,7 +464,6 @@ class Archive_Creation_Job extends Background_Process {
 
 			$end_time = Util::formatted_datetime();
 			$this->options
-				->set( 'crawling_archive_start_time', null )
 				->set( 'archive_end_time', $end_time )
 				->save();
 
