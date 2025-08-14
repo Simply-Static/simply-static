@@ -35,18 +35,34 @@ class Discover_Urls_Task extends Task {
 		// Get the crawler manager
 		$crawlers = Crawlers::instance();
 
-		// Run all active crawlers
-		$urls_added = $crawlers->run();
+		// Get active crawlers
+		$active_crawlers = $crawlers->get_active_crawlers();
 
-		// Log the number of URLs added
-		Util::debug_log( "Added $urls_added URLs to the queue using crawlers" );
+		// Run active crawlers
+		$total_urls_added = 0;
 
-		// Save the status message
-		$message = sprintf( __( "Added %d URLs to the queue", 'simply-static' ), $urls_added );
-		$this->save_status_message( $message );
+		foreach ( $active_crawlers as $crawler ) {
+			// Run the current crawler
+			$urls_added = $crawler->add_urls_to_queue();
+			$total_urls_added += $urls_added;
+
+			// Log the number of URLs added
+			Util::debug_log( "Added $urls_added URLs to the queue using " . $crawler->js_object()['name'] . " crawler" );
+
+			// Save the status message
+			$message = sprintf( __( "Added %d URLs to the queue using %s crawler", 'simply-static' ), 
+				$urls_added, 
+				$crawler->js_object()['name']
+			);
+			$this->save_status_message( $message );
+		}
 
 		// Trigger an action after URL discovery
-		do_action( 'ss_after_discover_urls', $urls_added );
+		do_action( 'ss_after_discover_urls', $total_urls_added );
+
+		// Save the final status message
+		$message = sprintf( __( "Added %d URLs to the queue", 'simply-static' ), $total_urls_added );
+		$this->save_status_message( $message );
 
 		return true;
 	}

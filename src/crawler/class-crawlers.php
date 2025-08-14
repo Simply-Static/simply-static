@@ -70,26 +70,35 @@ class Crawlers {
 
 		// Load all crawler implementations
 		$crawler_files = glob( SIMPLY_STATIC_PATH . 'src/crawler/class-*-crawler.php' );
-		
+
+		Util::debug_log( "Found " . count( $crawler_files ) . " crawler files" );
+
 		foreach ( $crawler_files as $file ) {
 			require_once $file;
-			
+
 			// Get the class name from the file name
 			$class_name = str_replace( 'class-', '', basename( $file, '.php' ) );
 			$class_name = str_replace( '-', '_', $class_name );
 			$class_name = ucwords( $class_name, '_' );
-			
+
 			// Create the fully qualified class name
 			$fq_class_name = 'Simply_Static\\Crawler\\' . $class_name;
-			
+
+			Util::debug_log( "Checking for crawler class: " . $fq_class_name );
+
 			// Create an instance of the crawler
 			if ( class_exists( $fq_class_name ) ) {
+				Util::debug_log( "Class exists, creating instance of: " . $fq_class_name );
 				$this->crawlers[] = new $fq_class_name();
+			} else {
+				Util::debug_log( "Class does not exist: " . $fq_class_name );
 			}
 		}
 
 		// Allow plugins to add their own crawlers
 		$this->crawlers = apply_filters( 'simply_static_crawlers', $this->crawlers );
+
+		Util::debug_log( "Total crawlers loaded: " . count( $this->crawlers ) );
 	}
 
 	/**
@@ -97,6 +106,14 @@ class Crawlers {
 	 * @return array
 	 */
 	public function get_crawlers() {
+		// Check if we have any crawlers loaded
+		if (empty($this->crawlers)) {
+			Util::debug_log("No crawlers loaded. Reloading crawlers.");
+			$this->load_crawlers();
+		}
+
+		Util::debug_log( "Found " . count( $this->crawlers ) . " total crawlers" );
+
 		return $this->crawlers;
 	}
 
@@ -108,21 +125,6 @@ class Crawlers {
 		return array_filter( $this->crawlers, function( $crawler ) {
 			return $crawler->is_active();
 		} );
-	}
-
-	/**
-	 * Run all active crawlers and add URLs to the queue
-	 * @return int Number of URLs added
-	 */
-	public function run() {
-		$count = 0;
-		$active_crawlers = $this->get_active_crawlers();
-
-		foreach ( $active_crawlers as $crawler ) {
-			$count += $crawler->add_urls_to_queue();
-		}
-
-		return $count;
 	}
 
 	/**

@@ -144,6 +144,7 @@ class Upgrade_Handler {
 			'minify_inline_js'              => false,
 			'generate_404'                  => false,
 			'add_feeds'                     => false,
+			'add_rest_api'                  => false,
 			'smart_crawl'                   => true,
 			'wp_content_folder'             => '',
 			'wp_includes_folder'            => '',

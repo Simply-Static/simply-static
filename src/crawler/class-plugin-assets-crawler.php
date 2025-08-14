@@ -102,23 +102,79 @@ class Plugin_Assets_Crawler extends Crawler {
 			'tests',
 			'languages',
 			'admin/build',
+			'admin',
 			'install-plugins',
 			'freemius',
 			'locale'
 		] );
 
-		// Get all files in the directory
-		$files = new \RecursiveIteratorIterator(
-			new \RecursiveDirectoryIterator( $dir, \RecursiveDirectoryIterator::SKIP_DOTS ),
-			\RecursiveIteratorIterator::SELF_FIRST
-		);
+		// Check if directory exists
+		if ( ! is_dir( $dir ) ) {
+			\Simply_Static\Util::debug_log( "Directory does not exist: $dir" );
+			return $urls;
+		}
 
-		foreach ( $files as $file ) {
-			// Skip directories
-			if ( $file->isDir() ) {
-				continue;
+		try {
+			// Get all files in the directory
+			$iterator = new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator( $dir, \RecursiveDirectoryIterator::SKIP_DOTS ),
+				\RecursiveIteratorIterator::SELF_FIRST
+			);
+
+			// Process files in batches to prevent memory issues
+			$batch_size = apply_filters( 'simply_static_plugin_assets_batch_size', 500 );
+			$file_count = 0;
+			$batch_count = 0;
+			$file_batch = [];
+
+			foreach ( $iterator as $file ) {
+				// Skip directories
+				if ( $file->isDir() ) {
+					continue;
+				}
+
+				$file_batch[] = $file;
+				$file_count++;
+
+				// Process batch when it reaches the batch size
+				if ( $file_count % $batch_size === 0 ) {
+					$batch_count++;
+					\Simply_Static\Util::debug_log( "Processing plugin assets batch $batch_count with $batch_size files" );
+					$urls = array_merge( $urls, $this->process_file_batch( $file_batch, $dir, $url_base, $skip_dirs, $asset_extensions ) );
+					$file_batch = []; // Reset batch
+				}
 			}
 
+			// Process any remaining files
+			if ( ! empty( $file_batch ) ) {
+				$batch_count++;
+				\Simply_Static\Util::debug_log( "Processing final plugin assets batch $batch_count with " . count( $file_batch ) . " files" );
+				$urls = array_merge( $urls, $this->process_file_batch( $file_batch, $dir, $url_base, $skip_dirs, $asset_extensions ) );
+			}
+
+			\Simply_Static\Util::debug_log( "Found " . count( $urls ) . " asset URLs in $dir" );
+		} catch ( \Exception $e ) {
+			\Simply_Static\Util::debug_log( "Error scanning directory $dir: " . $e->getMessage() );
+		}
+
+		return $urls;
+	}
+
+	/**
+	 * Process a batch of files
+	 *
+	 * @param array $files Array of SplFileInfo objects
+	 * @param string $dir Base directory path
+	 * @param string $url_base Base URL
+	 * @param array $skip_dirs Directories to skip
+	 * @param array $asset_extensions Valid asset extensions
+	 *
+	 * @return array List of asset URLs
+	 */
+	private function process_file_batch( $files, $dir, $url_base, $skip_dirs, $asset_extensions ): array {
+		$urls = [];
+
+		foreach ( $files as $file ) {
 			// Skip files in directories we want to ignore
 			$relative_path = str_replace( $dir, '', $file->getPathname() );
 			$should_skip   = false;
