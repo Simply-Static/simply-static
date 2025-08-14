@@ -374,6 +374,10 @@ function Optimize() {
                         }}
                     />
                     {settings.shortpixel_backup_enabled && <>
+                        <Notice status={'warning'} isDismissible={false}>
+                          { __( 'It will preserve every image which might increase your disk space usage.', 'simply-static' ) }
+                        </Notice>
+                        <Spacer padding={1}></Spacer>
                         <Button disabled={shortPixelResetting} onClick={restoreBackups}
                                 variant="secondary">
                             {!shortPixelResetting && __('Restore Original Images', 'simply-static')}
