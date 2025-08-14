@@ -30,7 +30,7 @@ class Discover_Urls_Task extends Task {
 	 * @return boolean|WP_Error true if done, false if not done, WP_Error if error.
 	 */
 	public function perform() {
-		$this->save_status_message( __( 'Discovering URLs using crawlers', 'simply-static' ) );
+		$this->save_status_message( __( 'Discovering URLs', 'simply-static' ) );
 
 		// Get the crawler manager
 		$crawlers = Crawlers::instance();
@@ -47,10 +47,10 @@ class Discover_Urls_Task extends Task {
 			$total_urls_added += $urls_added;
 
 			// Log the number of URLs added
-			Util::debug_log( "Added $urls_added URLs to the queue using " . $crawler->js_object()['name'] . " crawler" );
+			Util::debug_log( "Added $urls_added URLs via " . $crawler->js_object()['name'] . " Crawler" );
 
 			// Save the status message
-			$message = sprintf( __( "Added %d URLs to the queue using %s crawler", 'simply-static' ), 
+			$message = sprintf( __( "Added %d URLs via %s Crawler", 'simply-static' ),
 				$urls_added, 
 				$crawler->js_object()['name']
 			);
