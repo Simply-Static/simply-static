@@ -366,6 +366,15 @@ function Optimize() {
                     />
                     <Spacer padding={1}></Spacer>
                     <ToggleControl
+                      label={__('Convert to webP', 'simply-static')}
+                      checked={settings.shortpixel_webp_enabled}
+                      disabled={('free' === options.plan || !isPro())}
+                      onChange={(value) => {
+                        updateSetting('shortpixel_webp_enabled', value);
+                      }}
+                    />
+                    <Spacer padding={1}></Spacer>
+                    <ToggleControl
                         label={__('Backup the original images?', 'simply-static')}
                         checked={settings.shortpixel_backup_enabled}
                         disabled={('free' === options.plan || !isPro())}

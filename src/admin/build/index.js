@@ -1558,6 +1558,7 @@ function SettingsContextProvider(props) {
     'shortpixel_enabled': false,
     'shortpixel_api_key': '',
     'shortpixel_backup_enabled': false,
+    'shortpixel_webp_enabled': false,
     'integrations': false // Will be array when saved.
   };
   const [isRunning, setIsRunning] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
@@ -3723,6 +3724,15 @@ function Optimize() {
     disabled: 'free' === options.plan || !isPro(),
     onChange: apiKey => {
       updateSetting('shortpixel_api_key', apiKey);
+    }
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+    padding: 1
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+    label: __('Convert to webP', 'simply-static'),
+    checked: settings.shortpixel_webp_enabled,
+    disabled: 'free' === options.plan || !isPro(),
+    onChange: value => {
+      updateSetting('shortpixel_webp_enabled', value);
     }
   }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
     padding: 1

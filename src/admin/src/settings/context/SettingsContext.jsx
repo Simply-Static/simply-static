@@ -124,6 +124,7 @@ function SettingsContextProvider(props) {
         'shortpixel_enabled': false,
         'shortpixel_api_key': '',
         'shortpixel_backup_enabled': false,
+        'shortpixel_webp_enabled': false,
         'integrations': false // Will be array when saved.
     }
     const [isRunning, setIsRunning] = useState(false);
