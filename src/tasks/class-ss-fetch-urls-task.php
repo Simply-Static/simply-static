@@ -46,21 +46,37 @@ class Fetch_Urls_Task extends Task {
 	public function perform() {
 		$batch_size = apply_filters( 'simply_static_fetch_urls_batch_size', 50 );
 
+		// Get the current archive start time
+		$current_archive_start_time = $this->archive_start_time;
+
+		// Check if we have a stored archive start time from when the crawling started
+		$crawling_archive_start_time = $this->options->get( 'crawling_archive_start_time' );
+
+		// If we have a stored archive start time, use that instead
+		// This ensures we process all pages discovered during crawling, even if a new export started
+		if ( $crawling_archive_start_time ) {
+			Util::debug_log( "Using stored crawling_archive_start_time: " . $crawling_archive_start_time );
+			$archive_start_time_to_use = $crawling_archive_start_time;
+		} else {
+			Util::debug_log( "No stored crawling_archive_start_time found, using current archive_start_time: " . $current_archive_start_time );
+			$archive_start_time_to_use = $current_archive_start_time;
+		}
+
 		$static_pages = apply_filters(
 			'ss_static_pages',
 			Page::query()
-			    ->where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time )
+			    ->where( 'last_checked_at < ? OR last_checked_at IS NULL', $archive_start_time_to_use )
 				->limit( $batch_size )
 				->find(),
-			$this->archive_start_time
+			$archive_start_time_to_use
 		);
 
 		$pages_remaining = apply_filters(
 			'ss_remaining_pages',
 			Page::query()
-			    ->where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time )
+			    ->where( 'last_checked_at < ? OR last_checked_at IS NULL', $archive_start_time_to_use )
 			    ->count(),
-			$this->archive_start_time
+			$archive_start_time_to_use
 		);
 
 		$total_pages = apply_filters( 'ss_total_pages', Page::query()->count() );
@@ -356,8 +372,22 @@ class Fetch_Urls_Task extends Task {
 	 * @return void
 	 */
 	public function set_url_found_on( $static_page, $child_url ) {
+		// Get the current archive start time
+		$current_archive_start_time = $this->archive_start_time;
+
+		// Check if we have a stored archive start time from when the crawling started
+		$crawling_archive_start_time = $this->options->get( 'crawling_archive_start_time' );
+
+		// If we have a stored archive start time, use that instead
+		// This ensures we process all pages discovered during crawling, even if a new export started
+		if ( $crawling_archive_start_time ) {
+			$archive_start_time_to_use = $crawling_archive_start_time;
+		} else {
+			$archive_start_time_to_use = $current_archive_start_time;
+		}
+
 		$child_static_page = Page::query()->find_or_create_by( 'url', $child_url );
-		if ( $child_static_page->found_on_id === null || $child_static_page->updated_at < $this->archive_start_time ) {
+		if ( $child_static_page->found_on_id === null || $child_static_page->updated_at < $archive_start_time_to_use ) {
 			$child_static_page->found_on_id = $static_page->id;
 			if ( ! $child_static_page->post_id ) {
 				$id = url_to_postid( $child_url );

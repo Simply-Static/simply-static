@@ -32,6 +32,14 @@ class Discover_Urls_Task extends Task {
 	public function perform() {
 		$this->save_status_message( __( 'Discovering URLs', 'simply-static' ) );
 
+		// Store the current archive start time for use by fetch_urls_task
+		// This ensures that fetch_urls_task processes all pages discovered during crawling,
+		// even if a new export starts while the crawler is yielding
+		$archive_start_time = $this->options->get( 'archive_start_time' );
+		$this->options->set( 'crawling_archive_start_time', $archive_start_time );
+		$this->options->save();
+		Util::debug_log( "Stored crawling_archive_start_time: " . $archive_start_time );
+
 		// Get the crawler manager
 		$crawlers = Crawlers::instance();
 
