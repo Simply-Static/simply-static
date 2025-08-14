@@ -102,7 +102,9 @@ class Plugin_Assets_Crawler extends Crawler {
 			'tests',
 			'languages',
 			'admin/build',
-			'install-plugins'
+			'install-plugins',
+			'freemius',
+			'locale'
 		] );
 
 		// Get all files in the directory
