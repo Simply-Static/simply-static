@@ -41,6 +41,12 @@ class Discover_Urls_Task extends Task {
 		// Run active crawlers
 		$total_urls_added = 0;
 
+		// Get the archive start time
+		$archive_start_time = $this->options->get( 'archive_start_time' );
+
+		// Count URLs that will be processed in this export before running crawlers
+		$initial_count = Page::query()->where( 'last_checked_at < ? OR last_checked_at IS NULL', $archive_start_time )->count();
+
 		foreach ( $active_crawlers as $crawler ) {
 			// Run the current crawler
 			$urls_added = $crawler->add_urls_to_queue();
@@ -49,20 +55,32 @@ class Discover_Urls_Task extends Task {
 			// Log the number of URLs added
 			Util::debug_log( "Added $urls_added URLs via " . $crawler->js_object()['name'] . " Crawler" );
 
-			// Save the status message
-			$message = sprintf( __( "Added %d URLs via %s Crawler", 'simply-static' ),
-				$urls_added, 
-				$crawler->js_object()['name']
-			);
-			$this->save_status_message( $message );
+			// Only show individual crawler messages for full exports
+			$generate_type = $this->options->get( 'generate_type' );
+			if ( $generate_type === 'export' ) {
+				// Save the status message
+				$message = sprintf( __( "Added %d URLs via %s Crawler", 'simply-static' ),
+					$urls_added, 
+					$crawler->js_object()['name']
+				);
+				$this->save_status_message( $message );
+			}
 		}
 
 		// Trigger an action after URL discovery
 		do_action( 'ss_after_discover_urls', $total_urls_added );
 
-		// Save the final status message
-		$message = sprintf( __( "Added %d URLs via Crawler", 'simply-static' ), $total_urls_added );
-		$this->save_status_message( $message );
+		// Count URLs that will be processed in this export after running crawlers
+		$urls_for_current_export = Page::query()->where( 'last_checked_at < ? OR last_checked_at IS NULL', $archive_start_time )->count();
+		$new_urls_for_export = $urls_for_current_export - $initial_count;
+
+		// Only show the "Added X URLs via Crawler" message for full exports
+		$generate_type = $this->options->get( 'generate_type' );
+		if ( $generate_type === 'export' ) {
+			// Save the final status message
+			$message = sprintf( __( "Added %d URLs via Crawler", 'simply-static' ), $new_urls_for_export );
+			$this->save_status_message( $message );
+		}
 
 		return true;
 	}
