@@ -813,8 +813,13 @@ class Admin_Settings {
 		$type    = ! empty( $params['type'] ) ? $params['type'] : 'export';
 
 		// Check if an export is already running
-		if ( Plugin::instance()->get_archive_creation_job()->is_running() ) {
+		$archive_creation_job = Plugin::instance()->get_archive_creation_job();
+		if ( $archive_creation_job->is_running() ) {
 			Util::debug_log( "Export already running. Blocking new export request." );
+			Util::debug_log( "Current task: " . $archive_creation_job->get_current_task() );
+			Util::debug_log( "Is job done: " . ($archive_creation_job->is_job_done() ? 'true' : 'false') );
+
+			// Return a 409 Conflict status code with an error message
 			return json_encode( [
 				'status'  => 409, // Conflict status code
 				'message' => __( 'An export is already running. Please wait for it to complete or cancel it before starting a new one.', 'simply-static' )
@@ -826,9 +831,10 @@ class Admin_Settings {
 
 			$type = apply_filters( 'ss_export_type', $type );
 
-			Plugin::instance()->run_static_export( $blog_id, $type );
-
-			do_action( 'ss_after_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
+			// Only trigger the after action if the export was successfully started
+			if (Plugin::instance()->run_static_export( $blog_id, $type )) {
+				do_action( 'ss_after_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
+			}
 
 			return json_encode( [
 				'status' => 200,

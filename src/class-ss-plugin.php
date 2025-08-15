@@ -205,16 +205,18 @@ class Plugin {
 	 *
 	 * @param int $blog_id given blog id.
 	 *
-	 * @return void
+	 * @return bool Whether the export was started successfully
 	 */
 	public function run_static_export( $blog_id = 0, $type = 'export' ) {
 		// Check if an export is already running
 		if ( $this->archive_creation_job->is_running() ) {
 			Util::debug_log( "Export already running. Blocking new export request." );
+			Util::debug_log( "Current task: " . $this->archive_creation_job->get_current_task() );
+			Util::debug_log( "Is job done: " . ($this->archive_creation_job->is_job_done() ? 'true' : 'false') );
 
 			// For cron jobs or programmatic calls, we just return without starting a new export
 			// The REST API endpoints will handle their own error responses
-			return;
+			return false;
 		}
 
 		if ( ! $blog_id ) {
@@ -268,8 +270,11 @@ class Plugin {
 				$options['archive_end_time']   = null;
 
 				update_option( 'simply-static', $options );
+				return false;
 			}
 		}
+
+		return true;
 	}
 
 	/**
