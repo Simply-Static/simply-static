@@ -84,11 +84,8 @@ class Crawlers {
 			// Create the fully qualified class name
 			$fq_class_name = 'Simply_Static\\Crawler\\' . $class_name;
 
-			Util::debug_log( "Checking for crawler class: " . $fq_class_name );
-
 			// Create an instance of the crawler
 			if ( class_exists( $fq_class_name ) ) {
-				Util::debug_log( "Class exists, creating instance of: " . $fq_class_name );
 				$this->crawlers[] = new $fq_class_name();
 			} else {
 				Util::debug_log( "Class does not exist: " . $fq_class_name );

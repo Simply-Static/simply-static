@@ -139,7 +139,6 @@ class Plugin_Assets_Crawler extends Crawler {
 				// Process batch when it reaches the batch size
 				if ( $file_count % $batch_size === 0 ) {
 					$batch_count++;
-					\Simply_Static\Util::debug_log( "Processing plugin assets batch $batch_count with $batch_size files" );
 					$urls = array_merge( $urls, $this->process_file_batch( $file_batch, $dir, $url_base, $skip_dirs, $asset_extensions ) );
 					$file_batch = []; // Reset batch
 				}
@@ -148,7 +147,6 @@ class Plugin_Assets_Crawler extends Crawler {
 			// Process any remaining files
 			if ( ! empty( $file_batch ) ) {
 				$batch_count++;
-				\Simply_Static\Util::debug_log( "Processing final plugin assets batch $batch_count with " . count( $file_batch ) . " files" );
 				$urls = array_merge( $urls, $this->process_file_batch( $file_batch, $dir, $url_base, $skip_dirs, $asset_extensions ) );
 			}
 
