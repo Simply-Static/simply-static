@@ -208,6 +208,15 @@ class Plugin {
 	 * @return void
 	 */
 	public function run_static_export( $blog_id = 0, $type = 'export' ) {
+		// Check if an export is already running
+		if ( $this->archive_creation_job->is_running() ) {
+			Util::debug_log( "Export already running. Blocking new export request." );
+
+			// For cron jobs or programmatic calls, we just return without starting a new export
+			// The REST API endpoints will handle their own error responses
+			return;
+		}
+
 		if ( ! $blog_id ) {
 			$blog_id = get_current_blog_id();
 		}

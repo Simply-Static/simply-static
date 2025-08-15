@@ -812,6 +812,15 @@ class Admin_Settings {
 		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
 		$type    = ! empty( $params['type'] ) ? $params['type'] : 'export';
 
+		// Check if an export is already running
+		if ( Plugin::instance()->get_archive_creation_job()->is_running() ) {
+			Util::debug_log( "Export already running. Blocking new export request." );
+			return json_encode( [
+				'status'  => 409, // Conflict status code
+				'message' => __( 'An export is already running. Please wait for it to complete or cancel it before starting a new one.', 'simply-static' )
+			] );
+		}
+
 		try {
 			do_action( 'ss_before_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
 
