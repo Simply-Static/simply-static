@@ -98,9 +98,15 @@ class Block_Theme_Crawler extends Crawler {
 				$relative_path = str_replace($dir, '', $file->getPathname());
 				$relative_path = str_replace('\\', '/', $relative_path); // Normalize slashes for URLs
 
-				// Create the full URL
-				$url = $url_base . $relative_path;
-				$urls[] = $url;
+				// Get the file extension
+				$extension = strtolower(pathinfo($relative_path, PATHINFO_EXTENSION));
+
+				// Only include CSS and JS files
+				if ($extension === 'css' || $extension === 'js') {
+					// Create the full URL
+					$url = $url_base . $relative_path;
+					$urls[] = $url;
+				}
 			}
 
 			\Simply_Static\Util::debug_log( "Found " . count( $urls ) . " asset URLs in $dir" );
