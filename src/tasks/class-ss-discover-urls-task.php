@@ -61,7 +61,7 @@ class Discover_Urls_Task extends Task {
 		do_action( 'ss_after_discover_urls', $total_urls_added );
 
 		// Save the final status message
-		$message = sprintf( __( "Added %d URLs to the queue", 'simply-static' ), $total_urls_added );
+		$message = sprintf( __( "Added %d URLs via Crawler", 'simply-static' ), $total_urls_added );
 		$this->save_status_message( $message );
 
 		return true;

@@ -945,13 +945,15 @@ class Url_Extractor {
 		$url = Util::relative_to_absolute_url( $extracted_url, $this->static_page->url );
 
 		if ( $url && Util::is_local_url( $url ) ) {
-			// add to extracted urls queue
-			$this->extracted_urls[] = apply_filters(
-				'simply_static_extracted_url',
-				Util::remove_params_and_fragment( $url ),
-				$url,
-				$this->static_page
-			);
+			// Only add to extracted urls queue if smart_crawl is not enabled
+			if ( ! $this->options->get( 'smart_crawl' ) ) {
+				$this->extracted_urls[] = apply_filters(
+					'simply_static_extracted_url',
+					Util::remove_params_and_fragment( $url ),
+					$url,
+					$this->static_page
+				);
+			}
 
 			$url = $this->convert_url( $url );
 		}
