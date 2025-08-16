@@ -29,7 +29,7 @@ toplevel_page_simply-static img {
 
   .components-flex-item {
     margin-left: 0;
-    width:100%;
+    width: 100%;
   }
 
   .inner-settings > * {
@@ -124,7 +124,7 @@ toplevel_page_simply-static img {
   /* Navigation */
 
   .plugin-nav {
-    height:100%;
+    height: 100%;
     box-shadow: none;
 
     button:focus, button:focus-visible, button:hover {
@@ -237,6 +237,25 @@ toplevel_page_simply-static img {
     height: auto;
     background: #f0f0f1;
 
+    /* Smart Crawl */
+    .crawler-descriptions {
+      margin: 20px 0;
+    }
+
+    .crawler-description {
+      margin: 5px 0;
+    }
+
+    .crawler-name {
+      max-width: 20%;
+    }
+
+    .horizontal-token-field {
+      .components-flex-item {
+        width: auto;
+      }
+    }
+
     /* Tables */
     table {
       width: 100%;
@@ -315,7 +334,7 @@ toplevel_page_simply-static img {
       color: #51aa51;
     }
 
-      .react-terminal-line a {
+    .react-terminal-line a {
       color: #6fa4df;
     }
 
@@ -355,7 +374,6 @@ toplevel_page_simply-static img {
       border-color: #3858e9;
     }
   }
-
 
 
   /* Style for disabled settings */
@@ -449,7 +467,7 @@ a.show-nav {
   }
 
   .log-table-container {
-    max-width:300px;
+    max-width: 300px;
   }
 
   .plugin-settings-container .plugin-settings {

@@ -86,7 +86,8 @@ class Crawlers {
 
 			// Create an instance of the crawler
 			if ( class_exists( $fq_class_name ) ) {
-				$this->crawlers[] = new $fq_class_name();
+				$crawler = new $fq_class_name();
+				$this->crawlers[] = $crawler;
 			} else {
 				Util::debug_log( "Class does not exist: " . $fq_class_name );
 			}
@@ -94,8 +95,6 @@ class Crawlers {
 
 		// Allow plugins to add their own crawlers
 		$this->crawlers = apply_filters( 'simply_static_crawlers', $this->crawlers );
-
-		Util::debug_log( "Total crawlers loaded: " . count( $this->crawlers ) );
 	}
 
 	/**
@@ -105,11 +104,8 @@ class Crawlers {
 	public function get_crawlers() {
 		// Check if we have any crawlers loaded
 		if (empty($this->crawlers)) {
-			Util::debug_log("No crawlers loaded. Reloading crawlers.");
 			$this->load_crawlers();
 		}
-
-		Util::debug_log( "Found " . count( $this->crawlers ) . " total crawlers" );
 
 		return $this->crawlers;
 	}
@@ -132,7 +128,8 @@ class Crawlers {
 		$crawlers_for_js = [];
 
 		foreach ( $this->crawlers as $crawler ) {
-			$crawlers_for_js[] = $crawler->js_object();
+			$js_object = $crawler->js_object();
+			$crawlers_for_js[] = $js_object;
 		}
 
 		return $crawlers_for_js;

@@ -280,6 +280,14 @@ class Admin_Settings {
 	 * @return void
 	 */
 	public function rest_api_init() {
+		register_rest_route( 'simplystatic/v1', '/crawlers', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'get_crawlers' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+			},
+		) );
+
 		register_rest_route( 'simplystatic/v1', '/export-type', array(
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'get_export_type' ],
@@ -541,7 +549,7 @@ class Admin_Settings {
 				'minify_js_exclude'
 			];
 
-			$array_fields = [ 'integrations' ];
+			$array_fields = [ 'integrations', 'crawlers' ];
 
 			// Sanitize each key/value pair in options.
 			foreach ( $options as $key => $value ) {
@@ -919,5 +927,26 @@ class Admin_Settings {
 		do_action( 'ss_after_perform_archive_action', $blog_id, 'resume', Plugin::instance()->get_archive_creation_job() );
 
 		return json_encode( [ 'status' => 200 ] );
+	}
+
+	/**
+	 * Get crawlers for JS
+	 *
+	 * @return false|string
+	 */
+	public function get_crawlers() {
+		// Load the Crawlers class
+		require_once SIMPLY_STATIC_PATH . 'src/crawler/class-crawlers.php';
+
+		// Get the crawler manager
+		$crawlers = \Simply_Static\Crawlers::instance();
+
+		// Get all crawlers for JS
+		$crawlers_for_js = $crawlers->get_crawlers_for_js();
+
+		return json_encode( [
+			'status' => 200,
+			'data'   => $crawlers_for_js,
+		] );
 	}
 }

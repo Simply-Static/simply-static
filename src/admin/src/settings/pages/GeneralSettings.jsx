@@ -8,7 +8,9 @@ import {
     Notice,
     Animate,
     TextControl, SelectControl, Flex, FlexItem, TextareaControl, ToggleControl,
+    FormTokenField,
 } from "@wordpress/components";
+import apiFetch from "@wordpress/api-fetch";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
 import HelperVideo from "../components/HelperVideo";
@@ -29,6 +31,9 @@ function GeneralSettings() {
     const [enableSmartCrawl, setEnableSmartCrawl] = useState(false);
     const [addFeeds, setAddFeeds] = useState(false);
     const [addRestApi, setAddRestApi] = useState(false);
+    const [crawlers, setCrawlers] = useState([]);
+    const [selectedCrawlers, setSelectedCrawlers] = useState([]);
+    const [apiError, setApiError] = useState(null);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -38,6 +43,61 @@ function GeneralSettings() {
             setSettingsSaved(false);
         }, 2000);
     }
+
+    // Fetch crawlers from API
+    useEffect(() => {
+        // Reset API error
+        setApiError(null);
+
+        apiFetch({ 
+            path: '/simplystatic/v1/crawlers',
+            // Use raw: true to get the raw response
+            parse: true
+        })
+            .then(response => {
+
+                // Check if response is a string (JSON) and try to parse it
+                if (typeof response === 'string') {
+                    try {
+                        response = JSON.parse(response);
+                    } catch (e) {
+                        setApiError('Error parsing API response: ' + e.message);
+                        return;
+                    }
+                }
+
+                if (response && response.data && response.data.length > 0) {
+                    setCrawlers(response.data);
+
+                    // If no crawlers are selected or settings.crawlers is not an array, select all by default
+                    if (!settings.crawlers || !Array.isArray(settings.crawlers) || settings.crawlers.length === 0) {
+                        const allCrawlerIds = response.data.map(crawler => crawler.id);
+                        setSelectedCrawlers(allCrawlerIds);
+                        updateSetting('crawlers', allCrawlerIds);
+                    } else {
+
+                        // Ensure all selected crawlers exist in the crawlers list
+                        const validCrawlerIds = settings.crawlers.filter(id => 
+                            response.data.some(crawler => crawler.id === id)
+                        );
+
+                        // If no valid crawlers are selected, select all by default
+                        if (validCrawlerIds.length === 0) {
+                            const allCrawlerIds = response.data.map(crawler => crawler.id);
+                            setSelectedCrawlers(allCrawlerIds);
+                            updateSetting('crawlers', allCrawlerIds);
+                        } else {
+                            setSelectedCrawlers(validCrawlerIds);
+                        }
+                    }
+                } else {
+                    setApiError('Invalid API response structure or empty crawlers array');
+                }
+            })
+            .catch(error => {
+                setApiError('Error fetching crawlers: ' + (error.message || 'Unknown error'));
+            });
+    }, []);
 
     useEffect(() => {
         if (settings.destination_url_type) {
@@ -78,6 +138,10 @@ function GeneralSettings() {
 
         if (settings.smart_crawl) {
             setEnableSmartCrawl(settings.smart_crawl);
+        }
+
+        if (settings.crawlers) {
+            setSelectedCrawlers(settings.crawlers);
         }
 
     }, [settings]);
@@ -185,6 +249,106 @@ function GeneralSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
+                <b>{__('Smart Crawl', 'simply-static')}<HelperVideo
+                    title={__('How Smart Crawl improves your static exports', 'simply-static')}
+                    videoUrl={'https://youtu.be/voAHfwVMLi8'}/></b>
+            </CardHeader>
+            <CardBody>
+                <p>{__('Smart Crawl uses native WordPress functions to find all pages and files when running a static export.', 'simply-static')}</p>
+                <ToggleControl
+                    label={
+                        <>
+                            {__('Enable Smart Crawl', 'simply-static')}
+                        </>
+                    }
+                    help={
+                        enableSmartCrawl
+                            ? __('Find pages and files via Smart Crawl.', 'simply-static')
+                            : __('Don\'t find pages and files via Smart Crawl.', 'simply-static')
+                    }
+                    checked={enableSmartCrawl}
+                    onChange={(value) => {
+                        setEnableSmartCrawl(value);
+                        updateSetting('smart_crawl', value);
+                    }}
+                />
+
+                {enableSmartCrawl && (
+                    <>
+                        <Spacer margin={2} />
+                        {apiError && (
+                            <>
+                                <Notice status="error" isDismissible={false}>
+                                    {__('Error loading crawlers: ', 'simply-static')} {apiError}
+                                </Notice>
+                                <Spacer margin={2} />
+                            </>
+                        )}
+                        {crawlers.length > 0 ? (
+                            <>
+                                <FormTokenField
+                                    label={__('Active Crawlers', 'simply-static')}
+                                    value={selectedCrawlers.map(id => {
+                                        const crawler = crawlers.find(c => c.id === id);
+                                        return crawler ? crawler.name : id;
+                                    })}
+                                    suggestions={crawlers.map(crawler => crawler.name)}
+                                    onChange={(value) => {
+                                        // Convert names to IDs for storage
+                                        const selectedIds = value.map(name => {
+                                            // First try to find an exact match
+                                            let crawler = crawlers.find(c => c.name === name);
+
+                                            // If no exact match, try case-insensitive match
+                                            if (!crawler) {
+                                                crawler = crawlers.find(c => 
+                                                    c.name.toLowerCase() === name.toLowerCase()
+                                                );
+                                            }
+
+                                            // If still no match, check if it's already an ID
+                                            if (!crawler) {
+                                                crawler = crawlers.find(c => c.id === name);
+                                            }
+
+                                            return crawler ? crawler.id : name;
+                                        });
+                                        setSelectedCrawlers(selectedIds);
+                                        updateSetting('crawlers', selectedIds);
+                                    }}
+                                    help={__('Select which crawlers to activate. If none selected, all crawlers will be active by default.', 'simply-static')}
+                                    tokenizeOnSpace={false}
+                                    __experimentalExpandOnFocus={true}
+                                    __experimentalShowHowTo={false}
+                                    maxSuggestions={100}
+                                    className="horizontal-token-field"
+                                />
+                                <Spacer margin={2} />
+                                <div className="crawler-descriptions">
+                                    {crawlers.map(crawler => (
+                                        <div key={crawler.id} className="crawler-description">
+                                            <Flex>
+                                                <FlexItem className={"crawler-name"}>
+                                                    <strong>{crawler.name}:</strong>
+                                                </FlexItem>
+                                                <FlexItem>
+                                                    {crawler.description}
+                                                </FlexItem>
+                                            </Flex>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        ) : (
+                            <p>{__('Loading crawlers...', 'simply-static')}</p>
+                        )}
+                    </>
+                )}
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
                 <b>{__('Include', 'simply-static')}<HelperVideo
                     title={__('Include & Exclude files and pages', 'simply-static')}
                     videoUrl={'https://youtu.be/voAHfwVMLi8'}/></b>
@@ -217,23 +381,7 @@ function GeneralSettings() {
                     {hasCopied ? __('Copied home path', 'simply-static') : __('Copy home path', 'simply-static')}
                 </ClipboardButton>
                 <Spacer margin={5}/>
-                <ToggleControl
-                    label={
-                        <>
-                            {__('Enable Smart Crawl', 'simply-static')}
-                        </>
-                    }
-                    help={
-                        enableSmartCrawl
-                            ? __('Collect pages and files via Smart Crawl.', 'simply-static')
-                            : __('Don\'t collect pages and files via Smart Crawl.', 'simply-static')
-                    }
-                    checked={enableSmartCrawl}
-                    onChange={(value) => {
-                        setEnableSmartCrawl(value);
-                        updateSetting('smart_crawl', value);
-                    }}
-                />
+
                 <ToggleControl
                     label={
                         <>
