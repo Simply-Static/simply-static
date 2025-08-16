@@ -25,7 +25,7 @@ class Plugin_Assets_Crawler extends Crawler {
 	 */
 	public function __construct() {
 		$this->name        = __( 'Plugin Assets', 'simply-static' );
-		$this->description = __( 'Detects URLs for assets (CSS, JS, images) used by plugins.', 'simply-static' );
+		$this->description = __( 'Detects URLs for assets (CSS, JS, images) used by active plugins.', 'simply-static' );
 	}
 
 	/**

@@ -24,8 +24,8 @@ class Home_Crawler extends Crawler {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->name = __( 'Home Page URL', 'simply-static' );
-		$this->description = __( 'Detects the home page URL.', 'simply-static' );
+		$this->name = __( 'Homepage URL', 'simply-static' );
+		$this->description = __( 'Detects the homepage URL.', 'simply-static' );
 		$this->active_by_default = true;
 	}
 
