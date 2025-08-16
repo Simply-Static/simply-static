@@ -202,9 +202,15 @@ class Upgrade_Handler {
 	 */
 	protected static function set_default_options() {
 		foreach ( self::$default_options as $option_key => $option_value ) {
-			if ( self::$options->get( $option_key ) === null ) {
+			// For new installations, ensure smart_crawl is set to true
+			if ( $option_key === 'smart_crawl' ) {
+				self::$options->set( $option_key, true );
+			} else if ( self::$options->get( $option_key ) === null ) {
 				self::$options->set( $option_key, $option_value );
 			}
 		}
+
+		// Save the options
+		self::$options->save();
 	}
 }
