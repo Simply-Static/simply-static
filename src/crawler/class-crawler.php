@@ -97,7 +97,7 @@ abstract class Crawler {
 			// Allow other processes to run
 			if ( count( $batches ) > 1 ) {
 				\Simply_Static\Util::debug_log( 'Yielding to allow other processes to run' );
-				sleep( 0.1 );
+				usleep( 100000 ); // 0.1 seconds in microseconds
 			}
 		}
 

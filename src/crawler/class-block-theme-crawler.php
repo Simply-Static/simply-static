@@ -56,7 +56,8 @@ class Block_Theme_Crawler extends Crawler {
 
 		// Scan each directory and add files to asset URLs
 		foreach ( $block_theme_directories as $directory ) {
-			$full_path = $wp_path . ltrim($directory, '/');
+			$directory_clean = $directory !== null ? ltrim($directory, '/') : '';
+			$full_path = $wp_path . $directory_clean;
 			$directory_urls = $this->scan_directory_for_assets($full_path, $site_url . $directory);
 			$asset_urls = array_merge($asset_urls, $directory_urls);
 		}
