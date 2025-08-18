@@ -44,8 +44,8 @@ function GeneralSettings() {
         }, 2000);
     }
 
-    // Fetch crawlers from API
-    useEffect(() => {
+    // Function to fetch crawlers from API
+    const fetchCrawlers = () => {
         // Reset API error
         setApiError(null);
 
@@ -98,6 +98,13 @@ function GeneralSettings() {
             .catch(error => {
                 setApiError('Error fetching crawlers: ' + (error.message || 'Unknown error'));
             });
+    };
+
+    // Fetch crawlers when component mounts
+    // We intentionally use an empty dependency array to ensure this only runs once
+    // when the component mounts, not on every settings change
+    useEffect(() => {
+        fetchCrawlers();
     }, []);
 
     useEffect(() => {

@@ -556,7 +556,13 @@ class Admin_Settings {
 				if ( in_array( $key, $multiline_fields ) ) {
 					$options[ $key ] = sanitize_textarea_field( $value );
 				} elseif ( in_array( $key, $array_fields ) ) {
-					$options[ $key ] = array_map( 'sanitize_text_field', $value );
+					// Ensure value is an array before using array_map
+					if ( is_array( $value ) ) {
+						$options[ $key ] = array_map( 'sanitize_text_field', $value );
+					} else {
+						// If not an array, initialize as empty array
+						$options[ $key ] = [];
+					}
 				} else {
 					// Exclude Basic Auth fields from sanitize.
 					if ( $key === 'http_basic_auth_username' || $key === 'http_basic_auth_password' ) {
