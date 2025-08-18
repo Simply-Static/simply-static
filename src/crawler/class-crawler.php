@@ -50,13 +50,14 @@ abstract class Crawler {
 		$options  = \Simply_Static\Options::instance();
 		$crawlers = $options->get( 'crawlers' );
 
-		// If there is no such option, it means it's all active by default.
-		if ( empty( $crawlers ) && $this->active_by_default ) {
-			return true;
-		}
-
+		// Ensure crawlers is always an array
 		if ( ! is_array( $crawlers ) ) {
 			$crawlers = [];
+		}
+
+		// If there is no such option or it's empty, it means it's all active by default.
+		if ( empty( $crawlers ) && $this->active_by_default ) {
+			return true;
 		}
 
 		return in_array( $this->id, $crawlers, true );

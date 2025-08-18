@@ -70,11 +70,12 @@ function GeneralSettings() {
                     setCrawlers(response.data);
 
                     // If no crawlers are selected or settings.crawlers is not an array, select all by default
-                    if (!settings.crawlers || !Array.isArray(settings.crawlers) || settings.crawlers.length === 0) {
+                    // But only do this if smart_crawl is enabled and we're initializing for the first time
+                    if ((!settings.crawlers || !Array.isArray(settings.crawlers) || settings.crawlers.length === 0) && settings.smart_crawl === true) {
                         const allCrawlerIds = response.data.map(crawler => crawler.id);
                         setSelectedCrawlers(allCrawlerIds);
                         updateSetting('crawlers', allCrawlerIds);
-                    } else {
+                    } else if (Array.isArray(settings.crawlers)) {
 
                         // Ensure all selected crawlers exist in the crawlers list
                         const validCrawlerIds = settings.crawlers.filter(id => 
