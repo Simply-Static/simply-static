@@ -131,7 +131,7 @@ function SettingsContextProvider(props) {
     const [isPaused, setIsPaused] = useState(false);
     const [isResumed, setIsResumed] = useState(false);
     const [settingsSaved, setSettingsSaved] = useState(false);
-    const [settings, setSettings] = useState(defaultSettings);
+    const [settings, setSettings] = useState({});
     const [configs, setConfigs] = useState({});
     const [passedChecks, setPassedChecks] = useState('yes');
     const [blogId, setBlogId] = useState(1);
