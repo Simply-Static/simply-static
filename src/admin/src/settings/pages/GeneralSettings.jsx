@@ -28,7 +28,7 @@ function GeneralSettings() {
     const [forceURLReplacement, setForceURLReplacement] = useState(false);
     const [hasCopied, setHasCopied] = useState(false);
     const [generate404, setGenerate404] = useState(false);
-    const [enableSmartCrawl, setEnableSmartCrawl] = useState(false);
+    const [enableEnhancedCrawl, setEnableEnhancedCrawl] = useState(false);
     const [addFeeds, setAddFeeds] = useState(false);
     const [addRestApi, setAddRestApi] = useState(false);
     const [crawlers, setCrawlers] = useState([]);
@@ -145,7 +145,7 @@ function GeneralSettings() {
         }
 
         if (settings.smart_crawl) {
-            setEnableSmartCrawl(settings.smart_crawl);
+            setEnableEnhancedCrawl(settings.smart_crawl);
         }
 
         if (settings.crawlers) {
@@ -257,31 +257,31 @@ function GeneralSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('Smart Crawl', 'simply-static')}<HelperVideo
-                    title={__('How Smart Crawl improves your static exports', 'simply-static')}
-                    videoUrl={'https://youtu.be/5r8b0tC85Jo'}/></b>
+                <b>{__('Enhanced Crawl', 'simply-static')}<HelperVideo
+                    title={__('How Enhanced Crawl improves your static exports', 'simply-static')}
+                    videoUrl={'https://youtu.be/QfKxeQ1w7tU'}/></b>
             </CardHeader>
             <CardBody>
-                <p>{__('Smart Crawl uses native WordPress functions to find all pages and files when running a static export.', 'simply-static')}</p>
+                <p>{__('Enhanced Crawl uses native WordPress functions to find all pages and files when running a static export.', 'simply-static')}</p>
                 <ToggleControl
                     label={
                         <>
-                            {__('Enable Smart Crawl', 'simply-static')}
+                            {__('Enable Enhanced Crawl', 'simply-static')}
                         </>
                     }
                     help={
-                        enableSmartCrawl
-                            ? __('Find pages and files via Smart Crawl.', 'simply-static')
-                            : __('Don\'t find pages and files via Smart Crawl.', 'simply-static')
+                        enableEnhancedCrawl
+                            ? __('Find pages and files via Enhanced Crawl.', 'simply-static')
+                            : __('Don\'t find pages and files via Enhanced Crawl.', 'simply-static')
                     }
-                    checked={enableSmartCrawl}
+                    checked={enableEnhancedCrawl}
                     onChange={(value) => {
-                        setEnableSmartCrawl(value);
+                        setEnableEnhancedCrawl(value);
                         updateSetting('smart_crawl', value);
                     }}
                 />
 
-                {enableSmartCrawl && (
+                {enableEnhancedCrawl && (
                     <>
                         <Spacer margin={2} />
                         {apiError && (
