@@ -1,4 +1,4 @@
-=== Simply Static - The WordPress Static Site Generator ===
+=== Simply Static - The Static Site Generator ===
 Contributors: patrickposner
 Tags: static site generator, performance, security, jamstack
 Requires at least: 6.2
@@ -260,6 +260,11 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 3. Diagnostics
 
 == Changelog ==
+
+= 3.4.2 =
+
+* fixed integration loading in admin settings
+* modified readme to comply with .org trademark violation (...)
 
 = 3.4.1 =
 
