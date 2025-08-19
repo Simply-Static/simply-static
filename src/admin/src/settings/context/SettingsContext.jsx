@@ -324,7 +324,7 @@ function SettingsContextProvider(props) {
     const isIntegrationActive = (integration) => {
         let integrations = settings.integrations;
 
-        if (false === integrations) {
+        if (false === integrations || !integrations || !Array.isArray(integrations)) {
             return false;
         }
 
