@@ -259,7 +259,7 @@ function GeneralSettings() {
             <CardHeader>
                 <b>{__('Smart Crawl', 'simply-static')}<HelperVideo
                     title={__('How Smart Crawl improves your static exports', 'simply-static')}
-                    videoUrl={'https://youtu.be/voAHfwVMLi8'}/></b>
+                    videoUrl={'https://youtu.be/5r8b0tC85Jo'}/></b>
             </CardHeader>
             <CardBody>
                 <p>{__('Smart Crawl uses native WordPress functions to find all pages and files when running a static export.', 'simply-static')}</p>
