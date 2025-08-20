@@ -126,8 +126,8 @@ function GeneralSettings() {
                 if (response && response.data && response.data.length > 0) {
                     setPostTypes(response.data);
 
-                    // If no post types are selected or settings.post_types is not an array, select all by default
-                    if (!settings.post_types || !Array.isArray(settings.post_types) || settings.post_types.length === 0) {
+                    // If settings.post_types is not an array, initialize it as an empty array
+                    if (!settings.post_types || !Array.isArray(settings.post_types)) {
                         const allPostTypeIds = response.data.map(postType => postType.name);
                         setSelectedPostTypes(allPostTypeIds);
                         updateSetting('post_types', allPostTypeIds);
@@ -208,8 +208,8 @@ function GeneralSettings() {
             setSelectedCrawlers(settings.crawlers);
         }
 
-        if (settings.post_types) {
-            setSelectedPostTypes(settings.post_types);
+        if (settings.post_types !== undefined) {
+            setSelectedPostTypes(Array.isArray(settings.post_types) ? settings.post_types : []);
         }
 
     }, [settings]);
@@ -408,10 +408,10 @@ function GeneralSettings() {
                                             <>
                                                 <FormTokenField
                                                     label={__('Post Types to Include', 'simply-static')}
-                                                    value={selectedPostTypes.map(name => {
+                                                    value={Array.isArray(selectedPostTypes) ? selectedPostTypes.map(name => {
                                                         const postType = postTypes.find(pt => pt.name === name);
                                                         return postType ? postType.label : name;
-                                                    })}
+                                                    }) : []}
                                                     suggestions={postTypes.map(postType => postType.label)}
                                                     onChange={(value) => {
                                                         // Convert labels to names for storage
@@ -436,7 +436,7 @@ function GeneralSettings() {
                                                         setSelectedPostTypes(selectedNames);
                                                         updateSetting('post_types', selectedNames);
                                                     }}
-                                                    help={__('Select which post types to include in the static export. If none selected, all post types will be included by default.', 'simply-static')}
+                                                    help={__('Select which post types to include in the static export. If you remove all selections, all post types will be included by default.', 'simply-static')}
                                                     tokenizeOnSpace={false}
                                                     __experimentalExpandOnFocus={true}
                                                     __experimentalShowHowTo={false}

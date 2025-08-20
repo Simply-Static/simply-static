@@ -557,7 +557,7 @@ class Admin_Settings {
 				'minify_js_exclude'
 			];
 
-			$array_fields = [ 'integrations', 'crawlers' ];
+			$array_fields = [ 'integrations', 'crawlers', 'post_types' ];
 
 			// Sanitize each key/value pair in options.
 			foreach ( $options as $key => $value ) {
