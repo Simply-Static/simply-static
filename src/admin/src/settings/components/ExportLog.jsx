@@ -6,7 +6,7 @@ import DataTable from "react-data-table-component";
 import {Flex, FlexItem, Spinner} from "@wordpress/components";
 
 function ExportLog() {
-    const {isRunning, blogId, isPro} = useContext(SettingsContext);
+    const {isRunning, blogId, isPro, settings} = useContext(SettingsContext);
     const [exportLog, setExportLog] = useState([]);
     const [loadingExportLog, setLoadingExportLog] = useState(false);
     const [perPageExportLog, setPerPageExportLog] = useState(25);
@@ -15,11 +15,17 @@ function ExportLog() {
     const [allData, setAllData] = useState([]);
     const [loadingAllData, setLoadingAllData] = useState(false);
     const [totalPages, setTotalPages] = useState(0);
-    const [exportType, setExportType] = useState('Export');
+    const [exportType, setExportType] = useState('export');
     const [exportTypeId, setExportTypeId] = useState(null);
 
     // Determine export type based on available information
     useEffect(() => {
+        // If delivery method is 'zip', always use 'export' type
+        if (settings && settings.delivery_method === 'zip') {
+            setExportType('export');
+            return;
+        }
+
         // Use the new export-type endpoint to get the export type information
         apiFetch({
             path: '/simplystatic/v1/export-type',
@@ -28,20 +34,27 @@ function ExportLog() {
         .then(response => {
             const json = JSON.parse(response);
             if (json.status === 200 && json.data) {
-                setExportType(json.data.export_type);
-                setExportTypeId(json.data.export_type_id);
+                // If delivery method is 'zip', override with 'export' type
+                if (settings && settings.delivery_method === 'zip') {
+                    setExportType('export');
+                } else {
+                    setExportType(json.data.export_type);
+                    setExportTypeId(json.data.export_type_id);
+                }
             }
         })
         .catch(error => {
             console.error('Error fetching export type:', error);
             // Fallback to using options.last_export_end
-            if (options.last_export_end) {
+            if (settings && settings.delivery_method === 'zip') {
+                setExportType('export');
+            } else if (options.last_export_end) {
                 setExportType('Update');
             } else {
-                setExportType('Export');
+                setExportType('export');
             }
         });
-    }, []);
+    }, [settings]);
 
     // Define base columns
     const baseColumns = [
