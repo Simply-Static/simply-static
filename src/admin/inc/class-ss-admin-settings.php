@@ -164,6 +164,9 @@ class Admin_Settings {
 		// Check if directory exists, if not, create it.
 		$temp_dir = Util::get_temp_dir();
 
+		// Get the current settings
+		$current_settings = $this->get_settings();
+
 		$args = apply_filters(
 			'ss_settings_args',
 			array(
@@ -186,6 +189,8 @@ class Admin_Settings {
 
 					return $object->js_object();
 				}, Plugin::instance()->get_integrations() ),
+				// Add the current settings to the args
+				'current_settings' => $current_settings,
 			)
 		);
 
@@ -613,27 +618,135 @@ class Admin_Settings {
 	}
 
 	/**
-	 * Save settings via rest API.
+	 * Reset settings to default values via rest API.
 	 *
 	 * @param object $request given request.
 	 *
 	 * @return false|string
 	 */
 	public function reset_settings( $request ) {
-		if ( $request->get_params() ) {
-			// Check table.
-			Page::create_or_update_table();
+		// Check table.
+		Page::create_or_update_table();
 
-			// Reset options.
-			$options = sanitize_option( 'simply-static', $request->get_params() );
+		// Define default options (copied from Upgrade_Handler class)
+		$default_options = array(
+			'destination_scheme'            => 'https://',
+			'destination_host'              => '',
+			'temp_files_dir'                => '',
+			'additional_urls'               => '',
+			'additional_files'              => '',
+			'urls_to_exclude'               => "",
+			'delivery_method'               => 'zip',
+			'local_dir'                     => '',
+			'relative_path'                 => '',
+			'destination_url_type'          => 'relative',
+			'debugging_mode'                => true,
+			'server_cron'                   => false,
+			'whitelist_plugins'             => '',
+			'http_basic_auth_username'      => '',
+			'http_basic_auth_password'      => '',
+			'origin_url'                    => '',
+			'force_replace_url'             => true,
+			'clear_directory_before_export' => false,
+			'iframe_urls'                   => '',
+			'iframe_custom_css'             => '',
+			'tiiny_email'                   => get_bloginfo( 'admin_email' ),
+			'tiiny_subdomain'               => '',
+			'tiiny_domain_suffix'           => 'tiiny.site',
+			'tiiny_password'                => '',
+			'cdn_api_key'                   => '',
+			'cdn_storage_host'              => 'storage.bunnycdn.com',
+			'cdn_access_key'                => '',
+			'cdn_pull_zone'                 => '',
+			'cdn_storage_zone'              => '',
+			'cdn_directory'                 => '',
+			'github_account_type'           => 'personal',
+			'github_user'                   => '',
+			'github_email'                  => '',
+			'github_personal_access_token'  => '',
+			'github_repository'             => '',
+			'github_repository_visibility'  => 'public',
+			'github_branch'                 => 'main',
+			'github_webhook_url'            => '',
+			'github_folder_path'            => '',
+			'github_throttle_requests'      => false,
+			'aws_auth_method'               => 'aws-iam-key',
+			'aws_region'                    => 'us-east-2',
+			'aws_access_key'                => '',
+			'aws_access_secret'             => '',
+			'aws_bucket'                    => '',
+			'aws_subdirectory'              => '',
+			'aws_distribution_id'           => '',
+			'aws_webhook_url'               => '',
+			'aws_empty'                     => false,
+			's3_access_key'                 => '',
+			's3_base_url'                   => '',
+			's3_access_secret'              => '',
+			's3_bucket'                     => '',
+			's3_subdirectory'               => '',
+			'fix_cors'                      => 'allowed_http_origins',
+			'static_url'                    => '',
+			'use_forms'                     => false,
+			'use_comments'                  => false,
+			'comment_redirect'              => '',
+			'use_search'                    => false,
+			'search_type'                   => 'fuse',
+			'search_index_title'            => 'title',
+			'search_index_content'          => 'body',
+			'search_index_excerpt'          => '.entry-content',
+			'search_excludable'             => '',
+			'search_metadata'               => '',
+			'fuse_selector'                 => '.search-field',
+			'fuse_threshold'                => 0.1,
+			'algolia_app_id'                => '',
+			'algolia_admin_api_key'         => '',
+			'algolia_search_api_key'        => '',
+			'algolia_index'                 => 'simply_static',
+			'algolia_selector'              => '.search-field',
+			'use_minify'                    => false,
+			'minify_html'                   => false,
+			'minify_css'                    => false,
+			'minify_inline_css'             => false,
+			'minify_js'                     => false,
+			'minify_inline_js'              => false,
+			'generate_404'                  => false,
+			'add_feeds'                     => false,
+			'add_rest_api'                  => false,
+			'smart_crawl'                   => true,
+			'wp_content_folder'             => '',
+			'wp_includes_folder'            => '',
+			'wp_uploads_folder'             => '',
+			'wp_plugins_folder'             => '',
+			'wp_themes_folder'              => '',
+			'theme_style_name'              => 'style',
+			'author_url'                    => '',
+			'hide_comments'                 => false,
+			'hide_version'                  => false,
+			'hide_generator'                => false,
+			'hide_prefetch'                 => false,
+			'hide_rsd'                      => false,
+			'hide_emotes'                   => false,
+			'disable_xmlrpc'                => false,
+			'disable_embed'                 => false,
+			'disable_db_debug'              => false,
+			'disable_wlw_manifest'          => false,
+			'sftp_host'                     => '',
+			'sftp_user'                     => '',
+			'sftp_pass'                     => '',
+			'sftp_folder'                   => '',
+			'sftp_port'                     => 22,
+			'archive_status_messages'       => array(),
+			'pages_status'                  => array(),
+			'archive_name'                  => null,
+			'archive_start_time'            => null,
+			'archive_end_time'              => null,
+			'version'                       => SIMPLY_STATIC_VERSION,
+		);
 
-			// Update settings.
-			update_option( 'simply-static', $options );
+		// Update settings with default options.
+		update_option( 'simply-static', $default_options );
 
-			return json_encode( [ 'status' => 200, 'message' => "Ok" ] );
-		}
-
-		return json_encode( [ 'status' => 400, 'message' => "No options updated." ] );
+		return json_encode( [ 'status' => 200, 'message' => "Ok", 'data' => $default_options ] );
 	}
 
 
