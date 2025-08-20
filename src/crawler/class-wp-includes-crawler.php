@@ -8,38 +8,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Simply Static Block Theme Crawler class
+ * Simply Static WP Includes Crawler class
  *
- * This crawler detects URLs for essential files required by block themes.
+ * This crawler detects URLs for essential files in wp-includes directory.
  */
-class Block_Theme_Crawler extends Crawler {
+class WP_Includes_Crawler extends Crawler {
 
 	/**
 	 * Crawler ID.
 	 * @var string
 	 */
-	protected $id = 'block_theme';
+	protected $id = 'wp_includes';
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->name = __( 'Block Theme Files', 'simply-static' );
-		$this->description = __( 'Detects essential files required by block themes.', 'simply-static' );
+		$this->name        = __( 'Includes Directory', 'simply-static' );
+		$this->description = __( 'Detects essential files in wp-includes directory.', 'simply-static' );
 	}
 
 	/**
-	 * Detect block theme files.
+	 * Detect wp-includes files.
 	 *
-	 * @return array List of block theme file URLs
+	 * @return array List of wp-includes file URLs
 	 */
 	public function detect(): array {
 		$asset_urls = [];
-
-		// Only proceed if the site is using a block theme
-		if ( ! function_exists( 'wp_is_block_theme' ) || ! wp_is_block_theme() ) {
-			return $asset_urls;
-		}
 
 		// Get the site URL
 		$site_url = site_url();
@@ -47,19 +42,19 @@ class Block_Theme_Crawler extends Crawler {
 		// Get the WordPress ABSPATH
 		$wp_path = ABSPATH;
 
-		// List of directories to scan for block themes
-		$block_theme_directories = [
+		// List of directories to scan for wp-includes
+		$wp_includes_directories = [
 			'/wp-includes/blocks/',
 			'/wp-includes/css/dist/',
 			'/wp-includes/js/dist/'
 		];
 
 		// Scan each directory and add files to asset URLs
-		foreach ( $block_theme_directories as $directory ) {
-			$directory_clean = $directory !== null ? ltrim($directory, '/') : '';
-			$full_path = $wp_path . $directory_clean;
-			$directory_urls = $this->scan_directory_for_assets($full_path, $site_url . $directory);
-			$asset_urls = array_merge($asset_urls, $directory_urls);
+		foreach ( $wp_includes_directories as $directory ) {
+			$directory_clean = $directory !== null ? ltrim( $directory, '/' ) : '';
+			$full_path       = $wp_path . $directory_clean;
+			$directory_urls  = $this->scan_directory_for_assets( $full_path, $site_url . $directory );
+			$asset_urls      = array_merge( $asset_urls, $directory_urls );
 		}
 
 		return $asset_urls;
@@ -79,6 +74,7 @@ class Block_Theme_Crawler extends Crawler {
 		// Check if directory exists
 		if ( ! is_dir( $dir ) ) {
 			\Simply_Static\Util::debug_log( "Directory does not exist: $dir" );
+
 			return $urls;
 		}
 
@@ -96,16 +92,16 @@ class Block_Theme_Crawler extends Crawler {
 				}
 
 				// Get the relative path from the base directory
-				$relative_path = str_replace($dir, '', $file->getPathname());
-				$relative_path = str_replace('\\', '/', $relative_path); // Normalize slashes for URLs
+				$relative_path = str_replace( $dir, '', $file->getPathname() );
+				$relative_path = str_replace( '\\', '/', $relative_path ); // Normalize slashes for URLs
 
 				// Get the file extension
-				$extension = strtolower(pathinfo($relative_path, PATHINFO_EXTENSION));
+				$extension = strtolower( pathinfo( $relative_path, PATHINFO_EXTENSION ) );
 
 				// Only include CSS and JS files
-				if ($extension === 'css' || $extension === 'js') {
+				if ( $extension === 'css' || $extension === 'js' ) {
 					// Create the full URL
-					$url = $url_base . $relative_path;
+					$url    = $url_base . $relative_path;
 					$urls[] = $url;
 				}
 			}
