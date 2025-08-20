@@ -44,10 +44,14 @@ class WP_Includes_Crawler extends Crawler {
 
 		// List of directories to scan for wp-includes
 		$wp_includes_directories = [
-			'/wp-includes/blocks/',
 			'/wp-includes/css/dist/',
 			'/wp-includes/js/dist/'
 		];
+
+		// Only include blocks directory if it's a block theme
+		if ( function_exists( 'wp_is_block_theme' ) && wp_is_block_theme() ) {
+			array_unshift( $wp_includes_directories, '/wp-includes/blocks/' );
+		}
 
 		// Scan each directory and add files to asset URLs
 		foreach ( $wp_includes_directories as $directory ) {
