@@ -93,11 +93,54 @@ class Url_Fetcher {
 
 		Util::debug_log( "Fetching URL and saving it to: " . $temp_filename );
 
+		// Check if the URL is a local asset (file) that we can copy directly
+		// We do this check before prepare_url to avoid query parameters interfering with extension detection
+		$original_url = $url;
+		$is_local_asset = Util::is_local_asset_url( $original_url );
+
+		Util::debug_log( "URL: " . $original_url . " - Is local asset: " . ($is_local_asset ? 'Yes' : 'No') );
+
 		if ( $prepare_url ) {
 			$url = $static_page->get_handler()->prepare_url( $url );
 		}
 
-		$response = self::remote_get( $url, $temp_filename );
+		// Check if the URL is a local asset (file) that we can copy directly
+		if ( $is_local_asset ) {
+			// Get the local path for the URL using the original URL without query parameters
+			$local_path = Util::get_path_from_local_url( $original_url );
+			$file_path = ABSPATH . ltrim( $local_path, '/' );
+
+			Util::debug_log( "Local path: " . $local_path . " - Full file path: " . $file_path );
+
+			// Check if the file exists
+			if ( file_exists( $file_path ) ) {
+				Util::debug_log( "Copying local file directly: " . $file_path );
+
+				// Copy the file to the temporary location
+				if ( copy( $file_path, $temp_filename ) ) {
+					// Create a response-like array to match what remote_get would return
+					$response = array(
+						'response' => array(
+							'code' => 200
+						),
+						'headers' => array(
+							'content-type' => mime_content_type( $file_path )
+						)
+					);
+				} else {
+					// If copy fails, fall back to remote_get
+					Util::debug_log( "Failed to copy local file, falling back to remote_get" );
+					$response = self::remote_get( $url, $temp_filename );
+				}
+			} else {
+				// If file doesn't exist, fall back to remote_get
+				Util::debug_log( "Local file not found, falling back to remote_get" );
+				$response = self::remote_get( $url, $temp_filename );
+			}
+		} else {
+			// Not a local asset, use remote_get as before
+			$response = self::remote_get( $url, $temp_filename );
+		}
 
 		$filesize = file_exists( $temp_filename ) ? filesize( $temp_filename ) : 0;
 		Util::debug_log( "Filesize: " . $filesize . ' bytes' );
