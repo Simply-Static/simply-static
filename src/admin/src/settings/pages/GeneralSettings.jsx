@@ -34,6 +34,9 @@ function GeneralSettings() {
     const [crawlers, setCrawlers] = useState([]);
     const [selectedCrawlers, setSelectedCrawlers] = useState([]);
     const [apiError, setApiError] = useState(null);
+    const [postTypes, setPostTypes] = useState([]);
+    const [selectedPostTypes, setSelectedPostTypes] = useState([]);
+    const [postTypesApiError, setPostTypesApiError] = useState(null);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -100,11 +103,64 @@ function GeneralSettings() {
             });
     };
 
-    // Fetch crawlers when component mounts
+    // Function to fetch post types from API
+    const fetchPostTypes = () => {
+        // Reset API error
+        setPostTypesApiError(null);
+
+        apiFetch({ 
+            path: '/simplystatic/v1/post-types',
+            parse: true
+        })
+            .then(response => {
+                // Check if response is a string (JSON) and try to parse it
+                if (typeof response === 'string') {
+                    try {
+                        response = JSON.parse(response);
+                    } catch (e) {
+                        setPostTypesApiError('Error parsing API response: ' + e.message);
+                        return;
+                    }
+                }
+
+                if (response && response.data && response.data.length > 0) {
+                    setPostTypes(response.data);
+
+                    // If no post types are selected or settings.post_types is not an array, select all by default
+                    if (!settings.post_types || !Array.isArray(settings.post_types) || settings.post_types.length === 0) {
+                        const allPostTypeIds = response.data.map(postType => postType.name);
+                        setSelectedPostTypes(allPostTypeIds);
+                        updateSetting('post_types', allPostTypeIds);
+                    } else if (Array.isArray(settings.post_types)) {
+                        // Ensure all selected post types exist in the post types list
+                        const validPostTypeIds = settings.post_types.filter(name => 
+                            response.data.some(postType => postType.name === name)
+                        );
+
+                        // If no valid post types are selected, select all by default
+                        if (validPostTypeIds.length === 0) {
+                            const allPostTypeIds = response.data.map(postType => postType.name);
+                            setSelectedPostTypes(allPostTypeIds);
+                            updateSetting('post_types', allPostTypeIds);
+                        } else {
+                            setSelectedPostTypes(validPostTypeIds);
+                        }
+                    }
+                } else {
+                    setPostTypesApiError('Invalid API response structure or empty post types array');
+                }
+            })
+            .catch(error => {
+                setPostTypesApiError('Error fetching post types: ' + (error.message || 'Unknown error'));
+            });
+    };
+
+    // Fetch crawlers and post types when component mounts
     // We intentionally use an empty dependency array to ensure this only runs once
     // when the component mounts, not on every settings change
     useEffect(() => {
         fetchCrawlers();
+        fetchPostTypes();
     }, []);
 
     useEffect(() => {
@@ -150,6 +206,10 @@ function GeneralSettings() {
 
         if (settings.crawlers) {
             setSelectedCrawlers(settings.crawlers);
+        }
+
+        if (settings.post_types) {
+            setSelectedPostTypes(settings.post_types);
         }
 
     }, [settings]);
@@ -332,6 +392,64 @@ function GeneralSettings() {
                                     className="horizontal-token-field"
                                 />
                                 <Spacer margin={2} />
+                                {/* Show post types selection only when Post Type URLs crawler is active */}
+                                {selectedCrawlers.includes('post_type') && (
+                                    <>
+                                        <Spacer margin={2} />
+                                        {postTypesApiError && (
+                                            <>
+                                                <Notice status="error" isDismissible={false}>
+                                                    {__('Error loading post types: ', 'simply-static')} {postTypesApiError}
+                                                </Notice>
+                                                <Spacer margin={2} />
+                                            </>
+                                        )}
+                                        {postTypes.length > 0 ? (
+                                            <>
+                                                <FormTokenField
+                                                    label={__('Post Types to Include', 'simply-static')}
+                                                    value={selectedPostTypes.map(name => {
+                                                        const postType = postTypes.find(pt => pt.name === name);
+                                                        return postType ? postType.label : name;
+                                                    })}
+                                                    suggestions={postTypes.map(postType => postType.label)}
+                                                    onChange={(value) => {
+                                                        // Convert labels to names for storage
+                                                        const selectedNames = value.map(label => {
+                                                            // First try to find an exact match
+                                                            let postType = postTypes.find(pt => pt.label === label);
+
+                                                            // If no exact match, try case-insensitive match
+                                                            if (!postType) {
+                                                                postType = postTypes.find(pt => 
+                                                                    pt.label.toLowerCase() === label.toLowerCase()
+                                                                );
+                                                            }
+
+                                                            // If still no match, check if it's already a name
+                                                            if (!postType) {
+                                                                postType = postTypes.find(pt => pt.name === label);
+                                                            }
+
+                                                            return postType ? postType.name : label;
+                                                        });
+                                                        setSelectedPostTypes(selectedNames);
+                                                        updateSetting('post_types', selectedNames);
+                                                    }}
+                                                    help={__('Select which post types to include in the static export. If none selected, all post types will be included by default.', 'simply-static')}
+                                                    tokenizeOnSpace={false}
+                                                    __experimentalExpandOnFocus={true}
+                                                    __experimentalShowHowTo={false}
+                                                    maxSuggestions={100}
+                                                    className="horizontal-token-field"
+                                                />
+                                                <Spacer margin={2} />
+                                            </>
+                                        ) : (
+                                            <p>{__('Loading post types...', 'simply-static')}</p>
+                                        )}
+                                    </>
+                                )}
                                 <div className="crawler-descriptions">
                                     {crawlers.map(crawler => (
                                         <div key={crawler.id} className="crawler-description">

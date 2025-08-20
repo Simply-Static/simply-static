@@ -280,6 +280,14 @@ class Admin_Settings {
 	 * @return void
 	 */
 	public function rest_api_init() {
+		register_rest_route( 'simplystatic/v1', '/post-types', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'get_post_types' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+			},
+		) );
+
 		register_rest_route( 'simplystatic/v1', '/crawlers', array(
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'get_crawlers' ],
@@ -953,6 +961,45 @@ class Admin_Settings {
 		return json_encode( [
 			'status' => 200,
 			'data'   => $crawlers_for_js,
+		] );
+	}
+
+	/**
+	 * Get post types for JS
+	 *
+	 * @return false|string
+	 */
+	public function get_post_types() {
+		// Get all public post types
+		$post_types = get_post_types( [ 'public' => true ], 'objects' );
+
+		// Exclude attachment post type
+		if ( isset( $post_types['attachment'] ) ) {
+			unset( $post_types['attachment'] );
+		}
+
+		// Exclude Elementor's element_library post type
+		if ( isset( $post_types['elementor_library'] ) ) {
+			unset( $post_types['elementor_library'] );
+		}
+
+		// Exclude ssp-form post type
+		if ( isset( $post_types['ssp-form'] ) ) {
+			unset( $post_types['ssp-form'] );
+		}
+
+		// Format post types for JS
+		$post_types_for_js = [];
+		foreach ( $post_types as $post_type ) {
+			$post_types_for_js[] = [
+				'name'  => $post_type->name,
+				'label' => $post_type->label,
+			];
+		}
+
+		return json_encode( [
+			'status' => 200,
+			'data'   => $post_types_for_js,
 		] );
 	}
 }
