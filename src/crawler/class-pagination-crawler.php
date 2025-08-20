@@ -80,7 +80,8 @@ class Pagination_Crawler extends Crawler {
 
 				// Add URLs for each page (starting from page 2, as page 1 is the main URL)
 				for ($i = 2; $i <= $total_pages; $i++) {
-					$urls[] = add_query_arg('paged', $i, $blog_url);
+					// Use /page/N/ format instead of ?paged=N
+					$urls[] = trailingslashit(rtrim($blog_url, '/')) . 'page/' . $i . '/';
 				}
 
 				// Get pagination for category archives
@@ -91,7 +92,8 @@ class Pagination_Crawler extends Crawler {
 					$category_pages = ceil($category_post_count / $posts_per_page);
 
 					for ($i = 2; $i <= $category_pages; $i++) {
-						$urls[] = add_query_arg('paged', $i, $category_link);
+						// Use /page/N/ format instead of ?paged=N
+						$urls[] = trailingslashit(rtrim($category_link, '/')) . 'page/' . $i . '/';
 					}
 				}
 
@@ -103,7 +105,8 @@ class Pagination_Crawler extends Crawler {
 					$tag_pages = ceil($tag_post_count / $posts_per_page);
 
 					for ($i = 2; $i <= $tag_pages; $i++) {
-						$urls[] = add_query_arg('paged', $i, $tag_link);
+						// Use /page/N/ format instead of ?paged=N
+						$urls[] = trailingslashit(rtrim($tag_link, '/')) . 'page/' . $i . '/';
 					}
 				}
 			}
@@ -149,7 +152,8 @@ class Pagination_Crawler extends Crawler {
 
 				// Add URLs for each page (starting from page 2, as page 1 is the main URL)
 				for ($i = 2; $i <= $pages; $i++) {
-					$urls[] = add_query_arg('page', $i, $permalink);
+					// Use /N/ format for post pagination
+					$urls[] = trailingslashit(rtrim($permalink, '/')) . $i . '/';
 				}
 			}
 		}
