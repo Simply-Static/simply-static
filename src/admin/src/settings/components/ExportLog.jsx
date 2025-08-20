@@ -6,7 +6,7 @@ import DataTable from "react-data-table-component";
 import {Flex, FlexItem, Spinner} from "@wordpress/components";
 
 function ExportLog() {
-    const {isRunning, blogId, isPro} = useContext(SettingsContext);
+    const {isRunning, blogId, isPro, settings} = useContext(SettingsContext);
     const [exportLog, setExportLog] = useState([]);
     const [loadingExportLog, setLoadingExportLog] = useState(false);
     const [perPageExportLog, setPerPageExportLog] = useState(25);
@@ -15,11 +15,17 @@ function ExportLog() {
     const [allData, setAllData] = useState([]);
     const [loadingAllData, setLoadingAllData] = useState(false);
     const [totalPages, setTotalPages] = useState(0);
-    const [exportType, setExportType] = useState('Export');
+    const [exportType, setExportType] = useState('export');
     const [exportTypeId, setExportTypeId] = useState(null);
 
     // Determine export type based on available information
     useEffect(() => {
+        // If delivery method is 'zip', always use 'export' type
+        if (settings && settings.delivery_method === 'zip') {
+            setExportType('export');
+            return;
+        }
+
         // Use the new export-type endpoint to get the export type information
         apiFetch({
             path: '/simplystatic/v1/export-type',
@@ -28,20 +34,27 @@ function ExportLog() {
         .then(response => {
             const json = JSON.parse(response);
             if (json.status === 200 && json.data) {
-                setExportType(json.data.export_type);
-                setExportTypeId(json.data.export_type_id);
+                // If delivery method is 'zip', override with 'export' type
+                if (settings && settings.delivery_method === 'zip') {
+                    setExportType('export');
+                } else {
+                    setExportType(json.data.export_type);
+                    setExportTypeId(json.data.export_type_id);
+                }
             }
         })
         .catch(error => {
             console.error('Error fetching export type:', error);
             // Fallback to using options.last_export_end
-            if (options.last_export_end) {
+            if (settings && settings.delivery_method === 'zip') {
+                setExportType('export');
+            } else if (options.last_export_end) {
                 setExportType('Update');
             } else {
-                setExportType('Export');
+                setExportType('export');
             }
         });
-    }, []);
+    }, [settings]);
 
     // Define base columns
     const baseColumns = [
@@ -114,6 +127,7 @@ function ExportLog() {
         // But only if we're not running a Build or Single export
         if (searchTerm && allData.length === 0 && exportType !== 'Build' && exportType !== 'Single') {
             await fetchAllData();
+            setLastAllDataFetch(Date.now()); // Update the timestamp after fetching
         }
     };
 
@@ -159,36 +173,57 @@ function ExportLog() {
 
             const firstPageJson = JSON.parse(firstPageResponse);
             const totalItems = firstPageJson.data.total_static_pages || 0;
-            const calculatedTotalPages = Math.ceil(totalItems / perPageExportLog);
+            let calculatedTotalPages = Math.ceil(totalItems / perPageExportLog);
 
-            // Create an array of promises for all pages
-            const pagePromises = [];
-            for (let i = 1; i <= calculatedTotalPages; i++) {
-                pagePromises.push(
-                    apiFetch({
-                        path: `/simplystatic/v1/export-log?page=${i}&per_page=${perPageExportLog}&blog_id=${blogId}&is_network_admin=${options.is_network}`,
-                        method: 'GET',
-                    })
-                );
+            // For very large sites, limit the number of pages we fetch to avoid timeouts
+            const MAX_PAGES_TO_FETCH = 20; // This will fetch up to 500 items with default perPage of 25
+            if (calculatedTotalPages > MAX_PAGES_TO_FETCH) {
+                console.log(`Site has ${calculatedTotalPages} pages of data, limiting to ${MAX_PAGES_TO_FETCH} pages to prevent timeouts`);
+                calculatedTotalPages = MAX_PAGES_TO_FETCH;
             }
 
-            // Execute all promises
-            const responses = await Promise.all(pagePromises);
-
-            // Combine all pages of data
+            // Instead of fetching all pages at once, fetch them in batches
+            const BATCH_SIZE = 5; // Process 5 pages at a time
             let allPages = [];
-            responses.forEach(response => {
-                const json = JSON.parse(response);
-                if (json.data && json.data.static_pages) {
-                    allPages = [...allPages, ...json.data.static_pages];
+
+            // Add the first page data we already fetched
+            if (firstPageJson.data && firstPageJson.data.static_pages) {
+                allPages = [...firstPageJson.data.static_pages];
+            }
+
+            // Process remaining pages in batches
+            for (let batchStart = 2; batchStart <= calculatedTotalPages; batchStart += BATCH_SIZE) {
+                const batchEnd = Math.min(batchStart + BATCH_SIZE - 1, calculatedTotalPages);
+                console.log(`Fetching batch of pages ${batchStart} to ${batchEnd}`);
+
+                // Create batch of promises
+                const batchPromises = [];
+                for (let i = batchStart; i <= batchEnd; i++) {
+                    batchPromises.push(
+                        apiFetch({
+                            path: `/simplystatic/v1/export-log?page=${i}&per_page=${perPageExportLog}&blog_id=${blogId}&is_network_admin=${options.is_network}`,
+                            method: 'GET',
+                        })
+                    );
                 }
-            });
+
+                // Execute batch of promises
+                const batchResponses = await Promise.all(batchPromises);
+
+                // Process batch responses
+                batchResponses.forEach(response => {
+                    const json = JSON.parse(response);
+                    if (json.data && json.data.static_pages) {
+                        allPages = [...allPages, ...json.data.static_pages];
+                    }
+                });
+            }
 
             // Update state with the fetched data
             setAllData(allPages);
 
             // Log for debugging
-            console.log(`Fetched ${allPages.length} total items from ${calculatedTotalPages} pages`);
+            console.log(`Fetched ${allPages.length} total items from ${calculatedTotalPages} pages (out of ${Math.ceil(totalItems / perPageExportLog)} total pages)`);
 
             return allPages;
         } catch (error) {
@@ -199,12 +234,21 @@ function ExportLog() {
         }
     }
 
+    // Track the last time we fetched all data
+    const [lastAllDataFetch, setLastAllDataFetch] = useState(0);
+
     useInterval(() => {
         getExportLog();
 
         // If we have a search term and already have all data, refresh the all data
-        if (filterText && allData.length > 0) {
+        // but limit how often we do this to prevent overloading the server
+        const currentTime = Date.now();
+        const ALL_DATA_REFRESH_INTERVAL = 30000; // 30 seconds between full refreshes
+
+        if (filterText && allData.length > 0 && (currentTime - lastAllDataFetch > ALL_DATA_REFRESH_INTERVAL)) {
+            console.log('Refreshing all data for search (30-second interval)');
             fetchAllData();
+            setLastAllDataFetch(currentTime);
         }
     }, isRunning ? 5000 : null);
 

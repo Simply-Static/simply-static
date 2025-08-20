@@ -7,132 +7,12 @@ const {__} = wp.i18n;
 export const SettingsContext = createContext();
 
 function SettingsContextProvider(props) {
-    const defaultSettings = {
-        'destination_scheme': 'https://',
-        'destination_host': '',
-        'temp_files_dir': '',
-        'additional_urls': '',
-        'additional_files': '',
-        'urls_to_exclude': '',
-        'delivery_method': 'zip',
-        'local_dir': '',
-        'relative_path': '',
-        'destination_url_type': 'relative',
-        'debugging_mode': true,
-        'server_cron': false,
-        'whitelist_plugins': '',
-        'http_basic_auth_username': '',
-        'http_basic_auth_password': '',
-        'http_basic_auth_on': false,
-        'origin_url': '',
-        'version': options.version,
-        'force_replace_url': true,
-        'clear_directory_before_export': false,
-        'iframe_urls': '',
-        'iframe_custom_css': '',
-        'tiiny_email': options.admin_email,
-        'tiiny_subdomain': '',
-        'tiiny_domain_suffix': 'tiiny.site',
-        'tiiny_password': '',
-        'cdn_api_key': '',
-        'cdn_storage_host': 'storage.bunnycdn.com',
-        'cdn_access_key': '',
-        'cdn_pull_zone': '',
-        'cdn_storage_zone': '',
-        'cdn_directory': '',
-        'github_account_type': 'personal',
-        'github_user': '',
-        'github_email': '',
-        'github_personal_access_token': '',
-        'github_repository': '',
-        'github_repository_visibility': 'public',
-        'github_branch': 'main',
-        'github_webhook_url': '',
-        'github_folder_path': '',
-        'github_throttle_requests': false,
-        'github_batch_size': 100,
-        'aws_region': 'us-east-2',
-        'aws_auth_method': 'aws-iam-key',
-        'aws_access_key': '',
-        'aws_access_secret': '',
-        'aws_bucket': '',
-        'aws_subdirectory': '',
-        'aws_distribution_id': '',
-        'aws_webhook_url': '',
-        'aws_empty': false,
-        's3_access_key': '',
-        's3_base_url': '',
-        's3_access_secret': '',
-        's3_bucket': '',
-        's3_subdirectory': '',
-        'fix_cors': 'allowed_http_origins',
-        'static_url': '',
-        'use_forms': false,
-        'use_comments': false,
-        'comment_redirect': '',
-        'use_search': false,
-        'search_type': 'fuse',
-        'search_index_title': 'title',
-        'search_index_content': 'body',
-        'search_index_excerpt': '.entry-content',
-        'search_excludable': '',
-        'search_metadata': '',
-        'fuse_selector': '.search-field',
-        'fuse_threshold': 0.1,
-        'algolia_app_id': '',
-        'algolia_admin_api_key': '',
-        'algolia_search_api_key': '',
-        'algolia_index': 'simply_static',
-        'algolia_selector': '.search-field',
-        'use_minify': false,
-        'minify_html': false,
-        'minify_html_leave_quotes': false,
-        'minify_css': false,
-        'minify_inline_css': false,
-        'minify_css_exclude': '',
-        'minify_js_exclude': '',
-        'minify_js': false,
-        'minify_inline_js': false,
-        'generate_404': false,
-        'smart_crawl': true,
-        'add_feeds': false,
-        'add_rest_api': false,
-        'wp_content_directory': '',
-        'wp_includes_directory': '',
-        'wp_uploads_directory': '',
-        'wp_plugins_directory': '',
-        'wp_themes_directory': '',
-        'theme_style_name': 'style',
-        'author_url': '',
-        'hide_comments': false,
-        'hide_version': false,
-        'hide_generator': false,
-        'hide_prefetch': false,
-        'hide_rsd': false,
-        'hide_emotes': false,
-        'disable_xmlrpc': false,
-        'disable_embed': false,
-        'disable_db_debug': false,
-        'disable_wlw_manifest': false,
-        'incremental_export': false,
-        'sftp_host': '',
-        'sftp_user': '',
-        'sftp_pass': '',
-        'sftp_private_key': '',
-        'sftp_folder': '',
-        'sftp_port': 22,
-        'shortpixel_enabled': false,
-        'shortpixel_api_key': '',
-        'shortpixel_backup_enabled': false,
-        'shortpixel_webp_enabled': false,
-        'integrations': false // Will be array when saved.
-    }
     const [isRunning, setIsRunning] = useState(false);
     const [isDelayed, setIsDelayed] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
     const [isResumed, setIsResumed] = useState(false);
     const [settingsSaved, setSettingsSaved] = useState(false);
-    const [settings, setSettings] = useState(defaultSettings);
+    const [settings, setSettings] = useState({});
     const [configs, setConfigs] = useState({});
     const [passedChecks, setPassedChecks] = useState('yes');
     const [blogId, setBlogId] = useState(1);
@@ -156,12 +36,16 @@ function SettingsContextProvider(props) {
     }
 
     const resetSettings = () => {
-        setSettings(defaultSettings);
-
         apiFetch({
             path: '/simplystatic/v1/settings/reset',
-            method: 'POST',
-            data: defaultSettings
+            method: 'POST'
+        }).then(resp => {
+            // Parse the response to get the default settings
+            const response = JSON.parse(resp);
+            if (response.status === 200 && response.data) {
+                // Update the settings state with the default settings from the server
+                setSettings(response.data);
+            }
         });
     }
 
@@ -215,7 +99,8 @@ function SettingsContextProvider(props) {
     }
 
     const updateSetting = (key, value) => {
-        setSettings({...settings, [key]: value});
+        const updatedSettings = {...settings, [key]: value};
+        setSettings(updatedSettings);
     };
 
     const getStatus = () => {
@@ -325,7 +210,7 @@ function SettingsContextProvider(props) {
     const isIntegrationActive = (integration) => {
         let integrations = settings.integrations;
 
-        if (false === integrations) {
+        if (false === integrations || !integrations || !Array.isArray(integrations)) {
             return false;
         }
 
@@ -346,7 +231,13 @@ function SettingsContextProvider(props) {
     }, isRunning || isDelayed ? 5000 : null);
 
     useEffect(() => {
-        getSettings();
+        // If current_settings is available in the options object, use it instead of fetching from the API
+        if (options.current_settings) {
+            setSettings(options.current_settings);
+        } else {
+            // Fallback to fetching from the API if current_settings is not available
+            getSettings();
+        }
         getStatus();
         checkIfRunning();
         setBlogId(options.blog_id)

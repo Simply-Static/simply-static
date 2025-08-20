@@ -184,7 +184,9 @@ class Elementor_Search_Widget extends Widget_Base {
 
         $search_class = explode(' ', $search_class );
         $search_class = end( $search_class );
-        $search_class = ltrim( $search_class, '.' );
+        if ( $search_class !== null ) {
+            $search_class = ltrim( $search_class, '.' );
+        }
 		?>
 		<div class="simply-static-search-widget">
 			<div class="simply-static-search-wrapper">
@@ -227,7 +229,9 @@ class Elementor_Search_Widget extends Widget_Base {
 
 		$search_class = explode(' ', $search_class );
 		$search_class = end( $search_class );
-		$search_class = ltrim( $search_class, '.' );
+		if ( $search_class !== null ) {
+			$search_class = ltrim( $search_class, '.' );
+		}
 
 		?>
 		<#

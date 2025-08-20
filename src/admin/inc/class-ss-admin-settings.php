@@ -164,6 +164,9 @@ class Admin_Settings {
 		// Check if directory exists, if not, create it.
 		$temp_dir = Util::get_temp_dir();
 
+		// Get the current settings
+		$current_settings = $this->get_settings();
+
 		$args = apply_filters(
 			'ss_settings_args',
 			array(
@@ -186,6 +189,8 @@ class Admin_Settings {
 
 					return $object->js_object();
 				}, Plugin::instance()->get_integrations() ),
+				// Add the current settings to the args
+				'current_settings' => $current_settings,
 			)
 		);
 
@@ -280,6 +285,22 @@ class Admin_Settings {
 	 * @return void
 	 */
 	public function rest_api_init() {
+		register_rest_route( 'simplystatic/v1', '/post-types', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'get_post_types' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+			},
+		) );
+
+		register_rest_route( 'simplystatic/v1', '/crawlers', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'get_crawlers' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+			},
+		) );
+
 		register_rest_route( 'simplystatic/v1', '/export-type', array(
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'get_export_type' ],
@@ -541,14 +562,20 @@ class Admin_Settings {
 				'minify_js_exclude'
 			];
 
-			$array_fields = [ 'integrations' ];
+			$array_fields = [ 'integrations', 'crawlers', 'post_types' ];
 
 			// Sanitize each key/value pair in options.
 			foreach ( $options as $key => $value ) {
 				if ( in_array( $key, $multiline_fields ) ) {
 					$options[ $key ] = sanitize_textarea_field( $value );
 				} elseif ( in_array( $key, $array_fields ) ) {
-					$options[ $key ] = array_map( 'sanitize_text_field', $value );
+					// Ensure value is an array before using array_map
+					if ( is_array( $value ) ) {
+						$options[ $key ] = array_map( 'sanitize_text_field', $value );
+					} else {
+						// If not an array, initialize as empty array
+						$options[ $key ] = [];
+					}
 				} else {
 					// Exclude Basic Auth fields from sanitize.
 					if ( $key === 'http_basic_auth_username' || $key === 'http_basic_auth_password' ) {
@@ -591,27 +618,135 @@ class Admin_Settings {
 	}
 
 	/**
-	 * Save settings via rest API.
+	 * Reset settings to default values via rest API.
 	 *
 	 * @param object $request given request.
 	 *
 	 * @return false|string
 	 */
 	public function reset_settings( $request ) {
-		if ( $request->get_params() ) {
-			// Check table.
-			Page::create_or_update_table();
+		// Check table.
+		Page::create_or_update_table();
 
-			// Reset options.
-			$options = sanitize_option( 'simply-static', $request->get_params() );
+		// Define default options (copied from Upgrade_Handler class)
+		$default_options = array(
+			'destination_scheme'            => 'https://',
+			'destination_host'              => '',
+			'temp_files_dir'                => '',
+			'additional_urls'               => '',
+			'additional_files'              => '',
+			'urls_to_exclude'               => "",
+			'delivery_method'               => 'zip',
+			'local_dir'                     => '',
+			'relative_path'                 => '',
+			'destination_url_type'          => 'relative',
+			'debugging_mode'                => true,
+			'server_cron'                   => false,
+			'whitelist_plugins'             => '',
+			'http_basic_auth_username'      => '',
+			'http_basic_auth_password'      => '',
+			'origin_url'                    => '',
+			'force_replace_url'             => true,
+			'clear_directory_before_export' => false,
+			'iframe_urls'                   => '',
+			'iframe_custom_css'             => '',
+			'tiiny_email'                   => get_bloginfo( 'admin_email' ),
+			'tiiny_subdomain'               => '',
+			'tiiny_domain_suffix'           => 'tiiny.site',
+			'tiiny_password'                => '',
+			'cdn_api_key'                   => '',
+			'cdn_storage_host'              => 'storage.bunnycdn.com',
+			'cdn_access_key'                => '',
+			'cdn_pull_zone'                 => '',
+			'cdn_storage_zone'              => '',
+			'cdn_directory'                 => '',
+			'github_account_type'           => 'personal',
+			'github_user'                   => '',
+			'github_email'                  => '',
+			'github_personal_access_token'  => '',
+			'github_repository'             => '',
+			'github_repository_visibility'  => 'public',
+			'github_branch'                 => 'main',
+			'github_webhook_url'            => '',
+			'github_folder_path'            => '',
+			'github_throttle_requests'      => false,
+			'aws_auth_method'               => 'aws-iam-key',
+			'aws_region'                    => 'us-east-2',
+			'aws_access_key'                => '',
+			'aws_access_secret'             => '',
+			'aws_bucket'                    => '',
+			'aws_subdirectory'              => '',
+			'aws_distribution_id'           => '',
+			'aws_webhook_url'               => '',
+			'aws_empty'                     => false,
+			's3_access_key'                 => '',
+			's3_base_url'                   => '',
+			's3_access_secret'              => '',
+			's3_bucket'                     => '',
+			's3_subdirectory'               => '',
+			'fix_cors'                      => 'allowed_http_origins',
+			'static_url'                    => '',
+			'use_forms'                     => false,
+			'use_comments'                  => false,
+			'comment_redirect'              => '',
+			'use_search'                    => false,
+			'search_type'                   => 'fuse',
+			'search_index_title'            => 'title',
+			'search_index_content'          => 'body',
+			'search_index_excerpt'          => '.entry-content',
+			'search_excludable'             => '',
+			'search_metadata'               => '',
+			'fuse_selector'                 => '.search-field',
+			'fuse_threshold'                => 0.1,
+			'algolia_app_id'                => '',
+			'algolia_admin_api_key'         => '',
+			'algolia_search_api_key'        => '',
+			'algolia_index'                 => 'simply_static',
+			'algolia_selector'              => '.search-field',
+			'use_minify'                    => false,
+			'minify_html'                   => false,
+			'minify_css'                    => false,
+			'minify_inline_css'             => false,
+			'minify_js'                     => false,
+			'minify_inline_js'              => false,
+			'generate_404'                  => false,
+			'add_feeds'                     => false,
+			'add_rest_api'                  => false,
+			'smart_crawl'                   => true,
+			'wp_content_folder'             => '',
+			'wp_includes_folder'            => '',
+			'wp_uploads_folder'             => '',
+			'wp_plugins_folder'             => '',
+			'wp_themes_folder'              => '',
+			'theme_style_name'              => 'style',
+			'author_url'                    => '',
+			'hide_comments'                 => false,
+			'hide_version'                  => false,
+			'hide_generator'                => false,
+			'hide_prefetch'                 => false,
+			'hide_rsd'                      => false,
+			'hide_emotes'                   => false,
+			'disable_xmlrpc'                => false,
+			'disable_embed'                 => false,
+			'disable_db_debug'              => false,
+			'disable_wlw_manifest'          => false,
+			'sftp_host'                     => '',
+			'sftp_user'                     => '',
+			'sftp_pass'                     => '',
+			'sftp_folder'                   => '',
+			'sftp_port'                     => 22,
+			'archive_status_messages'       => array(),
+			'pages_status'                  => array(),
+			'archive_name'                  => null,
+			'archive_start_time'            => null,
+			'archive_end_time'              => null,
+			'version'                       => SIMPLY_STATIC_VERSION,
+		);
 
-			// Update settings.
-			update_option( 'simply-static', $options );
+		// Update settings with default options.
+		update_option( 'simply-static', $default_options );
 
-			return json_encode( [ 'status' => 200, 'message' => "Ok" ] );
-		}
-
-		return json_encode( [ 'status' => 400, 'message' => "No options updated." ] );
+		return json_encode( [ 'status' => 200, 'message' => "Ok", 'data' => $default_options ] );
 	}
 
 
@@ -812,14 +947,29 @@ class Admin_Settings {
 		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
 		$type    = ! empty( $params['type'] ) ? $params['type'] : 'export';
 
+		// Check if an export is already running
+		$archive_creation_job = Plugin::instance()->get_archive_creation_job();
+		if ( $archive_creation_job->is_running() ) {
+			Util::debug_log( "Export already running. Blocking new export request." );
+			Util::debug_log( "Current task: " . $archive_creation_job->get_current_task() );
+			Util::debug_log( "Is job done: " . ($archive_creation_job->is_job_done() ? 'true' : 'false') );
+
+			// Return a 409 Conflict status code with an error message
+			return json_encode( [
+				'status'  => 409, // Conflict status code
+				'message' => __( 'An export is already running. Please wait for it to complete or cancel it before starting a new one.', 'simply-static' )
+			] );
+		}
+
 		try {
 			do_action( 'ss_before_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
 
 			$type = apply_filters( 'ss_export_type', $type );
 
-			Plugin::instance()->run_static_export( $blog_id, $type );
-
-			do_action( 'ss_after_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
+			// Only trigger the after action if the export was successfully started
+			if (Plugin::instance()->run_static_export( $blog_id, $type )) {
+				do_action( 'ss_after_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
+			}
 
 			return json_encode( [
 				'status' => 200,
@@ -904,5 +1054,65 @@ class Admin_Settings {
 		do_action( 'ss_after_perform_archive_action', $blog_id, 'resume', Plugin::instance()->get_archive_creation_job() );
 
 		return json_encode( [ 'status' => 200 ] );
+	}
+
+	/**
+	 * Get crawlers for JS
+	 *
+	 * @return false|string
+	 */
+	public function get_crawlers() {
+		// Load the Crawlers class
+		require_once SIMPLY_STATIC_PATH . 'src/crawler/class-crawlers.php';
+
+		// Get the crawler manager
+		$crawlers = \Simply_Static\Crawlers::instance();
+
+		// Get all crawlers for JS
+		$crawlers_for_js = $crawlers->get_crawlers_for_js();
+
+		return json_encode( [
+			'status' => 200,
+			'data'   => $crawlers_for_js,
+		] );
+	}
+
+	/**
+	 * Get post types for JS
+	 *
+	 * @return false|string
+	 */
+	public function get_post_types() {
+		// Get all public post types
+		$post_types = get_post_types( [ 'public' => true ], 'objects' );
+
+		// Exclude attachment post type
+		if ( isset( $post_types['attachment'] ) ) {
+			unset( $post_types['attachment'] );
+		}
+
+		// Exclude Elementor's element_library post type
+		if ( isset( $post_types['elementor_library'] ) ) {
+			unset( $post_types['elementor_library'] );
+		}
+
+		// Exclude ssp-form post type
+		if ( isset( $post_types['ssp-form'] ) ) {
+			unset( $post_types['ssp-form'] );
+		}
+
+		// Format post types for JS
+		$post_types_for_js = [];
+		foreach ( $post_types as $post_type ) {
+			$post_types_for_js[] = [
+				'name'  => $post_type->name,
+				'label' => $post_type->label,
+			];
+		}
+
+		return json_encode( [
+			'status' => 200,
+			'data'   => $post_types_for_js,
+		] );
 	}
 }

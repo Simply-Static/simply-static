@@ -321,7 +321,6 @@ class Archive_Creation_Job extends Background_Process {
 			$end_time    = Util::formatted_datetime();
 			$this->options->set( 'archive_end_time', $end_time );
 
-
 			$cancel_task = new Cancel_Task();
 			$cancel_task->perform();
 
@@ -424,6 +423,7 @@ class Archive_Creation_Job extends Background_Process {
 	protected function exception_occurred( $exception ) {
 		Util::debug_log( "An exception occurred: " . $exception->getMessage() );
 		Util::debug_log( $exception );
+
 		$message = sprintf( __( "An exception occurred: %s", 'simply-static' ), $exception->getMessage() );
 		$this->save_status_message( $message, 'error' );
 		do_action( 'ss_completed', 'exception', $message );
@@ -441,6 +441,7 @@ class Archive_Creation_Job extends Background_Process {
 	protected function error_occurred( $wp_error ) {
 		Util::debug_log( "An error occurred: " . $wp_error->get_error_message() );
 		Util::debug_log( $wp_error );
+
 		$message = sprintf( __( "An error occurred: %s", 'simply-static' ), $wp_error->get_error_message() );
 		$this->save_status_message( $message, 'error' );
 		do_action( 'ss_completed', 'error', $message );

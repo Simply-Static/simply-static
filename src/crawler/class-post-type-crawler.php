@@ -47,6 +47,18 @@ class Post_Type_Crawler extends Crawler {
 			unset( $post_types['elementor_library'] );
 		}
 
+		// Exclude ssp-form post type
+		if ( isset( $post_types['ssp-form'] ) ) {
+			unset( $post_types['ssp-form'] );
+		}
+
+		// Get selected post types from settings
+		$options = get_option( 'simply-static' );
+		if ( isset( $options['post_types'] ) && is_array( $options['post_types'] ) && ! empty( $options['post_types'] ) ) {
+			// Filter post types to only include those selected in settings
+			$post_types = array_intersect( $post_types, $options['post_types'] );
+		}
+
 		foreach ( $post_types as $post_type ) {
 			// Skip attachments as they're handled differently
 			if ( $post_type === 'attachment' ) {

@@ -8,7 +8,9 @@ import {
     Notice,
     Animate,
     TextControl, SelectControl, Flex, FlexItem, TextareaControl, ToggleControl,
+    FormTokenField,
 } from "@wordpress/components";
+import apiFetch from "@wordpress/api-fetch";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
 import HelperVideo from "../components/HelperVideo";
@@ -26,9 +28,15 @@ function GeneralSettings() {
     const [forceURLReplacement, setForceURLReplacement] = useState(false);
     const [hasCopied, setHasCopied] = useState(false);
     const [generate404, setGenerate404] = useState(false);
-    const [enableSmartCrawl, setEnableSmartCrawl] = useState(false);
+    const [enableEnhancedCrawl, setEnableEnhancedCrawl] = useState(false);
     const [addFeeds, setAddFeeds] = useState(false);
     const [addRestApi, setAddRestApi] = useState(false);
+    const [crawlers, setCrawlers] = useState([]);
+    const [selectedCrawlers, setSelectedCrawlers] = useState([]);
+    const [apiError, setApiError] = useState(null);
+    const [postTypes, setPostTypes] = useState([]);
+    const [selectedPostTypes, setSelectedPostTypes] = useState([]);
+    const [postTypesApiError, setPostTypesApiError] = useState(null);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -38,6 +46,122 @@ function GeneralSettings() {
             setSettingsSaved(false);
         }, 2000);
     }
+
+    // Function to fetch crawlers from API
+    const fetchCrawlers = () => {
+        // Reset API error
+        setApiError(null);
+
+        apiFetch({ 
+            path: '/simplystatic/v1/crawlers',
+            // Use raw: true to get the raw response
+            parse: true
+        })
+            .then(response => {
+
+                // Check if response is a string (JSON) and try to parse it
+                if (typeof response === 'string') {
+                    try {
+                        response = JSON.parse(response);
+                    } catch (e) {
+                        setApiError('Error parsing API response: ' + e.message);
+                        return;
+                    }
+                }
+
+                if (response && response.data && response.data.length > 0) {
+                    setCrawlers(response.data);
+
+                    // If no crawlers are selected or settings.crawlers is not an array, select all by default
+                    // But only do this if smart_crawl is enabled and we're initializing for the first time
+                    if ((!settings.crawlers || !Array.isArray(settings.crawlers) || settings.crawlers.length === 0) && settings.smart_crawl === true) {
+                        const allCrawlerIds = response.data.map(crawler => crawler.id);
+                        setSelectedCrawlers(allCrawlerIds);
+                        updateSetting('crawlers', allCrawlerIds);
+                    } else if (Array.isArray(settings.crawlers)) {
+
+                        // Ensure all selected crawlers exist in the crawlers list
+                        const validCrawlerIds = settings.crawlers.filter(id => 
+                            response.data.some(crawler => crawler.id === id)
+                        );
+
+                        // If no valid crawlers are selected, select all by default
+                        if (validCrawlerIds.length === 0) {
+                            const allCrawlerIds = response.data.map(crawler => crawler.id);
+                            setSelectedCrawlers(allCrawlerIds);
+                            updateSetting('crawlers', allCrawlerIds);
+                        } else {
+                            setSelectedCrawlers(validCrawlerIds);
+                        }
+                    }
+                } else {
+                    setApiError('Invalid API response structure or empty crawlers array');
+                }
+            })
+            .catch(error => {
+                setApiError('Error fetching crawlers: ' + (error.message || 'Unknown error'));
+            });
+    };
+
+    // Function to fetch post types from API
+    const fetchPostTypes = () => {
+        // Reset API error
+        setPostTypesApiError(null);
+
+        apiFetch({ 
+            path: '/simplystatic/v1/post-types',
+            parse: true
+        })
+            .then(response => {
+                // Check if response is a string (JSON) and try to parse it
+                if (typeof response === 'string') {
+                    try {
+                        response = JSON.parse(response);
+                    } catch (e) {
+                        setPostTypesApiError('Error parsing API response: ' + e.message);
+                        return;
+                    }
+                }
+
+                if (response && response.data && response.data.length > 0) {
+                    setPostTypes(response.data);
+
+                    // If settings.post_types is not an array, initialize it as an empty array
+                    if (!settings.post_types || !Array.isArray(settings.post_types)) {
+                        const allPostTypeIds = response.data.map(postType => postType.name);
+                        setSelectedPostTypes(allPostTypeIds);
+                        updateSetting('post_types', allPostTypeIds);
+                    } else if (Array.isArray(settings.post_types)) {
+                        // Ensure all selected post types exist in the post types list
+                        const validPostTypeIds = settings.post_types.filter(name => 
+                            response.data.some(postType => postType.name === name)
+                        );
+
+                        // If no valid post types are selected, select all by default
+                        if (validPostTypeIds.length === 0) {
+                            const allPostTypeIds = response.data.map(postType => postType.name);
+                            setSelectedPostTypes(allPostTypeIds);
+                            updateSetting('post_types', allPostTypeIds);
+                        } else {
+                            setSelectedPostTypes(validPostTypeIds);
+                        }
+                    }
+                } else {
+                    setPostTypesApiError('Invalid API response structure or empty post types array');
+                }
+            })
+            .catch(error => {
+                setPostTypesApiError('Error fetching post types: ' + (error.message || 'Unknown error'));
+            });
+    };
+
+    // Fetch crawlers and post types when component mounts
+    // We intentionally use an empty dependency array to ensure this only runs once
+    // when the component mounts, not on every settings change
+    useEffect(() => {
+        fetchCrawlers();
+        fetchPostTypes();
+    }, []);
 
     useEffect(() => {
         if (settings.destination_url_type) {
@@ -77,7 +201,15 @@ function GeneralSettings() {
         }
 
         if (settings.smart_crawl) {
-            setEnableSmartCrawl(settings.smart_crawl);
+            setEnableEnhancedCrawl(settings.smart_crawl);
+        }
+
+        if (settings.crawlers) {
+            setSelectedCrawlers(settings.crawlers);
+        }
+
+        if (settings.post_types !== undefined) {
+            setSelectedPostTypes(Array.isArray(settings.post_types) ? settings.post_types : []);
         }
 
     }, [settings]);
@@ -185,6 +317,164 @@ function GeneralSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
+                <b>{__('Enhanced Crawl', 'simply-static')}<HelperVideo
+                    title={__('How Enhanced Crawl improves your static exports', 'simply-static')}
+                    videoUrl={'https://youtu.be/QfKxeQ1w7tU'}/></b>
+            </CardHeader>
+            <CardBody>
+                <p>{__('Enhanced Crawl uses native WordPress functions to find all pages and files when running a static export.', 'simply-static')}</p>
+                <ToggleControl
+                    label={
+                        <>
+                            {__('Enable Enhanced Crawl', 'simply-static')}
+                        </>
+                    }
+                    help={
+                        enableEnhancedCrawl
+                            ? __('Find pages and files via Enhanced Crawl.', 'simply-static')
+                            : __('Don\'t find pages and files via Enhanced Crawl.', 'simply-static')
+                    }
+                    checked={enableEnhancedCrawl}
+                    onChange={(value) => {
+                        setEnableEnhancedCrawl(value);
+                        updateSetting('smart_crawl', value);
+                    }}
+                />
+
+                {enableEnhancedCrawl && (
+                    <>
+                        <Spacer margin={2} />
+                        {apiError && (
+                            <>
+                                <Notice status="error" isDismissible={false}>
+                                    {__('Error loading crawlers: ', 'simply-static')} {apiError}
+                                </Notice>
+                                <Spacer margin={2} />
+                            </>
+                        )}
+                        {crawlers.length > 0 ? (
+                            <>
+                                <FormTokenField
+                                    label={__('Active Crawlers', 'simply-static')}
+                                    value={selectedCrawlers.map(id => {
+                                        const crawler = crawlers.find(c => c.id === id);
+                                        return crawler ? crawler.name : id;
+                                    })}
+                                    suggestions={crawlers.map(crawler => crawler.name)}
+                                    onChange={(value) => {
+                                        // Convert names to IDs for storage
+                                        const selectedIds = value.map(name => {
+                                            // First try to find an exact match
+                                            let crawler = crawlers.find(c => c.name === name);
+
+                                            // If no exact match, try case-insensitive match
+                                            if (!crawler) {
+                                                crawler = crawlers.find(c => 
+                                                    c.name.toLowerCase() === name.toLowerCase()
+                                                );
+                                            }
+
+                                            // If still no match, check if it's already an ID
+                                            if (!crawler) {
+                                                crawler = crawlers.find(c => c.id === name);
+                                            }
+
+                                            return crawler ? crawler.id : name;
+                                        });
+                                        setSelectedCrawlers(selectedIds);
+                                        updateSetting('crawlers', selectedIds);
+                                    }}
+                                    help={__('Select which crawlers to activate. If none selected, all crawlers will be active by default.', 'simply-static')}
+                                    tokenizeOnSpace={false}
+                                    __experimentalExpandOnFocus={true}
+                                    __experimentalShowHowTo={false}
+                                    maxSuggestions={100}
+                                    className="horizontal-token-field"
+                                />
+                                <Spacer margin={2} />
+                                {/* Show post types selection only when Post Type URLs crawler is active */}
+                                {selectedCrawlers.includes('post_type') && (
+                                    <>
+                                        <Spacer margin={2} />
+                                        {postTypesApiError && (
+                                            <>
+                                                <Notice status="error" isDismissible={false}>
+                                                    {__('Error loading post types: ', 'simply-static')} {postTypesApiError}
+                                                </Notice>
+                                                <Spacer margin={2} />
+                                            </>
+                                        )}
+                                        {postTypes.length > 0 ? (
+                                            <>
+                                                <FormTokenField
+                                                    label={__('Post Types to Include', 'simply-static')}
+                                                    value={Array.isArray(selectedPostTypes) ? selectedPostTypes.map(name => {
+                                                        const postType = postTypes.find(pt => pt.name === name);
+                                                        return postType ? postType.label : name;
+                                                    }) : []}
+                                                    suggestions={postTypes.map(postType => postType.label)}
+                                                    onChange={(value) => {
+                                                        // Convert labels to names for storage
+                                                        const selectedNames = value.map(label => {
+                                                            // First try to find an exact match
+                                                            let postType = postTypes.find(pt => pt.label === label);
+
+                                                            // If no exact match, try case-insensitive match
+                                                            if (!postType) {
+                                                                postType = postTypes.find(pt => 
+                                                                    pt.label.toLowerCase() === label.toLowerCase()
+                                                                );
+                                                            }
+
+                                                            // If still no match, check if it's already a name
+                                                            if (!postType) {
+                                                                postType = postTypes.find(pt => pt.name === label);
+                                                            }
+
+                                                            return postType ? postType.name : label;
+                                                        });
+                                                        setSelectedPostTypes(selectedNames);
+                                                        updateSetting('post_types', selectedNames);
+                                                    }}
+                                                    help={__('Select which post types to include in the static export. If you remove all selections, all post types will be included by default.', 'simply-static')}
+                                                    tokenizeOnSpace={false}
+                                                    __experimentalExpandOnFocus={true}
+                                                    __experimentalShowHowTo={false}
+                                                    maxSuggestions={100}
+                                                    className="horizontal-token-field"
+                                                />
+                                                <Spacer margin={2} />
+                                            </>
+                                        ) : (
+                                            <p>{__('Loading post types...', 'simply-static')}</p>
+                                        )}
+                                    </>
+                                )}
+                                <div className="crawler-descriptions">
+                                    {crawlers.map(crawler => (
+                                        <div key={crawler.id} className="crawler-description">
+                                            <Flex>
+                                                <FlexItem className={"crawler-name"}>
+                                                    <strong>{crawler.name}:</strong>
+                                                </FlexItem>
+                                                <FlexItem>
+                                                    {crawler.description}
+                                                </FlexItem>
+                                            </Flex>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        ) : (
+                            <p>{__('Loading crawlers...', 'simply-static')}</p>
+                        )}
+                    </>
+                )}
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
                 <b>{__('Include', 'simply-static')}<HelperVideo
                     title={__('Include & Exclude files and pages', 'simply-static')}
                     videoUrl={'https://youtu.be/voAHfwVMLi8'}/></b>
@@ -217,23 +507,7 @@ function GeneralSettings() {
                     {hasCopied ? __('Copied home path', 'simply-static') : __('Copy home path', 'simply-static')}
                 </ClipboardButton>
                 <Spacer margin={5}/>
-                <ToggleControl
-                    label={
-                        <>
-                            {__('Enable Smart Crawl', 'simply-static')}
-                        </>
-                    }
-                    help={
-                        enableSmartCrawl
-                            ? __('Collect pages and files via Smart Crawl.', 'simply-static')
-                            : __('Don\'t collect pages and files via Smart Crawl.', 'simply-static')
-                    }
-                    checked={enableSmartCrawl}
-                    onChange={(value) => {
-                        setEnableSmartCrawl(value);
-                        updateSetting('smart_crawl', value);
-                    }}
-                />
+
                 <ToggleControl
                     label={
                         <>

@@ -179,6 +179,11 @@ class Util {
 	 */
 	public static function relative_to_absolute_url( $extracted_url, $page_url ) {
 
+		// we can't do anything with null or blank urls
+		if ( $extracted_url === null ) {
+			return null;
+		}
+
 		$extracted_url = trim( $extracted_url );
 
 		// we can't do anything with blank urls
@@ -500,6 +505,9 @@ class Util {
 	 * @param string $path File path to remove leading directory separators from
 	 */
 	public static function remove_leading_directory_separator( $path ) {
+		if ( $path === null ) {
+			return '';
+		}
 		return ltrim( $path, DIRECTORY_SEPARATOR );
 	}
 
@@ -518,6 +526,9 @@ class Util {
 	 * @param string $path URL path to remove leading slash from
 	 */
 	public static function remove_leading_slash( $path ) {
+		if ( $path === null ) {
+			return '';
+		}
 		return ltrim( $path, '/' );
 	}
 

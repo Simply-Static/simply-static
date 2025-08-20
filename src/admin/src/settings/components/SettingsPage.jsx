@@ -100,9 +100,12 @@ function SettingsPage() {
             setSelectableSites(sites);
         }
 
-        // Maybe set to update.
-        if (options.last_export_end && ! isRunning) {
+        // Maybe set to update, but only if delivery method is not 'zip'
+        if (options.last_export_end && !isRunning && settings && settings.delivery_method !== 'zip') {
             setSelectedExportType('update');
+        } else if (settings && settings.delivery_method === 'zip') {
+            // Always use 'export' for ZIP delivery method
+            setSelectedExportType('export');
         }
 
     }, [options, isRunning, isPaused]);
@@ -256,6 +259,7 @@ function SettingsPage() {
                                     </>}
 
                                 </div>
+                                <Spacer margin={5}/>
                                 <Spacer margin={5}/>
                                 <Button href="https://simplystatic.com/changelogs/" target="_blank">
                                     <Dashicon icon="editor-ul"/> {__('Changelog', 'simply-static')}
