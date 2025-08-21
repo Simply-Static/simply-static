@@ -100,15 +100,13 @@ function SettingsPage() {
             setSelectableSites(sites);
         }
 
-        // Maybe set to update, but only if delivery method is not 'zip'
-        if (options.last_export_end && !isRunning && settings && settings.delivery_method !== 'zip') {
-            setSelectedExportType('update');
-        } else if (settings && settings.delivery_method === 'zip') {
-            // Always use 'export' for ZIP delivery method
-            setSelectedExportType('export');
-        }
-
     }, [options, isRunning, isPaused]);
+
+    // Set the default export type when the component mounts or when settings change
+    useEffect(() => {
+        // Always use 'export' as the default option
+        setSelectedExportType('export');
+    }, [settings]);
 
     const startExport = () => {
         setDisabledButton(true);
