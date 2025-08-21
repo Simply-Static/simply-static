@@ -34,7 +34,6 @@ class Integrations {
 			'cookieyes'         => CookieYes_Integration::class,
 			'complianz'         => Complianz_Integration::class,
 			//'search-and-filter' => SearchAndFilter_Integration::class,
-			'jetpack'           => Jetpack_Integration::class,
 			'multilingual'      => Multilingual_Integration::class,
 			'github'            => Github_Integration::class,
 			'shortpixel'        => Shortpixel_Integration::class,
@@ -60,7 +59,6 @@ class Integrations {
 		require_once $path . 'class-elementor-integration.php';
 		require_once $path . 'class-elementor-pro-integration.php';
 		require_once $path . 'class-cookie-yes-integration.php';
-		require_once $path . 'class-jetpack-integration.php';
 
 		// Simply Static Pro integrations.
 		require_once $path . 'class-pro-integration.php';
