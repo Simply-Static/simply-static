@@ -261,6 +261,14 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 
 == Changelog ==
 
+= 3.4.3.1 =
+
+* better XML sitemap handling with Enhanced Crawl
+* easier path handling for XSL stylesheets
+* merged Elementor + Elementor Pro into single integration
+* removed Jetpack integration (now handled by Enhanced Crawl)
+* upgrade handler specifically for Enhanced Crawl
+
 = 3.4.3 =
 
 * fixed export type selection based on deployment method
