@@ -1,10 +1,10 @@
-import {Button, Flex, FlexItem, SelectControl} from "@wordpress/components";
+import {Button, Flex, FlexBlock, FlexItem, SelectControl} from "@wordpress/components";
 const {__} = wp.i18n;
 
 export default function EnvironmentDropdown({ onChange, current, environments, disabled, onDelete }) {
     return (
-        <Flex align={'flex-start'}>
-            <FlexItem>
+        <Flex>
+            <FlexItem style={{minWidth: "80%"}}>
                 <SelectControl
                     disabled={disabled}
                     value={current}

@@ -1,9 +1,10 @@
-import {Button, Flex, FlexItem, TextControl} from "@wordpress/components";
+import {Button, Flex, FlexBlock, FlexItem, TextControl} from "@wordpress/components";
 import {useState} from "@wordpress/element";
 import apiFetch from "@wordpress/api-fetch";
+
 const {__} = wp.i18n;
 
-export default function EnvironmentForm( { onClose, setSelectableEnvironments, setSelectedEnvironment } ) {
+export default function EnvironmentForm({onClose, setSelectableEnvironments, setSelectedEnvironment}) {
     const [name, setName] = useState('');
     const [creating, setCreating] = useState(false);
 
@@ -12,13 +13,13 @@ export default function EnvironmentForm( { onClose, setSelectableEnvironments, s
         apiFetch({
             path: '/simplystatic/v1/environment',
             method: 'POST',
-            data: { title: name },
+            data: {title: name},
         }).then(resp => {
             let environments = Object.keys(resp.environments).map(function (version) {
                 return {label: resp.environments[version], value: version}
             });
 
-            setSelectableEnvironments( environments );
+            setSelectableEnvironments(environments);
             setSelectedEnvironment(resp.current_environment);
 
             onClose();
@@ -35,16 +36,15 @@ export default function EnvironmentForm( { onClose, setSelectableEnvironments, s
                 value={name}
             />
             <p>{__('A new environment will be created with the current configuration.', 'simply-static')}</p>
-
-            <Flex justify={'flex-start'}>
-                <FlexItem>
+            <Flex>
+                <FlexBlock>
                     <Button variant={'primary'} onClick={createNew} isBusy={creating}>
-                        { creating ? __( 'Creating...', 'simply-static' ) : __( 'Create', 'simply-static' ) }
+                        {creating ? __('Creating...', 'simply-static') : __('Create', 'simply-static')}
                     </Button>
-                </FlexItem>
-                <FlexItem>
-                    <Button variant={'link'} onClick={onClose}>{ __( 'Cancel', 'simply-static' )}</Button>
-                </FlexItem>
+                </FlexBlock>
+                <FlexBlock>
+                    <Button variant={'secondary'} onClick={onClose}>{__('Cancel', 'simply-static')}</Button>
+                </FlexBlock>
             </Flex>
 
         </div>

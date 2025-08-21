@@ -148,7 +148,6 @@ toplevel_page_simply-static img {
 
           button {
             width: 100%;
-            padding: 20px 0;
 
             &.components-button > .dashicon {
               margin: 0 auto;
@@ -162,8 +161,7 @@ toplevel_page_simply-static img {
         border: solid 1px #50059b;
         color: white;
         text-decoration: none;
-        padding: 20px;
-        max-width: 200px;
+        line-height: 1.5;
 
         &.ss-generate-cancel-button {
           background: #b32d2e;
@@ -179,7 +177,6 @@ toplevel_page_simply-static img {
         text-align: center;
         display: block;
         max-width: 200px;
-        margin: 10px 0;
         cursor: pointer;
         color: rgb(104, 4, 204);
         text-decoration: underline;
@@ -193,8 +190,9 @@ toplevel_page_simply-static img {
 
     .components-button {
       width: 100%;
-      text-align: left;
+      text-align: center;
       padding: 0;
+      display: block !important;
     }
 
     .components-card__body {
@@ -202,9 +200,9 @@ toplevel_page_simply-static img {
     }
 
     .components-button.is-primary {
-      width: auto;
-      padding: 10px 15px;
-      margin: 10px 0;
+      padding: 10px 5px;
+      box-sizing: border-box;
+      width: 100%;
     }
 
     .dashicon.dashicons.dashicons-admin-links {
