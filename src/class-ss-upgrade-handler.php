@@ -187,6 +187,9 @@ class Upgrade_Handler {
 				// Sync database.
 				Page::create_or_update_table();
 
+				// Clean up renamed crawlers in the crawlers option
+				self::cleanup_renamed_crawlers();
+
 				// Update version.
 				self::$options
 					->set( 'version', SIMPLY_STATIC_VERSION )
@@ -212,5 +215,53 @@ class Upgrade_Handler {
 
 		// Save the options
 		self::$options->save();
+	}
+
+	/**
+	 * Clean up renamed crawlers in the crawlers option
+	 *
+	 * @return void
+	 */
+	protected static function cleanup_renamed_crawlers() {
+		$crawlers = self::$options->get( 'crawlers' );
+
+		// If crawlers is not an array or is empty, nothing to do
+		if ( ! is_array( $crawlers ) || empty( $crawlers ) ) {
+			return;
+		}
+
+		$updated = false;
+
+		// Check for old crawler IDs and replace them with new ones
+		$crawler_replacements = [
+			'block_theme' => 'wp_includes'
+		];
+
+		foreach ( $crawler_replacements as $old_id => $new_id ) {
+			$old_id_index = array_search( $old_id, $crawlers, true );
+
+			// If the old ID exists in the array
+			if ( $old_id_index !== false ) {
+				// Remove the old ID
+				unset( $crawlers[ $old_id_index ] );
+
+				// Add the new ID if it doesn't already exist
+				if ( ! in_array( $new_id, $crawlers, true ) ) {
+					$crawlers[] = $new_id;
+				}
+
+				$updated = true;
+			}
+		}
+
+		// If we made changes, save the updated crawlers
+		if ( $updated ) {
+			// Reindex the array to ensure sequential numeric keys
+			$crawlers = array_values( $crawlers );
+
+			self::$options->set( 'crawlers', $crawlers )->save();
+
+			\Simply_Static\Util::debug_log( 'Updated crawler IDs in options: ' . implode( ', ', $crawlers ) );
+		}
 	}
 }
