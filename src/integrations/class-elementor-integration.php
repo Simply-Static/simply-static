@@ -2,6 +2,7 @@
 
 namespace Simply_Static;
 
+use function Clue\StreamFilter\fun;
 
 class Elementor_Integration extends Integration {
 	/**
@@ -31,6 +32,15 @@ class Elementor_Integration extends Integration {
 	}
 
 	/**
+	 * Check if Elementor Pro is active.
+	 *
+	 * @return boolean
+	 */
+	public function is_elementor_pro_active() {
+		return defined( 'ELEMENTOR_PRO_VERSION' );
+	}
+
+	/**
 	 * Run the integration.
 	 *
 	 * @return void
@@ -42,6 +52,11 @@ class Elementor_Integration extends Integration {
 		// Register Elementor widgets
 		add_action( 'elementor/widgets/register', [ $this, 'register_widgets' ] );
 		add_action( 'elementor/elements/categories_registered', [ $this, 'register_widget_categories' ] );
+
+		// Register Elementor Pro specific functionality if available
+		if ( $this->is_elementor_pro_active() ) {
+			add_action( 'ss_after_setup_task', [ $this, 'register_lottie_files' ] );
+		}
 	}
 
 	/**
@@ -156,6 +171,17 @@ Util::debug_log('extract_elementor_settings: ' . $json);
 	}
 
 	/**
+	 * Move Elementor Pro Files to make sure all assets that might be required are there.
+	 * @return array
+	 */
+	public function get_pro_lib_files() {
+		if ( ! $this->is_elementor_pro_active() ) {
+			return [];
+		}
+		return $this->get_pro_files_in_url( 'lib' );
+	}
+
+	/**
 	 * Move Elementor Files to make sure all assets that might be required are there.
 	 * @return array
 	 */
@@ -171,6 +197,31 @@ Util::debug_log('extract_elementor_settings: ' . $json);
 			}
 
 			$urls[] = str_replace( trailingslashit( ELEMENTOR_PATH ), trailingslashit( ELEMENTOR_URL ), $file );
+		}
+
+		return $urls;
+	}
+
+	/**
+	 * Move Elementor Pro Files to make sure all assets that might be required are there.
+	 * @return array
+	 */
+	public function get_pro_files_in_url( $asset_dir ) {
+		if ( ! $this->is_elementor_pro_active() ) {
+			return [];
+		}
+
+		$dir   = trailingslashit( ELEMENTOR_PRO_PATH ) . 'assets/' . $asset_dir;
+		$files = $this->get_files_in_dir( $dir );
+		$urls  = [];
+
+		foreach ( $files as $file ) {
+			// If file size is empty, skip it.
+			if ( ! filesize( $file ) ) {
+				continue;
+			}
+
+			$urls[] = str_replace( trailingslashit( ELEMENTOR_PRO_PATH ), trailingslashit( ELEMENTOR_PRO_URL ), $file );
 		}
 
 		return $urls;
@@ -230,12 +281,44 @@ Util::debug_log('extract_elementor_settings: ' . $json);
 	}
 
 	/**
+	 * Get Elementor Pro bundle files
+	 * 
+	 * @return array
+	 */
+	protected function get_pro_bundle_files() {
+		if ( ! $this->is_elementor_pro_active() ) {
+			return [];
+		}
+
+		$js_bundles_folder = trailingslashit( ELEMENTOR_PRO_PATH ) . 'assets/js/';
+		$files             = scandir( $js_bundles_folder );
+		$only_bundle_min   = array_filter( $files, function ( $file ) {
+			return strpos( $file, 'bundle.min.js' );
+		} );
+
+		$urls = [];
+
+		foreach ( $only_bundle_min as $minified_file ) {
+			// If file size is empty, skip it.
+			if ( ! filesize( $minified_file ) ) {
+				continue;
+			}
+
+			$urls[] = trailingslashit( ELEMENTOR_PRO_URL ) . 'assets/js/' . $minified_file;
+		}
+
+		return $urls;
+	}
+
+	/**
 	 * Register Elementor Assets to be added that are loaded conditionally
 	 *
 	 * @return void
 	 */
 	public function register_assets() {
 		$file_urls = [];
+
+		// Get Elementor core assets
 		$lib_urls  = $this->get_lib_files();
 		$css_urls  = $this->get_files_in_dir( '/uploads/elementor/css/' );
 		$js_urls   = $this->get_files_in_dir( '/uploads/elementor/js/' );
@@ -249,6 +332,7 @@ Util::debug_log('extract_elementor_settings: ' . $json);
 			$file_urls   = array_merge( $file_urls, $bundle_urls );
 		}
 
+		// Add Elementor core asset directories
 		$file_urls = array_merge( $file_urls, $this->get_files_in_url( 'css' ) );
 		$file_urls = array_merge( $file_urls, $this->get_files_in_url( 'js' ) );
 		$file_urls = array_merge( $file_urls, $this->get_files_in_url( 'images' ) );
@@ -256,6 +340,27 @@ Util::debug_log('extract_elementor_settings: ' . $json);
 		$file_urls = array_merge( $file_urls, $this->get_files_in_url( 'mask-shapes' ) );
 		$file_urls = array_merge( $file_urls, $this->get_files_in_url( 'svg-paths' ) );
 		$file_urls = array_merge( $file_urls, $this->get_files_in_url( 'data' ) );
+
+		// Add Elementor Pro assets if available
+		if ( $this->is_elementor_pro_active() ) {
+			// Get Elementor Pro lib files
+			$pro_lib_urls = $this->get_pro_lib_files();
+			$file_urls = array_merge( $file_urls, $pro_lib_urls );
+
+			// Add Elementor Pro bundle files if needed
+			if ( $add_bundle ) {
+				$pro_bundle_urls = $this->get_pro_bundle_files();
+				$file_urls = array_merge( $file_urls, $pro_bundle_urls );
+			}
+
+			// Add Elementor Pro asset directories
+			$file_urls = array_merge( $file_urls, $this->get_pro_files_in_url( 'js' ) );
+			$file_urls = array_merge( $file_urls, $this->get_pro_files_in_url( 'css' ) );
+			$file_urls = array_merge( $file_urls, $this->get_pro_files_in_url( 'images' ) );
+			$file_urls = array_merge( $file_urls, $this->get_pro_files_in_url( 'mask-shapes' ) );
+			$file_urls = array_merge( $file_urls, $this->get_pro_files_in_url( 'svg-paths' ) );
+			$file_urls = array_merge( $file_urls, $this->get_pro_files_in_url( 'data' ) );
+		}
 
 		foreach ( $file_urls as $url ) {
 			Util::debug_log( 'Adding elementor bundle asset to queue: ' . $url );
@@ -293,5 +398,115 @@ Util::debug_log('extract_elementor_settings: ' . $json);
 
 		// Register the widget
 		$widgets_manager->register( new Elementor_Search_Widget() );
+	}
+
+	/**
+	 * Register Elementor Assets to be added that are loaded conditionally
+	 *
+	 * @return void
+	 */
+	public function register_lottie_files() {
+		global $wpdb;
+
+		$elementor_data = $wpdb->get_results( "SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key='_elementor_data'", ARRAY_A );
+
+		if ( ! $elementor_data ) {
+			return;
+		}
+
+		$files = [];
+
+		foreach ( $elementor_data as $data ) {
+
+			foreach ( json_decode( $data['meta_value'], true ) as $widget_data ) {
+
+				$flat_widget  = $this->flatten_data( $widget_data );
+				$lottie_files = array_filter( $flat_widget, function ( $item ) {
+					if ( ! isset( $item['widgetType'] ) ) {
+						return false;
+					}
+
+					if ( empty( $item['settings'] ) ) {
+						return false;
+					}
+
+					if ( empty( $item['settings']['source_json'] ) ) {
+						return false;
+					}
+
+					if ( 'library' !== $item['settings']['source_json']['source'] ) {
+						return false;
+					}
+
+					return $item['widgetType'] === 'lottie';
+				} );
+
+				if ( ! $lottie_files ) {
+					continue;
+				}
+
+				foreach ( $lottie_files as $lottie_widget ) {
+					$files[] = $lottie_widget['settings']['source_json']['url'];
+				}
+
+			}
+
+		}
+
+
+		$files = array_unique( $files );
+
+		if ( ! $files ) {
+			return;
+		}
+
+		foreach ( $files as $file_url ) {
+			Util::debug_log( 'Adding elementor pro Lottie File to queue: ' . $file_url );
+			/** @var \Simply_Static\Page $static_page */
+			$static_page = Page::query()->find_or_initialize_by( 'url', $file_url );
+			$static_page->set_status_message( __( 'Elementor Pro Lottie', 'simply-static' ) );
+			$static_page->found_on_id = 0;
+			$static_page->save();
+		}
+	}
+
+
+	/**
+	 * Get all widget
+	 *
+	 * @param $type
+	 *
+	 * @return array
+	 */
+	protected function flatten_data( $data, $flat_array = [] ) {
+
+		if ( ! is_array( $data ) ) {
+			return $flat_array;
+		}
+
+		if ( ! empty( $data['elements'] ) ) {
+			$flat_array = $this->flatten_data( $data['elements'], $flat_array );
+			unset( $data['elements'] );
+		}
+
+		$array_keys = array_keys( $data );
+
+		foreach ( $array_keys as $number ) {
+			if ( ! is_integer( $number ) ) {
+				continue;
+			}
+
+			$flat_array = $this->flatten_data( $data[ $number ], $flat_array );
+			unset( $data[ $number ] );
+		}
+
+
+		if ( isset( $data['elements'] ) ) {
+			unset( $data['elements'] );
+		}
+
+		$flat_array[] = array_merge( $data, $flat_array );
+
+		return $flat_array;
 	}
 }
