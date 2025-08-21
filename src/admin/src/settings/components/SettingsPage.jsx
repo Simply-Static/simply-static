@@ -509,15 +509,6 @@ function SettingsPage() {
                                     <Button href="https://simplystatic.com/tutorials/" target="_blank">
                                         <Dashicon icon="edit"/> {__('Tutorials', 'simply-static')}
                                     </Button>
-                                    {!isStudio() &&
-                                        <>
-                                            <Button className={"ss-get-pro"} isPrimary
-                                                    href="https://simplystatic.com/simply-static-studio/"
-                                                    target="_blank">
-                                                Try Simply Static Studio
-                                            </Button>
-                                        </>
-                                    }
                                 </CardBody>
                             </Card>
                         }

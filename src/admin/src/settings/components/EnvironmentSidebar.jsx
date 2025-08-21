@@ -75,7 +75,7 @@ export default function EnvironmentSidebar({ getSettings, isRunning }) {
         }).pop().label;
     }
 
-    return (<>
+    return (<div className={"environment-container"}>
         <h4 className={"settings-headline"}> {__('Environment', 'simply-static')}</h4>
         { !showingEnvironmentForm && selectedEnvironment &&
             <p>Current: <strong>{currentVersion()}</strong></p>
@@ -97,5 +97,5 @@ export default function EnvironmentSidebar({ getSettings, isRunning }) {
         }
         { showingEnvironmentForm && <EnvironmentForm onClose={() => setShowingEnvironmentForm(false)} setSelectedEnvironment={setSelectedEnvironment} setSelectableEnvironments={setSelectableEnvironments} />}
 
-    </>)
+    </div>)
 }

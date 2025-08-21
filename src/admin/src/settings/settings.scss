@@ -132,6 +132,10 @@ toplevel_page_simply-static img {
       color: rgb(104, 4, 204);
     }
 
+    .environment-container button {
+      text-align: center !important;
+    }
+
     .generate-container {
       margin-top: 30px;
 
@@ -162,6 +166,7 @@ toplevel_page_simply-static img {
         color: white;
         text-decoration: none;
         line-height: 1.5;
+        text-align: center;
 
         &.ss-generate-cancel-button {
           background: #b32d2e;
@@ -190,7 +195,7 @@ toplevel_page_simply-static img {
 
     .components-button {
       width: 100%;
-      text-align: center;
+      text-align: left;
       padding: 0;
       display: block !important;
     }
