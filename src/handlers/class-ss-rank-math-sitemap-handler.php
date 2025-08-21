@@ -4,6 +4,7 @@ namespace Simply_Static;
 
 use RankMath\Helper;
 use RankMath\Traits\Hooker;
+use Simply_Static\Options;
 
 class Rank_Math_Sitemap_Handler extends Page_Handler {
 
@@ -58,6 +59,7 @@ class Rank_Math_Sitemap_Handler extends Page_Handler {
 	public function after_file_fetch( $destination_dir ) {
         $this->save_xsl( $destination_dir );
         $this->rename_sitemap( $destination_dir );
+        $this->fix_sitemap_xsl_references( $destination_dir );
 	}
 
     /**
@@ -90,24 +92,49 @@ class Rank_Math_Sitemap_Handler extends Page_Handler {
      * @return void
      */
     protected function save_xsl( $destination_dir ) {
-        $destination_path = Util::combine_path( $destination_dir, '/main-sitemap.xsl' );
-
-        if ( file_exists( $destination_path ) ) {
-            return;
-        }
-
+        // Generate XSL content once
         Util::debug_log( 'Getting content for main-sitemap.xsl' );
         ob_start();
         $this->generate_xsl();
-        $xsl_content   = ob_get_clean();
+        $xsl_content = ob_get_clean();
         $temp_filename = wp_tempnam();
         file_put_contents( $temp_filename, $xsl_content );
-        $rename = rename( $temp_filename, $destination_path );
 
-        if ( $rename === false ) {
-            Util::debug_log( 'Cannot create ' . $destination_path );
-        } else {
-            Util::debug_log( 'Created ' . $destination_path );
+        // Copy to the root directory (original behavior)
+        $destination_path = Util::combine_path( $destination_dir, '/main-sitemap.xsl' );
+        if ( ! file_exists( $destination_path ) ) {
+            $rename = rename( $temp_filename, $destination_path );
+            if ( $rename === false ) {
+                Util::debug_log( 'Cannot create ' . $destination_path );
+                // Create a new temp file for the second copy
+                $temp_filename = wp_tempnam();
+                file_put_contents( $temp_filename, $xsl_content );
+            } else {
+                Util::debug_log( 'Created ' . $destination_path );
+                // Create a new temp file for the second copy
+                $temp_filename = wp_tempnam();
+                file_put_contents( $temp_filename, $xsl_content );
+            }
+        }
+
+        // Also copy to any potential path referenced in the sitemap XML
+        // For RankMath, we don't know the exact path, so we'll create a common location
+        $plugin_dir = Util::combine_path( $destination_dir, '/wp-content/plugins/seo-by-rank-math/assets' );
+
+        // Create directory structure if it doesn't exist
+        if ( ! file_exists( $plugin_dir ) ) {
+            wp_mkdir_p( $plugin_dir );
+        }
+
+        $plugin_xsl_path = Util::combine_path( $plugin_dir, '/main-sitemap.xsl' );
+
+        if ( ! file_exists( $plugin_xsl_path ) ) {
+            $rename = rename( $temp_filename, $plugin_xsl_path );
+            if ( $rename === false ) {
+                Util::debug_log( 'Cannot create ' . $plugin_xsl_path );
+            } else {
+                Util::debug_log( 'Created ' . $plugin_xsl_path );
+            }
         }
     }
 
@@ -128,4 +155,41 @@ class Rank_Math_Sitemap_Handler extends Page_Handler {
 
 		require_once RANK_MATH_PATH . 'includes/modules/sitemap/sitemap-xsl.php';
 	}
+
+    /**
+     * Fix XSL references in sitemap XML files
+     *
+     * @param string $destination_dir Destination directory.
+     * @return void
+     */
+    protected function fix_sitemap_xsl_references( $destination_dir ) {
+        // List of sitemap files to check
+        $sitemap_files = [
+            Util::combine_path( $destination_dir, '/sitemap.xml' ),
+            Util::combine_path( $destination_dir, '/sitemap_index.xml' ),
+            // Add other sitemap files if needed
+        ];
+
+        // Find all XML files that might be sitemaps
+        $xml_files = glob( Util::combine_path( $destination_dir, '/*-sitemap.xml' ) );
+        if ( is_array( $xml_files ) ) {
+            $sitemap_files = array_merge( $sitemap_files, $xml_files );
+        }
+
+        foreach ( $sitemap_files as $sitemap_file ) {
+            if ( file_exists( $sitemap_file ) ) {
+                $content = file_get_contents( $sitemap_file );
+
+                // Replace the XSL reference with the one pointing to the root directory
+                $content = preg_replace(
+                    '/<\?xml-stylesheet type="text\/xsl" href="[^"]*"\?>/',
+                    '<?xml-stylesheet type="text/xsl" href="' . trailingslashit( Options::instance()->get_destination_url() ) . 'main-sitemap.xsl"?>',
+                    $content
+                );
+
+                file_put_contents( $sitemap_file, $content );
+                Util::debug_log( 'Fixed XSL reference in ' . $sitemap_file );
+            }
+        }
+    }
 }
