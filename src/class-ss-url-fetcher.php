@@ -156,7 +156,17 @@ class Url_Fetcher {
 			return false;
 		} else {
 			$static_page->http_status_code = $response['response']['code'];
-			$static_page->content_type     = $response['headers']['content-type'];
+
+			// Check if this is a JavaScript file based on the URL extension
+			$path_info = Util::url_path_info($static_page->url);
+			if (isset($path_info['extension']) && $path_info['extension'] === 'js') {
+				// Force the correct MIME type for JavaScript files
+				$static_page->content_type = 'application/javascript';
+			} else {
+				// Use the content type from the response headers
+				$static_page->content_type = $response['headers']['content-type'];
+			}
+
 			$static_page->redirect_url     = isset( $response['headers']['location'] ) ? $response['headers']['location'] : null;
 
 			Util::debug_log( "http_status_code: " . $static_page->http_status_code . " | content_type: " . $static_page->content_type );
