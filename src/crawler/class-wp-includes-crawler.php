@@ -53,6 +53,13 @@ class WP_Includes_Crawler extends Crawler {
 			array_unshift( $wp_includes_directories, '/wp-includes/blocks/' );
 		}
 
+		// Check if comments are enabled and add comment-reply.min.js
+		if ( get_option( 'thread_comments' ) ) {
+			$comment_reply_js = $site_url . '/wp-includes/js/comment-reply.min.js?ver=' . get_bloginfo( 'version' );
+			$asset_urls[] = $comment_reply_js;
+			\Simply_Static\Util::debug_log( "Added comment-reply.min.js to assets" );
+		}
+
 		// Scan each directory and add files to asset URLs
 		foreach ( $wp_includes_directories as $directory ) {
 			$directory_clean = $directory !== null ? ltrim( $directory, '/' ) : '';
