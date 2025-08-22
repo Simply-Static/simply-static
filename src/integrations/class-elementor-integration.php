@@ -46,16 +46,28 @@ class Elementor_Integration extends Integration {
 	 * @return void
 	 */
 	public function run() {
-		add_action( 'ss_after_setup_task', [ $this, 'register_assets' ] );
 		//add_filter( 'ss_html_after_restored_attributes', [ $this, 'extract_elementor_settings' ], 20, 2 );
 
 		// Register Elementor widgets
 		add_action( 'elementor/widgets/register', [ $this, 'register_widgets' ] );
 		add_action( 'elementor/elements/categories_registered', [ $this, 'register_widget_categories' ] );
 
-		// Register Elementor Pro specific functionality if available
+		// Get options instance
+		$options = Options::instance();
+
+		// Add Elementor Crawler to active crawlers
+		$this->activate_elementor_crawler();
+
+		// Register Elementor Pro specific functionality if available and if smart_crawl is not enabled
 		if ( $this->is_elementor_pro_active() ) {
-			add_action( 'ss_after_setup_task', [ $this, 'register_lottie_files' ] );
+			if ( ! $options->get( 'smart_crawl' ) ) {
+				add_action( 'ss_after_setup_task', [ $this, 'register_lottie_files' ] );
+			}
+		}
+
+		// Register Elementor assets only if smart_crawl is not enabled
+		if ( ! $options->get( 'smart_crawl' ) ) {
+			add_action( 'ss_after_setup_task', [ $this, 'register_assets' ] );
 		}
 	}
 
@@ -470,6 +482,35 @@ Util::debug_log('extract_elementor_settings: ' . $json);
 		}
 	}
 
+
+	/**
+	 * Activate the Elementor Crawler
+	 *
+	 * @return void
+	 */
+	protected function activate_elementor_crawler() {
+		// Get options instance
+		$options = Options::instance();
+
+		// Get current active crawlers
+		$crawlers = $options->get( 'crawlers' );
+
+		// Ensure crawlers is always an array
+		if ( ! is_array( $crawlers ) ) {
+			$crawlers = [];
+		}
+
+		// Add elementor crawler to the list if not already there
+		if ( ! in_array( 'elementor', $crawlers, true ) ) {
+			$crawlers[] = 'elementor';
+
+			// Save the updated crawlers list
+			$options->set( 'crawlers', $crawlers );
+			$options->save();
+
+			Util::debug_log( 'Elementor Crawler activated' );
+		}
+	}
 
 	/**
 	 * Get all widget
