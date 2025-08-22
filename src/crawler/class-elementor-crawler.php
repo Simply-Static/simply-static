@@ -77,6 +77,8 @@ class Elementor_Crawler extends Crawler {
 		$directories = [
 			// Elementor uploads directory
 			'/wp-content/uploads/elementor' => $wp_path . 'wp-content/uploads/elementor',
+			// Elementor CSS directory (for post CSS files)
+			'/wp-content/uploads/elementor/css' => $wp_path . 'wp-content/uploads/elementor/css',
 			// jQuery directory
 			'/wp-includes/js/jquery' => $wp_path . 'wp-includes/js/jquery',
 		];
