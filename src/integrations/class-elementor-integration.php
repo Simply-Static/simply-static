@@ -500,14 +500,34 @@ Util::debug_log('extract_elementor_settings: ' . $json);
 			$crawlers = [];
 		}
 
-		// Add elementor crawler to the list if not already there
+		// If crawlers are empty, populate with all available crawler IDs (including Elementor)
+		if ( empty( $crawlers ) ) {
+			try {
+				$all_crawlers = Crawlers::instance()->get_crawlers();
+				$all_ids = [];
+				foreach ( $all_crawlers as $crawler ) {
+					// Each crawler exposes its ID via js_object()
+					$info = $crawler->js_object();
+					if ( isset( $info['id'] ) && is_string( $info['id'] ) && $info['id'] !== '' ) {
+						$all_ids[] = $info['id'];
+					}
+				}
+				$all_ids = array_values( array_unique( $all_ids ) );
+
+				$options->set( 'crawlers', $all_ids );
+				$options->save();
+				Util::debug_log( 'Crawlers were empty – populated all available crawlers including Elementor.' );
+				return;
+			} catch ( \Throwable $e ) {
+				Util::debug_log( 'Failed to populate all crawlers: ' . $e->getMessage() );
+			}
+		}
+
+		// Otherwise, just ensure Elementor crawler is present
 		if ( ! in_array( 'elementor', $crawlers, true ) ) {
 			$crawlers[] = 'elementor';
-
-			// Save the updated crawlers list
 			$options->set( 'crawlers', $crawlers );
 			$options->save();
-
 			Util::debug_log( 'Elementor Crawler activated' );
 		}
 	}
