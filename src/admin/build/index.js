@@ -422,7 +422,8 @@ function ExportLog() {
   const {
     isRunning,
     blogId,
-    isPro
+    isPro,
+    settings
   } = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useContext)(_context_SettingsContext__WEBPACK_IMPORTED_MODULE_2__.SettingsContext);
   const [exportLog, setExportLog] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
   const [loadingExportLog, setLoadingExportLog] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
@@ -432,11 +433,17 @@ function ExportLog() {
   const [allData, setAllData] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
   const [loadingAllData, setLoadingAllData] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
   const [totalPages, setTotalPages] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(0);
-  const [exportType, setExportType] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)('Export');
+  const [exportType, setExportType] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)('export');
   const [exportTypeId, setExportTypeId] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(null);
 
   // Determine export type based on available information
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
+    // If delivery method is 'zip', always use 'export' type
+    if (settings && settings.delivery_method === 'zip') {
+      setExportType('export');
+      return;
+    }
+
     // Use the new export-type endpoint to get the export type information
     _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_3___default()({
       path: '/simplystatic/v1/export-type',
@@ -444,19 +451,26 @@ function ExportLog() {
     }).then(response => {
       const json = JSON.parse(response);
       if (json.status === 200 && json.data) {
-        setExportType(json.data.export_type);
-        setExportTypeId(json.data.export_type_id);
+        // If delivery method is 'zip', override with 'export' type
+        if (settings && settings.delivery_method === 'zip') {
+          setExportType('export');
+        } else {
+          setExportType(json.data.export_type);
+          setExportTypeId(json.data.export_type_id);
+        }
       }
     }).catch(error => {
       console.error('Error fetching export type:', error);
       // Fallback to using options.last_export_end
-      if (options.last_export_end) {
+      if (settings && settings.delivery_method === 'zip') {
+        setExportType('export');
+      } else if (options.last_export_end) {
         setExportType('Update');
       } else {
-        setExportType('Export');
+        setExportType('export');
       }
     });
-  }, []);
+  }, [settings]);
 
   // Define base columns
   const baseColumns = [{
@@ -528,6 +542,7 @@ function ExportLog() {
     // But only if we're not running a Build or Single export
     if (searchTerm && allData.length === 0 && exportType !== 'Build' && exportType !== 'Single') {
       await fetchAllData();
+      setLastAllDataFetch(Date.now()); // Update the timestamp after fetching
     }
   };
   function getExportLog(page, force = false) {
@@ -568,34 +583,55 @@ function ExportLog() {
       });
       const firstPageJson = JSON.parse(firstPageResponse);
       const totalItems = firstPageJson.data.total_static_pages || 0;
-      const calculatedTotalPages = Math.ceil(totalItems / perPageExportLog);
+      let calculatedTotalPages = Math.ceil(totalItems / perPageExportLog);
 
-      // Create an array of promises for all pages
-      const pagePromises = [];
-      for (let i = 1; i <= calculatedTotalPages; i++) {
-        pagePromises.push(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_3___default()({
-          path: `/simplystatic/v1/export-log?page=${i}&per_page=${perPageExportLog}&blog_id=${blogId}&is_network_admin=${options.is_network}`,
-          method: 'GET'
-        }));
+      // For very large sites, limit the number of pages we fetch to avoid timeouts
+      const MAX_PAGES_TO_FETCH = 20; // This will fetch up to 500 items with default perPage of 25
+      if (calculatedTotalPages > MAX_PAGES_TO_FETCH) {
+        console.log(`Site has ${calculatedTotalPages} pages of data, limiting to ${MAX_PAGES_TO_FETCH} pages to prevent timeouts`);
+        calculatedTotalPages = MAX_PAGES_TO_FETCH;
       }
 
-      // Execute all promises
-      const responses = await Promise.all(pagePromises);
-
-      // Combine all pages of data
+      // Instead of fetching all pages at once, fetch them in batches
+      const BATCH_SIZE = 5; // Process 5 pages at a time
       let allPages = [];
-      responses.forEach(response => {
-        const json = JSON.parse(response);
-        if (json.data && json.data.static_pages) {
-          allPages = [...allPages, ...json.data.static_pages];
+
+      // Add the first page data we already fetched
+      if (firstPageJson.data && firstPageJson.data.static_pages) {
+        allPages = [...firstPageJson.data.static_pages];
+      }
+
+      // Process remaining pages in batches
+      for (let batchStart = 2; batchStart <= calculatedTotalPages; batchStart += BATCH_SIZE) {
+        const batchEnd = Math.min(batchStart + BATCH_SIZE - 1, calculatedTotalPages);
+        console.log(`Fetching batch of pages ${batchStart} to ${batchEnd}`);
+
+        // Create batch of promises
+        const batchPromises = [];
+        for (let i = batchStart; i <= batchEnd; i++) {
+          batchPromises.push(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_3___default()({
+            path: `/simplystatic/v1/export-log?page=${i}&per_page=${perPageExportLog}&blog_id=${blogId}&is_network_admin=${options.is_network}`,
+            method: 'GET'
+          }));
         }
-      });
+
+        // Execute batch of promises
+        const batchResponses = await Promise.all(batchPromises);
+
+        // Process batch responses
+        batchResponses.forEach(response => {
+          const json = JSON.parse(response);
+          if (json.data && json.data.static_pages) {
+            allPages = [...allPages, ...json.data.static_pages];
+          }
+        });
+      }
 
       // Update state with the fetched data
       setAllData(allPages);
 
       // Log for debugging
-      console.log(`Fetched ${allPages.length} total items from ${calculatedTotalPages} pages`);
+      console.log(`Fetched ${allPages.length} total items from ${calculatedTotalPages} pages (out of ${Math.ceil(totalItems / perPageExportLog)} total pages)`);
       return allPages;
     } catch (error) {
       console.error('Error fetching all data:', error);
@@ -604,12 +640,21 @@ function ExportLog() {
       setLoadingAllData(false);
     }
   }
+
+  // Track the last time we fetched all data
+  const [lastAllDataFetch, setLastAllDataFetch] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(0);
   (0,_hooks_useInterval__WEBPACK_IMPORTED_MODULE_4__["default"])(() => {
     getExportLog();
 
     // If we have a search term and already have all data, refresh the all data
-    if (filterText && allData.length > 0) {
+    // but limit how often we do this to prevent overloading the server
+    const currentTime = Date.now();
+    const ALL_DATA_REFRESH_INTERVAL = 30000; // 30 seconds between full refreshes
+
+    if (filterText && allData.length > 0 && currentTime - lastAllDataFetch > ALL_DATA_REFRESH_INTERVAL) {
+      console.log('Refreshing all data for search (30-second interval)');
       fetchAllData();
+      setLastAllDataFetch(currentTime);
     }
   }, isRunning ? 5000 : null);
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
@@ -987,9 +1032,12 @@ function SettingsPage() {
       setSelectableSites(sites);
     }
 
-    // Maybe set to update.
-    if (options.last_export_end && !isRunning) {
+    // Maybe set to update, but only if delivery method is not 'zip'
+    if (options.last_export_end && !isRunning && settings && settings.delivery_method !== 'zip') {
       setSelectedExportType('update');
+    } else if (settings && settings.delivery_method === 'zip') {
+      // Always use 'export' for ZIP delivery method
+      setSelectedExportType('export');
     }
   }, [options, isRunning, isPaused]);
   const startExport = () => {
@@ -1126,6 +1174,8 @@ function SettingsPage() {
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Dashicon, {
     icon: 'no'
   })))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.__experimentalSpacer, {
+    margin: 5
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.__experimentalSpacer, {
     margin: 5
   }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Button, {
     href: "https://simplystatic.com/changelogs/",
@@ -1441,132 +1491,12 @@ const {
 } = wp.i18n;
 const SettingsContext = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createContext)();
 function SettingsContextProvider(props) {
-  const defaultSettings = {
-    'destination_scheme': 'https://',
-    'destination_host': '',
-    'temp_files_dir': '',
-    'additional_urls': '',
-    'additional_files': '',
-    'urls_to_exclude': '',
-    'delivery_method': 'zip',
-    'local_dir': '',
-    'relative_path': '',
-    'destination_url_type': 'relative',
-    'debugging_mode': true,
-    'server_cron': false,
-    'whitelist_plugins': '',
-    'http_basic_auth_username': '',
-    'http_basic_auth_password': '',
-    'http_basic_auth_on': false,
-    'origin_url': '',
-    'version': options.version,
-    'force_replace_url': true,
-    'clear_directory_before_export': false,
-    'iframe_urls': '',
-    'iframe_custom_css': '',
-    'tiiny_email': options.admin_email,
-    'tiiny_subdomain': '',
-    'tiiny_domain_suffix': 'tiiny.site',
-    'tiiny_password': '',
-    'cdn_api_key': '',
-    'cdn_storage_host': 'storage.bunnycdn.com',
-    'cdn_access_key': '',
-    'cdn_pull_zone': '',
-    'cdn_storage_zone': '',
-    'cdn_directory': '',
-    'github_account_type': 'personal',
-    'github_user': '',
-    'github_email': '',
-    'github_personal_access_token': '',
-    'github_repository': '',
-    'github_repository_visibility': 'public',
-    'github_branch': 'main',
-    'github_webhook_url': '',
-    'github_folder_path': '',
-    'github_throttle_requests': false,
-    'github_batch_size': 100,
-    'aws_region': 'us-east-2',
-    'aws_auth_method': 'aws-iam-key',
-    'aws_access_key': '',
-    'aws_access_secret': '',
-    'aws_bucket': '',
-    'aws_subdirectory': '',
-    'aws_distribution_id': '',
-    'aws_webhook_url': '',
-    'aws_empty': false,
-    's3_access_key': '',
-    's3_base_url': '',
-    's3_access_secret': '',
-    's3_bucket': '',
-    's3_subdirectory': '',
-    'fix_cors': 'allowed_http_origins',
-    'static_url': '',
-    'use_forms': false,
-    'use_comments': false,
-    'comment_redirect': '',
-    'use_search': false,
-    'search_type': 'fuse',
-    'search_index_title': 'title',
-    'search_index_content': 'body',
-    'search_index_excerpt': '.entry-content',
-    'search_excludable': '',
-    'search_metadata': '',
-    'fuse_selector': '.search-field',
-    'fuse_threshold': 0.1,
-    'algolia_app_id': '',
-    'algolia_admin_api_key': '',
-    'algolia_search_api_key': '',
-    'algolia_index': 'simply_static',
-    'algolia_selector': '.search-field',
-    'use_minify': false,
-    'minify_html': false,
-    'minify_html_leave_quotes': false,
-    'minify_css': false,
-    'minify_inline_css': false,
-    'minify_css_exclude': '',
-    'minify_js_exclude': '',
-    'minify_js': false,
-    'minify_inline_js': false,
-    'generate_404': false,
-    'smart_crawl': true,
-    'add_feeds': false,
-    'add_rest_api': false,
-    'wp_content_directory': '',
-    'wp_includes_directory': '',
-    'wp_uploads_directory': '',
-    'wp_plugins_directory': '',
-    'wp_themes_directory': '',
-    'theme_style_name': 'style',
-    'author_url': '',
-    'hide_comments': false,
-    'hide_version': false,
-    'hide_generator': false,
-    'hide_prefetch': false,
-    'hide_rsd': false,
-    'hide_emotes': false,
-    'disable_xmlrpc': false,
-    'disable_embed': false,
-    'disable_db_debug': false,
-    'disable_wlw_manifest': false,
-    'incremental_export': false,
-    'sftp_host': '',
-    'sftp_user': '',
-    'sftp_pass': '',
-    'sftp_private_key': '',
-    'sftp_folder': '',
-    'sftp_port': 22,
-    'shortpixel_enabled': false,
-    'shortpixel_api_key': '',
-    'shortpixel_backup_enabled': false,
-    'shortpixel_webp_enabled': false,
-    'integrations': false // Will be array when saved.
-  };
   const [isRunning, setIsRunning] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
   const [isDelayed, setIsDelayed] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(0);
   const [isPaused, setIsPaused] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
   const [isResumed, setIsResumed] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
   const [settingsSaved, setSettingsSaved] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
-  const [settings, setSettings] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(defaultSettings);
+  const [settings, setSettings] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)({});
   const [configs, setConfigs] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)({});
   const [passedChecks, setPassedChecks] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)('yes');
   const [blogId, setBlogId] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(1);
@@ -1589,11 +1519,16 @@ function SettingsContextProvider(props) {
     });
   };
   const resetSettings = () => {
-    setSettings(defaultSettings);
     _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2___default()({
       path: '/simplystatic/v1/settings/reset',
-      method: 'POST',
-      data: defaultSettings
+      method: 'POST'
+    }).then(resp => {
+      // Parse the response to get the default settings
+      const response = JSON.parse(resp);
+      if (response.status === 200 && response.data) {
+        // Update the settings state with the default settings from the server
+        setSettings(response.data);
+      }
     });
   };
   const resetDatabase = () => {
@@ -1640,10 +1575,11 @@ function SettingsContextProvider(props) {
     });
   };
   const updateSetting = (key, value) => {
-    setSettings({
+    const updatedSettings = {
       ...settings,
       [key]: value
-    });
+    };
+    setSettings(updatedSettings);
   };
   const getStatus = () => {
     _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2___default()({
@@ -1732,7 +1668,7 @@ function SettingsContextProvider(props) {
   };
   const isIntegrationActive = integration => {
     let integrations = settings.integrations;
-    if (false === integrations) {
+    if (false === integrations || !integrations || !Array.isArray(integrations)) {
       return false;
     }
     if (integrations.indexOf(integration) >= 0) {
@@ -1747,7 +1683,13 @@ function SettingsContextProvider(props) {
     checkIfRunning();
   }, isRunning || isDelayed ? 5000 : null);
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
-    getSettings();
+    // If current_settings is available in the options object, use it instead of fetching from the API
+    if (options.current_settings) {
+      setSettings(options.current_settings);
+    } else {
+      // Fallback to fetching from the API if current_settings is not available
+      getSettings();
+    }
     getStatus();
     checkIfRunning();
     setBlogId(options.blog_id);
@@ -2999,10 +2941,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _context_SettingsContext__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../context/SettingsContext */ "./src/settings/context/SettingsContext.jsx");
-/* harmony import */ var _components_HelperVideo__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../components/HelperVideo */ "./src/settings/components/HelperVideo.jsx");
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _context_SettingsContext__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../context/SettingsContext */ "./src/settings/context/SettingsContext.jsx");
+/* harmony import */ var _components_HelperVideo__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../components/HelperVideo */ "./src/settings/components/HelperVideo.jsx");
+
 
 
 
@@ -3019,18 +2964,24 @@ function GeneralSettings() {
     settingsSaved,
     setSettingsSaved,
     isPro
-  } = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useContext)(_context_SettingsContext__WEBPACK_IMPORTED_MODULE_3__.SettingsContext);
-  const [replaceType, setReplaceType] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)('relative');
-  const [useForms, setUseForms] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)(false);
-  const [scheme, setScheme] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)('https://');
-  const [host, setHost] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)('');
-  const [path, setPath] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)('/');
-  const [forceURLReplacement, setForceURLReplacement] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)(false);
-  const [hasCopied, setHasCopied] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)(false);
-  const [generate404, setGenerate404] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)(false);
-  const [enableSmartCrawl, setEnableSmartCrawl] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)(false);
-  const [addFeeds, setAddFeeds] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)(false);
-  const [addRestApi, setAddRestApi] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)(false);
+  } = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useContext)(_context_SettingsContext__WEBPACK_IMPORTED_MODULE_4__.SettingsContext);
+  const [replaceType, setReplaceType] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)('relative');
+  const [useForms, setUseForms] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(false);
+  const [scheme, setScheme] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)('https://');
+  const [host, setHost] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)('');
+  const [path, setPath] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)('/');
+  const [forceURLReplacement, setForceURLReplacement] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(false);
+  const [hasCopied, setHasCopied] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(false);
+  const [generate404, setGenerate404] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(false);
+  const [enableEnhancedCrawl, setEnableEnhancedCrawl] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(false);
+  const [addFeeds, setAddFeeds] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(false);
+  const [addRestApi, setAddRestApi] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(false);
+  const [crawlers, setCrawlers] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)([]);
+  const [selectedCrawlers, setSelectedCrawlers] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)([]);
+  const [apiError, setApiError] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(null);
+  const [postTypes, setPostTypes] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)([]);
+  const [selectedPostTypes, setSelectedPostTypes] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)([]);
+  const [postTypesApiError, setPostTypesApiError] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(null);
   const setSavingSettings = () => {
     saveSettings();
     setSettingsSaved(true);
@@ -3038,7 +2989,109 @@ function GeneralSettings() {
       setSettingsSaved(false);
     }, 2000);
   };
-  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useEffect)(() => {
+
+  // Function to fetch crawlers from API
+  const fetchCrawlers = () => {
+    // Reset API error
+    setApiError(null);
+    _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2___default()({
+      path: '/simplystatic/v1/crawlers',
+      // Use raw: true to get the raw response
+      parse: true
+    }).then(response => {
+      // Check if response is a string (JSON) and try to parse it
+      if (typeof response === 'string') {
+        try {
+          response = JSON.parse(response);
+        } catch (e) {
+          setApiError('Error parsing API response: ' + e.message);
+          return;
+        }
+      }
+      if (response && response.data && response.data.length > 0) {
+        setCrawlers(response.data);
+
+        // If no crawlers are selected or settings.crawlers is not an array, select all by default
+        // But only do this if smart_crawl is enabled and we're initializing for the first time
+        if ((!settings.crawlers || !Array.isArray(settings.crawlers) || settings.crawlers.length === 0) && settings.smart_crawl === true) {
+          const allCrawlerIds = response.data.map(crawler => crawler.id);
+          setSelectedCrawlers(allCrawlerIds);
+          updateSetting('crawlers', allCrawlerIds);
+        } else if (Array.isArray(settings.crawlers)) {
+          // Ensure all selected crawlers exist in the crawlers list
+          const validCrawlerIds = settings.crawlers.filter(id => response.data.some(crawler => crawler.id === id));
+
+          // If no valid crawlers are selected, select all by default
+          if (validCrawlerIds.length === 0) {
+            const allCrawlerIds = response.data.map(crawler => crawler.id);
+            setSelectedCrawlers(allCrawlerIds);
+            updateSetting('crawlers', allCrawlerIds);
+          } else {
+            setSelectedCrawlers(validCrawlerIds);
+          }
+        }
+      } else {
+        setApiError('Invalid API response structure or empty crawlers array');
+      }
+    }).catch(error => {
+      setApiError('Error fetching crawlers: ' + (error.message || 'Unknown error'));
+    });
+  };
+
+  // Function to fetch post types from API
+  const fetchPostTypes = () => {
+    // Reset API error
+    setPostTypesApiError(null);
+    _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2___default()({
+      path: '/simplystatic/v1/post-types',
+      parse: true
+    }).then(response => {
+      // Check if response is a string (JSON) and try to parse it
+      if (typeof response === 'string') {
+        try {
+          response = JSON.parse(response);
+        } catch (e) {
+          setPostTypesApiError('Error parsing API response: ' + e.message);
+          return;
+        }
+      }
+      if (response && response.data && response.data.length > 0) {
+        setPostTypes(response.data);
+
+        // If settings.post_types is not an array, initialize it as an empty array
+        if (!settings.post_types || !Array.isArray(settings.post_types)) {
+          const allPostTypeIds = response.data.map(postType => postType.name);
+          setSelectedPostTypes(allPostTypeIds);
+          updateSetting('post_types', allPostTypeIds);
+        } else if (Array.isArray(settings.post_types)) {
+          // Ensure all selected post types exist in the post types list
+          const validPostTypeIds = settings.post_types.filter(name => response.data.some(postType => postType.name === name));
+
+          // If no valid post types are selected, select all by default
+          if (validPostTypeIds.length === 0) {
+            const allPostTypeIds = response.data.map(postType => postType.name);
+            setSelectedPostTypes(allPostTypeIds);
+            updateSetting('post_types', allPostTypeIds);
+          } else {
+            setSelectedPostTypes(validPostTypeIds);
+          }
+        }
+      } else {
+        setPostTypesApiError('Invalid API response structure or empty post types array');
+      }
+    }).catch(error => {
+      setPostTypesApiError('Error fetching post types: ' + (error.message || 'Unknown error'));
+    });
+  };
+
+  // Fetch crawlers and post types when component mounts
+  // We intentionally use an empty dependency array to ensure this only runs once
+  // when the component mounts, not on every settings change
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
+    fetchCrawlers();
+    fetchPostTypes();
+  }, []);
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
     if (settings.destination_url_type) {
       setReplaceType(settings.destination_url_type);
     }
@@ -3067,12 +3120,18 @@ function GeneralSettings() {
       setAddRestApi(settings.add_rest_api);
     }
     if (settings.smart_crawl) {
-      setEnableSmartCrawl(settings.smart_crawl);
+      setEnableEnhancedCrawl(settings.smart_crawl);
+    }
+    if (settings.crawlers) {
+      setSelectedCrawlers(settings.crawlers);
+    }
+    if (settings.post_types !== undefined) {
+      setSelectedPostTypes(Array.isArray(settings.post_types) ? settings.post_types : []);
     }
   }, [settings]);
   return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "inner-settings"
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Replacing URLs', 'simply-static'), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_HelperVideo__WEBPACK_IMPORTED_MODULE_4__["default"], {
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Replacing URLs', 'simply-static'), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_HelperVideo__WEBPACK_IMPORTED_MODULE_5__["default"], {
     title: __('How to replace URLs', 'simply-static'),
     videoUrl: 'https://youtu.be/cb8jAMJlfGI'
   }))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, __('When exporting your static site, any links to your WordPress site will be replaced by one of the following: absolute URLs, relative URLs, or URLs contructed for offline use.', 'simply-static')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
@@ -3148,7 +3207,111 @@ function GeneralSettings() {
     }
   }))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
     margin: 5
-  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Include', 'simply-static'), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_HelperVideo__WEBPACK_IMPORTED_MODULE_4__["default"], {
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Enhanced Crawl', 'simply-static'), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_HelperVideo__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    title: __('How Enhanced Crawl improves your static exports', 'simply-static'),
+    videoUrl: 'https://youtu.be/QfKxeQ1w7tU'
+  }))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, __('Enhanced Crawl uses native WordPress functions to find all pages and files when running a static export.', 'simply-static')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+    label: (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, __('Enable Enhanced Crawl', 'simply-static')),
+    help: enableEnhancedCrawl ? __('Find pages and files via Enhanced Crawl.', 'simply-static') : __('Don\'t find pages and files via Enhanced Crawl.', 'simply-static'),
+    checked: enableEnhancedCrawl,
+    onChange: value => {
+      setEnableEnhancedCrawl(value);
+      updateSetting('smart_crawl', value);
+    }
+  }), enableEnhancedCrawl && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+    margin: 2
+  }), apiError && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Notice, {
+    status: "error",
+    isDismissible: false
+  }, __('Error loading crawlers: ', 'simply-static'), " ", apiError), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+    margin: 2
+  })), crawlers.length > 0 ? (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.FormTokenField, {
+    label: __('Active Crawlers', 'simply-static'),
+    value: selectedCrawlers.map(id => {
+      const crawler = crawlers.find(c => c.id === id);
+      return crawler ? crawler.name : id;
+    }),
+    suggestions: crawlers.map(crawler => crawler.name),
+    onChange: value => {
+      // Convert names to IDs for storage
+      const selectedIds = value.map(name => {
+        // First try to find an exact match
+        let crawler = crawlers.find(c => c.name === name);
+
+        // If no exact match, try case-insensitive match
+        if (!crawler) {
+          crawler = crawlers.find(c => c.name.toLowerCase() === name.toLowerCase());
+        }
+
+        // If still no match, check if it's already an ID
+        if (!crawler) {
+          crawler = crawlers.find(c => c.id === name);
+        }
+        return crawler ? crawler.id : name;
+      });
+      setSelectedCrawlers(selectedIds);
+      updateSetting('crawlers', selectedIds);
+    },
+    help: __('Select which crawlers to activate. If none selected, all crawlers will be active by default.', 'simply-static'),
+    tokenizeOnSpace: false,
+    __experimentalExpandOnFocus: true,
+    __experimentalShowHowTo: false,
+    maxSuggestions: 100,
+    className: "horizontal-token-field"
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+    margin: 2
+  }), selectedCrawlers.includes('post_type') && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+    margin: 2
+  }), postTypesApiError && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Notice, {
+    status: "error",
+    isDismissible: false
+  }, __('Error loading post types: ', 'simply-static'), " ", postTypesApiError), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+    margin: 2
+  })), postTypes.length > 0 ? (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.FormTokenField, {
+    label: __('Post Types to Include', 'simply-static'),
+    value: Array.isArray(selectedPostTypes) ? selectedPostTypes.map(name => {
+      const postType = postTypes.find(pt => pt.name === name);
+      return postType ? postType.label : name;
+    }) : [],
+    suggestions: postTypes.map(postType => postType.label),
+    onChange: value => {
+      // Convert labels to names for storage
+      const selectedNames = value.map(label => {
+        // First try to find an exact match
+        let postType = postTypes.find(pt => pt.label === label);
+
+        // If no exact match, try case-insensitive match
+        if (!postType) {
+          postType = postTypes.find(pt => pt.label.toLowerCase() === label.toLowerCase());
+        }
+
+        // If still no match, check if it's already a name
+        if (!postType) {
+          postType = postTypes.find(pt => pt.name === label);
+        }
+        return postType ? postType.name : label;
+      });
+      setSelectedPostTypes(selectedNames);
+      updateSetting('post_types', selectedNames);
+    },
+    help: __('Select which post types to include in the static export. If you remove all selections, all post types will be included by default.', 'simply-static'),
+    tokenizeOnSpace: false,
+    __experimentalExpandOnFocus: true,
+    __experimentalShowHowTo: false,
+    maxSuggestions: 100,
+    className: "horizontal-token-field"
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+    margin: 2
+  })) : (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, __('Loading post types...', 'simply-static'))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "crawler-descriptions"
+  }, crawlers.map(crawler => (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    key: crawler.id,
+    className: "crawler-description"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Flex, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.FlexItem, {
+    className: "crawler-name"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("strong", null, crawler.name, ":")), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.FlexItem, null, crawler.description)))))) : (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, __('Loading crawlers...', 'simply-static'))))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+    margin: 5
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Include', 'simply-static'), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_HelperVideo__WEBPACK_IMPORTED_MODULE_5__["default"], {
     title: __('Include & Exclude files and pages', 'simply-static'),
     videoUrl: 'https://youtu.be/voAHfwVMLi8'
   }))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextareaControl, {
@@ -3175,15 +3338,7 @@ function GeneralSettings() {
   }, hasCopied ? __('Copied home path', 'simply-static') : __('Copy home path', 'simply-static')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
     margin: 5
   }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
-    label: (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, __('Enable Smart Crawl', 'simply-static')),
-    help: enableSmartCrawl ? __('Collect pages and files via Smart Crawl.', 'simply-static') : __('Don\'t collect pages and files via Smart Crawl.', 'simply-static'),
-    checked: enableSmartCrawl,
-    onChange: value => {
-      setEnableSmartCrawl(value);
-      updateSetting('smart_crawl', value);
-    }
-  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
-    label: (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, __('Generate 404 Page?', 'simply-static'), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_HelperVideo__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    label: (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, __('Generate 404 Page?', 'simply-static'), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_HelperVideo__WEBPACK_IMPORTED_MODULE_5__["default"], {
       title: __('How to manage 404 pages?', 'simply-static'),
       videoUrl: 'https://youtu.be/dnRtuQrXG-k'
     })),
@@ -3211,7 +3366,7 @@ function GeneralSettings() {
     }
   }))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
     margin: 5
-  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Exclude', 'simply-static'), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_HelperVideo__WEBPACK_IMPORTED_MODULE_4__["default"], {
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Exclude', 'simply-static'), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_HelperVideo__WEBPACK_IMPORTED_MODULE_5__["default"], {
     title: __('Include & Exclude files and pages', 'simply-static'),
     videoUrl: 'https://youtu.be/voAHfwVMLi8'
   }))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextareaControl, {

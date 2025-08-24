@@ -196,10 +196,23 @@ toplevel_page_simply-static img {
   box-sizing: border-box;
   height: auto;
   background: #f0f0f1;
+  /* Smart Crawl */
   /* Tables */
   /* Notices */
   /* Tooltips */
   /* Terminal */
+}
+.plugin-settings-container .plugin-settings .crawler-descriptions {
+  margin: 20px 0;
+}
+.plugin-settings-container .plugin-settings .crawler-description {
+  margin: 5px 0;
+}
+.plugin-settings-container .plugin-settings .crawler-name {
+  max-width: 20%;
+}
+.plugin-settings-container .plugin-settings .horizontal-token-field .components-flex-item {
+  width: auto;
 }
 .plugin-settings-container .plugin-settings table {
   width: 100%;

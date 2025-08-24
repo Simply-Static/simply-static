@@ -968,7 +968,7 @@ class Url_Extractor {
 	 *
 	 * @return string      Converted URL
 	 */
-	private function convert_url( $url ) {
+	public function convert_url( $url ) {
 
 		$url = apply_filters( 'simply_static_pre_converted_url', $url, $this->static_page, $this );
 
