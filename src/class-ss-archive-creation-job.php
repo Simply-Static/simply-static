@@ -259,7 +259,7 @@ class Archive_Creation_Job extends Background_Process {
 	protected function task_cleanup( $task_name ) {
 		$task = $this->get_task_object( $task_name );
 
-		if ( method_exists( $task, 'cleanup' ) ) {
+		if ( $task && method_exists( $task, 'cleanup' ) ) {
 			Util::debug_log( "Cleaning on first run for task: " . $task_name );
 			$task->cleanup();
 		}
