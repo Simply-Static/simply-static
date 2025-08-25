@@ -60,6 +60,11 @@ class WP_Includes_Crawler extends Crawler {
 			\Simply_Static\Util::debug_log( "Added comment-reply.min.js to assets" );
 		}
 
+		// Always include core jQuery file from wp-includes
+		$jquery_core_js = $site_url . '/wp-includes/js/jquery/jquery.min.js';
+		$asset_urls[]   = $jquery_core_js;
+		\Simply_Static\Util::debug_log( "Added jquery.min.js to assets" );
+
 		// Scan each directory and add files to asset URLs
 		foreach ( $wp_includes_directories as $directory ) {
 			$directory_clean = $directory !== null ? ltrim( $directory, '/' ) : '';
