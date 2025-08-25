@@ -111,6 +111,7 @@ class Plugin_Assets_Crawler extends Crawler {
 		// Check if directory exists
 		if ( ! is_dir( $dir ) ) {
 			\Simply_Static\Util::debug_log( "Directory does not exist: $dir" );
+
 			return $urls;
 		}
 
@@ -122,10 +123,10 @@ class Plugin_Assets_Crawler extends Crawler {
 			);
 
 			// Process files in batches to prevent memory issues
-			$batch_size = apply_filters( 'simply_static_plugin_assets_batch_size', 500 );
-			$file_count = 0;
+			$batch_size  = apply_filters( 'simply_static_plugin_assets_batch_size', 500 );
+			$file_count  = 0;
 			$batch_count = 0;
-			$file_batch = [];
+			$file_batch  = [];
 
 			foreach ( $iterator as $file ) {
 				// Skip directories
@@ -134,19 +135,19 @@ class Plugin_Assets_Crawler extends Crawler {
 				}
 
 				$file_batch[] = $file;
-				$file_count++;
+				$file_count ++;
 
 				// Process batch when it reaches the batch size
 				if ( $file_count % $batch_size === 0 ) {
-					$batch_count++;
-					$urls = array_merge( $urls, $this->process_file_batch( $file_batch, $dir, $url_base, $skip_dirs, $asset_extensions ) );
+					$batch_count ++;
+					$urls       = array_merge( $urls, $this->process_file_batch( $file_batch, $dir, $url_base, $skip_dirs, $asset_extensions ) );
 					$file_batch = []; // Reset batch
 				}
 			}
 
 			// Process any remaining files
 			if ( ! empty( $file_batch ) ) {
-				$batch_count++;
+				$batch_count ++;
 				$urls = array_merge( $urls, $this->process_file_batch( $file_batch, $dir, $url_base, $skip_dirs, $asset_extensions ) );
 			}
 
@@ -204,61 +205,7 @@ class Plugin_Assets_Crawler extends Crawler {
 				// Convert the file path to a URL
 				$relative_url = str_replace( '\\', '/', $relative_path );
 				$url          = $url_base . $relative_url;
-
-				$urls[] = $url;
-
-				// If this is a CSS file, extract URLs from it
-				if ( $extension === 'css' ) {
-					$css_urls = $this->extract_urls_from_css( $file->getPathname(), $url );
-					$urls = array_merge( $urls, $css_urls );
-				}
-			}
-		}
-
-		return $urls;
-	}
-
-	/**
-	 * Extract URLs from CSS file content
-	 *
-	 * @param string $file_path Path to the CSS file
-	 * @param string $css_url URL of the CSS file
-	 *
-	 * @return array List of URLs extracted from the CSS
-	 */
-	private function extract_urls_from_css( $file_path, $css_url ): array {
-		$urls = [];
-
-		// Get the CSS file content
-		$css_content = file_get_contents( $file_path );
-		if ( ! $css_content ) {
-			return $urls;
-		}
-
-		// We'll use the Util class to convert relative URLs to absolute URLs
-
-		// Extract URLs from the CSS content
-		$extracted_urls = [];
-		$patterns = [
-			"/url\(\s*[\"']?([^)\"']+)/", // url()
-			"/@import\s+[\"']([^\"']+)/"  // @import w/o url()
-		];
-
-		foreach ( $patterns as $pattern ) {
-			if ( preg_match_all( $pattern, $css_content, $matches ) ) {
-				foreach ( $matches[1] as $match ) {
-					// Skip data URIs, hash references
-					if ( strpos( $match, 'data:' ) === 0 || strpos( $match, '#' ) === 0 ) {
-						continue;
-					}
-
-					// Convert relative URL to absolute URL
-					$absolute_url = \Simply_Static\Util::relative_to_absolute_url( $match, $css_url );
-
-					if ( $absolute_url && \Simply_Static\Util::is_local_url( $absolute_url ) ) {
-						$urls[] = $absolute_url;
-					}
-				}
+				$urls[]       = $url;
 			}
 		}
 
