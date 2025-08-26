@@ -67,10 +67,26 @@ function ExportLog() {
         {
             name: 'URL',
             selector: row => {
-                // Strip domain from URL for display
-                const url = new URL(row.url);
-                const pathOnly = url.pathname + url.search + url.hash;
-                return <a target={'_blank'} href={row.url}>{pathOnly}</a>;
+                // Display a safe path without throwing on invalid URLs
+                const raw = row && typeof row.url === 'string' ? row.url : '';
+                if (!raw) {
+                    return <span>-</span>;
+                }
+                // Default to the raw value
+                let pathOnly = raw;
+                // If it's a relative path, just show it as-is
+                if (raw.startsWith('/')) {
+                    pathOnly = raw;
+                } else {
+                    // Try to parse absolute URLs safely
+                    try {
+                        const parsed = new URL(raw);
+                        pathOnly = parsed.pathname + parsed.search + parsed.hash;
+                    } catch (e) {
+                        // Parsing failed (e.g., protocol-relative or malformed). Keep raw.
+                    }
+                }
+                return <a target={'_blank'} href={raw}>{pathOnly}</a>;
             },
             sortable: true,
             sortFunction: (rowA, rowB) => rowA.url.localeCompare(rowB.url)
