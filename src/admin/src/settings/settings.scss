@@ -161,6 +161,7 @@ toplevel_page_simply-static img {
         border: solid 1px #50059b;
         color: white;
         text-decoration: none;
+        text-align: center;
         line-height: 1.5;
 
         &.ss-generate-cancel-button {
@@ -183,6 +184,12 @@ toplevel_page_simply-static img {
       }
     }
 
+    .environment-container {
+      button {
+        text-align: center;
+      }
+    }
+
     .environment-delete-button {
       margin-top: 4px;
       color: #b32d2e;
@@ -190,7 +197,7 @@ toplevel_page_simply-static img {
 
     .components-button {
       width: 100%;
-      text-align: center;
+      text-align: left;
       padding: 0;
       display: block !important;
     }
