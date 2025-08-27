@@ -762,6 +762,18 @@ class Url_Extractor {
 			$text = preg_replace_callback( $pattern, array( $this, 'css_matches' ), $text );
 		}
 
+		// Fallback: replace any remaining bare local URLs in CSS (not necessarily inside url())
+		$origin_host = addcslashes( Util::origin_host(), '/' );
+		$text = preg_replace_callback(
+			'/((?:https?:)?\/\/' . $origin_host . ')[^\s"\'\)]+/i',
+			function ( $m ) {
+				$matched_url = $m[0];
+				$updated = $this->add_to_extracted_urls( $matched_url );
+				return $updated ?: $matched_url;
+			},
+			$text
+		);
+
 		return $text;
 	}
 
