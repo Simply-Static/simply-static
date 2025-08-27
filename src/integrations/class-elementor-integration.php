@@ -495,40 +495,19 @@ Util::debug_log('extract_elementor_settings: ' . $json);
 		// Get current active crawlers
 		$crawlers = $options->get( 'crawlers' );
 
-		// Ensure crawlers is always an array
-		if ( ! is_array( $crawlers ) ) {
-			$crawlers = [];
-		}
-
-		// If crawlers are empty, populate with all available crawler IDs (including Elementor)
-		if ( empty( $crawlers ) ) {
-			try {
-				$all_crawlers = Crawlers::instance()->get_crawlers();
-				$all_ids = [];
-				foreach ( $all_crawlers as $crawler ) {
-					// Each crawler exposes its ID via js_object()
-					$info = $crawler->js_object();
-					if ( isset( $info['id'] ) && is_string( $info['id'] ) && $info['id'] !== '' ) {
-						$all_ids[] = $info['id'];
-					}
-				}
-				$all_ids = array_values( array_unique( $all_ids ) );
-
-				$options->set( 'crawlers', $all_ids );
+		// Only modify the option when it is a non-empty array. If it's empty/undefined,
+		// do nothing to avoid overwriting defaults or user selections during activation.
+		if ( is_array( $crawlers ) && ! empty( $crawlers ) ) {
+			// Ensure Elementor crawler is present without removing others
+			if ( ! in_array( 'elementor', $crawlers, true ) ) {
+				$crawlers[] = 'elementor';
+				$options->set( 'crawlers', array_values( array_unique( $crawlers ) ) );
 				$options->save();
-				Util::debug_log( 'Crawlers were empty – populated all available crawlers including Elementor.' );
-				return;
-			} catch ( \Throwable $e ) {
-				Util::debug_log( 'Failed to populate all crawlers: ' . $e->getMessage() );
+				Util::debug_log( 'Elementor Crawler added to existing crawlers list.' );
 			}
-		}
-
-		// Otherwise, just ensure Elementor crawler is present
-		if ( ! in_array( 'elementor', $crawlers, true ) ) {
-			$crawlers[] = 'elementor';
-			$options->set( 'crawlers', $crawlers );
-			$options->save();
-			Util::debug_log( 'Elementor Crawler activated' );
+		} else {
+			// Leave option as-is when empty or not an array; defaults will apply elsewhere.
+			Util::debug_log( 'Crawlers option empty or not an array; not modifying. Elementor will be active by default logic.' );
 		}
 	}
 

@@ -72,13 +72,13 @@ function GeneralSettings() {
                 if (response && response.data && response.data.length > 0) {
                     setCrawlers(response.data);
 
-                    // If no crawlers are selected or settings.crawlers is not an array, select all by default
+                    // If no crawlers are selected or settings.crawlers is not an array, select defaults by active flag
                     // This ensures that if active_crawlers is empty (like when it's enabled for the first time),
-                    // all available crawlers are added by default
+                    // only crawlers active by default are added by default
                     if (!settings.crawlers || !Array.isArray(settings.crawlers) || settings.crawlers.length === 0) {
-                        const allCrawlerIds = response.data.map(crawler => crawler.id);
-                        setSelectedCrawlers(allCrawlerIds);
-                        updateSetting('crawlers', allCrawlerIds);
+                        const defaultCrawlerIds = response.data.filter(crawler => crawler.active).map(crawler => crawler.id);
+                        setSelectedCrawlers(defaultCrawlerIds);
+                        updateSetting('crawlers', defaultCrawlerIds);
                     } else if (Array.isArray(settings.crawlers)) {
 
                         // Ensure all selected crawlers exist in the crawlers list

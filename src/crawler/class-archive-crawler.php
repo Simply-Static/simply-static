@@ -21,6 +21,13 @@ class Archive_Crawler extends Crawler {
 	protected $id = 'archive';
 
 	/**
+	 * Not active by default on new installations.
+	 *
+	 * @var bool
+	 */
+	protected $active_by_default = false;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
