@@ -31,6 +31,8 @@ class Uploads_Crawler extends Crawler {
 	/**
 	 * Detect media file URLs in the uploads directory.
 	 *
+	 * NOTE: Kept for backward compatibility, but not used by our overridden add_urls_to_queue().
+	 *
 	 * @return array List of media file URLs
 	 */
 	public function detect(): array {
@@ -49,6 +51,115 @@ class Uploads_Crawler extends Crawler {
 		$media_urls = $this->scan_directory_for_media_files( $uploads_dir['basedir'], $uploads_dir['baseurl'] );
 
 		return $media_urls;
+	}
+
+	/**
+	 * Override add_urls_to_queue to stream URLs directly into the queue in batches.
+	 * This avoids building a massive array in memory for large media libraries.
+	 *
+	 * @return int Number of URLs added
+	 */
+	public function add_urls_to_queue(): int {
+		$count = 0;
+
+		$uploads_dir = wp_upload_dir();
+		$base_dir    = $uploads_dir['basedir'];
+		$base_url    = $uploads_dir['baseurl'];
+
+		if ( ! is_dir( $base_dir ) ) {
+			\Simply_Static\Util::debug_log( "Uploads directory does not exist: " . $base_dir );
+			return 0;
+		}
+
+		// Media file extensions to look for
+		$media_extensions = [
+			'jpg','jpeg','png','gif','webp','svg','ico',
+			'pdf','mp3','mp4','webm','ogg','wav','mov','avi','wmv',
+			'zip','doc','docx','xls','xlsx','ppt','pptx'
+		];
+		$media_extensions = apply_filters( 'ss_uploads_media_extensions', $media_extensions );
+
+		// Directories to skip
+		$skip_dirs = [ '.git','node_modules','cache','tmp','temp' ];
+		$skip_dirs = apply_filters( 'ss_skip_crawl_uploads_directories', $skip_dirs );
+
+		$batch_size = (int) apply_filters( 'simply_static_crawler_batch_size', 100 );
+		$buffer     = [];
+
+		try {
+			$iterator = new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator( $base_dir, \RecursiveDirectoryIterator::SKIP_DOTS ),
+				\RecursiveIteratorIterator::SELF_FIRST
+			);
+
+			foreach ( $iterator as $file ) {
+				if ( $file->isDir() ) {
+					continue;
+				}
+
+				$relative_path = str_replace( $base_dir, '', $file->getPathname() );
+				$relative_path = str_replace( '\\', '/', $relative_path );
+
+				// Skip files in ignored directories
+				$skip = false;
+				foreach ( (array) $skip_dirs as $skip_dir ) {
+					if ( $skip_dir && strpos( $relative_path, '/' . trim( $skip_dir, '/' ) . '/' ) !== false ) {
+						$skip = true;
+						break;
+					}
+				}
+				if ( $skip ) {
+					continue;
+				}
+
+				$ext = strtolower( $file->getExtension() );
+				if ( ! in_array( $ext, (array) $media_extensions, true ) ) {
+					continue;
+				}
+
+				$relative_url = $relative_path; // starts with '/YYYY/MM/...'
+				$url          = $base_url . str_replace( '\\', '/', $relative_url );
+				$buffer[]     = $url;
+
+				if ( count( $buffer ) >= $batch_size ) {
+					$count += $this->enqueue_urls_batch( $buffer );
+					$buffer = [];
+					// Yield to allow other processes to run
+					usleep( 100000 );
+				}
+			}
+
+			// Process remaining
+			if ( ! empty( $buffer ) ) {
+				$count += $this->enqueue_urls_batch( $buffer );
+			}
+		} catch ( \Exception $e ) {
+			\Simply_Static\Util::debug_log( 'Error streaming uploads crawl: ' . $e->getMessage() );
+		}
+
+		\Simply_Static\Util::debug_log( sprintf( 'Uploads crawler added %d URLs (streamed)', $count ) );
+		return $count;
+	}
+
+	/**
+	 * Enqueue a batch of URLs, returning how many were added.
+	 *
+	 * @param array $urls
+	 * @return int
+	 */
+	private function enqueue_urls_batch( array $urls ): int {
+		$count = 0;
+		\Simply_Static\Util::debug_log( sprintf( 'Processing batch of %d URLs for %s crawler', count( $urls ), $this->name ) );
+
+		foreach ( $urls as $url ) {
+			$static_page = \Simply_Static\Page::query()->find_or_initialize_by( 'url', $url );
+			$static_page->set_status_message( sprintf( __( 'Added by %s Crawler', 'simply-static' ), $this->name ) );
+			$static_page->found_on_id = 0;
+			$static_page->save();
+			$count++;
+		}
+
+		return $count;
 	}
 
 	/**
