@@ -450,26 +450,16 @@ class Util {
 		}
 
 		$allowed_asset_extensions = apply_filters( 'simply_static_allowed_local_asset_extensions', [
-			'webp',
-			'gif',
-			'jpg',
-			'jpeg',
-			'png',
-			'svg',
-			'mp4',
-			'webm',
-			'ogg',
-			'ogv',
-			'mp3',
-			'wav',
-			'json',
-			'js',
-			'css',
-			'xml',
-			'csv',
-			'pdf',
-			'txt',
-			'cur'
+			// Images
+			'webp', 'gif', 'jpg', 'jpeg', 'png', 'svg', 'ico', 'cur',
+			// Media
+			'mp4', 'webm', 'ogg', 'ogv', 'mp3', 'wav',
+			// Data/Docs
+			'json', 'xml', 'csv', 'pdf', 'txt',
+			// Web assets
+			'js', 'css',
+			// Fonts
+			'woff2', 'woff', 'ttf', 'eot', 'otf'
 		] );
 
 		$path_info = self::url_path_info( $url );

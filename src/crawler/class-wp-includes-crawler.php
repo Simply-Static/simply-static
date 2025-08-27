@@ -48,10 +48,8 @@ class WP_Includes_Crawler extends Crawler {
 			'/wp-includes/js/dist/'
 		];
 
-		// Only include blocks directory if it's a block theme
-		if ( function_exists( 'wp_is_block_theme' ) && wp_is_block_theme() ) {
-			array_unshift( $wp_includes_directories, '/wp-includes/blocks/' );
-		}
+		// Always include blocks directory; block assets can be required even for classic themes.
+		array_unshift( $wp_includes_directories, '/wp-includes/blocks/' );
 
 		// Check if comments are enabled and add comment-reply.min.js
 		if ( get_option( 'thread_comments' ) ) {
