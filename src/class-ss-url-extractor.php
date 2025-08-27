@@ -754,9 +754,9 @@ class Url_Extractor {
 	private function extract_and_replace_urls_in_css( $text ) {
 		$text     = html_entity_decode( $text );
 		$patterns = array(
-			"/url\(\s*[\"']?([^)\"']+)/", // url()
-			"/@import\s+[\"']([^\"']+)/"
-		); // @import w/o url()
+			"/url\(\s*[\"']?([^)\"']+)/i", // url() - case-insensitive to catch URL(), Url(), etc.
+			"/@import\s+[\"']([^\"']+)/i"
+		); // @import w/o url() - case-insensitive
 
 		foreach ( $patterns as $pattern ) {
 			$text = preg_replace_callback( $pattern, array( $this, 'css_matches' ), $text );
