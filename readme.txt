@@ -261,7 +261,7 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 
 = 3.4.3.4-beta =
 
-* improved url() extraction pattern for CSS
+* improved URL extraction for URLs in CSS files
 * stream files for media, plugins and themes
 * avoid memory issues with large log objects
 * discover_task only on export
