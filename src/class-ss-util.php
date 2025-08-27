@@ -141,16 +141,39 @@ class Util {
 	 * @return string         String containing the contents of the object
 	 */
 	protected static function get_contents_from_object( $object ) {
+		// Handle common scalar types early and safely
 		if ( is_string( $object ) ) {
-			return $object;
+			// Prevent huge memory usage by truncating very large strings
+			return self::truncate( $object, 5000 );
+		}
+		if ( is_null( $object ) ) {
+			return 'NULL';
+		}
+		if ( is_bool( $object ) ) {
+			return $object ? 'TRUE' : 'FALSE';
+		}
+		if ( is_int( $object ) || is_float( $object ) ) {
+			return (string) $object;
+		}
+		if ( is_resource( $object ) ) {
+			return 'resource(' . get_resource_type( $object ) . ')';
 		}
 
-		ob_start();
-		var_dump( $object );
-		$contents = ob_get_contents();
-		ob_end_clean();
+		// For arrays/objects, avoid var_dump which can explode memory usage.
+		// Prefer JSON with partial output on error; fall back to print_r.
+		$max_length = apply_filters( 'simply_static_debug_max_length', 100000 ); // 100 KB by default
+		$json_opts  = defined( 'JSON_PARTIAL_OUTPUT_ON_ERROR' ) ? JSON_PARTIAL_OUTPUT_ON_ERROR : 0;
+		$encoded    = function_exists( 'wp_json_encode' ) ? wp_json_encode( $object, $json_opts, 5 ) : json_encode( $object, $json_opts, 5 );
 
-		return $contents;
+		if ( $encoded === false || $encoded === null ) {
+			$encoded = print_r( $object, true );
+		}
+
+		if ( strlen( $encoded ) > $max_length ) {
+			$encoded = substr( $encoded, 0, $max_length ) . '... [truncated]';
+		}
+
+		return $encoded;
 	}
 
 	public static function is_valid_scheme( $scheme ) {
