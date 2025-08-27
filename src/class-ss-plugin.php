@@ -444,7 +444,13 @@ class Plugin {
 		$task_list[] = 'setup';
 
 		if ( $this->options->get( 'smart_crawl' ) ) {
-			$task_list[] = 'discover_urls';
+			// Only include discover_urls on full exports (exclude update, single, and build exports).
+			$use_single  = get_option( 'simply-static-use-single' );
+			$use_build   = get_option( 'simply-static-use-build' );
+			$export_type = $this->options->get( 'generate_type' );
+			if ( empty( $use_single ) && empty( $use_build ) && 'update' !== $export_type ) {
+				$task_list[] = 'discover_urls';
+			}
 		}
 
 		$task_list[] = 'fetch_urls';
