@@ -543,15 +543,20 @@ class Admin_Settings {
 	 * @return false|string
 	 */
 	public function check_system_status_passed() {
-		$diagnostics = new Diagnostic();
-		$passed      = 'yes';
-		$checks      = $diagnostics->get_checks();
+		$passed = 'yes';
+
+		// Prefer cached checks to avoid heavy recomputation on frequent requests.
+		$checks = get_transient( 'simply_static_checks' );
+		if ( false === $checks || empty( $checks ) ) {
+			$diagnostics = new Diagnostic();
+			$checks      = $diagnostics->get_checks();
+		}
 
 		foreach ( $checks as $topics ) {
 			foreach ( $topics as $check ) {
-				if ( ! $check['test'] ) {
+				if ( isset( $check['test'] ) && ! $check['test'] ) {
 					$passed = 'no';
-					break;
+					break 2;
 				}
 			}
 		}
@@ -1010,8 +1015,9 @@ class Admin_Settings {
 	 *
 	 * @return false|string
 	 */
-	public function cancel_export() {
+	public function cancel_export( $request ) {
 		Util::debug_log( "Received request to cancel static archive generation" );
+		$params  = $request->get_params();
 		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
 
 		do_action( 'ss_before_perform_archive_action', $blog_id, 'cancel', Plugin::instance()->get_archive_creation_job() );
@@ -1045,8 +1051,9 @@ class Admin_Settings {
 	 *
 	 * @return false|string
 	 */
-	public function pause_export() {
+	public function pause_export( $request ) {
 		Util::debug_log( "Received request to pause static archive generation" );
+		$params  = $request->get_params();
 		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
 
 		do_action( 'ss_before_perform_archive_action', $blog_id, 'pause', Plugin::instance()->get_archive_creation_job() );
@@ -1063,8 +1070,9 @@ class Admin_Settings {
 	 *
 	 * @return false|string
 	 */
-	public function resume_export() {
+	public function resume_export( $request ) {
 		Util::debug_log( "Received request to resume static archive generation" );
+		$params  = $request->get_params();
 		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
 
 		do_action( 'ss_before_perform_archive_action', $blog_id, 'resume', Plugin::instance()->get_archive_creation_job() );
