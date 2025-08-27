@@ -38,6 +38,9 @@ class Admin_Settings {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_menu' ) );
 		add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
+		// Prevent WP core from altering the admin URL with history.replaceState on Simply Static pages.
+		// This avoids a SecurityError when Basic Auth credentials are present in the URL.
+		add_action( 'admin_head', array( $this, 'maybe_disable_admin_canonical' ), 1 );
 
 		$this->failed_tests = intval( get_transient( 'simply_static_failed_tests' ) );
 
@@ -131,6 +134,23 @@ class Admin_Settings {
                 </script>
 				<?php
 			} );
+		}
+	}
+
+	public function maybe_disable_admin_canonical() {
+		// Only run in admin and on Simply Static pages.
+		if ( ! is_admin() ) {
+			return;
+		}
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+		$our_pages = array(
+			'simply-static-generate',
+			'simply-static-settings',
+			'simply-static-diagnostics',
+		);
+		if ( in_array( $page, $our_pages, true ) ) {
+			// Remove the core canonical URL handler that uses history.replaceState on admin pages.
+			remove_action( 'admin_head', 'wp_admin_canonical_url' );
 		}
 	}
 
