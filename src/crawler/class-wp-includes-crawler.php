@@ -75,6 +75,97 @@ class WP_Includes_Crawler extends Crawler {
 	}
 
 	/**
+	 * Stream URLs directly into the queue to avoid building large arrays.
+	 *
+	 * @return int
+	 */
+	public function add_urls_to_queue(): int {
+		$count    = 0;
+		$batch    = [];
+		$batch_sz = (int) apply_filters( 'simply_static_crawler_batch_size', 100 );
+
+		$site_url = site_url();
+		$wp_path  = ABSPATH;
+
+		$dirs = [
+			'/wp-includes/css/dist/',
+			'/wp-includes/js/dist/',
+			'/wp-includes/blocks/',
+		];
+
+		// Always include special scripts first.
+		if ( get_option( 'thread_comments' ) ) {
+			$count += $this->enqueue_urls_batch( [ $site_url . '/wp-includes/js/comment-reply.min.js?ver=' . get_bloginfo( 'version' ) ] );
+		}
+		$count += $this->enqueue_urls_batch( [ $site_url . '/wp-includes/js/jquery/jquery.min.js' ] );
+
+		foreach ( $dirs as $directory ) {
+			$directory_clean = ltrim( $directory, '/' );
+			$full_path       = $wp_path . $directory_clean;
+			$base_url        = $site_url . $directory;
+
+			if ( ! is_dir( $full_path ) ) {
+				\Simply_Static\Util::debug_log( "Directory does not exist: $full_path" );
+				continue;
+			}
+
+			try {
+				$iterator = new \RecursiveIteratorIterator(
+					new \RecursiveDirectoryIterator( $full_path, \RecursiveDirectoryIterator::SKIP_DOTS ),
+					\RecursiveIteratorIterator::SELF_FIRST
+				);
+
+				foreach ( $iterator as $file ) {
+					if ( $file->isDir() ) {
+						continue;
+					}
+
+					$relative_path = str_replace( $full_path, '', $file->getPathname() );
+					$relative_path = str_replace( '\\', '/', $relative_path );
+					$ext           = strtolower( pathinfo( $relative_path, PATHINFO_EXTENSION ) );
+					if ( $ext !== 'css' && $ext !== 'js' ) {
+						continue;
+					}
+
+					$batch[] = $base_url . $relative_path;
+					if ( count( $batch ) >= $batch_sz ) {
+						$count += $this->enqueue_urls_batch( $batch );
+						$batch = [];
+						usleep( 100000 );
+					}
+				}
+			} catch ( \Exception $e ) {
+				\Simply_Static\Util::debug_log( 'Error streaming wp-includes crawl: ' . $e->getMessage() );
+			}
+		}
+
+		if ( ! empty( $batch ) ) {
+			$count += $this->enqueue_urls_batch( $batch );
+		}
+
+		\Simply_Static\Util::debug_log( sprintf( 'WP Includes crawler added %d URLs (streamed)', $count ) );
+		return $count;
+	}
+
+	/**
+	 * Enqueue a batch of URLs.
+	 * @param array $urls
+	 * @return int
+	 */
+	private function enqueue_urls_batch( array $urls ): int {
+		$added = 0;
+		\Simply_Static\Util::debug_log( sprintf( 'Processing batch of %d URLs for %s crawler', count( $urls ), $this->name ) );
+		foreach ( $urls as $url ) {
+			$static_page = \Simply_Static\Page::query()->find_or_initialize_by( 'url', $url );
+			$static_page->set_status_message( sprintf( __( 'Added by %s Crawler', 'simply-static' ), $this->name ) );
+			$static_page->found_on_id = 0;
+			$static_page->save();
+			$added++;
+		}
+		return $added;
+	}
+
+	/**
 	 * Scan a directory for asset files recursively
 	 *
 	 * @param string $dir Directory path

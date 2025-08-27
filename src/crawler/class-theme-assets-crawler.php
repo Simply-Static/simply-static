@@ -64,6 +64,88 @@ class Theme_Assets_Crawler extends Crawler {
 	}
 
 	/**
+	 * Stream URLs directly into the queue for theme and parent theme.
+	 *
+	 * @return int
+	 */
+	public function add_urls_to_queue(): int {
+		$count     = 0;
+		$batch     = [];
+		$batch_sz  = (int) apply_filters( 'simply_static_crawler_batch_size', 100 );
+		$extensions = [ 'css','js','png','jpg','jpeg','gif','svg','webp','woff','woff2','ttf','eot','otf','ico' ];
+		$skip_dirs  = apply_filters( 'ss_skip_crawl_theme_directories', [ '.git','node_modules','vendor/bin','vendor/composer','tests' ] );
+
+		$themes = [];
+		$themes[] = [ get_stylesheet_directory(), get_stylesheet_directory_uri() ];
+		if ( $p = wp_get_theme()->parent() ) {
+			$parent_dir = get_template_directory();
+			$parent_url = get_template_directory_uri();
+			if ( $parent_dir !== $themes[0][0] ) {
+				$themes[] = [ $parent_dir, $parent_url ];
+			}
+		}
+
+		foreach ( $themes as [ $dir, $url_base ] ) {
+			if ( ! is_dir( $dir ) ) {
+				\Simply_Static\Util::debug_log( "Theme directory does not exist: $dir" );
+				continue;
+			}
+
+			try {
+				$it = new \RecursiveIteratorIterator(
+					new \RecursiveDirectoryIterator( $dir, \RecursiveDirectoryIterator::SKIP_DOTS ),
+					\RecursiveIteratorIterator::SELF_FIRST
+				);
+				foreach ( $it as $file ) {
+					if ( $file->isDir() ) { continue; }
+					$relative_path = str_replace( $dir, '', $file->getPathname() );
+					$rel           = str_replace( '\\', '/', $relative_path );
+					$skip = false;
+					foreach ( (array) $skip_dirs as $sd ) {
+						if ( $sd && strpos( $rel, '/' . $sd . '/' ) !== false ) { $skip = true; break; }
+					}
+					if ( $skip ) { continue; }
+					$ext = strtolower( pathinfo( $rel, PATHINFO_EXTENSION ) );
+					if ( ! in_array( $ext, $extensions, true ) ) { continue; }
+					$batch[] = $url_base . $rel;
+					if ( count( $batch ) >= $batch_sz ) {
+						$count += $this->enqueue_urls_batch( $batch );
+						$batch = [];
+						usleep( 100000 );
+					}
+				}
+			} catch ( \Exception $e ) {
+				\Simply_Static\Util::debug_log( 'Error streaming theme crawl: ' . $e->getMessage() );
+			}
+		}
+
+		if ( ! empty( $batch ) ) {
+			$count += $this->enqueue_urls_batch( $batch );
+		}
+
+		\Simply_Static\Util::debug_log( sprintf( 'Theme assets crawler added %d URLs (streamed)', $count ) );
+		return $count;
+	}
+
+	/**
+	 * Enqueue a batch of URLs.
+	 * @param array $urls
+	 * @return int
+	 */
+	private function enqueue_urls_batch( array $urls ): int {
+		$added = 0;
+		\Simply_Static\Util::debug_log( sprintf( 'Processing batch of %d URLs for %s crawler', count( $urls ), $this->name ) );
+		foreach ( $urls as $url ) {
+			$static_page = \Simply_Static\Page::query()->find_or_initialize_by( 'url', $url );
+			$static_page->set_status_message( sprintf( __( 'Added by %s Crawler', 'simply-static' ), $this->name ) );
+			$static_page->found_on_id = 0;
+			$static_page->save();
+			$added++;
+		}
+		return $added;
+	}
+
+	/**
 	 * Scan a directory for asset files recursively
 	 *
 	 * @param string $dir Directory path
