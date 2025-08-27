@@ -132,7 +132,7 @@ class Diagnostic {
 
 		// Set transient for checks.
 		if ( ! get_transient( 'simply_static_checks' ) ) {
-			set_transient( 'simply_static_checks', $this->checks, MINUTE_IN_SECONDS );
+			set_transient( 'simply_static_checks', $this->checks, 5 * MINUTE_IN_SECONDS );
 		}
 
 		// Set transient for failed tests.
@@ -146,7 +146,7 @@ class Diagnostic {
 					}
 				}
 			}
-			set_transient( 'simply_static_failed_tests', $failed_tests, MINUTE_IN_SECONDS );
+			set_transient( 'simply_static_failed_tests', $failed_tests, 5 * MINUTE_IN_SECONDS );
 		}
 	}
 
