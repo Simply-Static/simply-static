@@ -157,11 +157,14 @@ class Url_Fetcher {
 		} else {
 			$static_page->http_status_code = $response['response']['code'];
 
-			// Check if this is a JavaScript file based on the URL extension
+			// Check if this is a JavaScript or CSS file based on the URL extension
 			$path_info = Util::url_path_info($static_page->url);
 			if (isset($path_info['extension']) && $path_info['extension'] === 'js') {
 				// Force the correct MIME type for JavaScript files
 				$static_page->content_type = 'application/javascript';
+			} elseif (isset($path_info['extension']) && $path_info['extension'] === 'css') {
+				// Force the correct MIME type for CSS files
+				$static_page->content_type = 'text/css';
 			} else {
 				// Use the content type from the response headers
 				$static_page->content_type = $response['headers']['content-type'];

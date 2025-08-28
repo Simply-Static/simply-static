@@ -202,7 +202,9 @@ class Url_Extractor {
 			$this->save_body( $this->extract_and_replace_urls_in_html() );
 		}
 
-		if ( $this->static_page->is_type( 'css' ) ) {
+		// Treat as CSS either by content-type or by file extension fallback (handles servers sending wrong or missing headers)
+		$looks_like_css = $this->static_page->is_type( 'css' ) || ( isset( $this->static_page->file_path ) && substr( $this->static_page->file_path, -4 ) === '.css' );
+		if ( $looks_like_css ) {
 			$this->save_body( $this->extract_and_replace_urls_in_css( $this->get_body() ) );
 		}
 
@@ -755,10 +757,43 @@ class Url_Extractor {
 		// Decode entities to ensure URLs are detected correctly
 		$text = html_entity_decode( $text );
 
-		// Replace any local absolute or protocol-relative URLs by converting them
-		$origin_host = addcslashes( Util::origin_host(), '/' );
+		// Pass 1: Handle url(...) constructs with quoted or unquoted values, including relative URLs.
+		// Pattern breakdown:
+		// - url( optional whitespace
+		// - capture optional quote (single or double) in group 1
+		// - capture the URL (anything but closing paren; we'll trim trailing whitespace) in group 2
+		// - match the same optional quote in group 3 via backreference
+		// - optional whitespace and closing paren
 		$text = preg_replace_callback(
-			'/((?:https?:)?\/\/' . $origin_host . ')[^\s"\'\)]+/i',
+			'/url\(\s*(?:(["\'])\s*)?([^\)\s]+?)\s*(?:\1)?\s*\)/i',
+			function ( $m ) {
+				$quote = isset( $m[1] ) ? $m[1] : '';
+				$raw   = $m[2];
+				$val   = trim( $raw );
+
+				// Skip data URIs or empty
+				if ( $val === '' || stripos( $val, 'data:' ) === 0 ) {
+					return $m[0];
+				}
+
+				$updated = $this->add_to_extracted_urls( $val );
+				if ( empty( $updated ) ) {
+					return $m[0];
+				}
+
+				// Reconstruct preserving original quote style if present
+				if ( $quote === '"' || $quote === "'" ) {
+					return 'url(' . $quote . $updated . $quote . ')';
+				}
+				return 'url(' . $updated . ')';
+			},
+			$text
+		);
+
+		// Pass 2: Fallback - replace any remaining bare local absolute or protocol-relative URLs by converting them.
+		$escaped_origin = preg_quote( Util::origin_host(), '/' );
+		$text = preg_replace_callback(
+			'/((?:https?:)?\/\/' . $escaped_origin . ')[^"\')\s;,]+/i',
 			function ( $m ) {
 				$matched_url = $m[0];
 				$updated = $this->add_to_extracted_urls( $matched_url );
