@@ -74,6 +74,8 @@ class Uploads_Crawler extends Crawler {
 		// Media file extensions to look for
 		$media_extensions = [
 			'jpg','jpeg','png','gif','webp','svg','ico',
+			'css','js',
+			'woff','woff2','ttf','otf','eot',
 			'pdf','mp3','mp4','webm','ogg','wav','mov','avi','wmv',
 			'zip','doc','docx','xls','xlsx','ppt','pptx'
 		];
@@ -182,6 +184,13 @@ class Uploads_Crawler extends Crawler {
 			'webp',
 			'svg',
 			'ico',
+			'css',
+			'js',
+			'woff',
+			'woff2',
+			'ttf',
+			'otf',
+			'eot',
 			'pdf',
 			'mp3',
 			'mp4',
