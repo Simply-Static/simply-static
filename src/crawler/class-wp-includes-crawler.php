@@ -45,7 +45,8 @@ class WP_Includes_Crawler extends Crawler {
 		// List of directories to scan for wp-includes
 		$wp_includes_directories = [
 			'/wp-includes/css/dist/',
-			'/wp-includes/js/dist/'
+			'/wp-includes/js/dist/',
+			'/wp-includes/js/jquery/'
 		];
 
 		// Always include blocks directory; block assets can be required even for classic themes.
@@ -90,6 +91,7 @@ class WP_Includes_Crawler extends Crawler {
 		$dirs = [
 			'/wp-includes/css/dist/',
 			'/wp-includes/js/dist/',
+			'/wp-includes/js/jquery/',
 			'/wp-includes/blocks/',
 		];
 

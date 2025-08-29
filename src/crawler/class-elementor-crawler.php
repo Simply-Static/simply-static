@@ -29,6 +29,124 @@ class Elementor_Crawler extends Crawler {
 	}
 
 	/**
+	 * Stream Elementor asset URLs directly into the queue in batches.
+	 * Mirrors the streaming approach used by Uploads and Plugin Assets crawlers
+	 * to avoid building huge arrays in memory.
+	 *
+	 * @return int Number of URLs added
+	 */
+	public function add_urls_to_queue(): int {
+		$count     = 0;
+		$batch     = [];
+		$batch_sz  = (int) apply_filters( 'simply_static_crawler_batch_size', 100 );
+
+		$site_url = site_url();
+		$wp_path  = ABSPATH;
+
+		$directories = [
+			'/wp-content/uploads/elementor'              => $wp_path . 'wp-content/uploads/elementor',
+			'/wp-content/uploads/elementor/css'          => $wp_path . 'wp-content/uploads/elementor/css',
+			// Elementor plugin assets
+			'/wp-content/plugins/elementor/assets'       => $wp_path . 'wp-content/plugins/elementor/assets',
+			'/wp-content/plugins/elementor/assets/js'    => $wp_path . 'wp-content/plugins/elementor/assets/js',
+			'/wp-content/plugins/elementor/assets/css'   => $wp_path . 'wp-content/plugins/elementor/assets/css',
+			'/wp-content/plugins/elementor/assets/lib'   => $wp_path . 'wp-content/plugins/elementor/assets/lib',
+			// Core jQuery (Elementor relies on this)
+			'/wp-includes/js/jquery'                     => $wp_path . 'wp-includes/js/jquery',
+		];
+
+		// Stream files from the directories
+		foreach ( $directories as $url_path => $dir_path ) {
+			if ( ! is_dir( $dir_path ) ) {
+				\Simply_Static\Util::debug_log( "Directory does not exist: $dir_path" );
+				continue;
+			}
+			try {
+				$it = new \RecursiveIteratorIterator(
+					new \RecursiveDirectoryIterator( $dir_path, \RecursiveDirectoryIterator::SKIP_DOTS ),
+					\RecursiveIteratorIterator::SELF_FIRST
+				);
+				foreach ( $it as $file ) {
+					if ( $file->isDir() ) { continue; }
+					$relative_path = str_replace( $dir_path, '', $file->getPathname() );
+					$rel = str_replace( '\\', '/', $relative_path );
+					$batch[] = $site_url . $url_path . $rel;
+					if ( count( $batch ) >= $batch_sz ) {
+						$count += $this->enqueue_urls_batch( $batch );
+						$batch = [];
+						usleep( 100000 );
+					}
+				}
+			} catch ( \Exception $e ) {
+				\Simply_Static\Util::debug_log( 'Error streaming Elementor directory crawl: ' . $e->getMessage() );
+			}
+		}
+
+		// Add specific imagesloaded.min.js
+		$batch[] = $site_url . '/wp-includes/js/imagesloaded.min.js';
+		if ( count( $batch ) >= $batch_sz ) {
+			$count += $this->enqueue_urls_batch( $batch );
+			$batch = [];
+		}
+
+		// Stream Lottie URLs if Elementor Pro is active
+		if ( $this->is_elementor_pro_active() ) {
+			global $wpdb;
+			$rows = $wpdb->get_results( "SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key='_elementor_data'", ARRAY_A );
+			if ( $rows ) {
+				foreach ( $rows as $row ) {
+					if ( empty( $row['meta_value'] ) ) { continue; }
+					$decoded = json_decode( $row['meta_value'], true );
+					if ( ! $decoded || ! is_array( $decoded ) ) { continue; }
+					foreach ( $decoded as $widget_data ) {
+						$flat_widget = $this->flatten_data( $widget_data );
+						foreach ( (array) $flat_widget as $item ) {
+							if ( empty( $item['widgetType'] ) || 'lottie' !== $item['widgetType'] ) { continue; }
+							if ( empty( $item['settings']['source_json'] ) ) { continue; }
+							$src = $item['settings']['source_json'];
+							if ( empty( $src['source'] ) || $src['source'] !== 'library' ) { continue; }
+							if ( empty( $src['url'] ) ) { continue; }
+							$batch[] = $src['url'];
+							if ( count( $batch ) >= $batch_sz ) {
+								$count += $this->enqueue_urls_batch( $batch );
+								$batch = [];
+								usleep( 100000 );
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// Flush remaining
+		if ( ! empty( $batch ) ) {
+			$count += $this->enqueue_urls_batch( $batch );
+		}
+
+		\Simply_Static\Util::debug_log( sprintf( 'Elementor crawler added %d URLs (streamed)', $count ) );
+		return $count;
+	}
+
+	/**
+	 * Enqueue a batch of URLs and return how many were added.
+	 *
+	 * @param array $urls
+	 * @return int
+	 */
+	private function enqueue_urls_batch( array $urls ): int {
+		$count = 0;
+		\Simply_Static\Util::debug_log( sprintf( 'Processing batch of %d URLs for %s crawler', count( $urls ), $this->name ) );
+		foreach ( $urls as $url ) {
+			$static_page = \Simply_Static\Page::query()->find_or_initialize_by( 'url', $url );
+			$static_page->set_status_message( sprintf( __( 'Added by %s Crawler', 'simply-static' ), $this->name ) );
+			$static_page->found_on_id = 0;
+			$static_page->save();
+			$count++;
+		}
+		return $count;
+	}
+
+	/**
 	 * Check if Elementor is installed.
 	 *
 	 * @return boolean
@@ -79,6 +197,11 @@ class Elementor_Crawler extends Crawler {
 			'/wp-content/uploads/elementor' => $wp_path . 'wp-content/uploads/elementor',
 			// Elementor CSS directory (for post CSS files)
 			'/wp-content/uploads/elementor/css' => $wp_path . 'wp-content/uploads/elementor/css',
+			// Elementor plugin assets
+			'/wp-content/plugins/elementor/assets'     => $wp_path . 'wp-content/plugins/elementor/assets',
+			'/wp-content/plugins/elementor/assets/js'  => $wp_path . 'wp-content/plugins/elementor/assets/js',
+			'/wp-content/plugins/elementor/assets/css' => $wp_path . 'wp-content/plugins/elementor/assets/css',
+			'/wp-content/plugins/elementor/assets/lib' => $wp_path . 'wp-content/plugins/elementor/assets/lib',
 			// jQuery directory
 			'/wp-includes/js/jquery' => $wp_path . 'wp-includes/js/jquery',
 		];
