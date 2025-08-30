@@ -15,6 +15,38 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WP_Includes_Crawler extends Crawler {
 
 	/**
+	 * Collect style*.css files directly within each block subdirectory under wp-includes/blocks.
+	 * This ensures core block styles like navigation/style.min.css and social-links/style.min.css
+	 * are included even if a directory scan misses them in some environments.
+	 *
+	 * @param string $blocks_dir Absolute path to wp-includes/blocks (no trailing slash required)
+	 * @param string $blocks_url Base URL to wp-includes/blocks (site_url + '/wp-includes/blocks')
+	 * @return array URLs to block style CSS files
+	 */
+	private function get_block_style_urls( string $blocks_dir, string $blocks_url ): array {
+		$urls = [];
+		$blocks_dir = rtrim( $blocks_dir, DIRECTORY_SEPARATOR );
+		if ( ! is_dir( $blocks_dir ) ) {
+			\Simply_Static\Util::debug_log( "Blocks directory does not exist: $blocks_dir" );
+			return $urls;
+		}
+		try {
+			// Use simple glob for immediate children style*.css files
+			$pattern = $blocks_dir . DIRECTORY_SEPARATOR . '*'. DIRECTORY_SEPARATOR . 'style*.css';
+			$files = glob( $pattern );
+			if ( $files ) {
+				foreach ( $files as $abs_file ) {
+					$rel = \Simply_Static\Util::safe_relative_path( $blocks_dir, $abs_file );
+					$urls[] = \Simply_Static\Util::safe_join_url( $blocks_url, $rel );
+				}
+			}
+		} catch ( \Exception $e ) {
+			\Simply_Static\Util::debug_log( 'Error collecting block style URLs: ' . $e->getMessage() );
+		}
+		return $urls;
+	}
+
+	/**
 	 * Crawler ID.
 	 * @var string
 	 */
@@ -71,6 +103,11 @@ class WP_Includes_Crawler extends Crawler {
 			$directory_urls  = $this->scan_directory_for_assets( $full_path, $site_url . $directory );
 			$asset_urls      = array_merge( $asset_urls, $directory_urls );
 		}
+
+		// Ensure core block style sheets are always included
+		$blocks_dir = $wp_path . 'wp-includes/blocks';
+		$blocks_url = $site_url . '/wp-includes/blocks';
+		$asset_urls = array_merge( $asset_urls, $this->get_block_style_urls( $blocks_dir, $blocks_url ) );
 
 		return $asset_urls;
 	}
@@ -141,7 +178,13 @@ class WP_Includes_Crawler extends Crawler {
 				\Simply_Static\Util::debug_log( 'Error streaming wp-includes crawl: ' . $e->getMessage() );
 			}
 		}
-
+		
+		// Explicitly add core block style sheets (style*.css) to ensure inclusion
+		$extra_block_styles = $this->get_block_style_urls( $wp_path . 'wp-includes/blocks', $site_url . '/wp-includes/blocks' );
+		if ( ! empty( $extra_block_styles ) ) {
+			$count += $this->enqueue_urls_batch( $extra_block_styles );
+		}
+		
 		if ( ! empty( $batch ) ) {
 			$count += $this->enqueue_urls_batch( $batch );
 		}
