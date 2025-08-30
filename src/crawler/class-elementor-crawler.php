@@ -68,9 +68,9 @@ class Elementor_Crawler extends Crawler {
 				);
 				foreach ( $it as $file ) {
 					if ( $file->isDir() ) { continue; }
-					$relative_path = str_replace( $dir_path, '', $file->getPathname() );
-					$rel = str_replace( '\\', '/', $relative_path );
-					$batch[] = $site_url . $url_path . $rel;
+					// Build a safe relative path from the directory prefix
+					$rel = \Simply_Static\Util::safe_relative_path( $dir_path, $file->getPathname() );
+					$batch[] = \Simply_Static\Util::safe_join_url( $site_url . $url_path, $rel );
 					if ( count( $batch ) >= $batch_sz ) {
 						$count += $this->enqueue_urls_batch( $batch );
 						$batch = [];
@@ -367,13 +367,12 @@ class Elementor_Crawler extends Crawler {
 				if ( $file->isDir() ) {
 					continue;
 				}
-
-				// Get the relative path from the base directory
-				$relative_path = str_replace( $dir, '', $file->getPathname() );
-				$relative_path = str_replace( '\\', '/', $relative_path ); // Normalize slashes for URLs
-
-				// Create the full URL
-				$url = $url_base . $relative_path;
+				
+				// Build the relative path safely
+				$relative_path = \Simply_Static\Util::safe_relative_path( $dir, $file->getPathname() );
+				
+				// Create the full URL with safe joining
+				$url = \Simply_Static\Util::safe_join_url( $url_base, $relative_path );
 				$urls[] = $url;
 			}
 

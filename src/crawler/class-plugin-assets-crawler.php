@@ -92,8 +92,8 @@ class Plugin_Assets_Crawler extends Crawler {
 				);
 				foreach ( $it as $file ) {
 					if ( $file->isDir() ) { continue; }
-					$relative_path = str_replace( $plugin_path, '', $file->getPathname() );
-					$rel = str_replace( '\\', '/', $relative_path );
+					// Build a safe relative path from the plugin directory prefix
+					$rel = \Simply_Static\Util::safe_relative_path( $plugin_path, $file->getPathname() );
 					// Skip unwanted directories
 					$skip = false;
 					foreach ( (array) $skip_dirs as $sd ) {
@@ -105,7 +105,8 @@ class Plugin_Assets_Crawler extends Crawler {
 					if ( ! $skip && strtolower( basename( $rel ) ) === 'composer.json' ) { $skip = true; }
 					if ( $skip ) { continue; }
 					if ( ! in_array( $ext, $assets_ext, true ) ) { continue; }
-					$batch[] = $base_url . $rel;
+					// Join with exactly one slash between base and relative
+					$batch[] = \Simply_Static\Util::safe_join_url( $base_url, $rel );
 					if ( count( $batch ) >= $batch_sz ) {
 						$count += $this->enqueue_urls_batch( $batch );
 						$batch = [];
@@ -254,8 +255,8 @@ class Plugin_Assets_Crawler extends Crawler {
 		$urls = [];
 
 		foreach ( $files as $file ) {
-			// Skip files in directories we want to ignore
-			$relative_path = str_replace( $dir, '', $file->getPathname() );
+			// Build a safe relative path and evaluate skip rules
+			$relative_path = \Simply_Static\Util::safe_relative_path( $dir, $file->getPathname() );
 			$should_skip   = false;
 
 			foreach ( $skip_dirs as $skip_dir ) {
@@ -266,12 +267,13 @@ class Plugin_Assets_Crawler extends Crawler {
 			}
 
 			// Skip JSON files in the languages directory (used for admin translations)
-			if ( ! $should_skip && strtolower( $file->getExtension() ) === 'json' && strpos( $relative_path, '/languages/' ) !== false ) {
+			$extension = strtolower( pathinfo( $relative_path, PATHINFO_EXTENSION ) );
+			if ( ! $should_skip && $extension === 'json' && strpos( $relative_path, '/languages/' ) !== false ) {
 				$should_skip = true;
 			}
 
 			// Skip composer.json files
-			if ( ! $should_skip && strtolower( $file->getBasename() ) === 'composer.json' ) {
+			if ( ! $should_skip && strtolower( basename( $relative_path ) ) === 'composer.json' ) {
 				$should_skip = true;
 			}
 
@@ -280,12 +282,10 @@ class Plugin_Assets_Crawler extends Crawler {
 			}
 
 			// Check if the file has an asset extension
-			$extension = strtolower( $file->getExtension() );
-			if ( in_array( $extension, $asset_extensions ) ) {
-				// Convert the file path to a URL
-				$relative_url = str_replace( '\\', '/', $relative_path );
-				$url          = $url_base . $relative_url;
-				$urls[]       = $url;
+			if ( in_array( $extension, $asset_extensions, true ) ) {
+				// Convert the file path to a URL and join safely
+				$url = \Simply_Static\Util::safe_join_url( $url_base, $relative_path );
+				$urls[] = $url;
 			}
 		}
 

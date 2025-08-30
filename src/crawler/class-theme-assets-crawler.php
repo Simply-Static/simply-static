@@ -98,8 +98,8 @@ class Theme_Assets_Crawler extends Crawler {
 				);
 				foreach ( $it as $file ) {
 					if ( $file->isDir() ) { continue; }
-					$relative_path = str_replace( $dir, '', $file->getPathname() );
-					$rel           = str_replace( '\\', '/', $relative_path );
+					// Build a safe relative path from the theme directory prefix
+					$rel = \Simply_Static\Util::safe_relative_path( $dir, $file->getPathname() );
 					$skip = false;
 					foreach ( (array) $skip_dirs as $sd ) {
 						if ( $sd && strpos( $rel, '/' . $sd . '/' ) !== false ) { $skip = true; break; }
@@ -107,7 +107,8 @@ class Theme_Assets_Crawler extends Crawler {
 					if ( $skip ) { continue; }
 					$ext = strtolower( pathinfo( $rel, PATHINFO_EXTENSION ) );
 					if ( ! in_array( $ext, $extensions, true ) ) { continue; }
-					$batch[] = $url_base . $rel;
+					// Join with exactly one slash between base and relative
+					$batch[] = \Simply_Static\Util::safe_join_url( $url_base, $rel );
 					if ( count( $batch ) >= $batch_sz ) {
 						$count += $this->enqueue_urls_batch( $batch );
 						$batch = [];
@@ -195,8 +196,8 @@ class Theme_Assets_Crawler extends Crawler {
 				continue;
 			}
 
-			// Skip files in directories we want to ignore
-			$relative_path = str_replace( $dir, '', $file->getPathname() );
+			// Build a safe relative path and skip files in ignored directories
+			$relative_path = \Simply_Static\Util::safe_relative_path( $dir, $file->getPathname() );
 			$should_skip   = false;
 
 			foreach ( $skip_dirs as $skip_dir ) {
@@ -211,12 +212,10 @@ class Theme_Assets_Crawler extends Crawler {
 			}
 
 			// Check if the file has an asset extension
-			$extension = strtolower( $file->getExtension() );
-			if ( in_array( $extension, $asset_extensions ) ) {
-				// Convert the file path to a URL
-				$relative_url = str_replace( '\\', '/', $relative_path );
-				$url          = $url_base . $relative_url;
-
+			$extension = strtolower( pathinfo( $relative_path, PATHINFO_EXTENSION ) );
+			if ( in_array( $extension, $asset_extensions, true ) ) {
+				// Convert the file path to a URL and join safely
+				$url = \Simply_Static\Util::safe_join_url( $url_base, $relative_path );
 				$urls[] = $url;
 			}
 		}

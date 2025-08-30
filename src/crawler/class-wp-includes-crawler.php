@@ -121,15 +121,16 @@ class WP_Includes_Crawler extends Crawler {
 					if ( $file->isDir() ) {
 						continue;
 					}
-
-					$relative_path = str_replace( $full_path, '', $file->getPathname() );
-					$relative_path = str_replace( '\\', '/', $relative_path );
-					$ext           = strtolower( pathinfo( $relative_path, PATHINFO_EXTENSION ) );
+					
+					// Build a safe relative path from the directory prefix
+					$relative_path = \Simply_Static\Util::safe_relative_path( $full_path, $file->getPathname() );
+					$ext = strtolower( pathinfo( $relative_path, PATHINFO_EXTENSION ) );
 					if ( $ext !== 'css' && $ext !== 'js' ) {
 						continue;
 					}
-
-					$batch[] = $base_url . $relative_path;
+					
+					// Join with exactly one slash
+					$batch[] = \Simply_Static\Util::safe_join_url( $base_url, $relative_path );
 					if ( count( $batch ) >= $batch_sz ) {
 						$count += $this->enqueue_urls_batch( $batch );
 						$batch = [];
@@ -197,18 +198,17 @@ class WP_Includes_Crawler extends Crawler {
 				if ( $file->isDir() ) {
 					continue;
 				}
-
-				// Get the relative path from the base directory
-				$relative_path = str_replace( $dir, '', $file->getPathname() );
-				$relative_path = str_replace( '\\', '/', $relative_path ); // Normalize slashes for URLs
-
+				
+				// Build a safe relative path from the base directory
+				$relative_path = \Simply_Static\Util::safe_relative_path( $dir, $file->getPathname() );
+				
 				// Get the file extension
 				$extension = strtolower( pathinfo( $relative_path, PATHINFO_EXTENSION ) );
-
+				
 				// Only include CSS and JS files
 				if ( $extension === 'css' || $extension === 'js' ) {
-					// Create the full URL
-					$url    = $url_base . $relative_path;
+					// Create the full URL with safe joining
+					$url    = \Simply_Static\Util::safe_join_url( $url_base, $relative_path );
 					$urls[] = $url;
 				}
 			}

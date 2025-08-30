@@ -99,8 +99,7 @@ class Uploads_Crawler extends Crawler {
 					continue;
 				}
 
-				$relative_path = str_replace( $base_dir, '', $file->getPathname() );
-				$relative_path = str_replace( '\\', '/', $relative_path );
+				$relative_path = \Simply_Static\Util::safe_relative_path( $base_dir, $file->getPathname() );
 
 				// Skip files in ignored directories
 				$skip = false;
@@ -114,14 +113,13 @@ class Uploads_Crawler extends Crawler {
 					continue;
 				}
 
-				$ext = strtolower( $file->getExtension() );
+				$ext = strtolower( pathinfo( $relative_path, PATHINFO_EXTENSION ) );
 				if ( ! in_array( $ext, (array) $media_extensions, true ) ) {
 					continue;
 				}
 
-				$relative_url = $relative_path; // starts with '/YYYY/MM/...'
-				$url          = $base_url . str_replace( '\\', '/', $relative_url );
-				$buffer[]     = $url;
+				$url      = \Simply_Static\Util::safe_join_url( $base_url, $relative_path );
+				$buffer[] = $url;
 
 				if ( count( $buffer ) >= $batch_size ) {
 					$count += $this->enqueue_urls_batch( $buffer );
@@ -285,8 +283,8 @@ class Uploads_Crawler extends Crawler {
 		$urls = [];
 
 		foreach ( $files as $file ) {
-			// Skip files in directories we want to ignore
-			$relative_path = str_replace( $dir, '', $file->getPathname() );
+			// Build a safe relative path and evaluate skip rules
+			$relative_path = \Simply_Static\Util::safe_relative_path( $dir, $file->getPathname() );
 			$should_skip   = false;
 
 			foreach ( $skip_dirs as $skip_dir ) {
@@ -301,12 +299,10 @@ class Uploads_Crawler extends Crawler {
 			}
 
 			// Check if the file has a media extension
-			$extension = strtolower( $file->getExtension() );
-			if ( in_array( $extension, $media_extensions ) ) {
-				// Convert the file path to a URL
-				$relative_url = str_replace( '\\', '/', $relative_path );
-				$url          = $url_base . $relative_url;
-
+			$extension = strtolower( pathinfo( $relative_path, PATHINFO_EXTENSION ) );
+			if ( in_array( $extension, $media_extensions, true ) ) {
+				// Convert the file path to a URL and join safely
+				$url = \Simply_Static\Util::safe_join_url( $url_base, $relative_path );
 				$urls[] = $url;
 			}
 		}

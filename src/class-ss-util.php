@@ -647,6 +647,38 @@ class Util {
 	}
 
 	/**
+	 * Build a safe relative path from an absolute path and its base directory.
+	 * Ensures forward slashes and a leading slash for consistent URL building.
+	 *
+	 * @param string $base_dir      The base directory (prefix) of the absolute path.
+	 * @param string $absolute_path The absolute path to the file.
+	 * @return string               The normalized relative path starting with '/'.
+	 */
+	public static function safe_relative_path( string $base_dir, string $absolute_path ): string {
+		$dir_norm = rtrim( $base_dir, DIRECTORY_SEPARATOR );
+		$rel      = substr( $absolute_path, strlen( $dir_norm ) );
+		if ( $rel === false ) {
+			$rel = str_replace( $base_dir, '', $absolute_path );
+		}
+		$rel = str_replace( '\\', '/', $rel );
+		if ( $rel === '' || $rel[0] !== '/' ) {
+			$rel = '/' . ltrim( $rel, '/' );
+		}
+		return $rel;
+	}
+
+	/**
+	 * Join a base URL and a relative path with exactly one slash.
+	 *
+	 * @param string $base_url      Base URL (may end with or without a slash).
+	 * @param string $relative_path Relative path (may start with or without a slash).
+	 * @return string               The joined URL.
+	 */
+	public static function safe_join_url( string $base_url, string $relative_path ): string {
+		return rtrim( $base_url, '/' ) . '/' . ltrim( $relative_path, '/' );
+	}
+
+	/**
 	 * Returns the global $wp_filesystem with credentials set.
 	 * Returns null in case of any errors.
 	 *
