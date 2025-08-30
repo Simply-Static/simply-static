@@ -112,28 +112,12 @@ class Url_Fetcher {
 
 			Util::debug_log( "Local path: " . $local_path . " - Full file path: " . $file_path );
 
-			$retries    = (int) apply_filters( 'ss_url_fetcher_fs_retries', 3 );
-			$retry_ms   = (int) apply_filters( 'ss_url_fetcher_fs_retry_delay_ms', 200 );
-			$copied_ok  = false;
-			$response  = null;
-
 			// Check if the file exists
 			if ( file_exists( $file_path ) ) {
 				Util::debug_log( "Copying local file directly: " . $file_path );
-				$src_size = @filesize( $file_path );
-				for ( $attempt = 1; $attempt <= max( 1, $retries ); $attempt++ ) {
-					if ( @copy( $file_path, $temp_filename ) ) {
-						$dst_size = file_exists( $temp_filename ) ? @filesize( $temp_filename ) : 0;
-						if ( $dst_size > 0 && ( $src_size === false || $dst_size === $src_size ) ) {
-							$copied_ok = true;
-							break;
-						}
-					}
-					Util::debug_log( sprintf( 'Local copy attempt %d/%d failed or size mismatch (src:%s dst:%s).', $attempt, max( 1, $retries ), (string) $src_size, (string) ( file_exists( $temp_filename ) ? @filesize( $temp_filename ) : 0 ) ) );
-					if ( $attempt < max( 1, $retries ) ) { usleep( $retry_ms * 1000 ); }
-				}
 
-				if ( $copied_ok ) {
+				// Copy the file to the temporary location
+				if ( copy( $file_path, $temp_filename ) ) {
 					// Create a response-like array to match what remote_get would return
 					$response = array(
 						'response' => array(
@@ -145,7 +129,7 @@ class Url_Fetcher {
 					);
 				} else {
 					// If copy fails, fall back to remote_get
-					Util::debug_log( "Failed to copy local file reliably, falling back to remote_get" );
+					Util::debug_log( "Failed to copy local file, falling back to remote_get" );
 					$response = self::remote_get( $url, $temp_filename );
 				}
 			} else {
@@ -160,21 +144,6 @@ class Url_Fetcher {
 
 		$filesize = file_exists( $temp_filename ) ? filesize( $temp_filename ) : 0;
 		Util::debug_log( "Filesize: " . $filesize . ' bytes' );
-
-		// If we appear to have a successful response but a zero-byte file, try a few retries
-		if ( ! is_wp_error( $response ) && isset( $response['response']['code'] ) && (int) $response['response']['code'] === 200 && (int) $filesize === 0 ) {
-			$retries  = isset( $retries ) ? $retries : (int) apply_filters( 'ss_url_fetcher_http_retries', 2 );
-			$retry_ms = isset( $retry_ms ) ? $retry_ms : (int) apply_filters( 'ss_url_fetcher_http_retry_delay_ms', 250 );
-			for ( $attempt = 1; $attempt <= max( 0, $retries ); $attempt++ ) {
-				Util::debug_log( sprintf( 'Zero-byte body after fetch, retrying HTTP (%d/%d)...', $attempt, max( 0, $retries ) ) );
-				$response = self::remote_get( $url, $temp_filename );
-				$filesize = file_exists( $temp_filename ) ? @filesize( $temp_filename ) : 0;
-				if ( is_wp_error( $response ) ) { break; }
-				if ( (int) $filesize > 0 ) { break; }
-				usleep( $retry_ms * 1000 );
-			}
-			Util::debug_log( "Filesize after retry: " . ( file_exists( $temp_filename ) ? @filesize( $temp_filename ) : 0 ) . ' bytes' );
-		}
 
 		if ( is_wp_error( $response ) ) {
 			Util::debug_log( "We encountered an error when fetching: " . $response->get_error_message() );
@@ -228,33 +197,7 @@ class Url_Fetcher {
 				}
 
 				Util::debug_log( "Renaming temp file from " . $temp_filename . " to " . $file_path );
-				$retries    = isset( $retries ) ? $retries : (int) apply_filters( 'ss_url_fetcher_fs_retries', 3 );
-				$retry_ms   = isset( $retry_ms ) ? $retry_ms : (int) apply_filters( 'ss_url_fetcher_fs_retry_delay_ms', 200 );
-				$renamed_ok = false;
-				for ( $attempt = 1; $attempt <= max( 1, $retries ); $attempt++ ) {
-					if ( @rename( $temp_filename, $file_path ) ) {
-						$renamed_ok = file_exists( $file_path );
-						if ( $renamed_ok ) { break; }
-					}
-					Util::debug_log( sprintf( 'Rename attempt %d/%d failed.', $attempt, max( 1, $retries ) ) );
-					if ( $attempt < max( 1, $retries ) ) { usleep( $retry_ms * 1000 ); }
-				}
-				if ( ! $renamed_ok ) {
-					Util::debug_log( 'Rename failed, trying copy+unlink fallback.' );
-					// Attempt copy to destination then unlink temp
-					for ( $attempt = 1; $attempt <= max( 1, $retries ); $attempt++ ) {
-						if ( @copy( $temp_filename, $file_path ) ) {
-							@unlink( $temp_filename );
-							$renamed_ok = file_exists( $file_path );
-							if ( $renamed_ok ) { break; }
-						}
-						Util::debug_log( sprintf( 'Copy+unlink attempt %d/%d failed.', $attempt, max( 1, $retries ) ) );
-						if ( $attempt < max( 1, $retries ) ) { usleep( $retry_ms * 1000 ); }
-					}
-				}
-				if ( ! $renamed_ok ) {
-					Util::debug_log( 'ERROR: Unable to move temp file to destination after retries.' );
-				}
+				rename( $temp_filename, $file_path );
 				$static_page->get_handler()->after_file_fetch( $this->archive_dir );
 			} else {
 				Util::debug_log( "We weren't able to establish a filename; deleting temp file" );
