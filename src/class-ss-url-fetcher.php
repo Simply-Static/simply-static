@@ -95,10 +95,10 @@ class Url_Fetcher {
 
 		// Check if the URL is a local asset (file) that we can copy directly
 		// We do this check before prepare_url to avoid query parameters interfering with extension detection
-		$original_url = $url;
+		$original_url   = $url;
 		$is_local_asset = Util::is_local_asset_url( $original_url );
 
-		Util::debug_log( "URL: " . $original_url . " - Is local asset: " . ($is_local_asset ? 'Yes' : 'No') );
+		Util::debug_log( "URL: " . $original_url . " - Is local asset: " . ( $is_local_asset ? 'Yes' : 'No' ) );
 
 		if ( $prepare_url ) {
 			$url = $static_page->get_handler()->prepare_url( $url );
@@ -108,20 +108,20 @@ class Url_Fetcher {
 		if ( $is_local_asset ) {
 			// Get the local path for the URL using the original URL without query parameters
 			$local_path = Util::get_path_from_local_url( $original_url );
-			$file_path = ABSPATH . ltrim( $local_path, '/' );
+			$file_path  = ABSPATH . ltrim( $local_path, '/' );
 
 			Util::debug_log( "Local path: " . $local_path . " - Full file path: " . $file_path );
 
-			$retries    = (int) apply_filters( 'ss_url_fetcher_fs_retries', 3 );
-			$retry_ms   = (int) apply_filters( 'ss_url_fetcher_fs_retry_delay_ms', 200 );
-			$copied_ok  = false;
+			$retries   = (int) apply_filters( 'ss_url_fetcher_fs_retries', 3 );
+			$retry_ms  = (int) apply_filters( 'ss_url_fetcher_fs_retry_delay_ms', 200 );
+			$copied_ok = false;
 			$response  = null;
 
 			// Check if the file exists
 			if ( file_exists( $file_path ) ) {
 				Util::debug_log( "Copying local file directly: " . $file_path );
 				$src_size = @filesize( $file_path );
-				for ( $attempt = 1; $attempt <= max( 1, $retries ); $attempt++ ) {
+				for ( $attempt = 1; $attempt <= max( 1, $retries ); $attempt ++ ) {
 					if ( @copy( $file_path, $temp_filename ) ) {
 						$dst_size = file_exists( $temp_filename ) ? @filesize( $temp_filename ) : 0;
 						if ( $dst_size > 0 && ( $src_size === false || $dst_size === $src_size ) ) {
@@ -130,7 +130,9 @@ class Url_Fetcher {
 						}
 					}
 					Util::debug_log( sprintf( 'Local copy attempt %d/%d failed or size mismatch (src:%s dst:%s).', $attempt, max( 1, $retries ), (string) $src_size, (string) ( file_exists( $temp_filename ) ? @filesize( $temp_filename ) : 0 ) ) );
-					if ( $attempt < max( 1, $retries ) ) { usleep( $retry_ms * 1000 ); }
+					if ( $attempt < max( 1, $retries ) ) {
+						usleep( $retry_ms * 1000 );
+					}
 				}
 
 				if ( $copied_ok ) {
@@ -139,7 +141,7 @@ class Url_Fetcher {
 						'response' => array(
 							'code' => 200
 						),
-						'headers' => array(
+						'headers'  => array(
 							'content-type' => mime_content_type( $file_path )
 						)
 					);
@@ -165,15 +167,32 @@ class Url_Fetcher {
 		if ( ! is_wp_error( $response ) && isset( $response['response']['code'] ) && (int) $response['response']['code'] === 200 && (int) $filesize === 0 ) {
 			$retries  = isset( $retries ) ? $retries : (int) apply_filters( 'ss_url_fetcher_http_retries', 2 );
 			$retry_ms = isset( $retry_ms ) ? $retry_ms : (int) apply_filters( 'ss_url_fetcher_http_retry_delay_ms', 250 );
-			for ( $attempt = 1; $attempt <= max( 0, $retries ); $attempt++ ) {
+			for ( $attempt = 1; $attempt <= max( 0, $retries ); $attempt ++ ) {
 				Util::debug_log( sprintf( 'Zero-byte body after fetch, retrying HTTP (%d/%d)...', $attempt, max( 0, $retries ) ) );
 				$response = self::remote_get( $url, $temp_filename );
 				$filesize = file_exists( $temp_filename ) ? @filesize( $temp_filename ) : 0;
-				if ( is_wp_error( $response ) ) { break; }
-				if ( (int) $filesize > 0 ) { break; }
+				if ( is_wp_error( $response ) ) {
+					break;
+				}
+				if ( (int) $filesize > 0 ) {
+					break;
+				}
 				usleep( $retry_ms * 1000 );
 			}
 			Util::debug_log( "Filesize after retry: " . ( file_exists( $temp_filename ) ? @filesize( $temp_filename ) : 0 ) . ' bytes' );
+		}
+		// As a final guard, if the temp file is still zero bytes, allow a short verification wait loop
+		if ( (int) ( file_exists( $temp_filename ) ? @filesize( $temp_filename ) : 0 ) === 0 ) {
+			$verify_retries = (int) apply_filters( 'ss_url_fetcher_verify_retries', 2 );
+			$verify_ms      = (int) apply_filters( 'ss_url_fetcher_verify_delay_ms', 200 );
+			for ( $v = 1; $v <= max( 0, $verify_retries ); $v ++ ) {
+				usleep( $verify_ms * 1000 );
+				$size_now = file_exists( $temp_filename ) ? @filesize( $temp_filename ) : 0;
+				Util::debug_log( sprintf( 'Post-stream verify check %d/%d, size=%d bytes', $v, max( 0, $verify_retries ), (int) $size_now ) );
+				if ( (int) $size_now > 0 ) {
+					break;
+				}
+			}
 		}
 
 		if ( is_wp_error( $response ) ) {
@@ -189,11 +208,11 @@ class Url_Fetcher {
 			$static_page->http_status_code = $response['response']['code'];
 
 			// Check if this is a JavaScript or CSS file based on the URL extension
-			$path_info = Util::url_path_info($static_page->url);
-			if (isset($path_info['extension']) && $path_info['extension'] === 'js') {
+			$path_info = Util::url_path_info( $static_page->url );
+			if ( isset( $path_info['extension'] ) && $path_info['extension'] === 'js' ) {
 				// Force the correct MIME type for JavaScript files
 				$static_page->content_type = 'application/javascript';
-			} elseif (isset($path_info['extension']) && $path_info['extension'] === 'css') {
+			} elseif ( isset( $path_info['extension'] ) && $path_info['extension'] === 'css' ) {
 				// Force the correct MIME type for CSS files
 				$static_page->content_type = 'text/css';
 			} else {
@@ -201,7 +220,7 @@ class Url_Fetcher {
 				$static_page->content_type = $response['headers']['content-type'];
 			}
 
-			$static_page->redirect_url     = isset( $response['headers']['location'] ) ? $response['headers']['location'] : null;
+			$static_page->redirect_url = isset( $response['headers']['location'] ) ? $response['headers']['location'] : null;
 
 			Util::debug_log( "http_status_code: " . $static_page->http_status_code . " | content_type: " . $static_page->content_type );
 
@@ -227,33 +246,63 @@ class Url_Fetcher {
 					$temp_filename = str_replace( '\/', '/', $temp_filename );
 				}
 
+				// Optional small delay before moving to avoid races on some file systems (filterable)
+				$pre_move_ms = (int) apply_filters( 'ss_url_fetcher_pre_move_delay_ms', 0 );
+				if ( $pre_move_ms > 0 ) {
+					usleep( $pre_move_ms * 1000 );
+				}
+				// Re-stat temp file just before move
+				$temp_size_before_move = file_exists( $temp_filename ) ? @filesize( $temp_filename ) : 0;
 				Util::debug_log( "Renaming temp file from " . $temp_filename . " to " . $file_path );
 				$retries    = isset( $retries ) ? $retries : (int) apply_filters( 'ss_url_fetcher_fs_retries', 3 );
 				$retry_ms   = isset( $retry_ms ) ? $retry_ms : (int) apply_filters( 'ss_url_fetcher_fs_retry_delay_ms', 200 );
 				$renamed_ok = false;
-				for ( $attempt = 1; $attempt <= max( 1, $retries ); $attempt++ ) {
+				for ( $attempt = 1; $attempt <= max( 1, $retries ); $attempt ++ ) {
 					if ( @rename( $temp_filename, $file_path ) ) {
 						$renamed_ok = file_exists( $file_path );
-						if ( $renamed_ok ) { break; }
+						if ( $renamed_ok ) {
+							break;
+						}
 					}
 					Util::debug_log( sprintf( 'Rename attempt %d/%d failed.', $attempt, max( 1, $retries ) ) );
-					if ( $attempt < max( 1, $retries ) ) { usleep( $retry_ms * 1000 ); }
+					if ( $attempt < max( 1, $retries ) ) {
+						usleep( $retry_ms * 1000 );
+					}
 				}
 				if ( ! $renamed_ok ) {
 					Util::debug_log( 'Rename failed, trying copy+unlink fallback.' );
 					// Attempt copy to destination then unlink temp
-					for ( $attempt = 1; $attempt <= max( 1, $retries ); $attempt++ ) {
+					for ( $attempt = 1; $attempt <= max( 1, $retries ); $attempt ++ ) {
 						if ( @copy( $temp_filename, $file_path ) ) {
 							@unlink( $temp_filename );
 							$renamed_ok = file_exists( $file_path );
-							if ( $renamed_ok ) { break; }
+							if ( $renamed_ok ) {
+								break;
+							}
 						}
 						Util::debug_log( sprintf( 'Copy+unlink attempt %d/%d failed.', $attempt, max( 1, $retries ) ) );
-						if ( $attempt < max( 1, $retries ) ) { usleep( $retry_ms * 1000 ); }
+						if ( $attempt < max( 1, $retries ) ) {
+							usleep( $retry_ms * 1000 );
+						}
 					}
 				}
 				if ( ! $renamed_ok ) {
 					Util::debug_log( 'ERROR: Unable to move temp file to destination after retries.' );
+				} else {
+					// Verify destination file size is non-zero; allow short wait loop if needed
+					$dst_size_now = file_exists( $file_path ) ? @filesize( $file_path ) : 0;
+					if ( (int) $dst_size_now === 0 ) {
+						$verify_retries = (int) apply_filters( 'ss_url_fetcher_verify_retries', 2 );
+						$verify_ms      = (int) apply_filters( 'ss_url_fetcher_verify_delay_ms', 200 );
+						for ( $v = 1; $v <= max( 0, $verify_retries ); $v ++ ) {
+							usleep( $verify_ms * 1000 );
+							$dst_size_now = file_exists( $file_path ) ? @filesize( $file_path ) : 0;
+							Util::debug_log( sprintf( 'Post-move verify check %d/%d, size=%d bytes', $v, max( 0, $verify_retries ), (int) $dst_size_now ) );
+							if ( (int) $dst_size_now > 0 ) {
+								break;
+							}
+						}
+					}
 				}
 				$static_page->get_handler()->after_file_fetch( $this->archive_dir );
 			} else {
@@ -359,12 +408,13 @@ class Url_Fetcher {
 	}
 
 	public static function remote_get( $url, $filename = null ) {
-		$basic_auth_digest = base64_encode( Options::instance()->get('http_basic_auth_username') . ':' . Options::instance()->get('http_basic_auth_password') );
+		$basic_auth_digest = base64_encode( Options::instance()->get( 'http_basic_auth_username' ) . ':' . Options::instance()->get( 'http_basic_auth_password' ) );
 
 		Util::debug_log( "Fetching URL: " . $url );
 
-		$args = array(
-			'timeout'     => self::TIMEOUT,
+		$timeout = (int) apply_filters( 'ss_url_fetcher_timeout', self::TIMEOUT, $url );
+		$args    = array(
+			'timeout'     => $timeout,
 			'user-agent'  => 'Simply Static/' . SIMPLY_STATIC_VERSION,
 			'sslverify'   => false,
 			'redirection' => 0, // disable redirection.
