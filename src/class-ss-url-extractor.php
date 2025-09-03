@@ -611,16 +611,9 @@ class Url_Extractor {
 		$dom->preserveWhiteSpace = true;
 		$dom->formatOutput       = false;
 
-		// Load the HTML directly without a wrapper
-		$utf8_html_string = htmlspecialchars_decode( htmlentities( $html_string, ENT_COMPAT, 'utf-8', false ) );
+		// $utf8_html_string = htmlspecialchars_decode( htmlentities( $html_string, ENT_COMPAT, 'utf-8', false ) );
 
-		// Check if the HTML string is empty to prevent ValueError
-		if ( empty( $utf8_html_string ) ) {
-			// Return the original HTML string if the processed string is empty
-			return $html_string;
-		}
-
-		$dom->loadHTML( $utf8_html_string );
+		$dom->loadHTML( $html_string );
 
 		// Clear any errors
 		libxml_clear_errors();
@@ -707,8 +700,45 @@ class Url_Extractor {
 
 			$html = apply_filters( 'ss_html_after_restored_attributes', $html, $this );
 
+			// Optionally decode numeric HTML entities (>=128) back into UTF-8 characters.
+			// This helps preserve non-Latin characters (e.g., Japanese) that libxml may output as entities.
+			$decode_numeric_entities = apply_filters( 'ss_decode_numeric_entities_after_dom', true, $this );
+			if ( $decode_numeric_entities ) {
+				$html = $this->decode_numeric_entities_safely( $html );
+			}
+
 			return $html;
 		}
+	}
+
+	/**
+	 * Decode numeric HTML entities (decimal and hex) with code points >= 128 to UTF-8.
+	 * This avoids decoding structural entities like <, >, &, etc., while restoring
+	 * non-Latin characters (e.g., Japanese) that DOMDocument may output as entities.
+	 *
+	 * @param string $html
+	 * @return string
+	 */
+	private function decode_numeric_entities_safely( $html ) {
+		// Decode decimal numeric entities
+		$html = preg_replace_callback( '/&#(\d+);/u', function ( $m ) {
+			$code = intval( $m[1] );
+			if ( $code < 128 ) {
+				return $m[0]; // keep ASCII entities intact (e.g., &#60;)
+			}
+			return html_entity_decode( '&#' . $code . ';', ENT_NOQUOTES, 'UTF-8' );
+		}, $html );
+
+		// Decode hexadecimal numeric entities
+		$html = preg_replace_callback( '/&#x([0-9a-fA-F]+);/u', function ( $m ) {
+			$code = hexdec( $m[1] );
+			if ( $code < 128 ) {
+				return $m[0];
+			}
+			return html_entity_decode( '&#x' . strtoupper( $m[1] ) . ';', ENT_NOQUOTES, 'UTF-8' );
+		}, $html );
+
+		return $html;
 	}
 
 	/**
