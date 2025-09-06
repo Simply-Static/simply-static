@@ -611,8 +611,6 @@ class Url_Extractor {
 		$dom->preserveWhiteSpace = true;
 		$dom->formatOutput       = false;
 
-		// $utf8_html_string = htmlspecialchars_decode( htmlentities( $html_string, ENT_COMPAT, 'utf-8', false ) );
-
 		$dom->loadHTML( $html_string );
 
 		// Clear any errors
