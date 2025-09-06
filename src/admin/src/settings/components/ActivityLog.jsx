@@ -8,7 +8,7 @@ const {__} = wp.i18n;
 function ActivityLog() {
     const {isRunning, isResumed, isPaused, blogId} = useContext(SettingsContext);
     const [terminalLineData, setTerminalLineData] = useState([
-        <TerminalOutput>Waiting for new export..</TerminalOutput>
+        <TerminalOutput key="waiting">Waiting for new export..</TerminalOutput>
     ]);
 
     function refreshActivityLog() {
@@ -25,7 +25,7 @@ function ActivityLog() {
                 var success = message.includes('resume');
 
                 terminal.push(
-                    <TerminalOutput>[{date}] <span className={`${error ? 'is-error' : '' } ${success ? 'is-success' : '' }`} dangerouslySetInnerHTML={{__html: text}}></span></TerminalOutput>
+                    <TerminalOutput key={message}>[{date}] <span className={`${error ? 'is-error' : '' } ${success ? 'is-success' : '' }`} dangerouslySetInnerHTML={{__html: text}}></span></TerminalOutput>
                 );
             }
 
@@ -39,10 +39,10 @@ function ActivityLog() {
 
     useEffect(() => {
         if (isRunning && !isResumed) {
-            setTerminalLineData([<TerminalOutput>Waiting for new export..</TerminalOutput>]);
+            setTerminalLineData([<TerminalOutput key="waiting">Waiting for new export..</TerminalOutput>]);
         }
         if (isRunning && isResumed) {
-            setTerminalLineData([<TerminalOutput>Resuming the export..</TerminalOutput>]);
+            setTerminalLineData([<TerminalOutput key="resuming">Resuming the export..</TerminalOutput>]);
         }
 
         refreshActivityLog();

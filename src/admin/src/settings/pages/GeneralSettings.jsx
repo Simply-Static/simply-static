@@ -227,6 +227,8 @@ function GeneralSettings() {
                 <SelectControl
                     label={__('Replacing URLs', 'simply-static')}
                     value={replaceType}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     options={[
                         {label: __('Absolute URLs', 'simply-static'), value: 'absolute'},
                         {label: __('Relative Path', 'simply-static'), value: 'relative'},
@@ -244,6 +246,8 @@ function GeneralSettings() {
                                 <SelectControl
                                     label={__('Scheme', 'simply-static')}
                                     value={scheme}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
                                     options={[
                                         {label: 'https://', value: 'https://'},
                                         {label: 'http://', value: 'http://'},
@@ -260,6 +264,8 @@ function GeneralSettings() {
                                     label={__('Host', 'simply-static')}
                                     type={"text"}
                                     placeholder={"example.com"}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
                                     value={host}
                                     onChange={(host) => {
                                         setHost(host);
@@ -277,6 +283,8 @@ function GeneralSettings() {
                             label={__('Path', 'simply-static')}
                             type={"text"}
                             placeholder={"/"}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={path}
                             onChange={(path) => {
                                 setPath(path);
@@ -287,12 +295,10 @@ function GeneralSettings() {
                             {__('Convert all URLs for your WordPress site to relative URLs that will work at any domain.', 'simply-static')}<br></br>
                             {__('Optionally specify a path above if you intend to place the files in a subdirectory.', 'simply-static')}
                         </p>
-                        <p>
-                            <Notice status={"warning"} isDismissible={false}>
-                                <b>{__('Example', 'simply-static')}: </b>
-                                {__('enter /path above if you wanted to serve your files at www.example.com/path/', 'simply-static')}
-                            </Notice>
-                        </p>
+                        <Notice status={"warning"} isDismissible={false}>
+                            <b>{__('Example', 'simply-static')}: </b>
+                            {__('enter /path above if you wanted to serve your files at www.example.com/path/', 'simply-static')}
+                        </Notice>
                     </>
                 }
                 {replaceType === 'offline' &&
@@ -301,6 +307,7 @@ function GeneralSettings() {
                 {!useForms &&
                     <ToggleControl
                         label={__('Force URL replacements', 'simply-static')}
+                        __nextHasNoMarginBottom
                         help={
                             forceURLReplacement
                                 ? __('Replace all occurrences of the WordPress URL with the static URL (includes inline CSS and JS).', 'simply-static')
@@ -325,6 +332,7 @@ function GeneralSettings() {
             <CardBody>
                 <p>{__('Enhanced Crawl uses native WordPress functions to find all pages and files when running a static export.', 'simply-static')}</p>
                 <ToggleControl
+                    __nextHasNoMarginBottom
                     label={
                         <>
                             {__('Enable Enhanced Crawl', 'simply-static')}
@@ -357,6 +365,8 @@ function GeneralSettings() {
                             <>
                                 <FormTokenField
                                     label={__('Active Crawlers', 'simply-static')}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
                                     value={selectedCrawlers.map(id => {
                                         const crawler = crawlers.find(c => c.id === id);
                                         return crawler ? crawler.name : id;
@@ -409,6 +419,8 @@ function GeneralSettings() {
                                             <>
                                                 <FormTokenField
                                                     label={__('Post Types to Include', 'simply-static')}
+                                                    __next40pxDefaultSize
+                                                    __nextHasNoMarginBottom
                                                     value={Array.isArray(selectedPostTypes) ? selectedPostTypes.map(name => {
                                                         const postType = postTypes.find(pt => pt.name === name);
                                                         return postType ? postType.label : name;
@@ -484,6 +496,7 @@ function GeneralSettings() {
                 <TextareaControl
                     label={__('Additional URLs', 'simply-static')}
                     placeholder={options.home + "/hidden-page/"}
+                    __nextHasNoMarginBottom
                     help={__('If you want to create static copies of pages or files that aren\'t linked to, add the URLs here (one per line).', 'simply-static')}
                     value={settings.additional_urls}
                     onChange={(value) => {
@@ -493,23 +506,31 @@ function GeneralSettings() {
                 <TextareaControl
                     label={__('Additional Files and Directories', 'simply-static')}
                     placeholder={options.home_path + "additional-directory/\n" + options.home_path + "additional-file.html"}
+                    __nextHasNoMarginBottom
                     help={__('Sometimes you may want to include additional files (such as files referenced via AJAX) or directories. Add the paths to those files or directories here (one per line).', 'simply-static')}
                     value={settings.additional_files}
                     onChange={(value) => {
                         updateSetting('additional_files', value);
                     }}
                 />
-                <ClipboardButton
+                <Button
                     variant="secondary"
-                    text={options.home_path}
-                    onCopy={() => setHasCopied(true)}
-                    onFinishCopy={() => setHasCopied(false)}
+                    onClick={() => {
+                        try {
+                            navigator.clipboard.writeText(options.home_path);
+                            setHasCopied(true);
+                            setTimeout(() => setHasCopied(false), 1500);
+                        } catch (e) {
+                            console.error('Clipboard copy failed', e);
+                        }
+                    }}
                 >
                     {hasCopied ? __('Copied home path', 'simply-static') : __('Copy home path', 'simply-static')}
-                </ClipboardButton>
+                </Button>
                 <Spacer margin={5}/>
 
                 <ToggleControl
+                    __nextHasNoMarginBottom
                     label={
                         <>
                             {__('Generate 404 Page?', 'simply-static')}
@@ -529,6 +550,7 @@ function GeneralSettings() {
                     }}
                 />
                 <ToggleControl
+                    __nextHasNoMarginBottom
                     label={
                         <>
                             {__('Include RSS Feeds?', 'simply-static')}
@@ -546,6 +568,7 @@ function GeneralSettings() {
                     }}
                 />
                 <ToggleControl
+                    __nextHasNoMarginBottom
                     label={
                         <>
                             {__('Include Rest API?', 'simply-static')}
@@ -575,6 +598,7 @@ function GeneralSettings() {
                 <TextareaControl
                     label={__('Urls to exclude', 'simply-static')}
                     placeholder={"some-directory\nsome-file.json\n.jpg"}
+                    __nextHasNoMarginBottom
                     help={__('Specify URLs (or parts of URLs) you want to exclude from the processing (one per line).', 'simply-static')}
                     value={settings.urls_to_exclude}
                     onChange={(value) => {

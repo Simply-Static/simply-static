@@ -61,8 +61,7 @@ function ExportLog() {
         {
             name: 'Code',
             selector: row => row.code,
-            sortable: true,
-            maxWidth: '100px'
+            sortable: true
         },
         {
             name: 'URL',
@@ -103,8 +102,7 @@ function ExportLog() {
             }
             return exportType;
         },
-        sortable: true,
-        maxWidth: '200px'
+        sortable: true
     };
 
     // Define Notes column

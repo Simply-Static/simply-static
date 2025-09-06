@@ -119,6 +119,8 @@ function DeploymentSettings() {
                     label={__('Deployment method', 'simply-static')}
                     value={deliveryMethod}
                     options={deploymentOptions}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     onChange={(method) => {
                         setDeliveryMethod(method);
                         updateSetting('delivery_method', method);
@@ -141,7 +143,7 @@ function DeploymentSettings() {
                         {__('Enjoy secure WordPress, the fastest exports, and the best-performing static site hosting in one package.', 'simply-static')}
                     </p>
                     <p>
-                    <a class={"button button-primary"} href={"https://simplystatic.com/simply-static-studio/"} target={"_blank"}>Check out Static Studio</a>
+                    <a className={"button button-primary"} href={"https://simplystatic.com/simply-static-studio/"} target={"_blank"}>Check out Static Studio</a>
                     </p>
                 </CardBody>
             </Card>
@@ -174,23 +176,29 @@ function DeploymentSettings() {
                         type={"text"}
                         help={__("This is the directory where your static files will be saved. We will create it automatically on the first export if it doesn't exist.", 'simply-static')}
                         placeholder={options.home_path + "public_static/"}
+                        __next40pxDefaultSize
+                        __nextHasNoMarginBottom
                         value={settings.local_dir}
                         onChange={(path) => {
                             updateSetting('local_dir', path);
                         }}
                     />
-                    <p>
-                        <ClipboardButton
-                            variant="secondary"
-                            text={options.home_path}
-                            onCopy={() => setHasCopied(true)}
-                            onFinishCopy={() => setHasCopied(false)}
-                        >
-                            {hasCopied ? __('Copied home path', 'simply-static') : __('Copy home path', 'simply-static')}
-                        </ClipboardButton>
-                    </p>
-                    <p>
-                        <ToggleControl
+                    <Button
+                        variant="secondary"
+                        onClick={() => {
+                            try {
+                                navigator.clipboard.writeText(options.home_path);
+                                setHasCopied(true);
+                                setTimeout(() => setHasCopied(false), 1500);
+                            } catch (e) {
+                                console.error('Clipboard copy failed', e);
+                            }
+                        }}
+                    >
+                        {hasCopied ? __('Copied home path', 'simply-static') : __('Copy home path', 'simply-static')}
+                    </Button>
+                    <ToggleControl
+                            __nextHasNoMarginBottom
                             label={__('Clear Local Directory', 'simply-static')}
                             help={
                                 clearDirectory
@@ -203,7 +211,6 @@ function DeploymentSettings() {
                                 updateSetting('clear_directory_before_export', value);
                             }}
                         />
-                    </p>
                 </CardBody>
             </Card>
         }
@@ -233,6 +240,8 @@ function DeploymentSettings() {
                             value={githubAccountType}
                             help={__('Depending on the account type the settings fields will change.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             options={[
                                 {label: __('Personal', 'simply-static'), value: 'personal'},
                                 {label: __('Organization', 'simply-static'), value: 'organization'},
@@ -249,6 +258,8 @@ function DeploymentSettings() {
                                 type={"text"}
                                 help={__('Enter the name of your organization.', 'simply-static')}
                                 disabled={('free' === options.plan || !isPro())}
+                                __next40pxDefaultSize
+                                __nextHasNoMarginBottom
                                 value={settings.github_user}
                                 onChange={(organization) => {
                                     updateSetting('github_user', organization);
@@ -260,6 +271,8 @@ function DeploymentSettings() {
                                 type={"text"}
                                 help={__('Enter your GitHub username.', 'simply-static')}
                                 disabled={('free' === options.plan || !isPro())}
+                                __next40pxDefaultSize
+                                __nextHasNoMarginBottom
                                 value={settings.github_user}
                                 onChange={(name) => {
                                     updateSetting('github_user', name);
@@ -271,6 +284,8 @@ function DeploymentSettings() {
                             type={"email"}
                             help={__('Enter your GitHub email address. This will be used to commit files to your repository.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.github_email}
                             onChange={(email) => {
                                 updateSetting('github_email', email);
@@ -295,6 +310,8 @@ function DeploymentSettings() {
                                 </>
                             }
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.github_personal_access_token}
                             onChange={(token) => {
                                 updateSetting('github_personal_access_token', token);
@@ -306,6 +323,8 @@ function DeploymentSettings() {
                             type={"text"}
                             help={__('Enter a name for your repository (lowercase without spaces or special characters).', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.github_repository}
                             onChange={(repository) => {
                                 updateSetting('github_repository', repository);
@@ -324,6 +343,8 @@ function DeploymentSettings() {
                             type={"text"}
                             help={__('Enter a relative path to a folder if you want to push files under it. Example: for github.com/USER/REPOSITORY/folder1, enter folder1', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.github_folder_path}
                             onChange={(repository) => {
                                 updateSetting('github_folder_path', repository);
@@ -343,6 +364,8 @@ function DeploymentSettings() {
                             value={githubVisibility}
                             help={__('Decide if you want to make your repository public or private.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             options={[
                                 {label: __('Public', 'simply-static'), value: 'public'},
                                 {label: __('Private', 'simply-static'), value: 'private'},
@@ -359,6 +382,8 @@ function DeploymentSettings() {
                             placeholder={"main"}
                             help={__('Simply Static automatically uses "main" as branch. You may want to modify that for example to gh-pages. for GitHub Pages.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.github_branch}
                             onChange={(branch) => {
                                 updateSetting('github_branch', branch);
@@ -370,6 +395,8 @@ function DeploymentSettings() {
                             type={"url"}
                             help={__('Enter your Webhook URL here and Simply Static will send a POST request after all files are commited to GitHub.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.github_webhook_url}
                             onChange={(webhook) => {
                                 updateSetting('github_webhook_url', webhook);
@@ -379,6 +406,7 @@ function DeploymentSettings() {
                             label={__('Throttle Requests', 'simply-static')}
                             help={__('Enable this option if you are experiencing issues with the GitHub API rate limit.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __nextHasNoMarginBottom
                             checked={throttleGitHubRequests}
                             onChange={(value) => {
                                 setThrottleGitHubRequests(value);
@@ -391,6 +419,8 @@ function DeploymentSettings() {
                             type={"number"}
                             help={__('Enter the number of files you want to be processed in a single batch. If current export fails to deploy, lower the number.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.github_batch_size ?? 100}
                             onChange={(size) => {
                                 updateSetting('github_batch_size', size);
@@ -431,6 +461,8 @@ function DeploymentSettings() {
                                     <b>{__('An account will be created automatically on your first deployment.', 'simply-static')}</b>
                                 </>
                             }
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={options.admin_email}
                         />
 
@@ -439,6 +471,8 @@ function DeploymentSettings() {
                             type={"text"}
                             help={__('That\'s the part before your TLD. Your full URL is the combination of the subdomain plus the domain suffix.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.tiiny_subdomain}
                             onChange={(subdomain) => {
                                 updateSetting('tiiny_subdomain', subdomain);
@@ -450,6 +484,8 @@ function DeploymentSettings() {
                             type={"text"}
                             help={__('This defaults to tiiny.site. If you have a custom domain configured in Tiiny.host, you can also use  that one.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.tiiny_domain_suffix}
                             onChange={(suffix) => {
                                 updateSetting('tiiny_domain_suffix', suffix);
@@ -461,6 +497,8 @@ function DeploymentSettings() {
                             type={"password"}
                             help={__('Adding a password will activate password protection on your static site. The website is only visible with the password.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.tiiny_password}
                             onChange={(password) => {
                                 updateSetting('tiiny_password', password);
@@ -501,6 +539,8 @@ function DeploymentSettings() {
                                 </>
                             }
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.cdn_api_key}
                             onChange={(api_key) => {
                                 updateSetting('cdn_api_key', api_key);
@@ -518,6 +558,8 @@ function DeploymentSettings() {
                                 </>
                             }
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.cdn_storage_host}
                             onChange={(storage_host) => {
                                 updateSetting('cdn_storage_host', storage_host);
@@ -529,6 +571,8 @@ function DeploymentSettings() {
                             type={"password"}
                             help={__('Enter your Acess Key from Bunny CDN. You will find it within your storage zone setttings within FTP & API Access -> Password.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.cdn_access_key}
                             onChange={(access_key) => {
                                 updateSetting('cdn_access_key', access_key);
@@ -540,6 +584,8 @@ function DeploymentSettings() {
                             type={"text"}
                             help={__('A pull zone is the connection of your CDN to the internet. Simply Static will try to find an existing pull zone with the provided name, if there is none it creates a new pull zone.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.cdn_pull_zone}
                             onChange={(pull_zone) => {
                                 updateSetting('cdn_pull_zone', pull_zone);
@@ -551,6 +597,8 @@ function DeploymentSettings() {
                             type={"text"}
                             help={__('A storage zone contains your static files. Simply Static will try to find an existing storage zone with the provided name, if there is none it creates a new storage zone.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.cdn_storage_zone}
                             onChange={(storage_zone) => {
                                 updateSetting('cdn_storage_zone', storage_zone);
@@ -563,6 +611,8 @@ function DeploymentSettings() {
                             placeholder={'/subdirectory/'}
                             help={__('If you want to transfer the files to a specific subdirectory on your storage zone add the name of that directory here.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.cdn_directory}
                             onChange={(directory) => {
                                 updateSetting('cdn_directory', directory);
@@ -598,6 +648,8 @@ function DeploymentSettings() {
                                 {label: __('AWS EC2', 'simply-static'), value: 'aws-ec2'},
                             ]}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             onChange={(method) => {
                                 setAwsAuthMethod(method);
                                 updateSetting('aws_auth_method', method);
@@ -616,6 +668,8 @@ function DeploymentSettings() {
                                         </>
                                     }
                                     disabled={('free' === options.plan || !isPro())}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
                                     value={settings.aws_access_key}
                                     onChange={(access_key) => {
                                         updateSetting('aws_access_key', access_key);
@@ -632,6 +686,8 @@ function DeploymentSettings() {
                                         </>
                                     }
                                     disabled={('free' === options.plan || !isPro())}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
                                     value={settings.aws_access_secret}
                                     onChange={(secret) => {
                                         updateSetting('aws_access_secret', secret);
@@ -642,6 +698,8 @@ function DeploymentSettings() {
                         <SelectControl
                             label={__('Region', 'simply-static')}
                             value={region}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             options={[
                                 {label: __('US East (Ohio)', 'simply-static'), value: 'us-east-2'},
                                 {label: __('US East (N. Virginia)', 'simply-static'), value: 'us-east-1'},
@@ -684,6 +742,8 @@ function DeploymentSettings() {
                             type={"text"}
                             help={__('Add the name of your bucket here.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.aws_bucket}
                             onChange={(bucket) => {
                                 updateSetting('aws_bucket', bucket);
@@ -695,6 +755,8 @@ function DeploymentSettings() {
                             type={"text"}
                             help={__('Add an optional subdirectory for your bucket', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.aws_subdirectory}
                             onChange={(subdirectory) => {
                                 updateSetting('aws_subdirectory', subdirectory);
@@ -706,6 +768,8 @@ function DeploymentSettings() {
                             type={"text"}
                             help={__('We automatically invalidate the cache after each export.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.aws_distribution_id}
                             onChange={(distribution_id) => {
                                 updateSetting('aws_distribution_id', distribution_id);
@@ -717,6 +781,8 @@ function DeploymentSettings() {
                             type={"url"}
                             help={__('Enter your Webhook URL here and Simply Static will send a POST request after all files are transferred to AWS S3.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.aws_webhook_url}
                             onChange={(webhook) => {
                                 updateSetting('aws_webhook_url', webhook);
@@ -731,6 +797,7 @@ function DeploymentSettings() {
                                     : __('Don\'t clear bucket before new export.', 'simply-static')
                             }
                             disabled={('free' === options.plan || !isPro())}
+                            __nextHasNoMarginBottom
                             checked={emptyBucketBeforeExport}
                             onChange={(value) => {
                                 setEmptyBucketBeforeExport(value);
@@ -765,6 +832,8 @@ function DeploymentSettings() {
                             help={__('Enter your SFTP host.', 'simply-static')}
                             value={settings.sftp_host}
                             disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             onChange={(host) => {
                                 updateSetting('sftp_host', host);
                             }}
@@ -775,6 +844,8 @@ function DeploymentSettings() {
                             type={"number"}
                             disabled={('free' === options.plan || !isPro())}
                             help={__('Enter your SFTP port.', 'simply-static')}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.sftp_port}
                             onChange={(port) => {
                                 updateSetting('sftp_port', port);
@@ -787,6 +858,8 @@ function DeploymentSettings() {
                             type={"text"}
                             disabled={('free' === options.plan || !isPro())}
                             placeholder={"username"}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.sftp_user}
                             onChange={(user) => {
                                 updateSetting('sftp_user', user);
@@ -798,6 +871,8 @@ function DeploymentSettings() {
                             type={"password"}
                             disabled={('free' === options.plan || !isPro())}
                             help={__('Enter your SFTP password.', 'simply-static')}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.sftp_pass}
                             onChange={(pass) => {
                                 updateSetting('sftp_pass', pass);
@@ -807,6 +882,7 @@ function DeploymentSettings() {
                         <TextareaControl
                             label={__('SFTP private key', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
+                            __nextHasNoMarginBottom
                             placeholder={__('OPTIONAL: This is only required if you need to authenticate via a private key to access your SFTP server.', 'simply-static')}
                             help={__('Enter your SFTP private key if you want passwordless upload and the server is configured to allow it. You can set it as a constant in wp-config.php by using define(\'SSP_SFTP_KEY\', \'YOUR_KEY\')', 'simply-static')}
                             value={settings.sftp_private_key}
@@ -821,6 +897,8 @@ function DeploymentSettings() {
                             type={"text"}
                             disabled={('free' === options.plan || !isPro())}
                             placeholder={""}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={settings.sftp_folder}
                             onChange={(folder) => {
                                 updateSetting('sftp_folder', folder);

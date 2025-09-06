@@ -10,6 +10,8 @@ export default function EnvironmentDropdown({ onChange, current, environments, d
                     value={current}
                     options={environments}
                     help={__('Choose an environment or create a new one to configure settings.', 'simply-static')}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     onChange={onChange}
                 />
             </FlexItem>
@@ -18,7 +20,6 @@ export default function EnvironmentDropdown({ onChange, current, environments, d
                     className={'environment-delete-button'}
                     variant={'tertiary'}
                     label={__('Delete selected environment', 'simply-static')}
-                    showToolTip={true}
                     size={'small'}
                     icon={'trash'}
                     disabled={disabled}
