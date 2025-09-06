@@ -89,6 +89,18 @@ toplevel_page_simply-static img {
     text-align: right;
   }
 
+  .components-toggle-control {
+    margin: 15px 0;
+  }
+
+  .components-base-control__help {
+    margin-bottom: 15px;
+  }
+
+  .components-base-control__label {
+    margin-top: 15px;
+  }
+
   textarea {
     width: 100%;
   }
@@ -163,6 +175,7 @@ toplevel_page_simply-static img {
         text-decoration: none;
         text-align: center;
         line-height: 1.5;
+        margin-top:10px;
 
         &.ss-generate-cancel-button {
           background: #b32d2e;

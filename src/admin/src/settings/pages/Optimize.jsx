@@ -354,8 +354,8 @@ function Optimize() {
                     __nextHasNoMarginBottom
                     help={
                         settings.shortpixel_enabled
-                            ? __('Optimize images.', 'simply-static')
-                            : __('Don\'t optimize images.', 'simply-static')
+                            ? __('Optimize images with the ShortPixel API.', 'simply-static')
+                            : __('Don\'t optimize images with the ShortPixel API.', 'simply-static')
                     }
                     disabled={('free' === options.plan || !isPro())}
                     checked={!!settings.shortpixel_enabled}
@@ -376,20 +376,28 @@ function Optimize() {
                             updateSetting('shortpixel_api_key', apiKey);
                         }}
                     />
-                    <Spacer padding={1}></Spacer>
                     <ToggleControl
                       label={__('Convert to webP', 'simply-static')}
                       __nextHasNoMarginBottom
+                      help={
+                          settings.shortpixel_webp_enabled
+                              ? __('Convert images to webp format.', 'simply-static')
+                              : __('Don\'t convert images to webp format', 'simply-static')
+                      }
                       checked={!!settings.shortpixel_webp_enabled}
                       disabled={('free' === options.plan || !isPro())}
                       onChange={(value) => {
                         updateSetting('shortpixel_webp_enabled', value);
                       }}
                     />
-                    <Spacer padding={1}></Spacer>
                     <ToggleControl
                         label={__('Backup the original images?', 'simply-static')}
                         __nextHasNoMarginBottom
+                        help={
+                            settings.shortpixel_backup_enabled
+                                ? __('Back original images.', 'simply-static')
+                                : __('Don\'t backup original images.', 'simply-static')
+                        }
                         checked={!!settings.shortpixel_backup_enabled}
                         disabled={('free' === options.plan || !isPro())}
                         onChange={(value) => {

@@ -57,11 +57,13 @@ function ExportLog() {
     }, [settings]);
 
     // Define base columns
+    const urlColumnWidth = isPro() ? '40%' : '60%';
     const baseColumns = [
         {
             name: 'Code',
             selector: row => row.code,
-            sortable: true
+            sortable: true,
+            width: '12%'
         },
         {
             name: 'URL',
@@ -88,7 +90,9 @@ function ExportLog() {
                 return <a target={'_blank'} href={raw}>{pathOnly}</a>;
             },
             sortable: true,
-            sortFunction: (rowA, rowB) => rowA.url.localeCompare(rowB.url)
+            sortFunction: (rowA, rowB) => rowA.url.localeCompare(rowB.url),
+            width: urlColumnWidth,
+            wrap: true
         }
     ];
 
@@ -102,7 +106,8 @@ function ExportLog() {
             }
             return exportType;
         },
-        sortable: true
+        sortable: true,
+        width: '20%'
     };
 
     // Define Notes column
@@ -116,7 +121,8 @@ function ExportLog() {
             const notesA = rowA.notes.replace(/<[^>]*>/g, '');
             const notesB = rowB.notes.replace(/<[^>]*>/g, '');
             return notesA.localeCompare(notesB);
-        }
+        },
+        width: '28%'
     };
 
     // Combine columns based on whether Pro is activated
