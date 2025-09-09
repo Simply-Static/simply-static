@@ -601,6 +601,11 @@ class Url_Extractor {
 			return $conditional_comment;
 		}, $html_string );
 
+		// If there's no HTML to process, return early to avoid DOM warnings/errors
+		if ( ! is_string( $html_string ) || trim( $html_string ) === '' ) {
+			return $html_string;
+		}
+
 		// Use PHP's native DOMDocument
 		$dom = new DOMDocument();
 
