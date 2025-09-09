@@ -242,7 +242,7 @@ function GeneralSettings() {
                 {replaceType === 'absolute' &&
                     <>
                         <Flex>
-                            <FlexItem style={{minWidth: "15%"}}>
+                            <FlexItem style={{minWidth: "15%", marginTop: "15px"}}>
                                 <SelectControl
                                     label={__('Scheme', 'simply-static')}
                                     value={scheme}
