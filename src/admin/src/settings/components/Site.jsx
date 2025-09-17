@@ -14,7 +14,13 @@ function Site( props ) {
         if ( isRunning ) {
             setAnyRunning(true);
         }
-    }, [isRunning])
+    }, [isRunning]);
+
+    useEffect(() => {
+        setIsPaused(site.paused);
+        setIsRunning(site.running);
+        setCanGenerate(!site.running && !site.paused);
+    }, [site]);
 
     const startExport = () => {
         setCanGenerate(false);
@@ -80,15 +86,13 @@ function Site( props ) {
     return (
         <tr>
             <td>
-                {site.name}
+                {site.name}<br/>
+                <a href={site.url}>{site.url}</a>
             </td>
             <td>
-                {site.url}
+                {isRunning ? 'Running' : ( isPaused ? 'Paused' : 'Idle' ) }
             </td>
-            <td>
-                {isRunning ? 'Running' : 'Idle'}
-            </td>
-            <td>
+            <td className={'generate-container'}>
                 <Buttons
                     site={site}
                     canGenerate={canGenerate}

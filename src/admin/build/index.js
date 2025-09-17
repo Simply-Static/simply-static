@@ -6464,6 +6464,11 @@ function Site(props) {
       setAnyRunning(true);
     }
   }, [isRunning]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    setIsPaused(site.paused);
+    setIsRunning(site.running);
+    setCanGenerate(!site.running && !site.paused);
+  }, [site]);
   const startExport = () => {
     setCanGenerate(false);
     setIsPaused(false);
@@ -6520,7 +6525,11 @@ function Site(props) {
       setIsRunning(true);
     });
   };
-  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("tr", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", null, site.name), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", null, site.url), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", null, isRunning ? 'Running' : 'Idle'), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_GenerateButtons__WEBPACK_IMPORTED_MODULE_2__["default"], {
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("tr", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", null, site.name, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("br", null), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("a", {
+    href: site.url
+  }, site.url)), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", null, isRunning ? 'Running' : isPaused ? 'Paused' : 'Idle'), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", {
+    className: 'generate-container'
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_GenerateButtons__WEBPACK_IMPORTED_MODULE_2__["default"], {
     site: site,
     canGenerate: canGenerate,
     startExport: startExport,
@@ -6576,7 +6585,6 @@ function Sites(props) {
       path: '/simplystatic/v1/sites',
       method: 'GET'
     }).then(resp => {
-      console.log(resp);
       let sitesObjects = [];
       let haveRunningSite = false;
       resp.data.forEach(function (site) {
@@ -6596,11 +6604,13 @@ function Sites(props) {
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     refreshSites();
   }, []);
-  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("table", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("thead", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("tr", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("th", null, __('Name', 'simply-static')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("th", null, __('URL', 'simply-static')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("th", null, __('Status', 'simply-static')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("th", null, __('Actions', 'simply-static')))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("tbody", null, sites.map(site => {
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("table", {
+    className: 'wp-list-table widefat fixed striped posts simple-static-sites'
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("thead", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("tr", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("th", null, __('Name', 'simply-static')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("th", null, __('Status', 'simply-static')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("th", null, __('Actions', 'simply-static')))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("tbody", null, sites.map(site => {
     return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_Site__WEBPACK_IMPORTED_MODULE_6__["default"], {
       setAnyRunning: setAnyRunning,
       site: site,
-      key: site.blog_id
+      key: site.id
     });
   }))));
 }

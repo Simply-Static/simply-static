@@ -106,6 +106,52 @@ toplevel_page_simply-static img {
 .plugin-settings-container {
   /* Navigation */
 }
+.plugin-settings-container .simple-static-sites .generate-container .generate-type,
+.plugin-settings-container .plugin-nav .generate-container .generate-type {
+  height: 40px;
+  line-height: 40px;
+  max-width: 200px;
+}
+.plugin-settings-container .simple-static-sites .generate-container.generating .generate-buttons-container,
+.plugin-settings-container .plugin-nav .generate-container.generating .generate-buttons-container {
+  display: flex;
+  gap: 5px;
+}
+.plugin-settings-container .simple-static-sites .generate-container.generating .generate-buttons-container button,
+.plugin-settings-container .plugin-nav .generate-container.generating .generate-buttons-container button {
+  width: 100%;
+}
+.plugin-settings-container .simple-static-sites .generate-container.generating .generate-buttons-container button.components-button > .dashicon,
+.plugin-settings-container .plugin-nav .generate-container.generating .generate-buttons-container button.components-button > .dashicon {
+  margin: 0 auto;
+}
+.plugin-settings-container .simple-static-sites .generate-container button,
+.plugin-settings-container .plugin-nav .generate-container button {
+  background: #6804cc;
+  border: solid 1px #50059b;
+  color: white;
+  text-decoration: none;
+  text-align: center;
+  line-height: 1.5;
+}
+.plugin-settings-container .simple-static-sites .generate-container button.ss-generate-cancel-button,
+.plugin-settings-container .plugin-nav .generate-container button.ss-generate-cancel-button {
+  background: #b32d2e;
+  border-color: #9b2626;
+}
+.plugin-settings-container .simple-static-sites .generate-container button:disabled,
+.plugin-settings-container .plugin-nav .generate-container button:disabled {
+  opacity: 0.5;
+}
+.plugin-settings-container .simple-static-sites .generate-container .cancel-button,
+.plugin-settings-container .plugin-nav .generate-container .cancel-button {
+  text-align: center;
+  display: block;
+  max-width: 200px;
+  cursor: pointer;
+  color: rgb(104, 4, 204);
+  text-decoration: underline;
+}
 .plugin-settings-container .plugin-nav {
   height: 100%;
   box-shadow: none;
@@ -116,44 +162,6 @@ toplevel_page_simply-static img {
 }
 .plugin-settings-container .plugin-nav .generate-container {
   margin-top: 30px;
-}
-.plugin-settings-container .plugin-nav .generate-container .generate-type {
-  height: 40px;
-  line-height: 40px;
-  max-width: 200px;
-}
-.plugin-settings-container .plugin-nav .generate-container.generating .generate-buttons-container {
-  display: flex;
-  gap: 5px;
-}
-.plugin-settings-container .plugin-nav .generate-container.generating .generate-buttons-container button {
-  width: 100%;
-}
-.plugin-settings-container .plugin-nav .generate-container.generating .generate-buttons-container button.components-button > .dashicon {
-  margin: 0 auto;
-}
-.plugin-settings-container .plugin-nav .generate-container button {
-  background: #6804cc;
-  border: solid 1px #50059b;
-  color: white;
-  text-decoration: none;
-  text-align: center;
-  line-height: 1.5;
-}
-.plugin-settings-container .plugin-nav .generate-container button.ss-generate-cancel-button {
-  background: #b32d2e;
-  border-color: #9b2626;
-}
-.plugin-settings-container .plugin-nav .generate-container button:disabled {
-  opacity: 0.5;
-}
-.plugin-settings-container .plugin-nav .generate-container .cancel-button {
-  text-align: center;
-  display: block;
-  max-width: 200px;
-  cursor: pointer;
-  color: rgb(104, 4, 204);
-  text-decoration: underline;
 }
 .plugin-settings-container .plugin-nav .environment-container button {
   text-align: center;

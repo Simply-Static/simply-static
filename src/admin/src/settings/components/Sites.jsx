@@ -16,9 +16,8 @@ function Sites (props) {
             path: '/simplystatic/v1/sites',
             method: 'GET',
         }).then(resp => {
-            console.log(resp);
             let sitesObjects = [];
-            let haveRunningSite     = false;
+            let haveRunningSite= false;
             resp.data.forEach(function (site) {
                 console.log(site);
 
@@ -45,17 +44,16 @@ function Sites (props) {
 
     return (
         <>
-            <table>
+            <table className={'wp-list-table widefat fixed striped posts simple-static-sites'}>
                 <thead>
                     <tr>
                         <th>{__('Name', 'simply-static')}</th>
-                        <th>{__('URL', 'simply-static')}</th>
                         <th>{__('Status', 'simply-static')}</th>
                         <th>{__('Actions', 'simply-static')}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    { sites.map( (site) => { return <Site setAnyRunning={setAnyRunning} site={site} key={site.blog_id} /> } ) }
+                    { sites.map( (site) => { return <Site setAnyRunning={setAnyRunning} site={site} key={site.id} /> } ) }
                 </tbody>
             </table>
 
