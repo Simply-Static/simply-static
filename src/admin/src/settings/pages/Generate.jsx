@@ -10,6 +10,7 @@ import {SettingsContext} from "../context/SettingsContext";
 import ActivityLog from "../components/ActivityLog";
 import ExportLog from "../components/ExportLog";
 import LogButtons from "../components/LogButtons";
+import Sites from "../components/Sites";
 
 const {__} = wp.i18n;
 
@@ -28,6 +29,12 @@ function Generate() {
         <Flex align={"top"}>
             {options.is_network &&
                 <FlexItem isBlock={true}>
+                    <Card>
+                        <CardBody>
+                            <Sites />
+                        </CardBody>
+
+                    </Card>
                     <Card>
                         <CardHeader>
                             <b>{__('Multisite', 'simply-static')}</b>

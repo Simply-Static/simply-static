@@ -103,6 +103,15 @@ class Archive_Creation_Job extends Background_Process {
 	}
 
 	/**
+	 * @param Options $options
+	 *
+	 * @return void
+	 */
+	public function set_options( Options $options ) {
+		$this->options = $options;
+	}
+
+	/**
 	 * Helper method for starting the Archive_Creation_Job
 	 * @return boolean true if we were able to successfully start generating an archive
 	 */

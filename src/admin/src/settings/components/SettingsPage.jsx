@@ -122,7 +122,7 @@ function SettingsPage() {
             }
         }).then(resp => {
             var json = JSON.parse(resp);
-            if (json.status === 500 ) {
+            if (json.status === 500) {
                 alert(json.message);
                 setDisabledButton(false);
                 return;
@@ -211,52 +211,6 @@ function SettingsPage() {
                                     <p className={"version-number"}>Version: <b>{options.version}</b></p>
                                 }
 
-                                <div className={`generate-container ${disabledButton ? 'generating' : ''}`}>
-                                    {!disabledButton && <Button onClick={() => {
-                                        setSelectedExportType('export');
-                                        startExport();
-                                    }}
-                                    disabled={disabledButton || isDelayed}
-                                    className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
-                                    >
-                                        {!disabledButton && [<Dashicon icon="update"/>,
-                                            __('Generate', 'simply-static')
-                                        ]}
-
-                                        {!disabledButton && isDelayed>0 && <>{isDelayed}s</>}
-
-                                        {disabledButton && [<Dashicon icon="update spin"/>,
-                                            __('Generating...', 'simply-static'),
-                                        ]}
-                                    </Button>}
-                                    {disabledButton && <>
-                                        {!isPaused && <Button
-                                            label={__('Pause', 'simply-static')}
-                                            showToolTip={true}
-                                            className={"ss-generate-media-button"}
-                                            onClick={() => pauseExport()}>
-                                            <Dashicon icon={"controls-pause"}/>
-                                        </Button>
-                                        }
-                                        {isPaused && <Button
-                                            label={__('Resume', 'simply-static')}
-                                            showToolTip={true}
-                                            className={"ss-generate-media-button"}
-                                            onClick={() => resumeExport()}>
-                                            <Dashicon icon={"controls-play"}/>
-                                        </Button>
-                                        }
-                                        <Button
-                                            onClick={() => cancelExport()}
-                                            label={__('Cancel', 'simply-static')}
-                                            className={"ss-generate-cancel-button"}
-                                            showToolTip={true}
-                                        >
-                                            <Dashicon icon={'no'}/>
-                                        </Button>
-                                    </>}
-
-                                </div>
                                 <Spacer margin={5}/>
                                 <Spacer margin={5}/>
                                 <Button href="https://simplystatic.com/changelogs/" target="_blank">

@@ -1,1 +1,236 @@
-(globalThis.webpackChunksimplystatic_settings=globalThis.webpackChunksimplystatic_settings||[]).push([[446],{910:(e,t,a)=>{var s,l=Object.create,o=Object.defineProperty,n=Object.getOwnPropertyDescriptor,r=Object.getOwnPropertyNames,i=Object.getPrototypeOf,p=Object.prototype.hasOwnProperty,y=(e,t,a,s)=>{if(t&&"object"==typeof t||"function"==typeof t)for(let l of r(t))p.call(e,l)||l===a||o(e,l,{get:()=>t[l],enumerable:!(s=n(t,l))||s.enumerable});return e},c=(e,t,a)=>(((e,t,a)=>{t in e?o(e,t,{enumerable:!0,configurable:!0,writable:!0,value:a}):e[t]=a})(e,"symbol"!=typeof t?t+"":t,a),a),u={};((e,t)=>{for(var a in t)o(e,a,{get:t[a],enumerable:!0})})(u,{default:()=>f}),e.exports=(s=u,y(o({},"__esModule",{value:!0}),s));var h=((e,t,a)=>(a=null!=e?l(i(e)):{},y(e&&e.__esModule?a:o(a,"default",{value:e,enumerable:!0}),e)))(a(609)),d=a(635),P=a(327);const g=/[?&](?:list|channel)=([a-zA-Z0-9_-]+)/,m=/user\/([a-zA-Z0-9_-]+)\/?/,b=/youtube-nocookie\.com/;class f extends h.Component{constructor(){super(...arguments),c(this,"callPlayer",d.callPlayer),c(this,"parsePlaylist",(e=>{if(e instanceof Array)return{listType:"playlist",playlist:e.map(this.getID).join(",")};if(g.test(e)){const[,t]=e.match(g);return{listType:"playlist",list:t.replace(/^UC/,"UU")}}if(m.test(e)){const[,t]=e.match(m);return{listType:"user_uploads",list:t}}return{}})),c(this,"onStateChange",(e=>{const{data:t}=e,{onPlay:a,onPause:s,onBuffer:l,onBufferEnd:o,onEnded:n,onReady:r,loop:i,config:{playerVars:p,onUnstarted:y}}=this.props,{UNSTARTED:c,PLAYING:u,PAUSED:h,BUFFERING:d,ENDED:P,CUED:g}=window.YT.PlayerState;if(t===c&&y(),t===u&&(a(),o()),t===h&&s(),t===d&&l(),t===P){const e=!!this.callPlayer("getPlaylist");i&&!e&&(p.start?this.seekTo(p.start):this.play()),n()}t===g&&r()})),c(this,"mute",(()=>{this.callPlayer("mute")})),c(this,"unmute",(()=>{this.callPlayer("unMute")})),c(this,"ref",(e=>{this.container=e}))}componentDidMount(){this.props.onMount&&this.props.onMount(this)}getID(e){return!e||e instanceof Array||g.test(e)?null:e.match(P.MATCH_URL_YOUTUBE)[1]}load(e,t){const{playing:a,muted:s,playsinline:l,controls:o,loop:n,config:r,onError:i}=this.props,{playerVars:p,embedOptions:y}=r,c=this.getID(e);if(t)return g.test(e)||m.test(e)||e instanceof Array?void this.player.loadPlaylist(this.parsePlaylist(e)):void this.player.cueVideoById({videoId:c,startSeconds:(0,d.parseStartTime)(e)||p.start,endSeconds:(0,d.parseEndTime)(e)||p.end});(0,d.getSDK)("https://www.youtube.com/iframe_api","YT","onYouTubeIframeAPIReady",(e=>e.loaded)).then((t=>{this.container&&(this.player=new t.Player(this.container,{width:"100%",height:"100%",videoId:c,playerVars:{autoplay:a?1:0,mute:s?1:0,controls:o?1:0,start:(0,d.parseStartTime)(e),end:(0,d.parseEndTime)(e),origin:window.location.origin,playsinline:l?1:0,...this.parsePlaylist(e),...p},events:{onReady:()=>{n&&this.player.setLoop(!0),this.props.onReady()},onPlaybackRateChange:e=>this.props.onPlaybackRateChange(e.data),onPlaybackQualityChange:e=>this.props.onPlaybackQualityChange(e),onStateChange:this.onStateChange,onError:e=>i(e.data)},host:b.test(e)?"https://www.youtube-nocookie.com":void 0,...y}))}),i),y.events&&console.warn("Using `embedOptions.events` will likely break things. Use ReactPlayer’s callback props instead, eg onReady, onPlay, onPause")}play(){this.callPlayer("playVideo")}pause(){this.callPlayer("pauseVideo")}stop(){document.body.contains(this.callPlayer("getIframe"))&&this.callPlayer("stopVideo")}seekTo(e,t=!1){this.callPlayer("seekTo",e),t||this.props.playing||this.pause()}setVolume(e){this.callPlayer("setVolume",100*e)}setPlaybackRate(e){this.callPlayer("setPlaybackRate",e)}setLoop(e){this.callPlayer("setLoop",e)}getDuration(){return this.callPlayer("getDuration")}getCurrentTime(){return this.callPlayer("getCurrentTime")}getSecondsLoaded(){return this.callPlayer("getVideoLoadedFraction")*this.getDuration()}render(){const{display:e}=this.props,t={width:"100%",height:"100%",display:e};return h.default.createElement("div",{style:t},h.default.createElement("div",{ref:this.ref}))}}c(f,"displayName","YouTube"),c(f,"canPlay",P.canPlay.youtube)}}]);
+(globalThis["webpackChunksimplystatic_settings"] = globalThis["webpackChunksimplystatic_settings"] || []).push([["reactPlayerYouTube"],{
+
+/***/ "./node_modules/react-player/lib/players/YouTube.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/react-player/lib/players/YouTube.js ***!
+  \**********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var __publicField = (obj, key, value) => {
+  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
+var YouTube_exports = {};
+__export(YouTube_exports, {
+  default: () => YouTube
+});
+module.exports = __toCommonJS(YouTube_exports);
+var import_react = __toESM(__webpack_require__(/*! react */ "react"));
+var import_utils = __webpack_require__(/*! ../utils */ "./node_modules/react-player/lib/utils.js");
+var import_patterns = __webpack_require__(/*! ../patterns */ "./node_modules/react-player/lib/patterns.js");
+const SDK_URL = "https://www.youtube.com/iframe_api";
+const SDK_GLOBAL = "YT";
+const SDK_GLOBAL_READY = "onYouTubeIframeAPIReady";
+const MATCH_PLAYLIST = /[?&](?:list|channel)=([a-zA-Z0-9_-]+)/;
+const MATCH_USER_UPLOADS = /user\/([a-zA-Z0-9_-]+)\/?/;
+const MATCH_NOCOOKIE = /youtube-nocookie\.com/;
+const NOCOOKIE_HOST = "https://www.youtube-nocookie.com";
+class YouTube extends import_react.Component {
+  constructor() {
+    super(...arguments);
+    __publicField(this, "callPlayer", import_utils.callPlayer);
+    __publicField(this, "parsePlaylist", (url) => {
+      if (url instanceof Array) {
+        return {
+          listType: "playlist",
+          playlist: url.map(this.getID).join(",")
+        };
+      }
+      if (MATCH_PLAYLIST.test(url)) {
+        const [, playlistId] = url.match(MATCH_PLAYLIST);
+        return {
+          listType: "playlist",
+          list: playlistId.replace(/^UC/, "UU")
+        };
+      }
+      if (MATCH_USER_UPLOADS.test(url)) {
+        const [, username] = url.match(MATCH_USER_UPLOADS);
+        return {
+          listType: "user_uploads",
+          list: username
+        };
+      }
+      return {};
+    });
+    __publicField(this, "onStateChange", (event) => {
+      const { data } = event;
+      const { onPlay, onPause, onBuffer, onBufferEnd, onEnded, onReady, loop, config: { playerVars, onUnstarted } } = this.props;
+      const { UNSTARTED, PLAYING, PAUSED, BUFFERING, ENDED, CUED } = window[SDK_GLOBAL].PlayerState;
+      if (data === UNSTARTED)
+        onUnstarted();
+      if (data === PLAYING) {
+        onPlay();
+        onBufferEnd();
+      }
+      if (data === PAUSED)
+        onPause();
+      if (data === BUFFERING)
+        onBuffer();
+      if (data === ENDED) {
+        const isPlaylist = !!this.callPlayer("getPlaylist");
+        if (loop && !isPlaylist) {
+          if (playerVars.start) {
+            this.seekTo(playerVars.start);
+          } else {
+            this.play();
+          }
+        }
+        onEnded();
+      }
+      if (data === CUED)
+        onReady();
+    });
+    __publicField(this, "mute", () => {
+      this.callPlayer("mute");
+    });
+    __publicField(this, "unmute", () => {
+      this.callPlayer("unMute");
+    });
+    __publicField(this, "ref", (container) => {
+      this.container = container;
+    });
+  }
+  componentDidMount() {
+    this.props.onMount && this.props.onMount(this);
+  }
+  getID(url) {
+    if (!url || url instanceof Array || MATCH_PLAYLIST.test(url)) {
+      return null;
+    }
+    return url.match(import_patterns.MATCH_URL_YOUTUBE)[1];
+  }
+  load(url, isReady) {
+    const { playing, muted, playsinline, controls, loop, config, onError } = this.props;
+    const { playerVars, embedOptions } = config;
+    const id = this.getID(url);
+    if (isReady) {
+      if (MATCH_PLAYLIST.test(url) || MATCH_USER_UPLOADS.test(url) || url instanceof Array) {
+        this.player.loadPlaylist(this.parsePlaylist(url));
+        return;
+      }
+      this.player.cueVideoById({
+        videoId: id,
+        startSeconds: (0, import_utils.parseStartTime)(url) || playerVars.start,
+        endSeconds: (0, import_utils.parseEndTime)(url) || playerVars.end
+      });
+      return;
+    }
+    (0, import_utils.getSDK)(SDK_URL, SDK_GLOBAL, SDK_GLOBAL_READY, (YT) => YT.loaded).then((YT) => {
+      if (!this.container)
+        return;
+      this.player = new YT.Player(this.container, {
+        width: "100%",
+        height: "100%",
+        videoId: id,
+        playerVars: {
+          autoplay: playing ? 1 : 0,
+          mute: muted ? 1 : 0,
+          controls: controls ? 1 : 0,
+          start: (0, import_utils.parseStartTime)(url),
+          end: (0, import_utils.parseEndTime)(url),
+          origin: window.location.origin,
+          playsinline: playsinline ? 1 : 0,
+          ...this.parsePlaylist(url),
+          ...playerVars
+        },
+        events: {
+          onReady: () => {
+            if (loop) {
+              this.player.setLoop(true);
+            }
+            this.props.onReady();
+          },
+          onPlaybackRateChange: (event) => this.props.onPlaybackRateChange(event.data),
+          onPlaybackQualityChange: (event) => this.props.onPlaybackQualityChange(event),
+          onStateChange: this.onStateChange,
+          onError: (event) => onError(event.data)
+        },
+        host: MATCH_NOCOOKIE.test(url) ? NOCOOKIE_HOST : void 0,
+        ...embedOptions
+      });
+    }, onError);
+    if (embedOptions.events) {
+      console.warn("Using `embedOptions.events` will likely break things. Use ReactPlayer\u2019s callback props instead, eg onReady, onPlay, onPause");
+    }
+  }
+  play() {
+    this.callPlayer("playVideo");
+  }
+  pause() {
+    this.callPlayer("pauseVideo");
+  }
+  stop() {
+    if (!document.body.contains(this.callPlayer("getIframe")))
+      return;
+    this.callPlayer("stopVideo");
+  }
+  seekTo(amount, keepPlaying = false) {
+    this.callPlayer("seekTo", amount);
+    if (!keepPlaying && !this.props.playing) {
+      this.pause();
+    }
+  }
+  setVolume(fraction) {
+    this.callPlayer("setVolume", fraction * 100);
+  }
+  setPlaybackRate(rate) {
+    this.callPlayer("setPlaybackRate", rate);
+  }
+  setLoop(loop) {
+    this.callPlayer("setLoop", loop);
+  }
+  getDuration() {
+    return this.callPlayer("getDuration");
+  }
+  getCurrentTime() {
+    return this.callPlayer("getCurrentTime");
+  }
+  getSecondsLoaded() {
+    return this.callPlayer("getVideoLoadedFraction") * this.getDuration();
+  }
+  render() {
+    const { display } = this.props;
+    const style = {
+      width: "100%",
+      height: "100%",
+      display
+    };
+    return /* @__PURE__ */ import_react.default.createElement("div", { style }, /* @__PURE__ */ import_react.default.createElement("div", { ref: this.ref }));
+  }
+}
+__publicField(YouTube, "displayName", "YouTube");
+__publicField(YouTube, "canPlay", import_patterns.canPlay.youtube);
+
+
+/***/ })
+
+}]);
+//# sourceMappingURL=reactPlayerYouTube.js.map

@@ -571,6 +571,7 @@ abstract class Background_Process extends Async_Request {
 		$key_column   = 'option_id';
 		$value_column = 'option_value';
 
+
 		if ( is_multisite() ) {
 			$table        = $wpdb->sitemeta;
 			$column       = 'meta_key';

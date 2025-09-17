@@ -40,9 +40,10 @@ class Multisite {
 	 */
 	public function __construct() {
 		add_action( 'ss_archive_creation_job_before_start', [ $this, 'switch_to_blog' ] );
-		add_action( 'ss_before_perform_archive_action', [ $this, 'before_perform_action' ], 20, 3 );
-		add_action( 'ss_after_perform_archive_action', [ $this, 'after_perform_action' ], 20, 2 );
-		add_action( 'ss_before_render_activity_log', [ $this, 'switch_to_blog' ] );
+		add_action( 'ss_before_perform_archive_action', [ $this, 'before_perform_action' ], 1, 3 );
+		add_action( 'ss_after_perform_archive_action', [ $this, 'after_perform_action' ], 99, 3 );
+        add_action( 'ss_before_perform_archive_running_check', [ $this, 'before_running_check' ], 1, 2 );
+		add_action( 'ss_before_render_activity_log', [ $this, 'before_rendering_activity_log' ], 1 );;
 		add_action( 'ss_before_render_export_log', [ $this, 'switch_to_blog' ] );
 		add_action( 'ss_after_render_export_log', [ $this, 'restore_blog' ] );
 		add_action( 'ss_before_sending_response_for_static_archive', [ $this, 'restore_blog' ] );
@@ -54,7 +55,7 @@ class Multisite {
 		add_action( 'network_admin_menu', array( Admin_Settings::get_instance(), 'add_menu' ), 2 );
 	}
 
-	public function after_perform_action( $blog_id, $action ) {
+	public function after_perform_action( $blog_id, $action, $archive_creation_job ) {
 		if ( 'start' !== $action ) {
 			return;
 		}
@@ -64,7 +65,21 @@ class Multisite {
 		}
 
 		$this->restore_blog();
+
+        $options = Options::reinstance();
+        $archive_creation_job->set_options( $options );
 	}
+
+    public function before_running_check( $blog_id, $archive_creation_job ) {
+        if ( ! isset( $_REQUEST['blog_id'] ) || ! isset( $_REQUEST['is_network_admin'] ) ) {
+            return;
+        }
+
+        $this->switch_to_blog( absint( $_REQUEST['blog_id'] ) );
+
+        $options = Options::reinstance();
+        $archive_creation_job->set_options( $options );
+    }
 
 	/**
 	 * @param integer $blog_id
@@ -86,7 +101,21 @@ class Multisite {
 		Util::debug_log( 'Last export: ' . absint( $_REQUEST['blog_id'] ) );
 
 		$this->switch_to_blog( absint( $_REQUEST['blog_id'] ) );
+
+        $options = Options::reinstance();
+        $archive_creation_job->set_options( $options );
 	}
+
+    public function before_rendering_activity_log( $blog_id ) {
+        if ( ! isset( $_REQUEST['blog_id'] ) || ! isset( $_REQUEST['is_network_admin'] ) ) {
+            return;
+        }
+
+        $blog_id = absint( $_REQUEST['blog_id'] );
+        $this->switch_to_blog( $blog_id );
+
+        $options = Options::reinstance();
+    }
 
 	/**
 	 * Hide the "Simply Static Pro" top level menu on Multisite through CSS.
@@ -140,6 +169,7 @@ class Multisite {
 		}
 
 		switch_to_blog( $blog_id );
+        $this->switched = $blog_id;
 		Util::debug_log( "Switched to blog: " . get_current_blog_id() );
 	}
 

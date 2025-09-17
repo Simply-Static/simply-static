@@ -91,6 +91,10 @@ class Util {
 
 		$debug_file = self::get_debug_log_filename();
 
+		if ( ! file_exists( $debug_file ) ) {
+			wp_mkdir_p( dirname( $debug_file ) );
+		}
+
 		// add timestamp and newline
 		$message = '[' . date( 'Y-m-d H:i:s' ) . '] ';
 

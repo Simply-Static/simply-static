@@ -305,6 +305,16 @@ class Admin_Settings {
 	 * @return void
 	 */
 	public function rest_api_init() {
+        if ( is_multisite() ) {
+            register_rest_route( 'simplystatic/v1', '/sites', array(
+                    'methods'             => 'GET',
+                    'callback'            => [ $this, 'get_sites' ],
+                    'permission_callback' => function () {
+                        return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+                    },
+            ) );
+        }
+
 		register_rest_route( 'simplystatic/v1', '/post-types', array(
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'get_post_types' ],
@@ -972,19 +982,20 @@ class Admin_Settings {
 		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
 		$type    = ! empty( $params['type'] ) ? $params['type'] : 'export';
 
-		// Check if an export is already running
-		$archive_creation_job = Plugin::instance()->get_archive_creation_job();
-		if ( $archive_creation_job->is_running() ) {
-			Util::debug_log( "Export already running. Blocking new export request." );
-			Util::debug_log( "Current task: " . $archive_creation_job->get_current_task() );
-			Util::debug_log( "Is job done: " . ($archive_creation_job->is_job_done() ? 'true' : 'false') );
+        // Check if an export is already running
+        $archive_creation_job = Plugin::instance()->get_archive_creation_job();
+        do_action( 'ss_before_perform_archive_running_check', $blog_id, $archive_creation_job );
+        if ( $archive_creation_job->is_running() ) {
+            Util::debug_log( "Export already running. Blocking new export request." );
+            Util::debug_log( "Current task: " . $archive_creation_job->get_current_task() );
+            Util::debug_log( "Is job done: " . ($archive_creation_job->is_job_done() ? 'true' : 'false') );
 
-			// Return a 409 Conflict status code with an error message
-			return json_encode( [
-				'status'  => 409, // Conflict status code
-				'message' => __( 'An export is already running. Please wait for it to complete or cancel it before starting a new one.', 'simply-static' )
-			] );
-		}
+            // Return a 409 Conflict status code with an error message
+            return json_encode( [
+                    'status'  => 409, // Conflict status code
+                    'message' => __( 'An export is already running. Please wait for it to complete or cancel it before starting a new one.', 'simply-static' )
+            ] );
+        }
 
 		try {
 			do_action( 'ss_before_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
@@ -1104,6 +1115,48 @@ class Admin_Settings {
 			'data'   => $crawlers_for_js,
 		] );
 	}
+
+    public function get_sites() {
+        $site_ids = get_sites([
+            "spam"                   => 0,
+            "deleted"                => 0,
+            "archived"               => 0,
+            "network_id"             => get_current_network_id(),
+            "number"                 => 999,
+            "offset"                 => 0,
+            "fields"                 => "ids",
+            "order"                  => "DESC",
+            "orderby"                => "id",
+            "update_site_meta_cache" => false
+        ]);
+
+        /** @var Archive_Creation_Job $job */
+        $job = Plugin::instance()->get_archive_creation_job();
+
+        $sites = [];
+        foreach ($site_ids as $site_id) {
+            $site = get_blog_details( $site_id );
+
+            switch_to_blog( $site_id );
+
+            $options = Options::reinstance();
+            $job->set_options( $options );
+
+            $sites[] = [
+                'id'       => $site->blog_id,
+                'name'     => $site->blogname,
+                'url'      => $site->siteurl,
+                'path'     => $site->path,
+                'running'  => $job->is_running(),
+                'paused'   => $job->is_paused(),
+            ];
+
+            restore_current_blog();
+
+        }
+
+        return wp_send_json_success( $sites );
+    }
 
 	/**
 	 * Get post types for JS
