@@ -2,6 +2,8 @@ import apiFetch from "@wordpress/api-fetch";
 import Buttons from "./GenerateButtons";
 import {useState} from "@wordpress/element";
 import {useEffect} from "react";
+import {Button, Dashicon} from "@wordpress/components";
+const {__} = wp.i18n;
 
 function Site( props ) {
     const { site, setAnyRunning } = props;
@@ -102,7 +104,15 @@ function Site( props ) {
                     cancelExport={cancelExport}
                     pauseExport={pauseExport}
                     resumeExport={resumeExport}
-                />
+                >
+                    <Button
+
+                        onClick={() => window.location = site.settings_url}>
+                        <Dashicon icon="admin-generic"/>
+                    </Button>
+
+                </Buttons>
+
             </td>
         </tr>
     )

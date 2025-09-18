@@ -36,7 +36,7 @@ function Sites (props) {
 
     useInterval(() => {
         refreshSites();
-    }, anyRunning ? 2500 : null);
+    }, anyRunning ? 2500 : 300000); // Any running, check every 2-3secs. Not running, check every 5 mins.
 
     useEffect(() => {
         refreshSites();

@@ -1,7 +1,7 @@
 import {Button, Dashicon} from "@wordpress/components";
 const {__} = wp.i18n;
 function GenerateButtons(props) {
-    const { canGenerate, isPaused, isDelayed, startExport, cancelExport, pauseExport, resumeExport } = props;
+    const { children, canGenerate, isPaused, isDelayed, startExport, cancelExport, pauseExport, resumeExport } = props;
     const hasPauseFeature = typeof pauseExport === 'function';
     const hasCancelFeature = typeof cancelExport === 'function';
     const hasResumeFeature = typeof resumeExport === 'function';
@@ -48,6 +48,7 @@ function GenerateButtons(props) {
                 <Dashicon icon={'no'}/>
             </Button> }
         </>}
+        {children}
     </div>
 }
 

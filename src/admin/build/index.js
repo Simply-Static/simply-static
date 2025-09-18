@@ -5676,6 +5676,7 @@ const {
 } = wp.i18n;
 function GenerateButtons(props) {
   const {
+    children,
     canGenerate,
     isPaused,
     isDelayed,
@@ -5720,7 +5721,7 @@ function GenerateButtons(props) {
     showToolTip: true
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Dashicon, {
     icon: 'no'
-  }))));
+  }))), children);
 }
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (GenerateButtons);
 
@@ -6445,11 +6446,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _GenerateButtons__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./GenerateButtons */ "./src/settings/components/GenerateButtons.jsx");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__);
 
 
 
 
 
+
+const {
+  __
+} = wp.i18n;
 function Site(props) {
   const {
     site,
@@ -6538,7 +6545,11 @@ function Site(props) {
     cancelExport: cancelExport,
     pauseExport: pauseExport,
     resumeExport: resumeExport
-  })));
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Button, {
+    onClick: () => window.location = site.settings_url
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Dashicon, {
+    icon: "admin-generic"
+  })))));
 }
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Site);
 
@@ -6600,7 +6611,8 @@ function Sites(props) {
   }
   (0,_hooks_useInterval__WEBPACK_IMPORTED_MODULE_5__["default"])(() => {
     refreshSites();
-  }, anyRunning ? 2500 : null);
+  }, anyRunning ? 2500 : 300000); // Any running, check every 2-3secs. Not running, check every 5 mins.
+
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     refreshSites();
   }, []);
@@ -8595,8 +8607,6 @@ function Generate() {
     blogId,
     setBlogId
   } = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useContext)(_context_SettingsContext__WEBPACK_IMPORTED_MODULE_3__.SettingsContext);
-  const [selectedSiteUrl, setSelectedSiteURL] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)('');
-  const [selectedSiteActivityUrl, setSelectedSiteActivityUrl] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)('');
   return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "inner-settings"
   }, !options.is_network && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_ActivityLog__WEBPACK_IMPORTED_MODULE_4__["default"], null), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
@@ -8605,40 +8615,11 @@ function Generate() {
     align: "top"
   }, options.is_network && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.FlexItem, {
     isBlock: true
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_Sites__WEBPACK_IMPORTED_MODULE_7__["default"], null))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Multisite', 'simply-static'))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
-    label: __('Choose a site to export', 'simply-static'),
-    value: blogId,
-    options: options.sites.map(function (site) {
-      return {
-        label: `${site.name} (${site.url})`,
-        value: site.blog_id
-      };
-    }),
-    onChange: blog_id => {
-      setBlogId(blog_id);
-
-      // Update admin edit URL:
-      options.sites.some(item => {
-        if (item.blog_id === blog_id) {
-          setSelectedSiteURL(item.settings_url);
-          setSelectedSiteActivityUrl(item.activity_log_url);
-        }
-      });
-    }
-  }), selectedSiteUrl && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-    isPrimary: true,
-    href: selectedSiteUrl
-  }, "Switch to Site settings"), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-    style: {
-      marginLeft: "5px"
-    },
-    isSecondary: true,
-    href: selectedSiteActivityUrl
-  }, "Check progress"))))), settings.debugging_mode && options.log_file && !options.is_network && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.FlexItem, {
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_Sites__WEBPACK_IMPORTED_MODULE_7__["default"], null)))), settings.debugging_mode && options.log_file && !options.is_network && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.FlexItem, {
     isBlock: true
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Debugging', 'simply-static'))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_LogButtons__WEBPACK_IMPORTED_MODULE_6__["default"], null))))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Debugging', 'simply-static'))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_LogButtons__WEBPACK_IMPORTED_MODULE_6__["default"], null))))), !options.is_network && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
     margin: 5
-  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Export Log', 'simply-static'))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_ExportLog__WEBPACK_IMPORTED_MODULE_5__["default"], null))));
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, __('Export Log', 'simply-static'))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.CardBody, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_ExportLog__WEBPACK_IMPORTED_MODULE_5__["default"], null)))));
 }
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Generate);
 

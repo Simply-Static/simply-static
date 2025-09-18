@@ -1143,12 +1143,14 @@ class Admin_Settings {
             $job->set_options( $options );
 
             $sites[] = [
-                'id'       => $site->blog_id,
-                'name'     => $site->blogname,
-                'url'      => $site->siteurl,
-                'path'     => $site->path,
-                'running'  => $job->is_running(),
-                'paused'   => $job->is_paused(),
+                'id'               => $site->blog_id,
+                'name'             => $site->blogname,
+                'url'              => $site->siteurl,
+                'path'             => $site->path,
+                'running'          => $job->is_running(),
+                'paused'           => $job->is_paused(),
+                'settings_url'     => esc_url( get_admin_url( $site->blog_id ) . 'admin.php?page=simply-static-settings' ),
+                'activity_log_url' => esc_url( get_admin_url( $site->blog_id ) . 'admin.php?page=simply-static-generate' )
             ];
 
             restore_current_blog();
