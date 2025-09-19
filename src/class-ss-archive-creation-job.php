@@ -146,6 +146,9 @@ class Archive_Creation_Job extends Background_Process {
 
 			Util::debug_log( "Pushing first task to queue: " . $first_task );
 
+			// Set the current site ID for multisite support
+			$this->set_current_site_id( $blog_id );
+
 			$this->push_to_queue( $first_task )
 			     ->save()
 			     ->dispatch();

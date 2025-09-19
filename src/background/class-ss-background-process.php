@@ -40,6 +40,13 @@ abstract class Background_Process extends Async_Request {
 	private $switched_to_blog = false;
 
 	/**
+	 * Current site ID for multisite support
+	 *
+	 * @var int|null
+	 */
+	private $current_site_id = null;
+
+	/**
 	 * Action
 	 *
 	 * (default value: 'background_process')
@@ -464,7 +471,7 @@ abstract class Background_Process extends Async_Request {
 	 * @return bool
 	 */
 	public function is_processing() {
-		if ( get_site_transient( $this->identifier . '_process_lock' ) ) {
+		if ( get_site_transient( $this->get_lock_key() ) ) {
 			// Process already running.
 			return true;
 		}
@@ -490,7 +497,7 @@ abstract class Background_Process extends Async_Request {
 		$lock_duration = apply_filters( $this->identifier . '_queue_lock_time', $lock_duration );
 
 		$microtime = microtime();
-		$locked    = set_site_transient( $this->identifier . '_process_lock', $microtime, $lock_duration );
+		$locked    = set_site_transient( $this->get_lock_key(), $microtime, $lock_duration );
 
 		/**
 		 * Action to note whether the background process managed to create its lock.
@@ -520,7 +527,7 @@ abstract class Background_Process extends Async_Request {
 	 * @return $this
 	 */
 	protected function unlock_process() {
-		$unlocked = delete_site_transient( $this->identifier . '_process_lock' );
+		$unlocked = delete_site_transient( $this->get_lock_key() );
 
 		/**
 		 * Action to note whether the background process managed to release its lock.
@@ -952,6 +959,40 @@ abstract class Background_Process extends Async_Request {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Set the current site ID for multisite processing
+	 *
+	 * @param int|null $site_id
+	 */
+	public function set_current_site_id( $site_id ) {
+		$this->current_site_id = $site_id;
+	}
+
+	/**
+	 * Get the current site ID for multisite processing
+	 *
+	 * @return int|null
+	 */
+	public function get_current_site_id() {
+		return $this->current_site_id;
+	}
+
+	/**
+	 * Get site-specific lock key
+	 *
+	 * @return string
+	 */
+	private function get_lock_key() {
+		$lock_key = $this->identifier . '_process_lock';
+		
+		// In multisite, add site ID to make lock site-specific
+		if ( is_multisite() && !is_null( $this->current_site_id ) ) {
+			$lock_key .= '_site_' . $this->current_site_id;
+		}
+		
+		return $lock_key;
 	}
 
 	/**

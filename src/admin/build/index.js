@@ -6591,6 +6591,48 @@ const {
 function Sites(props) {
   const [sites, setSites] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)([]);
   const [anyRunning, setAnyRunning] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(false);
+  const [siteToTriggerCron, setSiteToTriggerCron] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(0);
+  const triggerCron = blogId => {
+    _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2___default()({
+      path: '/simplystatic/v1/trigger-cron',
+      method: 'POST',
+      data: {
+        'blog_id': blogId
+      }
+    }).then(resp => {
+      var json = JSON.parse(resp);
+      if (json.status === 200) {
+        // Show success message or update UI
+        console.log('CRON triggered successfully for site ' + blogId);
+      } else {
+        console.error('Failed to trigger CRON:', json.message);
+      }
+      let id = getNextSiteId(blogId);
+      setSiteToTriggerCron(id);
+    }).catch(error => {
+      console.error('Error triggering CRON:', error);
+    });
+  };
+  function getNextSiteId(siteId) {
+    let ids = getSiteIds();
+    if (ids.length === 0) {
+      return 0;
+    }
+    let index = ids.indexOf(siteId);
+    if (index === -1) {
+      return ids[0];
+    }
+    index++;
+    let id = ids[index] || ids[0];
+    return id;
+  }
+  function getSiteIds() {
+    let siteIds = [];
+    sites.forEach(function (site) {
+      siteIds.push(site.id);
+    });
+    return siteIds;
+  }
   function refreshSites() {
     _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2___default()({
       path: '/simplystatic/v1/sites',
@@ -6612,6 +6654,16 @@ function Sites(props) {
   (0,_hooks_useInterval__WEBPACK_IMPORTED_MODULE_5__["default"])(() => {
     refreshSites();
   }, anyRunning ? 2500 : 300000); // Any running, check every 2-3secs. Not running, check every 5 mins.
+
+  (0,_hooks_useInterval__WEBPACK_IMPORTED_MODULE_5__["default"])(() => {
+    if (!siteToTriggerCron && sites.length > 0) {
+      setSiteToTriggerCron(sites[0].id);
+    }
+    if (!siteToTriggerCron) {
+      return;
+    }
+    triggerCron(siteToTriggerCron);
+  }, anyRunning ? 150000 : null); // Run Cron every 2.5mins. 1 site per iteration.
 
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     refreshSites();

@@ -490,6 +490,14 @@ class Admin_Settings {
 				return current_user_can( apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ) );
 			},
 		) );
+
+		register_rest_route( 'simplystatic/v1', '/trigger-cron', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'trigger_cron' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_network', 'cron' ) );
+			},
+		) );
 	}
 
 	/**
@@ -1093,6 +1101,54 @@ class Admin_Settings {
 		do_action( 'ss_after_perform_archive_action', $blog_id, 'resume', Plugin::instance()->get_archive_creation_job() );
 
 		return json_encode( [ 'status' => 200 ] );
+	}
+
+	/**
+	 * Trigger CRON for specific site
+	 *
+	 * @return false|string
+	 */
+	public function trigger_cron( $request ) {
+		$params  = $request->get_params();
+		$blog_id = ! empty( $params['blog_id'] ) ? (int) $params['blog_id'] : 0;
+
+		if ( ! is_multisite() ) {
+			return json_encode( [
+				'status'  => 400,
+				'message' => __( 'This endpoint is only available for multisite installations.', 'simply-static' )
+			] );
+		}
+
+		if ( empty( $blog_id ) || ! get_blog_details( $blog_id ) ) {
+			return json_encode( [
+				'status'  => 400,
+				'message' => __( 'Invalid blog ID provided.', 'simply-static' )
+			] );
+		}
+
+		try {
+			// Switch to the specified blog
+			switch_to_blog( $blog_id );
+
+            do_action( 'wp_archive_creation_job' );
+
+			// Restore the previous blog
+			restore_current_blog();
+
+			return json_encode( [
+				'status'  => 200,
+				'message' => sprintf( __( 'CRON triggered successfully for site %d.', 'simply-static' ), $blog_id )
+			] );
+
+		} catch ( \Exception $e ) {
+			// Make sure to restore blog context even on error
+			restore_current_blog();
+
+			return json_encode( [
+				'status'  => 500,
+				'message' => $e->getMessage()
+			] );
+		}
 	}
 
 	/**
