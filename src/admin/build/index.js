@@ -5950,6 +5950,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
 /* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_14___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_14__);
 /* harmony import */ var _EnvironmentSidebar__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./EnvironmentSidebar */ "./src/settings/components/EnvironmentSidebar.jsx");
+/* harmony import */ var _SidebarMultisite__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./SidebarMultisite */ "./src/settings/components/SidebarMultisite.jsx");
+
 
 
 
@@ -6138,37 +6140,7 @@ function SettingsPage() {
     icon: "align-center"
   }), " ", __('Toggle menu', 'simply-static')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.FlexItem, {
     className: showMobileNav ? 'toggle-nav sidebar' : 'sidebar'
-  }, options.is_network ? (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Card, {
-    className: "plugin-nav"
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "plugin-logo"
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("img", {
-    alt: "Logo",
-    src: options.logo
-  })), 'pro' === options.plan && isPro() ? (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", {
-    className: "version-number"
-  }, "Free: ", (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, options.version), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("br", null), "Pro: ", (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, options.version_pro)) : (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", {
-    className: "version-number"
-  }, "Version: ", (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, options.version)), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.__experimentalSpacer, {
-    margin: 5
-  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.__experimentalSpacer, {
-    margin: 5
-  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Button, {
-    href: "https://simplystatic.com/changelogs/",
-    target: "_blank"
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Dashicon, {
-    icon: "editor-ul"
-  }), " ", __('Changelog', 'simply-static')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Button, {
-    href: "https://docs.simplystatic.com",
-    target: "_blank"
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Dashicon, {
-    icon: "admin-links"
-  }), " ", __('Documentation', 'simply-static')), 'free' === options.plan && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Button, {
-    href: "https://simplystatic.com",
-    target: "_blank"
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Dashicon, {
-    icon: "admin-site-alt3"
-  }), "Simply Static Pro")) : (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Card, {
+  }, options.is_network ? (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_SidebarMultisite__WEBPACK_IMPORTED_MODULE_16__["default"], null) : (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Card, {
     className: "plugin-nav"
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "plugin-logo"
@@ -6431,6 +6403,71 @@ function SettingsPage() {
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_pages_IntegrationsSettings__WEBPACK_IMPORTED_MODULE_10__["default"], null)))))));
 }
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SettingsPage);
+
+/***/ }),
+
+/***/ "./src/settings/components/SidebarMultisite.jsx":
+/*!******************************************************!*\
+  !*** ./src/settings/components/SidebarMultisite.jsx ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _context_SettingsContext__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../context/SettingsContext */ "./src/settings/context/SettingsContext.jsx");
+
+
+
+
+const {
+  __
+} = wp.i18n;
+function SidebarMultisite(props = null) {
+  const {
+    isPro
+  } = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useContext)(_context_SettingsContext__WEBPACK_IMPORTED_MODULE_3__.SettingsContext);
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Card, {
+    className: "plugin-nav"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "plugin-logo"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("img", {
+    alt: "Logo",
+    src: options.logo
+  })), 'pro' === options.plan && isPro() ? (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", {
+    className: "version-number"
+  }, "Free: ", (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, options.version), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("br", null), "Pro: ", (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, options.version_pro)) : (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", {
+    className: "version-number"
+  }, "Version: ", (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("b", null, options.version)), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+    margin: 5
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalSpacer, {
+    margin: 5
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+    href: "https://simplystatic.com/changelogs/",
+    target: "_blank"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Dashicon, {
+    icon: "editor-ul"
+  }), " ", __('Changelog', 'simply-static')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+    href: "https://docs.simplystatic.com",
+    target: "_blank"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Dashicon, {
+    icon: "admin-links"
+  }), " ", __('Documentation', 'simply-static')), 'free' === options.plan && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+    href: "https://simplystatic.com",
+    target: "_blank"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Dashicon, {
+    icon: "admin-site-alt3"
+  }), "Simply Static Pro"));
+}
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SidebarMultisite);
 
 /***/ }),
 
