@@ -188,9 +188,13 @@ function SettingsPage() {
         </optgroup>
     }
 
+    const minHeight = () => {
+        return window.innerHeight - ( wpadminbar ? wpadminbar.clientHeight : 0 ) - 1;
+    }
+
     return (
-        <div className={"plugin-settings-container"}>
-            <NavigatorProvider initialPath={initialPage}>
+        <div className={"plugin-settings-container"} >
+            <NavigatorProvider initialPath={initialPage} style={{minHeight: minHeight() + "px"}}>
                 <Flex>
                     <a onClick={() => {
                         setShowMobileNav(!showMobileNav);

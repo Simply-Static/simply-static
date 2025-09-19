@@ -6119,10 +6119,16 @@ function SettingsPage() {
       label: "Builds"
     }, builds);
   }
+  const minHeight = () => {
+    return window.innerHeight - (wpadminbar ? wpadminbar.clientHeight : 0) - 1;
+  };
   return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "plugin-settings-container"
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.__experimentalNavigatorProvider, {
-    initialPath: initialPage
+    initialPath: initialPage,
+    style: {
+      minHeight: minHeight() + "px"
+    }
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Flex, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("a", {
     onClick: () => {
       setShowMobileNav(!showMobileNav);
