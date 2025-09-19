@@ -488,6 +488,16 @@ class Url_Extractor {
 		// Preserve JSON attributes before processing
 		$html_string = $this->preserve_attributes($html_string);
 
+		// Extract and preserve non-conditional HTML comments to avoid altering their content (e.g., commented-out scripts)
+		$html_comments = [];
+		$comment_placeholder = '<!-- COMMENT_PLACEHOLDER_%d -->';
+		$non_conditional_comment_regex = '/<!--(?!\s*\[if).*?-->/s';
+		$html_string = preg_replace_callback( $non_conditional_comment_regex, function( $matches ) use ( &$html_comments, &$comment_placeholder ) {
+			$index = count( $html_comments );
+			$html_comments[] = $matches[0];
+			return sprintf( $comment_placeholder, $index );
+		}, $html_string );
+
 		// Next, extract and save all script tags using regex to ensure they're preserved
 		$this->script_tags  = []; // Reset the array for each call
 		$script_placeholder = '<!-- SCRIPT_PLACEHOLDER_%d -->';
@@ -696,6 +706,12 @@ class Url_Extractor {
 				} else {
 					return '';
 				}
+			}, $html );
+
+			// Restore non-conditional comments exactly as they were
+			$html = preg_replace_callback( '/<!-- COMMENT_PLACEHOLDER_(\d+) -->/', function ( $matches ) use ( $html_comments ) {
+				$index = (int) $matches[1];
+				return isset( $html_comments[ $index ] ) ? $html_comments[ $index ] : '';
 			}, $html );
 
 			// Restore JSON attributes
