@@ -313,6 +313,14 @@ class Admin_Settings {
                         return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
                     },
             ) );
+
+            register_rest_route( 'simplystatic/v1', '/trigger-cron', array(
+                    'methods'             => 'POST',
+                    'callback'            => [ $this, 'trigger_cron' ],
+                    'permission_callback' => function () {
+                        return current_user_can( apply_filters( 'ss_user_capability', 'manage_network', 'cron' ) );
+                    },
+            ) );
         }
 
 		register_rest_route( 'simplystatic/v1', '/post-types', array(
@@ -491,13 +499,6 @@ class Admin_Settings {
 			},
 		) );
 
-		register_rest_route( 'simplystatic/v1', '/trigger-cron', array(
-			'methods'             => 'POST',
-			'callback'            => [ $this, 'trigger_cron' ],
-			'permission_callback' => function () {
-				return current_user_can( apply_filters( 'ss_user_capability', 'manage_network', 'cron' ) );
-			},
-		) );
 	}
 
 	/**

@@ -378,6 +378,9 @@ abstract class Background_Process extends Async_Request {
 	protected function get_status() {
 		global $wpdb;
 
+		/*
+		 * Still using status per site within their options to allow multiple exports.
+		 *
 		if ( is_multisite() ) {
 			$status = $wpdb->get_var(
 				$wpdb->prepare(
@@ -393,7 +396,14 @@ abstract class Background_Process extends Async_Request {
 					$this->get_status_key()
 				)
 			);
-		}
+		}*/
+
+		$status = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1",
+				$this->get_status_key()
+			)
+		);
 
 		return absint( $status );
 	}
@@ -579,12 +589,15 @@ abstract class Background_Process extends Async_Request {
 		$value_column = 'option_value';
 
 
+		/*
+		 * Still using batches on site level.
 		if ( is_multisite() ) {
 			$table        = $wpdb->sitemeta;
 			$column       = 'meta_key';
 			$key_column   = 'meta_id';
 			$value_column = 'meta_value';
 		}
+		*/
 
 		if( !is_null( $for_site_id ) ) {
 			$key = $wpdb->esc_like( $this->identifier . '_batch_' . $for_site_id ) . '%';
