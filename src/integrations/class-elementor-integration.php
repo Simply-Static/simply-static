@@ -58,6 +58,9 @@ class Elementor_Integration extends Integration {
 		// Add Elementor Crawler to active crawlers
 		$this->activate_elementor_crawler();
 
+		// Set Elementor defaults once when integration becomes active
+		$this->set_elementor_default_options();
+
 		// Register Elementor Pro specific functionality if available and if smart_crawl is not enabled
 		if ( $this->is_elementor_pro_active() ) {
 			if ( ! $options->get( 'smart_crawl' ) ) {
@@ -482,6 +485,30 @@ Util::debug_log('extract_elementor_settings: ' . $json);
 		}
 	}
 
+
+	/**
+	 * Set Elementor default options inside wp_options once when the integration is activated.
+	 * Uses update_option as requested and guards with a one-time flag to avoid overriding user changes.
+	 *
+	 * @return void
+	 */
+	protected function set_elementor_default_options() {
+		// Prevent repeated overrides; run only once per site unless flag is removed.
+		if ( get_option( 'simply_static_elementor_defaults_set' ) ) {
+			return;
+		}
+
+		// Apply requested defaults
+		update_option( 'elementor_meta_generator_tag', 1 );
+		update_option( 'elementor_css_print_method', 'internal' );
+		update_option( 'elementor_lazy_load_background_images', 0 );
+		update_option( 'elementor_element_cache_ttl', 'disable' );
+		update_option( 'elementor_experiment-e_font_icon_svg', 'active' );
+		update_option( 'elementor_experiment-e_optimized_markup', 'inactive' );
+
+		// Mark done
+		update_option( 'simply_static_elementor_defaults_set', 1 );
+	}
 
 	/**
 	 * Activate the Elementor Crawler
