@@ -356,6 +356,19 @@ class Fetch_Urls_Task extends Task {
 	 * @return void
 	 */
 	public function set_url_found_on( $static_page, $child_url ) {
+		// Skip adding the selected custom 404 page as a regular page
+		$exclude_url = '';
+		if ( $this->options->get( 'generate_404' ) && (int) $this->options->get( 'custom_404_page' ) ) {
+			$permalink = get_permalink( (int) $this->options->get( 'custom_404_page' ) );
+			if ( $permalink ) {
+				$exclude_url = untrailingslashit( $permalink );
+			}
+		}
+		if ( ! empty( $exclude_url ) && 0 === strcasecmp( untrailingslashit( $child_url ), $exclude_url ) ) {
+			Util::debug_log( sprintf( 'Skipping link-follow to custom 404 page URL "%s"', $child_url ) );
+			return;
+		}
+
 		$child_static_page = Page::query()->find_or_create_by( 'url', $child_url );
 		if ( $child_static_page->found_on_id === null || $child_static_page->updated_at < $this->archive_start_time ) {
 			$child_static_page->found_on_id = $static_page->id;

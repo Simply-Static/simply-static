@@ -37,6 +37,7 @@ function GeneralSettings() {
     const [postTypes, setPostTypes] = useState([]);
     const [selectedPostTypes, setSelectedPostTypes] = useState([]);
     const [postTypesApiError, setPostTypesApiError] = useState(null);
+    const [pages, setPages] = useState([]);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -162,6 +163,15 @@ function GeneralSettings() {
     useEffect(() => {
         fetchCrawlers();
         fetchPostTypes();
+        // Fetch pages for optional 404 selection
+        apiFetch({ path: '/simplystatic/v1/pages' }).then((fetched_pages) => {
+            let pages = fetched_pages || [];
+            // Prepend default option
+            pages.unshift({ label: __('No page selected', 'simply-static'), value: 0 });
+            setPages(pages);
+        }).catch(() => {
+            setPages([]);
+        });
     }, []);
 
     useEffect(() => {
@@ -549,6 +559,20 @@ function GeneralSettings() {
                         updateSetting('generate_404', value);
                     }}
                 />
+
+                {generate404 && (
+                    <SelectControl
+                        label={__('Custom 404 page (optional)', 'simply-static')}
+                        value={settings.custom_404_page ?? 0}
+                        __next40pxDefaultSize
+                        __nextHasNoMarginBottom
+                        options={pages}
+                        onChange={(pageId) => {
+                            updateSetting('custom_404_page', pageId);
+                        }}
+                        help={__('If selected, Simply Static will use the content of this page for the 404 page instead of the theme default.', 'simply-static')}
+                    />
+                )}
                 <ToggleControl
                     __nextHasNoMarginBottom
                     label={
