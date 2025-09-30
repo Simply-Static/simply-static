@@ -28,17 +28,12 @@ class Divi_Integration extends Integration {
 	 * @return bool
 	 */
 	public function dependency_active() {
-		$tpl        = function_exists( 'get_template' ) ? get_template() : '';
-		$stylesheet = function_exists( 'get_stylesheet' ) ? get_stylesheet() : '';
-		if ( 'Divi' === $tpl || 'Divi' === $stylesheet ) {
-			return true;
-		}
-		// Fallback checks using common Divi constants or theme directory presence.
-		if ( defined( 'ET_CORE_VERSION' ) || defined( 'ET_BUILDER_VERSION' ) ) {
-			return true;
-		}
-
-		return is_dir( ABSPATH . 'wp-content/themes/Divi' );
+		// Only consider Divi available when the Divi THEME is active (including child themes).
+		// In WordPress, get_template() returns the parent theme directory name. For a Divi child theme,
+		// get_template() will still be 'Divi'. This avoids false positives from the Divi Builder plugin
+		// or just having the Divi theme directory present.
+		$tpl = function_exists( 'get_template' ) ? get_template() : '';
+		return 'Divi' === $tpl;
 	}
 
 	/**

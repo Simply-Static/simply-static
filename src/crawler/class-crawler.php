@@ -42,6 +42,16 @@ abstract class Crawler {
 	protected $active_by_default = true;
 
 	/**
+	 * Whether the crawler's external dependency is active (e.g., plugin/theme).
+	 * Crawler implementations can override this.
+	 *
+	 * @return bool
+	 */
+	public function dependency_active() : bool {
+		return true;
+	}
+
+	/**
 	 * Check if the crawler is active.
 	 *
 	 * @return boolean
@@ -134,7 +144,8 @@ abstract class Crawler {
 			'id'          => $this->id,
 			'name'        => $this->name,
 			'description' => $this->description,
-			'active'      => $this->is_active()
+			'active'      => $this->is_active(),
+			'can_run'     => $this->dependency_active(),
 		];
 	}
 }

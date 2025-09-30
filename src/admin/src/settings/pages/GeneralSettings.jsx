@@ -71,25 +71,27 @@ function GeneralSettings() {
                 }
 
                 if (response && response.data && response.data.length > 0) {
-                    setCrawlers(response.data);
+                    // Only show crawlers that can currently run (dependencies satisfied)
+                    const crawlersData = response.data.filter(crawler => crawler.can_run);
+                    setCrawlers(crawlersData);
 
                     // If no crawlers are selected or settings.crawlers is not an array, select defaults by active flag
                     // This ensures that if active_crawlers is empty (like when it's enabled for the first time),
                     // only crawlers active by default are added by default
                     if (!settings.crawlers || !Array.isArray(settings.crawlers) || settings.crawlers.length === 0) {
-                        const defaultCrawlerIds = response.data.filter(crawler => crawler.active).map(crawler => crawler.id);
+                        const defaultCrawlerIds = crawlersData.filter(crawler => crawler.active).map(crawler => crawler.id);
                         setSelectedCrawlers(defaultCrawlerIds);
                         updateSetting('crawlers', defaultCrawlerIds);
                     } else if (Array.isArray(settings.crawlers)) {
 
-                        // Ensure all selected crawlers exist in the crawlers list
+                        // Ensure all selected crawlers exist in the allowed crawlers list
                         const validCrawlerIds = settings.crawlers.filter(id => 
-                            response.data.some(crawler => crawler.id === id)
+                            crawlersData.some(crawler => crawler.id === id)
                         );
 
-                        // If no valid crawlers are selected, select all by default
+                        // If no valid crawlers are selected, select all allowed by default
                         if (validCrawlerIds.length === 0) {
-                            const allCrawlerIds = response.data.map(crawler => crawler.id);
+                            const allCrawlerIds = crawlersData.map(crawler => crawler.id);
                             setSelectedCrawlers(allCrawlerIds);
                             updateSetting('crawlers', allCrawlerIds);
                         } else {
@@ -383,7 +385,7 @@ function GeneralSettings() {
                                     })}
                                     suggestions={crawlers.map(crawler => crawler.name)}
                                     onChange={(value) => {
-                                        // Convert names to IDs for storage
+                                        // Convert names to IDs for storage, and only allow known/available crawlers
                                         const selectedIds = value.map(name => {
                                             // First try to find an exact match
                                             let crawler = crawlers.find(c => c.name === name);
@@ -391,7 +393,7 @@ function GeneralSettings() {
                                             // If no exact match, try case-insensitive match
                                             if (!crawler) {
                                                 crawler = crawlers.find(c => 
-                                                    c.name.toLowerCase() === name.toLowerCase()
+                                                    c.name.toLowerCase() === (name || '').toLowerCase()
                                                 );
                                             }
 
@@ -400,8 +402,8 @@ function GeneralSettings() {
                                                 crawler = crawlers.find(c => c.id === name);
                                             }
 
-                                            return crawler ? crawler.id : name;
-                                        });
+                                            return crawler ? crawler.id : null;
+                                        }).filter(id => !!id && crawlers.some(c => c.id === id));
                                         setSelectedCrawlers(selectedIds);
                                         updateSetting('crawlers', selectedIds);
                                     }}
