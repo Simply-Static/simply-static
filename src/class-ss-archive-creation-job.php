@@ -219,6 +219,8 @@ class Archive_Creation_Job extends Background_Process {
 		try {
 			Util::debug_log( 'Performing task: ' . $task_name );
 			$is_done = $task->perform();
+
+			Util::debug_log( 'Task performed: ' . (bool)$is_done );
 		} catch (Pause_Exception $e ) {
 			// If it's a pause execption, just return task since we've paused the execution of tha tasks.
 			return $task_name;

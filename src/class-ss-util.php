@@ -376,6 +376,10 @@ class Util {
 	 * @return array            Converted array
 	 */
 	public static function string_to_array( $textarea ) {
+		if ( ! is_string( $textarea ) ) {
+			return array();
+		}
+
 		// using preg_split to intelligently break at newlines
 		// see: http://stackoverflow.com/questions/1483497/how-to-put-string-in-array-split-by-new-line
 		$lines = preg_split( "/\r\n|\n|\r/", $textarea );

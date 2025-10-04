@@ -33,7 +33,8 @@ function Site( props ) {
             method: 'POST',
             data: {
                 'blog_id': blogId,
-                'type': 'export'
+                'type': 'export',
+                'is_network_admin': options.is_network
             }
         }).then(resp => {
             var json = JSON.parse(resp);
@@ -51,6 +52,7 @@ function Site( props ) {
             method: 'POST',
             data: {
                 'blog_id': blogId,
+                'is_network_admin': options.is_network
             }
         }).then(resp => {
             setIsPaused(false)
@@ -65,6 +67,7 @@ function Site( props ) {
             method: 'POST',
             data: {
                 'blog_id': blogId,
+                'is_network_admin': options.is_network
             }
         }).then(resp => {
             setIsRunning(false);
@@ -78,6 +81,7 @@ function Site( props ) {
             method: 'POST',
             data: {
                 'blog_id': blogId,
+                'is_network_admin': options.is_network
             }
         }).then(resp => {
             setIsPaused(false);

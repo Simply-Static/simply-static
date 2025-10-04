@@ -198,7 +198,8 @@ abstract class Background_Process extends Async_Request {
 		$key = $this->generate_key();
 
 		if ( ! empty( $this->data ) ) {
-			update_site_option( $key, $this->data );
+			Util::debug_log( "Saving to key: $key. Data: " . print_r( $this->data, true ));
+			update_option( $key, $this->data );
 		}
 
 		// Clean out data so that new data isn't prepended with closed session's data.
@@ -217,7 +218,7 @@ abstract class Background_Process extends Async_Request {
 	 */
 	public function update( $key, $data ) {
 		if ( ! empty( $data ) ) {
-			update_site_option( $key, $data );
+			update_option( $key, $data );
 		}
 
 		return $this;
@@ -231,7 +232,7 @@ abstract class Background_Process extends Async_Request {
 	 * @return $this
 	 */
 	public function delete( $key ) {
-		delete_site_option( $key );
+		delete_option( $key );
 
 		return $this;
 	}
@@ -246,7 +247,7 @@ abstract class Background_Process extends Async_Request {
 			$this->delete( $batch->key );
 		}
 
-		delete_site_option( $this->get_status_key() );
+		delete_option( $this->get_status_key() );
 
 		$this->cancelled();
 	}
@@ -255,7 +256,7 @@ abstract class Background_Process extends Async_Request {
 	 * Cancel job on next batch.
 	 */
 	public function cancel() {
-		update_site_option( $this->get_status_key(), self::STATUS_CANCELLED );
+		update_option( $this->get_status_key(), self::STATUS_CANCELLED );
 
 		// Just in case the job was paused at the time.
 		$this->dispatch();
@@ -281,7 +282,7 @@ abstract class Background_Process extends Async_Request {
 	 * Pause job on next batch.
 	 */
 	public function pause() {
-		update_site_option( $this->get_status_key(), self::STATUS_PAUSED );
+		update_option( $this->get_status_key(), self::STATUS_PAUSED );
 	}
 
 	/**
@@ -304,7 +305,7 @@ abstract class Background_Process extends Async_Request {
 	 * Resume job.
 	 */
 	public function resume() {
-		delete_site_option( $this->get_status_key() );
+		delete_option( $this->get_status_key() );
 
 		$this->schedule_event();
 		$this->dispatch();
@@ -380,7 +381,7 @@ abstract class Background_Process extends Async_Request {
 
 		/*
 		 * Still using status per site within their options to allow multiple exports.
-		 *
+		 **
 		if ( is_multisite() ) {
 			$status = $wpdb->get_var(
 				$wpdb->prepare(
@@ -396,7 +397,7 @@ abstract class Background_Process extends Async_Request {
 					$this->get_status_key()
 				)
 			);
-		}*/
+		}/**/
 
 		$status = $wpdb->get_var(
 			$wpdb->prepare(
@@ -417,6 +418,9 @@ abstract class Background_Process extends Async_Request {
 	public function maybe_handle() {
 		// Don't lock up other requests while processing.
 		session_write_close();
+
+		Util::debug_log( "Maybe handling: Site ID: " . get_current_blog_id() );
+		$this->set_current_site_id( get_current_blog_id() );
 
 		check_ajax_referer( $this->identifier, 'nonce' );
 
@@ -591,13 +595,13 @@ abstract class Background_Process extends Async_Request {
 
 		/*
 		 * Still using batches on site level.
-		if ( is_multisite() ) {
+		*if ( is_multisite() ) {
 			$table        = $wpdb->sitemeta;
 			$column       = 'meta_key';
 			$key_column   = 'meta_id';
 			$value_column = 'meta_value';
 		}
-		*/
+		/**/
 
 		if( !is_null( $for_site_id ) ) {
 			$key = $wpdb->esc_like( $this->identifier . '_batch_' . $for_site_id ) . '%';
@@ -821,7 +825,7 @@ abstract class Background_Process extends Async_Request {
 	 * performed, or, call parent::complete().
 	 */
 	protected function complete() {
-		delete_site_option( $this->get_status_key() );
+		delete_option( $this->get_status_key() );
 
 		// Remove the cron healthcheck job from the cron schedule.
 		$this->clear_scheduled_event();
