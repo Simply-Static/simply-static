@@ -1,6 +1,7 @@
 import {__experimentalSpacer as Spacer, Button, Card, Dashicon} from "@wordpress/components";
 import {useContext} from "@wordpress/element";
 import {SettingsContext} from "../context/SettingsContext";
+import VersionInfo from "./VersionInfo";
 
 const {__} = wp.i18n;
 function SidebarMultisite( props = null ) {
@@ -11,14 +12,7 @@ function SidebarMultisite( props = null ) {
             <img alt="Logo"
                  src={options.logo}/>
         </div>
-        {'pro' === options.plan && isPro() ?
-            <p className={"version-number"}>
-                Free: <b>{options.version}</b><br></br>
-                Pro: <b>{options.version_pro}</b>
-            </p>
-            :
-            <p className={"version-number"}>Version: <b>{options.version}</b></p>
-        }
+        <VersionInfo/>
 
         <Spacer margin={5}/>
         <Spacer margin={5}/>

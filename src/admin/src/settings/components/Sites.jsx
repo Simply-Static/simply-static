@@ -1,7 +1,5 @@
-import {Animate, Button, Notice} from "@wordpress/components";
 import apiFetch from "@wordpress/api-fetch";
 import {useState} from "@wordpress/element";
-import {TerminalOutput} from "react-terminal-ui";
 import useInterval from "../../hooks/useInterval";
 import {useEffect} from "react";
 import Site from "./Site";
