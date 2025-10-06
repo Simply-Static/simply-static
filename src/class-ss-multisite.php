@@ -86,10 +86,6 @@ class Multisite {
     }
 
 	public function after_perform_action( $blog_id, $action, $archive_creation_job ) {
-		if ( 'start' !== $action ) {
-			return;
-		}
-
 		if ( ! isset( $_REQUEST['blog_id'] ) || ! isset( $_REQUEST['is_network_admin'] ) ) {
 			return;
 		}
@@ -116,10 +112,6 @@ class Multisite {
 	 * @return void
 	 */
 	public function before_perform_action( $blog_id, $action, $archive_creation_job ) {
-		if ( 'start' !== $action ) {
-			return;
-		}
-
 		if ( ! isset( $_REQUEST['blog_id'] ) || ! isset( $_REQUEST['is_network_admin'] ) ) {
 			return;
 		}
