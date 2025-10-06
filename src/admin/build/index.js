@@ -5951,6 +5951,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_14___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_14__);
 /* harmony import */ var _EnvironmentSidebar__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./EnvironmentSidebar */ "./src/settings/components/EnvironmentSidebar.jsx");
 /* harmony import */ var _SidebarMultisite__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./SidebarMultisite */ "./src/settings/components/SidebarMultisite.jsx");
+/* harmony import */ var _GenerateButtons__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./GenerateButtons */ "./src/settings/components/GenerateButtons.jsx");
+
 
 
 
@@ -6169,40 +6171,17 @@ function SettingsPage() {
   }, __('Export Changes', 'simply-static')) : (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("option", {
     disabled: true,
     value: "update"
-  }, __('Export Changes (Requires Simply Static Pro)', 'simply-static'))), buildOptions), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "generate-buttons-container"
-  }, !disabledButton && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Button, {
-    onClick: () => {
-      startExport();
-    },
-    disabled: disabledButton || isDelayed,
-    className: activeItem === '/' ? 'is-active-item generate' : 'generate'
-  }, !disabledButton && [(0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Dashicon, {
-    icon: "update"
-  }), __('Generate', 'simply-static')], !disabledButton && isDelayed > 0 && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, " ", isDelayed, "s"), disabledButton && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Dashicon, {
-    icon: "update spin"
-  })), disabledButton && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, !isPaused && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Button, {
-    label: __('Pause', 'simply-static'),
-    className: "ss-generate-media-button",
-    showToolTip: true,
-    onClick: () => pauseExport()
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Dashicon, {
-    icon: "controls-pause"
-  })), isPaused && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Button, {
-    label: __('Resume', 'simply-static'),
-    className: "ss-generate-media-button",
-    showToolTip: true,
-    onClick: () => resumeExport()
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Dashicon, {
-    icon: "controls-play"
-  })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Button, {
-    onClick: () => cancelExport(),
-    label: __('Cancel', 'simply-static'),
-    className: "ss-generate-cancel-button",
-    showToolTip: true
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Dashicon, {
-    icon: 'no'
-  }))))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.CardBody, null, 'pro' === options.plan && isPro() && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, !options.is_network && canRunIntegration('environments') && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_EnvironmentSidebar__WEBPACK_IMPORTED_MODULE_15__["default"], {
+  }, __('Export Changes (Requires Simply Static Pro)', 'simply-static'))), buildOptions), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_GenerateButtons__WEBPACK_IMPORTED_MODULE_17__["default"], {
+    canGenerate: !disabledButton,
+    startExport: startExport,
+    cancelExport: cancelExport,
+    pauseExport: pauseExport,
+    resumeExport: resumeExport,
+    isRunning: isRunning,
+    isPaused: isPaused,
+    isResumed: isResumed,
+    isDelayed: isDelayed
+  })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.CardBody, null, 'pro' === options.plan && isPro() && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, !options.is_network && canRunIntegration('environments') && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_EnvironmentSidebar__WEBPACK_IMPORTED_MODULE_15__["default"], {
     isRunning: isRunning,
     getSettings: getSettings
   })), !options.is_network && options.is_multisite && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("h4", {
