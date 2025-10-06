@@ -5,6 +5,7 @@ return apply_filters( 'ss_compatible_plugins', array(
 	array( 'slug' => 'all-in-one-seo-pack' ),
 	array( 'slug' => 'seo-by-rank-math' ),
 	array( 'slug' => 'wp-seopress' ),
+	array( 'slug' => 'nsg-seo-generator' ),
 	array( 'slug' => 'google-sitemap-generator' ),
 	array( 'slug' => 'elementor' ),
 	array( 'slug' => 'elementor-pro' ),
