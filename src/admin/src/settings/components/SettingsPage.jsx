@@ -248,46 +248,6 @@ function SettingsPage() {
                                          isResumed={isResumed}
                                          isDelayed={isDelayed}
                                     />
-                                    <div className="generate-buttons-container">
-                                        {!disabledButton && <Button onClick={() => {
-                                            startExport();
-                                        }}
-                                                                    disabled={disabledButton || isDelayed}
-                                                                    className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
-                                        >
-                                            {!disabledButton && <>
-                                                <Dashicon icon="update"/>
-                                                {__('Generate', 'simply-static')}
-                                            </>}
-
-                                            {!disabledButton && isDelayed>0 && <> {isDelayed}s</>}
-
-                                            {disabledButton && <Dashicon icon="update spin"/>}
-                                        </Button>}
-                                        {disabledButton && <>
-                                            {!isPaused && <Button
-                                                label={__('Pause', 'simply-static')}
-                                                className={"ss-generate-media-button"}
-                                                onClick={() => pauseExport()}>
-                                                <Dashicon icon={"controls-pause"}/>
-                                            </Button>
-                                            }
-                                            {isPaused && <Button
-                                                label={__('Resume', 'simply-static')}
-                                                className={"ss-generate-media-button"}
-                                                onClick={() => resumeExport()}>
-                                                <Dashicon icon={"controls-play"}/>
-                                            </Button>
-                                            }
-                                            <Button
-                                                onClick={() => cancelExport()}
-                                                label={__('Cancel', 'simply-static')}
-                                                className={"ss-generate-cancel-button"}
-                                            >
-                                                <Dashicon icon={'no'}/>
-                                            </Button>
-                                        </>}
-                                    </div>
                                 </div>
                                 <CardBody>
                                     {'pro' === options.plan && isPro() &&
