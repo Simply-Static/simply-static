@@ -32,6 +32,8 @@ export default function EnvironmentForm({onClose, setSelectableEnvironments, set
         <div className={'ss-environment-form'}>
             <TextControl
                 label={"Name"}
+                __next40pxDefaultSize
+                __nextHasNoMarginBottom
                 onChange={(val) => setName(val)}
                 value={name}
             />

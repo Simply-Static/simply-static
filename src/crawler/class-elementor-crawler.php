@@ -151,7 +151,7 @@ class Elementor_Crawler extends Crawler {
 	 *
 	 * @return boolean
 	 */
-	public function dependency_active() {
+	public function dependency_active() : bool {
 		return defined( 'ELEMENTOR_VERSION' );
 	}
 

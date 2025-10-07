@@ -42,6 +42,16 @@ abstract class Crawler {
 	protected $active_by_default = true;
 
 	/**
+	 * Whether the crawler's external dependency is active (e.g., plugin/theme).
+	 * Crawler implementations can override this.
+	 *
+	 * @return bool
+	 */
+	public function dependency_active() : bool {
+		return true;
+	}
+
+	/**
 	 * Check if the crawler is active.
 	 *
 	 * @return boolean
@@ -80,6 +90,16 @@ abstract class Crawler {
 		$count = 0;
 		$batch_size = apply_filters( 'simply_static_crawler_batch_size', 100 );
 
+		// Determine excluded URL if a custom 404 page is selected
+		$opts = \Simply_Static\Options::instance();
+		$exclude_url = '';
+		if ( $opts->get( 'generate_404' ) && (int) $opts->get( 'custom_404_page' ) ) {
+			$permalink = get_permalink( (int) $opts->get( 'custom_404_page' ) );
+			if ( $permalink ) {
+				$exclude_url = untrailingslashit( $permalink );
+			}
+		}
+
 		// Process URLs in batches to prevent timeouts
 		$batches = array_chunk( $urls, $batch_size );
 
@@ -87,6 +107,15 @@ abstract class Crawler {
 			\Simply_Static\Util::debug_log( sprintf( 'Processing batch of %d URLs for %s crawler', count( $batch ), $this->name ) );
 
 			foreach ( $batch as $url ) {
+				// Skip selected custom 404 page from regular crawl/export
+				if ( ! empty( $exclude_url ) ) {
+					$normalized = untrailingslashit( $url );
+					if ( 0 === strcasecmp( $normalized, $exclude_url ) ) {
+						\Simply_Static\Util::debug_log( sprintf( 'Skipping custom 404 page URL "%s" from %s crawler', $url, $this->name ) );
+						continue;
+					}
+				}
+
 				// Create a new Simply_Static\Page for each URL
 				$static_page = \Simply_Static\Page::query()->find_or_initialize_by( 'url', $url );
 				$static_page->set_status_message( sprintf( __( 'Added by %s Crawler', 'simply-static' ), $this->name ) );
@@ -115,7 +144,8 @@ abstract class Crawler {
 			'id'          => $this->id,
 			'name'        => $this->name,
 			'description' => $this->description,
-			'active'      => $this->is_active()
+			'active'      => $this->is_active(),
+			'can_run'     => $this->dependency_active(),
 		];
 	}
 }

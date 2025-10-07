@@ -37,6 +37,7 @@ function GeneralSettings() {
     const [postTypes, setPostTypes] = useState([]);
     const [selectedPostTypes, setSelectedPostTypes] = useState([]);
     const [postTypesApiError, setPostTypesApiError] = useState(null);
+    const [pages, setPages] = useState([]);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -70,25 +71,27 @@ function GeneralSettings() {
                 }
 
                 if (response && response.data && response.data.length > 0) {
-                    setCrawlers(response.data);
+                    // Only show crawlers that can currently run (dependencies satisfied)
+                    const crawlersData = response.data.filter(crawler => crawler.can_run);
+                    setCrawlers(crawlersData);
 
                     // If no crawlers are selected or settings.crawlers is not an array, select defaults by active flag
                     // This ensures that if active_crawlers is empty (like when it's enabled for the first time),
                     // only crawlers active by default are added by default
                     if (!settings.crawlers || !Array.isArray(settings.crawlers) || settings.crawlers.length === 0) {
-                        const defaultCrawlerIds = response.data.filter(crawler => crawler.active).map(crawler => crawler.id);
+                        const defaultCrawlerIds = crawlersData.filter(crawler => crawler.active).map(crawler => crawler.id);
                         setSelectedCrawlers(defaultCrawlerIds);
                         updateSetting('crawlers', defaultCrawlerIds);
                     } else if (Array.isArray(settings.crawlers)) {
 
-                        // Ensure all selected crawlers exist in the crawlers list
+                        // Ensure all selected crawlers exist in the allowed crawlers list
                         const validCrawlerIds = settings.crawlers.filter(id => 
-                            response.data.some(crawler => crawler.id === id)
+                            crawlersData.some(crawler => crawler.id === id)
                         );
 
-                        // If no valid crawlers are selected, select all by default
+                        // If no valid crawlers are selected, select all allowed by default
                         if (validCrawlerIds.length === 0) {
-                            const allCrawlerIds = response.data.map(crawler => crawler.id);
+                            const allCrawlerIds = crawlersData.map(crawler => crawler.id);
                             setSelectedCrawlers(allCrawlerIds);
                             updateSetting('crawlers', allCrawlerIds);
                         } else {
@@ -162,6 +165,15 @@ function GeneralSettings() {
     useEffect(() => {
         fetchCrawlers();
         fetchPostTypes();
+        // Fetch pages for optional 404 selection
+        apiFetch({ path: '/simplystatic/v1/pages' }).then((fetched_pages) => {
+            let pages = fetched_pages || [];
+            // Prepend default option
+            pages.unshift({ label: __('No page selected', 'simply-static'), value: 0 });
+            setPages(pages);
+        }).catch(() => {
+            setPages([]);
+        });
     }, []);
 
     useEffect(() => {
@@ -227,6 +239,8 @@ function GeneralSettings() {
                 <SelectControl
                     label={__('Replacing URLs', 'simply-static')}
                     value={replaceType}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     options={[
                         {label: __('Absolute URLs', 'simply-static'), value: 'absolute'},
                         {label: __('Relative Path', 'simply-static'), value: 'relative'},
@@ -240,10 +254,12 @@ function GeneralSettings() {
                 {replaceType === 'absolute' &&
                     <>
                         <Flex>
-                            <FlexItem style={{minWidth: "15%"}}>
+                            <FlexItem style={{minWidth: "15%", marginTop: "15px"}}>
                                 <SelectControl
                                     label={__('Scheme', 'simply-static')}
                                     value={scheme}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
                                     options={[
                                         {label: 'https://', value: 'https://'},
                                         {label: 'http://', value: 'http://'},
@@ -260,6 +276,8 @@ function GeneralSettings() {
                                     label={__('Host', 'simply-static')}
                                     type={"text"}
                                     placeholder={"example.com"}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
                                     value={host}
                                     onChange={(host) => {
                                         setHost(host);
@@ -277,6 +295,8 @@ function GeneralSettings() {
                             label={__('Path', 'simply-static')}
                             type={"text"}
                             placeholder={"/"}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             value={path}
                             onChange={(path) => {
                                 setPath(path);
@@ -287,12 +307,10 @@ function GeneralSettings() {
                             {__('Convert all URLs for your WordPress site to relative URLs that will work at any domain.', 'simply-static')}<br></br>
                             {__('Optionally specify a path above if you intend to place the files in a subdirectory.', 'simply-static')}
                         </p>
-                        <p>
-                            <Notice status={"warning"} isDismissible={false}>
-                                <b>{__('Example', 'simply-static')}: </b>
-                                {__('enter /path above if you wanted to serve your files at www.example.com/path/', 'simply-static')}
-                            </Notice>
-                        </p>
+                        <Notice status={"warning"} isDismissible={false}>
+                            <b>{__('Example', 'simply-static')}: </b>
+                            {__('enter /path above if you wanted to serve your files at www.example.com/path/', 'simply-static')}
+                        </Notice>
                     </>
                 }
                 {replaceType === 'offline' &&
@@ -301,6 +319,7 @@ function GeneralSettings() {
                 {!useForms &&
                     <ToggleControl
                         label={__('Force URL replacements', 'simply-static')}
+                        __nextHasNoMarginBottom
                         help={
                             forceURLReplacement
                                 ? __('Replace all occurrences of the WordPress URL with the static URL (includes inline CSS and JS).', 'simply-static')
@@ -325,6 +344,7 @@ function GeneralSettings() {
             <CardBody>
                 <p>{__('Enhanced Crawl uses native WordPress functions to find all pages and files when running a static export.', 'simply-static')}</p>
                 <ToggleControl
+                    __nextHasNoMarginBottom
                     label={
                         <>
                             {__('Enable Enhanced Crawl', 'simply-static')}
@@ -357,13 +377,15 @@ function GeneralSettings() {
                             <>
                                 <FormTokenField
                                     label={__('Active Crawlers', 'simply-static')}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
                                     value={selectedCrawlers.map(id => {
                                         const crawler = crawlers.find(c => c.id === id);
                                         return crawler ? crawler.name : id;
                                     })}
                                     suggestions={crawlers.map(crawler => crawler.name)}
                                     onChange={(value) => {
-                                        // Convert names to IDs for storage
+                                        // Convert names to IDs for storage, and only allow known/available crawlers
                                         const selectedIds = value.map(name => {
                                             // First try to find an exact match
                                             let crawler = crawlers.find(c => c.name === name);
@@ -371,7 +393,7 @@ function GeneralSettings() {
                                             // If no exact match, try case-insensitive match
                                             if (!crawler) {
                                                 crawler = crawlers.find(c => 
-                                                    c.name.toLowerCase() === name.toLowerCase()
+                                                    c.name.toLowerCase() === (name || '').toLowerCase()
                                                 );
                                             }
 
@@ -380,8 +402,8 @@ function GeneralSettings() {
                                                 crawler = crawlers.find(c => c.id === name);
                                             }
 
-                                            return crawler ? crawler.id : name;
-                                        });
+                                            return crawler ? crawler.id : null;
+                                        }).filter(id => !!id && crawlers.some(c => c.id === id));
                                         setSelectedCrawlers(selectedIds);
                                         updateSetting('crawlers', selectedIds);
                                     }}
@@ -409,6 +431,8 @@ function GeneralSettings() {
                                             <>
                                                 <FormTokenField
                                                     label={__('Post Types to Include', 'simply-static')}
+                                                    __next40pxDefaultSize
+                                                    __nextHasNoMarginBottom
                                                     value={Array.isArray(selectedPostTypes) ? selectedPostTypes.map(name => {
                                                         const postType = postTypes.find(pt => pt.name === name);
                                                         return postType ? postType.label : name;
@@ -484,6 +508,7 @@ function GeneralSettings() {
                 <TextareaControl
                     label={__('Additional URLs', 'simply-static')}
                     placeholder={options.home + "/hidden-page/"}
+                    __nextHasNoMarginBottom
                     help={__('If you want to create static copies of pages or files that aren\'t linked to, add the URLs here (one per line).', 'simply-static')}
                     value={settings.additional_urls}
                     onChange={(value) => {
@@ -493,23 +518,31 @@ function GeneralSettings() {
                 <TextareaControl
                     label={__('Additional Files and Directories', 'simply-static')}
                     placeholder={options.home_path + "additional-directory/\n" + options.home_path + "additional-file.html"}
+                    __nextHasNoMarginBottom
                     help={__('Sometimes you may want to include additional files (such as files referenced via AJAX) or directories. Add the paths to those files or directories here (one per line).', 'simply-static')}
                     value={settings.additional_files}
                     onChange={(value) => {
                         updateSetting('additional_files', value);
                     }}
                 />
-                <ClipboardButton
+                <Button
                     variant="secondary"
-                    text={options.home_path}
-                    onCopy={() => setHasCopied(true)}
-                    onFinishCopy={() => setHasCopied(false)}
+                    onClick={() => {
+                        try {
+                            navigator.clipboard.writeText(options.home_path);
+                            setHasCopied(true);
+                            setTimeout(() => setHasCopied(false), 1500);
+                        } catch (e) {
+                            console.error('Clipboard copy failed', e);
+                        }
+                    }}
                 >
                     {hasCopied ? __('Copied home path', 'simply-static') : __('Copy home path', 'simply-static')}
-                </ClipboardButton>
+                </Button>
                 <Spacer margin={5}/>
 
                 <ToggleControl
+                    __nextHasNoMarginBottom
                     label={
                         <>
                             {__('Generate 404 Page?', 'simply-static')}
@@ -528,7 +561,22 @@ function GeneralSettings() {
                         updateSetting('generate_404', value);
                     }}
                 />
+
+                {generate404 && (
+                    <SelectControl
+                        label={__('Custom 404 page (optional)', 'simply-static')}
+                        value={settings.custom_404_page ?? 0}
+                        __next40pxDefaultSize
+                        __nextHasNoMarginBottom
+                        options={pages}
+                        onChange={(pageId) => {
+                            updateSetting('custom_404_page', pageId);
+                        }}
+                        help={__('If selected, Simply Static will use the content of this page for the 404 page instead of the theme default.', 'simply-static')}
+                    />
+                )}
                 <ToggleControl
+                    __nextHasNoMarginBottom
                     label={
                         <>
                             {__('Include RSS Feeds?', 'simply-static')}
@@ -546,6 +594,7 @@ function GeneralSettings() {
                     }}
                 />
                 <ToggleControl
+                    __nextHasNoMarginBottom
                     label={
                         <>
                             {__('Include Rest API?', 'simply-static')}
@@ -575,6 +624,7 @@ function GeneralSettings() {
                 <TextareaControl
                     label={__('Urls to exclude', 'simply-static')}
                     placeholder={"some-directory\nsome-file.json\n.jpg"}
+                    __nextHasNoMarginBottom
                     help={__('Specify URLs (or parts of URLs) you want to exclude from the processing (one per line).', 'simply-static')}
                     value={settings.urls_to_exclude}
                     onChange={(value) => {

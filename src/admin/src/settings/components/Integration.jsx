@@ -25,7 +25,7 @@ function Integration({integration, settings, toggleIntegration}) {
             <div>
                 <strong>
                     {integration.name || integration.id}
-                    {(canRun && isQueued ) && <em class={"ss-text-notice"}>{__('Requires saving settings', 'simply-static')}</em>}
+                    {(canRun && isQueued ) && <em className={"ss-text-notice"}>{__('Requires saving settings', 'simply-static')}</em>}
                     { integration.id === 'redirection' &&
                         <HelperVideo
                             title={__('Automated Redirects with Redirection', 'simply-static')}
@@ -37,10 +37,12 @@ function Integration({integration, settings, toggleIntegration}) {
                             videoUrl={'https://youtu.be/GPKYtt8A5QE'}/>
                     }
                 </strong>
-                {integration.description != '' && [
-                    <br/>,
-                    integration.description
-                ]}
+                {integration.description !== '' && (
+                    <>
+                        <br/>
+                        {integration.description}
+                    </>
+                )}
             </div>
             {!canRun && <span className={'ss-align-right ss-no-shrink'}><em>Missing Plugin</em>{!canUse &&
                 <div><Button variant="link" href={"https://simplystatic.com/pricing/"}>
@@ -49,6 +51,7 @@ function Integration({integration, settings, toggleIntegration}) {
             {(canRun && canUse && !alwaysActive) &&
                 <ToggleControl
                     className={'integration-toggle'}
+                    __nextHasNoMarginBottom
                     checked={isActive}
                     onChange={(value) => {
                         toggleIntegration(integration.id, value);

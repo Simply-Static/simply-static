@@ -73,7 +73,7 @@ class Theme_Assets_Crawler extends Crawler {
 		$batch     = [];
 		$batch_sz  = (int) apply_filters( 'simply_static_crawler_batch_size', 100 );
 		$extensions = [ 'css','js','png','jpg','jpeg','gif','svg','webp','woff','woff2','ttf','eot','otf','ico' ];
-		$skip_dirs  = apply_filters( 'ss_skip_crawl_theme_directories', [ '.git','node_modules','vendor/bin','vendor/composer','tests' ] );
+		$skip_dirs  = apply_filters( 'ss_skip_crawl_theme_directories', [ '.git','vendor/bin','vendor/composer','tests' ] );
 
 		$themes = [];
 		$themes[] = [ get_stylesheet_directory(), get_stylesheet_directory_uri() ];
@@ -102,7 +102,13 @@ class Theme_Assets_Crawler extends Crawler {
 					$rel = \Simply_Static\Util::safe_relative_path( $dir, $file->getPathname() );
 					$skip = false;
 					foreach ( (array) $skip_dirs as $sd ) {
-						if ( $sd && strpos( $rel, '/' . $sd . '/' ) !== false ) { $skip = true; break; }
+						$sd = trim( $sd, "/" );
+						if ( $sd === '' ) { continue; }
+						if (
+							strpos( $rel, '/' . $sd . '/' ) !== false ||
+							strpos( $rel, $sd . '/' ) === 0 ||
+							substr( $rel, - ( strlen( $sd ) + 1 ) ) === '/' . $sd
+						) { $skip = true; break; }
 					}
 					if ( $skip ) { continue; }
 					$ext = strtolower( pathinfo( $rel, PATHINFO_EXTENSION ) );
@@ -178,7 +184,6 @@ class Theme_Assets_Crawler extends Crawler {
 		// Skip these directories
 		$skip_dirs = apply_filters( 'ss_skip_crawl_theme_directories', [
 			'.git',
-			'node_modules',
 			'vendor/bin',
 			'vendor/composer',
 			'tests'
@@ -201,7 +206,13 @@ class Theme_Assets_Crawler extends Crawler {
 			$should_skip   = false;
 
 			foreach ( $skip_dirs as $skip_dir ) {
-				if ( strpos( $relative_path, '/' . $skip_dir . '/' ) !== false ) {
+				$skip_dir = trim( $skip_dir, '/' );
+				if ( $skip_dir === '' ) { continue; }
+				if (
+					strpos( $relative_path, '/' . $skip_dir . '/' ) !== false ||
+					strpos( $relative_path, $skip_dir . '/' ) === 0 ||
+					substr( $relative_path, - ( strlen( $skip_dir ) + 1 ) ) === '/' . $skip_dir
+				) {
 					$should_skip = true;
 					break;
 				}

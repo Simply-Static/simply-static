@@ -12,15 +12,16 @@ function HelperVideo( {title, videoUrl}) {
     return (
         <>
             {isVideoModalOpen &&
-                <div class={"simply-static-video-modal-background"}>
+                <div className={"simply-static-video-modal-background"}>
                     <Modal title={title}
                            className={'simply-static-video-modal'}
                            onRequestClose={closeVideoModal}>
                         <ReactPlayer
-                            url={videoUrl}
+                            src={videoUrl}
                             controls={true}
                             width={'920px'}
                             height={'560px'}
+                            playsInline
                         />
                     </Modal>
                 </div>

@@ -4,7 +4,7 @@ Tags: static site generator, performance, security, jamstack
 Requires at least: 6.2
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag:  3.4.4.1
+Stable tag:  3.4.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -258,6 +258,25 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 3. Diagnostics
 
 == Changelog ==
+
+= 3.4.6 =
+
+* DIVI integration + custom crawler
+* Improved Elementor integration
+* Custom 404 page selection (instead of theme default)
+* auto-include llms.txt on crawl
+* improved third-party-crawler loading
+
+= 3.4.5.1 =
+
+* small admin UI fix (scheme positioning)
+* exit early in URL extractor if html_string is empty
+
+= 3.4.5 =
+
+* improved HTML conversion with non-latin characters
+* adapted our admin UI to latest React and WP components
+* updated all core dependencies (JS)
 
 = 3.4.4.1 =
 

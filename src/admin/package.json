@@ -1,6 +1,6 @@
 {
   "name": "simplystatic-settings",
-  "version": "1.0.0",
+  "version": "3.4.5",
   "description": "",
   "main": "build/index.js",
   "scripts": {
@@ -11,15 +11,15 @@
   "author": "",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "@wordpress/api-fetch": "^6.46.0",
-    "@wordpress/components": "^25.15.0",
-    "@wordpress/data": "^9.19.0",
-    "@wordpress/element": "^5.26.0",
-    "@wordpress/scripts": "^27.0.0"
+    "@wordpress/api-fetch": "^7.30.0",
+    "@wordpress/components": "^30.3.0",
+    "@wordpress/data": "^10.30.0",
+    "@wordpress/element": "^6.30.0",
+    "@wordpress/scripts": "^30.23.0"
   },
   "dependencies": {
-    "react-data-table-component": "^7.6.2",
-    "react-player": "^2.16.0",
-    "react-terminal-ui": "^1.2.0"
+    "react-data-table-component": "^7.7.0",
+    "react-player": "^3.3.2",
+    "react-terminal-ui": "^1.4.0"
   }
 }

@@ -105,6 +105,13 @@ class Setup_Task extends Task {
 			$additional_files[] = $robots_txt;
 		}
 
+		// Add llms.txt if exists.
+		$llms_txt = ABSPATH . 'llms.txt';
+
+		if ( file_exists( $llms_txt ) ) {
+			$additional_files[] = $llms_txt;
+		}
+
 		// Add feeds if enabled.
 		if ( $this->options->get( 'add_feeds' ) ) {
 			// Create feed directory it doesn't exist.

@@ -179,7 +179,7 @@ function SettingsPage() {
 
     let buildOptions = '';
     if (Object.keys(options.builds).length) {
-        const builds = Object.keys(options.builds).map((id) => <option value={id}>{options.builds[id]}</option>);
+        const builds = Object.keys(options.builds).map((id) => <option key={id} value={id}>{options.builds[id]}</option>);
 
         // Sort builds alphabetically
         builds.sort((a, b) => {
@@ -218,6 +218,8 @@ function SettingsPage() {
                                         className={'generate-type'}
                                         value={selectedExportType}
                                         disabled={disabledButton}
+                                        __next40pxDefaultSize
+                                        __nextHasNoMarginBottom
                                         onChange={(value) => {
                                             setSelectedExportType(value);
                                         }}
@@ -246,6 +248,46 @@ function SettingsPage() {
                                          isResumed={isResumed}
                                          isDelayed={isDelayed}
                                     />
+                                    <div className="generate-buttons-container">
+                                        {!disabledButton && <Button onClick={() => {
+                                            startExport();
+                                        }}
+                                                                    disabled={disabledButton || isDelayed}
+                                                                    className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
+                                        >
+                                            {!disabledButton && <>
+                                                <Dashicon icon="update"/>
+                                                {__('Generate', 'simply-static')}
+                                            </>}
+
+                                            {!disabledButton && isDelayed>0 && <> {isDelayed}s</>}
+
+                                            {disabledButton && <Dashicon icon="update spin"/>}
+                                        </Button>}
+                                        {disabledButton && <>
+                                            {!isPaused && <Button
+                                                label={__('Pause', 'simply-static')}
+                                                className={"ss-generate-media-button"}
+                                                onClick={() => pauseExport()}>
+                                                <Dashicon icon={"controls-pause"}/>
+                                            </Button>
+                                            }
+                                            {isPaused && <Button
+                                                label={__('Resume', 'simply-static')}
+                                                className={"ss-generate-media-button"}
+                                                onClick={() => resumeExport()}>
+                                                <Dashicon icon={"controls-play"}/>
+                                            </Button>
+                                            }
+                                            <Button
+                                                onClick={() => cancelExport()}
+                                                label={__('Cancel', 'simply-static')}
+                                                className={"ss-generate-cancel-button"}
+                                            >
+                                                <Dashicon icon={'no'}/>
+                                            </Button>
+                                        </>}
+                                    </div>
                                 </div>
                                 <CardBody>
                                     {'pro' === options.plan && isPro() &&
@@ -262,6 +304,8 @@ function SettingsPage() {
                                                 value={selectedCopySite}
                                                 options={selectablesSites}
                                                 help={__('Choose a subsite to import settings from.', 'simply-static')}
+                                                __next40pxDefaultSize
+                                                __nextHasNoMarginBottom
                                                 onChange={(blog_id) => {
                                                     setSelectedCopySite(blog_id);
                                                 }}
@@ -399,7 +443,7 @@ function SettingsPage() {
                         }
                     </FlexItem>
                     <FlexItem isBlock={true} className={!showMobileNav ? 'toggle-nav' : ''}>
-                        <div class={"plugin-settings"}>
+                        <div className={"plugin-settings"}>
                             {'no' === passedChecks && !options.is_network ?
                                 <Animate type="slide-in" options={{origin: 'top'}}>
                                     {() => (

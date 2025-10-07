@@ -86,6 +86,7 @@ function FormSettings() {
             <CardBody>
                 <ToggleControl
                     label={__('Use forms?', 'simply-static')}
+                    __nextHasNoMarginBottom
                     help={
                         useForms
                             ? __('Use Forms on your static website.', 'simply-static')
@@ -122,6 +123,7 @@ function FormSettings() {
             <CardBody>
                 <ToggleControl
                     label={__('Use comments?', 'simply-static')}
+                    __nextHasNoMarginBottom
                     help={
                         useComments
                             ? __('Use comments on your static website.', 'simply-static')
@@ -143,6 +145,8 @@ function FormSettings() {
                             help={__('The post will be regenerated after comment submission, but it might take a while so its good practice to redirect the visitor.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             value={settings.comment_redirect}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             onChange={(value) => {
                                 updateSetting('comment_redirect', value);
                             }}
@@ -182,6 +186,8 @@ function FormSettings() {
                     label={__('Static URL', 'simply-static')}
                     type={"url"}
                     placeholder={'https://static-site.com'}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     help={__('Add the URL of your static website to allow CORS from it.', 'simply-static')}
                     disabled={('free' === options.plan || !isPro())}
                     value={settings.static_url}
@@ -192,6 +198,8 @@ function FormSettings() {
                 <SelectControl
                     label={__('Select CORS method', 'simply-static')}
                     value={corsMethod}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     help={__('Choose one of the methods to allow CORS for your website.', 'simply-static')}
                     disabled={('free' === options.plan || !isPro())}
                     options={[
@@ -236,6 +244,7 @@ function FormSettings() {
                 <TextareaControl
                     label={__('URLs to embed as an iFrame', 'simply-static')}
                     placeholder={options.home + "/my-form-page/"}
+                    __nextHasNoMarginBottom
                     help={__('If you want to embed specific pages from your WordPress website into your static website, add the URLs here (one per line).', 'simply-static')}
                     disabled={('free' === options.plan || !isPro())}
                     value={settings.iframe_urls}
@@ -245,6 +254,7 @@ function FormSettings() {
                 />
                 <TextareaControl
                     label={__('Custom CSS', 'simply-static')}
+                    __nextHasNoMarginBottom
                     help={__('These styles will only apply to the embedded pages, not your entire website.', 'simply-static')}
                     disabled={('free' === options.plan || !isPro())}
                     value={settings.iframe_custom_css}

@@ -62,6 +62,7 @@ function SearchSettings() {
             <CardBody>
                 <ToggleControl
                     label={__('Use search?', 'simply-static')}
+                    __nextHasNoMarginBottom
                     help={
                         useSearch
                             ? __('Use search on your static website.', 'simply-static')
@@ -78,6 +79,8 @@ function SearchSettings() {
                     label={__('Search Type', 'simply-static')}
                     value={searchType}
                     help={__('Decide which search type you want to use. Fuse runs locally based on a file, and Algolia is an external API service.', 'simply-static')}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     options={[
                         {label: 'Fuse JS', value: 'fuse'},
                         {label: 'Algolia API', value: 'algolia'},
@@ -133,14 +136,15 @@ function SearchSettings() {
                         label={__('CSS-Selector for Title', 'simply-static')}
                         type={"text"}
                         placeholder={'title'}
+                        __next40pxDefaultSize
+                        __nextHasNoMarginBottom
                         help={
-                            [
-                                __('Add the CSS selector which contains the title of the page/post', 'simply-static'),
-                                ' ',
-                                <Button variant={'link'}
-                                        onClick={openMetaModal}>{__('Or meta tags. Click for more information.', 'simply-static')}</Button>
-                            ]
-
+                            <>
+                                {__('Add the CSS selector which contains the title of the page/post', 'simply-static')}{' '}
+                                <Button variant={'link'} onClick={openMetaModal}>
+                                    {__('Or meta tags. Click for more information.', 'simply-static')}
+                                </Button>
+                            </>
                         }
                         disabled={('free' === options.plan || !isPro())}
                         value={settings.search_index_title}
@@ -152,14 +156,15 @@ function SearchSettings() {
                         label={__('CSS-Selector for Content', 'simply-static')}
                         type={"text"}
                         placeholder={'body'}
+                        __next40pxDefaultSize
+                        __nextHasNoMarginBottom
                         help={
-                            [
-                                __('Add the CSS selector which contains the content of the page/post.', 'simply-static'),
-                                ' ',
-                                <Button variant={'link'}
-                                        onClick={openMetaModal}>{__('Or meta tags. Click for more information.', 'simply-static')}</Button>
-                            ]
-
+                            <>
+                                {__('Add the CSS selector which contains the content of the page/post.', 'simply-static')}{' '}
+                                <Button variant={'link'} onClick={openMetaModal}>
+                                    {__('Or meta tags. Click for more information.', 'simply-static')}
+                                </Button>
+                            </>
                         }
                         disabled={('free' === options.plan || !isPro())}
                         value={settings.search_index_content}
@@ -172,14 +177,15 @@ function SearchSettings() {
                         label={__('CSS-Selector for Excerpt', 'simply-static')}
                         type={"text"}
                         placeholder={'.entry-content'}
+                        __next40pxDefaultSize
+                        __nextHasNoMarginBottom
                         help={
-                            [
-                                __('Add the CSS selector which contains the excerpt of the page/post.', 'simply-static'),
-                                ' ',
-                                <Button variant={'link'}
-                                        onClick={openMetaModal}>{__('Or meta tags. Click for more information.', 'simply-static')}</Button>
-                            ]
-
+                            <>
+                                {__('Add the CSS selector which contains the excerpt of the page/post.', 'simply-static')}{' '}
+                                <Button variant={'link'} onClick={openMetaModal}>
+                                    {__('Or meta tags. Click for more information.', 'simply-static')}
+                                </Button>
+                            </>
                         }
                         disabled={('free' === options.plan || !isPro())}
                         value={settings.search_index_excerpt}
@@ -191,6 +197,7 @@ function SearchSettings() {
                     <TextareaControl
                         label={__('Exclude URLs', 'simply-static')}
                         placeholder={"author\narchive\ncategory"}
+                        __nextHasNoMarginBottom
                         help={__('Exclude URLs from indexing (one per line). You can use full URLs, parts of an URL or plain words (like stop words).', 'simply-static')}
                         disabled={('free' === options.plan || !isPro())}
                         value={settings.search_excludable}
@@ -224,6 +231,8 @@ function SearchSettings() {
                         <TextControl
                             label={__('CSS-Selector', 'simply-static')}
                             type={"text"}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             help={__('Add the CSS selector of your search element here.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             value={settings.fuse_selector}
@@ -237,6 +246,8 @@ function SearchSettings() {
                             step={ 0.1 }
                             min={0.1}
                             max={1}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             help={__(' A threshold of 0.0 requires a perfect match, a threshold of 1.0 would match anything.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             value={settings.fuse_threshold}
@@ -273,6 +284,8 @@ function SearchSettings() {
                         <TextControl
                             label={__('Application ID', 'simply-static')}
                             type={"password"}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             help={__('Add your Algolia App ID.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             value={settings.algolia_app_id}
@@ -284,6 +297,8 @@ function SearchSettings() {
                         <TextControl
                             label={__('Admin API Key', 'simply-static')}
                             type={"password"}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             help={__('Add your Algolia Admin API Key.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             value={settings.algolia_admin_api_key}
@@ -295,6 +310,8 @@ function SearchSettings() {
                         <TextControl
                             label={__('Search-Only API Key', 'simply-static')}
                             type={"password"}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             help={__('Add your Algolia Search-Only API Key here. This is the only key that will be visible on your static site.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             value={settings.algolia_search_api_key}
@@ -306,6 +323,8 @@ function SearchSettings() {
                         <TextControl
                             label={__('Name for your index', 'simply-static')}
                             type={"text"}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             help={__('Add your Algolia index name here.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             value={settings.algolia_index}
@@ -316,6 +335,8 @@ function SearchSettings() {
                         <TextControl
                             label={__('CSS-Selector', 'simply-static')}
                             type={"text"}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
                             help={__('Add the CSS selector of your search element here.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             value={settings.algolia_selector}
@@ -323,11 +344,9 @@ function SearchSettings() {
                                 updateSetting('algolia_selector', selector);
                             }}
                         />
-                        <p>
-                            <Notice status="warning" isDismissible={false}>
-                                {__('If you have multiple search elements with different CSS selectors, separate them by a comma (,) such as: .search-field, .search-field2', 'simply-static')}
-                            </Notice>
-                        </p>
+                        <Notice status="warning" isDismissible={false}>
+                            {__('If you have multiple search elements with different CSS selectors, separate them by a comma (,) such as: .search-field, .search-field2', 'simply-static')}
+                        </Notice>
                     </CardBody>
                 </Card>
             </>

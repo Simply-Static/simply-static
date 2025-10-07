@@ -753,7 +753,8 @@ class Admin_Settings {
 			'minify_inline_css'             => false,
 			'minify_js'                     => false,
 			'minify_inline_js'              => false,
-			'generate_404'                  => false,
+   'generate_404'                  => false,
+            'custom_404_page'              => 0,
 			'add_feeds'                     => false,
 			'add_rest_api'                  => false,
 			'smart_crawl'                   => true,
@@ -1166,6 +1167,27 @@ class Admin_Settings {
 
 		// Get all crawlers for JS
 		$crawlers_for_js = $crawlers->get_crawlers_for_js();
+
+		// Post-process: ensure Pro multilingual crawler shows can_run=false unless a supported plugin is active
+		try {
+			if ( ! function_exists( 'is_plugin_active' ) ) {
+				include_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+			$has_multilingual = (
+				is_plugin_active( 'sitepress-multilingual-cms/sitepress.php' ) ||
+				is_plugin_active( 'polylang/polylang.php' ) ||
+				is_plugin_active( 'polylang-pro/polylang.php' ) ||
+				is_plugin_active( 'translatepress-multilingual/index.php' )
+			);
+			foreach ( $crawlers_for_js as &$crawler_js ) {
+				if ( isset( $crawler_js['id'] ) && 'multilingual' === $crawler_js['id'] ) {
+					$crawler_js['can_run'] = (bool) $has_multilingual;
+				}
+			}
+			unset( $crawler_js );
+		} catch ( \Throwable $e ) {
+			\Simply_Static\Util::debug_log( 'Post-process crawlers failed: ' . $e->getMessage() );
+		}
 
 		return json_encode( [
 			'status' => 200,

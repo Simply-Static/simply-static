@@ -61,6 +61,8 @@ function DebugSettings() {
                     label={__('Basic Auth Username', 'simply-static')}
                     autoComplete={"off"}
                     type={"text"}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     value={settings.http_basic_auth_username}
                     onChange={(username) => {
                         updateSetting('http_basic_auth_username', username);
@@ -70,41 +72,42 @@ function DebugSettings() {
                     label={__('Basic Auth Password', 'simply-static')}
                     type={"password"}
                     autoComplete={"off"}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     value={settings.http_basic_auth_password}
                     onChange={(username) => {
                         updateSetting('http_basic_auth_password', username);
                     }}
                 />
-                <p>
-                    <ToggleControl
-                        label={__('Enable Basic Auth', 'simply-static')}
-                        help={
-                            <>
-                                {'free' === options.plan ?
-                                    <>
-                                        {__('Automatically setting up Basic Auth requires Simply Static Pro.', 'simply-static')}
-                                    </>
-                                    :
-                                    <>
-                                        {__('Once enabled we will put your entire website behind password protection.', 'simply-static')}
-                                    </>
-                                }
-                            </>
-                        }
-                        disabled={('free' === options.plan || !isPro())}
-                        checked={settings.http_basic_auth_on}
-                        onChange={(value) => {
-                            updateSetting('http_basic_auth_on', value);
-                        }}
-                    />
-                    {
-                        settings.http_basic_auth_on &&
-                        (!settings.http_basic_auth_username || !settings.http_basic_auth_password) &&
-                        <Notice status={"warning"} isDismissible={false}>
-                            {__('Requires Username & Password to work', 'simply-static')}
-                        </Notice>
+                <ToggleControl
+                    label={__('Enable Basic Auth', 'simply-static')}
+                    __nextHasNoMarginBottom
+                    help={
+                        <>
+                            {'free' === options.plan ?
+                                <>
+                                    {__('Automatically setting up Basic Auth requires Simply Static Pro.', 'simply-static')}
+                                </>
+                                :
+                                <>
+                                    {__('Once enabled we will put your entire website behind password protection.', 'simply-static')}
+                                </>
+                            }
+                        </>
                     }
-                </p>
+                    disabled={('free' === options.plan || !isPro())}
+                    checked={!!settings.http_basic_auth_on}
+                    onChange={(value) => {
+                        updateSetting('http_basic_auth_on', value);
+                    }}
+                />
+                {
+                    settings.http_basic_auth_on &&
+                    (!settings.http_basic_auth_username || !settings.http_basic_auth_password) &&
+                    <Notice status={"warning"} isDismissible={false}>
+                        {__('Requires Username & Password to work', 'simply-static')}
+                    </Notice>
+                }
             </CardBody>
         </Card>
         <Spacer margin={5}/>
@@ -119,6 +122,8 @@ function DebugSettings() {
                         type={"text"}
                         placeholder={options.temp_files_dir}
                         help={__('Optionally specify the directory to save your temporary files. This directory must exist and be writeable.', 'simply-static')}
+                        __next40pxDefaultSize
+                        __nextHasNoMarginBottom
                         value={settings.temp_files_dir}
                         onChange={(temp_dir) => {
                             updateSetting('temp_files_dir', temp_dir);
@@ -137,6 +142,7 @@ function DebugSettings() {
                     label={__('Whitelist plugins in diagnostics', 'simply-static')}
                     placeholder={"autoptimize\nwp-search-with-algolia\nwp-rocket"}
                     help={__('If you want to exclude certain plugins from the diagnostics check add the plugin slugs here (one per line).', 'simply-static')}
+                    __nextHasNoMarginBottom
                     value={settings.whitelist_plugins}
                     onChange={(value) => {
                         updateSetting('whitelist_plugins', value);
@@ -157,6 +163,8 @@ function DebugSettings() {
                         help={__('If the URL of your WordPress installation differs from the public-facing URL (Proxy Setup), add the public URL here.', 'simply-static')}
                         placeholder={options.home}
                         autoComplete={"off"}
+                        __next40pxDefaultSize
+                        __nextHasNoMarginBottom
                         value={settings.origin_url}
                         onChange={(origin_url) => {
                             updateSetting('origin_url', origin_url);
@@ -174,6 +182,7 @@ function DebugSettings() {
                 <ToggleControl
                     label={__('Activate Debug Log', 'simply-static')}
                     help={__('Enable it to download the debug log from Simply Static -> Generate.', 'simply-static')}
+                    __nextHasNoMarginBottom
                     checked={activateDebugLog}
                     onChange={(value) => {
                         setActivateDebugLog(value);
@@ -192,6 +201,7 @@ function DebugSettings() {
                     <ToggleControl
                         label={__('Use server-side cron job', 'simply-static')}
                         help={__('Enable this if you use a server-side cron job instead of the default WP-Cron.', 'simply-static')}
+                        __nextHasNoMarginBottom
                         checked={useServerCron}
                         onChange={(value) => {
                             setUserServerCron(value);

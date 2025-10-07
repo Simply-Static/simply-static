@@ -5,6 +5,7 @@ return apply_filters( 'ss_compatible_plugins', array(
 	array( 'slug' => 'all-in-one-seo-pack' ),
 	array( 'slug' => 'seo-by-rank-math' ),
 	array( 'slug' => 'wp-seopress' ),
+	array( 'slug' => 'nsg-seo-generator' ),
 	array( 'slug' => 'google-sitemap-generator' ),
 	array( 'slug' => 'elementor' ),
 	array( 'slug' => 'elementor-pro' ),
@@ -99,5 +100,15 @@ return apply_filters( 'ss_compatible_plugins', array(
 	array( 'slug' => 'host-webfonts-local' ),
 	array( 'slug' => 'favicon-by-realfavicongenerator' ),
 	array( 'slug' => 'use-any-font' ),
+	array( 'slug' => 'embed-optimizer' ),
+	array( 'slug' => 'auto-sizes' ),
+	array( 'slug' => 'dominant-color-images' ),
+	array( 'slug' => 'image-prioritizer' ),
+	array( 'slug' => 'webp-uploads' ),
+	array( 'slug' => 'optimization-detective' ),
+	array( 'slug' => 'performance-lab' ),
+	array( 'slug' => 'speculation-rules' ),
+	array( 'slug' => 'view-transitions' ),
+	array( 'slug' => 'nocache-bfcache' ),
 ) );
 

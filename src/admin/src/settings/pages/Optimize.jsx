@@ -192,6 +192,7 @@ function Optimize() {
             <CardBody>
                 <ToggleControl
                     label={__('Minify Files?', 'simply-static')}
+                    __nextHasNoMarginBottom
                     help={
                         minifyFiles
                             ? __('Enable minify files on your static website.', 'simply-static')
@@ -209,6 +210,7 @@ function Optimize() {
                     <>
                         <ToggleControl
                             label={__('Minify HTML', 'simply-static')}
+                            __nextHasNoMarginBottom
                             help={
                                 minifyHtml
                                     ? __('Minify HTML files.', 'simply-static')
@@ -224,11 +226,12 @@ function Optimize() {
 
                         {minifyHtml && <ToggleControl
                             label={__('Leave quotes inside HTML attributes', 'simply-static')}
+                            __nextHasNoMarginBottom
                             help={
                                 __('If there are issues with comments or JavaScript when minifying HTML, toggle this ON.', 'simply-static')
                             }
                             disabled={('free' === options.plan || !isPro())}
-                            checked={settings.minify_html_leave_quotes}
+                            checked={!!settings.minify_html_leave_quotes}
                             onChange={(value) => {
                                 updateSetting('minify_html_leave_quotes', value);
                             }}
@@ -236,6 +239,7 @@ function Optimize() {
 
                         <ToggleControl
                             label={__('Minify CSS', 'simply-static')}
+                            __nextHasNoMarginBottom
                             help={
                                 minifyCss
                                     ? __('Minify CSS files.', 'simply-static')
@@ -251,6 +255,7 @@ function Optimize() {
                         {minifyCss && <>
                                 <TextareaControl
                                     label={__('Exclude Stylesheet URLs', 'simply-static')}
+                                    __nextHasNoMarginBottom
                                     help={__('Exclude URLs from minification (one per line).', 'simply-static')}
                                     disabled={('free' === options.plan || !isPro())}
                                     value={settings.minify_css_exclude}
@@ -260,6 +265,7 @@ function Optimize() {
                                 />
                                 <ToggleControl
                                     label={__('Minify Inline CSS', 'simply-static')}
+                                    __nextHasNoMarginBottom
                                     help={
                                         minifyInlineCss
                                             ? __('Minify Inline CSS.', 'simply-static')
@@ -276,6 +282,7 @@ function Optimize() {
                         }
                         <ToggleControl
                             label={__('Minify JavaScript', 'simply-static')}
+                            __nextHasNoMarginBottom
                             help={
                                 minifyJavascript
                                     ? __('Minify JavaScript files.', 'simply-static')
@@ -292,6 +299,7 @@ function Optimize() {
                         {minifyJavascript && <>
                             <TextareaControl
                                 label={__('Exclude JavaScript URLs', 'simply-static')}
+                                __nextHasNoMarginBottom
                                 help={__('Exclude URLs from minification (one per line).', 'simply-static')}
                                 disabled={('free' === options.plan || !isPro())}
                                 value={settings.minify_js_exclude}
@@ -301,6 +309,7 @@ function Optimize() {
                             />
                             <ToggleControl
                                 label={__('Minify Inline JavaScript', 'simply-static')}
+                                __nextHasNoMarginBottom
                                 help={
                                     minifyInlineJavascript
                                         ? __('Minify Inline JavaScript.', 'simply-static')
@@ -342,13 +351,14 @@ function Optimize() {
             <CardBody>
                 <ToggleControl
                     label={__('Optimize Images with ShortPixel?', 'simply-static')}
+                    __nextHasNoMarginBottom
                     help={
                         settings.shortpixel_enabled
-                            ? __('Optimize images.', 'simply-static')
-                            : __('Don\'t optimize images.', 'simply-static')
+                            ? __('Optimize images with the ShortPixel API.', 'simply-static')
+                            : __('Don\'t optimize images with the ShortPixel API.', 'simply-static')
                     }
                     disabled={('free' === options.plan || !isPro())}
-                    checked={settings.shortpixel_enabled}
+                    checked={!!settings.shortpixel_enabled}
                     onChange={(value) => {
                         updateSetting('shortpixel_enabled', value);
                     }}
@@ -358,25 +368,37 @@ function Optimize() {
                     <TextControl
                         label={__('ShortPixel API Key', 'simply-static')}
                         type={"password"}
+                        __next40pxDefaultSize
+                        __nextHasNoMarginBottom
                         value={settings.shortpixel_api_key}
                         disabled={('free' === options.plan || !isPro())}
                         onChange={(apiKey) => {
                             updateSetting('shortpixel_api_key', apiKey);
                         }}
                     />
-                    <Spacer padding={1}></Spacer>
                     <ToggleControl
                       label={__('Convert to webP', 'simply-static')}
-                      checked={settings.shortpixel_webp_enabled}
+                      __nextHasNoMarginBottom
+                      help={
+                          settings.shortpixel_webp_enabled
+                              ? __('Convert images to webp format.', 'simply-static')
+                              : __('Don\'t convert images to webp format', 'simply-static')
+                      }
+                      checked={!!settings.shortpixel_webp_enabled}
                       disabled={('free' === options.plan || !isPro())}
                       onChange={(value) => {
                         updateSetting('shortpixel_webp_enabled', value);
                       }}
                     />
-                    <Spacer padding={1}></Spacer>
                     <ToggleControl
                         label={__('Backup the original images?', 'simply-static')}
-                        checked={settings.shortpixel_backup_enabled}
+                        __nextHasNoMarginBottom
+                        help={
+                            settings.shortpixel_backup_enabled
+                                ? __('Back original images.', 'simply-static')
+                                : __('Don\'t backup original images.', 'simply-static')
+                        }
+                        checked={!!settings.shortpixel_backup_enabled}
                         disabled={('free' === options.plan || !isPro())}
                         onChange={(value) => {
                             updateSetting('shortpixel_backup_enabled', value);
@@ -423,6 +445,8 @@ function Optimize() {
                     disabled={('free' === options.plan || !isPro())}
                     type={"text"}
                     placeholder={"wp-content"}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     value={wpContentDirectory}
                     onChange={(directory) => {
                         updateSetting('wp_content_directory', directory);
@@ -435,6 +459,8 @@ function Optimize() {
                     disabled={('free' === options.plan || !isPro())}
                     type={"text"}
                     placeholder={"wp-includes"}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     value={wpIncludesDirectory}
                     onChange={(directory) => {
                         updateSetting('wp_includes_directory', directory);
@@ -447,6 +473,8 @@ function Optimize() {
                     disabled={('free' === options.plan || !isPro())}
                     type={"text"}
                     placeholder={"uploads"}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     value={wpUploadsDirectory}
                     onChange={(directory) => {
                         setWpUploadsDirectory(directory);
@@ -460,6 +488,8 @@ function Optimize() {
                     disabled={('free' === options.plan || !isPro())}
                     type={"text"}
                     placeholder={"plugins"}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     value={wpPluginsDirectory}
                     onChange={(directory) => {
                         setWpPluginsDirectory(directory);
@@ -473,6 +503,8 @@ function Optimize() {
                     disabled={('free' === options.plan || !isPro())}
                     type={"text"}
                     placeholder={"themes"}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     value={wpThemesDirectory}
                     onChange={(directory) => {
                         setWpThemesDirectory(directory);
@@ -488,6 +520,8 @@ function Optimize() {
                     className={"ss-theme-style-name"}
                     suffix={'.css'}
                     placeholder={"style"}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     value={themeStyleName}
                     onChange={(style) => {
                         setThemeStyleName(style);
@@ -501,6 +535,8 @@ function Optimize() {
                     disabled={('free' === options.plan || !isPro())}
                     type={"text"}
                     placeholder={"author"}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     value={authorUrl}
                     onChange={(url) => {
                         setAuthorUrl(url);
@@ -530,6 +566,7 @@ function Optimize() {
             <CardBody>
                 <ToggleControl
                     label={__('Hide HTML Comments', 'simply-static')}
+                    __nextHasNoMarginBottom
                     checked={hideComments}
                     disabled={('free' === options.plan || !isPro())}
                     onChange={(value) => {
@@ -539,6 +576,7 @@ function Optimize() {
                 />
                 <ToggleControl
                     label={__('Hide WordPress Version', 'simply-static')}
+                    __nextHasNoMarginBottom
                     checked={hideVersion}
                     disabled={('free' === options.plan || !isPro())}
                     onChange={(value) => {
@@ -548,6 +586,7 @@ function Optimize() {
                 />
                 <ToggleControl
                     label={__('Hide WordPress Generator Meta', 'simply-static')}
+                    __nextHasNoMarginBottom
                     checked={hideGenerator}
                     disabled={('free' === options.plan || !isPro())}
                     onChange={(value) => {
@@ -557,6 +596,7 @@ function Optimize() {
                 />
                 <ToggleControl
                     label={__('Hide DNS Prefetch WordPress link', 'simply-static')}
+                    __nextHasNoMarginBottom
                     checked={hidePrefetch}
                     disabled={('free' === options.plan || !isPro())}
                     onChange={(value) => {
@@ -566,6 +606,7 @@ function Optimize() {
                 />
                 <ToggleControl
                     label={__('Hide RSD Header', 'simply-static')}
+                    __nextHasNoMarginBottom
                     checked={hideRSD}
                     disabled={('free' === options.plan || !isPro())}
                     onChange={(value) => {
@@ -575,6 +616,7 @@ function Optimize() {
                 />
                 <ToggleControl
                     label={__('Hide Emojis if you don\'t use them', 'simply-static')}
+                    __nextHasNoMarginBottom
                     checked={hideEmojis}
                     disabled={('free' === options.plan || !isPro())}
                     onChange={(value) => {
@@ -604,6 +646,7 @@ function Optimize() {
             <CardBody>
                 <ToggleControl
                     label={__('Disable XML-RPC', 'simply-static')}
+                    __nextHasNoMarginBottom
                     checked={disableXMLRPC}
                     disabled={('free' === options.plan || !isPro())}
                     onChange={(value) => {
@@ -613,6 +656,7 @@ function Optimize() {
                 />
                 <ToggleControl
                     label={__('Disable Embed Scripts', 'simply-static')}
+                    __nextHasNoMarginBottom
                     checked={disableEmbed}
                     disabled={('free' === options.plan || !isPro())}
                     onChange={(value) => {
@@ -622,6 +666,7 @@ function Optimize() {
                 />
                 <ToggleControl
                     label={__('Disable DB Debug in Frontend', 'simply-static')}
+                    __nextHasNoMarginBottom
                     checked={disableDbDebug}
                     disabled={('free' === options.plan || !isPro())}
                     onChange={(value) => {
@@ -631,6 +676,7 @@ function Optimize() {
                 />
                 <ToggleControl
                     label={__('Disable WLW Manifest Scripts', 'simply-static')}
+                    __nextHasNoMarginBottom
                     checked={disableWLW}
                     disabled={('free' === options.plan || !isPro())}
                     onChange={(value) => {
