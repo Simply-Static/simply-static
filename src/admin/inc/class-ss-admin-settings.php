@@ -1220,14 +1220,17 @@ class Admin_Settings {
 
             $options = Options::reinstance();
             $job->set_options( $options );
+            $running = $job->is_running();
+            $paused = $job->is_paused();
 
             $sites[] = [
                 'id'               => $site->blog_id,
                 'name'             => $site->blogname,
                 'url'              => $site->siteurl,
                 'path'             => $site->path,
-                'running'          => $job->is_running(),
-                'paused'           => $job->is_paused(),
+                'running'          => $running,
+                'paused'           => $paused,
+                'status'           => $running ? __( 'Running', 'simply-static' ) : ( $paused ? __( 'Paused', 'simply-static' ) : __( 'Idle', 'simply-static' ) ),
                 'settings_url'     => esc_url( get_admin_url( $site->blog_id ) . 'admin.php?page=simply-static-settings' ),
                 'activity_log_url' => esc_url( get_admin_url( $site->blog_id ) . 'admin.php?page=simply-static-generate' )
             ];
@@ -1235,6 +1238,8 @@ class Admin_Settings {
             restore_current_blog();
 
         }
+
+        $sites = apply_filters( 'ss_rest_multisite_get_sites', $sites );
 
         return wp_send_json_success( $sites );
     }

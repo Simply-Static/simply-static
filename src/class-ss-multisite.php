@@ -57,7 +57,36 @@ class Multisite {
         add_action( 'ss_before_static_export', [ $this, 'add_to_queue' ], 10, 1 );
         add_action( 'ss_archive_creation_job_before_start_queue', [ $this, 'add_site_to_queue' ], 1 );
         add_filter( 'simplystatic.archive_creation_job.task_list', [ $this, 'filter_task_list' ], PHP_INT_MAX );
+        add_filter( 'ss_rest_multisite_get_sites',  [ $this, 'filter_sites' ], 10, 1 );
 	}
+
+    public function filter_sites( $sites ) {
+        $queued = self::get_export_queue();
+
+        if ( empty( $queued ) ) {
+            return $sites;
+        }
+
+        foreach ( $sites as $index => $site ) {
+            $site_id = absint( $site['id'] );
+
+            if ( ! isset( $queued[ $site_id ] ) ) {
+                continue;
+            }
+
+            if ( ! $site['running'] ) {
+                continue;
+            }
+
+            if ( $queued[ $site_id ]['status'] === 'running' ) {
+                continue;
+            }
+
+            $sites[ $index ]['status'] = __( 'Queued', 'simply-static' );
+        }
+
+        return $sites;
+    }
 
     public function filter_task_list( $task_list ) {
         $multisite_task = [ 'multisite_queue' ];
@@ -264,6 +293,8 @@ class Multisite {
     public static function set_queued_export_as_running( $blog_id ) {
         $queue = self::get_export_queue();
 
+        $blog_id = absint( $blog_id );
+
         if ( ! isset( $queue[ $blog_id ] ) ) {
             $export_data = [
                     'site_id' => $blog_id,
@@ -298,7 +329,7 @@ class Multisite {
             'status' => 'queued'
         ];
 
-        $queue[ $blog_id ] = $export_data;
+        $queue[ absint( $blog_id ) ] = $export_data;
 
         self::update_export_queue( $queue );
     }
@@ -312,7 +343,7 @@ class Multisite {
      */
     public static function dequeue_export( $blog_id ) {
         $queue = self::get_export_queue();
-        unset( $queue[ $blog_id ] );
+        unset( $queue[ absint( $blog_id ) ] );
         self::update_export_queue( $queue );
     }
 
@@ -326,7 +357,7 @@ class Multisite {
      * @return bool
      */
     public static function can_run_export( $blog_id ) {
-        return in_array( self::get_next_export(), [ 0, $blog_id ], true );
+        return in_array( self::get_next_export(), [ 0, absint( $blog_id ) ], true );
     }
 
     /**

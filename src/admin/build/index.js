@@ -6576,7 +6576,7 @@ function Site(props) {
   };
   return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("tr", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", null, site.name, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("br", null), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("a", {
     href: site.url
-  }, site.url)), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", null, isRunning ? 'Running' : isPaused ? 'Paused' : 'Idle'), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", {
+  }, site.url)), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", null, site.status), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", {
     className: 'generate-container'
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_GenerateButtons__WEBPACK_IMPORTED_MODULE_2__["default"], {
     site: site,

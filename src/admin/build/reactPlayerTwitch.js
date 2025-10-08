@@ -1,1 +1,146 @@
-"use strict";(globalThis.webpackChunksimplystatic_settings=globalThis.webpackChunksimplystatic_settings||[]).push([[42],{682:(t,e,n)=>{n.r(e),n.d(e,{default:()=>b});var s=n(609);const i="https://player.twitch.tv",a=/(?:www\.|go\.)?twitch\.tv\/(?:videos?\/|\?video=)(\d+)($|\?)/,o=/(?:www\.|go\.)?twitch\.tv\/([a-zA-Z0-9_]+)($|\?)/;function r(t,e={}){const n={src:l(t,e),frameborder:"0",width:"100%",height:"100%",allow:"accelerometer; fullscreen; autoplay; encrypted-media; picture-in-picture;",sandbox:"allow-modals allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox",scrolling:"no"};return e.config&&(n["data-config"]=JSON.stringify(e.config)),`\n    <style>\n      :host {\n        display: inline-block;\n        min-width: 300px;\n        min-height: 150px;\n        position: relative;\n      }\n      iframe {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 100%;\n        height: 100%;\n      }\n      :host(:not([controls])) {\n        pointer-events: none;\n      }\n    </style>\n    <iframe${function(t){let e="";for(const n in t){const s=t[n];e+=""===s?` ${d(n)}`:` ${d(n)}="${d(`${s}`)}"`}return e}(n)}></iframe>\n  `}function l(t,e){var n;if(!t.src)return;const s=t.src.match(a),r=t.src.match(o),l={parent:null==(n=globalThis.location)?void 0:n.hostname,controls:""===t.controls&&null,autoplay:""===t.autoplay&&null,muted:t.muted,preload:t.preload,...e.config};if(s){const t=s[1];return`${i}/?video=v${t}&${c(l)}`}if(r){const t=r[1];return`${i}/?channel=${t}&${c(l)}`}return""}class u extends(globalThis.HTMLElement??class{}){static getTemplateHTML=r;static shadowRootOptions={mode:"open"};static observedAttributes=["autoplay","controls","loop","muted","playsinline","preload","src"];loadComplete=new h;#t;#e;#n;#s={};#i=0;#a=!1;#o=1;#r=!this.autoplay;#l=!1;#u=0;#d=null;constructor(){super(),this.#c("config")}get config(){return this.#d}set config(t){this.#d=t}async load(){if(this.#t)return;this.shadowRoot||this.attachShadow({mode:"open"});const t=!this.#e;if(this.#e&&(this.loadComplete=new h),this.#e=!0,await(this.#t=Promise.resolve()),this.#t=null,this.#u=0,this.dispatchEvent(new Event("emptied")),!this.src)return this.shadowRoot.innerHTML="",void globalThis.removeEventListener("message",this.#h);this.dispatchEvent(new Event("loadstart"));let e=this.shadowRoot.querySelector("iframe");const n=function(t){let e={};for(let n of t)e[n.name]=n.value;return e}(this.attributes);t&&e&&(this.#d=JSON.parse(e.getAttribute("data-config")||"{}")),(null==e?void 0:e.src)&&e.src===l(n,this)||(this.shadowRoot.innerHTML=r(n,this),e=this.shadowRoot.querySelector("iframe")),this.#n=e,globalThis.addEventListener("message",this.#h)}attributeChangedCallback(t,e,n){if(e!==n)switch(t){case"src":case"controls":this.load()}}getVideoPlaybackQuality(){return this.#s.stats.videoStats}get src(){return this.getAttribute("src")}set src(t){this.setAttribute("src",t)}get readyState(){return this.#u}get seeking(){return this.#l}get buffered(){var t,e,n;return n=(null==(e=null==(t=this.#s.stats)?void 0:t.videoStats)?void 0:e.bufferSize)??0,Array.isArray(0)?p(0):p(null==n||0===n?[[0,0]]:[[0,n]])}get paused(){return this.#s.playback?"Idle"===this.#s.playback:this.#r}get ended(){return!!this.#s.playback&&"Ended"===this.#s.playback}get duration(){return this.#s.duration??NaN}get autoplay(){return this.hasAttribute("autoplay")}set autoplay(t){this.autoplay!=t&&this.toggleAttribute("autoplay",Boolean(t))}get controls(){return this.hasAttribute("controls")}set controls(t){this.controls!=t&&this.toggleAttribute("controls",Boolean(t))}get currentTime(){return this.#s.currentTime?this.#s.currentTime:this.#i}set currentTime(t){this.#i=t,this.loadComplete.then((()=>{this.#p(4,t)}))}get defaultMuted(){return this.hasAttribute("muted")}set defaultMuted(t){this.toggleAttribute("muted",Boolean(t))}get loop(){return this.hasAttribute("loop")}set loop(t){this.toggleAttribute("loop",Boolean(t))}get muted(){return this.#a}set muted(t){this.#a=t,this.loadComplete.then((()=>{this.#p(10,t)}))}get volume(){return this.#o}set volume(t){this.#o=t,this.loadComplete.then((()=>{this.#p(11,t)}))}get playsInline(){return this.hasAttribute("playsinline")}set playsInline(t){this.toggleAttribute("playsinline",Boolean(t))}play(){this.#r=!1,this.#p(3)}pause(){this.#r=!0,this.#p(2)}#h=async t=>{var e,n,s,i;if(!this.#n.contentWindow)return;const{data:a,source:o}=t;if(o===this.#n.contentWindow)if("twitch-embed"===a.namespace)await new Promise((t=>setTimeout(t,10))),"ready"===a.eventName?(this.dispatchEvent(new Event("loadcomplete")),this.loadComplete.resolve(),this.#u=1,this.dispatchEvent(new Event("loadedmetadata"))):"seek"===a.eventName?(this.#l=!0,this.dispatchEvent(new Event("seeking"))):"playing"===a.eventName?(this.#l&&(this.#l=!1,this.dispatchEvent(new Event("seeked"))),this.#u=3,this.dispatchEvent(new Event("playing"))):this.dispatchEvent(new Event(a.eventName));else if("twitch-embed-player-proxy"===a.namespace&&"UPDATE_STATE"===a.eventName){const t=this.#s.duration,o=this.#s.currentTime,r=this.#s.volume,l=this.#s.muted,u=null==(n=null==(e=this.#s.stats)?void 0:e.videoStats)?void 0:n.bufferSize;this.#s={...this.#s,...a.params},t!==this.#s.duration&&this.dispatchEvent(new Event("durationchange")),o!==this.#s.currentTime&&this.dispatchEvent(new Event("timeupdate")),r===this.#s.volume&&l===this.#s.muted||this.dispatchEvent(new Event("volumechange")),u!==(null==(i=null==(s=this.#s.stats)?void 0:s.videoStats)?void 0:i.bufferSize)&&this.dispatchEvent(new Event("progress"))}};#p(t,e){if(!this.#n.contentWindow)return;const n={eventName:t,params:e,namespace:"twitch-embed-player-proxy"};this.#n.contentWindow.postMessage(n,i)}#c(t){if(Object.prototype.hasOwnProperty.call(this,t)){const e=this[t];delete this[t],this[t]=e}}}function d(t){return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;").replace(/`/g,"&#x60;")}function c(t){return String(new URLSearchParams(function(t){let e={};for(let n in t){let s=t[n];!0===s||""===s?e[n]=!0:!1===s?e[n]=!1:null!=s&&(e[n]=s)}return e}(t)))}class h extends Promise{constructor(t=()=>{}){let e,n;super(((s,i)=>{t(s,i),e=s,n=i})),this.resolve=e,this.reject=n}}function p(t){return Object.defineProperties(t,{start:{value:e=>t[e][0]},end:{value:e=>t[e][1]}}),t}globalThis.customElements&&!globalThis.customElements.get("twitch-video")&&globalThis.customElements.define("twitch-video",u);var m=u,f=new Set(["style","children","ref","key","suppressContentEditableWarning","suppressHydrationWarning","dangerouslySetInnerHTML"]),g={className:"class",htmlFor:"for"};function v(t){return t.toLowerCase()}function y(t){return"boolean"==typeof t?t?"":void 0:"function"==typeof t||"object"==typeof t&&null!==t?void 0:t}function w(t,e,n){var s;t[e]=n,null==n&&e in((null==(s=globalThis.HTMLElement)?void 0:s.prototype)??{})&&t.removeAttribute(e)}var b=function({react:t,tagName:e,elementClass:n,events:s,displayName:i,defaultProps:a,toAttributeName:o=v,toAttributeValue:r=y}){const l=Number.parseInt(t.version)>=19,u=t.forwardRef(((i,u)=>{var d,c;const h=t.useRef(null),p=t.useRef(new Map),m={},v={},b={},S={};for(const[t,e]of Object.entries(i)){if(f.has(t)){b[t]=e;continue}const s=o(g[t]??t);if(n.prototype&&t in n.prototype&&!(t in((null==(d=globalThis.HTMLElement)?void 0:d.prototype)??{}))&&!(null==(c=n.observedAttributes)?void 0:c.some((t=>t===s)))){S[t]=e;continue}if(t.startsWith("on")){m[t]=e;continue}const i=r(e);if(s&&null!=i&&(v[s]=String(i),l||(b[s]=i)),s&&l){const t=y(e);b[s]=i!==t?i:e}}if("undefined"!=typeof window){for(const e in m){const n=m[e],i=e.endsWith("Capture"),a=((null==s?void 0:s[e])??e.slice(2).toLowerCase()).slice(0,i?-7:void 0);t.useLayoutEffect((()=>{const t=null==h?void 0:h.current;if(t&&"function"==typeof n)return t.addEventListener(a,n,i),()=>{t.removeEventListener(a,n,i)}}),[null==h?void 0:h.current,n])}t.useLayoutEffect((()=>{if(null===h.current)return;const t=new Map;for(const e in S)w(h.current,e,S[e]),p.current.delete(e),t.set(e,S[e]);for(const[t,e]of p.current)w(h.current,t,void 0);p.current=t}))}if("undefined"==typeof window&&(null==n?void 0:n.getTemplateHTML)&&(null==n?void 0:n.shadowRootOptions)){const{mode:e,delegatesFocus:s}=n.shadowRootOptions,a=t.createElement("template",{shadowrootmode:e,shadowrootdelegatesfocus:s,dangerouslySetInnerHTML:{__html:n.getTemplateHTML(v,i)}});b.children=[a,b.children]}return t.createElement(e,{...a,...b,ref:t.useCallback((t=>{h.current=t,"function"==typeof u?u(t):null!==u&&(u.current=t)}),[u])})}));return u.displayName=i??n.name,u}({react:s,tagName:"twitch-video",elementClass:m,toAttributeName:t=>"muted"===t?"":"defaultMuted"===t?"muted":v(t)})}}]);
+(globalThis["webpackChunksimplystatic_settings"] = globalThis["webpackChunksimplystatic_settings"] || []).push([["reactPlayerTwitch"],{
+
+/***/ "./node_modules/react-player/lib/players/Twitch.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/react-player/lib/players/Twitch.js ***!
+  \*********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var __publicField = (obj, key, value) => {
+  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
+var Twitch_exports = {};
+__export(Twitch_exports, {
+  default: () => Twitch
+});
+module.exports = __toCommonJS(Twitch_exports);
+var import_react = __toESM(__webpack_require__(/*! react */ "react"));
+var import_utils = __webpack_require__(/*! ../utils */ "./node_modules/react-player/lib/utils.js");
+var import_patterns = __webpack_require__(/*! ../patterns */ "./node_modules/react-player/lib/patterns.js");
+const SDK_URL = "https://player.twitch.tv/js/embed/v1.js";
+const SDK_GLOBAL = "Twitch";
+const PLAYER_ID_PREFIX = "twitch-player-";
+class Twitch extends import_react.Component {
+  constructor() {
+    super(...arguments);
+    __publicField(this, "callPlayer", import_utils.callPlayer);
+    __publicField(this, "playerID", this.props.config.playerId || `${PLAYER_ID_PREFIX}${(0, import_utils.randomString)()}`);
+    __publicField(this, "mute", () => {
+      this.callPlayer("setMuted", true);
+    });
+    __publicField(this, "unmute", () => {
+      this.callPlayer("setMuted", false);
+    });
+  }
+  componentDidMount() {
+    this.props.onMount && this.props.onMount(this);
+  }
+  load(url, isReady) {
+    const { playsinline, onError, config, controls } = this.props;
+    const isChannel = import_patterns.MATCH_URL_TWITCH_CHANNEL.test(url);
+    const id = isChannel ? url.match(import_patterns.MATCH_URL_TWITCH_CHANNEL)[1] : url.match(import_patterns.MATCH_URL_TWITCH_VIDEO)[1];
+    if (isReady) {
+      if (isChannel) {
+        this.player.setChannel(id);
+      } else {
+        this.player.setVideo("v" + id);
+      }
+      return;
+    }
+    (0, import_utils.getSDK)(SDK_URL, SDK_GLOBAL).then((Twitch2) => {
+      this.player = new Twitch2.Player(this.playerID, {
+        video: isChannel ? "" : id,
+        channel: isChannel ? id : "",
+        height: "100%",
+        width: "100%",
+        playsinline,
+        autoplay: this.props.playing,
+        muted: this.props.muted,
+        // https://github.com/CookPete/react-player/issues/733#issuecomment-549085859
+        controls: isChannel ? true : controls,
+        time: (0, import_utils.parseStartTime)(url),
+        ...config.options
+      });
+      const { READY, PLAYING, PAUSE, ENDED, ONLINE, OFFLINE, SEEK } = Twitch2.Player;
+      this.player.addEventListener(READY, this.props.onReady);
+      this.player.addEventListener(PLAYING, this.props.onPlay);
+      this.player.addEventListener(PAUSE, this.props.onPause);
+      this.player.addEventListener(ENDED, this.props.onEnded);
+      this.player.addEventListener(SEEK, this.props.onSeek);
+      this.player.addEventListener(ONLINE, this.props.onLoaded);
+      this.player.addEventListener(OFFLINE, this.props.onLoaded);
+    }, onError);
+  }
+  play() {
+    this.callPlayer("play");
+  }
+  pause() {
+    this.callPlayer("pause");
+  }
+  stop() {
+    this.callPlayer("pause");
+  }
+  seekTo(seconds, keepPlaying = true) {
+    this.callPlayer("seek", seconds);
+    if (!keepPlaying) {
+      this.pause();
+    }
+  }
+  setVolume(fraction) {
+    this.callPlayer("setVolume", fraction);
+  }
+  getDuration() {
+    return this.callPlayer("getDuration");
+  }
+  getCurrentTime() {
+    return this.callPlayer("getCurrentTime");
+  }
+  getSecondsLoaded() {
+    return null;
+  }
+  render() {
+    const style = {
+      width: "100%",
+      height: "100%"
+    };
+    return /* @__PURE__ */ import_react.default.createElement("div", { style, id: this.playerID });
+  }
+}
+__publicField(Twitch, "displayName", "Twitch");
+__publicField(Twitch, "canPlay", import_patterns.canPlay.twitch);
+__publicField(Twitch, "loopOnEnded", true);
+
+
+/***/ })
+
+}]);
+//# sourceMappingURL=reactPlayerTwitch.js.map

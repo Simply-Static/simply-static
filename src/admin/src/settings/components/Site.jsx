@@ -96,7 +96,7 @@ function Site( props ) {
                 <a href={site.url}>{site.url}</a>
             </td>
             <td>
-                {isRunning ? 'Running' : ( isPaused ? 'Paused' : 'Idle' ) }
+                { site.status }
             </td>
             <td className={'generate-container'}>
                 <Buttons

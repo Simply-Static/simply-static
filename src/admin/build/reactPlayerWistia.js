@@ -1,1 +1,166 @@
-"use strict";(globalThis.webpackChunksimplystatic_settings=globalThis.webpackChunksimplystatic_settings||[]).push([[340],{868:(t,e,i)=>{i.r(e),i.d(e,{default:()=>L});var s=i(609);const o=["abort","canplay","canplaythrough","durationchange","emptied","encrypted","ended","error","loadeddata","loadedmetadata","loadstart","pause","play","playing","progress","ratechange","seeked","seeking","stalled","suspend","timeupdate","volumechange","waiting","waitingforkey","resize","enterpictureinpicture","leavepictureinpicture","webkitbeginfullscreen","webkitendfullscreen","webkitpresentationmodechanged"],n=globalThis.document?.createElement("template");n&&(n.innerHTML="\n    <style>\n      :host {\n        display: inline-block;\n        line-height: 0;\n      }\n\n      video,\n      audio {\n        max-width: 100%;\n        max-height: 100%;\n        min-width: 100%;\n        min-height: 100%;\n      }\n    </style>\n    <slot></slot>\n  ");const a=(t,{tag:e,is:i})=>{const s=globalThis.document?.createElement(e,{is:i}),a=s?l(s):[];return class d extends t{static Events=o;static template=n;static skipAttributes=[];static#t;static get observedAttributes(){return d.#e(),[...s?.constructor?.observedAttributes??[],"autopictureinpicture","disablepictureinpicture","disableremoteplayback","autoplay","controls","controlslist","crossorigin","loop","muted","playsinline","poster","preload","src"]}static#e(){if(this.#t)return;this.#t=!0;const t=new Set(this.observedAttributes);t.delete("muted");for(let e of a)if(!(e in this.prototype))if("function"==typeof s[e])this.prototype[e]=function(...t){this.#i();const i=()=>this.call?this.call(e,...t):this.nativeEl[e].apply(this.nativeEl,t);return this.loadComplete&&!this.isLoaded?this.loadComplete.then(i):i()};else{let i={get(){this.#i();let i=e.toLowerCase();if(t.has(i)){const t=this.getAttribute(i);return null!==t&&(""===t||t)}return this.get?.(e)??this.nativeEl?.[e]??this.#s[e]}};e!==e.toUpperCase()&&(i.set=async function(i){this.#i();let s=e.toLowerCase();t.has(s)?!0===i||!1===i||null==i?this.toggleAttribute(s,Boolean(i)):this.setAttribute(s,i):(this.loadComplete&&!this.isLoaded&&await this.loadComplete,this.set?this.set(e,i):this.nativeEl[e]=i)}),Object.defineProperty(this.prototype,e,i)}}#o;#n;#a=!1;#l=!1;#r;#s;constructor(){super(),this.shadowRoot||(this.attachShadow({mode:"open"}),this.shadowRoot.append(this.constructor.template.content.cloneNode(!0))),this.load!==d.prototype.load&&(this.loadComplete=new r)}get loadComplete(){return this.#n}set loadComplete(t){this.#l=!1,this.#n=t,t?.then((()=>{this.#l=!0}))}get isLoaded(){return this.#l}get nativeEl(){return this.#r??this.shadowRoot.querySelector(e)??this.querySelector(e)}set nativeEl(t){this.#r=t}get defaultMuted(){return this.hasAttribute("muted")}set defaultMuted(t){this.toggleAttribute("muted",Boolean(t))}get src(){return this.getAttribute("src")}set src(t){this.setAttribute("src",`${t}`)}get preload(){return this.getAttribute("preload")??this.nativeEl?.preload}set preload(t){this.setAttribute("preload",`${t}`)}async#i(){if(this.#o)return;this.#o=!0,this.#d(),this.#c();for(let t of a)this.#u(t);const t=new Map,e=this.shadowRoot.querySelector("slot:not([name])");e?.addEventListener("slotchange",(()=>{const i=new Map(t);e.assignedElements().filter((t=>["track","source"].includes(t.localName))).forEach((async e=>{i.delete(e);let s=t.get(e);s||(s=e.cloneNode(),t.set(e,s)),this.loadComplete&&!this.isLoaded&&await this.loadComplete,this.nativeEl.append?.(s)})),i.forEach((t=>t.remove()))}));for(let t of this.constructor.Events)this.shadowRoot.addEventListener?.(t,(t=>{t.target===this.nativeEl&&this.dispatchEvent(new CustomEvent(t.type,{detail:t.detail}))}),!0)}#u(t){if(Object.prototype.hasOwnProperty.call(this,t)){const e=this[t];delete this[t],this[t]=e}}#d(){const t=document.createElement(e,{is:i});t.muted=this.hasAttribute("muted");for(let{name:e,value:i}of this.attributes)t.setAttribute(e,i);this.#s={};for(let e of l(t))this.#s[e]=t[e];t.removeAttribute("src"),t.load()}async#c(){if(this.loadComplete&&!this.isLoaded&&await this.loadComplete,!this.nativeEl){const t=document.createElement(e,{is:i});t.part=e,this.shadowRoot.append(t)}this.nativeEl.muted=this.hasAttribute("muted")}attributeChangedCallback(t,e,i){this.#i(),"src"===t&&this.load!==d.prototype.load&&this.#h(),this.#p(t,e,i)}async#h(){this.#a&&(this.loadComplete=new r),this.#a=!0,await Promise.resolve(),await this.load(),this.loadComplete?.resolve(),await this.loadComplete}async#p(t,e,i){this.loadComplete&&!this.isLoaded&&await this.loadComplete,["id","class",...this.constructor.skipAttributes].includes(t)||(null===i?this.nativeEl.removeAttribute?.(t):this.nativeEl.setAttribute?.(t,i))}connectedCallback(){this.#i()}}};function l(t){let e=[];for(let i=Object.getPrototypeOf(t);i&&i!==HTMLElement.prototype;i=Object.getPrototypeOf(i))e.push(...Object.getOwnPropertyNames(i));return e}class r extends Promise{constructor(t=()=>{}){let e,i;super(((s,o)=>{t(s,o),e=s,i=o})),this.resolve=e,this.reject=i}}const d=globalThis.document?a(HTMLElement,{tag:"video"}):class{};var c,u;globalThis.document&&a(HTMLElement,{tag:"audio"});const h=null==(c=globalThis.document)?void 0:c.createElement("template");h&&(h.innerHTML='\n  <div class="wistia_embed"></div>\n  ');const p=null==(u=globalThis.document)?void 0:u.createElement("template");p&&(p.innerHTML="\n  <style>\n    :host {\n      display: inline-block;\n      min-width: 300px;\n      min-height: 150px;\n      position: relative;\n    }\n    ::slotted(.wistia_embed) {\n      position: absolute;\n      width: 100%;\n      height: 100%;\n    }\n  </style>\n  <slot></slot>\n  ");class m extends d{static template=p;static skipAttributes=["src"];get nativeEl(){var t;return(null==(t=this.api)?void 0:t.elem())??this.querySelector("video")}async load(){var t;if(null==(t=this.querySelector(".wistia_embed"))||t.remove(),!this.src)return;await new Promise((t=>setTimeout(t,50)));const e=this.src.match(/(?:wistia\.com|wi\.st)\/(?:medias|embed)\/(.*)$/i)[1],i={autoPlay:this.autoplay,preload:this.preload??"metadata",playsinline:this.playsInline,endVideoBehavior:this.loop&&"loop",chromeless:!this.controls,playButton:this.controls,muted:this.defaultMuted};this.append(h.content.cloneNode(!0));const s=this.querySelector(".wistia_embed");s.id||(s.id=`${e}${++b}`),s.classList.add(`wistia_async_${e}`),await async function(t,e){return e?f[t]?f[t]:self[e]?self[e]:f[t]=new Promise(((i,s)=>{const o=document.createElement("script");o.defer=!0,o.src=t,o.onload=()=>i(self[e]),o.onerror=s,document.head.append(o)})):import(t)}("https://fast.wistia.com/assets/external/E-v1.js","Wistia"),this.api=await new Promise((t=>{globalThis._wq.push({id:s.id,onReady:t,options:i})}))}async attributeChangedCallback(t,e,i){"controls"!==t?super.attributeChangedCallback(t,e,i):(await this.loadComplete,"controls"===t&&(this.api.bigPlayButtonEnabled(this.controls),this.controls?this.api.releaseChromeless():this.api.requestChromeless()))}get duration(){var t;return null==(t=this.api)?void 0:t.duration()}play(){return this.api.play(),new Promise((t=>this.addEventListener("playing",t)))}}const f={};let b=0;globalThis.customElements&&!globalThis.customElements.get("wistia-video")&&globalThis.customElements.define("wistia-video",m);var v=m,g=new Set(["style","children","ref","key","suppressContentEditableWarning","suppressHydrationWarning","dangerouslySetInnerHTML"]),y={className:"class",htmlFor:"for"};function w(t){return t.toLowerCase()}function E(t){return"boolean"==typeof t?t?"":void 0:"function"==typeof t||"object"==typeof t&&null!==t?void 0:t}function C(t,e,i){var s;t[e]=i,null==i&&e in((null==(s=globalThis.HTMLElement)?void 0:s.prototype)??{})&&t.removeAttribute(e)}var L=function({react:t,tagName:e,elementClass:i,events:s,displayName:o,defaultProps:n,toAttributeName:a=w,toAttributeValue:l=E}){const r=Number.parseInt(t.version)>=19,d=t.forwardRef(((o,d)=>{var c,u;const h=t.useRef(null),p=t.useRef(new Map),m={},f={},b={},v={};for(const[t,e]of Object.entries(o)){if(g.has(t)){b[t]=e;continue}const s=a(y[t]??t);if(i.prototype&&t in i.prototype&&!(t in((null==(c=globalThis.HTMLElement)?void 0:c.prototype)??{}))&&!(null==(u=i.observedAttributes)?void 0:u.some((t=>t===s)))){v[t]=e;continue}if(t.startsWith("on")){m[t]=e;continue}const o=l(e);if(s&&null!=o&&(f[s]=String(o),r||(b[s]=o)),s&&r){const t=E(e);b[s]=o!==t?o:e}}if("undefined"!=typeof window){for(const e in m){const i=m[e],o=e.endsWith("Capture"),n=((null==s?void 0:s[e])??e.slice(2).toLowerCase()).slice(0,o?-7:void 0);t.useLayoutEffect((()=>{const t=null==h?void 0:h.current;if(t&&"function"==typeof i)return t.addEventListener(n,i,o),()=>{t.removeEventListener(n,i,o)}}),[null==h?void 0:h.current,i])}t.useLayoutEffect((()=>{if(null===h.current)return;const t=new Map;for(const e in v)C(h.current,e,v[e]),p.current.delete(e),t.set(e,v[e]);for(const[t,e]of p.current)C(h.current,t,void 0);p.current=t}))}if("undefined"==typeof window&&(null==i?void 0:i.getTemplateHTML)&&(null==i?void 0:i.shadowRootOptions)){const{mode:e,delegatesFocus:s}=i.shadowRootOptions,n=t.createElement("template",{shadowrootmode:e,shadowrootdelegatesfocus:s,dangerouslySetInnerHTML:{__html:i.getTemplateHTML(f,o)}});b.children=[n,b.children]}return t.createElement(e,{...n,...b,ref:t.useCallback((t=>{h.current=t,"function"==typeof d?d(t):null!==d&&(d.current=t)}),[d])})}));return d.displayName=o??i.name,d}({react:s,tagName:"wistia-video",elementClass:v,toAttributeName:t=>"muted"===t?"":"defaultMuted"===t?"muted":w(t)})}}]);
+(globalThis["webpackChunksimplystatic_settings"] = globalThis["webpackChunksimplystatic_settings"] || []).push([["reactPlayerWistia"],{
+
+/***/ "./node_modules/react-player/lib/players/Wistia.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/react-player/lib/players/Wistia.js ***!
+  \*********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var __publicField = (obj, key, value) => {
+  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
+var Wistia_exports = {};
+__export(Wistia_exports, {
+  default: () => Wistia
+});
+module.exports = __toCommonJS(Wistia_exports);
+var import_react = __toESM(__webpack_require__(/*! react */ "react"));
+var import_utils = __webpack_require__(/*! ../utils */ "./node_modules/react-player/lib/utils.js");
+var import_patterns = __webpack_require__(/*! ../patterns */ "./node_modules/react-player/lib/patterns.js");
+const SDK_URL = "https://fast.wistia.com/assets/external/E-v1.js";
+const SDK_GLOBAL = "Wistia";
+const PLAYER_ID_PREFIX = "wistia-player-";
+class Wistia extends import_react.Component {
+  constructor() {
+    super(...arguments);
+    __publicField(this, "callPlayer", import_utils.callPlayer);
+    __publicField(this, "playerID", this.props.config.playerId || `${PLAYER_ID_PREFIX}${(0, import_utils.randomString)()}`);
+    // Proxy methods to prevent listener leaks
+    __publicField(this, "onPlay", (...args) => this.props.onPlay(...args));
+    __publicField(this, "onPause", (...args) => this.props.onPause(...args));
+    __publicField(this, "onSeek", (...args) => this.props.onSeek(...args));
+    __publicField(this, "onEnded", (...args) => this.props.onEnded(...args));
+    __publicField(this, "onPlaybackRateChange", (...args) => this.props.onPlaybackRateChange(...args));
+    __publicField(this, "mute", () => {
+      this.callPlayer("mute");
+    });
+    __publicField(this, "unmute", () => {
+      this.callPlayer("unmute");
+    });
+  }
+  componentDidMount() {
+    this.props.onMount && this.props.onMount(this);
+  }
+  load(url) {
+    const { playing, muted, controls, onReady, config, onError } = this.props;
+    (0, import_utils.getSDK)(SDK_URL, SDK_GLOBAL).then((Wistia2) => {
+      if (config.customControls) {
+        config.customControls.forEach((control) => Wistia2.defineControl(control));
+      }
+      window._wq = window._wq || [];
+      window._wq.push({
+        id: this.playerID,
+        options: {
+          autoPlay: playing,
+          silentAutoPlay: "allow",
+          muted,
+          controlsVisibleOnLoad: controls,
+          fullscreenButton: controls,
+          playbar: controls,
+          playbackRateControl: controls,
+          qualityControl: controls,
+          volumeControl: controls,
+          settingsControl: controls,
+          smallPlayButton: controls,
+          ...config.options
+        },
+        onReady: (player) => {
+          this.player = player;
+          this.unbind();
+          this.player.bind("play", this.onPlay);
+          this.player.bind("pause", this.onPause);
+          this.player.bind("seek", this.onSeek);
+          this.player.bind("end", this.onEnded);
+          this.player.bind("playbackratechange", this.onPlaybackRateChange);
+          onReady();
+        }
+      });
+    }, onError);
+  }
+  unbind() {
+    this.player.unbind("play", this.onPlay);
+    this.player.unbind("pause", this.onPause);
+    this.player.unbind("seek", this.onSeek);
+    this.player.unbind("end", this.onEnded);
+    this.player.unbind("playbackratechange", this.onPlaybackRateChange);
+  }
+  play() {
+    this.callPlayer("play");
+  }
+  pause() {
+    this.callPlayer("pause");
+  }
+  stop() {
+    this.unbind();
+    this.callPlayer("remove");
+  }
+  seekTo(seconds, keepPlaying = true) {
+    this.callPlayer("time", seconds);
+    if (!keepPlaying) {
+      this.pause();
+    }
+  }
+  setVolume(fraction) {
+    this.callPlayer("volume", fraction);
+  }
+  setPlaybackRate(rate) {
+    this.callPlayer("playbackRate", rate);
+  }
+  getDuration() {
+    return this.callPlayer("duration");
+  }
+  getCurrentTime() {
+    return this.callPlayer("time");
+  }
+  getSecondsLoaded() {
+    return null;
+  }
+  render() {
+    const { url } = this.props;
+    const videoID = url && url.match(import_patterns.MATCH_URL_WISTIA)[1];
+    const className = `wistia_embed wistia_async_${videoID}`;
+    const style = {
+      width: "100%",
+      height: "100%"
+    };
+    return /* @__PURE__ */ import_react.default.createElement("div", { id: this.playerID, key: videoID, className, style });
+  }
+}
+__publicField(Wistia, "displayName", "Wistia");
+__publicField(Wistia, "canPlay", import_patterns.canPlay.wistia);
+__publicField(Wistia, "loopOnEnded", true);
+
+
+/***/ })
+
+}]);
+//# sourceMappingURL=reactPlayerWistia.js.map
