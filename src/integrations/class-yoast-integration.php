@@ -147,23 +147,32 @@ class Yoast_Integration extends Integration {
 	/**
 	 * Replace JSON schema for schema.org
 	 *
-	 * @param object $dom given dom element.
+	 * @param mixed  $dom DOMDocument or HTML string.
 	 * @param string $url given URL.
 	 *
-	 * @return object
+	 * @return mixed DOMDocument or HTML string (same type as input)
 	 */
 	public function replace_json_schema( $dom, $url ) {
 		$options = Options::instance();
 
-		// Check if $dom is a string and convert it to a DOMDocument if needed
-		if ( is_string( $dom ) ) {
+		// Normalize input to DOMDocument while keeping track of original type.
+		$original_was_string = is_string( $dom );
+
+		if ( $original_was_string ) {
 			$doc = new \DOMDocument();
-			@$doc->loadHTML( $dom );
-			$dom = $doc;
+			libxml_use_internal_errors( true );
+			$load_options = defined('LIBXML_HTML_NOIMPLIED') ? (LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD) : 0;
+			$doc->loadHTML( $dom, $load_options );
+			libxml_clear_errors();
+		} elseif ( $dom instanceof \DOMDocument ) {
+			$doc = $dom;
+		} else {
+			// Unknown type; nothing to do.
+			return $dom;
 		}
 
 		// Use DOMXPath to find script elements with class 'yoast-schema-graph'
-		$xpath = new \DOMXPath( $dom );
+		$xpath = new \DOMXPath( $doc );
 		$scripts = $xpath->query( '//script[contains(@class, "yoast-schema-graph")]' );
 
 		if ( $scripts ) {
@@ -174,7 +183,12 @@ class Yoast_Integration extends Integration {
 			}
 		}
 
-		return $dom;
+		// Return the same type that was provided.
+		if ( $original_was_string ) {
+			return $doc->saveHTML();
+		}
+
+		return $doc;
 	}
 
 	/**
