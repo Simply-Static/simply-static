@@ -75,15 +75,34 @@ class Setup_Task extends Task {
 		$static_page->found_on_id = 0;
 		$static_page->save();
 
-		$urls = apply_filters( 'ss_additional_urls', array_unique( Util::string_to_array( $additional_urls ) ) );
+		// Convert raw textarea to array but avoid array_unique on the full dataset to reduce peak memory.
+		$raw_urls = Util::string_to_array( $additional_urls );
+		$urls     = apply_filters( 'ss_additional_urls', $raw_urls );
 
-		foreach ( $urls as $url ) {
-			if ( Util::is_local_url( $url ) ) {
-				Util::debug_log( 'Adding additional URL to queue: ' . $url );
-				$static_page = Page::query()->find_or_initialize_by( 'url', $url );
-				$static_page->set_status_message( __( "Additional URL", 'simply-static' ) );
-				$static_page->found_on_id = 0;
-				$static_page->save();
+		// Process Additional URLs in batches to avoid memory exhaustion with very large lists.
+		$batch_size = (int) apply_filters( 'ss_additional_urls_batch_size', 50 );
+		if ( $batch_size < 1 ) {
+			$batch_size = 50;
+		}
+
+		foreach ( array_chunk( (array) $urls, $batch_size ) as $chunk ) {
+			// De-duplicate within each chunk to minimize duplicate operations without loading entire list into memory.
+			$chunk = array_unique( $chunk );
+
+			foreach ( $chunk as $url ) {
+				if ( Util::is_local_url( $url ) ) {
+					Util::debug_log( 'Adding additional URL to queue: ' . $url );
+					$static_page = Page::query()->find_or_initialize_by( 'url', $url );
+					$static_page->set_status_message( __( 'Additional URL', 'simply-static' ) );
+					$static_page->found_on_id = 0;
+					$static_page->save();
+				}
+			}
+
+			// Free memory for processed chunk explicitly.
+			unset( $chunk );
+			if ( function_exists( 'gc_collect_cycles' ) ) {
+				gc_collect_cycles();
 			}
 		}
 	}
@@ -142,38 +161,51 @@ class Setup_Task extends Task {
 			$additional_files[] = $feed_directory . '/index.html';
 		}
 
-		// Convert additional files to URLs and add to queue.
-		foreach ( $additional_files as $item ) {
-			// If item is a file, convert to url and insert into database.
-			// If item is a directory, recursively iterate and grab all files,
-			// and for each file, convert to url and insert into database.
-			if ( file_exists( $item ) ) {
-				if ( is_file( $item ) ) {
-					$url = self::convert_path_to_url( $item );
-					Util::debug_log( "File " . $item . ' exists; adding to queue as: ' . $url );
-					$static_page = Page::query()
-					                   ->find_or_create_by( 'url', $url );
-					$static_page->set_status_message( __( "Additional File", 'simply-static' ) );
-					// setting found_on_id to 0 since this was user-specified
-					$static_page->found_on_id = 0;
-					$static_page->handler     = Additional_File_Handler::class;
-					$static_page->save();
-				} else {
-					Util::debug_log( "Adding files from directory: " . $item );
-					$iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $item, \RecursiveDirectoryIterator::SKIP_DOTS ) );
+		// Process Additional Files/Directories in batches to reduce peak memory usage.
+		$batch_size = (int) apply_filters( 'ss_additional_files_batch_size', 50 );
+		if ( $batch_size < 1 ) {
+			$batch_size = 50;
+		}
 
-					foreach ( $iterator as $file_name => $file_object ) {
-						$url = self::convert_path_to_url( $file_name );
-						Util::debug_log( "Adding file " . $file_name . ' to queue as: ' . $url );
-						$static_page = Page::query()->find_or_initialize_by( 'url', $url );
-						$static_page->set_status_message( __( "Additional Dir", 'simply-static' ) );
-						$static_page->handler     = Additional_File_Handler::class;
+		foreach ( array_chunk( (array) $additional_files, $batch_size ) as $chunk ) {
+			foreach ( $chunk as $item ) {
+				// If item is a file, convert to url and insert into database.
+				// If item is a directory, recursively iterate and grab all files,
+				// and for each file, convert to url and insert into database.
+				if ( file_exists( $item ) ) {
+					if ( is_file( $item ) ) {
+						$url = self::convert_path_to_url( $item );
+						Util::debug_log( "File " . $item . ' exists; adding to queue as: ' . $url );
+						$static_page = Page::query()
+						                   ->find_or_create_by( 'url', $url );
+						$static_page->set_status_message( __( "Additional File", 'simply-static' ) );
+						// setting found_on_id to 0 since this was user-specified
 						$static_page->found_on_id = 0;
+						$static_page->handler     = Additional_File_Handler::class;
 						$static_page->save();
+					} else {
+						Util::debug_log( "Adding files from directory: " . $item );
+						$iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $item, \RecursiveDirectoryIterator::SKIP_DOTS ) );
+
+						foreach ( $iterator as $file_name => $file_object ) {
+							$url = self::convert_path_to_url( $file_name );
+							Util::debug_log( "Adding file " . $file_name . ' to queue as: ' . $url );
+							$static_page = Page::query()->find_or_initialize_by( 'url', $url );
+							$static_page->set_status_message( __( "Additional Dir", 'simply-static' ) );
+							$static_page->handler     = Additional_File_Handler::class;
+							$static_page->found_on_id = 0;
+							$static_page->save();
+						}
 					}
+				} else {
+					Util::debug_log( "File doesn't exist: " . $item );
 				}
-			} else {
-				Util::debug_log( "File doesn't exist: " . $item );
+			}
+
+			// Free memory for processed chunk explicitly.
+			unset( $chunk );
+			if ( function_exists( 'gc_collect_cycles' ) ) {
+				gc_collect_cycles();
 			}
 		}
 	}
