@@ -148,6 +148,12 @@ class Url_Extractor {
 		$context = stream_context_create( $opts );
 		$path    = $this->options->get_archive_dir() . $this->static_page->file_path;
 
+		// Guard against invalid file paths (e.g., when file_path is empty or points to a directory)
+		if ( empty( $this->static_page->file_path ) || is_dir( $path ) || ! is_file( $path ) ) {
+			// Return empty string to avoid warnings; extractor callers will handle empty content gracefully
+			return '';
+		}
+
 		return file_get_contents( $path, false, $context );
 	}
 
@@ -173,7 +179,13 @@ class Url_Extractor {
 			}, $content );
 		}
 
-		return file_put_contents( $this->options->get_archive_dir() . $this->static_page->file_path, $content );
+		$target = $this->options->get_archive_dir() . $this->static_page->file_path;
+		// Guard against invalid write targets (empty file_path or a directory path)
+		if ( empty( $this->static_page->file_path ) || substr( $this->static_page->file_path, -1 ) === DIRECTORY_SEPARATOR || is_dir( $target ) ) {
+			return false;
+		}
+
+		return file_put_contents( $target, $content );
 	}
 
 	/**
