@@ -54,16 +54,17 @@ class Divi_Integration extends Integration {
 		$options  = Options::instance();
 		$crawlers = $options->get( 'crawlers' );
 
-		if ( is_array( $crawlers ) && ! empty( $crawlers ) ) {
-			if ( ! in_array( 'divi', $crawlers, true ) ) {
-				$crawlers[] = 'divi';
-				$options->set( 'crawlers', array_values( array_unique( $crawlers ) ) );
-				$options->save();
-				Util::debug_log( 'Divi Crawler added to existing crawlers list.' );
+		// Respect user selections completely:
+		// - If crawlers is an array and does NOT contain 'divi', treat as explicit opt-out and do not re-add.
+		// - If crawlers is null or not an array, do not modify; fall back to default is_active logic.
+		if ( is_array( $crawlers ) ) {
+			if ( in_array( 'divi', $crawlers, true ) ) {
+				Util::debug_log( 'Divi Crawler already present in user selection; leaving as-is.' );
+			} else {
+				Util::debug_log( 'Divi Crawler not in user selection; respecting opt-out and not adding.' );
 			}
 		} else {
-			// Leave defaults intact when empty/not an array; Divi crawler will be active by default logic.
-			Util::debug_log( 'Crawlers option empty or not an array; not modifying. Divi may be active by default.' );
+			Util::debug_log( 'Crawlers option undefined or not an array; not modifying for Divi.' );
 		}
 	}
 

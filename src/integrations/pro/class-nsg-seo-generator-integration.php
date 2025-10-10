@@ -10,8 +10,8 @@ class Nsg_SEO_Generator_Integration extends Pro_Integration {
 	protected $id = 'nsg-seo-generator';
 
 	public function __construct() {
-		$this->name = __( 'NSG SEO Generator', 'simply-static' );
-		$this->description = __( 'Integrates with the NSG SEO Generator plugin (Pro). Enable in Simply Static Pro to crawl generated URLs.', 'simply-static' );
+		$this->name = __( 'SEO Generator', 'simply-static' );
+		$this->description = __( 'Integrates with the SEO Generator plugin (Pro). Enable in Simply Static Pro to crawl generated URLs.', 'simply-static' );
 		$this->active_by_default = false;
 	}
 

@@ -522,19 +522,17 @@ Util::debug_log('extract_elementor_settings: ' . $json);
 		// Get current active crawlers
 		$crawlers = $options->get( 'crawlers' );
 
-		// Only modify the option when it is a non-empty array. If it's empty/undefined,
-		// do nothing to avoid overwriting defaults or user selections during activation.
-		if ( is_array( $crawlers ) && ! empty( $crawlers ) ) {
-			// Ensure Elementor crawler is present without removing others
-			if ( ! in_array( 'elementor', $crawlers, true ) ) {
-				$crawlers[] = 'elementor';
-				$options->set( 'crawlers', array_values( array_unique( $crawlers ) ) );
-				$options->save();
-				Util::debug_log( 'Elementor Crawler added to existing crawlers list.' );
+		// Respect user selections completely:
+		// - If crawlers is an array and does NOT contain 'elementor', treat as explicit opt-out and do not re-add.
+		// - If crawlers is null or not an array, do not modify; fall back to default is_active logic.
+		if ( is_array( $crawlers ) ) {
+			if ( in_array( 'elementor', $crawlers, true ) ) {
+				Util::debug_log( 'Elementor Crawler already present in user selection; leaving as-is.' );
+			} else {
+				Util::debug_log( 'Elementor Crawler not in user selection; respecting opt-out and not adding.' );
 			}
 		} else {
-			// Leave option as-is when empty or not an array; defaults will apply elsewhere.
-			Util::debug_log( 'Crawlers option empty or not an array; not modifying. Elementor will be active by default logic.' );
+			Util::debug_log( 'Crawlers option undefined or not an array; not modifying for Elementor.' );
 		}
 	}
 

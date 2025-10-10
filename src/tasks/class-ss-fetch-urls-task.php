@@ -55,23 +55,33 @@ class Fetch_Urls_Task extends Task {
 			$this->archive_start_time
 		);
 
-		$pages_remaining = apply_filters(
-			'ss_remaining_pages',
+		// Compute remaining and total using the same filtering as ss_static_pages to avoid mismatched counts that can stall progress
+		$remaining_pages_list = apply_filters(
+			'ss_static_pages',
 			Page::query()
 			    ->where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time )
-			    ->count(),
+			    ->find(),
 			$this->archive_start_time
 		);
+		$pages_remaining = is_array( $remaining_pages_list ) ? count( $remaining_pages_list ) : 0;
 
-		$total_pages = apply_filters( 'ss_total_pages', Page::query()->count() );
+		$total_pages_list = apply_filters( 'ss_static_pages', Page::query()->find(), $this->archive_start_time );
+		$total_pages = is_array( $total_pages_list ) ? count( $total_pages_list ) : 0;
 
+		// Note: We will recalculate these values again after processing this batch so the
+		// status message always reflects the latest progress.
 		$pages_processed = $total_pages - $pages_remaining;
 		Util::debug_log( "Total pages: " . $total_pages . '; Pages remaining: ' . $pages_remaining );
+
+		// Track remaining pages locally so we can update progress accurately without extra DB queries.
+		$remaining_counter = (int) $pages_remaining;
 
 		while ( $static_page = array_shift( $static_pages ) ) {
 			$this->check_if_running();
 			Util::debug_log( "URL: " . $static_page->url );
-			$this->save_pages_status( count( $static_pages ) + 1, intval( $total_pages ) );
+			$this->save_pages_status( $remaining_counter, (int) $total_pages );
+			// Decrement after scheduling processing of this page.
+			$remaining_counter = max( 0, $remaining_counter - 1 );
 
 			$excludable = apply_filters( 'ss_find_excludable', $this->find_excludable( $static_page ), $static_page );
 			if ( $excludable !== false ) {
@@ -126,10 +136,23 @@ class Fetch_Urls_Task extends Task {
 
 		}
 
+		// Recalculate progress after processing this batch to avoid stale counters.
+		$remaining_pages_list = apply_filters(
+			'ss_static_pages',
+			Page::query()
+		        ->where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time )
+		        ->find(),
+			$this->archive_start_time
+		);
+		$pages_remaining = is_array( $remaining_pages_list ) ? count( $remaining_pages_list ) : 0;
+		$total_pages_list = apply_filters( 'ss_static_pages', Page::query()->find(), $this->archive_start_time );
+		$total_pages = is_array( $total_pages_list ) ? count( $total_pages_list ) : 0;
+		$pages_processed = $total_pages - $pages_remaining;
+
 		$message = sprintf( __( "Fetched %d of %d pages/files", 'simply-static' ), $pages_processed, $total_pages );
 		$this->save_status_message( $message );
 
-		// if we haven't processed any additional pages, we're done.
+		// If we've processed all pages for this export, signal completion of this task.
 		if ( $pages_remaining == 0 ) {
 			do_action( 'ss_finished_fetching_pages' );
 		}
