@@ -53,8 +53,91 @@ class Multisite {
 		add_filter( 'ss_can_delete_file', [ $this, 'can_delete_file' ], 20, 3 );
 		add_action( 'admin_footer', [ $this, 'hide_top_menu' ] );
 		add_action( 'network_admin_menu', array( Admin_Settings::get_instance(), 'add_menu' ), 2 );
+        add_action( 'ss_archive_creation_job_before_start', [ $this, 'check_for_export' ], 30 );
+        add_action( 'ss_archive_creation_job_before_start', [ $this, 'add_export' ], 40 );
+        add_action( 'ss_after_cleanup', [ $this, 'remove_export_check' ], 10, 1 );
+
+    }
+
+    /**
+     * Add the current Blog ID to export check.
+     *
+     * @return void
+     */
+    public function add_export() {
+        if ( ! $this->can_disable_export() ) {
+            return;
+        }
+
+        $blog_id = get_current_blog_id();
+
+        update_site_option( Plugin::SLUG . '_multisite_export_running', $blog_id );
+    }
+
+    /**
+     * Delete the export check if the current blog is on it.
+     *
+     * @return void
+     */
+    public function remove_export_check() {
+        if ( ! $this->can_disable_export() ) {
+            return;
+        }
+
+        $export_site_id = $this->current_running_export_site_id();
+
+        if ( ! $export_site_id ) {
+            return;
+        }
+
+        $blog_id = get_current_blog_id();
+
+        if ( absint( $blog_id ) !== absint( $export_site_id ) ) {
+            return;
+        }
+
+        delete_site_option( Plugin::SLUG . '_multisite_export_running' );
+    }
+
+    /**
+     * Return Blog ID of the current export check.
+     *
+     * @return false|mixed
+     */
+     public function current_running_export_site_id() {
+        return get_site_option( Plugin::SLUG . '_multisite_export_running', false );;
      }
 
+    /**
+     * Check for export.
+     *
+     * @return void
+     * @throws \Exception
+     */
+     public function check_for_export() {
+        if ( ! $this->can_disable_export() ) {
+            return;
+        }
+
+        $export_site_id = $this->current_running_export_site_id();
+
+        if ( ! $export_site_id ) {
+            return;
+        }
+
+        $blog_id = get_current_blog_id();
+
+        if ( absint( $blog_id ) === absint( $export_site_id ) ) {
+            return;
+        }
+
+        throw new \Exception( 'Export is already running on another site. Upgrade to Pro to queue site exports.' , 'simply-static' );
+     }
+
+     public function can_disable_export() {
+        $is_pro_installed = defined( 'SIMPLY_STATIC_PRO_VERSION' ) ? true : false;
+        return apply_filters( 'ss_multisite_can_disable_export', ! $is_pro_installed );
+     }
 
 	public function after_perform_action( $blog_id, $action, $archive_creation_job ) {
 		if ( ! isset( $_REQUEST['blog_id'] ) || ! isset( $_REQUEST['is_network_admin'] ) ) {
