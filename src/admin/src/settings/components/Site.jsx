@@ -89,6 +89,10 @@ function Site( props ) {
         });
     }
 
+    const canRunFromNetwork = () => {
+        return options.plan === 'pro';
+    }
+
     return (
         <tr>
             <td>
@@ -102,18 +106,39 @@ function Site( props ) {
                 <Buttons
                     site={site}
                     canGenerate={canGenerate}
-                    startExport={startExport}
+                    startExport={canRunFromNetwork() ? startExport : null}
                     isPaused={isPaused}
                     isRunning={isRunning}
-                    cancelExport={cancelExport}
-                    pauseExport={pauseExport}
-                    resumeExport={resumeExport}
+                    cancelExport={canRunFromNetwork() ? cancelExport : null}
+                    pauseExport={canRunFromNetwork() ? pauseExport : null}
+                    resumeExport={canRunFromNetwork() ? resumeExport : null}
                 >
-                    <Button
+                    { ! canRunFromNetwork() &&
+                        <Button
+                            label={'test'}
+                            showTooltip={true}
+                            className={'generate'}
+                            disabled
+                        >
+                            <Dashicon icon="update"/>
+                            { __('Generate', 'simply-static') }
+                        </Button>
+                    }
 
+                    <Button
                         onClick={() => window.location = site.settings_url}>
                         <Dashicon icon="admin-generic"/>
                     </Button>
+
+                    { ! canRunFromNetwork() &&
+                        <Button
+                            target={'_blank'}
+                            variant={'link'}
+                            href={"https://simplystatic.com/pricing/"}
+                        >
+                            { __('Upgrade to manage from here', 'simply-static') }
+                        </Button>
+                    }
 
                 </Buttons>
 

@@ -5,9 +5,10 @@ function GenerateButtons(props) {
     const hasPauseFeature = typeof pauseExport === 'function';
     const hasCancelFeature = typeof cancelExport === 'function';
     const hasResumeFeature = typeof resumeExport === 'function';
+    const hasExportFeature = typeof startExport === 'function';
 
     return <div className="generate-buttons-container">
-        {canGenerate && <Button
+        {canGenerate && hasExportFeature && <Button
             onClick={() => {
                 startExport();
             }}

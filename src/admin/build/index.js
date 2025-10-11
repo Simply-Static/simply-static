@@ -5703,9 +5703,10 @@ function GenerateButtons(props) {
   const hasPauseFeature = typeof pauseExport === 'function';
   const hasCancelFeature = typeof cancelExport === 'function';
   const hasResumeFeature = typeof resumeExport === 'function';
+  const hasExportFeature = typeof startExport === 'function';
   return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "generate-buttons-container"
-  }, canGenerate && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+  }, canGenerate && hasExportFeature && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
     onClick: () => {
       startExport();
     },
@@ -6574,6 +6575,9 @@ function Site(props) {
       setIsRunning(true);
     });
   };
+  const canRunFromNetwork = () => {
+    return options.plan === 'pro';
+  };
   return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("tr", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", null, site.name, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("br", null), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("a", {
     href: site.url
   }, site.url)), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", null, site.status), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", {
@@ -6581,17 +6585,28 @@ function Site(props) {
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_GenerateButtons__WEBPACK_IMPORTED_MODULE_2__["default"], {
     site: site,
     canGenerate: canGenerate,
-    startExport: startExport,
+    startExport: canRunFromNetwork() ? startExport : null,
     isPaused: isPaused,
     isRunning: isRunning,
-    cancelExport: cancelExport,
-    pauseExport: pauseExport,
-    resumeExport: resumeExport
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Button, {
+    cancelExport: canRunFromNetwork() ? cancelExport : null,
+    pauseExport: canRunFromNetwork() ? pauseExport : null,
+    resumeExport: canRunFromNetwork() ? resumeExport : null
+  }, !canRunFromNetwork() && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Button, {
+    label: 'test',
+    showTooltip: true,
+    className: 'generate',
+    disabled: true
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Dashicon, {
+    icon: "update"
+  }), __('Generate', 'simply-static')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Button, {
     onClick: () => window.location = site.settings_url
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Dashicon, {
     icon: "admin-generic"
-  })))));
+  })), !canRunFromNetwork() && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Button, {
+    target: '_blank',
+    variant: 'link',
+    href: "https://simplystatic.com/pricing/"
+  }, __('Upgrade to manage from here', 'simply-static')))));
 }
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Site);
 

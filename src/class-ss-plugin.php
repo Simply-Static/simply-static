@@ -173,7 +173,6 @@ class Plugin {
 		require_once $path . 'src/tasks/class-ss-wrapup-task.php';
 		require_once $path . 'src/tasks/class-ss-cancel-task.php';
 		require_once $path . 'src/tasks/class-ss-generate-404-task.php';
-		require_once $path . 'src/tasks/class-ss-multisite-queue.php';
 		require_once $path . 'src/handlers/class-ss-page-handler.php';
 		require_once $path . 'src/class-ss-query.php';
 		require_once $path . 'src/models/class-ss-model.php';
