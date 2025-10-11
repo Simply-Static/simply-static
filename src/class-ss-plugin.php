@@ -336,7 +336,7 @@ class Plugin {
 
 		$log = $this->options->get( 'archive_status_messages' );
 
-		do_action( 'ss_after_render_activity_log', $blog_id );
+		do_action( 'ss_after_render_activity_log', $blog_id, $this->get_archive_creation_job() );
 
 		return $log;
 	}
@@ -354,7 +354,7 @@ class Plugin {
 
 		$blog_id = $blog_id ?: get_current_blog_id();
 
-		do_action( 'ss_before_render_export_log', $blog_id );
+		do_action( 'ss_before_render_export_log', $blog_id, $this->get_archive_creation_job() );
 
 		$per_page = $per_page ?: 25;
 		$offset   = ( intval( $current_page ) - 1 ) * intval( $per_page );
@@ -372,7 +372,7 @@ class Plugin {
 		$total_static_pages = apply_filters( 'ss_total_pages', array_sum( array_values( $http_status_codes ) ) );
 		$total_pages        = ceil( $total_static_pages / $per_page );
 
-		do_action( 'ss_after_render_export_log', $blog_id );
+		do_action( 'ss_after_render_export_log', $blog_id, $this->get_archive_creation_job() );
 
 		$static_pages_formatted = [];
 

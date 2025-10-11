@@ -41,6 +41,7 @@ class Integrations {
 			'environments'      => Environments_Integration::class,
 			'nsg-seo-generator' => Nsg_SEO_Generator_Integration::class,
 			'delay'             => Delay_Integration::class,
+			'multisite'         => Multisite_Integration::class,
 		] );
 	}
 
@@ -71,5 +72,6 @@ class Integrations {
 		require_once $path . 'pro/class-redirection-integration.php';
 		require_once $path . 'pro/class-environments-integration.php';
 		require_once $path . 'pro/class-nsg-seo-generator-integration.php';
+		require_once $path . 'pro/class-multisite-integration.php';
 	}
 }

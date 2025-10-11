@@ -110,7 +110,7 @@ class Model {
 	public static function table_name() {
 		global $wpdb;
 
-		return $wpdb->prefix . 'simply_static_' . static::$table_name;
+		return $wpdb->get_blog_prefix() . 'simply_static_' . static::$table_name;
 	}
 
 	/**

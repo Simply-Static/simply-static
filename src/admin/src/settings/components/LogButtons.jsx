@@ -1,6 +1,6 @@
 import {Animate, Button, Notice} from "@wordpress/components";
-import {useState} from "@wordpress/element";
 import apiFetch from "@wordpress/api-fetch";
+import {useState} from "@wordpress/element";
 const {__} = wp.i18n;
 
 function LogButtons() {

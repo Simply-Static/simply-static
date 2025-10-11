@@ -28,6 +28,9 @@ import Optimize from "../pages/Optimize";
 import {SettingsContext} from "../context/SettingsContext";
 import apiFetch from "@wordpress/api-fetch";
 import EnvironmentSidebar from "./EnvironmentSidebar";
+import SidebarMultisite from "./SidebarMultisite";
+import GenerateButtons from "./GenerateButtons";
+import VersionInfo from "./VersionInfo";
 
 const {__} = wp.i18n;
 
@@ -122,7 +125,7 @@ function SettingsPage() {
             }
         }).then(resp => {
             var json = JSON.parse(resp);
-            if (json.status === 500 ) {
+            if (json.status === 500) {
                 alert(json.message);
                 setDisabledButton(false);
                 return;
@@ -188,113 +191,27 @@ function SettingsPage() {
         </optgroup>
     }
 
+    const minHeight = () => {
+        return window.innerHeight - ( wpadminbar ? wpadminbar.clientHeight : 0 ) - 1;
+    }
+
     return (
-        <div className={"plugin-settings-container"}>
-            <NavigatorProvider initialPath={initialPage}>
+        <div className={"plugin-settings-container"} >
+            <NavigatorProvider initialPath={initialPage} style={{minHeight: minHeight() + "px"}}>
                 <Flex>
                     <a onClick={() => {
                         setShowMobileNav(!showMobileNav);
                     }} className={"show-nav"}><Dashicon icon="align-center"/> {__('Toggle menu', 'simply-static')}</a>
                     <FlexItem className={showMobileNav ? 'toggle-nav sidebar' : 'sidebar'}>
                         {options.is_network ?
-                            <Card className={"plugin-nav"}>
-                                <div className={"plugin-logo"}>
-                                    <img alt="Logo"
-                                         src={options.logo}/>
-                                </div>
-                                {'pro' === options.plan && isPro() ?
-                                    <p className={"version-number"}>
-                                        Free: <b>{options.version}</b><br></br>
-                                        Pro: <b>{options.version_pro}</b>
-                                    </p>
-                                    :
-                                    <p className={"version-number"}>Version: <b>{options.version}</b></p>
-                                }
-
-                                <div className={`generate-container ${disabledButton ? 'generating' : ''}`}>
-                                    {!disabledButton && <Button onClick={() => {
-                                        setSelectedExportType('export');
-                                        startExport();
-                                    }}
-                                    disabled={disabledButton || isDelayed}
-                                    className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
-                                    >
-                                        {!disabledButton && <>
-                                            <Dashicon icon="update"/>
-                                            {__('Generate', 'simply-static')}
-                                        </>}
-
-                                        {!disabledButton && isDelayed>0 && <>{isDelayed}s</>}
-
-                                        {disabledButton && <>
-                                            <Dashicon icon="update spin"/>
-                                            {__('Generating...', 'simply-static')}
-                                        </>}
-                                    </Button>}
-                                    {disabledButton && <>
-                                        {!isPaused && <Button
-                                            label={__('Pause', 'simply-static')}
-                                            className={"ss-generate-media-button"}
-                                            onClick={() => pauseExport()}>
-                                            <Dashicon icon={"controls-pause"}/>
-                                        </Button>
-                                        }
-                                        {isPaused && <Button
-                                            label={__('Resume', 'simply-static')}
-                                            className={"ss-generate-media-button"}
-                                            onClick={() => resumeExport()}>
-                                            <Dashicon icon={"controls-play"}/>
-                                        </Button>
-                                        }
-                                        <Button
-                                            onClick={() => cancelExport()}
-                                            label={__('Cancel', 'simply-static')}
-                                            className={"ss-generate-cancel-button"}
-                                        >
-                                            <Dashicon icon={'no'}/>
-                                        </Button>
-                                    </>}
-
-                                </div>
-                                <Spacer margin={5}/>
-                                <Spacer margin={5}/>
-                                <Button href="https://simplystatic.com/changelogs/" target="_blank">
-                                    <Dashicon icon="editor-ul"/> {__('Changelog', 'simply-static')}
-                                </Button>
-                                <Button href="https://docs.simplystatic.com" target="_blank">
-                                    <Dashicon icon="admin-links"/> {__('Documentation', 'simply-static')}
-                                </Button>
-                                {'free' === options.plan &&
-                                    <Button href="https://simplystatic.com" target="_blank">
-                                        <Dashicon
-                                            icon="admin-site-alt3"/>Simply Static Pro
-                                    </Button>
-                                }
-                            </Card>
+                             <SidebarMultisite />
                             :
                             <Card className={"plugin-nav"}>
                                 <div className={"plugin-logo"}>
                                     <img alt="Logo"
                                          src={options.logo}/>
                                 </div>
-                                {'pro' === options.plan && isPro() ?
-                                    <>
-                                        {isStudio() ?
-                                            <p className={"version-number"}>
-                                                Free: <b>{options.version}</b><br></br>
-                                                Pro: <b>{options.version_pro}</b><br></br>
-                                                Studio: <b>{options.version_studio}</b>
-                                            </p>
-                                            :
-                                            <p className={"version-number"}>
-                                                Free: <b>{options.version}</b><br></br>
-                                                Pro: <b>{options.version_pro}</b>
-                                            </p>
-                                        }
-                                    </>
-                                    :
-                                    <p className={"version-number"}>Version: <b>{options.version}</b></p>
-                                }
+                                <VersionInfo/>
 
                                 <div className={`generate-container ${disabledButton ? 'generating' : ''}`}>
                                     <SelectControl
@@ -320,46 +237,17 @@ function SettingsPage() {
                                         }
                                         {buildOptions}
                                     </SelectControl>
-                                    <div className="generate-buttons-container">
-                                        {!disabledButton && <Button onClick={() => {
-                                            startExport();
-                                        }}
-                                                                    disabled={disabledButton || isDelayed}
-                                                                    className={activeItem === '/' ? 'is-active-item generate' : 'generate'}
-                                        >
-                                            {!disabledButton && <>
-                                                <Dashicon icon="update"/>
-                                                {__('Generate', 'simply-static')}
-                                            </>}
-
-                                            {!disabledButton && isDelayed>0 && <> {isDelayed}s</>}
-
-                                            {disabledButton && <Dashicon icon="update spin"/>}
-                                        </Button>}
-                                        {disabledButton && <>
-                                            {!isPaused && <Button
-                                                label={__('Pause', 'simply-static')}
-                                                className={"ss-generate-media-button"}
-                                                onClick={() => pauseExport()}>
-                                                <Dashicon icon={"controls-pause"}/>
-                                            </Button>
-                                            }
-                                            {isPaused && <Button
-                                                label={__('Resume', 'simply-static')}
-                                                className={"ss-generate-media-button"}
-                                                onClick={() => resumeExport()}>
-                                                <Dashicon icon={"controls-play"}/>
-                                            </Button>
-                                            }
-                                            <Button
-                                                onClick={() => cancelExport()}
-                                                label={__('Cancel', 'simply-static')}
-                                                className={"ss-generate-cancel-button"}
-                                            >
-                                                <Dashicon icon={'no'}/>
-                                            </Button>
-                                        </>}
-                                    </div>
+                                    <GenerateButtons
+                                        canGenerate={!disabledButton}
+                                        startExport={startExport}
+                                         cancelExport={cancelExport}
+                                         pauseExport={pauseExport}
+                                         resumeExport={resumeExport}
+                                         isRunning={isRunning}
+                                         isPaused={isPaused}
+                                         isResumed={isResumed}
+                                         isDelayed={isDelayed}
+                                    />
                                 </div>
                                 <CardBody>
                                     {'pro' === options.plan && isPro() &&

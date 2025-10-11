@@ -40,6 +40,13 @@ abstract class Background_Process extends Async_Request {
 	private $switched_to_blog = false;
 
 	/**
+	 * Current site ID for multisite support
+	 *
+	 * @var int|null
+	 */
+	private $current_site_id = null;
+
+	/**
 	 * Action
 	 *
 	 * (default value: 'background_process')
@@ -191,7 +198,8 @@ abstract class Background_Process extends Async_Request {
 		$key = $this->generate_key();
 
 		if ( ! empty( $this->data ) ) {
-			update_site_option( $key, $this->data );
+			Util::debug_log( "Saving to key: $key. Data: " . print_r( $this->data, true ));
+			update_option( $key, $this->data );
 		}
 
 		// Clean out data so that new data isn't prepended with closed session's data.
@@ -210,7 +218,7 @@ abstract class Background_Process extends Async_Request {
 	 */
 	public function update( $key, $data ) {
 		if ( ! empty( $data ) ) {
-			update_site_option( $key, $data );
+			update_option( $key, $data );
 		}
 
 		return $this;
@@ -224,7 +232,7 @@ abstract class Background_Process extends Async_Request {
 	 * @return $this
 	 */
 	public function delete( $key ) {
-		delete_site_option( $key );
+		delete_option( $key );
 
 		return $this;
 	}
@@ -239,7 +247,7 @@ abstract class Background_Process extends Async_Request {
 			$this->delete( $batch->key );
 		}
 
-		delete_site_option( $this->get_status_key() );
+		delete_option( $this->get_status_key() );
 
 		$this->cancelled();
 	}
@@ -248,7 +256,7 @@ abstract class Background_Process extends Async_Request {
 	 * Cancel job on next batch.
 	 */
 	public function cancel() {
-		update_site_option( $this->get_status_key(), self::STATUS_CANCELLED );
+		update_option( $this->get_status_key(), self::STATUS_CANCELLED );
 
 		// Just in case the job was paused at the time.
 		$this->dispatch();
@@ -274,7 +282,7 @@ abstract class Background_Process extends Async_Request {
 	 * Pause job on next batch.
 	 */
 	public function pause() {
-		update_site_option( $this->get_status_key(), self::STATUS_PAUSED );
+		update_option( $this->get_status_key(), self::STATUS_PAUSED );
 	}
 
 	/**
@@ -297,7 +305,7 @@ abstract class Background_Process extends Async_Request {
 	 * Resume job.
 	 */
 	public function resume() {
-		delete_site_option( $this->get_status_key() );
+		delete_option( $this->get_status_key() );
 
 		$this->schedule_event();
 		$this->dispatch();
@@ -371,6 +379,9 @@ abstract class Background_Process extends Async_Request {
 	protected function get_status() {
 		global $wpdb;
 
+		/*
+		 * Still using status per site within their options to allow multiple exports.
+		 **
 		if ( is_multisite() ) {
 			$status = $wpdb->get_var(
 				$wpdb->prepare(
@@ -386,7 +397,14 @@ abstract class Background_Process extends Async_Request {
 					$this->get_status_key()
 				)
 			);
-		}
+		}/**/
+
+		$status = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1",
+				$this->get_status_key()
+			)
+		);
 
 		return absint( $status );
 	}
@@ -400,6 +418,9 @@ abstract class Background_Process extends Async_Request {
 	public function maybe_handle() {
 		// Don't lock up other requests while processing.
 		session_write_close();
+
+		Util::debug_log( "Maybe handling: Site ID: " . get_current_blog_id() );
+		$this->set_current_site_id( get_current_blog_id() );
 
 		check_ajax_referer( $this->identifier, 'nonce' );
 
@@ -464,7 +485,7 @@ abstract class Background_Process extends Async_Request {
 	 * @return bool
 	 */
 	public function is_processing() {
-		if ( get_site_transient( $this->identifier . '_process_lock' ) ) {
+		if ( get_site_transient( $this->get_lock_key() ) ) {
 			// Process already running.
 			return true;
 		}
@@ -490,7 +511,7 @@ abstract class Background_Process extends Async_Request {
 		$lock_duration = apply_filters( $this->identifier . '_queue_lock_time', $lock_duration );
 
 		$microtime = microtime();
-		$locked    = set_site_transient( $this->identifier . '_process_lock', $microtime, $lock_duration );
+		$locked    = set_site_transient( $this->get_lock_key(), $microtime, $lock_duration );
 
 		/**
 		 * Action to note whether the background process managed to create its lock.
@@ -520,7 +541,7 @@ abstract class Background_Process extends Async_Request {
 	 * @return $this
 	 */
 	protected function unlock_process() {
-		$unlocked = delete_site_transient( $this->identifier . '_process_lock' );
+		$unlocked = delete_site_transient( $this->get_lock_key() );
 
 		/**
 		 * Action to note whether the background process managed to release its lock.
@@ -571,12 +592,16 @@ abstract class Background_Process extends Async_Request {
 		$key_column   = 'option_id';
 		$value_column = 'option_value';
 
-		if ( is_multisite() ) {
+
+		/*
+		 * Still using batches on site level.
+		*if ( is_multisite() ) {
 			$table        = $wpdb->sitemeta;
 			$column       = 'meta_key';
 			$key_column   = 'meta_id';
 			$value_column = 'meta_value';
 		}
+		/**/
 
 		if( !is_null( $for_site_id ) ) {
 			$key = $wpdb->esc_like( $this->identifier . '_batch_' . $for_site_id ) . '%';
@@ -800,7 +825,7 @@ abstract class Background_Process extends Async_Request {
 	 * performed, or, call parent::complete().
 	 */
 	protected function complete() {
-		delete_site_option( $this->get_status_key() );
+		delete_option( $this->get_status_key() );
 
 		// Remove the cron healthcheck job from the cron schedule.
 		$this->clear_scheduled_event();
@@ -951,6 +976,40 @@ abstract class Background_Process extends Async_Request {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Set the current site ID for multisite processing
+	 *
+	 * @param int|null $site_id
+	 */
+	public function set_current_site_id( $site_id ) {
+		$this->current_site_id = $site_id;
+	}
+
+	/**
+	 * Get the current site ID for multisite processing
+	 *
+	 * @return int|null
+	 */
+	public function get_current_site_id() {
+		return $this->current_site_id;
+	}
+
+	/**
+	 * Get site-specific lock key
+	 *
+	 * @return string
+	 */
+	private function get_lock_key() {
+		$lock_key = $this->identifier . '_process_lock';
+		
+		// In multisite, add site ID to make lock site-specific
+		if ( is_multisite() && !is_null( $this->current_site_id ) ) {
+			$lock_key .= '_site_' . $this->current_site_id;
+		}
+		
+		return $lock_key;
 	}
 
 	/**
