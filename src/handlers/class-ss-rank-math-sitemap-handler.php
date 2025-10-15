@@ -60,6 +60,7 @@ class Rank_Math_Sitemap_Handler extends Page_Handler {
         $this->save_xsl( $destination_dir );
         $this->rename_sitemap( $destination_dir );
         $this->fix_sitemap_xsl_references( $destination_dir );
+        $this->replace_urls_in_sitemaps( $destination_dir );
 	}
 
     /**
@@ -191,5 +192,68 @@ class Rank_Math_Sitemap_Handler extends Page_Handler {
                 Util::debug_log( 'Fixed XSL reference in ' . $sitemap_file );
             }
         }
+    }
+
+    /**
+     * Perform generic URL replacements in sitemap XML files for Rank Math.
+     *
+     * @param string $destination_dir Destination directory.
+     * @return void
+     */
+    protected function replace_urls_in_sitemaps( $destination_dir ) {
+        try {
+            $options         = Options::instance();
+            $destination_url = trailingslashit( $options->get_destination_url() );
+            $origin_host     = Util::origin_host();
+
+            // Collect sitemap files to process
+            $sitemap_files = [
+                Util::combine_path( $destination_dir, '/sitemap.xml' ),
+                Util::combine_path( $destination_dir, '/sitemap_index.xml' ),
+            ];
+
+            $xml_files = glob( Util::combine_path( $destination_dir, '/*-sitemap.xml' ) );
+            if ( is_array( $xml_files ) ) {
+                $sitemap_files = array_merge( $sitemap_files, $xml_files );
+            }
+
+            $sitemap_files = array_unique( array_filter( $sitemap_files, 'file_exists' ) );
+            if ( empty( $sitemap_files ) ) {
+                return;
+            }
+
+            foreach ( $sitemap_files as $file ) {
+                $content = @file_get_contents( $file );
+                if ( false === $content || '' === $content ) {
+                    continue;
+                }
+
+                $updated = $this->replace_all_origin_urls_with_destination( $content, $destination_url, $origin_host );
+
+                if ( is_string( $updated ) && $updated !== $content ) {
+                    file_put_contents( $file, $updated );
+                    Util::debug_log( 'Updated URLs in sitemap (generic replace): ' . $file );
+                }
+            }
+        } catch ( \Throwable $e ) {
+            Util::debug_log( 'Error updating Rank Math sitemap URLs: ' . $e->getMessage() );
+        }
+    }
+
+    /**
+     * Generic, tag-agnostic replacement for origin host URLs.
+     *
+     * @param string $xml
+     * @param string $destination_url
+     * @param string $origin_host
+     * @return string
+     */
+    private function replace_all_origin_urls_with_destination( $xml, $destination_url, $origin_host ) {
+        if ( ! is_string( $xml ) || $xml === '' ) {
+            return $xml;
+        }
+        $dest = rtrim( $destination_url, '/' );
+        $pattern = '/(?:(https?:)?\\/\\/)' . preg_quote( $origin_host, '/' ) . '/i';
+        return preg_replace( $pattern, $dest, $xml );
     }
 }
