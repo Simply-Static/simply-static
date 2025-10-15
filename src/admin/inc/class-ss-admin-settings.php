@@ -321,6 +321,16 @@ class Admin_Settings {
                         return current_user_can( apply_filters( 'ss_user_capability', 'manage_network', 'cron' ) );
                     },
             ) );
+
+            register_rest_route( 'simplystatic/v1', '/check-can-run', array(
+                    'methods'             => 'POST',
+                    'callback'            => [ $this, 'check_if_can_run_export' ],
+                    'permission_callback' => function () {
+                        return current_user_can( apply_filters( 'ss_user_capability', 'manage_network', 'cron' ) );
+                    },
+            ) );
+
+
         }
 
 		register_rest_route( 'simplystatic/v1', '/post-types', array(
@@ -500,6 +510,24 @@ class Admin_Settings {
 		) );
 
 	}
+
+    public function check_if_can_run_export() {
+        $can_run = true;
+
+        try {
+            $multisite = Multisite::get_instance();
+            $multisite->check_for_export();
+        } catch ( \Exception $e ) {
+            $can_run = false;
+        }
+
+        $stats = [
+            'status'  => 200,
+            'can_run' => $can_run
+        ];
+
+        return json_encode( $stats );
+    }
 
 	/**
 	 * Get settings via Rest API.

@@ -68,7 +68,6 @@ function Sites (props) {
             let sitesObjects = [];
             let haveRunningSite= false;
             resp.data.forEach(function (site) {
-                console.log(site);
 
                 sitesObjects.push(site);
 
