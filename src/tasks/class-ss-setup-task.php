@@ -33,7 +33,7 @@ class Setup_Task extends Task {
 			Util::debug_log( 'Creating archive directory: ' . $archive_dir );
 			$create_dir = wp_mkdir_p( $archive_dir );
 			if ( $create_dir === false ) {
-				return new \WP_Error( 'cannot_create_archive_dir', sprintf( __( 'Cannot create archive directory %s' ), $archive_dir ) );
+				throw new \Exception( sprintf( __( 'Cannot create archive directory %s' ), $archive_dir ) );
 			}
 		}
 
@@ -253,6 +253,10 @@ class Setup_Task extends Task {
 		}
 
 		if ( false === file_exists( $dir ) || 'update' === $options->get( 'generate_type' ) ) {
+			return false;
+		}
+
+		if ( ! is_dir( $dir ) ) {
 			return false;
 		}
 

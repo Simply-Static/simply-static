@@ -103,6 +103,15 @@ class Archive_Creation_Job extends Background_Process {
 	}
 
 	/**
+	 * @param Options $options
+	 *
+	 * @return void
+	 */
+	public function set_options( Options $options ) {
+		$this->options = $options;
+	}
+
+	/**
 	 * Helper method for starting the Archive_Creation_Job
 	 * @return boolean true if we were able to successfully start generating an archive
 	 */
@@ -136,6 +145,9 @@ class Archive_Creation_Job extends Background_Process {
 				->save();
 
 			Util::debug_log( "Pushing first task to queue: " . $first_task );
+
+			// Set the current site ID for multisite support
+			$this->set_current_site_id( $blog_id );
 
 			$this->push_to_queue( $first_task )
 			     ->save()
@@ -207,6 +219,8 @@ class Archive_Creation_Job extends Background_Process {
 		try {
 			Util::debug_log( 'Performing task: ' . $task_name );
 			$is_done = $task->perform();
+
+			Util::debug_log( 'Task performed: ' . (bool)$is_done );
 		} catch (Pause_Exception $e ) {
 			// If it's a pause execption, just return task since we've paused the execution of tha tasks.
 			return $task_name;

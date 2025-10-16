@@ -135,18 +135,9 @@ toplevel_page_simply-static img {
 
   /* Navigation */
 
+  .simple-static-sites,
   .plugin-nav {
-    height: 100%;
-    box-shadow: none;
-
-    button:focus, button:focus-visible, button:hover {
-      box-shadow: none;
-      color: rgb(104, 4, 204);
-    }
-
     .generate-container {
-      margin-top: 30px;
-
       .generate-type {
         height: 40px;
         line-height: 40px;
@@ -195,6 +186,21 @@ toplevel_page_simply-static img {
         color: rgb(104, 4, 204);
         text-decoration: underline;
       }
+    }
+  }
+
+  .plugin-nav {
+    height: 100%;
+    box-shadow: none;
+
+    button:focus, button:focus-visible, button:hover {
+      box-shadow: none;
+      color: rgb(104, 4, 204);
+    }
+
+    .generate-container {
+      margin-top: 30px;
+
     }
 
     .environment-container {

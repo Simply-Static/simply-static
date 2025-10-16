@@ -305,6 +305,34 @@ class Admin_Settings {
 	 * @return void
 	 */
 	public function rest_api_init() {
+        if ( is_multisite() ) {
+            register_rest_route( 'simplystatic/v1', '/sites', array(
+                    'methods'             => 'GET',
+                    'callback'            => [ $this, 'get_sites' ],
+                    'permission_callback' => function () {
+                        return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+                    },
+            ) );
+
+            register_rest_route( 'simplystatic/v1', '/trigger-cron', array(
+                    'methods'             => 'POST',
+                    'callback'            => [ $this, 'trigger_cron' ],
+                    'permission_callback' => function () {
+                        return current_user_can( apply_filters( 'ss_user_capability', 'manage_network', 'cron' ) );
+                    },
+            ) );
+
+            register_rest_route( 'simplystatic/v1', '/check-can-run', array(
+                    'methods'             => 'POST',
+                    'callback'            => [ $this, 'check_if_can_run_export' ],
+                    'permission_callback' => function () {
+                        return current_user_can( apply_filters( 'ss_user_capability', 'manage_network', 'cron' ) );
+                    },
+            ) );
+
+
+        }
+
 		register_rest_route( 'simplystatic/v1', '/post-types', array(
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'get_post_types' ],
@@ -480,7 +508,26 @@ class Admin_Settings {
 				return current_user_can( apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ) );
 			},
 		) );
+
 	}
+
+    public function check_if_can_run_export() {
+        $can_run = true;
+
+        try {
+            $multisite = Multisite::get_instance();
+            $multisite->check_for_export();
+        } catch ( \Exception $e ) {
+            $can_run = false;
+        }
+
+        $stats = [
+            'status'  => 200,
+            'can_run' => $can_run
+        ];
+
+        return json_encode( $stats );
+    }
 
 	/**
 	 * Get settings via Rest API.
@@ -973,19 +1020,20 @@ class Admin_Settings {
 		$blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
 		$type    = ! empty( $params['type'] ) ? $params['type'] : 'export';
 
-		// Check if an export is already running
-		$archive_creation_job = Plugin::instance()->get_archive_creation_job();
-		if ( $archive_creation_job->is_running() ) {
-			Util::debug_log( "Export already running. Blocking new export request." );
-			Util::debug_log( "Current task: " . $archive_creation_job->get_current_task() );
-			Util::debug_log( "Is job done: " . ($archive_creation_job->is_job_done() ? 'true' : 'false') );
+        // Check if an export is already running
+        $archive_creation_job = Plugin::instance()->get_archive_creation_job();
+        do_action( 'ss_before_perform_archive_running_check', $blog_id, $archive_creation_job );
+        if ( $archive_creation_job->is_running() ) {
+            Util::debug_log( "Export already running. Blocking new export request." );
+            Util::debug_log( "Current task: " . $archive_creation_job->get_current_task() );
+            Util::debug_log( "Is job done: " . ($archive_creation_job->is_job_done() ? 'true' : 'false') );
 
-			// Return a 409 Conflict status code with an error message
-			return json_encode( [
-				'status'  => 409, // Conflict status code
-				'message' => __( 'An export is already running. Please wait for it to complete or cancel it before starting a new one.', 'simply-static' )
-			] );
-		}
+            // Return a 409 Conflict status code with an error message
+            return json_encode( [
+                    'status'  => 409, // Conflict status code
+                    'message' => __( 'An export is already running. Please wait for it to complete or cancel it before starting a new one.', 'simply-static' )
+            ] );
+        }
 
 		try {
 			do_action( 'ss_before_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
@@ -1086,6 +1134,54 @@ class Admin_Settings {
 	}
 
 	/**
+	 * Trigger CRON for specific site
+	 *
+	 * @return false|string
+	 */
+	public function trigger_cron( $request ) {
+		$params  = $request->get_params();
+		$blog_id = ! empty( $params['blog_id'] ) ? (int) $params['blog_id'] : 0;
+
+		if ( ! is_multisite() ) {
+			return json_encode( [
+				'status'  => 400,
+				'message' => __( 'This endpoint is only available for multisite installations.', 'simply-static' )
+			] );
+		}
+
+		if ( empty( $blog_id ) || ! get_blog_details( $blog_id ) ) {
+			return json_encode( [
+				'status'  => 400,
+				'message' => __( 'Invalid blog ID provided.', 'simply-static' )
+			] );
+		}
+
+		try {
+			// Switch to the specified blog
+			switch_to_blog( $blog_id );
+
+            do_action( 'wp_archive_creation_job' );
+
+			// Restore the previous blog
+			restore_current_blog();
+
+			return json_encode( [
+				'status'  => 200,
+				'message' => sprintf( __( 'CRON triggered successfully for site %d.', 'simply-static' ), $blog_id )
+			] );
+
+		} catch ( \Exception $e ) {
+			// Make sure to restore blog context even on error
+			restore_current_blog();
+
+			return json_encode( [
+				'status'  => 500,
+				'message' => $e->getMessage()
+			] );
+		}
+	}
+
+	/**
 	 * Get crawlers for JS
 	 *
 	 * @return false|string
@@ -1126,6 +1222,55 @@ class Admin_Settings {
 			'data'   => $crawlers_for_js,
 		] );
 	}
+
+    public function get_sites() {
+        $site_ids = get_sites([
+            "spam"                   => 0,
+            "deleted"                => 0,
+            "archived"               => 0,
+            "network_id"             => get_current_network_id(),
+            "number"                 => 999,
+            "offset"                 => 0,
+            "fields"                 => "ids",
+            "order"                  => "DESC",
+            "orderby"                => "id",
+            "update_site_meta_cache" => false
+        ]);
+
+        /** @var Archive_Creation_Job $job */
+        $job = Plugin::instance()->get_archive_creation_job();
+
+        $sites = [];
+        foreach ($site_ids as $site_id) {
+            $site = get_blog_details( $site_id );
+
+            switch_to_blog( $site_id );
+
+            $options = Options::reinstance();
+            $job->set_options( $options );
+            $running = $job->is_running();
+            $paused = $job->is_paused();
+
+            $sites[] = [
+                'id'               => $site->blog_id,
+                'name'             => $site->blogname,
+                'url'              => $site->siteurl,
+                'path'             => $site->path,
+                'running'          => $running,
+                'paused'           => $paused,
+                'status'           => $running ? __( 'Running', 'simply-static' ) : ( $paused ? __( 'Paused', 'simply-static' ) : __( 'Idle', 'simply-static' ) ),
+                'settings_url'     => esc_url( get_admin_url( $site->blog_id ) . 'admin.php?page=simply-static-settings' ),
+                'activity_log_url' => esc_url( get_admin_url( $site->blog_id ) . 'admin.php?page=simply-static-generate' )
+            ];
+
+            restore_current_blog();
+
+        }
+
+        $sites = apply_filters( 'ss_rest_multisite_get_sites', $sites );
+
+        return wp_send_json_success( $sites );
+    }
 
 	/**
 	 * Get post types for JS

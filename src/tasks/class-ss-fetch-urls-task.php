@@ -337,11 +337,16 @@ class Fetch_Urls_Task extends Task {
 		}
 
 		if ( ! empty( $this->options->get( 'urls_to_exclude' ) ) ) {
-			$excluded_by_option = explode( "\n", $this->options->get( 'urls_to_exclude' ) );
+			if ( is_array( $this->options->get( 'urls_to_exclude' ) ) ) {
+				$excluded_by_option = wp_list_pluck( $this->options->get( 'urls_to_exclude' ), 'url' );
+			} else {
+				$excluded_by_option = explode( "\n", $this->options->get( 'urls_to_exclude' ) );
+			}
 
 			if ( is_array( $excluded_by_option ) ) {
 				$excluded = array_merge( $excluded, $excluded_by_option );
 			}
+
 		}
 
 		if ( apply_filters( 'simply_static_exclude_temp_dir', true ) ) {
