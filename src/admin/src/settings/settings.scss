@@ -82,7 +82,8 @@ toplevel_page_simply-static img {
   }
 
   .upgrade-network-notice {
-    margin: 0 0 0 40px;
+    margin: 10px 0 0 0;
+    padding: 0 0 0 10px;
   }
 
   .ss-align-right {
@@ -166,7 +167,7 @@ toplevel_page_simply-static img {
         text-decoration: none;
         text-align: center;
         line-height: 1.5;
-        margin-top:10px;
+        margin-top: 10px;
 
         &.ss-generate-cancel-button {
           background: #b32d2e;
@@ -195,7 +196,6 @@ toplevel_page_simply-static img {
 
     button:focus, button:focus-visible, button:hover {
       box-shadow: none;
-      color: rgb(104, 4, 204);
     }
 
     .generate-container {
@@ -204,6 +204,12 @@ toplevel_page_simply-static img {
     }
 
     .environment-container {
+      button {
+        text-align: center;
+      }
+    }
+
+    .import-container {
       button {
         text-align: center;
       }
@@ -457,6 +463,25 @@ toplevel_page_simply-static img {
 
 .reset-db-btn {
   margin-left: 10px;
+}
+
+/* Multisite related styles */
+.network-generate-container {
+  button {
+    margin-right: 5px;
+  }
+
+  .ss-generate-cancel-button {
+    margin-left: 5px;
+  }
+
+  .ss-generate-media-button {
+    margin: 0;
+  }
+
+  .generate > span {
+    margin-right: 5px;
+  }
 }
 
 /* Responsive Design */

@@ -165,7 +165,7 @@ function SidebarSite( props = null ) {
         setTimeout(function () {
             setIsUpdatingFromNetwork(false);
             window.location.reload();
-        }, 2000);
+        }, 3500);
     }
 
     let buildOptions = '';
@@ -255,7 +255,7 @@ function SidebarSite( props = null ) {
                 </>
             }
             {!options.is_network && options.is_multisite &&
-                <>
+                <div className={"import-container"}>
                     <h4 className={"settings-headline"}> {__('Import', 'simply-static')}</h4>
                     <SelectControl
                         value={selectedCopySite}
@@ -286,7 +286,7 @@ function SidebarSite( props = null ) {
                         :
                         ''
                     }
-                </>
+                </div>
             }
             <h4 className={"settings-headline"}> {__('Tools', 'simply-static')}</h4>
             <NavigatorButton onClick={() => {

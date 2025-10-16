@@ -3,17 +3,18 @@ import Buttons from "./GenerateButtons";
 import {useState} from "@wordpress/element";
 import {useEffect} from "react";
 import {Button, Dashicon} from "@wordpress/components";
+
 const {__} = wp.i18n;
 
-function Site( props ) {
-    const { site, setAnyRunning } = props;
-    const blogId   = site.id;
+function Site(props) {
+    const {site, setAnyRunning} = props;
+    const blogId = site.id;
     const [canGenerate, setCanGenerate] = useState(!site.running && !site.paused);
     const [isRunning, setIsRunning] = useState(site.running);
     const [isPaused, setIsPaused] = useState(site.paused);
 
     useEffect(() => {
-        if ( isRunning ) {
+        if (isRunning) {
             setAnyRunning(true);
         }
     }, [isRunning]);
@@ -38,7 +39,7 @@ function Site( props ) {
             }
         }).then(resp => {
             var json = JSON.parse(resp);
-            if (json.status === 500 ) {
+            if (json.status === 500) {
                 setCanGenerate(true);
                 return;
             }
@@ -100,9 +101,9 @@ function Site( props ) {
                 <a href={site.url}>{site.url}</a>
             </td>
             <td>
-                { site.status }
+                {site.status}
             </td>
-            <td className={'generate-container'}>
+            <td className={'generate-container network-generate-container'}>
                 <Buttons
                     site={site}
                     canGenerate={canGenerate}
@@ -113,33 +114,31 @@ function Site( props ) {
                     pauseExport={canRunFromNetwork() ? pauseExport : null}
                     resumeExport={canRunFromNetwork() ? resumeExport : null}
                 >
-                    { ! canRunFromNetwork() &&
+                    {!canRunFromNetwork() &&
                         <Button
-                            label={'test'}
+                            label={'Generate'}
                             showTooltip={true}
                             className={'generate'}
                             disabled
                         >
                             <Dashicon icon="update"/>
-                            { __('Generate', 'simply-static') }
+                            {__('Generate', 'simply-static')}
                         </Button>
                     }
-
                     <Button
+                        className={"sub-site-settings"}
                         onClick={() => window.location = site.settings_url}>
                         <Dashicon icon="admin-generic"/>
                     </Button>
-
-                    { ! canRunFromNetwork() &&
+                    {!canRunFromNetwork() &&
                         <Button
                             target={'_blank'}
                             variant={'link'}
                             href={"https://simplystatic.com/pricing/"}
                         >
-                            { __('Upgrade to manage from here', 'simply-static') }
+                            {__('Upgrade to manage from network.', 'simply-static')}
                         </Button>
                     }
-
                 </Buttons>
 
             </td>
