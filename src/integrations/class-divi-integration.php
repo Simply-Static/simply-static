@@ -40,32 +40,7 @@ class Divi_Integration extends Integration {
 	 * Run the integration.
 	 */
 	public function run() {
-		$this->activate_divi_crawler();
 		$this->disable_divi_performance_options();
-	}
-
-	/**
-	 * Ensure the Divi crawler is part of the active crawlers without overwriting user choices.
-	 * Mirrors Elementor integration behaviour.
-	 *
-	 * @return void
-	 */
-	protected function activate_divi_crawler() {
-		$options  = Options::instance();
-		$crawlers = $options->get( 'crawlers' );
-
-		// Respect user selections completely:
-		// - If crawlers is an array and does NOT contain 'divi', treat as explicit opt-out and do not re-add.
-		// - If crawlers is null or not an array, do not modify; fall back to default is_active logic.
-		if ( is_array( $crawlers ) ) {
-			if ( in_array( 'divi', $crawlers, true ) ) {
-				Util::debug_log( 'Divi Crawler already present in user selection; leaving as-is.' );
-			} else {
-				Util::debug_log( 'Divi Crawler not in user selection; respecting opt-out and not adding.' );
-			}
-		} else {
-			Util::debug_log( 'Crawlers option undefined or not an array; not modifying for Divi.' );
-		}
 	}
 
 	/**
