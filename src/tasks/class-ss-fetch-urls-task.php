@@ -55,18 +55,16 @@ class Fetch_Urls_Task extends Task {
 			$this->archive_start_time
 		);
 
-		// Compute remaining and total using the same filtering as ss_static_pages to avoid mismatched counts that can stall progress
-		$remaining_pages_list = apply_filters(
-			'ss_static_pages',
+		// Compute remaining and total using the dedicated filters so Single/Build exports report correctly
+		$pages_remaining = (int) apply_filters(
+			'ss_remaining_pages',
 			Page::query()
 			    ->where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time )
-			    ->find(),
+			    ->count(),
 			$this->archive_start_time
 		);
-		$pages_remaining = is_array( $remaining_pages_list ) ? count( $remaining_pages_list ) : 0;
 
-		$total_pages_list = apply_filters( 'ss_static_pages', Page::query()->find(), $this->archive_start_time );
-		$total_pages = is_array( $total_pages_list ) ? count( $total_pages_list ) : 0;
+		$total_pages = (int) apply_filters( 'ss_total_pages', Page::query()->count() );
 
 		// Note: We will recalculate these values again after processing this batch so the
 		// status message always reflects the latest progress.
@@ -137,16 +135,14 @@ class Fetch_Urls_Task extends Task {
 		}
 
 		// Recalculate progress after processing this batch to avoid stale counters.
-		$remaining_pages_list = apply_filters(
-			'ss_static_pages',
+		$pages_remaining = (int) apply_filters(
+			'ss_remaining_pages',
 			Page::query()
 		        ->where( 'last_checked_at < ? OR last_checked_at IS NULL', $this->archive_start_time )
-		        ->find(),
+		        ->count(),
 			$this->archive_start_time
 		);
-		$pages_remaining = is_array( $remaining_pages_list ) ? count( $remaining_pages_list ) : 0;
-		$total_pages_list = apply_filters( 'ss_static_pages', Page::query()->find(), $this->archive_start_time );
-		$total_pages = is_array( $total_pages_list ) ? count( $total_pages_list ) : 0;
+		$total_pages = (int) apply_filters( 'ss_total_pages', Page::query()->count() );
 		$pages_processed = $total_pages - $pages_remaining;
 
 		$message = sprintf( __( "Fetched %d of %d pages/files", 'simply-static' ), $pages_processed, $total_pages );
