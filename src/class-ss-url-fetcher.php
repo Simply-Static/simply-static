@@ -145,6 +145,53 @@ class Url_Fetcher {
 		$filesize = file_exists( $temp_filename ) ? filesize( $temp_filename ) : 0;
 		Util::debug_log( "Filesize: " . $filesize . ' bytes' );
 
+		// Fallback: Sometimes streamed requests create an empty file despite 200 OK.
+		// If we got 200 but the file is empty, try alternative strategies to populate it.
+		if ( ! is_wp_error( $response ) ) {
+			$code = isset( $response['response']['code'] ) ? (int) $response['response']['code'] : 0;
+			if ( $code === 200 && $filesize === 0 ) {
+				Util::debug_log( 'Streamed file is empty after 200 response; attempting fallback to recover content.' );
+				$recovered = false;
+				// Attempt 1: If it is a local asset, try copying directly from disk again.
+				if ( isset( $is_local_asset ) && $is_local_asset ) {
+					$local_path = Util::get_path_from_local_url( $original_url );
+					$file_path  = ABSPATH . ltrim( $local_path, '/' );
+					if ( file_exists( $file_path ) && is_readable( $file_path ) ) {
+						$recovered = copy( $file_path, $temp_filename );
+						if ( $recovered ) {
+							Util::debug_log( 'Recovered by copying local asset from disk.' );
+							$filesize = filesize( $temp_filename );
+						}
+					}
+				}
+				// Attempt 2: Do a non-streamed request and write body manually.
+				if ( ! $recovered ) {
+					$alt_args = array(
+						'timeout'     => self::TIMEOUT,
+						'user-agent'  => 'Simply Static/' . SIMPLY_STATIC_VERSION,
+						'sslverify'   => false,
+						'redirection' => 0,
+						'blocking'    => true,
+					);
+					$basic_auth_digest = base64_encode( Options::instance()->get('http_basic_auth_username') . ':' . Options::instance()->get('http_basic_auth_password') );
+					if ( $basic_auth_digest ) {
+						$alt_args['headers'] = array( 'Authorization' => 'Basic ' . $basic_auth_digest );
+					}
+					$alt_resp = wp_remote_get( $url, apply_filters( 'ss_remote_get_args', $alt_args ) );
+					if ( ! is_wp_error( $alt_resp ) ) {
+						$body = wp_remote_retrieve_body( $alt_resp );
+						if ( strlen( $body ) > 0 ) {
+							file_put_contents( $temp_filename, $body );
+							$filesize = filesize( $temp_filename );
+							$response = $alt_resp; // use headers from non-streamed response
+							$recovered = true;
+							Util::debug_log( 'Recovered by non-streamed request. Size: ' . $filesize . ' bytes' );
+						}
+					}
+				}
+			}
+		}
+
 		if ( is_wp_error( $response ) ) {
 			Util::debug_log( "We encountered an error when fetching: " . $response->get_error_message() );
 			Util::debug_log( $response );
