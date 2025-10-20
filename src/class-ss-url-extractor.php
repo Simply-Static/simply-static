@@ -626,7 +626,17 @@ class Url_Extractor {
 		$dom->preserveWhiteSpace = true;
 		$dom->formatOutput       = false;
 
-		$dom->loadHTML( $html_string );
+		// Detect the source charset and normalize input to UTF-8 for DOM parsing without injecting XML headers
+		$source_charset = $this->detect_html_charset( $html_string );
+		$html_for_dom   = $html_string;
+		if ( $source_charset && strtoupper( $source_charset ) !== 'UTF-8' && function_exists( 'mb_convert_encoding' ) ) {
+			$converted = @mb_convert_encoding( $html_string, 'UTF-8', $source_charset );
+			if ( $converted !== false && $converted !== null ) {
+				$html_for_dom = $converted;
+			}
+		}
+
+		$dom->loadHTML( $html_for_dom );
 
 		// Clear any errors
 		libxml_clear_errors();
@@ -758,6 +768,50 @@ class Url_Extractor {
 		}, $html );
 
 		return $html;
+	}
+
+	/**
+	 * Detect the charset for HTML using, in order of priority:
+	 * 1) Charset from simply_static_pages.content_type (stored on $this->static_page->content_type)
+	 * 2) get_option('blog_charset')
+	 * 3) get_bloginfo('charset', true)
+	 * 4) Fallback to 'UTF-8'
+	 *
+	 * @param string $html Unused; kept for signature compatibility.
+	 * @return string Charset label (e.g., UTF-8)
+	 */
+	private function detect_html_charset( $html ) {
+		$charset = null;
+
+		// 1) From content_type saved for this page (e.g., "text/html; charset=UTF-8")
+		if ( isset( $this->static_page ) && isset( $this->static_page->content_type ) && is_string( $this->static_page->content_type ) && $this->static_page->content_type !== '' ) {
+			if ( preg_match( '/charset\s*=\s*([a-zA-Z0-9_\-]+)/i', $this->static_page->content_type, $m ) ) {
+				$charset = trim( $m[1] );
+			}
+		}
+
+		// 2) From WordPress settings
+		if ( ! $charset && function_exists( 'get_option' ) ) {
+			$opt = get_option( 'blog_charset' );
+			if ( is_string( $opt ) && $opt !== '' ) {
+				$charset = $opt;
+			}
+		}
+
+		// 3) get_bloginfo fallback
+		if ( ! $charset && function_exists( 'get_bloginfo' ) ) {
+			$info = get_bloginfo( 'charset', true );
+			if ( is_string( $info ) && $info !== '' ) {
+				$charset = $info;
+			}
+		}
+
+		// 4) Default
+		if ( ! $charset ) {
+			$charset = 'UTF-8';
+		}
+
+		return $charset;
 	}
 
 	/**
