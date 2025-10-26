@@ -465,6 +465,10 @@ toplevel_page_simply-static img {
   margin-left: 10px;
 }
 
+.reset-bg-btn {
+  margin-left: 10px;
+}
+
 /* Multisite related styles */
 .network-generate-container {
   button {
@@ -603,6 +607,9 @@ a.show-nav {
   }
 
   .reset-db-btn {
+    margin: 10px 0 0 0;
+  }
+  .reset-bg-btn {
     margin: 10px 0 0 0;
   }
 

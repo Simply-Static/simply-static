@@ -56,6 +56,13 @@ function SettingsContextProvider(props) {
         });
     }
 
+    const resetBackgroundQueue = () => {
+        apiFetch({
+            path: '/simplystatic/v1/settings/reset-background-queue',
+            method: 'POST',
+        });
+    }
+
     const updateFromNetwork = (blogId) => {
         apiFetch({
             path: '/simplystatic/v1/update-from-network',
@@ -256,6 +263,7 @@ function SettingsContextProvider(props) {
                 saveSettings,
                 resetSettings,
                 resetDatabase,
+                resetBackgroundQueue,
                 getSettings,
                 updateFromNetwork,
                 importSettings,

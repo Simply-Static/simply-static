@@ -22,7 +22,8 @@ function Utilities() {
         saveSettings,
         resetSettings,
         migrateSettings,
-        resetDatabase
+        resetDatabase,
+        resetBackgroundQueue
     } = useContext(SettingsContext);
     const [isExport, setIsExport] = useState(false);
     const [isImport, setIsImport] = useState(false);
@@ -31,6 +32,7 @@ function Utilities() {
     const [isMigrate, setIsMigrate] = useState(false);
     const [hasCopied, setHasCopied] = useState(false);
     const [importData, setImportData] = useState(false);
+    const [isResetBackgroundQueue, setIsResetBackgroundQueue] = useState(false);
 
     const setImportDataValue = event => {
         setImportData(JSON.parse(event.target.value));
@@ -77,32 +79,6 @@ function Utilities() {
 
     return (
         <div className={"inner-settings"}>
-            <Card>
-                <CardHeader>
-                    <b>{__('Migrate Settings', 'simply-static')}</b>
-                </CardHeader>
-                <CardBody>
-                    <p>{__('Migrate all of your settings to Simply Static 3.0', 'simply-static')}</p>
-                    <p>
-                        <Button onClick={runMigrateSettings}
-                                variant="primary">{__('Migrate settings', 'simply-static')}</Button>
-                    </p>
-                    {isMigrate ?
-                        <Animate type="slide-in" options={{origin: 'top'}}>
-                            {() => (
-                                <Notice status="success" isDismissible={false}>
-                                    <p>
-                                        {__('Settings migration successfully.', 'simply-static')}
-                                    </p>
-                                </Notice>
-                            )}
-                        </Animate>
-                        :
-                        ''
-                    }
-                </CardBody>
-            </Card>
-            <Spacer margin={5}/>
             <Card>
                 <CardHeader>
                     <b>{__('Export', 'simply-static')}<HelperVideo
@@ -173,11 +149,14 @@ function Utilities() {
                 <CardBody>
                     <p>{__('By clicking the "Reset Plugin Settings", you will reset all plugin settings. This can be useful if you want to import a new set of settings or you want a fresh start.', 'simply-static')}</p>
                     <p>{__('If you click the "Reset Database Table" button instead, you will keep all your settings, and we will only recreate our DB table.', 'simply-static')}</p>
+                    <p>{__('If the background process is stuck and your debug log shows "There is already an export running", use the "Reset Background Queue" button to clear the queue and locks.', 'simply-static')}</p>
                     <p>
                         <Button onClick={runResetSettings}
-                                variant="secondary">{__('Reset Plugin Settings', 'simply-static')}</Button>
+                                variant="primary">{__('Reset Plugin Settings', 'simply-static')}</Button>
                         <Button onClick={runResetDatabase} className={"reset-db-btn"}
                                 variant="primary">{__('Reset Database Table', 'simply-static')}</Button>
+                        <Button onClick={() => { resetBackgroundQueue(); setIsResetBackgroundQueue(true); setTimeout(() => setIsResetBackgroundQueue(false), 2000); }} className={"reset-bg-btn"}
+                                variant="primary">{__('Reset Background Queue', 'simply-static')}</Button>
                     </p>
                     {isReset ?
                         <Animate type="slide-in" options={{origin: 'top'}}>
@@ -198,6 +177,45 @@ function Utilities() {
                                 <Notice status="success" isDismissible={false}>
                                     <p>
                                         {__('Database table resetted successfully.', 'simply-static')}
+                                    </p>
+                                </Notice>
+                            )}
+                        </Animate>
+                        :
+                        ''
+                    }
+                    {isResetBackgroundQueue ?
+                        <Animate type="slide-in" options={{origin: 'top'}}>
+                            {() => (
+                                <Notice status="success" isDismissible={false}>
+                                    <p>
+                                        {__('Background queue reset successfully.', 'simply-static')}
+                                    </p>
+                                </Notice>
+                            )}
+                        </Animate>
+                        :
+                        ''
+                    }
+                </CardBody>
+            </Card>
+            <Spacer margin={5}/>
+            <Card>
+                <CardHeader>
+                    <b>{__('Migrate Settings', 'simply-static')}</b>
+                </CardHeader>
+                <CardBody>
+                    <p>{__('Migrate all of your settings to Simply Static 3.0', 'simply-static')}</p>
+                    <p>
+                        <Button onClick={runMigrateSettings}
+                                variant="primary">{__('Migrate settings', 'simply-static')}</Button>
+                    </p>
+                    {isMigrate ?
+                        <Animate type="slide-in" options={{origin: 'top'}}>
+                            {() => (
+                                <Notice status="success" isDismissible={false}>
+                                    <p>
+                                        {__('Settings migration successfully.', 'simply-static')}
                                     </p>
                                 </Notice>
                             )}

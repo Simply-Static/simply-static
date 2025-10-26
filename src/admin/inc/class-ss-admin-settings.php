@@ -392,6 +392,14 @@ class Admin_Settings {
 			},
 		) );
 
+		register_rest_route( 'simplystatic/v1', '/settings/reset-background-queue', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'reset_background_queue' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+			},
+		) );
+
 		register_rest_route( 'simplystatic/v1', '/update-from-network', array(
 			'methods'             => 'POST',
 			'callback'            => [ $this, 'update_from_network' ],
@@ -841,6 +849,42 @@ class Admin_Settings {
 		Page::create_or_update_table();
 
 		return json_encode( [ 'status' => 200, 'message' => "Ok" ] );
+	}
+
+	/**
+	 * Reset the background queue (delete all batches, status, locks and clear cron).
+	 * Useful when the export is stuck with message: "There is already an export running".
+	 *
+	 * @return false|string
+	 */
+	public function reset_background_queue() {
+		try {
+			/** @var Archive_Creation_Job $job */
+			$job = Plugin::instance()->get_archive_creation_job();
+
+			// Delete all batches and status for this job.
+			$job->delete_all();
+
+			// Clear any scheduled cron for this job using known hook name.
+			$identifier = 'wp_' . 'archive_creation_job'; // Background_Process identifier is prefix + action
+			$cron_hook  = $identifier . '_cron';
+			while ( $timestamp = wp_next_scheduled( $cron_hook ) ) {
+				wp_unschedule_event( $timestamp, $cron_hook );
+			}
+			wp_clear_scheduled_hook( $cron_hook );
+
+			// Remove process lock transient so a new run can start immediately.
+			$site_id = function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : null;
+			$lock_key = $identifier . '_process_lock';
+			if ( is_multisite() && ! is_null( $site_id ) ) {
+				$lock_key .= '_site_' . $site_id;
+			}
+			delete_site_transient( $lock_key );
+
+			return json_encode( [ 'status' => 200, 'message' => 'Ok' ] );
+		} catch ( \Throwable $e ) {
+			return json_encode( [ 'status' => 500, 'message' => $e->getMessage() ] );
+		}
 	}
 
 	/**
