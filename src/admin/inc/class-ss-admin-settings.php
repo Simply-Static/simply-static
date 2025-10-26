@@ -1322,6 +1322,11 @@ class Admin_Settings {
 	 * @return void
 	 */
 	public function filter_view_site_link( $admin_bar ) {
+		// Allow disabling this behavior via filter.
+		if ( ! apply_filters( 'ss_enable_view_static_site_link', true ) ) {
+			return;
+		}
+
 		// Only proceed if admin bar is visible.
 		if ( ! function_exists( 'is_admin_bar_showing' ) || ! is_admin_bar_showing() ) {
 			return;
