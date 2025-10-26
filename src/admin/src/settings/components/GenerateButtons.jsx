@@ -15,9 +15,10 @@ function GenerateButtons(props) {
             disabled={!canGenerate || isDelayed}
             className={'generate'}
         >
-            {canGenerate && [<Dashicon icon="update"/>,
-                __('Generate', 'simply-static')
-            ]}
+            {canGenerate && <>
+                <Dashicon icon="update"/>
+                {__('Generate', 'simply-static')}
+            </>}
 
             {canGenerate && isDelayed>0 && <> {isDelayed}s</>}
 
