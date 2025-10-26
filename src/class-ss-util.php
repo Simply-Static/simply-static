@@ -13,6 +13,48 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Util {
 
 	/**
+	 * Compute the target Static Site URL based on Simply Static settings.
+	 * Returns an empty string if it cannot be determined.
+	 *
+	 * Logic:
+	 * - destination_url_type = 'relative' and relative_path not empty:
+	 *   Use the current site's scheme (https if wp_is_using_https() or is_ssl()),
+	 *   then build home_url( '/', $scheme ) + relative_path.
+	 * - destination_url_type = 'absolute' with non-empty destination_scheme and destination_host:
+	 *   Normalize and return scheme://host.
+	 *
+	 * @return string The static site URL or empty string when unavailable.
+	 */
+	public static function get_static_site_url() {
+		$options = get_option( 'simply-static' );
+		if ( empty( $options ) || ! is_array( $options ) ) {
+			return '';
+		}
+
+		$type = isset( $options['destination_url_type'] ) ? strtolower( trim( $options['destination_url_type'] ) ) : '';
+		$target_url = '';
+
+		if ( 'relative' === $type ) {
+			$relative_path = isset( $options['relative_path'] ) ? trim( $options['relative_path'] ) : '';
+			if ( $relative_path !== '' ) {
+				$scheme   = ( function_exists( 'wp_is_using_https' ) && wp_is_using_https() ) ? 'https' : ( is_ssl() ? 'https' : 'http' );
+				$base_url = home_url( '/', $scheme );
+				$target_url = trailingslashit( $base_url ) . ltrim( $relative_path, '/' );
+			}
+		} elseif ( 'absolute' === $type ) {
+			$scheme = isset( $options['destination_scheme'] ) ? trim( $options['destination_scheme'] ) : '';
+			$host   = isset( $options['destination_host'] ) ? trim( $options['destination_host'] ) : '';
+			if ( $scheme !== '' && $host !== '' ) {
+				$scheme = preg_replace( '/:\\/*$/', '', $scheme );
+				$host   = preg_replace( '/^\\/*/', '', $host );
+				$target_url = $scheme . '://' . $host;
+			}
+		}
+
+		return $target_url;
+	}
+
+	/**
 	 * Get the protocol used for the origin URL
 	 * @return string http or https
 	 */

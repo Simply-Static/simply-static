@@ -42,6 +42,9 @@ class Admin_Settings {
 		// This avoids a SecurityError when Basic Auth credentials are present in the URL.
 		add_action( 'admin_head', array( $this, 'maybe_disable_admin_canonical' ), 1 );
 
+		// Ensure the "View Site" link points to the static site even if the admin bar integration is disabled.
+		add_action( 'admin_bar_menu', array( $this, 'filter_view_site_link' ), 200 );
+
 		$this->failed_tests = intval( get_transient( 'simply_static_failed_tests' ) );
 
 		Admin_Meta::get_instance();
@@ -1309,5 +1312,42 @@ class Admin_Settings {
 			'status' => 200,
 			'data'   => $post_types_for_js,
 		] );
+	}
+
+	/**
+	 * Filter the default "View Site" admin bar link to point to the static site.
+	 * This is registered here so it remains active even if the Admin Bar integration is disabled.
+	 *
+	 * @param \WP_Admin_Bar $admin_bar
+	 * @return void
+	 */
+	public function filter_view_site_link( $admin_bar ) {
+		// Only proceed if admin bar is visible.
+		if ( ! function_exists( 'is_admin_bar_showing' ) || ! is_admin_bar_showing() ) {
+			return;
+		}
+
+		// Ensure we have the default node to modify.
+		$node = $admin_bar->get_node( 'view-site' );
+		if ( ! $node ) {
+			return;
+		}
+
+		$target_url = Util::get_static_site_url();
+		if ( $target_url === '' ) {
+			return; // Nothing to change or not configured.
+		}
+
+		// Update node title and href.
+		$node->title = __( 'View Static Site', 'simply-static' );
+		$node->href  = esc_url( $target_url );
+		// Open in a new tab for convenience and safety.
+		if ( ! isset( $node->meta ) || ! is_array( $node->meta ) ) {
+			$node->meta = [];
+		}
+		$node->meta['target'] = '_blank';
+		$node->meta['rel']    = 'noopener noreferrer';
+
+		$admin_bar->add_node( (array) $node );
 	}
 }
