@@ -27,6 +27,11 @@ class Rank_Math_Integration extends Integration {
 		add_action( 'ss_after_setup_task', [ $this, 'register_redirections' ] );
 		add_action( 'ss_dom_before_save', [ $this, 'replace_json_schema' ], 10, 2 );
 
+		// Ensure robots.txt and llms.txt are generated for static export when RankMath is active.
+		add_filter( 'ss_additional_files', [ $this, 'maybe_add_text_files' ] );
+		// Also ensure these URLs are added so they get transferred to Local Directory deployments.
+		add_filter( 'ss_setup_task_additional_urls', [ $this, 'add_text_file_urls' ] );
+
 		// Maybe update sitemap on single export.
 		$add_sitemap_single_export = apply_filters( 'ssp_single_export_add_xml_sitemap', false );
 
@@ -35,6 +40,149 @@ class Rank_Math_Integration extends Integration {
 		}
 
 		$this->include_file( 'handlers/class-ss-rank-math-sitemap-handler.php' );
+	}
+
+	/**
+	 * Maybe add robots.txt and llms.txt to additional files when RankMath is active.
+	 *
+	 * RankMath stores robots.txt content in settings and serves llms.txt dynamically.
+	 * We generate temporary files so Simply Static can export them.
+	 *
+	 * @param array $additional_files
+	 * @return array
+	 */
+	public function maybe_add_text_files( $additional_files ) {
+		// Ensure we have an array to work with.
+		$additional_files = is_array( $additional_files ) ? $additional_files : [];
+
+		// If physical files exist, Setup_Task will already include them.
+		$robots_physical = ABSPATH . 'robots.txt';
+		$llms_physical   = ABSPATH . 'llms.txt';
+
+		$archive_dir = Options::instance()->get_archive_dir();
+		if ( ! file_exists( $archive_dir ) ) {
+			wp_mkdir_p( $archive_dir );
+		}
+
+		// robots.txt via RankMath setting.
+		if ( ! file_exists( $robots_physical ) ) {
+			$robots = $this->get_rankmath_robots_content();
+			if ( is_string( $robots ) && $robots !== '' ) {
+				$path = $this->write_archive_file( 'robots.txt', $robots );
+				if ( $path ) {
+					Util::debug_log( 'RankMath: wrote robots.txt into archive dir: ' . $path );
+				}
+			}
+		}
+
+		// llms.txt via public endpoint served by RankMath.
+		if ( ! file_exists( $llms_physical ) ) {
+			$llms_url = home_url( '/llms.txt' );
+			$response = wp_remote_get( $llms_url, [ 'timeout' => 20 ] );
+			if ( ! is_wp_error( $response ) && (int) wp_remote_retrieve_response_code( $response ) === 200 ) {
+				$body = wp_remote_retrieve_body( $response );
+				$body = is_string( $body ) ? $body : '';
+				// Basic sanity check: ensure it looks like plain text and not an HTML 404.
+				if ( $body !== '' && stripos( $body, '<html' ) === false ) {
+					$path = $this->write_archive_file( 'llms.txt', $body );
+					if ( $path ) {
+						Util::debug_log( 'RankMath: wrote llms.txt into archive dir: ' . $path );
+					}
+				}
+			}
+		}
+
+		// We return the list unchanged; files are placed directly in the archive directory.
+		return $additional_files;
+	}
+
+	/**
+	 * Get robots.txt content from RankMath settings or WordPress defaults.
+	 *
+	 * @return string robots.txt content or empty string if unavailable.
+	 */
+	private function get_rankmath_robots_content() {
+		$public  = (int) get_option( 'blog_public' );
+		$default = "# This file is automatically added by Simply Static (Rank Math integration)\n";
+		$default .= "User-Agent: *\n";
+		if ( 0 === $public ) {
+			$default .= "Disallow: /\n";
+		} else {
+			$default .= "Disallow: /wp-admin/\n";
+			$default .= "Allow: /wp-admin/admin-ajax.php\n";
+		}
+
+		// Prefer RankMath custom content when available.
+		if ( class_exists( '\\RankMath\\Helper' ) ) {
+			$custom = \RankMath\Helper::get_settings( 'general.robots_txt_content' );
+			if ( is_string( $custom ) && $custom !== '' ) {
+				return $custom;
+			}
+		}
+
+		// Fallback to WP filtered default (may include other SEO filters when applicable).
+		return apply_filters( 'robots_txt', $default, $public );
+	}
+
+
+	/**
+	 * Write a file directly into the current archive directory (no prefix).
+	 * This ensures the file becomes part of the static export output and any local transfer.
+	 *
+	 * @param string $filename Filename such as 'robots.txt' or 'llms.txt'.
+	 * @param string $content  File contents.
+	 * @return string|null Full path on success, null on failure.
+	 */
+	private function write_archive_file( $filename, $content ) {
+		$archive_dir = Options::instance()->get_archive_dir();
+		if ( empty( $archive_dir ) ) {
+			return null;
+		}
+		if ( ! file_exists( $archive_dir ) ) {
+			wp_mkdir_p( $archive_dir );
+		}
+		$path = trailingslashit( $archive_dir ) . ltrim( $filename, '/\\' );
+		$result = @file_put_contents( $path, $content );
+		return $result !== false ? $path : null;
+	}
+
+	/**
+	 * Ensure robots.txt and llms.txt URLs are queued so they get transferred in Local Directory deployments.
+	 *
+	 * @param string $additional_urls Raw textarea string of additional URLs.
+	 * @return string Modified string including robots.txt and llms.txt when needed.
+	 */
+	public function add_text_file_urls( $additional_urls ) {
+		$robots_physical = ABSPATH . 'robots.txt';
+		$llms_physical   = ABSPATH . 'llms.txt';
+
+		$to_add = [];
+		if ( ! file_exists( $robots_physical ) ) {
+			$to_add[] = home_url( '/robots.txt' );
+		}
+		if ( ! file_exists( $llms_physical ) ) {
+			$to_add[] = home_url( '/llms.txt' );
+		}
+
+		if ( empty( $to_add ) ) {
+			return $additional_urls;
+		}
+
+		// Normalize to string.
+		if ( ! is_string( $additional_urls ) ) {
+			if ( is_array( $additional_urls ) ) {
+				$additional_urls = implode( "\n", $additional_urls );
+			} else {
+				$additional_urls = '';
+			}
+		}
+
+		$prefix = '';
+		if ( $additional_urls !== '' && substr( $additional_urls, -1 ) !== "\n" ) {
+			$prefix = "\n";
+		}
+
+		return $additional_urls . $prefix . implode( "\n", $to_add );
 	}
 
 	/**
@@ -229,7 +377,10 @@ class Rank_Math_Integration extends Integration {
 	 * @return boolean
 	 */
 	public function dependency_active() {
-		return class_exists( 'RankMath' );
+		// Rank Math exposes various identifiers; use multiple checks for reliability.
+		return ( defined( 'RANK_MATH_VERSION' )
+			|| class_exists( '\\RankMath\\Helper' )
+			|| class_exists( '\\RankMath\\Sitemap\\Router' ) );
 	}
 
 	/**
