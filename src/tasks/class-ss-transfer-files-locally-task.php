@@ -50,21 +50,24 @@ class Transfer_Files_Locally_Task extends Task {
 		$done = $this->process_pages();
 
 		if ( $done ) {
-
+			// Ensure rule text files created in the archive root are copied to the local directory as well.
+			$this->transfer_rule_file( 'robots.txt' );
+			$this->transfer_rule_file( 'llms.txt' );
+			
 			$this->transfer_404_page( $this->destination_dir );
-
+			
 			if ( $this->options->get( 'add_feeds' ) ) {
 				$this->transfer_feed_redirect( $this->destination_dir );
 			}
-
+			
 			if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
 				$destination_url = trailingslashit( $this->options->get_destination_url() );
 				$message         = __( 'Destination URL:', 'simply-static' ) . ' <a href="' . $destination_url . '" target="_blank">' . $destination_url . '</a>';
 				$this->save_status_message( $message, 'destination_url' );
 			}
-
+			
 			do_action( 'ss_finished_transferring_files_locally', $this->destination_dir );
-
+			
 			self::delete_total_pages();
 		}
 
@@ -190,6 +193,30 @@ class Transfer_Files_Locally_Task extends Task {
 	 *
 	 * @return void
 	 */
+	public function transfer_rule_file( $filename ) {
+		$archive_dir = $this->options->get_archive_dir();
+		$source      = trailingslashit( $archive_dir ) . ltrim( $filename, '/\\' );
+		$dest        = trailingslashit( $this->destination_dir ) . ltrim( $filename, '/\\' );
+		
+		if ( ! file_exists( $source ) ) {
+			Util::debug_log( '[Transfer] Rule file not found in archive: ' . $source );
+			return;
+		}
+		
+		// Ensure destination directory exists (root already ensured by maybe_create_local_directory)
+		$dest_dir = dirname( $dest );
+		if ( ! is_dir( $dest_dir ) ) {
+			wp_mkdir_p( $dest_dir );
+		}
+		
+		if ( ! @copy( $source, $dest ) ) {
+			Util::debug_log( '[Transfer] Failed to copy rule file from ' . $source . ' to ' . $dest );
+			return;
+		}
+		
+		Util::debug_log( '[Transfer] Copied rule file: ' . $filename . ' => ' . $dest );
+	}
+
 	public function transfer_404_page( $local_dir ) {
 		$archive_dir = $this->options->get_archive_dir();
 		$file_path   = untrailingslashit( $archive_dir ) . DIRECTORY_SEPARATOR . '404' . DIRECTORY_SEPARATOR . 'index.html';
