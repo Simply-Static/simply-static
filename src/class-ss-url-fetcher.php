@@ -322,6 +322,14 @@ class Url_Fetcher {
 			}
 		}
 
+		// Prevent query-string URLs from overwriting base paths (e.g., "/?wpr_mega_menu=...")
+		// by placing them in a deterministic subdirectory based on the query string.
+		if ( ! empty( $url_parts['query'] ) ) {
+			$qs_hash = substr( md5( $url_parts['query'] ), 0, 12 );
+			$relative_file_dir = Util::add_trailing_directory_separator( $relative_file_dir );
+			$relative_file_dir .= '__qs/' . $qs_hash . '/';
+		}
+
 		$page_handler = $static_page->get_handler();
 
 		$path_info         = apply_filters( 'simply_static_page_path_info', $page_handler->get_path_info( $path_info ), $static_page );
