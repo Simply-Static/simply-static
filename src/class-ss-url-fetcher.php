@@ -95,10 +95,10 @@ class Url_Fetcher {
 
 		// Check if the URL is a local asset (file) that we can copy directly
 		// We do this check before prepare_url to avoid query parameters interfering with extension detection
-		$original_url = $url;
+		$original_url   = $url;
 		$is_local_asset = Util::is_local_asset_url( $original_url );
 
-		Util::debug_log( "URL: " . $original_url . " - Is local asset: " . ($is_local_asset ? 'Yes' : 'No') );
+		Util::debug_log( "URL: " . $original_url . " - Is local asset: " . ( $is_local_asset ? 'Yes' : 'No' ) );
 
 		if ( $prepare_url ) {
 			$url = $static_page->get_handler()->prepare_url( $url );
@@ -108,7 +108,7 @@ class Url_Fetcher {
 		if ( $is_local_asset ) {
 			// Get the local path for the URL using the original URL without query parameters
 			$local_path = Util::get_path_from_local_url( $original_url );
-			$file_path = ABSPATH . ltrim( $local_path, '/' );
+			$file_path  = ABSPATH . ltrim( $local_path, '/' );
 
 			Util::debug_log( "Local path: " . $local_path . " - Full file path: " . $file_path );
 
@@ -123,7 +123,7 @@ class Url_Fetcher {
 						'response' => array(
 							'code' => 200
 						),
-						'headers' => array(
+						'headers'  => array(
 							'content-type' => mime_content_type( $file_path )
 						)
 					);
@@ -166,14 +166,14 @@ class Url_Fetcher {
 				}
 				// Attempt 2: Do a non-streamed request and write body manually.
 				if ( ! $recovered ) {
-					$alt_args = array(
+					$alt_args          = array(
 						'timeout'     => self::TIMEOUT,
 						'user-agent'  => 'Simply Static/' . SIMPLY_STATIC_VERSION,
 						'sslverify'   => false,
 						'redirection' => 0,
 						'blocking'    => true,
 					);
-					$basic_auth_digest = base64_encode( Options::instance()->get('http_basic_auth_username') . ':' . Options::instance()->get('http_basic_auth_password') );
+					$basic_auth_digest = base64_encode( Options::instance()->get( 'http_basic_auth_username' ) . ':' . Options::instance()->get( 'http_basic_auth_password' ) );
 					if ( $basic_auth_digest ) {
 						$alt_args['headers'] = array( 'Authorization' => 'Basic ' . $basic_auth_digest );
 					}
@@ -182,8 +182,8 @@ class Url_Fetcher {
 						$body = wp_remote_retrieve_body( $alt_resp );
 						if ( strlen( $body ) > 0 ) {
 							file_put_contents( $temp_filename, $body );
-							$filesize = filesize( $temp_filename );
-							$response = $alt_resp; // use headers from non-streamed response
+							$filesize  = filesize( $temp_filename );
+							$response  = $alt_resp; // use headers from non-streamed response
 							$recovered = true;
 							Util::debug_log( 'Recovered by non-streamed request. Size: ' . $filesize . ' bytes' );
 						}
@@ -205,11 +205,11 @@ class Url_Fetcher {
 			$static_page->http_status_code = $response['response']['code'];
 
 			// Check if this is a JavaScript or CSS file based on the URL extension
-			$path_info = Util::url_path_info($static_page->url);
-			if (isset($path_info['extension']) && $path_info['extension'] === 'js') {
+			$path_info = Util::url_path_info( $static_page->url );
+			if ( isset( $path_info['extension'] ) && $path_info['extension'] === 'js' ) {
 				// Force the correct MIME type for JavaScript files
 				$static_page->content_type = 'application/javascript';
-			} elseif (isset($path_info['extension']) && $path_info['extension'] === 'css') {
+			} elseif ( isset( $path_info['extension'] ) && $path_info['extension'] === 'css' ) {
 				// Force the correct MIME type for CSS files
 				$static_page->content_type = 'text/css';
 			} else {
@@ -217,7 +217,7 @@ class Url_Fetcher {
 				$static_page->content_type = $response['headers']['content-type'];
 			}
 
-			$static_page->redirect_url     = isset( $response['headers']['location'] ) ? $response['headers']['location'] : null;
+			$static_page->redirect_url = isset( $response['headers']['location'] ) ? $response['headers']['location'] : null;
 
 			Util::debug_log( "http_status_code: " . $static_page->http_status_code . " | content_type: " . $static_page->content_type );
 
@@ -322,10 +322,9 @@ class Url_Fetcher {
 			}
 		}
 
-		// Prevent query-string URLs from overwriting base paths (e.g., "/?wpr_mega_menu=...")
-		// by placing them in a deterministic subdirectory based on the query string.
+		// Prevent query-string URLs from overwriting base paths by placing them in a deterministic subdirectory based on the query string.
 		if ( ! empty( $url_parts['query'] ) ) {
-			$qs_hash = substr( md5( $url_parts['query'] ), 0, 12 );
+			$qs_hash           = substr( md5( $url_parts['query'] ), 0, 12 );
 			$relative_file_dir = Util::add_trailing_directory_separator( $relative_file_dir );
 			$relative_file_dir .= '__qs/' . $qs_hash . '/';
 		}
@@ -357,7 +356,7 @@ class Url_Fetcher {
 	}
 
 	public static function remote_get( $url, $filename = null ) {
-		$basic_auth_digest = base64_encode( Options::instance()->get('http_basic_auth_username') . ':' . Options::instance()->get('http_basic_auth_password') );
+		$basic_auth_digest = base64_encode( Options::instance()->get( 'http_basic_auth_username' ) . ':' . Options::instance()->get( 'http_basic_auth_password' ) );
 
 		Util::debug_log( "Fetching URL: " . $url );
 
