@@ -4,7 +4,7 @@ Tags: static site generator, performance, security, jamstack
 Requires at least: 6.2
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag:  3.4.7.2
+Stable tag:  3.4.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -51,11 +51,12 @@ I highly recommend not to use another tool for local development if you are not 
 
 Static Studio is our all-in-one Static WordPress cloud hosting solution - here is why you want it:
 
-* Secure WordPress hosting protected from public access (Firewall, Basic Auth, and WebAssembly)
-* High-performance static site hosting powered by BunnyCDN Enterprise
-* Ultra-fast exports because of our optimized server stack (NGINX, auto-scalable workers)
-* Backups, SSL, unlimited file storage, and bandwidth included
-* Devs: WP-CLI, SSH, SFT,P and hands-on code support
+* Secure WordPress hosting (Firewall, NGINX-powered, 24/7 monitoring and all the best practices
+* Fast static site hosting via BunnyCDN (global distribution, low TTFB, caching, minification)
+* Secure logins via SSO, 2FA protection and team management
+* Automated (and free) migration for all your existing sites
+* Backups, SSL, unlimited file storage and 1TB bandwidth per site
+* WP-CLI, SSH, SFTP and active hands-on code support
 
 [Start your 7-day free trial](https://simplystatic.com/simply-static-studio/)
 
@@ -258,6 +259,16 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 3. Diagnostics
 
 == Changelog ==
+
+= 3.4.8 =
+
+* new text handler for replacing URLs in txt files
+* RankMath: auto replace and copy llms.txt and robots.txt to your static site
+* Utilities: new reset background queue feature
+* improved admin bar integration with deeplinks and better performance
+* Quick link to view your static site from the dashboard
+* fallback strategy to pick up and export 0 byte files
+* Admin UI improvements (fixing Chrome notices)
 
 = 3.4.7.2 =
 
