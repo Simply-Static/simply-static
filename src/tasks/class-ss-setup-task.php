@@ -95,6 +95,12 @@ class Setup_Task extends Task {
 					$static_page = Page::query()->find_or_initialize_by( 'url', $url );
 					$static_page->set_status_message( __( 'Additional URL', 'simply-static' ) );
 					$static_page->found_on_id = 0;
+					// Assign special handler for text rule files to enable URL replacement in plain text.
+					$path_part = parse_url( $url, PHP_URL_PATH );
+					$lower     = is_string( $path_part ) ? strtolower( $path_part ) : '';
+					if ( $lower === '/robots.txt' || $lower === '/llms.txt' ) {
+						$static_page->handler = Text_File_Handler::class;
+					}
 					$static_page->save();
 				}
 			}
@@ -181,7 +187,13 @@ class Setup_Task extends Task {
 						$static_page->set_status_message( __( "Additional File", 'simply-static' ) );
 						// setting found_on_id to 0 since this was user-specified
 						$static_page->found_on_id = 0;
-						$static_page->handler     = Additional_File_Handler::class;
+						// Use the Text_File_Handler for robots.txt and llms.txt so URLs are replaced in plain text.
+						$base = strtolower( basename( $item ) );
+						if ( $base === 'robots.txt' || $base === 'llms.txt' ) {
+							$static_page->handler = Text_File_Handler::class;
+						} else {
+							$static_page->handler = Additional_File_Handler::class;
+						}
 						$static_page->save();
 					} else {
 						Util::debug_log( "Adding files from directory: " . $item );
@@ -192,7 +204,12 @@ class Setup_Task extends Task {
 							Util::debug_log( "Adding file " . $file_name . ' to queue as: ' . $url );
 							$static_page = Page::query()->find_or_initialize_by( 'url', $url );
 							$static_page->set_status_message( __( "Additional Dir", 'simply-static' ) );
-							$static_page->handler     = Additional_File_Handler::class;
+							$base = strtolower( basename( $file_name ) );
+							if ( $base === 'robots.txt' || $base === 'llms.txt' ) {
+								$static_page->handler = Text_File_Handler::class;
+							} else {
+								$static_page->handler = Additional_File_Handler::class;
+							}
 							$static_page->found_on_id = 0;
 							$static_page->save();
 						}

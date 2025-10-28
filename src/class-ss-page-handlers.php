@@ -30,6 +30,7 @@ class Page_Handlers {
 		require_once $path . 'class-ss-page-handler.php';
 		require_once $path . 'class-ss-handler-404.php';
 		require_once $path . 'class-ss-additional-file-handler.php';
+		require_once $path . 'class-ss-text-file-handler.php';
 	}
 
 	/**
