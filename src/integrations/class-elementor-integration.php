@@ -91,7 +91,7 @@ class Elementor_Integration extends Integration {
 			return preg_replace_callback($pattern, function($matches) {
 				$full_tag = $matches[0];
 				$json = $matches[2];
-Util::debug_log('extract_elementor_settings: ' . $json);
+				Util::debug_log('extract_elementor_settings: ' . $json);
 				// Process the JSON data
 				$decoded = htmlspecialchars_decode($json);
 				$decoded = json_decode($decoded, true);
@@ -297,7 +297,7 @@ Util::debug_log('extract_elementor_settings: ' . $json);
 
 	/**
 	 * Get Elementor Pro bundle files
-	 * 
+	 *
 	 * @return array
 	 */
 	protected function get_pro_bundle_files() {
@@ -522,18 +522,15 @@ Util::debug_log('extract_elementor_settings: ' . $json);
 		// Get current active crawlers
 		$crawlers = $options->get( 'crawlers' );
 
-		// Respect user selections completely:
+		// Respect user selections completely without verbose logging to avoid log spam during exports.
 		// - If crawlers is an array and does NOT contain 'elementor', treat as explicit opt-out and do not re-add.
 		// - If crawlers is null or not an array, do not modify; fall back to default is_active logic.
 		if ( is_array( $crawlers ) ) {
-			if ( in_array( 'elementor', $crawlers, true ) ) {
-				Util::debug_log( 'Elementor Crawler already present in user selection; leaving as-is.' );
-			} else {
-				Util::debug_log( 'Elementor Crawler not in user selection; respecting opt-out and not adding.' );
-			}
-		} else {
-			Util::debug_log( 'Crawlers option undefined or not an array; not modifying for Elementor.' );
+			// Intentionally no debug logging here to prevent repeated log entries when run multiple times.
+			return;
 		}
+		// If option not set or not an array, also do nothing silently.
+		return;
 	}
 
 	/**
