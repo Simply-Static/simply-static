@@ -411,6 +411,31 @@ toplevel_page_simply-static img {
     background: #eeeeee;
   }
 
+  /* Match disabled token fields (Pro-only controls) to lighter grey like search settings */
+  .horizontal-token-field[aria-disabled="true"],
+  .horizontal-token-field.components-form-token-field.is-disabled {
+    background: #eeeeee;
+    border-color: #ddd;
+    cursor: not-allowed;
+  }
+  .horizontal-token-field.components-form-token-field__input-container.is-disabled {
+    background: #eee;
+  }
+
+  .horizontal-token-field[aria-disabled="true"] .components-form-token-field__input,
+  .horizontal-token-field[aria-disabled="true"] .components-form-token-field__input input,
+  .horizontal-token-field[aria-disabled="true"] .components-form-token-field__input-container,
+  .horizontal-token-field.components-form-token-field.is-disabled .components-form-token-field__input,
+  .horizontal-token-field.components-form-token-field.is-disabled .components-form-token-field__input input,
+  .horizontal-token-field.components-form-token-field.is-disabled .components-form-token-field__input-container {
+    background: #eeeeee;
+    cursor: not-allowed;
+  }
+  .horizontal-token-field[aria-disabled="true"] .components-form-token-field__input input::placeholder,
+  .horizontal-token-field.components-form-token-field.is-disabled .components-form-token-field__input input::placeholder {
+    color: #7a7a7a;
+  }
+
   .components-card {
     border-radius: 0 !important;
   }

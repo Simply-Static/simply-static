@@ -8,7 +8,7 @@ import {
     Notice,
     Animate,
     TextControl, SelectControl, Flex, FlexItem, TextareaControl, ToggleControl,
-    FormTokenField,
+    FormTokenField, ExternalLink,
 } from "@wordpress/components";
 import apiFetch from "@wordpress/api-fetch";
 import {useContext, useEffect, useState} from '@wordpress/element';
@@ -37,6 +37,15 @@ function GeneralSettings() {
     const [postTypes, setPostTypes] = useState([]);
     const [selectedPostTypes, setSelectedPostTypes] = useState([]);
     const [postTypesApiError, setPostTypesApiError] = useState(null);
+
+    // Plugins/Themes for Enhanced Crawl
+    const [plugins, setPlugins] = useState([]);
+    const [selectedPlugins, setSelectedPlugins] = useState([]);
+    const [pluginsApiError, setPluginsApiError] = useState(null);
+    const [themes, setThemes] = useState([]);
+    const [selectedThemes, setSelectedThemes] = useState([]);
+    const [themesApiError, setThemesApiError] = useState(null);
+
     const [pages, setPages] = useState([]);
 
     const setSavingSettings = () => {
@@ -53,7 +62,7 @@ function GeneralSettings() {
         // Reset API error
         setApiError(null);
 
-        apiFetch({ 
+        apiFetch({
             path: '/simplystatic/v1/crawlers',
             // Use raw: true to get the raw response
             parse: true
@@ -85,7 +94,7 @@ function GeneralSettings() {
                     } else if (Array.isArray(settings.crawlers)) {
 
                         // Ensure all selected crawlers exist in the allowed crawlers list
-                        const validCrawlerIds = settings.crawlers.filter(id => 
+                        const validCrawlerIds = settings.crawlers.filter(id =>
                             crawlersData.some(crawler => crawler.id === id)
                         );
 
@@ -112,7 +121,7 @@ function GeneralSettings() {
         // Reset API error
         setPostTypesApiError(null);
 
-        apiFetch({ 
+        apiFetch({
             path: '/simplystatic/v1/post-types',
             parse: true
         })
@@ -137,7 +146,7 @@ function GeneralSettings() {
                         updateSetting('post_types', allPostTypeIds);
                     } else if (Array.isArray(settings.post_types)) {
                         // Ensure all selected post types exist in the post types list
-                        const validPostTypeIds = settings.post_types.filter(name => 
+                        const validPostTypeIds = settings.post_types.filter(name =>
                             response.data.some(postType => postType.name === name)
                         );
 
@@ -159,17 +168,60 @@ function GeneralSettings() {
             });
     };
 
+    // Fetch plugins
+    const fetchPlugins = () => {
+        setPluginsApiError(null);
+        apiFetch({path: '/simplystatic/v1/active-plugins', parse: true})
+            .then(response => {
+                if (typeof response === 'string') {
+                    response = JSON.parse(response);
+                }
+                const list = Array.isArray(response?.data) ? response.data : [];
+                setPlugins(list);
+                // Initialize selection default to all
+                const saved = Array.isArray(settings.plugins_to_include) ? settings.plugins_to_include : [];
+                const allSlugs = list.map(p => p.slug);
+                const valid = saved.filter(slug => allSlugs.includes(slug));
+                const initial = valid.length > 0 ? valid : allSlugs;
+                setSelectedPlugins(initial);
+                updateSetting('plugins_to_include', initial);
+            })
+            .catch(error => setPluginsApiError(error?.message || 'Unknown error'));
+    };
+
+    // Fetch themes
+    const fetchThemes = () => {
+        setThemesApiError(null);
+        apiFetch({path: '/simplystatic/v1/active-themes', parse: true})
+            .then(response => {
+                if (typeof response === 'string') {
+                    response = JSON.parse(response);
+                }
+                const list = Array.isArray(response?.data) ? response.data : [];
+                setThemes(list);
+                const saved = Array.isArray(settings.themes_to_include) ? settings.themes_to_include : [];
+                const allSlugs = list.map(t => t.slug);
+                const valid = saved.filter(slug => allSlugs.includes(slug));
+                const initial = valid.length > 0 ? valid : allSlugs;
+                setSelectedThemes(initial);
+                updateSetting('themes_to_include', initial);
+            })
+            .catch(error => setThemesApiError(error?.message || 'Unknown error'));
+    };
+
     // Fetch crawlers and post types when component mounts
     // We intentionally use an empty dependency array to ensure this only runs once
     // when the component mounts, not on every settings change
     useEffect(() => {
         fetchCrawlers();
         fetchPostTypes();
+        fetchPlugins();
+        fetchThemes();
         // Fetch pages for optional 404 selection
-        apiFetch({ path: '/simplystatic/v1/pages' }).then((fetched_pages) => {
+        apiFetch({path: '/simplystatic/v1/pages'}).then((fetched_pages) => {
             let pages = fetched_pages || [];
             // Prepend default option
-            pages.unshift({ label: __('No page selected', 'simply-static'), value: 0 });
+            pages.unshift({label: __('No page selected', 'simply-static'), value: 0});
             setPages(pages);
         }).catch(() => {
             setPages([]);
@@ -364,13 +416,13 @@ function GeneralSettings() {
 
                 {enableEnhancedCrawl && (
                     <>
-                        <Spacer margin={2} />
+                        <Spacer margin={2}/>
                         {apiError && (
                             <>
                                 <Notice status="error" isDismissible={false}>
                                     {__('Error loading crawlers: ', 'simply-static')} {apiError}
                                 </Notice>
-                                <Spacer margin={2} />
+                                <Spacer margin={2}/>
                             </>
                         )}
                         {crawlers.length > 0 ? (
@@ -392,7 +444,7 @@ function GeneralSettings() {
 
                                             // If no exact match, try case-insensitive match
                                             if (!crawler) {
-                                                crawler = crawlers.find(c => 
+                                                crawler = crawlers.find(c =>
                                                     c.name.toLowerCase() === (name || '').toLowerCase()
                                                 );
                                             }
@@ -414,17 +466,17 @@ function GeneralSettings() {
                                     maxSuggestions={100}
                                     className="horizontal-token-field"
                                 />
-                                <Spacer margin={2} />
+                                <Spacer margin={2}/>
                                 {/* Show post types selection only when Post Type URLs crawler is active */}
                                 {selectedCrawlers.includes('post_type') && (
                                     <>
-                                        <Spacer margin={2} />
+                                        <Spacer margin={2}/>
                                         {postTypesApiError && (
                                             <>
                                                 <Notice status="error" isDismissible={false}>
                                                     {__('Error loading post types: ', 'simply-static')} {postTypesApiError}
                                                 </Notice>
-                                                <Spacer margin={2} />
+                                                <Spacer margin={2}/>
                                             </>
                                         )}
                                         {postTypes.length > 0 ? (
@@ -446,7 +498,7 @@ function GeneralSettings() {
 
                                                             // If no exact match, try case-insensitive match
                                                             if (!postType) {
-                                                                postType = postTypes.find(pt => 
+                                                                postType = postTypes.find(pt =>
                                                                     pt.label.toLowerCase() === label.toLowerCase()
                                                                 );
                                                             }
@@ -468,10 +520,108 @@ function GeneralSettings() {
                                                     maxSuggestions={100}
                                                     className="horizontal-token-field"
                                                 />
-                                                <Spacer margin={2} />
+                                                <Spacer margin={2}/>
                                             </>
                                         ) : (
                                             <p>{__('Loading post types...', 'simply-static')}</p>
+                                        )}
+                                    </>
+                                )}
+                                {selectedCrawlers.includes('plugin_assets') && (
+                                    <>
+                                        {pluginsApiError && (
+                                            <>
+                                                <Notice status="error" isDismissible={false}>
+                                                    {__('Error loading plugins: ', 'simply-static')} {pluginsApiError}
+                                                </Notice>
+                                                <Spacer margin={2}/>
+                                            </>
+                                        )}
+                                        {plugins.length > 0 ? (
+                                            <>
+                                                <FormTokenField
+                                                    label={__('Plugins to Include', 'simply-static')}
+                                                    __next40pxDefaultSize
+                                                    __nextHasNoMarginBottom
+                                                    disabled={!isPro()}
+                                                    value={Array.isArray(selectedPlugins) ? selectedPlugins.map(slug => {
+                                                        const pl = plugins.find(p => p.slug === slug);
+                                                        return pl ? pl.label : slug;
+                                                    }) : []}
+                                                    suggestions={plugins.map(p => p.label)}
+                                                    onChange={(value) => {
+                                                        const selected = value.map(label => {
+                                                            let pl = plugins.find(p => p.label === label) || plugins.find(p => p.label.toLowerCase() === String(label).toLowerCase()) || plugins.find(p => p.slug === label);
+                                                            return pl ? pl.slug : label;
+                                                        });
+                                                        setSelectedPlugins(selected);
+                                                        updateSetting('plugins_to_include', selected);
+                                                    }}
+                                                    help={__('Select which active plugins to include. All active plugins are included by default; remove tokens to exclude them.', 'simply-static')}
+                                                    tokenizeOnSpace={false}
+                                                    __experimentalExpandOnFocus={true}
+                                                    __experimentalShowHowTo={false}
+                                                    maxSuggestions={100}
+                                                    className="horizontal-token-field"
+                                                />
+                                                {!isPro() && (
+                                                    <ExternalLink
+                                                        style={{marginTop: "5px"}}
+                                                        href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}
+                                                    </ExternalLink>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <p>{__('Loading plugins...', 'simply-static')}</p>
+                                        )}
+                                    </>
+                                )}
+                                {selectedCrawlers.includes('theme_assets') && (
+                                    <>
+                                        {themesApiError && (
+                                            <>
+                                                <Notice status="error" isDismissible={false}>
+                                                    {__('Error loading themes: ', 'simply-static')} {themesApiError}
+                                                </Notice>
+                                                <Spacer margin={2}/>
+                                            </>
+                                        )}
+                                        {themes.length > 0 ? (
+                                            <>
+                                                <FormTokenField
+                                                    label={__('Themes to Include', 'simply-static')}
+                                                    __next40pxDefaultSize
+                                                    __nextHasNoMarginBottom
+                                                    disabled={!isPro()}
+                                                    value={Array.isArray(selectedThemes) ? selectedThemes.map(slug => {
+                                                        const th = themes.find(t => t.slug === slug);
+                                                        return th ? th.label : slug;
+                                                    }) : []}
+                                                    suggestions={themes.map(t => t.label)}
+                                                    onChange={(value) => {
+                                                        const selected = value.map(label => {
+                                                            let th = themes.find(t => t.label === label) || themes.find(t => t.label.toLowerCase() === String(label).toLowerCase()) || themes.find(t => t.slug === label);
+                                                            return th ? th.slug : label;
+                                                        });
+                                                        setSelectedThemes(selected);
+                                                        updateSetting('themes_to_include', selected);
+                                                    }}
+                                                    help={__('Select which theme(s) to include. The active theme and parent (if any) are included by default; remove tokens to exclude them.', 'simply-static')}
+                                                    tokenizeOnSpace={false}
+                                                    __experimentalExpandOnFocus={true}
+                                                    __experimentalShowHowTo={false}
+                                                    maxSuggestions={100}
+                                                    className="horizontal-token-field"
+                                                />
+                                                {!isPro() && (
+                                                    <ExternalLink
+                                                        style={{marginTop: "5px"}}
+                                                        href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
+                                                )}
+                                                <Spacer margin={2}/>
+                                            </>
+                                        ) : (
+                                            <p>{__('Loading themes...', 'simply-static')}</p>
                                         )}
                                     </>
                                 )}

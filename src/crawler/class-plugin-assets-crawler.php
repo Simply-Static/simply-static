@@ -41,9 +41,16 @@ class Plugin_Assets_Crawler extends Crawler {
 		$plugins_dir = WP_PLUGIN_DIR;
 
 		// Get all active plugins
-		$active_plugins = get_option( 'active_plugins' );
+		$active_plugins = (array) get_option( 'active_plugins' );
+		$allowed = (array) \Simply_Static\Options::instance()->get( 'plugins_to_include' );
+		$allowed = is_array( $allowed ) ? array_filter( array_map( 'strval', $allowed ) ) : [];
 
 		foreach ( $active_plugins as $plugin ) {
+			// If user selected specific plugins, restrict to those (by directory slug)
+			if ( ! empty( $allowed ) ) {
+				$slug = dirname( $plugin );
+				if ( ! in_array( $slug, $allowed, true ) ) { continue; }
+			}
 			// Get the plugin directory
 			$plugin_dir  = dirname( $plugin );
 			$plugin_path = $plugins_dir . '/' . $plugin_dir;
@@ -78,8 +85,14 @@ class Plugin_Assets_Crawler extends Crawler {
 		$plugins_url = plugins_url();
 		$plugins_dir = WP_PLUGIN_DIR;
 		$active_plugins = (array) get_option( 'active_plugins' );
+		$allowed = (array) \Simply_Static\Options::instance()->get( 'plugins_to_include' );
+		$allowed = is_array( $allowed ) ? array_filter( array_map( 'strval', $allowed ) ) : [];
 
 		foreach ( $active_plugins as $plugin ) {
+			if ( ! empty( $allowed ) ) {
+				$slug = dirname( $plugin );
+				if ( ! in_array( $slug, $allowed, true ) ) { continue; }
+			}
 			$plugin_dir  = dirname( $plugin );
 			$plugin_path = $plugins_dir . '/' . $plugin_dir;
 			$base_url    = $plugins_url . '/' . $plugin_dir;

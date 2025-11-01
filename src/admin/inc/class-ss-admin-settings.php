@@ -344,6 +344,24 @@ class Admin_Settings {
 			},
 		) );
 
+		// Active plugins for Enhanced Crawl UI
+		register_rest_route( 'simplystatic/v1', '/active-plugins', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'get_active_plugins' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+			},
+		) );
+
+		// Active theme (and parent if child) for Enhanced Crawl UI
+		register_rest_route( 'simplystatic/v1', '/active-themes', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'get_active_themes' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+			},
+		) );
+
 		register_rest_route( 'simplystatic/v1', '/crawlers', array(
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'get_crawlers' ],
@@ -645,7 +663,7 @@ class Admin_Settings {
 				'minify_js_exclude'
 			];
 
-			$array_fields = [ 'integrations', 'crawlers', 'post_types' ];
+			$array_fields = [ 'integrations', 'crawlers', 'post_types', 'plugins_to_include', 'themes_to_include' ];
 
 			// Sanitize each key/value pair in options.
 			foreach ( $options as $key => $value ) {
@@ -1318,6 +1336,46 @@ class Admin_Settings {
 
         return wp_send_json_success( $sites );
     }
+
+	/**
+	 * Return list of active plugins (id = plugin directory, label = plugin name)
+	 *
+	 * @return false|string
+	 */
+	public function get_active_plugins() {
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		$active = (array) get_option( 'active_plugins', [] );
+		$all    = (array) get_plugins();
+		$list   = [];
+		foreach ( $active as $plugin_file ) {
+			$dir = dirname( $plugin_file );
+			$label = isset( $all[ $plugin_file ]['Name'] ) ? $all[ $plugin_file ]['Name'] : $dir;
+			$list[] = [ 'slug' => $dir, 'label' => $label ];
+		}
+
+		return json_encode( [ 'status' => 200, 'data' => $list ] );
+	}
+
+	/**
+	 * Return list of active theme slugs (child and parent if applicable)
+	 *
+	 * @return false|string
+	 */
+	public function get_active_themes() {
+		$themes = [];
+		$child_slug = get_stylesheet();
+		$child     = wp_get_theme( $child_slug );
+		$themes[]  = [ 'slug' => $child_slug, 'label' => $child->get( 'Name' ) ];
+		$parent_slug = get_template();
+		if ( $parent_slug && $parent_slug !== $child_slug ) {
+			$parent = wp_get_theme( $parent_slug );
+			$themes[] = [ 'slug' => $parent_slug, 'label' => $parent->get( 'Name' ) ];
+		}
+
+		return json_encode( [ 'status' => 200, 'data' => $themes ] );
+	}
 
 	/**
 	 * Get post types for JS

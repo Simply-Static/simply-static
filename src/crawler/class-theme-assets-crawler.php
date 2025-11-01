@@ -36,28 +36,23 @@ class Theme_Assets_Crawler extends Crawler {
 	public function detect(): array {
 		$asset_urls = [];
 
-		// Get the active theme
-		$theme = wp_get_theme();
+		$allowed = (array) \Simply_Static\Options::instance()->get( 'themes_to_include' );
+		$allowed = is_array( $allowed ) ? array_filter( array_map( 'strval', $allowed ) ) : [];
 
-		// Get the theme directory path and URL
-		$theme_dir = get_stylesheet_directory();
-		$theme_url = get_stylesheet_directory_uri();
-
-		// Scan the theme directory for asset files
-		$asset_urls = $this->scan_directory_for_assets( $theme_dir, $theme_url );
-
-		// If the theme has a parent, scan the parent theme as well
-		if ( $theme->parent() ) {
-			$parent_theme_dir = get_template_directory();
-			$parent_theme_url = get_template_directory_uri();
-
-			// Only scan the parent theme if it's different from the child theme
-			if ( $parent_theme_dir !== $theme_dir ) {
-				$asset_urls = array_merge(
-					$asset_urls,
-					$this->scan_directory_for_assets( $parent_theme_dir, $parent_theme_url )
-				);
+		$themes = [];
+		$child_slug = get_stylesheet();
+		if ( empty( $allowed ) || in_array( $child_slug, $allowed, true ) ) {
+			$themes[] = [ get_stylesheet_directory(), get_stylesheet_directory_uri() ];
+		}
+		$parent_slug = get_template();
+		if ( $parent_slug && $parent_slug !== $child_slug ) {
+			if ( empty( $allowed ) || in_array( $parent_slug, $allowed, true ) ) {
+				$themes[] = [ get_template_directory(), get_template_directory_uri() ];
 			}
+		}
+
+		foreach ( $themes as [ $dir, $url ] ) {
+			$asset_urls = array_merge( $asset_urls, $this->scan_directory_for_assets( $dir, $url ) );
 		}
 
 		return $asset_urls;
@@ -75,13 +70,22 @@ class Theme_Assets_Crawler extends Crawler {
 		$extensions = [ 'css','js','png','jpg','jpeg','gif','svg','webp','woff','woff2','ttf','eot','otf','ico' ];
 		$skip_dirs  = apply_filters( 'ss_skip_crawl_theme_directories', [ '.git','vendor/bin','vendor/composer','tests' ] );
 
+		$allowed = (array) \Simply_Static\Options::instance()->get( 'themes_to_include' );
+		$allowed = is_array( $allowed ) ? array_filter( array_map( 'strval', $allowed ) ) : [];
+
 		$themes = [];
-		$themes[] = [ get_stylesheet_directory(), get_stylesheet_directory_uri() ];
+		$child_slug = get_stylesheet();
+		if ( empty( $allowed ) || in_array( $child_slug, $allowed, true ) ) {
+			$themes[] = [ get_stylesheet_directory(), get_stylesheet_directory_uri() ];
+		}
+		$parent_slug = get_template();
 		if ( $p = wp_get_theme()->parent() ) {
 			$parent_dir = get_template_directory();
 			$parent_url = get_template_directory_uri();
-			if ( $parent_dir !== $themes[0][0] ) {
-				$themes[] = [ $parent_dir, $parent_url ];
+			if ( $parent_dir !== ( $themes[0][0] ?? '' ) ) {
+				if ( empty( $allowed ) || in_array( $parent_slug, $allowed, true ) ) {
+					$themes[] = [ $parent_dir, $parent_url ];
+				}
 			}
 		}
 
