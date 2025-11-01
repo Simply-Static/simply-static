@@ -588,6 +588,9 @@ function GeneralSettings() {
                                         )}
                                         {themes.length > 0 ? (
                                             <>
+                                                {isPro() &&
+                                                    <Spacer margin={"5px"}/>
+                                                }
                                                 <FormTokenField
                                                     label={__('Themes to Include', 'simply-static')}
                                                     __next40pxDefaultSize
