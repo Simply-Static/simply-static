@@ -1085,6 +1085,12 @@ class Url_Extractor {
 		$destination_url = $this->options->get_destination_url();
 		$url             = Util::strip_protocol_from_url( $url );
 		$url             = str_replace( Util::origin_host(), $destination_url, $url );
+		// Decode only the path component to make URLs more human-friendly while preserving query/fragment
+		$parts = wp_parse_url( $url );
+		if ( is_array( $parts ) && isset( $parts['path'] ) && $parts['path'] !== '' ) {
+			$decoded_path = urldecode( $parts['path'] );
+			$url = str_replace( $parts['path'], $decoded_path, $url );
+		}
 
 		return $url;
 	}
@@ -1099,6 +1105,9 @@ class Url_Extractor {
 	private function convert_relative_url( $url ) {
 		$url = Util::get_path_from_local_url( $url );
 		$url = $this->options->get( 'relative_path' ) . $url;
+		// Decode percent-encoded path segments to create human-friendly URLs that match filesystem paths
+		// Only apply to relative URLs to avoid unexpected behavior for absolute destinations
+		$url = urldecode( $url );
 
 		return $url;
 	}
