@@ -343,7 +343,6 @@ class Diagnostic {
 			'booking-system',
 			'yet-another-stars-rating',
 			'mailpoet',
-			'the-events-calendar',
 			'buddypress',
 			'lifterlms',
 			'wp-job-manager',
