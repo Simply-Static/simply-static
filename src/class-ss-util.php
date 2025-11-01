@@ -13,6 +13,86 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Util {
 
 	/**
+	 * Parse a list of user-provided lines into literals and regex patterns.
+	 * Lines wrapped like /pattern/flags are treated as regex; others as literals.
+	 *
+	 * @param array $lines
+	 * @return array{literals: string[], regex: string[]}
+	 */
+	public static function parse_patterns( array $lines ): array {
+		$literals = [];
+		$regex    = [];
+		foreach ( $lines as $line ) {
+			$line = trim( (string) $line );
+			if ( $line === '' ) { continue; }
+			// Regex if starts and ends with /, allow optional flags like i,m,s,u
+			if ( strlen( $line ) >= 2 && $line[0] === '/' && strrpos( $line, '/' ) !== 0 ) {
+				$last = strrpos( $line, '/' );
+				$pattern = substr( $line, 0, $last + 1 );
+				$flags   = substr( $line, $last + 1 );
+				// Validate pattern
+				$valid = @preg_match( $pattern . $flags, '' );
+				if ( $valid !== false ) {
+					$regex[] = $pattern . $flags;
+					continue;
+				}
+			}
+			$literals[] = $line;
+		}
+		return [ 'literals' => array_values( array_unique( $literals ) ), 'regex' => array_values( array_unique( $regex ) ) ];
+	}
+
+	/**
+	 * Build a candidate URL list used when resolving regex in Additional URLs.
+	 * This is a best-effort set: home/front page, all public posts, term links, author links,
+	 * and common archive/pagination URLs. Filterable and capped by limits.
+	 *
+	 * @return string[]
+	 */
+	public static function candidate_urls_for_regex(): array {
+		$limit = (int) apply_filters( 'ss_regex_candidate_url_limit', 5000 );
+		$urls  = [];
+		$urls[] = home_url( '/' );
+		if ( 'page' === get_option( 'show_on_front' ) ) {
+			$front_id = (int) get_option( 'page_on_front' );
+			if ( $front_id ) {
+				$u = get_permalink( $front_id ); if ( is_string( $u ) ) { $urls[] = $u; }
+			}
+		}
+		// Posts and pages of public types
+		$post_types = get_post_types( [ 'public' => true ], 'names' );
+		unset( $post_types['attachment'] );
+		$post_types = apply_filters( 'simply_static_post_types_to_crawl', $post_types );
+		$q = [ 'post_type' => $post_types, 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids' ];
+		$ids = get_posts( $q );
+		foreach ( (array) $ids as $pid ) {
+			$u = get_permalink( $pid ); if ( is_string( $u ) ) { $urls[] = $u; }
+			if ( count( $urls ) >= $limit ) { break; }
+		}
+		if ( count( $urls ) < $limit ) {
+			// Terms
+			$taxes = get_taxonomies( [ 'public' => true ], 'names' );
+			foreach ( $taxes as $tx ) {
+				$terms = get_terms( [ 'taxonomy' => $tx, 'hide_empty' => true ] );
+				if ( is_wp_error( $terms ) ) { continue; }
+				foreach ( $terms as $term ) {
+					$u = get_term_link( $term ); if ( ! is_wp_error( $u ) ) { $urls[] = $u; }
+					if ( count( $urls ) >= $limit ) { break 2; }
+				}
+			}
+		}
+		if ( count( $urls ) < $limit ) {
+			// Authors
+			$users = get_users( [ 'who' => 'authors' ] );
+			foreach ( (array) $users as $user ) {
+				$u = get_author_posts_url( $user->ID ); if ( is_string( $u ) ) { $urls[] = $u; }
+				if ( count( $urls ) >= $limit ) { break; }
+			}
+		}
+		return array_values( array_unique( $urls ) );
+	}
+
+	/**
 	 * Determine if a URL should be excluded based on settings and patterns.
 	 * Centralized helper used by crawlers and fetch tasks.
 	 *
@@ -42,6 +122,7 @@ class Util {
 		}
 
 		$urls_to_exclude = $opts->get( 'urls_to_exclude' );
+		$regex_patterns  = [];
 		if ( ! empty( $urls_to_exclude ) ) {
 			if ( is_array( $urls_to_exclude ) ) {
 				$excluded_by_option = wp_list_pluck( $urls_to_exclude, 'url' );
@@ -55,7 +136,9 @@ class Util {
 					return $v !== '';
 				} );
 				$excluded_by_option = array_unique( $excluded_by_option );
-				$excluded = array_merge( $excluded, $excluded_by_option );
+				$parsed = self::parse_patterns( $excluded_by_option );
+				$excluded = array_merge( $excluded, $parsed['literals'] );
+				$regex_patterns = $parsed['regex'];
 			}
 		}
 
@@ -69,6 +152,14 @@ class Util {
 			$excluded = array_filter( $excluded );
 		}
 
+		// First test regex patterns if provided
+		foreach ( (array) $regex_patterns as $pattern ) {
+			if ( @preg_match( $pattern, $url ) ) {
+				if ( preg_match( $pattern, $url ) ) { return true; }
+			}
+		}
+
+		// Then test literal contains (case-insensitive)
 		if ( ! empty( $excluded ) ) {
 			foreach ( $excluded as $excludable ) {
 				if ( stripos( $url, $excludable ) !== false ) {

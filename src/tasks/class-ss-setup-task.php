@@ -75,27 +75,25 @@ class Setup_Task extends Task {
 		$static_page->found_on_id = 0;
 		$static_page->save();
 
-		// Convert raw textarea to array but avoid array_unique on the full dataset to reduce peak memory.
+		// Convert raw textarea to array
 		$raw_urls = Util::string_to_array( $additional_urls );
 		$urls     = apply_filters( 'ss_additional_urls', $raw_urls );
+		$parsed   = Util::parse_patterns( (array) $urls );
+		$literals = (array) $parsed['literals'];
+		$regexes  = (array) $parsed['regex'];
 
-		// Process Additional URLs in batches to avoid memory exhaustion with very large lists.
+		// Process literal Additional URLs in batches to avoid memory exhaustion with very large lists.
 		$batch_size = (int) apply_filters( 'ss_additional_urls_batch_size', 50 );
-		if ( $batch_size < 1 ) {
-			$batch_size = 50;
-		}
+		if ( $batch_size < 1 ) { $batch_size = 50; }
 
-		foreach ( array_chunk( (array) $urls, $batch_size ) as $chunk ) {
-			// De-duplicate within each chunk to minimize duplicate operations without loading entire list into memory.
+		foreach ( array_chunk( $literals, $batch_size ) as $chunk ) {
 			$chunk = array_unique( $chunk );
-
 			foreach ( $chunk as $url ) {
 				if ( Util::is_local_url( $url ) ) {
 					Util::debug_log( 'Adding additional URL to queue: ' . $url );
 					$static_page = Page::query()->find_or_initialize_by( 'url', $url );
 					$static_page->set_status_message( __( 'Additional URL', 'simply-static' ) );
 					$static_page->found_on_id = 0;
-					// Assign special handler for text rule files to enable URL replacement in plain text.
 					$path_part = parse_url( $url, PHP_URL_PATH );
 					$lower     = is_string( $path_part ) ? strtolower( $path_part ) : '';
 					if ( $lower === '/robots.txt' || $lower === '/llms.txt' ) {
@@ -104,12 +102,30 @@ class Setup_Task extends Task {
 					$static_page->save();
 				}
 			}
-
-			// Free memory for processed chunk explicitly.
 			unset( $chunk );
-			if ( function_exists( 'gc_collect_cycles' ) ) {
-				gc_collect_cycles();
+			if ( function_exists( 'gc_collect_cycles' ) ) { gc_collect_cycles(); }
+		}
+
+		// Handle regex Additional URLs by matching against a candidate set of site URLs
+		if ( ! empty( $regexes ) ) {
+			$candidates = apply_filters( 'ss_regex_candidate_urls', Util::candidate_urls_for_regex() );
+			$max_matches = (int) apply_filters( 'ss_additional_url_regex_max_matches', 10000 );
+			$added = 0;
+			foreach ( $candidates as $cand ) {
+				foreach ( $regexes as $pattern ) {
+					if ( @preg_match( $pattern, $cand ) && preg_match( $pattern, $cand ) ) {
+						if ( ! Util::is_local_url( $cand ) ) { continue; }
+						$static_page = Page::query()->find_or_initialize_by( 'url', $cand );
+						$static_page->set_status_message( __( 'Additional URL (regex)', 'simply-static' ) );
+						$static_page->found_on_id = 0;
+						$static_page->save();
+						$added++;
+						break; // already matched one pattern
+					}
+				}
+				if ( $added >= $max_matches ) { break; }
 			}
+			Util::debug_log( sprintf( 'Additional URL regex matched %d URLs', $added ) );
 		}
 	}
 
@@ -122,12 +138,15 @@ class Setup_Task extends Task {
 	 */
 	public function add_additional_files_to_db( $additional_files ) {
 		$additional_files = apply_filters( 'ss_additional_files', Util::string_to_array( $additional_files ) );
+		$parsed   = Util::parse_patterns( (array) $additional_files );
+		$file_literals = (array) $parsed['literals'];
+		$file_regexes  = (array) $parsed['regex'];
 
 		// Add robots.txt if exists.
 		$robots_txt = ABSPATH . 'robots.txt';
 
 		if ( file_exists( $robots_txt ) ) {
-			$additional_files[] = $robots_txt;
+			$file_literals[] = $robots_txt;
 		}
 
 		// Add llms.txt if exists.
@@ -173,7 +192,7 @@ class Setup_Task extends Task {
 			$batch_size = 50;
 		}
 
-		foreach ( array_chunk( (array) $additional_files, $batch_size ) as $chunk ) {
+		foreach ( array_chunk( (array) $file_literals, $batch_size ) as $chunk ) {
 			foreach ( $chunk as $item ) {
 				// If item is a file, convert to url and insert into database.
 				// If item is a directory, recursively iterate and grab all files,
@@ -224,6 +243,48 @@ class Setup_Task extends Task {
 			if ( function_exists( 'gc_collect_cycles' ) ) {
 				gc_collect_cycles();
 			}
+		}
+
+		// Resolve regex file/directory patterns by scanning allowed roots
+		if ( ! empty( $file_regexes ) ) {
+			$roots = apply_filters( 'ss_additional_file_regex_roots', [ WP_CONTENT_DIR, untrailingslashit( ABSPATH ) ] );
+			$max_matches = (int) apply_filters( 'ss_additional_file_regex_max_matches', 10000 );
+			$added = 0;
+			$skip_dirs = (array) apply_filters( 'ss_additional_file_regex_skip_dirs', [ '.git', 'node_modules', 'vendor', 'cache', 'tmp', 'temp', basename( $this->options->get_archive_dir() ) ] );
+			foreach ( (array) $roots as $root ) {
+				if ( ! is_dir( $root ) ) { continue; }
+				try {
+					$it = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $root, \RecursiveDirectoryIterator::SKIP_DOTS ) );
+					foreach ( $it as $path => $fileobj ) {
+						$rel = Util::normalize_slashes( (string) $path );
+						// Quick skip: directories we don't want
+						$skip = false;
+						foreach ( $skip_dirs as $sd ) {
+							$sd = trim( $sd, '/' ); if ( $sd === '' ) { continue; }
+							if ( strpos( $rel, '/' . $sd . '/' ) !== false ) { $skip = true; break; }
+						}
+						if ( $skip ) { continue; }
+						foreach ( $file_regexes as $pattern ) {
+							if ( @preg_match( $pattern, $rel ) && preg_match( $pattern, $rel ) ) {
+								if ( is_dir( $path ) ) { continue; }
+								$url = self::convert_path_to_url( $path );
+								$static_page = Page::query()->find_or_initialize_by( 'url', $url );
+								$static_page->set_status_message( __( 'Additional File (regex)', 'simply-static' ) );
+								$base = strtolower( basename( $path ) );
+								$static_page->handler = ( $base === 'robots.txt' || $base === 'llms.txt' ) ? Text_File_Handler::class : Additional_File_Handler::class;
+								$static_page->found_on_id = 0;
+								$static_page->save();
+								$added++;
+								break; // already matched one pattern
+							}
+						}
+						if ( $added >= $max_matches ) { break 2; }
+					}
+				} catch ( \Exception $e ) {
+					Util::debug_log( 'Error scanning for additional file regex: ' . $e->getMessage() );
+				}
+			}
+			Util::debug_log( sprintf( 'Additional file regex matched %d files', $added ) );
 		}
 	}
 

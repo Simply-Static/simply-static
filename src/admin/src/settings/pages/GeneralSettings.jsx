@@ -660,9 +660,9 @@ function GeneralSettings() {
             <CardBody>
                 <TextareaControl
                     label={__('Additional URLs', 'simply-static')}
-                    placeholder={options.home + "/hidden-page/"}
+                    placeholder={options.home + "/hidden-page/\n/\\/blog\\/.*$/i "}
                     __nextHasNoMarginBottom
-                    help={__('If you want to create static copies of pages or files that aren\'t linked to, add the URLs here (one per line).', 'simply-static')}
+                    help={__('You can enter full URLs or regex (wrap with / /). Examples: https://example.com/private/ or /\\/blog\\/.*$/i (one per line).', 'simply-static')}
                     value={settings.additional_urls}
                     onChange={(value) => {
                         updateSetting('additional_urls', value);
@@ -670,9 +670,9 @@ function GeneralSettings() {
                 />
                 <TextareaControl
                     label={__('Additional Files and Directories', 'simply-static')}
-                    placeholder={options.home_path + "additional-directory/\n" + options.home_path + "additional-file.html"}
+                    placeholder={options.home_path + "additional-directory/\n" + options.home_path + "additional-file.html\n/\\.pdf$/i"}
                     __nextHasNoMarginBottom
-                    help={__('Sometimes you may want to include additional files (such as files referenced via AJAX) or directories. Add the paths to those files or directories here (one per line).', 'simply-static')}
+                    help={__('Enter absolute paths or regex (wrap with / /). Examples: /\\.pdf$/i or /wp-content\\/uploads\\/reports\\/.*/ (one per line).', 'simply-static')}
                     value={settings.additional_files}
                     onChange={(value) => {
                         updateSetting('additional_files', value);
@@ -776,9 +776,9 @@ function GeneralSettings() {
             <CardBody>
                 <TextareaControl
                     label={__('Urls to exclude', 'simply-static')}
-                    placeholder={"some-directory\nsome-file.json\n.jpg"}
+                    placeholder={"/some-directory/\n.jpg\n/\\.(pdf|zip)$/i\n/\\/private\\/.*/"}
                     __nextHasNoMarginBottom
-                    help={__('Specify URLs (or parts of URLs) you want to exclude from the processing (one per line).', 'simply-static')}
+                    help={__('You can enter substrings or regex (wrap with / /). Examples: .jpg or /\\.(pdf|zip)$/i or /\/private\/.*/ (one per line).', 'simply-static')}
                     value={settings.urls_to_exclude}
                     onChange={(value) => {
                         updateSetting('urls_to_exclude', value);
