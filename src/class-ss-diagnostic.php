@@ -103,7 +103,7 @@ class Diagnostic {
 
 		// Check for incompatible plugins.
 		$plugins           = get_plugins();
-		$active_plugins    = get_option( 'active_plugins' );
+		$active_plugins    = Util::get_all_active_plugins();
 		$plugin_count      = 0;
 		$activated_plugins = array();
 

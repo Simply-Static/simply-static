@@ -40,8 +40,8 @@ class Plugin_Assets_Crawler extends Crawler {
 		$plugins_url = plugins_url();
 		$plugins_dir = WP_PLUGIN_DIR;
 
-		// Get all active plugins
-		$active_plugins = (array) get_option( 'active_plugins' );
+		// Get all active plugins (including network-activated on multisite)
+		$active_plugins = \Simply_Static\Util::get_all_active_plugins();
 		$allowed = (array) \Simply_Static\Options::instance()->get( 'plugins_to_include' );
 		$allowed = is_array( $allowed ) ? array_filter( array_map( 'strval', $allowed ) ) : [];
 
@@ -84,7 +84,7 @@ class Plugin_Assets_Crawler extends Crawler {
 
 		$plugins_url = plugins_url();
 		$plugins_dir = WP_PLUGIN_DIR;
-		$active_plugins = (array) get_option( 'active_plugins' );
+		$active_plugins = \Simply_Static\Util::get_all_active_plugins();
 		$allowed = (array) \Simply_Static\Options::instance()->get( 'plugins_to_include' );
 		$allowed = is_array( $allowed ) ? array_filter( array_map( 'strval', $allowed ) ) : [];
 

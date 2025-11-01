@@ -13,6 +13,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Util {
 
 	/**
+	 * Get all active plugins for the current site, including network-activated plugins on multisite.
+	 *
+	 * Returns a list of plugin basenames (e.g. akismet/akismet.php).
+	 *
+	 * @return array
+	 */
+	public static function get_all_active_plugins(): array {
+		$active = (array) get_option( 'active_plugins', [] );
+		if ( function_exists( 'is_multisite' ) && is_multisite() ) {
+			// Network-activated plugins are stored as an associative array with plugin file as the key.
+			$network = (array) get_site_option( 'active_sitewide_plugins', [] );
+			$network_plugins = array_keys( $network );
+			$active = array_merge( $active, $network_plugins );
+		}
+		$active = array_values( array_unique( $active ) );
+		sort( $active );
+		return $active;
+	}
+
+	/**
 	 * Compute the target Static Site URL based on Simply Static settings.
 	 * Returns an empty string if it cannot be determined.
 	 *
