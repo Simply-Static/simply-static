@@ -143,7 +143,12 @@ class Beaver_Builder_Crawler extends Crawler {
 	 */
 	protected function enqueue_urls_batch( array $urls ): int {
 		$added = 0;
-		foreach ( $urls as $url ) {
+  foreach ( $urls as $url ) {
+			// Skip URLs that are excluded by settings/patterns
+			if ( \Simply_Static\Util::is_url_excluded( $url ) ) {
+				\Simply_Static\Util::debug_log( sprintf( 'Beaver Builder crawler skipping excluded URL: %s', $url ) );
+				continue;
+			}
 			$static_page = \Simply_Static\Page::query()->find_or_initialize_by( 'url', $url );
 			$static_page->set_status_message( __( 'Beaver Builder Cache', 'simply-static' ) );
 			$static_page->found_on_id = 0;

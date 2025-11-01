@@ -159,7 +159,12 @@ class Divi_Crawler extends Crawler {
 	private function enqueue_urls_batch( array $urls ): int {
 		$added = 0;
 		\Simply_Static\Util::debug_log( sprintf( 'Processing batch of %d URLs for %s crawler', count( $urls ), $this->name ) );
-		foreach ( $urls as $url ) {
+  foreach ( $urls as $url ) {
+  			// Skip URLs that are excluded by settings/patterns
+  			if ( \Simply_Static\Util::is_url_excluded( $url ) ) {
+  				\Simply_Static\Util::debug_log( sprintf( 'Divi crawler skipping excluded URL: %s', $url ) );
+  				continue;
+  			}
 			$static_page = \Simply_Static\Page::query()->find_or_initialize_by( 'url', $url );
 			$static_page->set_status_message( sprintf( __( 'Added by %s Crawler', 'simply-static' ), $this->name ) );
 			$static_page->found_on_id = 0;

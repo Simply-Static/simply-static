@@ -13,6 +13,74 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Util {
 
 	/**
+	 * Determine if a URL should be excluded based on settings and patterns.
+	 * Centralized helper used by crawlers and fetch tasks.
+	 *
+	 * @param string $url
+	 * @return bool
+	 */
+	public static function is_url_excluded( string $url ): bool {
+		$excluded = array( '.php' );
+		$opts = Options::instance();
+
+		// Exclude debug files (.log, .txt) but not robots.txt
+		if ( preg_match( '/\.(log|txt)$/i', $url ) && strpos( $url, 'debug' ) !== false && strpos( $url, 'robots.txt' ) === false ) {
+			return true;
+		}
+
+		// Exclude feeds if add_feeds is not true.
+		if ( ! $opts->get( 'add_feeds' ) ) {
+			// Only exclude WordPress feed-style URLs
+			if ( preg_match( '/(\/feed\/?$|\?feed=|\/feed\/|\/rss\/?$|\/atom\/?$)/i', $url ) ) {
+				return true;
+			}
+		}
+
+		// Exclude Rest API if add_rest_api is not true.
+		if ( ! $opts->get( 'add_rest_api' ) ) {
+			$excluded[] = 'wp-json';
+		}
+
+		$urls_to_exclude = $opts->get( 'urls_to_exclude' );
+		if ( ! empty( $urls_to_exclude ) ) {
+			if ( is_array( $urls_to_exclude ) ) {
+				$excluded_by_option = wp_list_pluck( $urls_to_exclude, 'url' );
+			} else {
+				$excluded_by_option = explode( "\n", $urls_to_exclude );
+			}
+
+			if ( is_array( $excluded_by_option ) ) {
+				// Normalize: trim whitespace/CRLF, drop empties, unique
+				$excluded_by_option = array_filter( array_map( 'trim', $excluded_by_option ), function ( $v ) {
+					return $v !== '';
+				} );
+				$excluded_by_option = array_unique( $excluded_by_option );
+				$excluded = array_merge( $excluded, $excluded_by_option );
+			}
+		}
+
+		if ( apply_filters( 'simply_static_exclude_temp_dir', true ) ) {
+			$excluded[] = self::get_temp_dir_url();
+		}
+
+		$excluded = apply_filters( 'ss_excluded_by_default', $excluded );
+
+		if ( $excluded ) {
+			$excluded = array_filter( $excluded );
+		}
+
+		if ( ! empty( $excluded ) ) {
+			foreach ( $excluded as $excludable ) {
+				if ( stripos( $url, $excludable ) !== false ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Get all active plugins for the current site, including network-activated plugins on multisite.
 	 *
 	 * Returns a list of plugin basenames (e.g. akismet/akismet.php).

@@ -107,7 +107,12 @@ abstract class Crawler {
 		foreach ( $batches as $batch ) {
 			\Simply_Static\Util::debug_log( sprintf( 'Processing batch of %d URLs for %s crawler', count( $batch ), $this->name ) );
 
-			foreach ( $batch as $url ) {
+   foreach ( $batch as $url ) {
+   				// Skip excluded URLs to avoid adding to DB
+   				if ( \Simply_Static\Util::is_url_excluded( $url ) ) {
+   					\Simply_Static\Util::debug_log( sprintf( 'Base crawler skipping excluded URL: %s', $url ) );
+   					continue;
+   				}
 				// Skip selected custom 404 page from regular crawl/export
 				if ( ! empty( $exclude_url ) ) {
 					$normalized = untrailingslashit( $url );

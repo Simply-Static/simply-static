@@ -310,7 +310,11 @@ class Fetch_Urls_Task extends Task {
 	 *
 	 * @return bool
 	 */
-	public function find_excludable( $static_page ) {
+ public function find_excludable( $static_page ) {
+ 		// Delegate exclusion decision to central utility for consistency with crawlers
+ 		if ( \Simply_Static\Util::is_url_excluded( $static_page->url ) ) {
+ 			return true;
+ 		}
 		$excluded = array( '.php' );
 		$url = $static_page->url;
 
@@ -390,6 +394,12 @@ class Fetch_Urls_Task extends Task {
 		}
 		if ( ! empty( $exclude_url ) && 0 === strcasecmp( untrailingslashit( $child_url ), $exclude_url ) ) {
 			Util::debug_log( sprintf( 'Skipping link-follow to custom 404 page URL "%s"', $child_url ) );
+			return;
+		}
+
+		// Do not add excluded URLs to the database at all
+		if ( Util::is_url_excluded( $child_url ) ) {
+			Util::debug_log( sprintf( 'Skipping excluded child URL: %s', $child_url ) );
 			return;
 		}
 
