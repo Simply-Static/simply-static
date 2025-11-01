@@ -40,10 +40,11 @@ class Uploads_Crawler extends Crawler {
 
 		// Get the uploads directory information
 		$uploads_dir = wp_upload_dir();
-		
+
 		// Skip if the uploads directory doesn't exist
 		if ( ! is_dir( $uploads_dir['basedir'] ) ) {
 			\Simply_Static\Util::debug_log( "Uploads directory does not exist: " . $uploads_dir['basedir'] );
+
 			return $media_urls;
 		}
 
@@ -68,21 +69,50 @@ class Uploads_Crawler extends Crawler {
 
 		if ( ! is_dir( $base_dir ) ) {
 			\Simply_Static\Util::debug_log( "Uploads directory does not exist: " . $base_dir );
+
 			return 0;
 		}
 
 		// Media file extensions to look for
 		$media_extensions = [
-			'jpg','jpeg','png','gif','webp','svg','ico',
-			'css','js',
-			'woff','woff2','ttf','otf','eot',
-			'pdf','mp3','mp4','webm','ogg','wav','mov','avi','wmv',
-			'zip','doc','docx','xls','xlsx','ppt','pptx'
+			'jpg',
+			'jpeg',
+			'png',
+			'gif',
+			'webp',
+			'avif',
+			'tiff',
+			'heic',
+			'svg',
+			'ico',
+			'css',
+			'js',
+			'woff',
+			'woff2',
+			'ttf',
+			'otf',
+			'eot',
+			'pdf',
+			'mp3',
+			'mp4',
+			'webm',
+			'ogg',
+			'wav',
+			'mov',
+			'avi',
+			'wmv',
+			'zip',
+			'doc',
+			'docx',
+			'xls',
+			'xlsx',
+			'ppt',
+			'pptx'
 		];
 		$media_extensions = apply_filters( 'ss_uploads_media_extensions', $media_extensions );
 
 		// Directories to skip
-		$skip_dirs = [ '.git','node_modules','cache','tmp','temp' ];
+		$skip_dirs = [ '.git', 'node_modules', 'cache', 'tmp', 'temp' ];
 		$skip_dirs = apply_filters( 'ss_skip_crawl_uploads_directories', $skip_dirs );
 
 		$batch_size = (int) apply_filters( 'simply_static_crawler_batch_size', 100 );
@@ -122,7 +152,7 @@ class Uploads_Crawler extends Crawler {
 				$buffer[] = $url;
 
 				if ( count( $buffer ) >= $batch_size ) {
-					$count += $this->enqueue_urls_batch( $buffer );
+					$count  += $this->enqueue_urls_batch( $buffer );
 					$buffer = [];
 					// Yield to allow other processes to run
 					usleep( 100000 );
@@ -138,6 +168,7 @@ class Uploads_Crawler extends Crawler {
 		}
 
 		\Simply_Static\Util::debug_log( sprintf( 'Uploads crawler added %d URLs (streamed)', $count ) );
+
 		return $count;
 	}
 
@@ -145,6 +176,7 @@ class Uploads_Crawler extends Crawler {
 	 * Enqueue a batch of URLs, returning how many were added.
 	 *
 	 * @param array $urls
+	 *
 	 * @return int
 	 */
 	private function enqueue_urls_batch( array $urls ): int {
@@ -156,7 +188,7 @@ class Uploads_Crawler extends Crawler {
 			$static_page->set_status_message( sprintf( __( 'Added by %s Crawler', 'simply-static' ), $this->name ) );
 			$static_page->found_on_id = 0;
 			$static_page->save();
-			$count++;
+			$count ++;
 		}
 
 		return $count;
@@ -180,6 +212,9 @@ class Uploads_Crawler extends Crawler {
 			'png',
 			'gif',
 			'webp',
+			'avif',
+			'tiff',
+			'heic',
 			'svg',
 			'ico',
 			'css',
@@ -219,6 +254,7 @@ class Uploads_Crawler extends Crawler {
 		// Check if directory exists
 		if ( ! is_dir( $dir ) ) {
 			\Simply_Static\Util::debug_log( "Directory does not exist: $dir" );
+
 			return $urls;
 		}
 
@@ -230,10 +266,10 @@ class Uploads_Crawler extends Crawler {
 			);
 
 			// Process files in batches to prevent memory issues
-			$batch_size = apply_filters( 'simply_static_uploads_batch_size', 500 );
-			$file_count = 0;
+			$batch_size  = apply_filters( 'simply_static_uploads_batch_size', 500 );
+			$file_count  = 0;
 			$batch_count = 0;
-			$file_batch = [];
+			$file_batch  = [];
 
 			foreach ( $iterator as $file ) {
 				// Skip directories
@@ -242,20 +278,20 @@ class Uploads_Crawler extends Crawler {
 				}
 
 				$file_batch[] = $file;
-				$file_count++;
+				$file_count ++;
 
 				// Process batch when it reaches the batch size
 				if ( $file_count % $batch_size === 0 ) {
-					$batch_count++;
+					$batch_count ++;
 					\Simply_Static\Util::debug_log( "Processing uploads batch $batch_count with $batch_size files" );
-					$urls = array_merge( $urls, $this->process_file_batch( $file_batch, $dir, $url_base, $skip_dirs, $media_extensions ) );
+					$urls       = array_merge( $urls, $this->process_file_batch( $file_batch, $dir, $url_base, $skip_dirs, $media_extensions ) );
 					$file_batch = []; // Reset batch
 				}
 			}
 
 			// Process any remaining files
 			if ( ! empty( $file_batch ) ) {
-				$batch_count++;
+				$batch_count ++;
 				\Simply_Static\Util::debug_log( "Processing final uploads batch $batch_count with " . count( $file_batch ) . " files" );
 				$urls = array_merge( $urls, $this->process_file_batch( $file_batch, $dir, $url_base, $skip_dirs, $media_extensions ) );
 			}
@@ -302,7 +338,7 @@ class Uploads_Crawler extends Crawler {
 			$extension = strtolower( pathinfo( $relative_path, PATHINFO_EXTENSION ) );
 			if ( in_array( $extension, $media_extensions, true ) ) {
 				// Convert the file path to a URL and join safely
-				$url = \Simply_Static\Util::safe_join_url( $url_base, $relative_path );
+				$url    = \Simply_Static\Util::safe_join_url( $url_base, $relative_path );
 				$urls[] = $url;
 			}
 		}
