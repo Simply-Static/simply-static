@@ -726,6 +726,18 @@ class Url_Extractor {
 				$html = $this->decode_numeric_entities_safely( $html );
 			}
 
+			// Optionally decode named HTML entities (e.g., &auml; &ouml;) to UTF-8 for non-ASCII codepoints.
+			$decode_named_entities = apply_filters( 'ss_decode_named_entities_after_dom', true, $this );
+			if ( $decode_named_entities ) {
+				$html = $this->decode_named_entities_safely( $html );
+			}
+
+			// Optionally fix common UTF-8 mojibake sequences (e.g., "FÃ¶r" -> "För").
+			$fix_mojibake = apply_filters( 'ss_fix_mojibake_after_dom', true, $this );
+			if ( $fix_mojibake ) {
+				$html = $this->fix_mojibake_sequences( $html );
+			}
+
 			return $html;
 		}
 	}
@@ -758,6 +770,153 @@ class Url_Extractor {
 		}, $html );
 
 		return $html;
+	}
+
+	/**
+	 * Decode named (non-numeric) HTML entities to UTF-8 when they represent non-ASCII characters.
+	 * Examples: &auml; → ä, &ouml; → ö. Structural ASCII entities like &amp;, &lt;, &gt; remain encoded.
+	 *
+	 * @param string $html
+	 * @return string
+	 */
+	private function decode_named_entities_safely( $html ) {
+		return preg_replace_callback( '/&([a-zA-Z][a-zA-Z0-9]+);/u', function ( $m ) {
+			$entity  = '&' . $m[1] . ';';
+			$decoded = html_entity_decode( $entity, ENT_NOQUOTES, 'UTF-8' );
+			// If decoding didn't change anything, keep as-is (unknown entity or already plain text)
+			if ( $decoded === $entity ) {
+				return $m[0];
+			}
+			// Only replace when it decodes to non-ASCII char(s). If multiple characters, ensure all are non-ASCII.
+			$len = strlen( $decoded );
+			if ( $len === 0 ) {
+				return $m[0];
+			}
+			// Iterate through UTF-8 sequence(s) and ensure at least one codepoint >=128 and none are invalid.
+			$all_ascii = true;
+			$pos = 0;
+			while ( $pos < $len ) {
+				$cp_info = $this->utf8_next_codepoint( $decoded, $pos );
+				if ( $cp_info === null ) {
+					return $m[0]; // invalid sequence, keep entity
+				}
+				list( $cp, $next_pos ) = $cp_info;
+				if ( $cp >= 128 ) {
+					$all_ascii = false;
+				}
+				$pos = $next_pos;
+			}
+			if ( $all_ascii ) {
+				return $m[0]; // keep ASCII structural entities like &amp; &lt; &gt; etc.
+			}
+			return $decoded;
+		}, $html );
+	}
+
+	/**
+	 * Read next UTF-8 code point starting at byte offset $pos. Returns array [codepoint, next_pos] or null on error.
+	 *
+	 * @param string $s
+	 * @param int $pos
+	 * @return array|null
+	 */
+	private function utf8_next_codepoint( $s, $pos ) {
+		$len = strlen( $s );
+		if ( $pos >= $len ) return null;
+		$b1 = ord( $s[ $pos ] );
+		if ( $b1 < 0x80 ) {
+			return [ $b1, $pos + 1 ];
+		}
+		if ( ( $b1 & 0xE0 ) === 0xC0 ) {
+			if ( $pos + 1 >= $len ) return null;
+			$b2 = ord( $s[ $pos + 1 ] );
+			if ( ( $b2 & 0xC0 ) !== 0x80 ) return null;
+			$cp = ( ( $b1 & 0x1F ) << 6 ) | ( $b2 & 0x3F );
+			return [ $cp, $pos + 2 ];
+		}
+		if ( ( $b1 & 0xF0 ) === 0xE0 ) {
+			if ( $pos + 2 >= $len ) return null;
+			$b2 = ord( $s[ $pos + 1 ] );
+			$b3 = ord( $s[ $pos + 2 ] );
+			if ( ( $b2 & 0xC0 ) !== 0x80 || ( $b3 & 0xC0 ) !== 0x80 ) return null;
+			$cp = ( ( $b1 & 0x0F ) << 12 ) | ( ( $b2 & 0x3F ) << 6 ) | ( $b3 & 0x3F );
+			return [ $cp, $pos + 3 ];
+		}
+		if ( ( $b1 & 0xF8 ) === 0xF0 ) {
+			if ( $pos + 3 >= $len ) return null;
+			$b2 = ord( $s[ $pos + 1 ] );
+			$b3 = ord( $s[ $pos + 2 ] );
+			$b4 = ord( $s[ $pos + 3 ] );
+			if ( ( $b2 & 0xC0 ) !== 0x80 || ( $b3 & 0xC0 ) !== 0x80 || ( $b4 & 0xC0 ) !== 0x80 ) return null;
+			$cp = ( ( $b1 & 0x07 ) << 18 ) | ( ( $b2 & 0x3F ) << 12 ) | ( ( $b3 & 0x3F ) << 6 ) | ( $b4 & 0x3F );
+			return [ $cp, $pos + 4 ];
+		}
+		return null; // invalid leading byte
+	}
+
+	/**
+	 * Fix common UTF-8 mojibake sequences (UTF-8 interpreted as ISO-8859-1) for Western/Nordic languages.
+	 * This is a conservative mapping covering the most frequent cases seen in exports.
+	 *
+	 * @param string $html
+	 * @return string
+	 */
+	private function fix_mojibake_sequences( $html ) {
+		$map = array(
+			// Swedish/Finnish/Nordic letters
+			"Ã¤" => "ä",
+			"Ã„" => "Ä",
+			"Ã¶" => "ö",
+			"Ã–" => "Ö",
+			"Ã¥" => "å",
+			"Ã…" => "Å",
+			"Ã¼" => "ü",
+			"Ãœ" => "Ü",
+			"Ã¸" => "ø",
+			"Ã˜" => "Ø",
+			"Ã¦" => "æ",
+			"Ã†" => "Æ",
+			"Ã±" => "ñ",
+			"Ã‘" => "Ñ",
+			"Ã§" => "ç",
+			// Common accented Latin letters
+			"Ã©" => "é",
+			"Ã¨" => "è",
+			"Ãª" => "ê",
+			"Ã«" => "ë",
+			"Ã¡" => "á",
+			"Ã " => "à",
+			"Ã¢" => "â",
+			"Ã³" => "ó",
+			"Ã²" => "ò",
+			"Ã´" => "ô",
+			"Ã­" => "í",
+			"Ãì" => "ì",
+			"Ã®" => "î",
+			"Ã¯" => "ï",
+			"Ãº" => "ú",
+			"Ã¹" => "ù",
+			"Ã»" => "û",
+			// Punctuation and symbols that often get prefixed by Â (non-breaking space issues)
+			"Â»" => "»",
+			"Â«" => "«",
+			"Â©" => "©",
+			"Â®" => "®",
+			"Â±" => "±",
+			"Â·" => "·",
+			"Â·" => "·",
+			"Â“" => "“",
+			"Â”" => "”",
+			"Â‘" => "‘",
+			"Â’" => "’",
+			"Â–" => "–",
+			"Â—" => "—",
+			"Â™" => "™",
+			"Â " => " ", // NBSP shown as 'Â ' becomes a normal space.
+		);
+
+		$map = apply_filters( 'ss_mojibake_map', $map, $this );
+		return strtr( $html, $map );
 	}
 
 	/**
@@ -900,7 +1059,7 @@ class Url_Extractor {
 
 	/**
 	 * Check whether a given string is a valid JSON representation.
-	 * 
+	 *
 	 * This is a legacy method, use is_valid_json() instead.
 	 *
 	 * @deprecated Use is_valid_json() instead
@@ -1085,12 +1244,6 @@ class Url_Extractor {
 		$destination_url = $this->options->get_destination_url();
 		$url             = Util::strip_protocol_from_url( $url );
 		$url             = str_replace( Util::origin_host(), $destination_url, $url );
-		// Decode only the path component to make URLs more human-friendly while preserving query/fragment
-		$parts = wp_parse_url( $url );
-		if ( is_array( $parts ) && isset( $parts['path'] ) && $parts['path'] !== '' ) {
-			$decoded_path = urldecode( $parts['path'] );
-			$url = str_replace( $parts['path'], $decoded_path, $url );
-		}
 
 		return $url;
 	}
@@ -1105,9 +1258,6 @@ class Url_Extractor {
 	private function convert_relative_url( $url ) {
 		$url = Util::get_path_from_local_url( $url );
 		$url = $this->options->get( 'relative_path' ) . $url;
-		// Decode percent-encoded path segments to create human-friendly URLs that match filesystem paths
-		// Only apply to relative URLs to avoid unexpected behavior for absolute destinations
-		$url = urldecode( $url );
 
 		return $url;
 	}
