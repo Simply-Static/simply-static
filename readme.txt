@@ -4,7 +4,7 @@ Tags: static site generator, performance, security, jamstack
 Requires at least: 6.2
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag:  3.4.8
+Stable tag:  3.5.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -51,12 +51,12 @@ I highly recommend not to use another tool for local development if you are not 
 
 Static Studio is our all-in-one Static WordPress cloud hosting solution - here is why you want it:
 
-* Secure WordPress hosting (Firewall, NGINX-powered, 24/7 monitoring and all the best practices
+* Secure WordPress hosting (locked-down WP, Firewall, NGINX-powered, 24/7 monitoring)
 * Fast static site hosting via BunnyCDN (global distribution, low TTFB, caching, minification)
 * Secure logins via SSO, 2FA protection and team management
 * Automated (and free) migration for all your existing sites
 * Backups, SSL, unlimited file storage and 1TB bandwidth per site
-* WP-CLI, SSH, SFTP and active hands-on code support
+* WP-CLI, SSH, SFTP and hands-on code support
 
 [Start your 7-day free trial](https://simplystatic.com/simply-static-studio/)
 
@@ -259,6 +259,17 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 3. Diagnostics
 
 == Changelog ==
+
+= 3.5.0 =
+
+* better UTF-8 and entity handling (content + URLs)
+* added network-activated plugins to crawler support
+* added ability to exclude specific plugins + themes in Enhanced Crawl (pro-only)
+* added support for .avif, .tiff and .heic image files
+* regex support for Include/Exclude settings
+* URL-based export cancellation via cancel-export=true parameter
+* llms.txt support for AIO SEO and Yoast SEO integration
+* fixed logging loop for Elementor integration
 
 = 3.4.8 =
 
