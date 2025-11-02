@@ -45,6 +45,9 @@ class Admin_Settings {
 		// Ensure the "View Site" link points to the static site even if the admin bar integration is disabled.
 		add_action( 'admin_bar_menu', array( $this, 'filter_view_site_link' ), 200 );
 
+		// Handle cancel via URL param as a fallback when REST API is unavailable.
+		add_action( 'admin_init', array( $this, 'maybe_handle_cancel_export' ) );
+
 		$this->failed_tests = intval( get_transient( 'simply_static_failed_tests' ) );
 
 		Admin_Meta::get_instance();
@@ -300,6 +303,41 @@ class Admin_Settings {
 		?>
         <div id="simplystatic-settings"></div>
 		<?php
+	}
+
+	/**
+	 * Fallback: handle cancel export via URL param when REST API is unavailable.
+	 * Example: /wp-admin/admin.php?page=simply-static-generate&cancel-export=true
+	 */
+	public function maybe_handle_cancel_export() {
+		// Only run in admin and on our Generate page.
+		if ( ! is_admin() ) {
+			return;
+		}
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+		if ( 'simply-static-generate' !== $page ) {
+			return;
+		}
+		$cancel = isset( $_GET['cancel-export'] ) ? sanitize_text_field( wp_unslash( $_GET['cancel-export'] ) ) : '';
+		if ( 'true' !== $cancel ) {
+			return;
+		}
+
+		// Permission check mirrors access to the Generate page.
+		if ( ! current_user_can( apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ) ) ) {
+			return;
+		}
+
+		// Trigger same actions as REST endpoint without relying on REST.
+		$blog_id = 0;
+		do_action( 'ss_before_perform_archive_action', $blog_id, 'cancel', Plugin::instance()->get_archive_creation_job() );
+		Plugin::instance()->cancel_static_export();
+		do_action( 'ss_after_perform_archive_action', $blog_id, 'cancel', Plugin::instance()->get_archive_creation_job() );
+
+		// Redirect to remove the query parameter and avoid re-triggering on refresh.
+		$redirect_url = remove_query_arg( 'cancel-export' );
+		wp_safe_redirect( $redirect_url );
+		exit;
 	}
 
 	/**
