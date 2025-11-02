@@ -25,6 +25,7 @@ class AIO_SEO_Integration extends Integration {
         add_filter( 'aioseo_unrecognized_allowed_query_args', [ $this, 'allowed_query_args' ] );
 		add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_pages' ] );
 		add_filter( 'ssp_single_export_additional_urls', [ $this, 'add_sitemap_url' ] );
+		add_filter( 'ss_additional_files', [ $this, 'maybe_add_text_files' ] );
 
 		$this->include_file( 'handlers/class-ss-aio-seo-sitemap-handler.php' );
 	}
@@ -193,4 +194,149 @@ class AIO_SEO_Integration extends Integration {
 	public function dependency_active() {
 		return defined( 'AIOSEO_FILE' );
 	}
+
+	/**
+	 * Maybe add robots.txt and llms.txt to additional files when AIOSEO is active.
+	 *
+	 * We fetch public endpoints and write temporary files into the archive so Simply Static can export them.
+	 *
+	 * @param array $additional_files
+	 * @return array
+	 */
+	public function maybe_add_text_files( $additional_files ) {
+		$additional_files = is_array( $additional_files ) ? $additional_files : [];
+
+		$robots_physical = ABSPATH . 'robots.txt';
+		$llms_physical   = ABSPATH . 'llms.txt';
+
+		// If a physical llms.txt exists in the WP root, ensure it is exported with URL replacements.
+		if ( file_exists( $llms_physical ) ) {
+			$body = @file_get_contents( $llms_physical );
+			if ( is_string( $body ) && $body !== '' ) {
+				$body = $this->replace_urls_in_text( $body );
+				$path = $this->write_archive_file( 'llms.txt', $body );
+				if ( $path ) {
+					$this->run_text_file_handler( 'llms.txt' );
+				}
+			}
+		}
+
+		$archive_dir = Options::instance()->get_archive_dir();
+		if ( ! file_exists( $archive_dir ) ) {
+			wp_mkdir_p( $archive_dir );
+		}
+
+		// robots.txt via public endpoint
+		if ( ! file_exists( $robots_physical ) ) {
+			$robots_url = home_url( '/robots.txt' );
+			$response   = wp_remote_get( $robots_url, [ 'timeout' => 20 ] );
+			if ( ! is_wp_error( $response ) && (int) wp_remote_retrieve_response_code( $response ) === 200 ) {
+				$body = wp_remote_retrieve_body( $response );
+				$body = is_string( $body ) ? $body : '';
+				if ( $body !== '' && stripos( $body, '<html' ) === false ) {
+					$body = $this->replace_urls_in_text( $body );
+					$path = $this->write_archive_file( 'robots.txt', $body );
+					if ( $path ) {
+						$this->run_text_file_handler( 'robots.txt' );
+					}
+				}
+			}
+		}
+
+		// llms.txt via public endpoint (if plugin provides it)
+		if ( ! file_exists( $llms_physical ) ) {
+			$llms_url = home_url( '/llms.txt' );
+			$response = wp_remote_get( $llms_url, [ 'timeout' => 20 ] );
+			if ( ! is_wp_error( $response ) && (int) wp_remote_retrieve_response_code( $response ) === 200 ) {
+				$body = wp_remote_retrieve_body( $response );
+				$body = is_string( $body ) ? $body : '';
+				if ( $body !== '' && stripos( $body, '<html' ) === false ) {
+					$body = $this->replace_urls_in_text( $body );
+					$path = $this->write_archive_file( 'llms.txt', $body );
+					if ( $path ) {
+						$this->run_text_file_handler( 'llms.txt' );
+					}
+				}
+			}
+		}
+
+		return $additional_files;
+	}
+
+	/**
+	 * Write a file directly into the current archive directory.
+	 *
+	 * @param string $filename
+	 * @param string $content
+	 * @return string|null
+	 */
+	private function write_archive_file( $filename, $content ) {
+		$archive_dir = Options::instance()->get_archive_dir();
+		if ( empty( $archive_dir ) ) {
+			return null;
+		}
+		if ( ! file_exists( $archive_dir ) ) {
+			wp_mkdir_p( $archive_dir );
+		}
+		$path = trailingslashit( $archive_dir ) . ltrim( $filename, '/\\' );
+		$result = @file_put_contents( $path, $content );
+		return $result !== false ? $path : null;
+	}
+
+	/**
+	 * Replace origin URLs with destination URL inside a plain-text string.
+	 *
+	 * @param string $content
+	 * @return string
+	 */
+	private function replace_urls_in_text( $content ) {
+		if ( ! is_string( $content ) || $content === '' ) {
+			return $content;
+		}
+		$options         = Options::instance();
+		$destination_url = rtrim( $options->get_destination_url(), '/' );
+		if ( empty( $destination_url ) ) {
+			return $content;
+		}
+		$origin_host  = Util::origin_host();
+		$host_no_port = preg_replace( '/:\\d+$/', '', (string) $origin_host );
+		$pattern      = '/(?:https?:)?\\/\\/' . preg_quote( $host_no_port, '/' ) . '(?::\\d+)?/i';
+		$replaced     = preg_replace( $pattern, $destination_url, $content );
+
+		$home_http  = set_url_scheme( home_url( '/' ), 'http' );
+		$home_https = set_url_scheme( home_url( '/' ), 'https' );
+		$home_proto = preg_replace( '#^https?:#i', '', $home_https );
+		$search    = [ rtrim( $home_http, '/' ), rtrim( $home_https, '/' ), rtrim( $home_proto, '/' ) ];
+		$replaced2 = str_replace( $search, rtrim( $destination_url, '/' ), $replaced );
+		return $replaced2;
+	}
+
+	/**
+	 * Run the Text_File_Handler on a relative file within the archive directory.
+	 *
+	 * @param string $relative_filename
+	 * @return void
+	 */
+	private function run_text_file_handler( $relative_filename ) {
+		if ( ! class_exists( __NAMESPACE__ . '\\Text_File_Handler', false ) ) {
+			$this->include_file( 'handlers/class-ss-page-handler.php' );
+			$this->include_file( 'handlers/class-ss-text-file-handler.php' );
+		}
+		if ( ! class_exists( __NAMESPACE__ . '\\Page', false ) ) {
+			$this->include_file( 'models/class-ss-page.php' );
+		}
+		try {
+			$archive_dir = Options::instance()->get_archive_dir();
+			if ( empty( $archive_dir ) ) {
+				return;
+			}
+			$page = new Page();
+			$page->file_path = ltrim( $relative_filename, '/\\' );
+			$handler = new Text_File_Handler( $page );
+			$handler->after_file_fetch( $archive_dir );
+		} catch ( \Throwable $e ) {
+			// silent
+		}
+	}
+
 }
