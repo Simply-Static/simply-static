@@ -80,7 +80,14 @@ class Create_Zip_Archive_Task extends Task {
 		// Now we are creating a new zip file.
 		$archive_dir  = $this->options->get_archive_dir();
 		$zip_filename = untrailingslashit( $archive_dir ) . '.zip';
-		$zip_archive  = new \PclZip( $zip_filename );
+		$zip_filename = apply_filters( 'ss_zip_filename', $zip_filename, $archive_dir, $this->options );
+
+		// Ensure target directory exists in case a custom path points elsewhere
+		$zip_dir = dirname( $zip_filename );
+		if ( ! is_dir( $zip_dir ) ) {
+			wp_mkdir_p( $zip_dir );
+		}
+		$zip_archive = new \PclZip( $zip_filename );
 
 		Util::debug_log( 'Fetching list of files to include in zip' );
 
