@@ -203,7 +203,7 @@ class Url_Extractor {
 		}
 
 		// Treat as CSS either by content-type or by file extension fallback (handles servers sending wrong or missing headers)
-		$looks_like_css = $this->static_page->is_type( 'css' ) || ( isset( $this->static_page->file_path ) && substr( $this->static_page->file_path, -4 ) === '.css' );
+		$looks_like_css = $this->static_page->is_type( 'css' ) || ( isset( $this->static_page->file_path ) && substr( $this->static_page->file_path, - 4 ) === '.css' );
 		if ( $looks_like_css ) {
 			$this->save_body( $this->extract_and_replace_urls_in_css( $this->get_body() ) );
 		}
@@ -240,15 +240,16 @@ class Url_Extractor {
 	 * Check if a string is valid JSON
 	 *
 	 * @param string $string The string to check
+	 *
 	 * @return bool Whether the string is valid JSON
 	 */
-	private function is_valid_json($string) {
-		if (!is_string($string)) {
+	private function is_valid_json( $string ) {
+		if ( ! is_string( $string ) ) {
 			return false;
 		}
 
-		$decoded_value = htmlspecialchars_decode($string);
-		$json_data = json_decode($decoded_value, true);
+		$decoded_value = htmlspecialchars_decode( $string );
+		$json_data     = json_decode( $decoded_value, true );
 
 		return $json_data !== null;
 	}
@@ -259,33 +260,34 @@ class Url_Extractor {
 	 * @return mixed|null
 	 */
 	protected function can_preserve_attributes() {
-		return apply_filters(' ss_extract_html_preserve_attributes', true );
+		return apply_filters( ' ss_extract_html_preserve_attributes', true );
 	}
 
 	/**
 	 * Preserve attributes in HTML content
 	 *
 	 * @param string $content The HTML content
+	 *
 	 * @return array An array containing the modified content and the preserved JSON attributes
 	 */
-	private function preserve_attributes($content) {
+	private function preserve_attributes( $content ) {
 
 		if ( ! $this->can_preserve_attributes() ) {
 			return $content;
 		}
 
 		$entities = [
-			'quote' => '&quot;',
-			'apos' => '&apos;',
-			'lessthan' => '&lt;',
+			'quote'     => '&quot;',
+			'apos'      => '&apos;',
+			'lessthan'  => '&lt;',
 			'greatthan' => '&gt;',
 			'ampersand' => '&amp;'
 		];
 
-		foreach ($entities as $placeholder_name => $entity) {
-			if (strpos($content, $entity) !== false) {
-				$placeholder =  strtoupper( $placeholder_name ) . "_PLACEHOLDER";
-				$content = str_replace($entity, $placeholder, $content);
+		foreach ( $entities as $placeholder_name => $entity ) {
+			if ( strpos( $content, $entity ) !== false ) {
+				$placeholder = strtoupper( $placeholder_name ) . "_PLACEHOLDER";
+				$content     = str_replace( $entity, $placeholder, $content );
 			}
 		}
 
@@ -300,24 +302,24 @@ class Url_Extractor {
 	 *
 	 * @return string The HTML content with restored attributes
 	 */
-	private function restore_attributes($content) {
+	private function restore_attributes( $content ) {
 
 		if ( ! $this->can_preserve_attributes() ) {
 			return $content;
 		}
 
 		$entities = [
-			'quote' => '&quot;',
-			'apos' => '&apos;',
-			'lessthan' => '&lt;',
+			'quote'     => '&quot;',
+			'apos'      => '&apos;',
+			'lessthan'  => '&lt;',
 			'greatthan' => '&gt;',
 			'ampersand' => '&amp;'
 		];
 
-		foreach ($entities as $placeholder_name => $entity) {
-			$placeholder =  strtoupper( $placeholder_name ) . "_PLACEHOLDER";
-			if (strpos($content, $placeholder) !== false) {
-				$content = str_replace($placeholder, $entity, $content);
+		foreach ( $entities as $placeholder_name => $entity ) {
+			$placeholder = strtoupper( $placeholder_name ) . "_PLACEHOLDER";
+			if ( strpos( $content, $placeholder ) !== false ) {
+				$content = str_replace( $placeholder, $entity, $content );
 			}
 		}
 
@@ -344,7 +346,7 @@ class Url_Extractor {
 		$response_body   = $this->get_body();
 
 		// Preserve JSON attributes before replacement
-		$response_body = $this->preserve_attributes($response_body);
+		$response_body = $this->preserve_attributes( $response_body );
 
 		// replace wp_json_encode'd urls, as used by WP's `concatemoji`
 		$response_body = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
@@ -353,7 +355,7 @@ class Url_Extractor {
 		$response_body = preg_replace( '/(https?%3A)?%2F%2F' . addcslashes( urlencode( Util::origin_host() ), '.' ) . '/i', urlencode( $destination_url ), $response_body );
 
 		// Restore preserved JSON attributes
-		$response_body = $this->restore_attributes($response_body);
+		$response_body = $this->restore_attributes( $response_body );
 
 		$this->save_body( $response_body );
 	}
@@ -369,7 +371,7 @@ class Url_Extractor {
 		$destination_url = $this->options->get_destination_url();
 
 		// Preserve JSON attributes before replacement
-		$content = $this->preserve_attributes($content);
+		$content = $this->preserve_attributes( $content );
 
 		// replace any instance of the origin url, whether it starts with https://, http://, or //.
 		$content = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $destination_url, $content );
@@ -379,7 +381,7 @@ class Url_Extractor {
 		$content = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $content );
 
 		// Restore preserved JSON attributes
-		$content = $this->restore_attributes($content);
+		$content = $this->restore_attributes( $content );
 
 		return $content;
 	}
@@ -433,7 +435,7 @@ class Url_Extractor {
 				$attribute_value = $tag->getAttribute( $attribute_name );
 
 				// Skip processing any attribute that contains valid JSON to prevent breaking JSON structure
-				if ( $this->is_valid_json($attribute_value) ) {
+				if ( $this->is_valid_json( $attribute_value ) ) {
 					// This attribute contains JSON, don't process it as a URL
 					continue;
 				}
@@ -486,15 +488,16 @@ class Url_Extractor {
 		$match_tags  = apply_filters( 'ss_match_tags', self::$match_tags );
 
 		// Preserve JSON attributes before processing
-		$html_string = $this->preserve_attributes($html_string);
+		$html_string = $this->preserve_attributes( $html_string );
 
 		// Extract and preserve non-conditional HTML comments to avoid altering their content (e.g., commented-out scripts)
-		$html_comments = [];
-		$comment_placeholder = '<!-- COMMENT_PLACEHOLDER_%d -->';
+		$html_comments                 = [];
+		$comment_placeholder           = '<!-- COMMENT_PLACEHOLDER_%d -->';
 		$non_conditional_comment_regex = '/<!--(?!\s*\[if).*?-->/s';
-		$html_string = preg_replace_callback( $non_conditional_comment_regex, function( $matches ) use ( &$html_comments, &$comment_placeholder ) {
-			$index = count( $html_comments );
+		$html_string                   = preg_replace_callback( $non_conditional_comment_regex, function ( $matches ) use ( &$html_comments, &$comment_placeholder ) {
+			$index           = count( $html_comments );
 			$html_comments[] = $matches[0];
+
 			return sprintf( $comment_placeholder, $index );
 		}, $html_string );
 
@@ -711,212 +714,17 @@ class Url_Extractor {
 			// Restore non-conditional comments exactly as they were
 			$html = preg_replace_callback( '/<!-- COMMENT_PLACEHOLDER_(\d+) -->/', function ( $matches ) use ( $html_comments ) {
 				$index = (int) $matches[1];
+
 				return isset( $html_comments[ $index ] ) ? $html_comments[ $index ] : '';
 			}, $html );
 
 			// Restore JSON attributes
-			$html = $this->restore_attributes($html);
-
+			$html = $this->restore_attributes( $html );
+			$html = html_entity_decode( $html );
 			$html = apply_filters( 'ss_html_after_restored_attributes', $html, $this );
-
-			// Optionally decode numeric HTML entities (>=128) back into UTF-8 characters.
-			// This helps preserve non-Latin characters (e.g., Japanese) that libxml may output as entities.
-			$decode_numeric_entities = apply_filters( 'ss_decode_numeric_entities_after_dom', true, $this );
-			if ( $decode_numeric_entities ) {
-				$html = $this->decode_numeric_entities_safely( $html );
-			}
-
-			// Optionally decode named HTML entities (e.g., &auml; &ouml;) to UTF-8 for non-ASCII codepoints.
-			$decode_named_entities = apply_filters( 'ss_decode_named_entities_after_dom', true, $this );
-			if ( $decode_named_entities ) {
-				$html = $this->decode_named_entities_safely( $html );
-			}
-
-			// Optionally fix common UTF-8 mojibake sequences (e.g., "FÃ¶r" -> "För").
-			$fix_mojibake = apply_filters( 'ss_fix_mojibake_after_dom', true, $this );
-			if ( $fix_mojibake ) {
-				$html = $this->fix_mojibake_sequences( $html );
-			}
 
 			return $html;
 		}
-	}
-
-	/**
-	 * Decode numeric HTML entities (decimal and hex) with code points >= 128 to UTF-8.
-	 * This avoids decoding structural entities like <, >, &, etc., while restoring
-	 * non-Latin characters (e.g., Japanese) that DOMDocument may output as entities.
-	 *
-	 * @param string $html
-	 * @return string
-	 */
-	private function decode_numeric_entities_safely( $html ) {
-		// Decode decimal numeric entities
-		$html = preg_replace_callback( '/&#(\d+);/u', function ( $m ) {
-			$code = intval( $m[1] );
-			if ( $code < 128 ) {
-				return $m[0]; // keep ASCII entities intact (e.g., &#60;)
-			}
-			return html_entity_decode( '&#' . $code . ';', ENT_NOQUOTES, 'UTF-8' );
-		}, $html );
-
-		// Decode hexadecimal numeric entities
-		$html = preg_replace_callback( '/&#x([0-9a-fA-F]+);/u', function ( $m ) {
-			$code = hexdec( $m[1] );
-			if ( $code < 128 ) {
-				return $m[0];
-			}
-			return html_entity_decode( '&#x' . strtoupper( $m[1] ) . ';', ENT_NOQUOTES, 'UTF-8' );
-		}, $html );
-
-		return $html;
-	}
-
-	/**
-	 * Decode named (non-numeric) HTML entities to UTF-8 when they represent non-ASCII characters.
-	 * Examples: &auml; → ä, &ouml; → ö. Structural ASCII entities like &amp;, &lt;, &gt; remain encoded.
-	 *
-	 * @param string $html
-	 * @return string
-	 */
-	private function decode_named_entities_safely( $html ) {
-		return preg_replace_callback( '/&([a-zA-Z][a-zA-Z0-9]+);/u', function ( $m ) {
-			$entity  = '&' . $m[1] . ';';
-			$decoded = html_entity_decode( $entity, ENT_NOQUOTES, 'UTF-8' );
-			// If decoding didn't change anything, keep as-is (unknown entity or already plain text)
-			if ( $decoded === $entity ) {
-				return $m[0];
-			}
-			// Only replace when it decodes to non-ASCII char(s). If multiple characters, ensure all are non-ASCII.
-			$len = strlen( $decoded );
-			if ( $len === 0 ) {
-				return $m[0];
-			}
-			// Iterate through UTF-8 sequence(s) and ensure at least one codepoint >=128 and none are invalid.
-			$all_ascii = true;
-			$pos = 0;
-			while ( $pos < $len ) {
-				$cp_info = $this->utf8_next_codepoint( $decoded, $pos );
-				if ( $cp_info === null ) {
-					return $m[0]; // invalid sequence, keep entity
-				}
-				list( $cp, $next_pos ) = $cp_info;
-				if ( $cp >= 128 ) {
-					$all_ascii = false;
-				}
-				$pos = $next_pos;
-			}
-			if ( $all_ascii ) {
-				return $m[0]; // keep ASCII structural entities like &amp; &lt; &gt; etc.
-			}
-			return $decoded;
-		}, $html );
-	}
-
-	/**
-	 * Read next UTF-8 code point starting at byte offset $pos. Returns array [codepoint, next_pos] or null on error.
-	 *
-	 * @param string $s
-	 * @param int $pos
-	 * @return array|null
-	 */
-	private function utf8_next_codepoint( $s, $pos ) {
-		$len = strlen( $s );
-		if ( $pos >= $len ) return null;
-		$b1 = ord( $s[ $pos ] );
-		if ( $b1 < 0x80 ) {
-			return [ $b1, $pos + 1 ];
-		}
-		if ( ( $b1 & 0xE0 ) === 0xC0 ) {
-			if ( $pos + 1 >= $len ) return null;
-			$b2 = ord( $s[ $pos + 1 ] );
-			if ( ( $b2 & 0xC0 ) !== 0x80 ) return null;
-			$cp = ( ( $b1 & 0x1F ) << 6 ) | ( $b2 & 0x3F );
-			return [ $cp, $pos + 2 ];
-		}
-		if ( ( $b1 & 0xF0 ) === 0xE0 ) {
-			if ( $pos + 2 >= $len ) return null;
-			$b2 = ord( $s[ $pos + 1 ] );
-			$b3 = ord( $s[ $pos + 2 ] );
-			if ( ( $b2 & 0xC0 ) !== 0x80 || ( $b3 & 0xC0 ) !== 0x80 ) return null;
-			$cp = ( ( $b1 & 0x0F ) << 12 ) | ( ( $b2 & 0x3F ) << 6 ) | ( $b3 & 0x3F );
-			return [ $cp, $pos + 3 ];
-		}
-		if ( ( $b1 & 0xF8 ) === 0xF0 ) {
-			if ( $pos + 3 >= $len ) return null;
-			$b2 = ord( $s[ $pos + 1 ] );
-			$b3 = ord( $s[ $pos + 2 ] );
-			$b4 = ord( $s[ $pos + 3 ] );
-			if ( ( $b2 & 0xC0 ) !== 0x80 || ( $b3 & 0xC0 ) !== 0x80 || ( $b4 & 0xC0 ) !== 0x80 ) return null;
-			$cp = ( ( $b1 & 0x07 ) << 18 ) | ( ( $b2 & 0x3F ) << 12 ) | ( ( $b3 & 0x3F ) << 6 ) | ( $b4 & 0x3F );
-			return [ $cp, $pos + 4 ];
-		}
-		return null; // invalid leading byte
-	}
-
-	/**
-	 * Fix common UTF-8 mojibake sequences (UTF-8 interpreted as ISO-8859-1) for Western/Nordic languages.
-	 * This is a conservative mapping covering the most frequent cases seen in exports.
-	 *
-	 * @param string $html
-	 * @return string
-	 */
-	private function fix_mojibake_sequences( $html ) {
-		$map = array(
-			// Swedish/Finnish/Nordic letters
-			"Ã¤" => "ä",
-			"Ã„" => "Ä",
-			"Ã¶" => "ö",
-			"Ã–" => "Ö",
-			"Ã¥" => "å",
-			"Ã…" => "Å",
-			"Ã¼" => "ü",
-			"Ãœ" => "Ü",
-			"Ã¸" => "ø",
-			"Ã˜" => "Ø",
-			"Ã¦" => "æ",
-			"Ã†" => "Æ",
-			"Ã±" => "ñ",
-			"Ã‘" => "Ñ",
-			"Ã§" => "ç",
-			// Common accented Latin letters
-			"Ã©" => "é",
-			"Ã¨" => "è",
-			"Ãª" => "ê",
-			"Ã«" => "ë",
-			"Ã¡" => "á",
-			"Ã " => "à",
-			"Ã¢" => "â",
-			"Ã³" => "ó",
-			"Ã²" => "ò",
-			"Ã´" => "ô",
-			"Ã­" => "í",
-			"Ãì" => "ì",
-			"Ã®" => "î",
-			"Ã¯" => "ï",
-			"Ãº" => "ú",
-			"Ã¹" => "ù",
-			"Ã»" => "û",
-			// Punctuation and symbols that often get prefixed by Â (non-breaking space issues)
-			"Â»" => "»",
-			"Â«" => "«",
-			"Â©" => "©",
-			"Â®" => "®",
-			"Â±" => "±",
-			"Â·" => "·",
-			"Â·" => "·",
-			"Â“" => "“",
-			"Â”" => "”",
-			"Â‘" => "‘",
-			"Â’" => "’",
-			"Â–" => "–",
-			"Â—" => "—",
-			"Â™" => "™",
-			"Â " => " ", // NBSP shown as 'Â ' becomes a normal space.
-		);
-
-		$map = apply_filters( 'ss_mojibake_map', $map, $this );
-		return strtr( $html, $map );
 	}
 
 	/**
@@ -993,6 +801,7 @@ class Url_Extractor {
 				if ( $quote === '"' || $quote === "'" ) {
 					return 'url(' . $quote . $updated . $quote . ')';
 				}
+
 				return 'url(' . $updated . ')';
 			},
 			$text
@@ -1000,11 +809,12 @@ class Url_Extractor {
 
 		// Pass 2: Fallback - replace any remaining bare local absolute or protocol-relative URLs by converting them.
 		$escaped_origin = preg_quote( Util::origin_host(), '/' );
-		$text = preg_replace_callback(
+		$text           = preg_replace_callback(
 			'/((?:https?:)?\/\/' . $escaped_origin . ')[^"\')\s;,]+/i',
 			function ( $m ) {
 				$matched_url = $m[0];
-				$updated = $this->add_to_extracted_urls( $matched_url );
+				$updated     = $this->add_to_extracted_urls( $matched_url );
+
 				return $updated ?: $matched_url;
 			},
 			$text
@@ -1062,12 +872,12 @@ class Url_Extractor {
 	 *
 	 * This is a legacy method, use is_valid_json() instead.
 	 *
-	 * @deprecated Use is_valid_json() instead
 	 * @param string $argument String to evaluate.
 	 * @param bool $ignore_scalars Optional. Whether to ignore scalar values.
 	 *                               Defaults to true.
 	 *
 	 * @return bool Whether the provided string is a valid JSON representation.
+	 * @deprecated Use is_valid_json() instead
 	 */
 	protected function is_json( $argument, $ignore_scalars = true ) {
 		// For backward compatibility, maintain the original behavior
@@ -1079,7 +889,7 @@ class Url_Extractor {
 			return false;
 		}
 
-		return $this->is_valid_json($argument);
+		return $this->is_valid_json( $argument );
 	}
 
 	/**
