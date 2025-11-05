@@ -9,6 +9,7 @@ import {
     TextControl, ToggleControl, TextareaControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 import {SettingsContext} from "../context/SettingsContext";
 import HelperVideo from "../components/HelperVideo";
 
@@ -26,6 +27,34 @@ function DebugSettings() {
     } = useContext(SettingsContext);
     const [activateDebugLog, setActivateDebugLog] = useState(false);
     const [useServerCron, setUserServerCron] = useState(false);
+    const [clearingTemp, setClearingTemp] = useState(false);
+    const [clearNotice, setClearNotice] = useState(null);
+
+    const handleClearTemp = async () => {
+        setClearingTemp(true);
+        setClearNotice(null);
+        try {
+            const resp = await apiFetch({path: '/simplystatic/v1/clear-temp-files', method: 'POST'});
+            let data = resp;
+            // Some endpoints in this app return JSON string, some parsed.
+            if (typeof resp === 'string') {
+                try {
+                    data = JSON.parse(resp);
+                } catch (e) { /* ignore */
+                }
+            }
+            if (data && data.status === 200) {
+                setClearNotice({type: 'success', message: __('Temporary files cleared.', 'simply-static')});
+            } else {
+                const msg = (data && data.message) ? data.message : __('Could not clear temporary files.', 'simply-static');
+                setClearNotice({type: 'error', message: msg});
+            }
+        } catch (e) {
+            setClearNotice({type: 'error', message: __('Request failed. Please try again.', 'simply-static')});
+        } finally {
+            setClearingTemp(false);
+        }
+    };
 
     const setSavingSettings = () => {
         saveSettings();
@@ -129,6 +158,25 @@ function DebugSettings() {
                             updateSetting('temp_files_dir', temp_dir);
                         }}
                     />
+
+                    {clearNotice && (
+                        <>
+                            <Notice status={clearNotice.type} isDismissible={true}
+                                    onRemove={() => setClearNotice(null)}>
+                                {clearNotice.message}
+                            </Notice>
+                            <Spacer margin={5}/>
+                        </>
+                    )}
+
+                    <Button
+                        isSecondary
+                        onClick={handleClearTemp}
+                        disabled={clearingTemp}
+                        isBusy={clearingTemp}
+                    >
+                        {clearingTemp ? __('Clearing…', 'simply-static') : __('Clear Temporary Files', 'simply-static')}
+                    </Button>
                 </CardBody>
             </Card>
         }

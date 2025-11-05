@@ -576,6 +576,15 @@ class Admin_Settings {
 			},
 		) );
 
+		// Clear temporary files directory.
+		register_rest_route( 'simplystatic/v1', '/clear-temp-files', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'clear_temp_files' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+			},
+		) );
+
 	}
 
     public function check_if_can_run_export() {
@@ -1179,6 +1188,31 @@ class Admin_Settings {
 		do_action( 'ss_after_perform_archive_action', $blog_id, 'cancel', Plugin::instance()->get_archive_creation_job() );
 
 		return json_encode( [ 'status' => 200 ] );
+	}
+
+	/**
+	 * Clear temporary, generated static files via REST.
+	 *
+	 * @return false|string JSON-encoded response
+	 */
+	public function clear_temp_files() {
+		try {
+			$setup_task = new Setup_Task();
+			$result     = $setup_task->delete_temp_static_files();
+
+			return json_encode( [
+				'status' => 200,
+				'cleared' => (bool) $result,
+			] );
+		} catch ( \Throwable $e ) {
+			if ( class_exists( '\\Simply_Static\\Util' ) ) {
+				Util::debug_log( 'Error clearing temporary files via REST: ' . $e->getMessage() );
+			}
+			return json_encode( [
+				'status'  => 500,
+				'message' => $e->getMessage(),
+			] );
+		}
 	}
 
 	/**
