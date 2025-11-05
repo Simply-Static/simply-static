@@ -625,11 +625,25 @@ class Url_Extractor {
 		// Suppress errors from malformed HTML
 		libxml_use_internal_errors( true );
 
-		// Load the HTML, preserving whitespace and handling UTF-8
+		// Determine site charset (fallback to UTF-8)
+		$charset = \get_bloginfo( 'charset' );
+		if ( empty( $charset ) ) {
+			$charset = 'UTF-8';
+		}
+
+		// Prepare HTML for DOM parsing without XML prolog:
+		// Convert multibyte characters to HTML entities so DOMDocument (which may assume Latin-1)
+		// does not corrupt UTF-8 text. Unlike htmlentities, mb_convert_encoding preserves markup
+		// characters like '<' and '>' unescaped while converting multibyte characters to entities.
+		$html_for_dom = function_exists( 'mb_convert_encoding' )
+			? mb_convert_encoding( $html_string, 'HTML-ENTITIES', $charset )
+			: $html_string;
+
+		// Load the HTML, preserving whitespace and silencing libxml warnings
 		$dom->preserveWhiteSpace = true;
 		$dom->formatOutput       = false;
 
-		$dom->loadHTML( $html_string );
+		$dom->loadHTML( $html_for_dom, LIBXML_NOWARNING | LIBXML_NOERROR );
 
 		// Clear any errors
 		libxml_clear_errors();
@@ -688,6 +702,56 @@ class Url_Extractor {
 				return $dom;
 			}
 
+			// Ensure a proper <meta charset> is present as the first child of <head>
+			try {
+				$charset = is_string( $charset ) && $charset !== '' ? $charset : \get_bloginfo( 'charset' );
+				if ( empty( $charset ) ) {
+					$charset = 'UTF-8';
+				}
+				$head_nodes = $dom->getElementsByTagName( 'head' );
+				$head       = $head_nodes && $head_nodes->length > 0 ? $head_nodes->item( 0 ) : null;
+				if ( ! $head ) {
+					// Create <head> if missing
+					$head = $dom->createElement( 'head' );
+					$html_el_list = $dom->getElementsByTagName( 'html' );
+					$html_el      = $html_el_list && $html_el_list->length > 0 ? $html_el_list->item( 0 ) : null;
+					if ( $html_el ) {
+						if ( $html_el->firstChild ) {
+							$html_el->insertBefore( $head, $html_el->firstChild );
+						} else {
+							$html_el->appendChild( $head );
+						}
+					}
+				}
+				if ( $head ) {
+					// Find existing <meta charset>
+					$existing_meta = null;
+					foreach ( $head->getElementsByTagName( 'meta' ) as $m ) {
+						if ( $m->hasAttribute( 'charset' ) ) {
+							$existing_meta = $m;
+							break;
+						}
+					}
+					if ( $existing_meta ) {
+						$existing_meta->setAttribute( 'charset', $charset );
+						// Move to top of <head>
+						if ( $head->firstChild && $head->firstChild !== $existing_meta ) {
+							$head->insertBefore( $existing_meta, $head->firstChild );
+						}
+					} else {
+						$meta = $dom->createElement( 'meta' );
+						$meta->setAttribute( 'charset', $charset );
+						if ( $head->firstChild ) {
+							$head->insertBefore( $meta, $head->firstChild );
+						} else {
+							$head->appendChild( $meta );
+						}
+					}
+				}
+			} catch ( \Throwable $e ) {
+				// If anything goes wrong here, continue without blocking the export
+			}
+
 			// Save the HTML document
 			$html = $dom->saveHTML();
 
@@ -720,7 +784,18 @@ class Url_Extractor {
 
 			// Restore JSON attributes
 			$html = $this->restore_attributes( $html );
-			$html = html_entity_decode( $html );
+
+			// Decode HTML entities across the final HTML using the site's charset so non-Latin text (e.g., Japanese/Arabic)
+			// is preserved as real characters instead of numeric entities. This is safe for markup and prevents mojibake.
+			$charset = \get_bloginfo( 'charset' );
+			if ( empty( $charset ) ) {
+				$charset = 'UTF-8';
+			}
+			$should_decode_final = apply_filters( 'simply_static_decode_final_html', true, $this );
+			if ( $should_decode_final ) {
+				$html = html_entity_decode( $html, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, $charset );
+			}
+
 			$html = apply_filters( 'ss_html_after_restored_attributes', $html, $this );
 
 			return $html;
@@ -770,8 +845,12 @@ class Url_Extractor {
 	 * @return string The CSS with all URLs converted
 	 */
 	private function extract_and_replace_urls_in_css( $text ) {
-		// Decode entities to ensure URLs are detected correctly
-		$text = html_entity_decode( $text );
+		// Decode entities to ensure URLs are detected correctly, using site charset
+		$charset = \get_bloginfo( 'charset' );
+		if ( empty( $charset ) ) {
+			$charset = 'UTF-8';
+		}
+		$text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, $charset );
 
 		// Pass 1: Handle url(...) constructs with quoted or unquoted values, including relative URLs.
 		// Pattern breakdown:
@@ -824,10 +903,14 @@ class Url_Extractor {
 	}
 
 	private function extract_and_replace_urls_in_script( $text ) {
+		$charset = \get_bloginfo( 'charset' );
+		if ( empty( $charset ) ) {
+			$charset = 'UTF-8';
+		}
 		if ( $this->is_valid_json( $text ) ) {
-			$decoded_text = html_entity_decode( $text, ENT_NOQUOTES );
+			$decoded_text = html_entity_decode( $text, ENT_NOQUOTES | ENT_HTML5 | ENT_SUBSTITUTE, $charset );
 		} else {
-			$decoded_text = html_entity_decode( $text );
+			$decoded_text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, $charset );
 		}
 
 		$decoded_text = apply_filters( 'simply_static_decoded_urls_in_script', $decoded_text, $this->static_page, $this );
