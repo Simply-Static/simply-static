@@ -638,7 +638,7 @@ class Url_Extractor {
 		$preencode = apply_filters( 'simply_static_preencode_for_dom', true, $charset, $this );
 		if ( $preencode && function_exists( 'mb_encode_numericentity' ) ) {
 			// Encode all non-ASCII code points to numeric entities
-			$convmap     = array( 0x80, 0x10FFFF, 0, 0xFFFF );
+			$convmap      = array( 0x80, 0x10FFFF, 0, 0xFFFF );
 			$html_for_dom = mb_encode_numericentity( $html_string, $convmap, $charset );
 		} elseif ( $preencode && function_exists( 'mb_convert_encoding' ) && version_compare( PHP_VERSION, '8.2.0', '<' ) ) {
 			// Legacy fallback for older PHP versions (pre-8.2). Avoid on 8.2+ due to deprecation.
@@ -720,7 +720,7 @@ class Url_Extractor {
 				$head       = $head_nodes && $head_nodes->length > 0 ? $head_nodes->item( 0 ) : null;
 				if ( ! $head ) {
 					// Create <head> if missing
-					$head = $dom->createElement( 'head' );
+					$head         = $dom->createElement( 'head' );
 					$html_el_list = $dom->getElementsByTagName( 'html' );
 					$html_el      = $html_el_list && $html_el_list->length > 0 ? $html_el_list->item( 0 ) : null;
 					if ( $html_el ) {
@@ -793,13 +793,30 @@ class Url_Extractor {
 			// Restore JSON attributes
 			$html = $this->restore_attributes( $html );
 
+			// Strip erroneous closing tags for void elements that DOMDocument/libxml may insert.
+			// Handle </source> (HTML5 void element used in <picture>/<audio>/<video>) and </track>.
+			$void_elements_to_strip = apply_filters( 'simply_static_void_elements_to_strip_closing', array(
+				'source',
+				'track'
+			), $this );
+
+			if ( is_array( $void_elements_to_strip ) && ! empty( $void_elements_to_strip ) ) {
+				foreach ( $void_elements_to_strip as $void_tag ) {
+					// Remove closing tags like </source> or </track> with optional whitespace
+					$pattern = '#</' . preg_quote( (string) $void_tag, '#' ) . '\s*>#i';
+					$html    = preg_replace( $pattern, '', $html );
+				}
+			}
+
 			// Decode HTML entities across the final HTML using the site's charset so non-Latin text (e.g., Japanese/Arabic)
 			// is preserved as real characters instead of numeric entities. This is safe for markup and prevents mojibake.
 			$charset = \get_bloginfo( 'charset' );
+
 			if ( empty( $charset ) ) {
 				$charset = 'UTF-8';
 			}
 			$should_decode_final = apply_filters( 'simply_static_decode_final_html', true, $this );
+
 			if ( $should_decode_final ) {
 				$html = html_entity_decode( $html, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, $charset );
 			}
