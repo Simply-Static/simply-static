@@ -4,7 +4,7 @@ Tags: static site generator, performance, security, jamstack
 Requires at least: 6.2
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag:  3.5.0
+Stable tag:  3.5.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -259,6 +259,16 @@ Simply Static creates a static copy of your WordPress site that is intended to b
 3. Diagnostics
 
 == Changelog ==
+
+= 3.5.1 =
+
+* better HTML 5 markup support for non-closing tags (like <source>)
+* added ZIPArchive support for larger ZIP exports (>4GB)
+* MU: sort subsites ASC + added site ID
+* added Clear Temporary Files button + auto-clear on uninstall + ss_clear_temp_dir_on_wrapup filter
+* mb_encode_numericentity + mb_convert_encoding for better UTF-8 conversion support
+* added ss_zip_filename filter to rename ZIP file
+* added ss_crawlable_plugins and ss_crawlable_themes filter
 
 = 3.5.0 =
 
