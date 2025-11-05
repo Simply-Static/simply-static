@@ -74,9 +74,12 @@ function SidebarSite( props = null ) {
         setDisabledButton(isRunning || isPaused);
 
         if (options.selectable_sites && !options.is_network && options.is_multisite) {
-            let sites = options.selectable_sites.map(function (site) {
-                return {label: `${site.name}`, value: site.blog_id}
-            });
+            let sites = options.selectable_sites
+                .slice()
+                .sort(function(a, b) { return (a.name || '').localeCompare(b.name || ''); })
+                .map(function (site) {
+                    return {label: `${site.name} (#${site.blog_id})`, value: site.blog_id}
+                });
 
             sites.unshift({label: __('Use current settings', 'simply-static'), value: 'current'});
             setSelectableSites(sites);
