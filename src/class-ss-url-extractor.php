@@ -794,7 +794,9 @@ class Url_Extractor {
 			$html = $this->restore_attributes( $html );
 
 			// Decode HTML entities across the final HTML using the site's charset so non-Latin text (e.g., Japanese/Arabic)
-			// is preserved as real characters instead of numeric entities. This is safe for markup and prevents mojibake.
+			// is preserved as real characters instead of numeric entities. To avoid breaking complex attribute values
+			// (e.g., Elementor's data-settings JSON that may contain encoded SVG like &lt;svg&gt;), we protect attributes
+			// by replacing key entities with placeholders before decoding, then restore them afterwards.
 			$charset = \get_bloginfo( 'charset' );
 
 			if ( empty( $charset ) ) {
@@ -803,7 +805,11 @@ class Url_Extractor {
 			$should_decode_final = apply_filters( 'simply_static_decode_final_html', true, $this );
 
 			if ( $should_decode_final ) {
+				// Protect attribute content that must remain entity-encoded during the global decode
+				$html = $this->preserve_attributes( $html );
 				$html = html_entity_decode( $html, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, $charset );
+				// Restore the protected attribute content back to entities to keep markup valid
+				$html = $this->restore_attributes( $html );
 			}
 
 			$html = apply_filters( 'ss_html_after_restored_attributes', $html, $this );
