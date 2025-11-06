@@ -95,3 +95,32 @@ if ( ! function_exists( 'simply_static_run_plugin' ) ) {
 		}
 	}
 }
+
+register_deactivation_hook( __FILE__, 'simply_static_plugin_deactivate' );
+
+/**
+ * Clean up on deactivation.
+ */
+function simply_static_plugin_deactivate() {
+	// Ensure Util, Query, Model and Page classes are available.
+	if ( ! class_exists( 'Simply_Static\\Util' ) ) {
+		require_once SIMPLY_STATIC_PATH . 'src/class-ss-util.php';
+	}
+	if ( ! class_exists( 'Simply_Static\\Query' ) && file_exists( SIMPLY_STATIC_PATH . 'src/class-ss-query.php' ) ) {
+		require_once SIMPLY_STATIC_PATH . 'src/class-ss-query.php';
+	}
+	if ( ! class_exists( 'Simply_Static\\Model' ) && file_exists( SIMPLY_STATIC_PATH . 'src/models/class-ss-model.php' ) ) {
+		require_once SIMPLY_STATIC_PATH . 'src/models/class-ss-model.php';
+	}
+	// Load Page model to access its table
+	if ( ! class_exists( 'Simply_Static\\Page' ) && file_exists( SIMPLY_STATIC_PATH . 'src/models/class-ss-page.php' ) ) {
+		require_once SIMPLY_STATIC_PATH . 'src/models/class-ss-page.php';
+	}
+
+	// Clear temp dir.
+	$temp_dir = \Simply_Static\Util::get_temp_dir();
+	\Simply_Static\Util::delete_dir_contents( $temp_dir );
+
+	// Clear DB table.
+	\Simply_Static\Page::query()->delete_all();
+}

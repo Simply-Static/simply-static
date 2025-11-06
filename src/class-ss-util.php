@@ -1012,4 +1012,50 @@ class Util {
 
 		return trailingslashit( $temp_dir );
 	}
+
+	/**
+	 * Recursively delete contents of a directory but keep the directory itself.
+	 *
+	 * Rules:
+	 * - No error suppression operators (@). We perform checks before FS calls to avoid warnings.
+	 * - Very defensive: do nothing for empty/non-dirs and for very shallow paths.
+	 *
+	 * @param string $dir Absolute path to the directory whose contents should be cleared.
+	 * @return void
+	 */
+	public static function delete_dir_contents( string $dir ): void {
+		$dir = (string) $dir;
+		if ( $dir === '' || ! is_dir( $dir ) ) {
+			return;
+		}
+		$normalized = str_replace( '\\', '/', $dir );
+		// Safety guard: do not operate on very shallow paths (like root-level). Require at least 3 path segments.
+		if ( substr_count( trim( $normalized, '/' ), '/' ) < 2 ) {
+			return;
+		}
+		$items = scandir( $dir );
+		if ( $items === false ) {
+			return;
+		}
+		foreach ( $items as $item ) {
+			if ( $item === '.' || $item === '..' ) {
+				continue;
+			}
+			$path = $dir . DIRECTORY_SEPARATOR . $item;
+			if ( is_dir( $path ) && ! is_link( $path ) ) {
+				self::delete_dir_contents( $path );
+				// Remove the now-empty directory if possible.
+				if ( is_dir( $path ) && is_writable( $path ) ) {
+					rmdir( $path );
+				}
+			} else {
+				// Files or links
+				if ( ( is_file( $path ) || is_link( $path ) ) && ( file_exists( $path ) || is_link( $path ) ) ) {
+					if ( is_writable( $path ) ) {
+						unlink( $path );
+					}
+				}
+			}
+		}
+	}
 }
