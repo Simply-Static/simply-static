@@ -113,6 +113,12 @@ class SS_Adminbar_Integration extends Integration {
 			wp_die( 'Security check failed' );
 		}
 
+		// Permission check aligned with admin bar visibility (generate capability)
+		$cap_generate = apply_filters( 'ss_user_capability', 'publish_pages', 'generate' );
+		if ( ! current_user_can( $cap_generate ) ) {
+			wp_send_json_error( [ 'status' => 'forbidden' ], 403 );
+		}
+
 		// Default status
 		$status = 'error';
 
@@ -151,6 +157,11 @@ class SS_Adminbar_Integration extends Integration {
 			return;
 		}
 		if ( ! is_user_logged_in() ) {
+			return;
+		}
+		// Only output assets for users allowed to see the admin bar integration.
+		$cap_generate = apply_filters( 'ss_user_capability', 'publish_pages', 'generate' );
+		if ( ! current_user_can( $cap_generate ) ) {
 			return;
 		}
 		$ajax_url = admin_url( 'admin-ajax.php' );
