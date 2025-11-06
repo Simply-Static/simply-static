@@ -33,6 +33,11 @@ class SS_Adminbar_Integration extends Integration {
 	}
 
 	public function add_admin_bar_item( $admin_bar ) {
+		// Only show for users allowed by ss_user_capability (generate context).
+		$cap_generate = apply_filters( 'ss_user_capability', 'publish_pages', 'generate' );
+		if ( ! current_user_can( $cap_generate ) ) {
+			return;
+		}
 		// Get settings page.
 		$generate_settings = esc_url( get_admin_url() . 'admin.php?page=simply-static-generate' );
 
