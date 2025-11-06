@@ -123,4 +123,11 @@ function simply_static_plugin_deactivate() {
 
 	// Clear DB table.
 	\Simply_Static\Page::query()->delete_all();
+
+	// Remove debug log file.
+	$debug_file = \Simply_Static\Util::get_debug_log_filename();
+
+	if ( ( file_exists( $debug_file ) || is_link( $debug_file ) ) && is_writable( $debug_file ) ) {
+		unlink( $debug_file );
+	}
 }
