@@ -247,7 +247,7 @@ class Admin_Settings {
 				foreach ( $public_sites as $site ) {
 					$sites[] = [
 						'blog_id'          => $site->blog_id,
-						'name'             => $site->blogname,
+						'name'             => wp_specialchars_decode( $site->blogname, ENT_QUOTES | ENT_HTML5 ),
 						'url'              => $site->siteurl,
 						'settings_url'     => esc_url( get_admin_url( $site->blog_id ) . 'admin.php?page=simply-static-settings' ),
 						'activity_log_url' => esc_url( get_admin_url( $site->blog_id ) . 'admin.php?page=simply-static-generate' )
@@ -256,7 +256,7 @@ class Admin_Settings {
 					if ( $site->blog_id != get_current_blog_id() ) {
 						$selectable_sites[] = [
 							'blog_id' => $site->blog_id,
-							'name'    => $site->blogname,
+							'name'    => wp_specialchars_decode( $site->blogname, ENT_QUOTES | ENT_HTML5 ),
 						];
 					}
 				}
