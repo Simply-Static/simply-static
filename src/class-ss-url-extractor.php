@@ -793,21 +793,6 @@ class Url_Extractor {
 			// Restore JSON attributes
 			$html = $this->restore_attributes( $html );
 
-			// Strip erroneous closing tags for void elements that DOMDocument/libxml may insert.
-			// Handle </source> (HTML5 void element used in <picture>/<audio>/<video>) and </track>.
-			$void_elements_to_strip = apply_filters( 'simply_static_void_elements_to_strip_closing', array(
-				'source',
-				'track'
-			), $this );
-
-			if ( is_array( $void_elements_to_strip ) && ! empty( $void_elements_to_strip ) ) {
-				foreach ( $void_elements_to_strip as $void_tag ) {
-					// Remove closing tags like </source> or </track> with optional whitespace
-					$pattern = '#</' . preg_quote( (string) $void_tag, '#' ) . '\s*>#i';
-					$html    = preg_replace( $pattern, '', $html );
-				}
-			}
-
 			// Decode HTML entities across the final HTML using the site's charset so non-Latin text (e.g., Japanese/Arabic)
 			// is preserved as real characters instead of numeric entities. This is safe for markup and prevents mojibake.
 			$charset = \get_bloginfo( 'charset' );
