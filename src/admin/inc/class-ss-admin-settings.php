@@ -241,7 +241,9 @@ class Admin_Settings {
 		if ( is_multisite() && function_exists( 'get_sites' ) ) {
 			$sites            = [];
 			$selectable_sites = [];
-			$public_sites     = get_sites( [ 'public' => true ] );
+			// Allow filtering of get_sites() args, e.g., to set 'number' => 0 to list all sites.
+			$public_sites_args = apply_filters( 'ss_multisite_get_sites_args', [ 'public' => true ], 'settings_sites' );
+			$public_sites     = get_sites( $public_sites_args );
 
 			if ( $public_sites ) {
 				foreach ( $public_sites as $site ) {
@@ -1361,7 +1363,7 @@ class Admin_Settings {
 	}
 
     public function get_sites() {
-        $site_ids = get_sites([
+        $get_sites_args = [
             "spam"                   => 0,
             "deleted"                => 0,
             "archived"               => 0,
@@ -1372,7 +1374,10 @@ class Admin_Settings {
             "order"                  => "DESC",
             "orderby"                => "id",
             "update_site_meta_cache" => false
-        ]);
+        ];
+        // Allow filtering of REST get_sites() args for multisite endpoints
+        $get_sites_args = apply_filters( 'ss_multisite_get_sites_args', $get_sites_args, 'rest_sites' );
+        $site_ids = get_sites( $get_sites_args );
 
         /** @var Archive_Creation_Job $job */
         $job = Plugin::instance()->get_archive_creation_job();
