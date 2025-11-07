@@ -131,7 +131,7 @@ class Multisite {
             return;
         }
 
-        throw new \Exception( 'Export is already running on another site. Upgrade to Pro to queue site exports.' , 'simply-static' );
+        throw new \Exception( __( 'Export is already running on another site. Upgrade to Pro to queue site exports.', 'simply-static' ) );
      }
 
      public function can_disable_export() {
