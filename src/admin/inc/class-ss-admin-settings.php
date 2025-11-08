@@ -3,6 +3,7 @@
 namespace Simply_Static;
 
 class Admin_Settings {
+
 	/**
 	 * Contains the number of failed tests.
 	 *
@@ -45,8 +46,16 @@ class Admin_Settings {
 		// Ensure the "View Site" link points to the static site even if the admin bar integration is disabled.
 		add_action( 'admin_bar_menu', array( $this, 'filter_view_site_link' ), 200 );
 
-		// Handle cancel via URL param as a fallback when REST API is unavailable.
+  // Handle cancel via URL param as a fallback when REST API is unavailable.
 		add_action( 'admin_init', array( $this, 'maybe_handle_cancel_export' ) );
+
+		// Multisite: Free shows only an upgrade notice; full lock management lives in Pro.
+		if ( ! defined( 'SIMPLY_STATIC_PRO_VERSION' ) ) {
+			// Guard against fatal if method is unavailable in older installs/caches.
+			if ( method_exists( $this, 'render_network_lock_upgrade_notice' ) && is_callable( [ $this, 'render_network_lock_upgrade_notice' ] ) ) {
+				add_action( 'network_admin_notices', array( $this, 'render_network_lock_upgrade_notice' ) );
+			}
+		}
 
 		$this->failed_tests = intval( get_transient( 'simply_static_failed_tests' ) );
 
@@ -1534,4 +1543,34 @@ class Admin_Settings {
 
 		$admin_bar->add_node( (array) $node );
 	}
+
+	/**
+	 * Free (no Pro): Show an upgrade notice in Network Admin if a multisite export lock is detected.
+	 */
+	public function render_network_lock_upgrade_notice() {
+		if ( defined( 'SIMPLY_STATIC_PRO_VERSION' ) ) {
+			return; // Pro handles full UI.
+		}
+		if ( ! is_multisite() || ! function_exists( 'is_network_admin' ) || ! is_network_admin() ) {
+			return;
+		}
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+		if ( 'simply-static-settings' !== $page && 'simply-static-generate' !== $page ) {
+			return;
+		}
+		$running = get_site_option( Plugin::SLUG . '_multisite_export_running', false );
+		if ( empty( $running ) ) {
+			return; // No lock set.
+		}
+		$upgrade_url = 'https://simplystatic.com/?utm_source=plugin&utm_medium=notice&utm_campaign=ms-lock-reset';
+		?>
+		<div class="notice notice-info">
+			<p>
+				<?php echo esc_html__( 'A multisite export lock is currently set. Resetting the lock and using queued exports are available in Simply Static Pro.', 'simply-static' ); ?>
+				<a href="<?php echo esc_url( $upgrade_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html__( 'Learn more about Pro', 'simply-static' ); ?></a>
+			</p>
+		</div>
+		<?php
+	}
+
 }
