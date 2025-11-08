@@ -5,6 +5,27 @@ namespace Simply_Static;
 class Admin_Settings {
 
 	/**
+	 * Trigger a 404-only export via REST.
+	 *
+	 * @return \WP_REST_Response|array|string
+	 */
+	public function export_404() {
+		// Ensure generate_404 option is enabled via UI gating; proceed regardless.
+		update_option( 'simply-static-404-only', 1, false );
+
+		// Clear conflicting flags that could alter the task list.
+		delete_option( 'simply-static-use-single' );
+		delete_option( 'simply-static-use-build' );
+
+		try {
+			Plugin::instance()->run_static_export();
+			return [ 'success' => true ];
+		} catch ( \Throwable $e ) {
+			return [ 'success' => false, 'message' => $e->getMessage() ];
+		}
+	}
+
+	/**
 	 * Contains the number of failed tests.
 	 *
 	 * @var int
@@ -446,6 +467,15 @@ class Admin_Settings {
 		register_rest_route( 'simplystatic/v1', '/settings/reset', array(
 			'methods'             => 'POST',
 			'callback'            => [ $this, 'reset_settings' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+			},
+		) );
+
+		// Export 404-only run
+		register_rest_route( 'simplystatic/v1', '/export-404', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'export_404' ],
 			'permission_callback' => function () {
 				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
 			},

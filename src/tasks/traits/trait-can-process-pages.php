@@ -85,6 +85,15 @@ trait canProcessPages {
 		if ( $pages_to_process_count === 0 ) {
 			$processed_pages = $this->get_processed_pages();
 			$message         = $this->processed_pages_message( $processed_pages, $total_pages );
+			// In 404-only exports, force the transfer log to reflect a single artifact.
+			$only_404 = get_option( 'simply-static-404-only' );
+			if ( ! empty( $only_404 ) ) {
+				$message = sprintf( __( 'Transferred %d of %d files', 'simply-static' ), 1, 1 );
+				// Also update pages status so UI counters align.
+				if ( method_exists( $this, 'save_pages_status' ) ) {
+					$this->save_pages_status( 0, 1 );
+				}
+			}
 			$this->save_status_message( $message );
 
 			return true; // No Pages to process anymore. It's done.

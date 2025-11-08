@@ -439,6 +439,22 @@ class Plugin {
 	 * @return array The list of tasks to process.
 	 */
 	public function filter_task_list( $task_list, $delivery_method ): array {
+		// 404-only export short-circuit
+		$only_404 = get_option( 'simply-static-404-only' );
+		if ( ! empty( $only_404 ) ) {
+			$task_list = [ 'setup' ];
+			// Always include the 404 generator for this mode.
+			$task_list[] = 'generate_404';
+			if ( 'zip' === $delivery_method ) {
+				$task_list[] = 'create_zip_archive';
+			} elseif ( 'local' === $delivery_method ) {
+				$task_list[] = 'transfer_files_locally';
+			} else {
+				// For other delivery methods in Pro, keep placeholder; Free doesn't handle them.
+			}
+			$task_list[] = 'wrapup';
+			return $task_list;
+		}
 		$generate_404 = $this->options->get( 'generate_404' );
 
 		$task_list[] = 'setup';

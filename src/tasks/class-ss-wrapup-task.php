@@ -20,6 +20,9 @@ class Wrapup_Task extends Task {
 	 * @return bool
 	 */
 	public function perform() {
+		// Always clear the 404-only runtime flag here so subsequent exports are unaffected.
+		delete_option( 'simply-static-404-only' );
+
 		// Optionally clear the temporary directory (disabled by default).
 		$clear_temp_dir = apply_filters( 'ss_clear_temp_dir_on_wrapup', false );
 

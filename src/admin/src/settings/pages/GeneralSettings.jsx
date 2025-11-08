@@ -18,7 +18,16 @@ import HelperVideo from "../components/HelperVideo";
 const {__} = wp.i18n;
 
 function GeneralSettings() {
-    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved, isPro} = useContext(SettingsContext);
+    const {
+        settings,
+        updateSetting,
+        saveSettings,
+        settingsSaved,
+        setSettingsSaved,
+        isPro,
+        isRunning,
+        setIsRunning
+    } = useContext(SettingsContext);
 
     const [replaceType, setReplaceType] = useState('relative');
     const [useForms, setUseForms] = useState(false);
@@ -653,6 +662,106 @@ function GeneralSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
+                <b>
+                    {__('404', 'simply-static')}
+                    <HelperVideo title={__('How to manage 404 pages?', 'simply-static')}
+                                 videoUrl={'https://youtu.be/dnRtuQrXG-k'}/>
+                </b>
+            </CardHeader>
+            <CardBody>
+                <ToggleControl
+                    __nextHasNoMarginBottom
+                    label={
+                        <>
+                            {__('Generate 404 Page?', 'simply-static')}
+                        </>
+                    }
+                    help={
+                        generate404
+                            ? __('Generate a 404 page based on your theme template.', 'simply-static')
+                            : __('Don\'t generate a 404 page.', 'simply-static')
+                    }
+                    checked={generate404}
+                    onChange={(value) => {
+                        setGenerate404(value);
+                        updateSetting('generate_404', value);
+                    }}
+                />
+
+                {generate404 && (
+                    <>
+                        <SelectControl
+                            label={
+                                <>
+                                    {!(isPro && typeof isPro === 'function' ? isPro() : false) ? (
+                                            <>
+                                                <span style={{position: "relative", bottom: "-15px"}}>
+                                                {__('Custom 404 page (optional)', 'simply-static')}
+                                                </span>
+                                                <ExternalLink href="https://simplystatic.com">
+                                                    {__('Requires Simply Static Pro', 'simply-static')}
+                                                </ExternalLink>
+                                            </>
+                                        ) :
+                                        <>
+                                            {__('Custom 404 page (optional)', 'simply-static')}
+                                        </>
+                                    }
+                                </>
+                            }
+                            value={settings.custom_404_page ?? 0}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            options={pages}
+                            disabled={!(isPro && typeof isPro === 'function' ? isPro() : false)}
+                            onChange={(pageId) => {
+                                updateSetting('custom_404_page', pageId);
+                            }}
+                            help={__('If selected, Simply Static will use the content of this page for the 404 page instead of the theme default.', 'simply-static')}
+                        />
+                        {(isPro && typeof isPro === 'function' ? isPro() : false) && (
+                            <Button
+                                variant="secondary"
+                                disabled={isRunning}
+                                isBusy={isRunning}
+                                onClick={() => {
+                                    // Trigger 404-only export via REST
+                                    if (isRunning) {
+                                        return;
+                                    }
+                                    setIsRunning(true);
+                                    apiFetch({
+                                        path: '/simplystatic/v1/export-404',
+                                        method: 'POST',
+                                    }).then(resp => {
+                                        try {
+                                            if (resp && resp.success === false && resp.message) {
+                                                alert(resp.message);
+                                            } else {
+                                                // Reload to reflect new status/progress
+                                                window.location.reload();
+                                            }
+                                        } catch (e) {
+                                            // Fallback reload
+                                            window.location.reload();
+                                        }
+                                    }).catch(() => {
+                                        // Reset running flag on error
+                                        setIsRunning(false);
+                                        alert(__('Failed to start 404 export.', 'simply-static'));
+                                    });
+                                }}
+                            >
+                                {__('Export 404 Page', 'simply-static')}
+                            </Button>
+                        )}
+                    </>
+                )}
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
                 <b>{__('Include', 'simply-static')}<HelperVideo
                     title={__('Include & Exclude files and pages', 'simply-static')}
                     videoUrl={'https://youtu.be/voAHfwVMLi8'}/></b>
@@ -692,42 +801,6 @@ function GeneralSettings() {
                 >
                     {hasCopied ? __('Copied home path', 'simply-static') : __('Copy home path', 'simply-static')}
                 </Button>
-                <Spacer margin={5}/>
-
-                <ToggleControl
-                    __nextHasNoMarginBottom
-                    label={
-                        <>
-                            {__('Generate 404 Page?', 'simply-static')}
-                            <HelperVideo title={__('How to manage 404 pages?', 'simply-static')}
-                                         videoUrl={'https://youtu.be/dnRtuQrXG-k'}/>
-                        </>
-                    }
-                    help={
-                        generate404
-                            ? __('Generate a 404 page based on your theme template.', 'simply-static')
-                            : __('Don\'t generate a 404 page.', 'simply-static')
-                    }
-                    checked={generate404}
-                    onChange={(value) => {
-                        setGenerate404(value);
-                        updateSetting('generate_404', value);
-                    }}
-                />
-
-                {generate404 && (
-                    <SelectControl
-                        label={__('Custom 404 page (optional)', 'simply-static')}
-                        value={settings.custom_404_page ?? 0}
-                        __next40pxDefaultSize
-                        __nextHasNoMarginBottom
-                        options={pages}
-                        onChange={(pageId) => {
-                            updateSetting('custom_404_page', pageId);
-                        }}
-                        help={__('If selected, Simply Static will use the content of this page for the 404 page instead of the theme default.', 'simply-static')}
-                    />
-                )}
                 <ToggleControl
                     __nextHasNoMarginBottom
                     label={
