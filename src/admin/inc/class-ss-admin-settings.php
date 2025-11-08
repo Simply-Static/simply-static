@@ -375,7 +375,7 @@ class Admin_Settings {
             ) );
 
             register_rest_route( 'simplystatic/v1', '/check-can-run', array(
-                    'methods'             => 'POST',
+                    'methods'             => 'GET',
                     'callback'            => [ $this, 'check_if_can_run_export' ],
                     'permission_callback' => function () {
                         return current_user_can( apply_filters( 'ss_user_capability', 'manage_network', 'cron' ) );
