@@ -155,6 +155,7 @@ class Plugin {
 		require_once $path . 'src/class-ss-phpuri.php';
 		require_once $path . 'src/class-ss-options.php';
 		require_once $path . 'src/class-ss-view.php';
+		require_once $path . 'src/class-ss-html-encoding-helper.php';
 		require_once $path . 'src/class-ss-url-extractor.php';
 		require_once $path . 'src/class-ss-url-fetcher.php';
 		require_once $path . 'src/background/class-ss-async-request.php';

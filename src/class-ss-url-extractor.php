@@ -631,26 +631,17 @@ class Url_Extractor {
 			$charset = 'UTF-8';
 		}
 
-		// Encode non-ASCII characters as numeric entities so DOMDocument (which may assume Latin-1)
-		// does not corrupt UTF-8 text. We use mb_encode_numericentity to avoid PHP 8.2+ deprecation
-		// of mb_convert_encoding(..., 'HTML-ENTITIES', ...). Markup characters like '<' and '>' remain
-		// untouched.
-		$preencode = apply_filters( 'simply_static_preencode_for_dom', true, $charset, $this );
-		if ( $preencode && function_exists( 'mb_encode_numericentity' ) ) {
-			// Encode all non-ASCII code points to numeric entities
-			$convmap      = array( 0x80, 0x10FFFF, 0, 0xFFFF );
-			$html_for_dom = mb_encode_numericentity( $html_string, $convmap, $charset );
-		} elseif ( $preencode && function_exists( 'mb_convert_encoding' ) && version_compare( PHP_VERSION, '8.2.0', '<' ) ) {
-			// Legacy fallback for older PHP versions (pre-8.2). Avoid on 8.2+ due to deprecation.
-			$html_for_dom = mb_convert_encoding( $html_string, 'HTML-ENTITIES', $charset );
-		} else {
-			$html_for_dom = $html_string;
-		}
+		// Prepare HTML for DOM via helper (prefers mb_encode_numericentity; legacy fallback for PHP < 8.2)
+		$prepared     = Html_Encoding_Helper::prepare_html_for_dom( $html_string, $charset, $this );
+		$html_for_dom = is_array( $prepared ) && isset( $prepared['html'] ) ? $prepared['html'] : $html_string;
+		$dom_encoding = is_array( $prepared ) && isset( $prepared['encoding'] ) ? $prepared['encoding'] : $charset;
 
 		// Load the HTML, preserving whitespace and silencing libxml warnings
 		$dom->preserveWhiteSpace = true;
 		$dom->formatOutput       = false;
 
+		// Hint DOMDocument about the expected encoding
+		$dom->encoding = $dom_encoding;
 		$dom->loadHTML( $html_for_dom, LIBXML_NOWARNING | LIBXML_NOERROR );
 
 		// Clear any errors
