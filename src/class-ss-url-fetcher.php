@@ -323,10 +323,31 @@ class Url_Fetcher {
 		}
 
 		// Prevent query-string URLs from overwriting base paths by placing them in a deterministic subdirectory based on the query string.
+		// Exception: native WordPress search (query parameter `s`) should NOT use a hash subdirectory.
 		if ( ! empty( $url_parts['query'] ) ) {
-			$qs_hash           = substr( md5( $url_parts['query'] ), 0, 12 );
 			$relative_file_dir = Util::add_trailing_directory_separator( $relative_file_dir );
-			$relative_file_dir .= '__qs/' . $qs_hash . '/';
+			$use_hash_dir      = true;
+			parse_str( (string) $url_parts['query'], $qs_args );
+			if ( is_array( $qs_args ) && array_key_exists( 's', $qs_args ) ) {
+				$use_hash_dir = false;
+			}
+			/**
+			 * Filter whether Simply Static should use a hash directory for query-string URLs.
+			 *
+			 * Returning false writes query-string URLs directly under `__qs/` without the hash subdirectory.
+			 *
+			 * @param bool              $use_hash_dir Whether to use the hash directory. Default true (except for native search URLs).
+			 * @param array<string,mixed> $qs_args     Parsed query-string arguments.
+			 * @param \Simply_Static\Page $static_page The current static page.
+			 */
+			$use_hash_dir = apply_filters( 'simply_static_use_qs_hash_dir', $use_hash_dir, $qs_args, $static_page );
+			if ( $use_hash_dir ) {
+				$qs_hash           = substr( md5( $url_parts['query'] ), 0, 12 );
+				$relative_file_dir .= '__qs/' . $qs_hash . '/';
+			} else {
+				$relative_file_dir .= '__qs/';
+				Util::debug_log( '[SS][SEARCH_QS] Using non-hashed __qs/ directory for URL: ' . $static_page->url );
+			}
 		}
 
 		$page_handler = $static_page->get_handler();
