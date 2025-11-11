@@ -248,10 +248,24 @@ class Url_Extractor {
 			return false;
 		}
 
-		$decoded_value = htmlspecialchars_decode( $string );
-		$json_data     = json_decode( $decoded_value, true );
+		// Quick pre-check to avoid expensive decode attempts on non-JSON strings
+		$trimmed = trim( $string );
+		if ( $trimmed === '' ) {
+			return false;
+		}
+		$first = $trimmed[0];
+		if ( $first !== '{' && $first !== '[' && strpos( $trimmed, '{' ) === false && strpos( $trimmed, '[' ) === false ) {
+			return false;
+		}
 
-		return $json_data !== null;
+		// Create a safe, normalized copy for detection only (do not mutate the original)
+		// Decode HTML entities (including quotes) so JSON can be recognized reliably
+		$normalized = html_entity_decode( $trimmed, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8' );
+
+		// Attempt to decode
+		$json_data = json_decode( $normalized, true );
+
+		return $json_data !== null && ( is_array( $json_data ) || is_object( $json_data ) );
 	}
 
 	/**
@@ -260,7 +274,7 @@ class Url_Extractor {
 	 * @return mixed|null
 	 */
 	protected function can_preserve_attributes() {
-		return apply_filters( ' ss_extract_html_preserve_attributes', true );
+		return apply_filters( 'ss_extract_html_preserve_attributes', true );
 	}
 
 	/**
@@ -276,18 +290,22 @@ class Url_Extractor {
 			return $content;
 		}
 
-		$entities = [
-			'quote'     => '&quot;',
-			'apos'      => '&apos;',
-			'lessthan'  => '&lt;',
-			'greatthan' => '&gt;',
-			'ampersand' => '&amp;'
+		// Protect both named and numeric (decimal/hex) entities commonly used within attributes
+		// so that subsequent global decoding steps won't turn them into raw characters and break markup.
+		$entity_variants = [
+			'quote'     => [ '&quot;', '&#34;', '&#x22;', '&#X22;' ],
+			'apos'      => [ '&apos;', '&#39;', '&#x27;', '&#X27;' ],
+			'lessthan'  => [ '&lt;', '&#60;', '&#x3C;', '&#X3C;' ],
+			'greatthan' => [ '&gt;', '&#62;', '&#x3E;', '&#X3E;' ],
+			'ampersand' => [ '&amp;', '&#38;', '&#x26;', '&#X26;' ],
 		];
 
-		foreach ( $entities as $placeholder_name => $entity ) {
-			if ( strpos( $content, $entity ) !== false ) {
-				$placeholder = strtoupper( $placeholder_name ) . "_PLACEHOLDER";
-				$content     = str_replace( $entity, $placeholder, $content );
+		foreach ( $entity_variants as $placeholder_name => $variants ) {
+			$placeholder = strtoupper( $placeholder_name ) . '_PLACEHOLDER';
+			foreach ( $variants as $entity ) {
+				if ( strpos( $content, $entity ) !== false ) {
+					$content = str_replace( $entity, $placeholder, $content );
+				}
 			}
 		}
 
@@ -308,16 +326,16 @@ class Url_Extractor {
 			return $content;
 		}
 
-		$entities = [
-			'quote'     => '&quot;',
-			'apos'      => '&apos;',
-			'lessthan'  => '&lt;',
-			'greatthan' => '&gt;',
-			'ampersand' => '&amp;'
+		// Restore placeholders back to safe, named entities for consistency
+		$restore_map = [
+			'QUOTE_PLACEHOLDER'     => '&quot;',
+			'APOS_PLACEHOLDER'      => '&apos;',
+			'LESSTHAN_PLACEHOLDER'  => '&lt;',
+			'GREATTHAN_PLACEHOLDER' => '&gt;',
+			'AMPERSAND_PLACEHOLDER' => '&amp;',
 		];
 
-		foreach ( $entities as $placeholder_name => $entity ) {
-			$placeholder = strtoupper( $placeholder_name ) . "_PLACEHOLDER";
+		foreach ( $restore_map as $placeholder => $entity ) {
 			if ( strpos( $content, $placeholder ) !== false ) {
 				$content = str_replace( $placeholder, $entity, $content );
 			}
