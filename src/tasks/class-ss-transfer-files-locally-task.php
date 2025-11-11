@@ -53,22 +53,22 @@ class Transfer_Files_Locally_Task extends Task {
 			// Ensure rule text files created in the archive root are copied to the local directory as well.
 			$this->transfer_rule_file( 'robots.txt' );
 			$this->transfer_rule_file( 'llms.txt' );
-			
+
 			$this->transfer_404_page( $this->destination_dir );
-			
+
 			if ( $this->options->get( 'add_feeds' ) ) {
 				$this->transfer_feed_redirect( $this->destination_dir );
 			}
 
 			// Copy Fuse.js search artifacts (index/config) for Local Directory deployment.
 			$this->transfer_search_artifacts( $this->destination_dir );
-			
+
 			if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
 				$destination_url = trailingslashit( $this->options->get_destination_url() );
 				$message         = __( 'Destination URL:', 'simply-static' ) . ' <a href="' . $destination_url . '" target="_blank">' . $destination_url . '</a>';
 				$this->save_status_message( $message, 'destination_url' );
 			}
-			
+
 			// If this is a 404-only export, ensure the activity/export log reflects a single transferred file.
 			$only_404 = get_option( 'simply-static-404-only' );
 			if ( ! empty( $only_404 ) ) {
@@ -76,9 +76,9 @@ class Transfer_Files_Locally_Task extends Task {
 				$this->save_pages_status( 0, 1 );
 				$this->save_status_message( sprintf( __( 'Transferred %d of %d files', 'simply-static' ), 1, 1 ) );
 			}
-			
+
 			do_action( 'ss_finished_transferring_files_locally', $this->destination_dir );
-			
+
 			self::delete_total_pages();
 		}
 
@@ -92,6 +92,7 @@ class Transfer_Files_Locally_Task extends Task {
 	 * they were not part of the regular pages manifest. Runs only for Local Directory transfer.
 	 *
 	 * @param string $destination_dir Absolute path to the Local Directory destination.
+	 *
 	 * @return void
 	 */
 	protected function transfer_search_artifacts( $destination_dir ) {
@@ -121,14 +122,8 @@ class Transfer_Files_Locally_Task extends Task {
 			$src = $source_dir . $basename;
 			$dst = $dest_dir . $basename;
 			if ( file_exists( $src ) ) {
-				$ok = @copy( $src, $dst );
-				if ( $ok ) {
-					Util::debug_log( '[Transfer][Fuse] Copied search artifact to Local Directory: ' . $dst );
-				} else {
-					Util::debug_log( '[Transfer][Fuse] Failed copying search artifact to Local Directory: ' . $src . ' -> ' . $dst );
-				}
+				copy( $src, $dst );
 			} else {
-				Util::debug_log( '[Transfer][Fuse] Source search artifact not found in archive: ' . $src );
 			}
 		}
 	}
@@ -256,23 +251,25 @@ class Transfer_Files_Locally_Task extends Task {
 		$archive_dir = $this->options->get_archive_dir();
 		$source      = trailingslashit( $archive_dir ) . ltrim( $filename, '/\\' );
 		$dest        = trailingslashit( $this->destination_dir ) . ltrim( $filename, '/\\' );
-		
+
 		if ( ! file_exists( $source ) ) {
 			Util::debug_log( '[Transfer] Rule file not found in archive: ' . $source );
+
 			return;
 		}
-		
+
 		// Ensure destination directory exists (root already ensured by maybe_create_local_directory)
 		$dest_dir = dirname( $dest );
 		if ( ! is_dir( $dest_dir ) ) {
 			wp_mkdir_p( $dest_dir );
 		}
-		
-		if ( ! @copy( $source, $dest ) ) {
+
+		if ( ! copy( $source, $dest ) ) {
 			Util::debug_log( '[Transfer] Failed to copy rule file from ' . $source . ' to ' . $dest );
+
 			return;
 		}
-		
+
 		Util::debug_log( '[Transfer] Copied rule file: ' . $filename . ' => ' . $dest );
 	}
 
