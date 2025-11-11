@@ -59,6 +59,9 @@ class Transfer_Files_Locally_Task extends Task {
 			if ( $this->options->get( 'add_feeds' ) ) {
 				$this->transfer_feed_redirect( $this->destination_dir );
 			}
+
+			// Copy Fuse.js search artifacts (index/config) for Local Directory deployment.
+			$this->transfer_search_artifacts( $this->destination_dir );
 			
 			if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
 				$destination_url = trailingslashit( $this->options->get_destination_url() );
@@ -80,6 +83,54 @@ class Transfer_Files_Locally_Task extends Task {
 		}
 
 		return $done;
+	}
+
+	/**
+	 * Mirror Fuse.js search artifacts from the archive into the Local Directory destination.
+	 *
+	 * This ensures fuse-index.json (and fuse-config.json if present) are deployed even if
+	 * they were not part of the regular pages manifest. Runs only for Local Directory transfer.
+	 *
+	 * @param string $destination_dir Absolute path to the Local Directory destination.
+	 * @return void
+	 */
+	protected function transfer_search_artifacts( $destination_dir ) {
+		// Read Simply Static options to determine if search is enabled and using Fuse.
+		$ss_options  = get_option( 'simply-static' );
+		$use_search  = isset( $ss_options['use_search'] ) ? (bool) $ss_options['use_search'] : false;
+		$search_type = isset( $ss_options['search_type'] ) ? $ss_options['search_type'] : 'fuse';
+
+		$enabled = apply_filters( 'ssp_fuse_copy_to_destination', ( $use_search && 'fuse' === $search_type ), $destination_dir );
+		if ( ! $enabled ) {
+			return;
+		}
+
+		// Determine source and destination paths.
+		$relative_dir = 'wp-content/uploads/simply-static/configs/';
+		$source_dir   = trailingslashit( $this->archive_dir ) . $relative_dir;
+		$dest_dir     = trailingslashit( $destination_dir ) . $relative_dir;
+
+		// Ensure destination directory exists.
+		if ( ! is_dir( $dest_dir ) ) {
+			wp_mkdir_p( $dest_dir );
+		}
+
+		$files_to_copy = array( 'fuse-index.json', 'fuse-config.json' );
+
+		foreach ( $files_to_copy as $basename ) {
+			$src = $source_dir . $basename;
+			$dst = $dest_dir . $basename;
+			if ( file_exists( $src ) ) {
+				$ok = @copy( $src, $dst );
+				if ( $ok ) {
+					Util::debug_log( '[Transfer][Fuse] Copied search artifact to Local Directory: ' . $dst );
+				} else {
+					Util::debug_log( '[Transfer][Fuse] Failed copying search artifact to Local Directory: ' . $src . ' -> ' . $dst );
+				}
+			} else {
+				Util::debug_log( '[Transfer][Fuse] Source search artifact not found in archive: ' . $src );
+			}
+		}
 	}
 
 	public function maybe_create_local_directory() {
