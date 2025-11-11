@@ -44,6 +44,10 @@ function SearchSettings() {
 
     }, [settings]);
 
+    // Derived flag for showing submit-related controls
+    // Default is now: submit button disabled by default (false)
+    const showSubmit = (settings.search_show_submit ?? settings.search_fuse_show_submit ?? false);
+
     return (<div className={"inner-settings"}>
         <Card>
             <CardHeader>
@@ -90,6 +94,67 @@ function SearchSettings() {
                         updateSetting('search_type', type);
                     }}
                 />
+
+                {/* Search UI settings (generic keys) — visible when Use Search is enabled, for both Fuse & Algolia */}
+                {useSearch && (
+                    <>
+                        <Spacer margin={3} />
+                        <ToggleControl
+                            label={__('Use Submit Button', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={__('Show or hide the submit button in the search UI.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            checked={(settings.search_show_submit ?? settings.search_fuse_show_submit ?? false)}
+                            onChange={(value) => {
+                                updateSetting('search_show_submit', value);
+                            }}
+                        />
+
+                        {showSubmit && (
+                            <>
+                                <TextControl
+                                    label={__('Submit button text', 'simply-static')}
+                                    type={"text"}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
+                                    placeholder={__('Search', 'simply-static')}
+                                    help={__('Customize the submit button text or HTML (e.g., add an icon).', 'simply-static')}
+                                    disabled={('free' === options.plan || !isPro())}
+                                    value={settings.search_submit_text ?? settings.search_fuse_submit_text}
+                                    onChange={(val) => {
+                                        updateSetting('search_submit_text', val);
+                                    }}
+                                />
+                            </>
+                        )}
+
+                        <ToggleControl
+                            label={__('Show excerpt in suggestions/results', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={__('Enable to display the excerpt below each search suggestion and result item.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            checked={(settings.search_show_excerpt ?? false)}
+                            onChange={(value) => {
+                                updateSetting('search_show_excerpt', value);
+                            }}
+                        />
+
+                        {/* Input placeholder should be independent of the submit button visibility */}
+                        <TextControl
+                            label={__('Input placeholder', 'simply-static')}
+                            type={"text"}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            placeholder={__('Search..', 'simply-static')}
+                            help={__('Customize the placeholder text for the search input.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            value={settings.search_placeholder ?? settings.search_fuse_placeholder}
+                            onChange={(val) => {
+                                updateSetting('search_placeholder', val);
+                            }}
+                        />
+                    </>
+                )}
             </CardBody>
         </Card>
         <>
@@ -233,7 +298,7 @@ function SearchSettings() {
                             type={"text"}
                             __next40pxDefaultSize
                             __nextHasNoMarginBottom
-                            help={__('Add the CSS selector of your search element here.', 'simply-static')}
+                            help={__('Add the CSS selector for the <form> element that contains your search input field.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             value={settings.fuse_selector}
                             onChange={(selector) => {
@@ -337,7 +402,7 @@ function SearchSettings() {
                             type={"text"}
                             __next40pxDefaultSize
                             __nextHasNoMarginBottom
-                            help={__('Add the CSS selector of your search element here.', 'simply-static')}
+                            help={__('Add the CSS selector for the <form> element that contains your search input field.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             value={settings.algolia_selector}
                             onChange={(selector) => {
@@ -345,7 +410,7 @@ function SearchSettings() {
                             }}
                         />
                         <Notice status="warning" isDismissible={false}>
-                            {__('If you have multiple search elements with different CSS selectors, separate them by a comma (,) such as: .search-field, .search-field2', 'simply-static')}
+                            {__('If you have multiple search elements with different CSS selectors, separate them by a comma (,) such as: .search-form, .custom-search-form', 'simply-static')}
                         </Notice>
                     </CardBody>
                 </Card>
