@@ -239,12 +239,18 @@ toplevel_page_simply-static img {
 
     .dashicon.dashicons.dashicons-admin-links {
       font-size: 15px;
-      top: 2px;
       position: relative;
     }
 
     .components-button > .dashicon {
       margin-right: 10px;
+      position: relative;
+    }
+
+    .components-card__body {
+      .components-button > .dashicon {
+        top: -2px;
+      }
     }
 
     .plugin-logo {
@@ -418,6 +424,7 @@ toplevel_page_simply-static img {
     border-color: #ddd;
     cursor: not-allowed;
   }
+
   .horizontal-token-field.components-form-token-field__input-container.is-disabled {
     background: #eee;
   }
@@ -431,6 +438,7 @@ toplevel_page_simply-static img {
     background: #eeeeee;
     cursor: not-allowed;
   }
+
   .horizontal-token-field[aria-disabled="true"] .components-form-token-field__input input::placeholder,
   .horizontal-token-field.components-form-token-field.is-disabled .components-form-token-field__input input::placeholder {
     color: #7a7a7a;

@@ -1,1 +1,426 @@
-"use strict";(globalThis.webpackChunksimplystatic_settings=globalThis.webpackChunksimplystatic_settings||[]).push([[262],{805:(t,e,i)=>{i.r(e),i.d(e,{default:()=>v});var s=i(609),a=i(121),n=i(530),o=i(945);const r=(l=(0,n.u6)(a.lB),class extends l{static shadowRootOptions={...l.shadowRootOptions};static getTemplateHTML=(t,e={})=>{const{src:i,...s}=t;return`\n        <script type="application/json" id="config">\n          ${JSON.stringify(e.config||{})}\n        <\/script>\n        ${l.getTemplateHTML(s)}\n      `};#t=null;#e=null;constructor(){super(),this.#i("config")}get config(){return this.#e}set config(t){this.#e=t}attributeChangedCallback(t,e,i){"src"!==t&&super.attributeChangedCallback(t,e,i),"src"===t&&e!=i&&this.load()}#s(){var t,e;null==(t=this.#t)||t.remove(),null==(e=this.nativeEl)||e.removeEventListener("webkitcurrentplaybacktargetiswirelesschanged",this.#a),this.api&&(this.api.detachMedia(),this.api.destroy(),this.api=null)}async load(){var t,e;const i=!this.api;if(this.#s(),this.src)if(i&&!this.#e&&(this.#e=JSON.parse((null==(t=this.shadowRoot.getElementById("config"))?void 0:t.textContent)||"{}")),o.Ay.isSupported()){switch(this.api=new o.Ay({liveDurationInfinity:!0,autoStartLoad:!1,...this.config}),await Promise.resolve(),this.api.loadSource(this.src),this.api.attachMedia(this.nativeEl),this.nativeEl.preload){case"none":{const t=()=>this.api.startLoad();this.nativeEl.addEventListener("play",t,{once:!0}),this.api.on(o.Ay.Events.DESTROYING,(()=>{this.nativeEl.removeEventListener("play",t)}));break}case"metadata":{const t=this.api.config.maxBufferLength,e=this.api.config.maxBufferSize;this.api.config.maxBufferLength=1,this.api.config.maxBufferSize=1;const i=()=>{this.api.config.maxBufferLength=t,this.api.config.maxBufferSize=e};this.nativeEl.addEventListener("play",i,{once:!0}),this.api.on(o.Ay.Events.DESTROYING,(()=>{this.nativeEl.removeEventListener("play",i)})),this.api.startLoad();break}default:this.api.startLoad()}this.nativeEl.webkitCurrentPlaybackTargetIsWireless&&this.api.stopLoad(),this.nativeEl.addEventListener("webkitcurrentplaybacktargetiswirelesschanged",this.#a),this.#t=document.createElement("source"),this.#t.setAttribute("type","application/x-mpegURL"),this.#t.setAttribute("src",this.src),this.nativeEl.disableRemotePlayback=!1,this.nativeEl.append(this.#t);const t=new WeakMap;this.api.on(o.Ay.Events.MANIFEST_PARSED,((e,i)=>{this.nativeEl.autoplay&&this.nativeEl.paused&&this.nativeEl.play().catch((t=>{console.warn("Autoplay failed:",t)})),s();let a=this.videoTracks.getTrackById("main");a||(a=this.addVideoTrack("main"),a.id="main",a.selected=!0);for(const[e,s]of i.levels.entries()){const i=a.addRendition(s.url[0],s.width,s.height,s.videoCodec,s.bitrate);t.set(s,`${e}`),i.id=`${e}`}for(let[t,e]of i.audioTracks.entries()){const i=e.default?"main":"alternative",s=this.addAudioTrack(i,e.name,e.lang);s.id=`${t}`,e.default&&(s.enabled=!0)}})),this.audioTracks.addEventListener("change",(()=>{var t;const e=+(null==(t=[...this.audioTracks].find((t=>t.enabled)))?void 0:t.id),i=this.api.audioTracks.map((t=>t.id));e!=this.api.audioTrack&&i.includes(e)&&(this.api.audioTrack=e)})),this.api.on(o.Ay.Events.LEVELS_UPDATED,((e,i)=>{const s=this.videoTracks[this.videoTracks.selectedIndex??0];if(!s)return;const a=i.levels.map((e=>t.get(e)));for(const t of this.videoRenditions)t.id&&!a.includes(t.id)&&s.removeRendition(t)}));const i=t=>{const e=t.target.selectedIndex;e!=this.api.nextLevel&&(this.api.nextLevel=e)};null==(e=this.videoRenditions)||e.addEventListener("change",i);const s=()=>{for(const t of this.videoTracks)this.removeVideoTrack(t);for(const t of this.audioTracks)this.removeAudioTrack(t)};this.api.once(o.Ay.Events.DESTROYING,s)}else await Promise.resolve(),this.nativeEl.canPlayType("application/vnd.apple.mpegurl")&&(this.nativeEl.src=this.src)}#a=()=>{var t,e,i;(null==(t=this.nativeEl)?void 0:t.webkitCurrentPlaybackTargetIsWireless)?null==(e=this.api)||e.stopLoad():null==(i=this.api)||i.startLoad()};#i(t){if(Object.prototype.hasOwnProperty.call(this,t)){const e=this[t];delete this[t],this[t]=e}}});var l;globalThis.customElements&&!globalThis.customElements.get("hls-video")&&globalThis.customElements.define("hls-video",r);var c=r,d=new Set(["style","children","ref","key","suppressContentEditableWarning","suppressHydrationWarning","dangerouslySetInnerHTML"]),u={className:"class",htmlFor:"for"};function h(t){return t.toLowerCase()}function p(t){return"boolean"==typeof t?t?"":void 0:"function"==typeof t||"object"==typeof t&&null!==t?void 0:t}function f(t,e,i){var s;t[e]=i,null==i&&e in((null==(s=globalThis.HTMLElement)?void 0:s.prototype)??{})&&t.removeAttribute(e)}var v=function({react:t,tagName:e,elementClass:i,events:s,displayName:a,defaultProps:n,toAttributeName:o=h,toAttributeValue:r=p}){const l=Number.parseInt(t.version)>=19,c=t.forwardRef(((a,c)=>{var h,v;const g=t.useRef(null),m=t.useRef(new Map),y={},E={},b={},T={};for(const[t,e]of Object.entries(a)){if(d.has(t)){b[t]=e;continue}const s=o(u[t]??t);if(i.prototype&&t in i.prototype&&!(t in((null==(h=globalThis.HTMLElement)?void 0:h.prototype)??{}))&&!(null==(v=i.observedAttributes)?void 0:v.some((t=>t===s)))){T[t]=e;continue}if(t.startsWith("on")){y[t]=e;continue}const a=r(e);if(s&&null!=a&&(E[s]=String(a),l||(b[s]=a)),s&&l){const t=p(e);b[s]=a!==t?a:e}}if("undefined"!=typeof window){for(const e in y){const i=y[e],a=e.endsWith("Capture"),n=((null==s?void 0:s[e])??e.slice(2).toLowerCase()).slice(0,a?-7:void 0);t.useLayoutEffect((()=>{const t=null==g?void 0:g.current;if(t&&"function"==typeof i)return t.addEventListener(n,i,a),()=>{t.removeEventListener(n,i,a)}}),[null==g?void 0:g.current,i])}t.useLayoutEffect((()=>{if(null===g.current)return;const t=new Map;for(const e in T)f(g.current,e,T[e]),m.current.delete(e),t.set(e,T[e]);for(const[t,e]of m.current)f(g.current,t,void 0);m.current=t}))}if("undefined"==typeof window&&(null==i?void 0:i.getTemplateHTML)&&(null==i?void 0:i.shadowRootOptions)){const{mode:e,delegatesFocus:s}=i.shadowRootOptions,n=t.createElement("template",{shadowrootmode:e,shadowrootdelegatesfocus:s,dangerouslySetInnerHTML:{__html:i.getTemplateHTML(E,a)}});b.children=[n,b.children]}return t.createElement(e,{...n,...b,ref:t.useCallback((t=>{g.current=t,"function"==typeof c?c(t):null!==c&&(c.current=t)}),[c])})}));return c.displayName=a??i.name,c}({react:s,tagName:"hls-video",elementClass:c,toAttributeName:t=>"muted"===t?"":"defaultMuted"===t?"muted":h(t)})}}]);
+"use strict";
+(globalThis["webpackChunksimplystatic_settings"] = globalThis["webpackChunksimplystatic_settings"] || []).push([["reactPlayerHls"],{
+
+/***/ "./node_modules/hls-video-element/dist/hls-video-element.js":
+/*!******************************************************************!*\
+  !*** ./node_modules/hls-video-element/dist/hls-video-element.js ***!
+  \******************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Hls: () => (/* reexport safe */ hls_js_dist_hls_mjs__WEBPACK_IMPORTED_MODULE_2__["default"]),
+/* harmony export */   HlsVideoElement: () => (/* binding */ HlsVideoElement),
+/* harmony export */   HlsVideoMixin: () => (/* binding */ HlsVideoMixin),
+/* harmony export */   "default": () => (/* binding */ hls_video_element_default)
+/* harmony export */ });
+/* harmony import */ var custom_media_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! custom-media-element */ "./node_modules/custom-media-element/dist/custom-media-element.js");
+/* harmony import */ var media_tracks__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! media-tracks */ "./node_modules/media-tracks/dist/index.js");
+/* harmony import */ var hls_js_dist_hls_mjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! hls.js/dist/hls.mjs */ "./node_modules/hls.js/dist/hls.mjs");
+
+
+
+const HlsVideoMixin = (superclass) => {
+  return class HlsVideo extends superclass {
+    static shadowRootOptions = { ...superclass.shadowRootOptions };
+    static getTemplateHTML = (attrs, props = {}) => {
+      const { src, ...rest } = attrs;
+      return `
+        <script type="application/json" id="config">
+          ${JSON.stringify(props.config || {})}
+        </script>
+        ${superclass.getTemplateHTML(rest)}
+      `;
+    };
+    #airplaySourceEl = null;
+    #config = null;
+    constructor() {
+      super();
+      this.#upgradeProperty("config");
+    }
+    get config() {
+      return this.#config;
+    }
+    set config(value) {
+      this.#config = value;
+    }
+    attributeChangedCallback(attrName, oldValue, newValue) {
+      if (attrName !== "src") {
+        super.attributeChangedCallback(attrName, oldValue, newValue);
+      }
+      if (attrName === "src" && oldValue != newValue) {
+        this.load();
+      }
+    }
+    #destroy() {
+      var _a, _b;
+      (_a = this.#airplaySourceEl) == null ? void 0 : _a.remove();
+      (_b = this.nativeEl) == null ? void 0 : _b.removeEventListener(
+        "webkitcurrentplaybacktargetiswirelesschanged",
+        this.#toggleHlsLoad
+      );
+      if (this.api) {
+        this.api.detachMedia();
+        this.api.destroy();
+        this.api = null;
+      }
+    }
+    async load() {
+      var _a, _b;
+      const isFirstLoad = !this.api;
+      this.#destroy();
+      if (!this.src) {
+        return;
+      }
+      if (isFirstLoad && !this.#config) {
+        this.#config = JSON.parse(((_a = this.shadowRoot.getElementById("config")) == null ? void 0 : _a.textContent) || "{}");
+      }
+      if (hls_js_dist_hls_mjs__WEBPACK_IMPORTED_MODULE_2__["default"].isSupported()) {
+        this.api = new hls_js_dist_hls_mjs__WEBPACK_IMPORTED_MODULE_2__["default"]({
+          // Mimic the media element with an Infinity duration for live streams.
+          liveDurationInfinity: true,
+          // Disable auto quality level/fragment loading.
+          autoStartLoad: false,
+          // Custom configuration for hls.js.
+          ...this.config
+        });
+        await Promise.resolve();
+        this.api.loadSource(this.src);
+        this.api.attachMedia(this.nativeEl);
+        switch (this.nativeEl.preload) {
+          case "none": {
+            const loadSourceOnPlay = () => this.api.startLoad();
+            this.nativeEl.addEventListener("play", loadSourceOnPlay, {
+              once: true
+            });
+            this.api.on(hls_js_dist_hls_mjs__WEBPACK_IMPORTED_MODULE_2__["default"].Events.DESTROYING, () => {
+              this.nativeEl.removeEventListener("play", loadSourceOnPlay);
+            });
+            break;
+          }
+          case "metadata": {
+            const originalLength = this.api.config.maxBufferLength;
+            const originalSize = this.api.config.maxBufferSize;
+            this.api.config.maxBufferLength = 1;
+            this.api.config.maxBufferSize = 1;
+            const increaseBufferOnPlay = () => {
+              this.api.config.maxBufferLength = originalLength;
+              this.api.config.maxBufferSize = originalSize;
+            };
+            this.nativeEl.addEventListener("play", increaseBufferOnPlay, {
+              once: true
+            });
+            this.api.on(hls_js_dist_hls_mjs__WEBPACK_IMPORTED_MODULE_2__["default"].Events.DESTROYING, () => {
+              this.nativeEl.removeEventListener("play", increaseBufferOnPlay);
+            });
+            this.api.startLoad();
+            break;
+          }
+          default:
+            this.api.startLoad();
+        }
+        if (this.nativeEl.webkitCurrentPlaybackTargetIsWireless) {
+          this.api.stopLoad();
+        }
+        this.nativeEl.addEventListener(
+          "webkitcurrentplaybacktargetiswirelesschanged",
+          this.#toggleHlsLoad
+        );
+        this.#airplaySourceEl = document.createElement("source");
+        this.#airplaySourceEl.setAttribute("type", "application/x-mpegURL");
+        this.#airplaySourceEl.setAttribute("src", this.src);
+        this.nativeEl.disableRemotePlayback = false;
+        this.nativeEl.append(this.#airplaySourceEl);
+        const levelIdMap = /* @__PURE__ */ new WeakMap();
+        this.api.on(hls_js_dist_hls_mjs__WEBPACK_IMPORTED_MODULE_2__["default"].Events.MANIFEST_PARSED, (event, data) => {
+          if (this.nativeEl.autoplay && this.nativeEl.paused) {
+            this.nativeEl.play().catch((err) => {
+              console.warn("Autoplay failed:", err);
+            });
+          }
+          removeAllMediaTracks();
+          let videoTrack = this.videoTracks.getTrackById("main");
+          if (!videoTrack) {
+            videoTrack = this.addVideoTrack("main");
+            videoTrack.id = "main";
+            videoTrack.selected = true;
+          }
+          for (const [id, level] of data.levels.entries()) {
+            const videoRendition = videoTrack.addRendition(
+              level.url[0],
+              level.width,
+              level.height,
+              level.videoCodec,
+              level.bitrate
+            );
+            levelIdMap.set(level, `${id}`);
+            videoRendition.id = `${id}`;
+          }
+          for (let [id, a] of data.audioTracks.entries()) {
+            const kind = a.default ? "main" : "alternative";
+            const audioTrack = this.addAudioTrack(kind, a.name, a.lang);
+            audioTrack.id = `${id}`;
+            if (a.default) {
+              audioTrack.enabled = true;
+            }
+          }
+        });
+        this.audioTracks.addEventListener("change", () => {
+          var _a2;
+          const audioTrackId = +((_a2 = [...this.audioTracks].find((t) => t.enabled)) == null ? void 0 : _a2.id);
+          const availableIds = this.api.audioTracks.map((t) => t.id);
+          if (audioTrackId != this.api.audioTrack && availableIds.includes(audioTrackId)) {
+            this.api.audioTrack = audioTrackId;
+          }
+        });
+        this.api.on(hls_js_dist_hls_mjs__WEBPACK_IMPORTED_MODULE_2__["default"].Events.LEVELS_UPDATED, (event, data) => {
+          const videoTrack = this.videoTracks[this.videoTracks.selectedIndex ?? 0];
+          if (!videoTrack) return;
+          const levelIds = data.levels.map((l) => levelIdMap.get(l));
+          for (const rendition of this.videoRenditions) {
+            if (rendition.id && !levelIds.includes(rendition.id)) {
+              videoTrack.removeRendition(rendition);
+            }
+          }
+        });
+        const switchRendition = (event) => {
+          const level = event.target.selectedIndex;
+          if (level != this.api.nextLevel) {
+            this.api.nextLevel = level;
+          }
+        };
+        (_b = this.videoRenditions) == null ? void 0 : _b.addEventListener("change", switchRendition);
+        const removeAllMediaTracks = () => {
+          for (const videoTrack of this.videoTracks) {
+            this.removeVideoTrack(videoTrack);
+          }
+          for (const audioTrack of this.audioTracks) {
+            this.removeAudioTrack(audioTrack);
+          }
+        };
+        this.api.once(hls_js_dist_hls_mjs__WEBPACK_IMPORTED_MODULE_2__["default"].Events.DESTROYING, removeAllMediaTracks);
+        return;
+      }
+      await Promise.resolve();
+      if (this.nativeEl.canPlayType("application/vnd.apple.mpegurl")) {
+        this.nativeEl.src = this.src;
+      }
+    }
+    #toggleHlsLoad = () => {
+      var _a, _b, _c;
+      if ((_a = this.nativeEl) == null ? void 0 : _a.webkitCurrentPlaybackTargetIsWireless) {
+        (_b = this.api) == null ? void 0 : _b.stopLoad();
+      } else {
+        (_c = this.api) == null ? void 0 : _c.startLoad();
+      }
+    };
+    // This is a pattern to update property values that are set before
+    // the custom element is upgraded.
+    // https://web.dev/custom-elements-best-practices/#make-properties-lazy
+    #upgradeProperty(prop) {
+      if (Object.prototype.hasOwnProperty.call(this, prop)) {
+        const value = this[prop];
+        delete this[prop];
+        this[prop] = value;
+      }
+    }
+  };
+};
+const HlsVideoElement = HlsVideoMixin((0,media_tracks__WEBPACK_IMPORTED_MODULE_1__.MediaTracksMixin)(custom_media_element__WEBPACK_IMPORTED_MODULE_0__.CustomVideoElement));
+if (globalThis.customElements && !globalThis.customElements.get("hls-video")) {
+  globalThis.customElements.define("hls-video", HlsVideoElement);
+}
+var hls_video_element_default = HlsVideoElement;
+
+
+
+/***/ }),
+
+/***/ "./node_modules/hls-video-element/dist/react.js":
+/*!******************************************************!*\
+  !*** ./node_modules/hls-video-element/dist/react.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ react_default)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var _hls_video_element_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./hls-video-element.js */ "./node_modules/hls-video-element/dist/hls-video-element.js");
+"use client";
+
+// dist/react.ts
+
+
+
+// ../../node_modules/ce-la-react/dist/ce-la-react.js
+var reservedReactProps = /* @__PURE__ */ new Set([
+  "style",
+  "children",
+  "ref",
+  "key",
+  "suppressContentEditableWarning",
+  "suppressHydrationWarning",
+  "dangerouslySetInnerHTML"
+]);
+var reactPropToAttrNameMap = {
+  className: "class",
+  htmlFor: "for"
+};
+function defaultToAttributeName(propName) {
+  return propName.toLowerCase();
+}
+function defaultToAttributeValue(propValue) {
+  if (typeof propValue === "boolean") return propValue ? "" : void 0;
+  if (typeof propValue === "function") return void 0;
+  if (typeof propValue === "object" && propValue !== null) return void 0;
+  return propValue;
+}
+function createComponent({
+  react: React2,
+  tagName,
+  elementClass,
+  events,
+  displayName,
+  defaultProps,
+  toAttributeName = defaultToAttributeName,
+  toAttributeValue = defaultToAttributeValue
+}) {
+  const IS_REACT_19_OR_NEWER = Number.parseInt(React2.version) >= 19;
+  const ReactComponent = React2.forwardRef((props, ref) => {
+    var _a, _b;
+    const elementRef = React2.useRef(null);
+    const prevElemPropsRef = React2.useRef(/* @__PURE__ */ new Map());
+    const eventProps = {};
+    const attrs = {};
+    const reactProps = {};
+    const elementProps = {};
+    for (const [k, v] of Object.entries(props)) {
+      if (reservedReactProps.has(k)) {
+        reactProps[k] = v;
+        continue;
+      }
+      const attrName = toAttributeName(reactPropToAttrNameMap[k] ?? k);
+      if (elementClass.prototype && k in elementClass.prototype && !(k in (((_a = globalThis.HTMLElement) == null ? void 0 : _a.prototype) ?? {})) && !((_b = elementClass.observedAttributes) == null ? void 0 : _b.some((attr) => attr === attrName))) {
+        elementProps[k] = v;
+        continue;
+      }
+      if (k.startsWith("on")) {
+        eventProps[k] = v;
+        continue;
+      }
+      const attrValue = toAttributeValue(v);
+      if (attrName && attrValue != null) {
+        attrs[attrName] = String(attrValue);
+        if (!IS_REACT_19_OR_NEWER) {
+          reactProps[attrName] = attrValue;
+        }
+      }
+      if (attrName && IS_REACT_19_OR_NEWER) {
+        const attrValueFromDefault = defaultToAttributeValue(v);
+        if (attrValue !== attrValueFromDefault) {
+          reactProps[attrName] = attrValue;
+        } else {
+          reactProps[attrName] = v;
+        }
+      }
+    }
+    if (typeof window !== "undefined") {
+      for (const propName in eventProps) {
+        const callback = eventProps[propName];
+        const useCapture = propName.endsWith("Capture");
+        const eventName = ((events == null ? void 0 : events[propName]) ?? propName.slice(2).toLowerCase()).slice(
+          0,
+          useCapture ? -7 : void 0
+        );
+        React2.useLayoutEffect(() => {
+          const eventTarget = elementRef == null ? void 0 : elementRef.current;
+          if (!eventTarget || typeof callback !== "function") return;
+          eventTarget.addEventListener(eventName, callback, useCapture);
+          return () => {
+            eventTarget.removeEventListener(eventName, callback, useCapture);
+          };
+        }, [elementRef == null ? void 0 : elementRef.current, callback]);
+      }
+      React2.useLayoutEffect(() => {
+        if (elementRef.current === null) return;
+        const newElemProps = /* @__PURE__ */ new Map();
+        for (const key in elementProps) {
+          setProperty(elementRef.current, key, elementProps[key]);
+          prevElemPropsRef.current.delete(key);
+          newElemProps.set(key, elementProps[key]);
+        }
+        for (const [key, _value] of prevElemPropsRef.current) {
+          setProperty(elementRef.current, key, void 0);
+        }
+        prevElemPropsRef.current = newElemProps;
+      });
+    }
+    if (typeof window === "undefined" && (elementClass == null ? void 0 : elementClass.getTemplateHTML) && (elementClass == null ? void 0 : elementClass.shadowRootOptions)) {
+      const { mode, delegatesFocus } = elementClass.shadowRootOptions;
+      const templateShadowRoot = React2.createElement("template", {
+        shadowrootmode: mode,
+        shadowrootdelegatesfocus: delegatesFocus,
+        dangerouslySetInnerHTML: {
+          __html: elementClass.getTemplateHTML(attrs, props)
+        }
+      });
+      reactProps.children = [templateShadowRoot, reactProps.children];
+    }
+    return React2.createElement(tagName, {
+      ...defaultProps,
+      ...reactProps,
+      ref: React2.useCallback(
+        (node) => {
+          elementRef.current = node;
+          if (typeof ref === "function") {
+            ref(node);
+          } else if (ref !== null) {
+            ref.current = node;
+          }
+        },
+        [ref]
+      )
+    });
+  });
+  ReactComponent.displayName = displayName ?? elementClass.name;
+  return ReactComponent;
+}
+function setProperty(node, name, value) {
+  var _a;
+  node[name] = value;
+  if (value == null && name in (((_a = globalThis.HTMLElement) == null ? void 0 : _a.prototype) ?? {})) {
+    node.removeAttribute(name);
+  }
+}
+
+// dist/react.ts
+var react_default = createComponent({
+  react: react__WEBPACK_IMPORTED_MODULE_0__,
+  tagName: "hls-video",
+  elementClass: _hls_video_element_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+  toAttributeName(propName) {
+    if (propName === "muted") return "";
+    if (propName === "defaultMuted") return "muted";
+    return defaultToAttributeName(propName);
+  }
+});
+
+/*! Bundled license information:
+
+ce-la-react/dist/ce-la-react.js:
+  (**
+   * @license
+   * Copyright 2018 Google LLC
+   * SPDX-License-Identifier: BSD-3-Clause
+   *
+   * Modified version of `@lit/react` for vanilla custom elements with support for SSR.
+   *)
+*/
+
+
+/***/ })
+
+}]);
+//# sourceMappingURL=reactPlayerHls.js.map?ver=4da52c70173fcac296d0

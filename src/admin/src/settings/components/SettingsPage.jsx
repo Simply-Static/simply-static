@@ -25,6 +25,7 @@ import DebugSettings from "../pages/DebugSettings";
 import IntegrationsSettings from "../pages/IntegrationsSettings";
 import Generate from "../pages/Generate";
 import Optimize from "../pages/Optimize";
+import Workflow from "../pages/Workflow";
 import {SettingsContext} from "../context/SettingsContext";
 import SidebarMultisite from "./SidebarMultisite";
 import SidebarSite from "./SidebarSite";
@@ -161,6 +162,11 @@ function SettingsPage() {
                             {activeItem === '/optimize' &&
                                 <NavigatorScreen path="/optimize">
                                     <Optimize/>
+                                </NavigatorScreen>
+                            }
+                            {activeItem === '/workflow' &&
+                                <NavigatorScreen path="/workflow">
+                                    <Workflow/>
                                 </NavigatorScreen>
                             }
                             {activeItem === '/utilities' &&

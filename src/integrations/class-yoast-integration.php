@@ -27,6 +27,10 @@ class Yoast_Integration extends Integration {
 		add_action( 'ss_dom_before_save', [ $this, 'replace_json_schema' ], 10, 2 );
 		add_filter( 'ss_additional_files', [ $this, 'maybe_add_text_files' ] );
 
+  // Allow Simply Static setting to control sitemap inclusion on Single Export.
+  // Register early so that other plugins/themes (default priority 10+) can override via the same filter.
+  add_filter( 'ssp_single_export_add_xml_sitemap', [ $this, 'maybe_enable_sitemap_single_export' ], 1 );
+
 		// Maybe update sitemap on single export.
 		$add_sitemap_single_export = apply_filters( 'ssp_single_export_add_xml_sitemap', false );
 
@@ -35,6 +39,22 @@ class Yoast_Integration extends Integration {
 		}
 
 		$this->include_file( 'handlers/class-ss-yoast-sitemap-handler.php' );
+	}
+
+	/**
+	 * Maybe enable sitemap inclusion on Single Export based on plugin setting.
+	 * Developers can still override via filters with higher priority.
+	 *
+	 * @param bool $enabled Current enabled flag from filters.
+	 *
+	 * @return bool
+	 */
+	public function maybe_enable_sitemap_single_export( $enabled ) {
+		$settings = get_option( 'simply-static' );
+		if ( is_array( $settings ) && array_key_exists( 'ss_single_export_add_xml_sitemap', $settings ) ) {
+			return (bool) $settings['ss_single_export_add_xml_sitemap'];
+		}
+		return $enabled;
 	}
 
 	/**

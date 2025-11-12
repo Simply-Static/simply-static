@@ -1,1 +1,531 @@
-"use strict";(globalThis.webpackChunksimplystatic_settings=globalThis.webpackChunksimplystatic_settings||[]).push([[771],{653:(t,e,i)=>{i.r(e),i.d(e,{default:()=>w});var n=i(609);const s="https://open.spotify.com",o=/open\.spotify\.com\/(\w+)\/(\w+)/i;function a(t,e={}){return`\n    <style>\n      :host {\n        display: inline-block;\n        min-width: 160px;\n        min-height: 80px;\n        position: relative;\n      }\n      iframe {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 100%;\n        height: 100%;\n        overflow: hidden;\n      }\n      :host(:not([controls])) {\n        display: none !important;\n      }\n    </style>\n    <iframe${function(t){let e="";for(const i in t){const n=t[i];e+=""===n?` ${i}`:` ${i}="${n}"`}return e}({src:r(t,e),scrolling:"no",frameborder:0,width:"100%",height:"100%",allow:"accelerometer; fullscreen; autoplay; encrypted-media; gyroscope; picture-in-picture"})}></iframe>\n  `}function r(t,e){var i,n,a;if(!t.src)return;const r=t.src.match(o),l=r&&r[1],d=r&&r[2],u={t:null==(i=e.config)?void 0:i.startAt,theme:"dark"===(null==(n=e.config)?void 0:n.theme)?"0":null},h=(null==(a=e.config)?void 0:a.preferVideo)?"/video":"";return`${s}/embed/${l}/${d}${h}?${function(t){return String(new URLSearchParams(function(t){let e={};for(let i in t){let n=t[i];!0===n||""===n?e[i]=1:!1===n?e[i]=0:null!=n&&(e[i]=n)}return e}(t)))}(u)}`}class l extends(globalThis.HTMLElement??class{}){static getTemplateHTML=a;static shadowRootOptions={mode:"open"};static observedAttributes=["controls","loop","src"];loadComplete=new h;#t;#e;#i;#n=!1;#s=!1;#o=!0;#a=0;#r=NaN;#l=!1;#d=null;constructor(){super(),this.#u("config")}async load(){var t,e,i;if(this.#t)return;this.#e&&(this.loadComplete=new h),this.#e=!0,await(this.#t=Promise.resolve()),this.#t=null,this.#n=!1,this.#s=!1,this.#a=0,this.#r=NaN,this.#l=!1,this.dispatchEvent(new Event("emptied"));let n=this.api;if(this.api=null,!this.src)return;this.dispatchEvent(new Event("loadstart"));const s={t:null==(t=this.config)?void 0:t.startAt,theme:"dark"===(null==(e=this.config)?void 0:e.theme)?"0":null,preferVideo:null==(i=this.config)?void 0:i.preferVideo};if(this.#i)this.api=n,this.api.iframeElement.src=r(d(this.attributes),this);else{this.#i=!0,this.shadowRoot||(this.attachShadow({mode:"open"}),this.shadowRoot.innerHTML=a(d(this.attributes),this));let t=this.shadowRoot.querySelector("iframe");const e=await async function(t,e,i){return u[t]?u[t]:e&&self[e]?Promise.resolve(self[e]):u[t]=new Promise((function(e,n){const s=document.createElement("script");s.src=t;const o=t=>e(t);i&&(self[i]=o),s.onload=()=>!1,s.onerror=n,document.head.append(s)}))}("https://open.spotify.com/embed-podcast/iframe-api/v1","SpotifyIframeApi","onSpotifyIframeApiReady");this.api=await new Promise((i=>e.createController(t,s,i))),this.api.iframeElement=t,this.api.addListener("ready",(()=>{this.dispatchEvent(new Event("loadedmetadata")),this.dispatchEvent(new Event("durationchange")),this.dispatchEvent(new Event("volumechange"))})),this.api.addListener("playback_update",(t=>this.#s&&this.#o&&(t.data.isBuffering||!t.data.isPaused)?(this.#s=!1,void(this.currentTime=1)):(t.data.duration/1e3!==this.#r&&(this.#s=!1,this.#r=t.data.duration/1e3,this.dispatchEvent(new Event("durationchange"))),t.data.position/1e3!==this.#a&&(this.#l=!1,this.#s=!1,this.#a=t.data.position/1e3,this.dispatchEvent(new Event("timeupdate"))),this.#n||this.#o||!t.data.isPaused?!this.#o||!t.data.isBuffering&&t.data.isPaused?this.#n&&!t.data.isPaused?(this.#n=!1,void this.dispatchEvent(new Event("playing"))):!this.paused&&!this.seeking&&!this.#s&&Math.ceil(this.currentTime)>=this.duration?(this.#s=!0,this.loop?void(this.currentTime=1):void(this.continuous||(this.pause(),this.dispatchEvent(new Event("ended"))))):void 0:(this.#o=!1,this.dispatchEvent(new Event("play")),this.#n=t.data.isBuffering,void(this.#n?this.dispatchEvent(new Event("waiting")):this.dispatchEvent(new Event("playing")))):(this.#o=!0,void this.dispatchEvent(new Event("pause"))))))}this.loadComplete.resolve(),await this.loadComplete}async attributeChangedCallback(t,e,i){e!==i&&("src"!==t||this.load())}async play(){var t;return this.#o=!1,this.#n=!0,this.dispatchEvent(new Event("play")),await this.loadComplete,null==(t=this.api)?void 0:t.resume()}async pause(){var t;return await this.loadComplete,null==(t=this.api)?void 0:t.pause()}get config(){return this.#d}set config(t){this.#d=t}get paused(){return this.#o??!0}get muted(){return!1}set muted(t){}get volume(){return 1}set volume(t){}get ended(){return Math.ceil(this.currentTime)>=this.duration}get seeking(){return this.#l}get loop(){return this.hasAttribute("loop")}set loop(t){this.loop!=t&&this.toggleAttribute("loop",Boolean(t))}get currentTime(){return this.#a}set currentTime(t){if(this.currentTime==t)return;this.#l=!0;let e=this.#a;this.#a=t,this.dispatchEvent(new Event("timeupdate")),this.#a=e,this.loadComplete.then((()=>{var e;null==(e=this.api)||e.seek(t)}))}get duration(){return this.#r}get src(){return this.getAttribute("src")}set src(t){this.setAttribute("src",`${t}`)}#u(t){if(Object.prototype.hasOwnProperty.call(this,t)){const e=this[t];delete this[t],this[t]=e}}}function d(t){let e={};for(let i of t)e[i.name]=i.value;return e}const u={};class h extends Promise{constructor(t=()=>{}){let e,i;super(((n,s)=>{t(n,s),e=n,i=s})),this.resolve=e,this.reject=i}}globalThis.customElements&&!globalThis.customElements.get("spotify-audio")&&globalThis.customElements.define("spotify-audio",l);var c=l,p=new Set(["style","children","ref","key","suppressContentEditableWarning","suppressHydrationWarning","dangerouslySetInnerHTML"]),f={className:"class",htmlFor:"for"};function m(t){return t.toLowerCase()}function v(t){return"boolean"==typeof t?t?"":void 0:"function"==typeof t||"object"==typeof t&&null!==t?void 0:t}function g(t,e,i){var n;t[e]=i,null==i&&e in((null==(n=globalThis.HTMLElement)?void 0:n.prototype)??{})&&t.removeAttribute(e)}var w=function({react:t,tagName:e,elementClass:i,events:n,displayName:s,defaultProps:o,toAttributeName:a=m,toAttributeValue:r=v}){const l=Number.parseInt(t.version)>=19,d=t.forwardRef(((s,d)=>{var u,h;const c=t.useRef(null),m=t.useRef(new Map),w={},y={},E={},T={};for(const[t,e]of Object.entries(s)){if(p.has(t)){E[t]=e;continue}const n=a(f[t]??t);if(i.prototype&&t in i.prototype&&!(t in((null==(u=globalThis.HTMLElement)?void 0:u.prototype)??{}))&&!(null==(h=i.observedAttributes)?void 0:h.some((t=>t===n)))){T[t]=e;continue}if(t.startsWith("on")){w[t]=e;continue}const s=r(e);if(n&&null!=s&&(y[n]=String(s),l||(E[n]=s)),n&&l){const t=v(e);E[n]=s!==t?s:e}}if("undefined"!=typeof window){for(const e in w){const i=w[e],s=e.endsWith("Capture"),o=((null==n?void 0:n[e])??e.slice(2).toLowerCase()).slice(0,s?-7:void 0);t.useLayoutEffect((()=>{const t=null==c?void 0:c.current;if(t&&"function"==typeof i)return t.addEventListener(o,i,s),()=>{t.removeEventListener(o,i,s)}}),[null==c?void 0:c.current,i])}t.useLayoutEffect((()=>{if(null===c.current)return;const t=new Map;for(const e in T)g(c.current,e,T[e]),m.current.delete(e),t.set(e,T[e]);for(const[t,e]of m.current)g(c.current,t,void 0);m.current=t}))}if("undefined"==typeof window&&(null==i?void 0:i.getTemplateHTML)&&(null==i?void 0:i.shadowRootOptions)){const{mode:e,delegatesFocus:n}=i.shadowRootOptions,o=t.createElement("template",{shadowrootmode:e,shadowrootdelegatesfocus:n,dangerouslySetInnerHTML:{__html:i.getTemplateHTML(y,s)}});E.children=[o,E.children]}return t.createElement(e,{...o,...E,ref:t.useCallback((t=>{c.current=t,"function"==typeof d?d(t):null!==d&&(d.current=t)}),[d])})}));return d.displayName=s??i.name,d}({react:n,tagName:"spotify-audio",elementClass:c,toAttributeName:t=>"muted"===t?"":"defaultMuted"===t?"muted":m(t)})}}]);
+"use strict";
+(globalThis["webpackChunksimplystatic_settings"] = globalThis["webpackChunksimplystatic_settings"] || []).push([["reactPlayerSpotify"],{
+
+/***/ "./node_modules/spotify-audio-element/dist/react.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/spotify-audio-element/dist/react.js ***!
+  \**********************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ react_default)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var _spotify_audio_element_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./spotify-audio-element.js */ "./node_modules/spotify-audio-element/dist/spotify-audio-element.js");
+"use client";
+
+// dist/react.ts
+
+
+
+// ../../node_modules/ce-la-react/dist/ce-la-react.js
+var reservedReactProps = /* @__PURE__ */ new Set([
+  "style",
+  "children",
+  "ref",
+  "key",
+  "suppressContentEditableWarning",
+  "suppressHydrationWarning",
+  "dangerouslySetInnerHTML"
+]);
+var reactPropToAttrNameMap = {
+  className: "class",
+  htmlFor: "for"
+};
+function defaultToAttributeName(propName) {
+  return propName.toLowerCase();
+}
+function defaultToAttributeValue(propValue) {
+  if (typeof propValue === "boolean") return propValue ? "" : void 0;
+  if (typeof propValue === "function") return void 0;
+  if (typeof propValue === "object" && propValue !== null) return void 0;
+  return propValue;
+}
+function createComponent({
+  react: React2,
+  tagName,
+  elementClass,
+  events,
+  displayName,
+  defaultProps,
+  toAttributeName = defaultToAttributeName,
+  toAttributeValue = defaultToAttributeValue
+}) {
+  const IS_REACT_19_OR_NEWER = Number.parseInt(React2.version) >= 19;
+  const ReactComponent = React2.forwardRef((props, ref) => {
+    var _a, _b;
+    const elementRef = React2.useRef(null);
+    const prevElemPropsRef = React2.useRef(/* @__PURE__ */ new Map());
+    const eventProps = {};
+    const attrs = {};
+    const reactProps = {};
+    const elementProps = {};
+    for (const [k, v] of Object.entries(props)) {
+      if (reservedReactProps.has(k)) {
+        reactProps[k] = v;
+        continue;
+      }
+      const attrName = toAttributeName(reactPropToAttrNameMap[k] ?? k);
+      if (elementClass.prototype && k in elementClass.prototype && !(k in (((_a = globalThis.HTMLElement) == null ? void 0 : _a.prototype) ?? {})) && !((_b = elementClass.observedAttributes) == null ? void 0 : _b.some((attr) => attr === attrName))) {
+        elementProps[k] = v;
+        continue;
+      }
+      if (k.startsWith("on")) {
+        eventProps[k] = v;
+        continue;
+      }
+      const attrValue = toAttributeValue(v);
+      if (attrName && attrValue != null) {
+        attrs[attrName] = String(attrValue);
+        if (!IS_REACT_19_OR_NEWER) {
+          reactProps[attrName] = attrValue;
+        }
+      }
+      if (attrName && IS_REACT_19_OR_NEWER) {
+        const attrValueFromDefault = defaultToAttributeValue(v);
+        if (attrValue !== attrValueFromDefault) {
+          reactProps[attrName] = attrValue;
+        } else {
+          reactProps[attrName] = v;
+        }
+      }
+    }
+    if (typeof window !== "undefined") {
+      for (const propName in eventProps) {
+        const callback = eventProps[propName];
+        const useCapture = propName.endsWith("Capture");
+        const eventName = ((events == null ? void 0 : events[propName]) ?? propName.slice(2).toLowerCase()).slice(
+          0,
+          useCapture ? -7 : void 0
+        );
+        React2.useLayoutEffect(() => {
+          const eventTarget = elementRef == null ? void 0 : elementRef.current;
+          if (!eventTarget || typeof callback !== "function") return;
+          eventTarget.addEventListener(eventName, callback, useCapture);
+          return () => {
+            eventTarget.removeEventListener(eventName, callback, useCapture);
+          };
+        }, [elementRef == null ? void 0 : elementRef.current, callback]);
+      }
+      React2.useLayoutEffect(() => {
+        if (elementRef.current === null) return;
+        const newElemProps = /* @__PURE__ */ new Map();
+        for (const key in elementProps) {
+          setProperty(elementRef.current, key, elementProps[key]);
+          prevElemPropsRef.current.delete(key);
+          newElemProps.set(key, elementProps[key]);
+        }
+        for (const [key, _value] of prevElemPropsRef.current) {
+          setProperty(elementRef.current, key, void 0);
+        }
+        prevElemPropsRef.current = newElemProps;
+      });
+    }
+    if (typeof window === "undefined" && (elementClass == null ? void 0 : elementClass.getTemplateHTML) && (elementClass == null ? void 0 : elementClass.shadowRootOptions)) {
+      const { mode, delegatesFocus } = elementClass.shadowRootOptions;
+      const templateShadowRoot = React2.createElement("template", {
+        shadowrootmode: mode,
+        shadowrootdelegatesfocus: delegatesFocus,
+        dangerouslySetInnerHTML: {
+          __html: elementClass.getTemplateHTML(attrs, props)
+        }
+      });
+      reactProps.children = [templateShadowRoot, reactProps.children];
+    }
+    return React2.createElement(tagName, {
+      ...defaultProps,
+      ...reactProps,
+      ref: React2.useCallback(
+        (node) => {
+          elementRef.current = node;
+          if (typeof ref === "function") {
+            ref(node);
+          } else if (ref !== null) {
+            ref.current = node;
+          }
+        },
+        [ref]
+      )
+    });
+  });
+  ReactComponent.displayName = displayName ?? elementClass.name;
+  return ReactComponent;
+}
+function setProperty(node, name, value) {
+  var _a;
+  node[name] = value;
+  if (value == null && name in (((_a = globalThis.HTMLElement) == null ? void 0 : _a.prototype) ?? {})) {
+    node.removeAttribute(name);
+  }
+}
+
+// dist/react.ts
+var react_default = createComponent({
+  react: react__WEBPACK_IMPORTED_MODULE_0__,
+  tagName: "spotify-audio",
+  elementClass: _spotify_audio_element_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+  toAttributeName(propName) {
+    if (propName === "muted") return "";
+    if (propName === "defaultMuted") return "muted";
+    return defaultToAttributeName(propName);
+  }
+});
+
+/*! Bundled license information:
+
+ce-la-react/dist/ce-la-react.js:
+  (**
+   * @license
+   * Copyright 2018 Google LLC
+   * SPDX-License-Identifier: BSD-3-Clause
+   *
+   * Modified version of `@lit/react` for vanilla custom elements with support for SSR.
+   *)
+*/
+
+
+/***/ }),
+
+/***/ "./node_modules/spotify-audio-element/dist/spotify-audio-element.js":
+/*!**************************************************************************!*\
+  !*** ./node_modules/spotify-audio-element/dist/spotify-audio-element.js ***!
+  \**************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ spotify_audio_element_default)
+/* harmony export */ });
+const EMBED_BASE = "https://open.spotify.com";
+const MATCH_SRC = /open\.spotify\.com\/(\w+)\/(\w+)/i;
+const API_URL = "https://open.spotify.com/embed-podcast/iframe-api/v1";
+const API_GLOBAL = "SpotifyIframeApi";
+const API_GLOBAL_READY = "onSpotifyIframeApiReady";
+function getTemplateHTML(attrs, props = {}) {
+  const iframeAttrs = {
+    src: serializeIframeUrl(attrs, props),
+    scrolling: "no",
+    frameborder: 0,
+    width: "100%",
+    height: "100%",
+    allow: "accelerometer; fullscreen; autoplay; encrypted-media; gyroscope; picture-in-picture"
+  };
+  return (
+    /*html*/
+    `
+    <style>
+      :host {
+        display: inline-block;
+        min-width: 160px;
+        min-height: 80px;
+        position: relative;
+      }
+      iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      :host(:not([controls])) {
+        display: none !important;
+      }
+    </style>
+    <iframe${serializeAttributes(iframeAttrs)}></iframe>
+  `
+  );
+}
+function serializeIframeUrl(attrs, props) {
+  var _a, _b, _c;
+  if (!attrs.src) return;
+  const matches = attrs.src.match(MATCH_SRC);
+  const type = matches && matches[1];
+  const metaId = matches && matches[2];
+  const params = {
+    t: (_a = props.config) == null ? void 0 : _a.startAt,
+    theme: ((_b = props.config) == null ? void 0 : _b.theme) === "dark" ? "0" : null
+  };
+  const videoPath = ((_c = props.config) == null ? void 0 : _c.preferVideo) ? "/video" : "";
+  return `${EMBED_BASE}/embed/${type}/${metaId}${videoPath}?${serialize(params)}`;
+}
+class SpotifyAudioElement extends (globalThis.HTMLElement ?? class {
+}) {
+  static getTemplateHTML = getTemplateHTML;
+  static shadowRootOptions = { mode: "open" };
+  static observedAttributes = [
+    "controls",
+    "loop",
+    "src"
+  ];
+  loadComplete = new PublicPromise();
+  #loadRequested;
+  #hasLoaded;
+  #isInit;
+  #isWaiting = false;
+  #closeToEnded = false;
+  #paused = true;
+  #currentTime = 0;
+  #duration = NaN;
+  #seeking = false;
+  #config = null;
+  constructor() {
+    super();
+    this.#upgradeProperty("config");
+  }
+  async load() {
+    var _a, _b, _c;
+    if (this.#loadRequested) return;
+    if (this.#hasLoaded) this.loadComplete = new PublicPromise();
+    this.#hasLoaded = true;
+    await (this.#loadRequested = Promise.resolve());
+    this.#loadRequested = null;
+    this.#isWaiting = false;
+    this.#closeToEnded = false;
+    this.#currentTime = 0;
+    this.#duration = NaN;
+    this.#seeking = false;
+    this.dispatchEvent(new Event("emptied"));
+    let oldApi = this.api;
+    this.api = null;
+    if (!this.src) {
+      return;
+    }
+    this.dispatchEvent(new Event("loadstart"));
+    const options = {
+      t: (_a = this.config) == null ? void 0 : _a.startAt,
+      theme: ((_b = this.config) == null ? void 0 : _b.theme) === "dark" ? "0" : null,
+      preferVideo: (_c = this.config) == null ? void 0 : _c.preferVideo
+    };
+    if (this.#isInit) {
+      this.api = oldApi;
+      this.api.iframeElement.src = serializeIframeUrl(namedNodeMapToObject(this.attributes), this);
+    } else {
+      this.#isInit = true;
+      if (!this.shadowRoot) {
+        this.attachShadow({ mode: "open" });
+        this.shadowRoot.innerHTML = getTemplateHTML(namedNodeMapToObject(this.attributes), this);
+      }
+      let iframe = this.shadowRoot.querySelector("iframe");
+      const Spotify = await loadScript(API_URL, API_GLOBAL, API_GLOBAL_READY);
+      this.api = await new Promise((resolve) => Spotify.createController(iframe, options, resolve));
+      this.api.iframeElement = iframe;
+      this.api.addListener("ready", () => {
+        this.dispatchEvent(new Event("loadedmetadata"));
+        this.dispatchEvent(new Event("durationchange"));
+        this.dispatchEvent(new Event("volumechange"));
+      });
+      this.api.addListener("playback_update", (event) => {
+        if (this.#closeToEnded && this.#paused && (event.data.isBuffering || !event.data.isPaused)) {
+          this.#closeToEnded = false;
+          this.currentTime = 1;
+          return;
+        }
+        if (event.data.duration / 1e3 !== this.#duration) {
+          this.#closeToEnded = false;
+          this.#duration = event.data.duration / 1e3;
+          this.dispatchEvent(new Event("durationchange"));
+        }
+        if (event.data.position / 1e3 !== this.#currentTime) {
+          this.#seeking = false;
+          this.#closeToEnded = false;
+          this.#currentTime = event.data.position / 1e3;
+          this.dispatchEvent(new Event("timeupdate"));
+        }
+        if (!this.#isWaiting && !this.#paused && event.data.isPaused) {
+          this.#paused = true;
+          this.dispatchEvent(new Event("pause"));
+          return;
+        }
+        if (this.#paused && (event.data.isBuffering || !event.data.isPaused)) {
+          this.#paused = false;
+          this.dispatchEvent(new Event("play"));
+          this.#isWaiting = event.data.isBuffering;
+          if (this.#isWaiting) {
+            this.dispatchEvent(new Event("waiting"));
+          } else {
+            this.dispatchEvent(new Event("playing"));
+          }
+          return;
+        }
+        if (this.#isWaiting && !event.data.isPaused) {
+          this.#isWaiting = false;
+          this.dispatchEvent(new Event("playing"));
+          return;
+        }
+        if (!this.paused && !this.seeking && !this.#closeToEnded && Math.ceil(this.currentTime) >= this.duration) {
+          this.#closeToEnded = true;
+          if (this.loop) {
+            this.currentTime = 1;
+            return;
+          }
+          if (!this.continuous) {
+            this.pause();
+            this.dispatchEvent(new Event("ended"));
+          }
+          return;
+        }
+      });
+    }
+    this.loadComplete.resolve();
+    await this.loadComplete;
+  }
+  async attributeChangedCallback(attrName, oldValue, newValue) {
+    if (oldValue === newValue) return;
+    switch (attrName) {
+      case "src": {
+        this.load();
+        return;
+      }
+    }
+  }
+  async play() {
+    var _a;
+    this.#paused = false;
+    this.#isWaiting = true;
+    this.dispatchEvent(new Event("play"));
+    await this.loadComplete;
+    return (_a = this.api) == null ? void 0 : _a.resume();
+  }
+  async pause() {
+    var _a;
+    await this.loadComplete;
+    return (_a = this.api) == null ? void 0 : _a.pause();
+  }
+  get config() {
+    return this.#config;
+  }
+  set config(value) {
+    this.#config = value;
+  }
+  get paused() {
+    return this.#paused ?? true;
+  }
+  get muted() {
+    return false;
+  }
+  set muted(val) {
+  }
+  get volume() {
+    return 1;
+  }
+  set volume(val) {
+  }
+  get ended() {
+    return Math.ceil(this.currentTime) >= this.duration;
+  }
+  get seeking() {
+    return this.#seeking;
+  }
+  get loop() {
+    return this.hasAttribute("loop");
+  }
+  set loop(val) {
+    if (this.loop == val) return;
+    this.toggleAttribute("loop", Boolean(val));
+  }
+  get currentTime() {
+    return this.#currentTime;
+  }
+  set currentTime(val) {
+    if (this.currentTime == val) return;
+    this.#seeking = true;
+    let oldTime = this.#currentTime;
+    this.#currentTime = val;
+    this.dispatchEvent(new Event("timeupdate"));
+    this.#currentTime = oldTime;
+    this.loadComplete.then(() => {
+      var _a;
+      (_a = this.api) == null ? void 0 : _a.seek(val);
+    });
+  }
+  get duration() {
+    return this.#duration;
+  }
+  get src() {
+    return this.getAttribute("src");
+  }
+  set src(val) {
+    this.setAttribute("src", `${val}`);
+  }
+  // This is a pattern to update property values that are set before
+  // the custom element is upgraded.
+  // https://web.dev/custom-elements-best-practices/#make-properties-lazy
+  #upgradeProperty(prop) {
+    if (Object.prototype.hasOwnProperty.call(this, prop)) {
+      const value = this[prop];
+      delete this[prop];
+      this[prop] = value;
+    }
+  }
+}
+function serializeAttributes(attrs) {
+  let html = "";
+  for (const key in attrs) {
+    const value = attrs[key];
+    if (value === "") html += ` ${key}`;
+    else html += ` ${key}="${value}"`;
+  }
+  return html;
+}
+function serialize(props) {
+  return String(new URLSearchParams(boolToBinary(props)));
+}
+function boolToBinary(props) {
+  let p = {};
+  for (let key in props) {
+    let val = props[key];
+    if (val === true || val === "") p[key] = 1;
+    else if (val === false) p[key] = 0;
+    else if (val != null) p[key] = val;
+  }
+  return p;
+}
+function namedNodeMapToObject(namedNodeMap) {
+  let obj = {};
+  for (let attr of namedNodeMap) {
+    obj[attr.name] = attr.value;
+  }
+  return obj;
+}
+const loadScriptCache = {};
+async function loadScript(src, globalName, readyFnName) {
+  if (loadScriptCache[src]) return loadScriptCache[src];
+  if (globalName && self[globalName]) {
+    return Promise.resolve(self[globalName]);
+  }
+  return loadScriptCache[src] = new Promise(function(resolve, reject) {
+    const script = document.createElement("script");
+    script.src = src;
+    const ready = (api) => resolve(api);
+    if (readyFnName) self[readyFnName] = ready;
+    script.onload = () => !readyFnName && ready();
+    script.onerror = reject;
+    document.head.append(script);
+  });
+}
+class PublicPromise extends Promise {
+  constructor(executor = () => {
+  }) {
+    let res, rej;
+    super((resolve, reject) => {
+      executor(resolve, reject);
+      res = resolve;
+      rej = reject;
+    });
+    this.resolve = res;
+    this.reject = rej;
+  }
+}
+if (globalThis.customElements && !globalThis.customElements.get("spotify-audio")) {
+  globalThis.customElements.define("spotify-audio", SpotifyAudioElement);
+}
+var spotify_audio_element_default = SpotifyAudioElement;
+
+
+
+/***/ })
+
+}]);
+//# sourceMappingURL=reactPlayerSpotify.js.map?ver=67663adaefce4a5f5e6a

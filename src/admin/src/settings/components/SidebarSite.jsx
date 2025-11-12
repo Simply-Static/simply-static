@@ -355,6 +355,14 @@ function SidebarSite( props = null ) {
                                      path="/optimize">
                         <Dashicon icon="dashboard"/> {__('Optimize', 'simply-static')}
                     </NavigatorButton>
+                    <NavigatorButton onClick={() => {
+                        setActiveItem('/workflow')
+                        setShowMobileNav(!showMobileNav);
+                    }}
+                                     className={activeItem === '/workflow' ? 'is-active-item' : ''}
+                                     path="/workflow">
+                        <Dashicon icon="randomize"/> {__('Workflow', 'simply-static')}
+                    </NavigatorButton>
                 </>
             }
         </CardBody>

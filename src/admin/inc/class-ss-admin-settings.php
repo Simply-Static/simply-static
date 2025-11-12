@@ -414,6 +414,15 @@ class Admin_Settings {
 			},
 		) );
 
+		// Public taxonomies for UI token field
+		register_rest_route( 'simplystatic/v1', '/taxonomies', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'get_taxonomies' ],
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+			},
+		) );
+
 		// Active plugins for Enhanced Crawl UI
 		register_rest_route( 'simplystatic/v1', '/active-plugins', array(
 			'methods'             => 'GET',
@@ -670,6 +679,97 @@ class Admin_Settings {
 			$settings['integrations'] = $enabled_integrations;
 		}
 
+		// Provide on-the-fly defaults for new Single Export settings if missing.
+		// Master toggle: use Single Exports (default true)
+		if ( ! array_key_exists( 'ss_use_single_exports', $settings ) ) {
+			$settings['ss_use_single_exports'] = true;
+		}
+
+		// Master toggle: Use Builds (default false) with fallback if legacy Build terms exist
+		if ( ! array_key_exists( 'ss_use_builds', $settings ) ) {
+			$settings['ss_use_builds'] = false;
+		}
+
+		// Fallback: if the site already has terms in the ssp-build taxonomy, enable Builds in the returned settings
+		// This does not persist the option; it only reflects in the UI and runtime unless saved.
+		if ( empty( $settings['ss_use_builds'] ) ) {
+			$has_build_terms = get_transient( 'simply_static_has_build_terms' );
+			if ( false === $has_build_terms ) {
+				global $wpdb;
+				$has_build_terms = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->term_taxonomy} WHERE taxonomy = %s", 'ssp-build' ) );
+				// Cache for 5 minutes to avoid repeated queries
+				set_transient( 'simply_static_has_build_terms', $has_build_terms, 5 * MINUTE_IN_SECONDS );
+			}
+			if ( $has_build_terms > 0 ) {
+				$settings['ss_use_builds'] = true;
+			}
+		}
+
+		if ( ! isset( $settings['ss_single_pages'] ) || ! is_array( $settings['ss_single_pages'] ) ) {
+			$prefill = [];
+			$front_id = get_option( 'page_on_front' );
+			if ( $front_id ) {
+				$prefill[] = (int) $front_id;
+			}
+			$blog_id = get_option( 'page_for_posts' );
+			if ( $blog_id ) {
+				$prefill[] = (int) $blog_id;
+			}
+			$settings['ss_single_pages'] = $prefill;
+		}
+
+		// Defaults for related URL toggles (match current behavior: enabled).
+		if ( ! array_key_exists( 'ss_single_include_categories', $settings ) ) {
+			$settings['ss_single_include_categories'] = true;
+		}
+		if ( ! array_key_exists( 'ss_single_include_tags', $settings ) ) {
+			$settings['ss_single_include_tags'] = true;
+		}
+		if ( ! array_key_exists( 'ss_single_include_archives', $settings ) ) {
+			$settings['ss_single_include_archives'] = true;
+		}
+		if ( ! array_key_exists( 'ss_single_include_pagination', $settings ) ) {
+			$settings['ss_single_include_pagination'] = true;
+		}
+
+		// Default for updating XML sitemap during Single Export (off by default to preserve prior behavior)
+		if ( ! array_key_exists( 'ss_single_export_add_xml_sitemap', $settings ) ) {
+			$settings['ss_single_export_add_xml_sitemap'] = false;
+		}
+
+		// New: Single Export auto-export toggle and delay
+		if ( ! array_key_exists( 'ss_single_auto_export', $settings ) ) {
+			$settings['ss_single_auto_export'] = false;
+		}
+		if ( ! array_key_exists( 'ss_single_auto_export_delay', $settings ) ) {
+			$settings['ss_single_auto_export_delay'] = 3; // seconds
+		}
+		if ( ! array_key_exists( 'ss_single_export_webhook_url', $settings ) ) {
+			$settings['ss_single_export_webhook_url'] = '';
+		}
+
+		// New: Webhook settings (URL + enabled types)
+		if ( ! array_key_exists( 'ss_webhook_url', $settings ) || empty( $settings['ss_webhook_url'] ) ) {
+			// Migrate legacy single-only webhook if present
+			$settings['ss_webhook_url'] = ! empty( $settings['ss_single_export_webhook_url'] ) ? $settings['ss_single_export_webhook_url'] : '';
+		}
+		if ( ! array_key_exists( 'ss_webhook_enabled_types', $settings ) || ! is_array( $settings['ss_webhook_enabled_types'] ) ) {
+			// If legacy single-only webhook existed, default to ['single']; else enable all by default
+			$settings['ss_webhook_enabled_types'] = ! empty( $settings['ss_single_export_webhook_url'] ) ? array( 'single' ) : array( 'export', 'update', 'build', 'single' );
+		}
+
+		// New taxonomy archives selection (defaults derived from legacy booleans)
+		if ( ! isset( $settings['ss_single_taxonomy_archives'] ) || ! is_array( $settings['ss_single_taxonomy_archives'] ) ) {
+			$tax_archives = array();
+			if ( ! isset( $settings['ss_single_include_categories'] ) || (bool) $settings['ss_single_include_categories'] ) {
+				$tax_archives[] = 'category';
+			}
+			if ( ! isset( $settings['ss_single_include_tags'] ) || (bool) $settings['ss_single_include_tags'] ) {
+				$tax_archives[] = 'post_tag';
+			}
+			$settings['ss_single_taxonomy_archives'] = array_values( array_unique( $tax_archives ) );
+		}
+
 		return $settings;
 	}
 
@@ -751,7 +851,19 @@ class Admin_Settings {
 				'minify_js_exclude'
 			];
 
-			$array_fields = [ 'integrations', 'crawlers', 'post_types', 'plugins_to_include', 'themes_to_include' ];
+			$array_fields = [ 'integrations', 'crawlers', 'post_types', 'plugins_to_include', 'themes_to_include', 'ss_single_pages', 'ss_single_taxonomy_archives', 'ss_webhook_enabled_types' ];
+
+			// Explicit boolean fields that should be normalized to true/false.
+			$boolean_fields = [
+				'ss_use_single_exports',
+				'ss_use_builds',
+				'ss_single_include_categories',
+				'ss_single_include_tags',
+				'ss_single_include_archives',
+				'ss_single_include_pagination',
+				'ss_single_export_add_xml_sitemap',
+				'ss_single_auto_export',
+			];
 
 			// Sanitize each key/value pair in options.
 			foreach ( $options as $key => $value ) {
@@ -765,6 +877,23 @@ class Admin_Settings {
 						// If not an array, initialize as empty array
 						$options[ $key ] = [];
 					}
+				} elseif ( in_array( $key, $boolean_fields ) ) {
+					// Normalize boolean flags from checkbox/toggle inputs
+					$options[ $key ] = filter_var( $value, FILTER_VALIDATE_BOOLEAN );
+				} elseif ( 'ss_single_auto_export_delay' === $key ) {
+					$options[ $key ] = max( 0, absint( $value ) );
+				} elseif ( 'ss_single_export_webhook_url' === $key ) {
+					$sanitized = esc_url_raw( $value );
+					if ( empty( $sanitized ) || ! in_array( wp_parse_url( $sanitized, PHP_URL_SCHEME ), [ 'http', 'https' ], true ) ) {
+						$sanitized = '';
+					}
+					$options[ $key ] = $sanitized;
+				} elseif ( 'ss_webhook_url' === $key ) {
+					$sanitized = esc_url_raw( $value );
+					if ( empty( $sanitized ) || ! in_array( wp_parse_url( $sanitized, PHP_URL_SCHEME ), [ 'http', 'https' ], true ) ) {
+						$sanitized = '';
+					}
+					$options[ $key ] = $sanitized;
 				} else {
 					// Exclude Basic Auth fields from sanitize.
 					if ( $key === 'http_basic_auth_username' || $key === 'http_basic_auth_password' ) {
@@ -798,12 +927,43 @@ class Admin_Settings {
 			}
 
 			// Update settings.
+			// Back-compat: if ss_webhook_url is empty but legacy ss_single_export_webhook_url is set, copy it over
+			if ( ( empty( $options['ss_webhook_url'] ) || ! isset( $options['ss_webhook_url'] ) ) && ! empty( $options['ss_single_export_webhook_url'] ) ) {
+				$options['ss_webhook_url'] = $options['ss_single_export_webhook_url'];
+				if ( empty( $options['ss_webhook_enabled_types'] ) || ! is_array( $options['ss_webhook_enabled_types'] ) ) {
+					$options['ss_webhook_enabled_types'] = array( 'single' );
+				}
+			}
+
+			// Validate webhook enabled types against allowed set
+			if ( isset( $options['ss_webhook_enabled_types'] ) && is_array( $options['ss_webhook_enabled_types'] ) ) {
+				$allowed = array( 'export', 'update', 'build', 'single' );
+				$options['ss_webhook_enabled_types'] = array_values( array_intersect( $allowed, $options['ss_webhook_enabled_types'] ) );
+			}
 			update_option( 'simply-static', $options );
 
 			return json_encode( [ 'status' => 200, 'message' => "Ok" ] );
 		}
 
 		return json_encode( [ 'status' => 400, 'message' => "No options updated." ] );
+	}
+
+	/**
+	 * Get public taxonomies for settings UI.
+	 *
+	 * @return array
+	 */
+	public function get_taxonomies() {
+		$taxonomies = get_taxonomies( [ 'public' => true ], 'objects' );
+		$list       = array();
+		if ( is_array( $taxonomies ) ) {
+			foreach ( $taxonomies as $slug => $tax ) {
+				$label   = isset( $tax->labels->name ) ? $tax->labels->name : $slug;
+				$list[] = array( 'label' => $label, 'value' => $slug );
+			}
+		}
+
+		return $list;
 	}
 
 	/**
