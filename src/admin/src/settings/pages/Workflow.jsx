@@ -146,7 +146,7 @@ function Workflow() {
     };
 
     return (
-        <Fragment>
+        <div className={"inner-settings"}>
             <Card>
                 <CardHeader>
                     <Flex>
@@ -409,7 +409,7 @@ function Workflow() {
                     </Button>
                 </div>
             )}
-        </Fragment>
+        </div>
     );
 }
 
