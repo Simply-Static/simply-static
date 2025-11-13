@@ -52,49 +52,83 @@ class SEOPress_Sitemap_Handler extends Page_Handler {
      * @return void
      */
     protected function save_xsl( $destination_dir ) {
-        // Generate XSL content once
-        Util::debug_log( 'Getting content for main-sitemap.xsl' );
-        ob_start();
-        $this->generate_xsl();
-        $xsl_content = ob_get_clean();
-        $temp_filename = wp_tempnam();
-        file_put_contents( $temp_filename, $xsl_content );
-
-        // Copy to the root directory (original behavior)
+        // Target paths for main-sitemap.xsl
         $destination_path = Util::combine_path( $destination_dir, '/main-sitemap.xsl' );
-        if ( ! file_exists( $destination_path ) ) {
-            $rename = rename( $temp_filename, $destination_path );
-            if ( $rename === false ) {
-                Util::debug_log( 'Cannot create ' . $destination_path );
-                // Create a new temp file for the second copy
-                $temp_filename = wp_tempnam();
-                file_put_contents( $temp_filename, $xsl_content );
-            } else {
-                Util::debug_log( 'Created ' . $destination_path );
-                // Create a new temp file for the second copy
-                $temp_filename = wp_tempnam();
-                file_put_contents( $temp_filename, $xsl_content );
-            }
-        }
+        $plugin_dir       = Util::combine_path( $destination_dir, '/wp-content/plugins/wp-seopress/inc/functions/sitemap' );
+        $plugin_xsl_path  = Util::combine_path( $plugin_dir, '/main-sitemap.xsl' );
 
-        // Also copy to any potential path referenced in the sitemap XML
-        // For SEOPress, we'll create a common location
-        $plugin_dir = Util::combine_path( $destination_dir, '/wp-content/plugins/wp-seopress/inc/functions/sitemap' );
-
-        // Create directory structure if it doesn't exist
+        // Ensure plugin directory exists
         if ( ! file_exists( $plugin_dir ) ) {
             wp_mkdir_p( $plugin_dir );
         }
+        
+        // Generate main-sitemap.xsl content if missing in either location
+        $need_root   = ! file_exists( $destination_path );
+        $need_plugin = ! file_exists( $plugin_xsl_path );
 
-        $plugin_xsl_path = Util::combine_path( $plugin_dir, '/main-sitemap.xsl' );
+        if ( $need_root || $need_plugin ) {
+            Util::debug_log( 'Generating content for main-sitemap.xsl' );
+            ob_start();
+            $this->generate_xsl();
+            $xsl_content = ob_get_clean();
 
-        if ( ! file_exists( $plugin_xsl_path ) ) {
-            $rename = rename( $temp_filename, $plugin_xsl_path );
-            if ( $rename === false ) {
-                Util::debug_log( 'Cannot create ' . $plugin_xsl_path );
-            } else {
-                Util::debug_log( 'Created ' . $plugin_xsl_path );
+            if ( $need_root ) {
+                if ( false === @file_put_contents( $destination_path, $xsl_content ) ) {
+                    Util::debug_log( 'Cannot create ' . $destination_path );
+                } else {
+                    Util::debug_log( 'Created ' . $destination_path );
+                }
             }
+
+            if ( $need_plugin ) {
+                if ( false === @file_put_contents( $plugin_xsl_path, $xsl_content ) ) {
+                    Util::debug_log( 'Cannot create ' . $plugin_xsl_path );
+                } else {
+                    Util::debug_log( 'Created ' . $plugin_xsl_path );
+                }
+            }
+        }
+    }
+
+    /**
+     * Mirror main-sitemap.xsl from archive into Local Directory destination.
+     * Runs on ss_before_finish_transferring_files_locally.
+     * Only copies main-sitemap.xsl (no legacy fallbacks).
+     *
+     * @param string $destination_dir
+     * @param string $archive_dir
+     * @return void
+     */
+    public static function transfer_xsl_to_local_dir( $destination_dir, $archive_dir ) : void {
+        try {
+            // Root main-sitemap.xsl
+            $src_root = Util::combine_path( $archive_dir, '/main-sitemap.xsl' );
+            $dst_root = Util::combine_path( $destination_dir, '/main-sitemap.xsl' );
+            if ( file_exists( $src_root ) ) {
+                if ( ! @copy( $src_root, $dst_root ) ) {
+                    Util::debug_log( '[SEOPress] Failed to copy main-sitemap.xsl (root): ' . $src_root . ' -> ' . $dst_root );
+                } else {
+                    Util::debug_log( '[SEOPress] Copied main-sitemap.xsl (root) to Local Directory.' );
+                }
+            }
+
+            // Plugin path main-sitemap.xsl
+            $plugin_rel_dir = '/wp-content/plugins/wp-seopress/inc/functions/sitemap';
+            $src_plugin     = Util::combine_path( $archive_dir, $plugin_rel_dir . '/main-sitemap.xsl' );
+            if ( file_exists( $src_plugin ) ) {
+                $dst_plugin_dir = Util::combine_path( $destination_dir, $plugin_rel_dir );
+                if ( ! is_dir( $dst_plugin_dir ) ) {
+                    wp_mkdir_p( $dst_plugin_dir );
+                }
+                $dst_plugin = Util::combine_path( $dst_plugin_dir, '/main-sitemap.xsl' );
+                if ( ! @copy( $src_plugin, $dst_plugin ) ) {
+                    Util::debug_log( '[SEOPress] Failed to copy main-sitemap.xsl (plugin path): ' . $src_plugin . ' -> ' . $dst_plugin );
+                } else {
+                    Util::debug_log( '[SEOPress] Copied main-sitemap.xsl (plugin path) to Local Directory.' );
+                }
+            }
+        } catch ( \Throwable $e ) {
+            Util::debug_log( '[SEOPress] Error copying main-sitemap.xsl: ' . $e->getMessage() );
         }
     }
 
@@ -232,3 +266,6 @@ class SEOPress_Sitemap_Handler extends Page_Handler {
     }
 
 }
+
+// Hook: ensure XSL is present in Local Directory before finishing transfer (Local Directory deployment)
+add_action( 'ss_before_finish_transferring_files_locally', [ '\Simply_Static\SEOPress_Sitemap_Handler', 'transfer_xsl_to_local_dir' ], 10, 2 );

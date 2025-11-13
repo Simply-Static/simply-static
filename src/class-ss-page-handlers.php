@@ -28,9 +28,10 @@ class Page_Handlers {
 	public function includes() {
 		$path = plugin_dir_path( dirname( __FILE__ ) ) . 'src/handlers/';
 		require_once $path . 'class-ss-page-handler.php';
-		require_once $path . 'class-ss-handler-404.php';
+		require_once $path . 'class-ss-404-handler.php';
 		require_once $path . 'class-ss-additional-file-handler.php';
 		require_once $path . 'class-ss-text-file-handler.php';
+		require_once $path . 'class-ss-rule-file-handler.php';
 	}
 
 	/**

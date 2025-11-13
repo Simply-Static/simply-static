@@ -50,18 +50,21 @@ class Transfer_Files_Locally_Task extends Task {
 		$done = $this->process_pages();
 
 		if ( $done ) {
-			// Ensure rule text files created in the archive root are copied to the local directory as well.
-			$this->transfer_rule_file( 'robots.txt' );
-			$this->transfer_rule_file( 'llms.txt' );
-
-			$this->transfer_404_page( $this->destination_dir );
-
 			if ( $this->options->get( 'add_feeds' ) ) {
 				$this->transfer_feed_redirect( $this->destination_dir );
 			}
 
-			// Copy Fuse.js search artifacts (index/config) for Local Directory deployment.
-			$this->transfer_search_artifacts( $this->destination_dir );
+			/**
+			 * Allow handlers to transfer any remaining files before we finish the task.
+			 *
+			 * Fires near the end of Local Directory transfer, after the page manifest and feed redirect
+			 * have been copied, but before the task is marked as finished.
+			 *
+			 * @param string               $destination_dir Absolute path to Local Directory destination.
+			 * @param string               $archive_dir     Absolute path to archive (temp) directory.
+			 * @param Transfer_Files_Locally_Task $task     The current task instance.
+			 */
+			do_action( 'ss_before_finish_transferring_files_locally', $this->destination_dir, $this->archive_dir, $this );
 
 			if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
 				$destination_url = trailingslashit( $this->options->get_destination_url() );
@@ -83,49 +86,6 @@ class Transfer_Files_Locally_Task extends Task {
 		}
 
 		return $done;
-	}
-
-	/**
-	 * Mirror Fuse.js search artifacts from the archive into the Local Directory destination.
-	 *
-	 * This ensures fuse-index.json (and fuse-config.json if present) are deployed even if
-	 * they were not part of the regular pages manifest. Runs only for Local Directory transfer.
-	 *
-	 * @param string $destination_dir Absolute path to the Local Directory destination.
-	 *
-	 * @return void
-	 */
-	protected function transfer_search_artifacts( $destination_dir ) {
-		// Read Simply Static options to determine if search is enabled and using Fuse.
-		$ss_options  = get_option( 'simply-static' );
-		$use_search  = isset( $ss_options['use_search'] ) ? (bool) $ss_options['use_search'] : false;
-		$search_type = isset( $ss_options['search_type'] ) ? $ss_options['search_type'] : 'fuse';
-
-		$enabled = apply_filters( 'ssp_fuse_copy_to_destination', ( $use_search && 'fuse' === $search_type ), $destination_dir );
-		if ( ! $enabled ) {
-			return;
-		}
-
-		// Determine source and destination paths.
-		$relative_dir = 'wp-content/uploads/simply-static/configs/';
-		$source_dir   = trailingslashit( $this->archive_dir ) . $relative_dir;
-		$dest_dir     = trailingslashit( $destination_dir ) . $relative_dir;
-
-		// Ensure destination directory exists.
-		if ( ! is_dir( $dest_dir ) ) {
-			wp_mkdir_p( $dest_dir );
-		}
-
-		$files_to_copy = array( 'fuse-index.json', 'fuse-config.json' );
-
-		foreach ( $files_to_copy as $basename ) {
-			$src = $source_dir . $basename;
-			$dst = $dest_dir . $basename;
-			if ( file_exists( $src ) ) {
-				copy( $src, $dst );
-			} else {
-			}
-		}
 	}
 
 	public function maybe_create_local_directory() {
@@ -238,70 +198,6 @@ class Transfer_Files_Locally_Task extends Task {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Transfer the 404 page if it exists.
-	 *
-	 * @param string $local_dir Path to local dir.
-	 *
-	 * @return void
-	 */
-	public function transfer_rule_file( $filename ) {
-		$archive_dir = $this->options->get_archive_dir();
-		$source      = trailingslashit( $archive_dir ) . ltrim( $filename, '/\\' );
-		$dest        = trailingslashit( $this->destination_dir ) . ltrim( $filename, '/\\' );
-
-		if ( ! file_exists( $source ) ) {
-			Util::debug_log( '[Transfer] Rule file not found in archive: ' . $source );
-
-			return;
-		}
-
-		// Ensure destination directory exists (root already ensured by maybe_create_local_directory)
-		$dest_dir = dirname( $dest );
-		if ( ! is_dir( $dest_dir ) ) {
-			wp_mkdir_p( $dest_dir );
-		}
-
-		if ( ! copy( $source, $dest ) ) {
-			Util::debug_log( '[Transfer] Failed to copy rule file from ' . $source . ' to ' . $dest );
-
-			return;
-		}
-
-		Util::debug_log( '[Transfer] Copied rule file: ' . $filename . ' => ' . $dest );
-	}
-
-	public function transfer_404_page( $local_dir ) {
-		$archive_dir = $this->options->get_archive_dir();
-		$file_path   = untrailingslashit( $archive_dir ) . DIRECTORY_SEPARATOR . '404' . DIRECTORY_SEPARATOR . 'index.html';
-
-		Util::debug_log( 'Transferring 404 Page' );
-
-		if ( ! file_exists( $file_path ) ) {
-			Util::debug_log( 'No 404 Page found at ' . $file_path );
-
-			return;
-		}
-
-		$folder_404 = untrailingslashit( $local_dir ) . DIRECTORY_SEPARATOR . '404';
-
-		if ( ! is_dir( $folder_404 ) ) {
-			wp_mkdir_p( $folder_404 );
-		}
-
-		$destination_file = $folder_404 . DIRECTORY_SEPARATOR . 'index.html';
-
-		if ( file_exists( $destination_file ) ) {
-			return;
-		}
-
-		Util::debug_log( 'Destination 404 Page found at ' . $destination_file );
-
-		$copied = copy( $file_path, $destination_file );
-
-		Util::debug_log( 'Copy: ' . $copied ? 'Success' : 'No sucess' );
 	}
 
 	/**
