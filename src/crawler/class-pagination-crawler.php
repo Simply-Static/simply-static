@@ -50,8 +50,8 @@ class Pagination_Crawler extends Crawler {
 	 *
 	 * @return array List of archive pagination URLs
 	 */
-	private function get_archive_pagination() : array {
-		$urls = [];
+ private function get_archive_pagination() : array {
+        $urls = [];
 
 		// Get selected post types from settings
 		$options = get_option( 'simply-static' );
@@ -61,16 +61,19 @@ class Pagination_Crawler extends Crawler {
 
 		// If 'post' is not in the selected post types, don't include blog pagination
 		// as blog pages typically only show posts, not other post types
-		if (empty($selected_post_types) || in_array('post', $selected_post_types)) {
-			// Get the total number of posts (only 'post' type)
-			$total_posts = wp_count_posts('post')->publish;
+  if (empty($selected_post_types) || in_array('post', $selected_post_types)) {
+            // Get the total number of posts (only 'post' type)
+            $total_posts = wp_count_posts('post')->publish;
 
-			// Get posts per page setting
-			$posts_per_page = get_option('posts_per_page');
+            // Get posts per page setting
+            $posts_per_page = (int) get_option('posts_per_page');
+            if ($posts_per_page < 1) {
+                $posts_per_page = 1;
+            }
 
-			if ($posts_per_page > 0) {
-				// Calculate the number of pages
-				$total_pages = ceil($total_posts / $posts_per_page);
+            if ($posts_per_page > 0) {
+                // Calculate the number of pages
+                $total_pages = ceil($total_posts / $posts_per_page);
 
 				// Add pagination URLs for the main blog page
 				$blog_url = get_permalink(get_option('page_for_posts'));
@@ -84,36 +87,72 @@ class Pagination_Crawler extends Crawler {
 					$urls[] = trailingslashit(rtrim($blog_url, '/')) . 'page/' . $i . '/';
 				}
 
-				// Get pagination for category archives
-				$categories = get_categories(['hide_empty' => true]);
-				foreach ($categories as $category) {
-					$category_link = get_category_link($category->term_id);
-					$category_post_count = $category->count;
-					$category_pages = ceil($category_post_count / $posts_per_page);
+                // Get pagination for category archives
+                $categories = get_categories(['hide_empty' => true]);
+                foreach ($categories as $category) {
+                    $category_link = get_category_link($category->term_id);
+                    if (is_wp_error($category_link) || empty($category_link)) {
+                        continue;
+                    }
+                    $category_post_count = (int) $category->count;
+                    $category_pages = (int) ceil($category_post_count / $posts_per_page);
 
-					for ($i = 2; $i <= $category_pages; $i++) {
-						// Use /page/N/ format instead of ?paged=N
-						$urls[] = trailingslashit(rtrim($category_link, '/')) . 'page/' . $i . '/';
-					}
-				}
+                    // Add base term link
+                    $urls[] = trailingslashit(rtrim($category_link, '/')) . '';
 
-				// Get pagination for tag archives
-				$tags = get_tags(['hide_empty' => true]);
-				foreach ($tags as $tag) {
-					$tag_link = get_tag_link($tag->term_id);
-					$tag_post_count = $tag->count;
-					$tag_pages = ceil($tag_post_count / $posts_per_page);
+                    for ($i = 2; $i <= $category_pages; $i++) {
+                        // Use /page/N/ format instead of ?paged=N
+                        $urls[] = trailingslashit(rtrim($category_link, '/')) . 'page/' . $i . '/';
+                    }
+                }
 
-					for ($i = 2; $i <= $tag_pages; $i++) {
-						// Use /page/N/ format instead of ?paged=N
-						$urls[] = trailingslashit(rtrim($tag_link, '/')) . 'page/' . $i . '/';
-					}
-				}
-			}
-		}
+                // Get pagination for tag archives
+                $tags = get_tags(['hide_empty' => true]);
+                foreach ($tags as $tag) {
+                    $tag_link = get_tag_link($tag->term_id);
+                    if (is_wp_error($tag_link) || empty($tag_link)) {
+                        continue;
+                    }
+                    $tag_post_count = (int) $tag->count;
+                    $tag_pages = (int) ceil($tag_post_count / $posts_per_page);
 
-		return $urls;
-	}
+                    // Add base term link
+                    $urls[] = trailingslashit(rtrim($tag_link, '/')) . '';
+
+                    for ($i = 2; $i <= $tag_pages; $i++) {
+                        // Use /page/N/ format instead of ?paged=N
+                        $urls[] = trailingslashit(rtrim($tag_link, '/')) . 'page/' . $i . '/';
+                    }
+                }
+
+                // Get pagination for author archives (posts only)
+                $authors = get_users([
+                    'has_published_posts' => ['post'],
+                    'fields' => ['ID'],
+                ]);
+                if (!empty($authors)) {
+                    foreach ($authors as $author) {
+                        $author_id = is_object($author) ? (int) $author->ID : (int) $author;
+                        $post_count = (int) count_user_posts($author_id, 'post', true);
+                        $author_pages = (int) ceil($post_count / $posts_per_page);
+                        $author_link = get_author_posts_url($author_id);
+                        if (empty($author_link)) {
+                            continue;
+                        }
+                        // Base author link
+                        $urls[] = trailingslashit(rtrim($author_link, '/')) . '';
+                        // Pagination pages starting from 2
+                        for ($i = 2; $i <= $author_pages; $i++) {
+                            $urls[] = trailingslashit(rtrim($author_link, '/')) . 'page/' . $i . '/';
+                        }
+                    }
+                }
+            }
+        }
+
+        // Dedupe before returning
+        return array_values(array_unique($urls));
+    }
 
 	/**
 	 * Get pagination URLs for posts with <!--nextpage--> tag
