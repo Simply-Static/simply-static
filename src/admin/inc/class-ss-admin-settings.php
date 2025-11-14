@@ -1597,7 +1597,7 @@ class Admin_Settings {
      */
     public function get_crawlers() {
         // Load the Crawlers class
-        require_once SIMPLY_STATIC_PATH . 'src/crawler/class-crawlers.php';
+        require_once SIMPLY_STATIC_PATH . 'src/crawler/class-ss-crawlers.php';
 
         // Get the crawler manager
         $crawlers = \Simply_Static\Crawlers::instance();

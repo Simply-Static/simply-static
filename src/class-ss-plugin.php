@@ -162,9 +162,9 @@ class Plugin {
 		require_once $path . 'src/background/class-ss-background-process.php';
 		require_once $path . 'src/tasks/exceptions/class-ss-pause-exception.php';
 		require_once $path . 'src/class-ss-archive-creation-job.php';
-		require_once $path . 'src/tasks/traits/class-skip-further-processing-exception.php';
-		require_once $path . 'src/tasks/traits/trait-can-process-pages.php';
-		require_once $path . 'src/tasks/traits/trait-can-transfer.php';
+		require_once $path . 'src/tasks/traits/class-ss-skip-further-processing-exception.php';
+		require_once $path . 'src/tasks/traits/trait-ss-can-process-pages.php';
+		require_once $path . 'src/tasks/traits/trait-ss-can-transfer.php';
 		require_once $path . 'src/tasks/class-ss-task.php';
 		require_once $path . 'src/tasks/class-ss-setup-task.php';
 		require_once $path . 'src/tasks/class-ss-discover-urls-task.php';

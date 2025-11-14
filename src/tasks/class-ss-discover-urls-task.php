@@ -21,7 +21,7 @@ class Discover_Urls_Task extends Task {
 		parent::__construct();
 
 		// Load the Crawlers class
-		require_once SIMPLY_STATIC_PATH . 'src/crawler/class-crawlers.php';
+		require_once SIMPLY_STATIC_PATH . 'src/crawler/class-ss-crawlers.php';
 	}
 
 	/**

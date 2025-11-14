@@ -66,10 +66,10 @@ class Crawlers {
 	 */
 	protected function load_crawlers() {
 		// Load the base crawler class
-		require_once SIMPLY_STATIC_PATH . 'src/crawler/class-crawler.php';
+		require_once SIMPLY_STATIC_PATH . 'src/crawler/class-ss-crawler.php';
 
-		// Load all crawler implementations
-		$crawler_files = glob( SIMPLY_STATIC_PATH . 'src/crawler/class-*-crawler.php' );
+		// Load all crawler implementations (with ss- prefix in filenames)
+		$crawler_files = glob( SIMPLY_STATIC_PATH . 'src/crawler/class-ss-*-crawler.php' );
 
 		Util::debug_log( "Found " . count( $crawler_files ) . " crawler files" );
 
@@ -78,6 +78,10 @@ class Crawlers {
 
 			// Get the class name from the file name
 			$class_name = str_replace( 'class-', '', basename( $file, '.php' ) );
+			// Strip optional ss- prefix from filenames (class-ss-archive-crawler.php -> archive-crawler)
+			if ( strpos( $class_name, 'ss-' ) === 0 ) {
+				$class_name = substr( $class_name, 3 );
+			}
 			$class_name = str_replace( '-', '_', $class_name );
 			$class_name = ucwords( $class_name, '_' );
 
