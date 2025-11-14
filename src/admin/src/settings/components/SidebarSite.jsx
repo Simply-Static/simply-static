@@ -36,6 +36,7 @@ function SidebarSite( props = null ) {
         isDelayed
     } = useContext(SettingsContext);
     const { activeItem, setActiveItem} = props;
+    // UAM enablement follows server-bootstrapped flag; changes require a page reload.
     const [disabledButton, setDisabledButton] = useState(false);
     const [selectedCopySite, setSelectedCopySite] = useState('current');
     const [selectablesSites, setSelectableSites] = useState([]);
@@ -292,6 +293,7 @@ function SidebarSite( props = null ) {
                 </div>
             }
             <h4 className={"settings-headline"}> {__('Tools', 'simply-static')}</h4>
+            {(!options.allowed_pages || options.allowed_pages.includes('/')) && (
             <NavigatorButton onClick={() => {
                 setActiveItem('/')
                 setShowMobileNav(!showMobileNav);
@@ -300,6 +302,8 @@ function SidebarSite( props = null ) {
                              path="/">
                 <Dashicon icon="update"/> {__('Activity Log', 'simply-static')}
             </NavigatorButton>
+            )}
+            {(!options.allowed_pages || options.allowed_pages.includes('/diagnostics')) && (
             <NavigatorButton onClick={() => {
                 setActiveItem('/diagnostics')
                 setShowMobileNav(!showMobileNav);
@@ -308,9 +312,11 @@ function SidebarSite( props = null ) {
                              path="/diagnostics">
                 <Dashicon icon="bell"/> {__('Diagnostics', 'simply-static')}
             </NavigatorButton>
+            )}
         </CardBody>
         <CardBody>
             <h4 className={"settings-headline"}> {__('Settings', 'simply-static')}</h4>
+            {(!options.allowed_pages || options.allowed_pages.includes('/general')) && (
             <NavigatorButton onClick={() => {
                 setActiveItem('/general')
                 setShowMobileNav(!showMobileNav);
@@ -319,7 +325,9 @@ function SidebarSite( props = null ) {
                              path="/general">
                 <Dashicon icon="admin-generic"/> {__('General', 'simply-static')}
             </NavigatorButton>
+            )}
             {!options.is_network && !options.hidden_settings.includes('deployment') &&
+                (!options.allowed_pages || options.allowed_pages.includes('/deployment')) && (
                 <NavigatorButton onClick={() => {
                     setActiveItem('/deployment')
                     setShowMobileNav(!showMobileNav);
@@ -328,9 +336,11 @@ function SidebarSite( props = null ) {
                                  path="/deployment">
                     <Dashicon icon="migrate"/> {__('Deploy', 'simply-static')}
                 </NavigatorButton>
+                )
             }
             {!options.is_network &&
                 <>
+                    {(!options.allowed_pages || options.allowed_pages.includes('/forms')) && (
                     <NavigatorButton onClick={() => {
                         setActiveItem('/forms')
                         setShowMobileNav(!showMobileNav);
@@ -339,6 +349,8 @@ function SidebarSite( props = null ) {
                                      path="/forms">
                         <Dashicon icon="align-center"/> {__('Forms', 'simply-static')}
                     </NavigatorButton>
+                    )}
+                    {(!options.allowed_pages || options.allowed_pages.includes('/search')) && (
                     <NavigatorButton onClick={() => {
                         setActiveItem('/search')
                         setShowMobileNav(!showMobileNav);
@@ -347,6 +359,8 @@ function SidebarSite( props = null ) {
                                      path="/search">
                         <Dashicon icon="search"/> {__('Search', 'simply-static')}
                     </NavigatorButton>
+                    )}
+                    {(!options.allowed_pages || options.allowed_pages.includes('/optimize')) && (
                     <NavigatorButton onClick={() => {
                         setActiveItem('/optimize')
                         setShowMobileNav(!showMobileNav);
@@ -355,6 +369,8 @@ function SidebarSite( props = null ) {
                                      path="/optimize">
                         <Dashicon icon="dashboard"/> {__('Optimize', 'simply-static')}
                     </NavigatorButton>
+                    )}
+                    {(!options.allowed_pages || options.allowed_pages.includes('/workflow')) && (
                     <NavigatorButton onClick={() => {
                         setActiveItem('/workflow')
                         setShowMobileNav(!showMobileNav);
@@ -363,11 +379,13 @@ function SidebarSite( props = null ) {
                                      path="/workflow">
                         <Dashicon icon="randomize"/> {__('Workflow', 'simply-static')}
                     </NavigatorButton>
+                    )}
                 </>
             }
         </CardBody>
         <CardBody>
             <h4 className={"settings-headline"}> {__('Advanced', 'simply-static')}</h4>
+            {(!options.allowed_pages || options.allowed_pages.includes('/integrations')) && (
             <NavigatorButton onClick={() => {
                 setActiveItem('/integrations')
                 setShowMobileNav(!showMobileNav);
@@ -376,6 +394,8 @@ function SidebarSite( props = null ) {
                              path="/integrations">
                 <Dashicon icon="block-default"/> {__('Integrations', 'simply-static')}
             </NavigatorButton>
+            )}
+            {(!options.allowed_pages || options.allowed_pages.includes('/utilities')) && (
             <NavigatorButton onClick={() => {
                 setActiveItem('/utilities')
                 setShowMobileNav(!showMobileNav);
@@ -384,6 +404,8 @@ function SidebarSite( props = null ) {
                              path="/utilities">
                 <Dashicon icon="admin-tools"/> {__('Utilities', 'simply-static')}
             </NavigatorButton>
+            )}
+            {(!options.allowed_pages || options.allowed_pages.includes('/debug')) && (
             <NavigatorButton onClick={() => {
                 setActiveItem('/debug')
                 setShowMobileNav(!showMobileNav);
@@ -392,6 +414,17 @@ function SidebarSite( props = null ) {
                              path="/debug">
                 <Dashicon icon="editor-help"/> {__('Debug', 'simply-static')}
             </NavigatorButton>
+            )}
+            {options.uam_enabled && (!options.allowed_pages || options.allowed_pages.includes('/uam')) && (
+            <NavigatorButton onClick={() => {
+                setActiveItem('/uam')
+                setShowMobileNav(!showMobileNav);
+            }}
+                             className={activeItem === '/uam' ? 'is-active-item' : ''}
+                             path="/uam">
+                <Dashicon icon="admin-users"/> {__('UAM', 'simply-static')}
+            </NavigatorButton>
+            )}
         </CardBody>
         <CardBody>
             <h4 className={"settings-headline"}>Learn</h4>

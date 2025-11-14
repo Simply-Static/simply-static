@@ -23,9 +23,9 @@ class SS_Adminbar_Integration extends Integration {
 	 *
 	 * @return void
 	 */
-	public function run() {
-		add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_item' ), 100 );
-		add_action( 'wp_ajax_ss_admin_get_status', array( $this, 'get_export_status' ) );
+ public function run() {
+        add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_item' ), 100 );
+        add_action( 'wp_ajax_ss_admin_get_status', array( $this, 'get_export_status' ) );
 
 		// Lightweight, inline assets only when admin bar is present.
 		add_action( 'admin_footer', array( $this, 'print_admin_bar_inline_assets' ) );
@@ -33,9 +33,9 @@ class SS_Adminbar_Integration extends Integration {
 	}
 
 	public function add_admin_bar_item( $admin_bar ) {
-		// Only show for users allowed by ss_user_capability (generate context).
-		$cap_generate = apply_filters( 'ss_user_capability', 'publish_pages', 'generate' );
-		if ( ! current_user_can( $cap_generate ) ) {
+		// Only show for users allowed by UAM for Admin Bar visibility (adminbar context).
+		$cap_adminbar = apply_filters( 'ss_user_capability', 'publish_pages', 'adminbar' );
+		if ( ! current_user_can( $cap_adminbar ) ) {
 			return;
 		}
 		// Get settings page.
@@ -76,9 +76,9 @@ class SS_Adminbar_Integration extends Integration {
 		}
 
 		// Add submenu items: Diagnostics and Settings
-		// Diagnostics (available to users who can generate static site)
-		$cap_generate = apply_filters( 'ss_user_capability', 'publish_pages', 'generate' );
-		if ( current_user_can( $cap_generate ) ) {
+		// Diagnostics (respect UAM diagnostics context)
+		$cap_diagnostics = apply_filters( 'ss_user_capability', 'publish_pages', 'diagnostics' );
+		if ( current_user_can( $cap_diagnostics ) ) {
 			$admin_bar->add_node( [
 				'id'     => 'ss-admin-bar-diagnostics',
 				'parent' => 'ss-admin-bar',
@@ -107,11 +107,11 @@ class SS_Adminbar_Integration extends Integration {
 	 *
 	 * @return void
 	 */
-	public function get_export_status() {
-		// Validate nonce.
-		if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( $_POST['security'], 'ss-admin-bar-nonce' ) ) {
-			wp_die( 'Security check failed' );
-		}
+ public function get_export_status() {
+        // Validate nonce.
+        if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( $_POST['security'], 'ss-admin-bar-nonce' ) ) {
+            wp_die( 'Security check failed' );
+        }
 
 		// Permission check aligned with admin bar visibility (generate capability)
 		$cap_generate = apply_filters( 'ss_user_capability', 'publish_pages', 'generate' );

@@ -26,12 +26,15 @@ function SettingsContextProvider(props) {
     }
 
     const saveSettings = () => {
-        apiFetch({
+        return apiFetch({
             path: '/simplystatic/v1/settings',
             method: 'POST',
             data: settings,
         }).then(resp => {
+            // Behave like all other integrations: no special reloads.
+            // Clear any queued integration markers and resolve.
             setQueuedIntegrations([]);
+            return resp;
         });
     }
 

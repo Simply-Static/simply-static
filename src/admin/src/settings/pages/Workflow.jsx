@@ -378,7 +378,6 @@ function Workflow() {
                     </p>
                 </CardBody>
             </Card>
-            <Spacer margin={10}/>
             {settingsSaved && (
                 <>
                     <Animate type="slide-in" options={{origin: 'top'}}>

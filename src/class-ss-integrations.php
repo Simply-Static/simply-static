@@ -24,6 +24,7 @@ class Integrations {
 
 	public function get_integrations() {
 		return apply_filters( 'simply_static_integrations', [
+			'ss-uam'           => SS_UAM_Integration::class,
 			'ss-adminbar'       => SS_Adminbar_Integration::class,
 			'yoast'             => Yoast_Integration::class,
 			'rank-math'         => Rank_Math_Integration::class,
@@ -62,8 +63,9 @@ class Integrations {
 		require_once $path . 'class-divi-integration.php';
 		require_once $path . 'class-cookie-yes-integration.php';
 
-		// Simply Static Pro integrations.
+		// Simply Static Pro integrations (visible in Free as samples; runnable in Pro).
 		require_once $path . 'class-pro-integration.php';
+		require_once $path . 'pro/class-uam-integration.php';
 		require_once $path . 'pro/class-github-integration.php';
 		require_once $path . 'pro/class-multilingual-integration.php';
 		require_once $path . 'pro/class-shortpixel-integration.php';

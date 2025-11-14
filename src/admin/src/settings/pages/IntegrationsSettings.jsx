@@ -6,7 +6,7 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl, ToggleControl,
+    TextControl,
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
@@ -76,7 +76,7 @@ function IntegrationsSettings() {
             </CardHeader>
             <CardBody>
                 {__('Control Integrations that will be active during the export of the static site.', 'simply-static')}
-
+                <Spacer margin={10} />
             </CardBody>
         </Card>
         <Spacer margin={5}/>

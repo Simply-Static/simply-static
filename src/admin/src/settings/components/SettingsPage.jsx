@@ -23,6 +23,7 @@ import FormSettings from "../pages/FormSettings";
 import SearchSettings from "../pages/SearchSettings";
 import DebugSettings from "../pages/DebugSettings";
 import IntegrationsSettings from "../pages/IntegrationsSettings";
+import UAMSettings from "../pages/UAMSettings";
 import Generate from "../pages/Generate";
 import Optimize from "../pages/Optimize";
 import Workflow from "../pages/Workflow";
@@ -39,11 +40,14 @@ function SettingsPage() {
         passedChecks,
         isPro,
         showMobileNav,
-        setShowMobileNav
+        setShowMobileNav,
+        settings
     } = useContext(SettingsContext);
     const [activeItem, setActiveItem] = useState({activeItem: "/"});
     const [initialPage, setInitialPage] = useState(localStorage.getItem('ss-initial-page') ? localStorage.getItem('ss-initial-page') : options.initial);
     const [initialSet, setInitialSet] = useState(false);
+
+    // UAM enablement follows server-bootstrapped flag; changes require a page reload
 
 
     useEffect(() => {
@@ -63,6 +67,8 @@ function SettingsPage() {
             }
         }
     }, [options, isRunning, isPaused]);
+
+    // No live redirect; visibility updates after settings page reload
 
     const minHeight = () => {
         return window.innerHeight - ( wpadminbar ? wpadminbar.clientHeight : 0 ) - 1;
@@ -177,6 +183,11 @@ function SettingsPage() {
                             {activeItem === '/debug' &&
                                 <NavigatorScreen path="/debug">
                                     <DebugSettings/>
+                                </NavigatorScreen>
+                            }
+                            {activeItem === '/uam' && options.uam_enabled &&
+                                <NavigatorScreen path="/uam">
+                                    <UAMSettings/>
                                 </NavigatorScreen>
                             }
                             {activeItem === '/integrations' &&
