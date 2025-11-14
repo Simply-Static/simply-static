@@ -10,8 +10,8 @@ class Multilingual_Integration extends Pro_Integration {
 	protected $id = 'multilingual';
 
 	public function __construct() {
-		$this->name = __( 'WPML - Multilingual', 'simply-static' );
-		$this->description = __( 'Integrates WPML to work with exported sites.', 'simply-static' );
+		$this->name = __( 'Multilingual', 'simply-static' );
+		$this->description = __( 'Integrates WPML, Polylang and TranslatePress to work with exported sites.', 'simply-static' );
 	}
 
 	public function dependency_active() {

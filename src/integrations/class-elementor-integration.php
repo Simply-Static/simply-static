@@ -19,7 +19,7 @@ class Elementor_Integration extends Integration {
 
 	public function __construct() {
 		$this->name        = __( 'Elementor', 'simply-static' );
-		$this->description = __( 'Exports assets required for Elementor widgets and prepares data used by them.', 'simply-static' );
+		$this->description = __( 'Exports assets required for Elementor and Elementor Pro widgets and prepares data used by them.', 'simply-static' );
 	}
 
 	/**

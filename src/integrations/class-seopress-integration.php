@@ -13,7 +13,7 @@ class SEOPress_Integration extends Integration {
 
 	public function __construct() {
 		$this->name = __( 'SEOPress', 'simply-static' );
-		$this->description = __( 'Adds sitemaps to generated static files.', 'simply-static' );
+		$this->description = __( 'Adds XML sitemaps to generated static files.', 'simply-static' );
 	}
 
 	/**

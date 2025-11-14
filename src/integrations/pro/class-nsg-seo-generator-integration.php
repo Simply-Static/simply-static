@@ -11,7 +11,7 @@ class Nsg_SEO_Generator_Integration extends Pro_Integration {
 
 	public function __construct() {
 		$this->name = __( 'SEO Generator', 'simply-static' );
-		$this->description = __( 'Integrates with the SEO Generator plugin (Pro). Enable in Simply Static Pro to crawl generated URLs.', 'simply-static' );
+		$this->description = __( 'Efficiently crawl, queue and export pSEO websites with this integration.', 'simply-static' );
 		$this->active_by_default = false;
 	}
 
