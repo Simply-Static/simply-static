@@ -26,15 +26,17 @@ function SettingsContextProvider(props) {
     }
 
     const saveSettings = () => {
+        // If there are queued integrations that require a reload, capture before save.
+        const shouldReload = queuedIntegrations && queuedIntegrations.length > 0;
+
         return apiFetch({
             path: '/simplystatic/v1/settings',
             method: 'POST',
             data: settings,
         }).then(resp => {
-            // Behave like all other integrations: no special reloads.
-            // Clear any queued integration markers and resolve.
+            // Clear any queued integration markers and resolve with reload hint.
             setQueuedIntegrations([]);
-            return resp;
+            return { resp, shouldReload };
         });
     }
 
@@ -156,16 +158,30 @@ function SettingsContextProvider(props) {
         return false;
     }
 
-    const integrationRequiresSaving = (integration) => {
-        /**
-         * @todo make it defined inside integration classes when more come.
-         * @type {string[]}
-         */
-        const integrations = [
-            'environments'
-        ]
+    // Robustly resolve an integration object by id across array/object shapes
+    function getIntegrationById(id) {
+        try {
+            const list = options && options.integrations;
+            if (!list) return null;
+            // If it's an array, find by .id
+            if (Array.isArray(list)) {
+                for (let i = 0; i < list.length; i++) {
+                    const it = list[i];
+                    if (it && it.id === id) return it;
+                }
+                return null;
+            }
+            // Otherwise assume object keyed by id
+            return list[id] || null;
+        } catch (e) {
+            return null;
+        }
+    }
 
-        return integrations.indexOf(integration) >= 0;
+    const integrationRequiresSaving = (integration) => {
+        // Defined per integration in PHP via Integration::$requires_ui_reload
+        const integ = getIntegrationById(integration);
+        return !!(integ && integ.requires_ui_reload);
     }
 
     const maybeQueueIntegration = (integration) => {
@@ -178,8 +194,13 @@ function SettingsContextProvider(props) {
             return;
         }
 
-        queuedIntegrations.push(integration);
-        setQueuedIntegrations(queuedIntegrations);
+        // Use functional update to avoid mutating state in place
+        setQueuedIntegrations(prev => {
+            if (prev && prev.indexOf(integration) >= 0) {
+                return prev;
+            }
+            return [ ...(prev || []), integration ];
+        });
     }
 
     const maybeUnqueueIntegration = (integration) => {
@@ -187,18 +208,15 @@ function SettingsContextProvider(props) {
             return;
         }
 
-        // Already queued.
+        // Already queued?
         if (!isQueuedIntegration(integration)) {
             return;
         }
 
-        const index = queuedIntegrations.indexOf(integration);
-        if (index < 0) {
-            return;
-        }
-
-        queuedIntegrations.splice(index, 1);
-        setQueuedIntegrations(queuedIntegrations);
+        // Use functional update to create a new array without the integration
+        setQueuedIntegrations(prev => {
+            return (prev || []).filter(id => id !== integration);
+        });
     }
 
     const canRunIntegration = (integration) => {
@@ -239,6 +257,8 @@ function SettingsContextProvider(props) {
   useInterval(() => {
         checkIfRunning();
     }, isRunning || isDelayed ? 5000 : null);
+
+    // Removed legacy redirect marker handler; router uses 'ss-initial-page' on bootstrap
 
     useEffect(() => {
         // If current_settings is available in the options object, use it instead of fetching from the API
@@ -287,6 +307,7 @@ function SettingsContextProvider(props) {
                 maybeQueueIntegration,
                 maybeUnqueueIntegration,
                 isQueuedIntegration,
+                getIntegrationById,
                 showMobileNav,
                 setShowMobileNav,
                 isDelayed

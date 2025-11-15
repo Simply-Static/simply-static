@@ -6,20 +6,46 @@ import {
     __experimentalSpacer as Spacer,
     Notice,
     Animate,
-    TextControl,
 } from "@wordpress/components";
-import {useContext, useEffect, useState} from '@wordpress/element';
+import {useContext} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
 import Integration from "../components/Integration";
 
 const {__} = wp.i18n;
 
 function IntegrationsSettings() {
-    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved, maybeQueueIntegration, maybeUnqueueIntegration} = useContext(SettingsContext);
+    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved, maybeQueueIntegration} = useContext(SettingsContext);
 
-    const setSavingSettings = () => {
-        saveSettings();
-        setSettingsSaved(true);
+    const setSavingSettings = async () => {
+        try {
+            const { shouldReload } = await saveSettings();
+            setSettingsSaved(true);
+            if (shouldReload) {
+                // Give the success notice a brief moment, then reload to reflect UI changes
+                // and return to the Integrations page route afterwards.
+                setTimeout(() => {
+                    try {
+                        if (typeof window !== 'undefined') {
+                            // Persist redirect target so we can restore it deterministically after reload.
+                            const target = '/integrations';
+                            if (window.localStorage) {
+                                try {
+                                    // Explicitly set the initial-page key consumed by SettingsPage on mount
+                                    // so the NavigatorProvider starts at the Integrations route after reload.
+                                    window.localStorage.setItem('ss-initial-page', target);
+                                } catch (e) {}
+                            }
+                        }
+                    } catch (e) {
+                        // ignore and proceed to reload
+                    }
+                    window.location.reload();
+                }, 400);
+                return;
+            }
+        } catch (e) {
+            // noop; keep previous behavior
+        }
 
         setTimeout(function () {
             setSettingsSaved(false);
@@ -54,7 +80,9 @@ function IntegrationsSettings() {
 
         integrations.splice(index, 1);
         updateSetting( 'integrations', integrations );
-        maybeUnqueueIntegration(integration);
+        // Deactivation may also require an immediate UI reload (e.g., hiding UI pieces)
+        // So we treat deactivation the same as activation for reload-flagged integrations
+        maybeQueueIntegration(integration);
     }
 
     const toggleIntegration = ( integration, value ) => {

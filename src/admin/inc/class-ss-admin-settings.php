@@ -273,11 +273,20 @@ class Admin_Settings {
                         'builds'           => array(),
                         'hidden_settings'  => apply_filters( 'ss_hidden_settings', array() ),
                         'last_export_end'  => $options->get( 'archive_end_time' ),
-                        'integrations'     => array_map( function ( $item ) {
-                            $object = new $item;
-
-                            return $object->js_object();
-                        }, Plugin::instance()->get_integrations() ),
+                        // Build integrations as an associative array keyed by integration ID
+                        // to make lookups reliable in the admin app (no numeric reindexing).
+                        'integrations'     => ( function () {
+                            $out = array();
+                            $items = Plugin::instance()->get_integrations(); // [ id => class ]
+                            foreach ( $items as $id => $class ) {
+                                $object       = new $class();
+                                $js           = $object->js_object();
+                                // Ensure the id is present and matches the key
+                                $js['id']     = isset( $js['id'] ) && $js['id'] ? $js['id'] : $id;
+                                $out[ $id ]   = $js;
+                            }
+                            return $out;
+                        } )(),
                     // Add the current settings to the args
                         'current_settings' => $current_settings,
                         'allowed_pages'    => $allowed_pages,
@@ -286,6 +295,8 @@ class Admin_Settings {
         );
 
         if ( defined( 'SIMPLY_STATIC_PRO_VERSION' ) ) {
+            // Mark plan as Pro when the Pro plugin is active so the admin UI can enable Pro-only features/toggles.
+            $args['plan'] = 'pro';
             $args['version_pro'] = SIMPLY_STATIC_PRO_VERSION;
 
             // Pass in additional data.

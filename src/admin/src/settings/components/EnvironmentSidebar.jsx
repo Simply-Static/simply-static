@@ -1,34 +1,60 @@
 import {Button, Flex, FlexItem, SelectControl} from "@wordpress/components";
-import {useEffect, useState} from "@wordpress/element";
+import {useContext, useEffect, useState} from "@wordpress/element";
 import EnvironmentForm from "./Environments/EnvironmentForm";
 import EnvironmentDropdown from "./Environments/EnvironmentsDropdown";
 import apiFetch from "@wordpress/api-fetch";
+import {SettingsContext} from "../context/SettingsContext";
 
 const {__} = wp.i18n;
 
 export default function EnvironmentSidebar({ getSettings, isRunning }) {
+    const { getIntegrationById } = useContext(SettingsContext);
+    // Helper: determine if Environments feature is available (Pro + enabled)
+    const isEnvironmentsAvailable = () => {
+        try {
+            if (typeof options === 'undefined') return false;
+            if (options.plan !== 'pro') return false;
+            const env = getIntegrationById ? getIntegrationById('environments') : null;
+            if (!env) return false;
+            // Prefer explicit active flag when present, otherwise fallback to can_run
+            return !!(env.active || env.can_run);
+        } catch (e) {
+            return false;
+        }
+    }
     const [selectedEnvironment, setSelectedEnvironment] = useState('');
     const [selectableEnvironments, setSelectableEnvironments] = useState([]);
     const [showingEnvironmentForm, setShowingEnvironmentForm] = useState(false);
     const [changingEnvironment, setChangingEnvironment] = useState(false);
 
     useEffect(() => {
+        if (!isEnvironmentsAvailable()) {
+            return;
+        }
         apiFetch({
             path: '/simplystatic/v1/environment',
             method: 'GET',
-        }).then((resp) => {
-            let environments = Object.keys(resp.environments).map(function (version) {
-                return {label: resp.environments[version], value: version}
-            });
-
-            setSelectableEnvironments( environments );
-            setSelectedEnvironment(resp.current_environment);
-
         })
+            .then((resp) => {
+                let environments = Object.keys(resp.environments).map(function (version) {
+                    return {label: resp.environments[version], value: version}
+                });
+
+                setSelectableEnvironments( environments );
+                setSelectedEnvironment(resp.current_environment);
+            })
+            .catch((err) => {
+                // Swallow missing route errors gracefully when Pro is not active
+                // or the endpoint is unavailable.
+            });
     }, []);
 
     const deleteCurrentVersion = () => {
         setChangingEnvironment(true);
+        if (!isEnvironmentsAvailable()) {
+            setChangingEnvironment(false);
+            return;
+        }
         apiFetch({
             path: '/simplystatic/v1/environment',
             method: 'DELETE',
@@ -51,6 +77,10 @@ export default function EnvironmentSidebar({ getSettings, isRunning }) {
 
     const updateCurrentVersion = ( version ) => {
         setChangingEnvironment(true);
+        if (!isEnvironmentsAvailable()) {
+            setChangingEnvironment(false);
+            return;
+        }
         apiFetch({
             path: '/simplystatic/v1/environment',
             method: 'PUT',

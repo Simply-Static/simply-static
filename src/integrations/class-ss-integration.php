@@ -45,7 +45,15 @@ abstract class Integration {
 	 *
 	 * @var bool
 	 */
-	protected $hidden = false;
+ protected $hidden = false;
+
+ /**
+  * Whether enabling/disabling this integration requires a full admin UI reload
+  * to reflect changes immediately (e.g., UI components appear/disappear).
+  *
+  * @var bool
+  */
+ protected $requires_ui_reload = false;
 
 	/**
 	 * Load the integration.
@@ -151,16 +159,17 @@ abstract class Integration {
 	 *
 	 * @return array
 	 */
-	public function js_object() {
-		return [
-			'id'            => $this->id,
-			'name'          => $this->name,
-			'description'   => $this->description,
-			'active'        => $this->is_active(),
-			'pro'           => $this->is_pro(),
-			'can_run'       => $this->dependency_active(),
-			'always_active' => $this->always_active,
-			'hidden'        => $this->hidden
-		];
-	}
+    public function js_object() {
+        return [
+            'id'            => $this->id,
+            'name'          => $this->name,
+            'description'   => $this->description,
+            'active'        => $this->is_active(),
+            'pro'           => $this->is_pro(),
+            'can_run'       => $this->dependency_active(),
+            'always_active' => $this->always_active,
+            'hidden'        => $this->hidden,
+            'requires_ui_reload' => (bool) $this->requires_ui_reload,
+        ];
+    }
 }
