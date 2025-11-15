@@ -5,12 +5,13 @@ import {
     __experimentalSpacer as Spacer,
     Flex, FlexItem, SelectControl, Button,
 } from "@wordpress/components";
-import {useContext, useState} from '@wordpress/element';
+import {useContext} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
 import ActivityLog from "../components/ActivityLog";
 import ExportLog from "../components/ExportLog";
 import LogButtons from "../components/LogButtons";
 import Sites from "../components/Sites";
+import BFBanner from "../components/Marketing/BFBanner";
 
 const {__} = wp.i18n;
 
@@ -20,6 +21,7 @@ function Generate() {
     return (<div className={"inner-settings"}>
         {!options.is_network &&
             <>
+                <BFBanner />
                 <ActivityLog/>
                 <Spacer margin={5}/>
             </>
