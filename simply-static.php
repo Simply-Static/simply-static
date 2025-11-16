@@ -70,30 +70,63 @@ if ( ! function_exists( 'simply_static_run_plugin' ) ) {
 		}
 	}
 
-	// Update required?
-	if ( defined( 'SIMPLY_STATIC_PRO_VERSION' ) && version_compare( SIMPLY_STATIC_PRO_VERSION, '1.6.3.2', '<' ) ) {
-		// Site notice.
-		add_action(
-			'admin_notices',
-			function () {
-				$message = esc_html__( 'You need to update Simply Static Pro to version 1.6.3.2 before continuing to use Simply Static, as we made significant changes requiring an upgrade.', 'simply-static' );
-				echo wp_kses_post( '<div class="notice notice-error"><p>' . $message . '</p></div>' );
-			}
-		);
+ // Enforce Pro compatibility for Simply Static >= 3.5.2.
+ // When Simply Static is >= 3.5.2, we require Simply Static Pro >= 2.0.1.
+ add_action( 'plugins_loaded', function () {
+     if ( ! defined( 'SIMPLY_STATIC_VERSION' ) || version_compare( SIMPLY_STATIC_VERSION, '3.5.2', '<' ) ) {
+         return;
+     }
 
-		// Network notice.
-		if ( function_exists( 'is_network_admin' ) ) {
-			if ( is_network_admin() ) {
-				add_action(
-					'network_admin_notices',
-					function () {
-						$message = esc_html__( 'You need to update Simply Static Pro to version  1.6.3.2 before continuing to use Simply Static, as we made significant changes requiring an upgrade.', 'simply-static' );
-						echo wp_kses_post( '<div class="notice notice-error"><p>' . $message . '</p></div>' );
-					}
-				);
-			}
-		}
-	}
+     // Bail if Pro isn't active at all.
+     if ( ! function_exists( 'deactivate_plugins' ) || ! function_exists( 'is_plugin_active' ) || ! function_exists( 'is_plugin_active_for_network' ) ) {
+         require_once ABSPATH . 'wp-admin/includes/plugin.php';
+     }
+
+     $pro_basename  = 'simply-static-pro/simply-static-pro.php';
+     $pro_active    = function_exists( 'is_plugin_active' ) && is_plugin_active( $pro_basename );
+     $pro_netactive = function_exists( 'is_plugin_active_for_network' ) && is_plugin_active_for_network( $pro_basename );
+
+     if ( ! $pro_active && ! $pro_netactive ) {
+         return; // Pro not active; nothing to enforce.
+     }
+
+     // If Pro is active but version is missing or too low, deactivate and notify.
+     if ( ! defined( 'SIMPLY_STATIC_PRO_VERSION' ) || version_compare( SIMPLY_STATIC_PRO_VERSION, '2.0.1', '<' ) ) {
+         $network_wide = $pro_netactive;
+         deactivate_plugins( $pro_basename, false, $network_wide );
+
+         // Prevent Pro boot during current request if it already hooked into plugins_loaded.
+         if ( function_exists( 'ssp_run_plugin' ) ) {
+             remove_action( 'plugins_loaded', 'ssp_run_plugin' );
+         }
+
+         // Site admin notice.
+         add_action(
+             'admin_notices',
+             function () {
+                 $message = sprintf(
+                     /* translators: 1: required Simply Static Pro version */
+                     esc_html__( 'Simply Static Pro has been deactivated because it is not compatible with this version of Simply Static. Please update Simply Static Pro to at least version %1$s and then reactivate it.', 'simply-static' ),
+                     '2.0.1'
+                 );
+                 echo wp_kses_post( '<div class="notice notice-error"><p>' . $message . '</p></div>' );
+             }
+         );
+
+         // Network admin notice (multisite).
+         add_action(
+             'network_admin_notices',
+             function () {
+                 $message = sprintf(
+                     /* translators: 1: required Simply Static Pro version */
+                     esc_html__( 'Simply Static Pro has been deactivated network-wide because it is not compatible with this version of Simply Static. Please update Simply Static Pro to at least version %1$s and then reactivate it.', 'simply-static' ),
+                     '2.0.1'
+                 );
+                 echo wp_kses_post( '<div class="notice notice-error"><p>' . $message . '</p></div>' );
+             }
+         );
+     }
+ }, 1 );
 }
 
 register_deactivation_hook( __FILE__, 'simply_static_plugin_deactivate' );
