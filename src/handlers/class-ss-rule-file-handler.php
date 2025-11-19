@@ -24,6 +24,19 @@ class Rule_File_Handler {
      */
     public static function transfer_rule_files( $destination_dir, $archive_dir ) : void {
         $filenames = apply_filters( 'ss_rule_files_to_transfer', array( 'robots.txt', 'llms.txt' ) );
+
+        // Respect global include flags so site owners can disable transferring these files entirely.
+        $include_robots = (bool) apply_filters( 'ss_include_robots_txt_in_export', true );
+        $include_llms   = (bool) apply_filters( 'ss_include_llms_txt_in_export', true );
+
+        if ( ! $include_robots ) {
+            $filenames = array_values( array_diff( (array) $filenames, array( 'robots.txt' ) ) );
+            Util::debug_log( '[Rule File] robots.txt transfer disabled via ss_include_robots_txt_in_export' );
+        }
+        if ( ! $include_llms ) {
+            $filenames = array_values( array_diff( (array) $filenames, array( 'llms.txt' ) ) );
+            Util::debug_log( '[Rule File] llms.txt transfer disabled via ss_include_llms_txt_in_export' );
+        }
         if ( ! is_array( $filenames ) || empty( $filenames ) ) {
             return;
         }

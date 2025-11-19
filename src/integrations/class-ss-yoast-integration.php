@@ -281,11 +281,15 @@ class Yoast_Integration extends Integration {
 	public function maybe_add_text_files( $additional_files ) {
 		$additional_files = is_array( $additional_files ) ? $additional_files : [];
 
+		// Global flags to allow disabling robots.txt and llms.txt entirely.
+		$include_robots = (bool) apply_filters( 'ss_include_robots_txt_in_export', true );
+		$include_llms   = (bool) apply_filters( 'ss_include_llms_txt_in_export', true );
+
 		$robots_physical = ABSPATH . 'robots.txt';
 		$llms_physical   = ABSPATH . 'llms.txt';
 
 		// If a physical llms.txt exists in the WP root, ensure it is exported with URL replacements.
-		if ( file_exists( $llms_physical ) ) {
+		if ( $include_llms && file_exists( $llms_physical ) ) {
 			$body = @file_get_contents( $llms_physical );
 			if ( is_string( $body ) && $body !== '' ) {
 				$body = $this->replace_urls_in_text( $body );
@@ -294,6 +298,8 @@ class Yoast_Integration extends Integration {
 					$this->run_text_file_handler( 'llms.txt' );
 				}
 			}
+		} elseif ( ! $include_llms ) {
+			Util::debug_log( '[Yoast] llms.txt generation disabled via ss_include_llms_txt_in_export' );
 		}
 
 		$archive_dir = Options::instance()->get_archive_dir();
@@ -302,7 +308,7 @@ class Yoast_Integration extends Integration {
 		}
 
 		// robots.txt via public endpoint
-		if ( ! file_exists( $robots_physical ) ) {
+		if ( $include_robots && ! file_exists( $robots_physical ) ) {
 			$robots_url = home_url( '/robots.txt' );
 			$response   = wp_remote_get( $robots_url, [ 'timeout' => 20 ] );
 			if ( ! is_wp_error( $response ) && (int) wp_remote_retrieve_response_code( $response ) === 200 ) {
@@ -316,10 +322,12 @@ class Yoast_Integration extends Integration {
 					}
 				}
 			}
+		} elseif ( ! $include_robots ) {
+			Util::debug_log( '[Yoast] robots.txt generation disabled via ss_include_robots_txt_in_export' );
 		}
 
 		// llms.txt via public endpoint (if available)
-		if ( ! file_exists( $llms_physical ) ) {
+		if ( $include_llms && ! file_exists( $llms_physical ) ) {
 			$llms_url = home_url( '/llms.txt' );
 			$response = wp_remote_get( $llms_url, [ 'timeout' => 20 ] );
 			if ( ! is_wp_error( $response ) && (int) wp_remote_retrieve_response_code( $response ) === 200 ) {
@@ -333,6 +341,8 @@ class Yoast_Integration extends Integration {
 					}
 				}
 			}
+		} elseif ( ! $include_llms ) {
+			Util::debug_log( '[Yoast] llms.txt generation disabled via ss_include_llms_txt_in_export' );
 		}
 
 		return $additional_files;

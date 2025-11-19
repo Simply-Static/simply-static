@@ -47,26 +47,30 @@ class Rank_Math_Integration extends Integration {
 	 * @param array $additional_files
 	 * @return array
 	 */
-	public function maybe_add_text_files( $additional_files ) {
-		// Ensure we have an array to work with.
-		$additional_files = is_array( $additional_files ) ? $additional_files : [];
+ public function maybe_add_text_files( $additional_files ) {
+        // Ensure we have an array to work with.
+        $additional_files = is_array( $additional_files ) ? $additional_files : [];
 
-		// If physical files exist, Setup_Task will already include them.
-		$robots_physical = ABSPATH . 'robots.txt';
-		$llms_physical   = ABSPATH . 'llms.txt';
+        // Global flags to allow disabling robots.txt and llms.txt entirely.
+        $include_robots = (bool) apply_filters( 'ss_include_robots_txt_in_export', true );
+        $include_llms   = (bool) apply_filters( 'ss_include_llms_txt_in_export', true );
+
+        // If physical files exist, Setup_Task will already include them.
+        $robots_physical = ABSPATH . 'robots.txt';
+        $llms_physical   = ABSPATH . 'llms.txt';
 
 		$archive_dir = Options::instance()->get_archive_dir();
 		if ( ! file_exists( $archive_dir ) ) {
 			wp_mkdir_p( $archive_dir );
 		}
 
-		// robots.txt via public endpoint (fetch like llms.txt to ensure consistency with RankMath output).
-		if ( ! file_exists( $robots_physical ) ) {
-			$robots_url = home_url( '/robots.txt' );
-			$response   = wp_remote_get( $robots_url, [ 'timeout' => 20 ] );
-			if ( ! is_wp_error( $response ) && (int) wp_remote_retrieve_response_code( $response ) === 200 ) {
-				$body = wp_remote_retrieve_body( $response );
-				$body = is_string( $body ) ? $body : '';
+  // robots.txt via public endpoint (fetch like llms.txt to ensure consistency with RankMath output).
+  if ( $include_robots && ! file_exists( $robots_physical ) ) {
+      $robots_url = home_url( '/robots.txt' );
+      $response   = wp_remote_get( $robots_url, [ 'timeout' => 20 ] );
+      if ( ! is_wp_error( $response ) && (int) wp_remote_retrieve_response_code( $response ) === 200 ) {
+          $body = wp_remote_retrieve_body( $response );
+          $body = is_string( $body ) ? $body : '';
 				// Basic sanity check: ensure it looks like plain text and not an HTML 404.
 				if ( $body !== '' && stripos( $body, '<html' ) === false ) {
 					// Replace URLs directly in the content before writing the file.
@@ -77,16 +81,18 @@ class Rank_Math_Integration extends Integration {
 						$this->run_text_file_handler( 'robots.txt' );
 					}
 				}
-			}
-		}
+            }
+        } elseif ( ! $include_robots ) {
+            Util::debug_log( '[RankMath] robots.txt generation disabled via ss_include_robots_txt_in_export' );
+        }
 
-		// llms.txt via public endpoint served by RankMath.
-		if ( ! file_exists( $llms_physical ) ) {
-			$llms_url = home_url( '/llms.txt' );
-			$response = wp_remote_get( $llms_url, [ 'timeout' => 20 ] );
-			if ( ! is_wp_error( $response ) && (int) wp_remote_retrieve_response_code( $response ) === 200 ) {
-				$body = wp_remote_retrieve_body( $response );
-				$body = is_string( $body ) ? $body : '';
+        // llms.txt via public endpoint served by RankMath.
+        if ( $include_llms && ! file_exists( $llms_physical ) ) {
+            $llms_url = home_url( '/llms.txt' );
+            $response = wp_remote_get( $llms_url, [ 'timeout' => 20 ] );
+            if ( ! is_wp_error( $response ) && (int) wp_remote_retrieve_response_code( $response ) === 200 ) {
+                $body = wp_remote_retrieve_body( $response );
+                $body = is_string( $body ) ? $body : '';
 				// Basic sanity check: ensure it looks like plain text and not an HTML 404.
 				if ( $body !== '' && stripos( $body, '<html' ) === false ) {
 					// Replace URLs directly in the content before writing the file.
@@ -97,11 +103,13 @@ class Rank_Math_Integration extends Integration {
 							$this->run_text_file_handler( 'llms.txt' );
 					}
 				}
-			}
-		}
+            }
+        } elseif ( ! $include_llms ) {
+            Util::debug_log( '[RankMath] llms.txt generation disabled via ss_include_llms_txt_in_export' );
+        }
 
-		return $additional_files;
-	}
+        return $additional_files;
+    }
 
 	/**
 	 * Write a file directly into the current archive directory (no prefix).

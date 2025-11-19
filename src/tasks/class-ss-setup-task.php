@@ -142,19 +142,25 @@ class Setup_Task extends Task {
 		$file_literals = (array) $parsed['literals'];
 		$file_regexes  = (array) $parsed['regex'];
 
-		// Add robots.txt if exists.
-		$robots_txt = ABSPATH . 'robots.txt';
+  // Add robots.txt if exists and not globally disabled.
+  $robots_txt = ABSPATH . 'robots.txt';
+  $include_robots = (bool) apply_filters( 'ss_include_robots_txt_in_export', true );
 
-		if ( file_exists( $robots_txt ) ) {
-			$file_literals[] = $robots_txt;
-		}
+  if ( $include_robots && file_exists( $robots_txt ) ) {
+      $file_literals[] = $robots_txt;
+  } else if ( ! $include_robots ) {
+      Util::debug_log( 'robots.txt inclusion disabled via ss_include_robots_txt_in_export filter' );
+  }
 
-		// Add llms.txt if exists.
-		$llms_txt = ABSPATH . 'llms.txt';
+  // Add llms.txt if exists and not globally disabled.
+  $llms_txt = ABSPATH . 'llms.txt';
+  $include_llms = (bool) apply_filters( 'ss_include_llms_txt_in_export', true );
 
-		if ( file_exists( $llms_txt ) ) {
-			$additional_files[] = $llms_txt;
-		}
+  if ( $include_llms && file_exists( $llms_txt ) ) {
+      $additional_files[] = $llms_txt;
+  } else if ( ! $include_llms ) {
+      Util::debug_log( 'llms.txt inclusion disabled via ss_include_llms_txt_in_export filter' );
+  }
 
 		// Add feeds if enabled.
 		if ( $this->options->get( 'add_feeds' ) ) {
