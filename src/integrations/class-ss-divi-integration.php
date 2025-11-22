@@ -22,19 +22,49 @@ class Divi_Integration extends Integration {
 		$this->description = __( 'Optimizes DIVI for using it on static sites including a custom crawler to include cache files', 'simply-static' );
 	}
 
-	/**
-	 * Determine if Divi dependency is active (theme detection).
-	 *
-	 * @return bool
-	 */
-	public function dependency_active() {
-		// Only consider Divi available when the Divi THEME is active (including child themes).
-		// In WordPress, get_template() returns the parent theme directory name. For a Divi child theme,
-		// get_template() will still be 'Divi'. This avoids false positives from the Divi Builder plugin
-		// or just having the Divi theme directory present.
-		$tpl = function_exists( 'get_template' ) ? get_template() : '';
-		return 'Divi' === $tpl;
-	}
+ /**
+  * Determine if Divi dependency is active (theme detection).
+  *
+  * @return bool
+  */
+ public function dependency_active() {
+     // Only consider Divi available when the Divi THEME is active (including child themes).
+     // Be lenient with directory/name casing and possible customizations of the folder name.
+     // We detect by checking the active theme's template (parent theme directory) for "divi".
+
+     // Prefer wp_get_theme(), which correctly returns the parent template directory for child themes.
+     if ( function_exists( 'wp_get_theme' ) ) {
+         $theme = wp_get_theme();
+         if ( $theme ) {
+             // get_template() on WP_Theme is the parent theme directory (string).
+             $parent_template_dir = method_exists( $theme, 'get_template' ) ? $theme->get_template() : '';
+             if ( is_string( $parent_template_dir ) && false !== stripos( $parent_template_dir, 'divi' ) ) {
+                 return true;
+             }
+
+             // As an additional safeguard, look at the theme names (current and parent) in case
+             // the directory name was customized but still clearly refers to Divi.
+             $current_name = method_exists( $theme, 'get' ) ? (string) $theme->get( 'Name' ) : '';
+             if ( false !== stripos( $current_name, 'divi' ) ) {
+                 return true;
+             }
+             if ( method_exists( $theme, 'parent' ) ) {
+                 $parent = $theme->parent();
+                 if ( $parent ) {
+                     $parent_name = (string) $parent->get( 'Name' );
+                     $parent_stylesheet = (string) $parent->get_stylesheet();
+                     if ( false !== stripos( $parent_name, 'divi' ) || false !== stripos( $parent_stylesheet, 'divi' ) ) {
+                         return true;
+                     }
+                 }
+             }
+         }
+     }
+
+     // Fallback to classic get_template() check (case-insensitive) if wp_get_theme() is unavailable.
+     $tpl = function_exists( 'get_template' ) ? get_template() : '';
+     return is_string( $tpl ) && 0 === strcasecmp( $tpl, 'Divi' );
+ }
 
 	/**
 	 * Run the integration.
