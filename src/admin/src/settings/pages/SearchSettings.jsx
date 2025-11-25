@@ -100,6 +100,17 @@ function SearchSettings() {
                     <>
                         <Spacer margin={3} />
                         <ToggleControl
+                            label={__('Use Search Results Page', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={__('Simply Static will create a static search results page and the export will include a special __qs directory.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            checked={(settings.use_search_results_page ?? true)}
+                            onChange={(value) => {
+                                updateSetting('use_search_results_page', value);
+                            }}
+                        />
+                        <Spacer margin={3} />
+                        <ToggleControl
                             label={__('Use Submit Button', 'simply-static')}
                             __nextHasNoMarginBottom
                             help={__('Show or hide the submit button in the search UI.', 'simply-static')}

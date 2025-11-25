@@ -1121,6 +1121,7 @@ class Admin_Settings {
                 'comment_redirect'              => '',
                 'use_search'                    => false,
                 'search_type'                   => 'fuse',
+                'use_search_results_page'       => true,
                 'search_index_title'            => 'title',
                 'search_index_content'          => 'body',
                 'search_index_excerpt'          => '.entry-content',

@@ -410,13 +410,34 @@ class Url_Fetcher {
 
 		// Prevent query-string URLs from overwriting base paths by placing them in a deterministic subdirectory based on the query string.
 		// Exception: native WordPress search (query parameter `s`) should NOT use a hash subdirectory.
-		if ( ! empty( $url_parts['query'] ) ) {
-			$relative_file_dir = Util::add_trailing_directory_separator( $relative_file_dir );
-			$use_hash_dir      = true;
-			parse_str( (string) $url_parts['query'], $qs_args );
-			if ( is_array( $qs_args ) && array_key_exists( 's', $qs_args ) ) {
-				$use_hash_dir = false;
-			}
+  if ( ! empty( $url_parts['query'] ) ) {
+            $relative_file_dir = Util::add_trailing_directory_separator( $relative_file_dir );
+            $use_hash_dir      = true;
+            parse_str( (string) $url_parts['query'], $qs_args );
+
+            // Global gate: when the Search Results Page feature is disabled, do not create any __qs directories at all.
+            $use_results_page = Options::instance()->get( 'use_search_results_page' );
+            if ( ! isset( $use_results_page ) ) {
+                $use_results_page = true; // default back-compat
+            }
+            /**
+             * Filter whether Simply Static should use the dedicated Search Results Page export (`__qs`) for query-string URLs.
+             * Returning false will skip creating any `__qs` directory/files for all query-string URLs entirely.
+             *
+             * @param bool $use_results_page Whether to use the Search Results Page export. Default comes from settings (true).
+             * @param array<string,mixed> $qs_args Parsed query-string arguments.
+             * @param \Simply_Static\Page $static_page The current static page instance.
+             */
+            $use_results_page = apply_filters( 'ss_use_search_results_page', (bool) $use_results_page, $qs_args, $static_page );
+            if ( false === $use_results_page ) {
+                Util::debug_log( '[SS][SEARCH_QS] Skipping __qs/ creation due to setting being disabled: ' . $static_page->url );
+                return null; // do not create a file for this query-string URL
+            }
+
+            // Exception: native WordPress search (query parameter `s`) should NOT use a hash subdirectory.
+            if ( is_array( $qs_args ) && array_key_exists( 's', $qs_args ) ) {
+                $use_hash_dir = false;
+            }
 			/**
 			 * Filter whether Simply Static should use a hash directory for query-string URLs.
 			 *
