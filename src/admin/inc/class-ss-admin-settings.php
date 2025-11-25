@@ -273,18 +273,19 @@ class Admin_Settings {
                         'builds'           => array(),
                         'hidden_settings'  => apply_filters( 'ss_hidden_settings', array() ),
                         'last_export_end'  => $options->get( 'archive_end_time' ),
-                        // Build integrations as an associative array keyed by integration ID
-                        // to make lookups reliable in the admin app (no numeric reindexing).
+                    // Build integrations as an associative array keyed by integration ID
+                    // to make lookups reliable in the admin app (no numeric reindexing).
                         'integrations'     => ( function () {
-                            $out = array();
+                            $out   = array();
                             $items = Plugin::instance()->get_integrations(); // [ id => class ]
                             foreach ( $items as $id => $class ) {
-                                $object       = new $class();
-                                $js           = $object->js_object();
+                                $object = new $class();
+                                $js     = $object->js_object();
                                 // Ensure the id is present and matches the key
-                                $js['id']     = isset( $js['id'] ) && $js['id'] ? $js['id'] : $id;
-                                $out[ $id ]   = $js;
+                                $js['id']   = isset( $js['id'] ) && $js['id'] ? $js['id'] : $id;
+                                $out[ $id ] = $js;
                             }
+
                             return $out;
                         } )(),
                     // Add the current settings to the args
@@ -296,7 +297,7 @@ class Admin_Settings {
 
         if ( defined( 'SIMPLY_STATIC_PRO_VERSION' ) ) {
             // Mark plan as Pro when the Pro plugin is active so the admin UI can enable Pro-only features/toggles.
-            $args['plan'] = 'pro';
+            $args['plan']        = 'pro';
             $args['version_pro'] = SIMPLY_STATIC_PRO_VERSION;
 
             // Pass in additional data.
@@ -821,6 +822,29 @@ class Admin_Settings {
             $settings['ss_single_taxonomy_archives'] = array_values( array_unique( $tax_archives ) );
         }
 
+        // Ensure admin-only plugins are never suggested for inclusion in Enhanced Crawl.
+        if ( isset( $settings['plugins_to_include'] ) && is_array( $settings['plugins_to_include'] ) ) {
+            $admin_only = $this->get_admin_only_plugins();
+            if ( ! empty( $admin_only ) ) {
+                // Normalize to lowercase to be safe.
+                $current       = array_map( 'strval', $settings['plugins_to_include'] );
+                $current_lc    = array_map( 'strtolower', $current );
+                $admin_only_lc = array_map( 'strtolower', $admin_only );
+                $filtered_lc   = array_values( array_diff( $current_lc, $admin_only_lc ) );
+                // Rebuild original-cased list where possible.
+                $rebuild = array();
+                foreach ( $filtered_lc as $slug_lc ) {
+                    foreach ( $current as $orig ) {
+                        if ( strtolower( $orig ) === $slug_lc ) {
+                            $rebuild[] = $orig;
+                            break;
+                        }
+                    }
+                }
+                $settings['plugins_to_include'] = $rebuild;
+            }
+        }
+
         return $settings;
     }
 
@@ -993,6 +1017,27 @@ class Admin_Settings {
                 }
             }
 
+            // Scrub admin-only plugins from Enhanced Crawl selection before persisting.
+            if ( isset( $options['plugins_to_include'] ) && is_array( $options['plugins_to_include'] ) ) {
+                $admin_only = $this->get_admin_only_plugins();
+                if ( ! empty( $admin_only ) ) {
+                    $current       = array_map( 'strval', $options['plugins_to_include'] );
+                    $current_lc    = array_map( 'strtolower', $current );
+                    $admin_only_lc = array_map( 'strtolower', $admin_only );
+                    $filtered_lc   = array_values( array_diff( $current_lc, $admin_only_lc ) );
+                    $rebuild       = array();
+                    foreach ( $filtered_lc as $slug_lc ) {
+                        foreach ( $current as $orig ) {
+                            if ( strtolower( $orig ) === $slug_lc ) {
+                                $rebuild[] = $orig;
+                                break;
+                            }
+                        }
+                    }
+                    $options['plugins_to_include'] = $rebuild;
+                }
+            }
+
             // Maybe update network settings.
             if ( is_multisite() ) {
                 $blog_id = get_current_blog_id();
@@ -1028,6 +1073,64 @@ class Admin_Settings {
         }
 
         return json_encode( [ 'status' => 400, 'message' => "No options updated." ] );
+    }
+
+    /**
+     * Return a list of admin-only plugin slugs (directory names) that should never be
+     * included in the Enhanced Crawl "Plugins to Include" setting.
+     *
+     * These are typically development or admin utilities that don't add front-end assets
+     * relevant to the static export. Keep the defaults conservative; site owners and
+     * integrations can extend/override via the `ss_admin_only_plugins` filter.
+     *
+     * Example values: query-monitor, debug-bar, health-check, user-switching, wp-crontrol
+     *
+     * @return string[] Array of plugin directory slugs.
+     */
+    private function get_admin_only_plugins() {
+        $defaults = array(
+                'advanced-custom-fields',
+                'secure-custom-fields',
+                'query-monitor',
+                'debug-bar',
+                'health-check',
+                'user-switching',
+                'wp-crontrol',
+                'theme-check',
+                'regenerate-thumbnails',
+                'wp-migrate-db',
+                'wp-migrate-db-pro',
+                'wp-staging',
+                'wp-staging-pro',
+                'rollback',
+                'wp-rollback',
+                'classic-editor',
+                'artiss-transient-cleaner',
+                'updraftplus',
+                'user-switchting',
+                'view-admin-as',
+                'wp-beta-tester',
+                'wp-downgrade',
+                'wp-rest-cache',
+                'wp-reset',
+                'wpvidid-backuprestore',
+                'duplicate-post'
+        );
+
+        /**
+         * Filter the list of admin-only plugin slugs that should be excluded from Enhanced Crawl.
+         *
+         * @param string[] $defaults Directory slugs of admin-only plugins.
+         */
+        $list = apply_filters( 'ss_admin_only_plugins', $defaults );
+
+        if ( ! is_array( $list ) ) {
+            return $defaults;
+        }
+        // Sanitize values to simple slugs.
+        $list = array_map( 'sanitize_title', array_filter( array_map( 'strval', $list ) ) );
+
+        return array_values( array_unique( $list ) );
     }
 
     /**
