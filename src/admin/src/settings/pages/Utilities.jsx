@@ -6,7 +6,8 @@ import {
     Button,
     Notice,
     Animate,
-    ClipboardButton
+    ClipboardButton,
+    // Note: We are not using TextareaControl here to keep the field read-only without extra handlers.
 } from "@wordpress/components";
 import {useState, useContext} from "@wordpress/element";
 import {SettingsContext} from "../context/SettingsContext";
@@ -32,6 +33,9 @@ function Utilities() {
     const [isMigrate, setIsMigrate] = useState(false);
     const [hasCopied, setHasCopied] = useState(false);
     const [importData, setImportData] = useState(false);
+    const [exportJson, setExportJson] = useState('');
+    const [exportLoading, setExportLoading] = useState(false);
+    const [exportError, setExportError] = useState('');
     const [isResetBackgroundQueue, setIsResetBackgroundQueue] = useState(false);
 
     const setImportDataValue = event => {
@@ -77,6 +81,33 @@ function Utilities() {
         }, 2000);
     }
 
+    const startExport = () => {
+        setIsExport(true);
+        setExportLoading(true);
+        setExportError('');
+        // Fetch sanitized settings intended for export (excludes site-specific keys)
+        wp.apiFetch({ path: '/simplystatic/v1/settings/export', method: 'GET' })
+            .then((resp) => {
+                try {
+                    // Endpoint returns JSON-encoded string (php json_encode). If resp is string, try parse; else use as object
+                    let obj = resp;
+                    if (typeof resp === 'string') {
+                        obj = JSON.parse(resp);
+                    }
+                    const pretty = JSON.stringify(obj || {}, null, 2);
+                    setExportJson(pretty);
+                } catch (e) {
+                    setExportError(__('Failed to prepare export JSON.', 'simply-static'));
+                    setExportJson('');
+                }
+            })
+            .catch(() => {
+                setExportError(__('Failed to fetch export data.', 'simply-static'));
+                setExportJson('');
+            })
+            .finally(() => setExportLoading(false));
+    };
+
     return (
         <div className={"inner-settings"}>
             <Card>
@@ -88,24 +119,51 @@ function Utilities() {
                 <CardBody>
                     {!isExport ?
                         <p>
-                            <Button onClick={setIsExport}
+                            <Button onClick={startExport}
                                     variant="primary">{__('Export Settings', 'simply-static')}</Button>
                         </p>
                         :
                         <>
-                            <p>
-                                <code>{JSON.stringify(settings)}</code>
-                            </p>
-                            <p>
-                                <ClipboardButton
-                                    variant="secondary"
-                                    text={JSON.stringify(settings)}
-                                    onCopy={() => setHasCopied(true)}
-                                    onFinishCopy={() => setHasCopied(false)}
-                                >
-                                    {hasCopied ? __('Copied!', 'simply-static') : __('Copy export data', 'simply-static')}
-                                </ClipboardButton>
-                            </p>
+                            <>
+                                {exportLoading && (
+                                    <p>{__('Preparing export...', 'simply-static')}</p>
+                                )}
+                                {exportError && (
+                                    <Notice status="error" isDismissible={true}>
+                                        <p>{exportError}</p>
+                                    </Notice>
+                                )}
+                                {!exportLoading && !exportError && (
+                                    <>
+                                        <div style={{marginBottom: '12px'}}>
+                                            <textarea
+                                                className="ss-export-textarea"
+                                                value={exportJson}
+                                                readOnly
+                                                style={{
+                                                    width: '100%',
+                                                    height: '300px',
+                                                    fontFamily: 'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                                                    fontSize: '12px',
+                                                    whiteSpace: 'pre',
+                                                    overflow: 'auto',
+                                                    boxSizing: 'border-box'
+                                                }}
+                                            />
+                                        </div>
+                                        <p>
+                                            <ClipboardButton
+                                                variant="secondary"
+                                                text={exportJson}
+                                                onCopy={() => setHasCopied(true)}
+                                                onFinishCopy={() => setHasCopied(false)}
+                                            >
+                                                {hasCopied ? __('Copied!', 'simply-static') : __('Copy export data', 'simply-static')}
+                                            </ClipboardButton>
+                                        </p>
+                                    </>
+                                )}
+                            </>
                         </>
                     }
                 </CardBody>

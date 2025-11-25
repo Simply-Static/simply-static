@@ -512,6 +512,15 @@ class Admin_Settings {
                 },
         ) );
 
+        // Read-only export of settings with sensitive/site-specific keys removed
+        register_rest_route( 'simplystatic/v1', '/settings/export', array(
+                'methods'             => 'GET',
+                'callback'            => [ $this, 'get_settings_export' ],
+                'permission_callback' => function () {
+                    return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+                },
+        ) );
+
         register_rest_route( 'simplystatic/v1', '/settings', array(
                 'methods'             => 'POST',
                 'callback'            => [ $this, 'save_settings' ],
@@ -849,6 +858,30 @@ class Admin_Settings {
     }
 
     /**
+     * Return settings sanitized for export: remove site-specific/sensitive options.
+     * Uses filterable list from get_export_excluded_options().
+     *
+     * @return false|string
+     */
+    public function get_settings_export() {
+        $settings = get_option( 'simply-static' );
+        if ( ! is_array( $settings ) ) {
+            $settings = array();
+        }
+
+        $excluded = $this->get_export_excluded_options();
+        if ( is_array( $excluded ) ) {
+            foreach ( $excluded as $key ) {
+                if ( array_key_exists( $key, $settings ) ) {
+                    unset( $settings[ $key ] );
+                }
+            }
+        }
+
+        return json_encode( $settings );
+    }
+
+    /**
      * Get System Status via Rest API.
      *
      * @return array[]
@@ -1129,6 +1162,50 @@ class Admin_Settings {
         }
         // Sanitize values to simple slugs.
         $list = array_map( 'sanitize_title', array_filter( array_map( 'strval', $list ) ) );
+
+        return array_values( array_unique( $list ) );
+    }
+
+    /**
+     * Return a filterable list of option keys that should not be included in exported settings JSON.
+     *
+     * @return string[]
+     */
+    private function get_export_excluded_options() {
+        $defaults = array(
+                'temp_files_dir',
+                'local_dir',
+                'http_basic_auth_username',
+                'http_basic_auth_password',
+                'tiiny_email',
+                'cdn_pull_zone',
+                'cdn_storage_zone',
+                'github_repository',
+                'aws_bucket',
+                's3_bucket',
+                'algolia_index',
+                'sftp_folder',
+                'archive_status_messages',
+                'pages_status',
+                'archive_name',
+                'archive_start_time',
+                'archive_end_time',
+                'http_basic_auth_on',
+                'plugins_to_include',
+                'themes_to_include',
+                'ss_single_pages',
+        );
+
+        /**
+         * Filter the list of option keys excluded from settings export.
+         *
+         * @param string[] $defaults Option keys to exclude from export.
+         */
+        $list = apply_filters( 'ss_export_excluded_options', $defaults );
+        if ( ! is_array( $list ) ) {
+            return $defaults;
+        }
+        $list = array_map( 'sanitize_key', array_filter( array_map( 'strval', $list ) ) );
 
         return array_values( array_unique( $list ) );
     }
