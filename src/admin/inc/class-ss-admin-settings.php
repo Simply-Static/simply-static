@@ -60,7 +60,7 @@ class Admin_Settings {
      */
     public function __construct() {
         add_action( 'admin_menu', array( $this, 'add_menu' ) );
-        add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
+        // REST route registration moved to Admin_Rest. Keep method for BC, but do not hook here.
         // Prevent WP core from altering the admin URL with history.replaceState on Simply Static pages.
         // This avoids a SecurityError when Basic Auth credentials are present in the URL.
         add_action( 'admin_head', array( $this, 'maybe_disable_admin_canonical' ), 1 );
@@ -694,167 +694,18 @@ class Admin_Settings {
     }
 
     public function check_if_can_run_export() {
-        $can_run = true;
-
-        try {
-            $multisite = Multisite::get_instance();
-            $multisite->check_for_export();
-        } catch ( \Exception $e ) {
-            $can_run = false;
-        }
-
-        $stats = [
-                'status'  => 200,
-                'can_run' => $can_run
-        ];
-
-        return json_encode( $stats );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->check_if_can_run_export();
     }
 
     /**
      * Get settings via Rest API.
      *
-     * @return false|mixed|null
+     * @deprecated 2.0.3 Moved to Admin_Rest::get_settings(). This is a thin wrapper for BC.
+     * @return array
      */
     public function get_settings() {
-        $settings = get_option( 'simply-static' );
-        if ( empty( $settings['integrations'] ) ) {
-            $integrations         = Plugin::instance()->get_integrations();
-            $enabled_integrations = [];
-
-            foreach ( $integrations as $integration => $class ) {
-                $object = new $class;
-
-                if ( ! $object->is_enabled() ) {
-                    continue;
-                }
-
-                $enabled_integrations[] = $integration;
-            }
-
-            $settings['integrations'] = $enabled_integrations;
-        }
-
-        // Provide on-the-fly defaults for new Single Export settings if missing.
-        // Master toggle: use Single Exports (default true)
-        if ( ! array_key_exists( 'ss_use_single_exports', $settings ) ) {
-            $settings['ss_use_single_exports'] = true;
-        }
-
-        // Master toggle: Use Builds (default false) with fallback if legacy Build terms exist
-        if ( ! array_key_exists( 'ss_use_builds', $settings ) ) {
-            $settings['ss_use_builds'] = false;
-        }
-
-        // Fallback: if the site already has terms in the ssp-build taxonomy, enable Builds in the returned settings
-        // This does not persist the option; it only reflects in the UI and runtime unless saved.
-        if ( empty( $settings['ss_use_builds'] ) ) {
-            $has_build_terms = get_transient( 'simply_static_has_build_terms' );
-            if ( false === $has_build_terms ) {
-                global $wpdb;
-                $has_build_terms = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->term_taxonomy} WHERE taxonomy = %s", 'ssp-build' ) );
-                // Cache for 5 minutes to avoid repeated queries
-                set_transient( 'simply_static_has_build_terms', $has_build_terms, 5 * MINUTE_IN_SECONDS );
-            }
-            if ( $has_build_terms > 0 ) {
-                $settings['ss_use_builds'] = true;
-            }
-        }
-
-        if ( ! isset( $settings['ss_single_pages'] ) || ! is_array( $settings['ss_single_pages'] ) ) {
-            $prefill  = [];
-            $front_id = get_option( 'page_on_front' );
-            if ( $front_id ) {
-                $prefill[] = (int) $front_id;
-            }
-            $blog_id = get_option( 'page_for_posts' );
-            if ( $blog_id ) {
-                $prefill[] = (int) $blog_id;
-            }
-            $settings['ss_single_pages'] = $prefill;
-        }
-
-        // Defaults for related URL toggles (match current behavior: enabled).
-        if ( ! array_key_exists( 'ss_single_include_categories', $settings ) ) {
-            $settings['ss_single_include_categories'] = true;
-        }
-        if ( ! array_key_exists( 'ss_single_include_tags', $settings ) ) {
-            $settings['ss_single_include_tags'] = true;
-        }
-        if ( ! array_key_exists( 'ss_single_include_archives', $settings ) ) {
-            $settings['ss_single_include_archives'] = true;
-        }
-        if ( ! array_key_exists( 'ss_single_include_pagination', $settings ) ) {
-            $settings['ss_single_include_pagination'] = true;
-        }
-
-        // Default for updating XML sitemap during Single Export (off by default to preserve prior behavior)
-        if ( ! array_key_exists( 'ss_single_export_add_xml_sitemap', $settings ) ) {
-            $settings['ss_single_export_add_xml_sitemap'] = false;
-        }
-
-        // New: Single Export auto-export toggle and delay
-        if ( ! array_key_exists( 'ss_single_auto_export', $settings ) ) {
-            $settings['ss_single_auto_export'] = false;
-        }
-        if ( ! array_key_exists( 'ss_single_auto_export_delay', $settings ) ) {
-            $settings['ss_single_auto_export_delay'] = 3; // seconds
-        }
-        if ( ! array_key_exists( 'ss_single_export_webhook_url', $settings ) ) {
-            $settings['ss_single_export_webhook_url'] = '';
-        }
-
-        // New: Webhook settings (URL + enabled types)
-        if ( ! array_key_exists( 'ss_webhook_url', $settings ) || empty( $settings['ss_webhook_url'] ) ) {
-            // Migrate legacy single-only webhook if present
-            $settings['ss_webhook_url'] = ! empty( $settings['ss_single_export_webhook_url'] ) ? $settings['ss_single_export_webhook_url'] : '';
-        }
-        if ( ! array_key_exists( 'ss_webhook_enabled_types', $settings ) || ! is_array( $settings['ss_webhook_enabled_types'] ) ) {
-            // If legacy single-only webhook existed, default to ['single']; else enable all by default
-            $settings['ss_webhook_enabled_types'] = ! empty( $settings['ss_single_export_webhook_url'] ) ? array( 'single' ) : array(
-                    'export',
-                    'update',
-                    'build',
-                    'single'
-            );
-        }
-
-        // New taxonomy archives selection (defaults derived from legacy booleans)
-        if ( ! isset( $settings['ss_single_taxonomy_archives'] ) || ! is_array( $settings['ss_single_taxonomy_archives'] ) ) {
-            $tax_archives = array();
-            if ( ! isset( $settings['ss_single_include_categories'] ) || (bool) $settings['ss_single_include_categories'] ) {
-                $tax_archives[] = 'category';
-            }
-            if ( ! isset( $settings['ss_single_include_tags'] ) || (bool) $settings['ss_single_include_tags'] ) {
-                $tax_archives[] = 'post_tag';
-            }
-            $settings['ss_single_taxonomy_archives'] = array_values( array_unique( $tax_archives ) );
-        }
-
-        // Ensure admin-only plugins are never suggested for inclusion in Enhanced Crawl.
-        if ( isset( $settings['plugins_to_include'] ) && is_array( $settings['plugins_to_include'] ) ) {
-            $admin_only = $this->get_admin_only_plugins();
-            if ( ! empty( $admin_only ) ) {
-                // Normalize to lowercase to be safe.
-                $current       = array_map( 'strval', $settings['plugins_to_include'] );
-                $current_lc    = array_map( 'strtolower', $current );
-                $admin_only_lc = array_map( 'strtolower', $admin_only );
-                $filtered_lc   = array_values( array_diff( $current_lc, $admin_only_lc ) );
-                // Rebuild original-cased list where possible.
-                $rebuild = array();
-                foreach ( $filtered_lc as $slug_lc ) {
-                    foreach ( $current as $orig ) {
-                        if ( strtolower( $orig ) === $slug_lc ) {
-                            $rebuild[] = $orig;
-                            break;
-                        }
-                    }
-                }
-                $settings['plugins_to_include'] = $rebuild;
-            }
-        }
-
-        return $settings;
+        return Admin_Rest::get_instance()->get_settings();
     }
 
     /**
@@ -864,21 +715,8 @@ class Admin_Settings {
      * @return false|string
      */
     public function get_settings_export() {
-        $settings = get_option( 'simply-static' );
-        if ( ! is_array( $settings ) ) {
-            $settings = array();
-        }
-
-        $excluded = $this->get_export_excluded_options();
-        if ( is_array( $excluded ) ) {
-            foreach ( $excluded as $key ) {
-                if ( array_key_exists( $key, $settings ) ) {
-                    unset( $settings[ $key ] );
-                }
-            }
-        }
-
-        return json_encode( $settings );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->get_settings_export();
     }
 
     /**
@@ -887,14 +725,8 @@ class Admin_Settings {
      * @return array[]
      */
     public function get_system_status() {
-        $checks = get_transient( 'simply_static_checks' );
-
-        if ( ! $checks ) {
-            $diagnostics = new Diagnostic();
-            $checks      = $diagnostics->get_checks();
-        }
-
-        return $checks;
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->get_system_status();
     }
 
     /**
@@ -903,10 +735,8 @@ class Admin_Settings {
      * @return string
      */
     public function reset_diagnostics() {
-        delete_transient( 'simply_static_checks' );
-        delete_transient( 'simply_static_failed_tests' );
-
-        return json_encode( [ 'status' => 200 ] );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->reset_diagnostics();
     }
 
     /**
@@ -915,197 +745,19 @@ class Admin_Settings {
      * @return false|string
      */
     public function check_system_status_passed() {
-        $passed = 'yes';
-
-        // Prefer cached checks to avoid heavy recomputation on frequent requests.
-        $checks = get_transient( 'simply_static_checks' );
-        if ( false === $checks || empty( $checks ) ) {
-            $diagnostics = new Diagnostic();
-            $checks      = $diagnostics->get_checks();
-        }
-
-        foreach ( $checks as $topics ) {
-            foreach ( $topics as $check ) {
-                if ( isset( $check['test'] ) && ! $check['test'] ) {
-                    $passed = 'no';
-                    break 2;
-                }
-            }
-        }
-
-        return json_encode( [ 'status' => 200, 'passed' => $passed ] );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->check_system_status_passed();
     }
 
     /**
-     * Save settings via rest API.
+     * Save settings via REST API.
      *
-     * @param object $request given request.
-     *
-     * @return false|string
+     * @deprecated 2.0.3 Moved to Admin_Rest::save_settings(). This is a thin wrapper for BC.
+     * @param object $request The REST request.
+     * @return false|string JSON-encoded response
      */
     public function save_settings( $request ) {
-        if ( $request->get_params() ) {
-            $options = sanitize_option( 'simply-static', $request->get_params() );
-
-            $multiline_fields = [
-                    'additional_urls',
-                    'additional_files',
-                    'urls_to_exclude',
-                    'search_excludable',
-                    'iframe_urls',
-                    'iframe_custom_css',
-                    'whitelist_plugins',
-                    'minify_css_exclude',
-                    'minify_js_exclude'
-            ];
-
-            $array_fields = [
-                    'integrations',
-                    'crawlers',
-                    'post_types',
-                    'plugins_to_include',
-                    'themes_to_include',
-                    'ss_single_pages',
-                    'ss_single_taxonomy_archives',
-                    'ss_webhook_enabled_types',
-                    'ss_single_auto_export_types'
-            ];
-
-            // Explicit boolean fields that should be normalized to true/false.
-            $boolean_fields = [
-                    'ss_use_single_exports',
-                    'ss_use_builds',
-                    'ss_single_include_categories',
-                    'ss_single_include_tags',
-                    'ss_single_include_archives',
-                    'ss_single_include_pagination',
-                    'ss_single_export_add_xml_sitemap',
-                    'ss_single_auto_export',
-            ];
-
-            // Sanitize each key/value pair in options.
-            foreach ( $options as $key => $value ) {
-                if ( in_array( $key, $multiline_fields ) ) {
-                    $options[ $key ] = sanitize_textarea_field( $value );
-                } elseif ( in_array( $key, $array_fields ) ) {
-                    // Ensure value is an array before using array_map
-                    if ( is_array( $value ) ) {
-                        $options[ $key ] = array_map( 'sanitize_text_field', $value );
-                    } else {
-                        // If not an array, initialize as empty array
-                        $options[ $key ] = [];
-                    }
-                } elseif ( 'ss_uam_access' === $key ) {
-                    // Expect associative array: page_slug => role
-                    $sanitized = array();
-                    if ( is_array( $value ) ) {
-                        foreach ( $value as $page => $role ) {
-                            $sanitized[ sanitize_key( $page ) ] = sanitize_text_field( $role );
-                        }
-                    }
-                    $options[ $key ] = $sanitized;
-                } elseif ( in_array( $key, $boolean_fields ) ) {
-                    // Normalize boolean flags from checkbox/toggle inputs
-                    $options[ $key ] = filter_var( $value, FILTER_VALIDATE_BOOLEAN );
-                } elseif ( 'ss_single_auto_export_delay' === $key ) {
-                    $options[ $key ] = max( 0, absint( $value ) );
-                } elseif ( 'ss_single_export_webhook_url' === $key ) {
-                    $sanitized = esc_url_raw( $value );
-                    if ( empty( $sanitized ) || ! in_array( wp_parse_url( $sanitized, PHP_URL_SCHEME ), [
-                                    'http',
-                                    'https'
-                            ], true ) ) {
-                        $sanitized = '';
-                    }
-                    $options[ $key ] = $sanitized;
-                } elseif ( 'ss_webhook_url' === $key ) {
-                    $sanitized = esc_url_raw( $value );
-                    if ( empty( $sanitized ) || ! in_array( wp_parse_url( $sanitized, PHP_URL_SCHEME ), [
-                                    'http',
-                                    'https'
-                            ], true ) ) {
-                        $sanitized = '';
-                    }
-                    $options[ $key ] = $sanitized;
-                } else {
-                    // Exclude Basic Auth fields from sanitize.
-                    if ( $key === 'http_basic_auth_username' || $key === 'http_basic_auth_password' ) {
-                        // If they are empty, also clear $_SERVER['PHP_AUTH_USER'] and $_SERVER['PHP_AUTH_PW']
-                        if ( $key === 'http_basic_auth_username' && empty( $value ) ) {
-                            if ( isset( $_SERVER['PHP_AUTH_USER'] ) ) {
-                                unset( $_SERVER['PHP_AUTH_USER'] );
-                            }
-                        }
-
-                        if ( $key === 'http_basic_auth_password' && empty( $value ) ) {
-                            if ( isset( $_SERVER['PHP_AUTH_PW'] ) ) {
-                                unset( $_SERVER['PHP_AUTH_PW'] );
-                            }
-                        }
-
-                        // Continue with other options.
-                        continue;
-                    }
-                    $options[ $key ] = sanitize_text_field( $value );
-                }
-            }
-
-            // Scrub admin-only plugins from Enhanced Crawl selection before persisting.
-            if ( isset( $options['plugins_to_include'] ) && is_array( $options['plugins_to_include'] ) ) {
-                $admin_only = $this->get_admin_only_plugins();
-                if ( ! empty( $admin_only ) ) {
-                    $current       = array_map( 'strval', $options['plugins_to_include'] );
-                    $current_lc    = array_map( 'strtolower', $current );
-                    $admin_only_lc = array_map( 'strtolower', $admin_only );
-                    $filtered_lc   = array_values( array_diff( $current_lc, $admin_only_lc ) );
-                    $rebuild       = array();
-                    foreach ( $filtered_lc as $slug_lc ) {
-                        foreach ( $current as $orig ) {
-                            if ( strtolower( $orig ) === $slug_lc ) {
-                                $rebuild[] = $orig;
-                                break;
-                            }
-                        }
-                    }
-                    $options['plugins_to_include'] = $rebuild;
-                }
-            }
-
-            // Maybe update network settings.
-            if ( is_multisite() ) {
-                $blog_id = get_current_blog_id();
-
-                if ( $blog_id > 1 ) {
-                    update_site_option( 'simply-static-' . $blog_id, $options );
-                }
-            }
-
-            // Mark that the user explicitly saved UAM, so we won't apply runtime default corrections anymore.
-            if ( isset( $options['ss_uam_access'] ) && is_array( $options['ss_uam_access'] ) ) {
-                $options['ss_uam_access_user_saved'] = true;
-            }
-
-            // Update settings.
-            // Back-compat: if ss_webhook_url is empty but legacy ss_single_export_webhook_url is set, copy it over
-            if ( ( empty( $options['ss_webhook_url'] ) || ! isset( $options['ss_webhook_url'] ) ) && ! empty( $options['ss_single_export_webhook_url'] ) ) {
-                $options['ss_webhook_url'] = $options['ss_single_export_webhook_url'];
-                if ( empty( $options['ss_webhook_enabled_types'] ) || ! is_array( $options['ss_webhook_enabled_types'] ) ) {
-                    $options['ss_webhook_enabled_types'] = array( 'single' );
-                }
-            }
-
-            // Validate webhook enabled types against allowed set
-            if ( isset( $options['ss_webhook_enabled_types'] ) && is_array( $options['ss_webhook_enabled_types'] ) ) {
-                $allowed                             = array( 'export', 'update', 'build', 'single' );
-                $options['ss_webhook_enabled_types'] = array_values( array_intersect( $allowed, $options['ss_webhook_enabled_types'] ) );
-            }
-
-            update_option( 'simply-static', $options );
-
-            return json_encode( [ 'status' => 200, 'message' => "Ok" ] );
-        }
-
-        return json_encode( [ 'status' => 400, 'message' => "No options updated." ] );
+        return Admin_Rest::get_instance()->save_settings( $request );
     }
 
     /**
@@ -1216,16 +868,8 @@ class Admin_Settings {
      * @return array
      */
     public function get_taxonomies() {
-        $taxonomies = get_taxonomies( [ 'public' => true ], 'objects' );
-        $list       = array();
-        if ( is_array( $taxonomies ) ) {
-            foreach ( $taxonomies as $slug => $tax ) {
-                $label  = isset( $tax->labels->name ) ? $tax->labels->name : $slug;
-                $list[] = array( 'label' => $label, 'value' => $slug );
-            }
-        }
-
-        return $list;
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->get_taxonomies();
     }
 
     /**
@@ -1236,130 +880,8 @@ class Admin_Settings {
      * @return false|string
      */
     public function reset_settings( $request ) {
-        // Check table.
-        Page::create_or_update_table();
-
-        // Define default options (copied from Upgrade_Handler class)
-        $default_options = array(
-                'destination_scheme'            => 'https://',
-                'destination_host'              => '',
-                'temp_files_dir'                => '',
-                'additional_urls'               => '',
-                'additional_files'              => '',
-                'urls_to_exclude'               => "",
-                'delivery_method'               => 'zip',
-                'local_dir'                     => '',
-                'relative_path'                 => '',
-                'destination_url_type'          => 'relative',
-                'debugging_mode'                => true,
-                'server_cron'                   => false,
-                'whitelist_plugins'             => '',
-                'http_basic_auth_username'      => '',
-                'http_basic_auth_password'      => '',
-                'origin_url'                    => '',
-                'force_replace_url'             => true,
-                'clear_directory_before_export' => false,
-                'iframe_urls'                   => '',
-                'iframe_custom_css'             => '',
-                'tiiny_email'                   => get_bloginfo( 'admin_email' ),
-                'tiiny_subdomain'               => '',
-                'tiiny_domain_suffix'           => 'tiiny.site',
-                'tiiny_password'                => '',
-                'cdn_api_key'                   => '',
-                'cdn_storage_host'              => 'storage.bunnycdn.com',
-                'cdn_access_key'                => '',
-                'cdn_pull_zone'                 => '',
-                'cdn_storage_zone'              => '',
-                'cdn_directory'                 => '',
-                'github_account_type'           => 'personal',
-                'github_user'                   => '',
-                'github_email'                  => '',
-                'github_personal_access_token'  => '',
-                'github_repository'             => '',
-                'github_repository_visibility'  => 'public',
-                'github_branch'                 => 'main',
-                'github_webhook_url'            => '',
-                'github_folder_path'            => '',
-                'github_throttle_requests'      => false,
-                'aws_auth_method'               => 'aws-iam-key',
-                'aws_region'                    => 'us-east-2',
-                'aws_access_key'                => '',
-                'aws_access_secret'             => '',
-                'aws_bucket'                    => '',
-                'aws_subdirectory'              => '',
-                'aws_distribution_id'           => '',
-                'aws_webhook_url'               => '',
-                'aws_empty'                     => false,
-                's3_access_key'                 => '',
-                's3_base_url'                   => '',
-                's3_access_secret'              => '',
-                's3_bucket'                     => '',
-                's3_subdirectory'               => '',
-                'fix_cors'                      => 'allowed_http_origins',
-                'static_url'                    => '',
-                'use_forms'                     => false,
-                'use_comments'                  => false,
-                'comment_redirect'              => '',
-                'use_search'                    => false,
-                'search_type'                   => 'fuse',
-                'use_search_results_page'       => true,
-                'search_index_title'            => 'title',
-                'search_index_content'          => 'body',
-                'search_index_excerpt'          => '.entry-content',
-                'search_excludable'             => '',
-                'search_metadata'               => '',
-                'fuse_selector'                 => '.search-field',
-                'fuse_threshold'                => 0.1,
-                'algolia_app_id'                => '',
-                'algolia_admin_api_key'         => '',
-                'algolia_search_api_key'        => '',
-                'algolia_index'                 => 'simply_static',
-                'algolia_selector'              => '.search-field',
-                'use_minify'                    => false,
-                'minify_html'                   => false,
-                'minify_css'                    => false,
-                'minify_inline_css'             => false,
-                'minify_js'                     => false,
-                'minify_inline_js'              => false,
-                'generate_404'                  => false,
-                'custom_404_page'               => 0,
-                'add_feeds'                     => false,
-                'add_rest_api'                  => false,
-                'smart_crawl'                   => true,
-                'wp_content_folder'             => '',
-                'wp_includes_folder'            => '',
-                'wp_uploads_folder'             => '',
-                'wp_plugins_folder'             => '',
-                'wp_themes_folder'              => '',
-                'theme_style_name'              => 'style',
-                'author_url'                    => '',
-                'hide_comments'                 => false,
-                'hide_version'                  => false,
-                'hide_generator'                => false,
-                'hide_prefetch'                 => false,
-                'hide_rsd'                      => false,
-                'hide_emotes'                   => false,
-                'disable_xmlrpc'                => false,
-                'disable_embed'                 => false,
-                'disable_db_debug'              => false,
-                'disable_wlw_manifest'          => false,
-                'sftp_host'                     => '',
-                'sftp_user'                     => '',
-                'sftp_pass'                     => '',
-                'sftp_folder'                   => '',
-                'sftp_port'                     => 22,
-                'archive_status_messages'       => array(),
-                'pages_status'                  => array(),
-                'archive_name'                  => null,
-                'archive_start_time'            => null,
-                'archive_end_time'              => null,
-                'version'                       => SIMPLY_STATIC_VERSION,
-        );
-
-        // Update settings with default options.
-        update_option( 'simply-static', $default_options );
-
-        return json_encode( [ 'status' => 200, 'message' => "Ok", 'data' => $default_options ] );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->reset_settings( $request );
     }
 
 
@@ -1369,15 +891,8 @@ class Admin_Settings {
      * @return false|string
      */
     public function reset_database() {
-        // Drop Simply Static database table.
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'simply_static_pages';
-        $wpdb->query( "DROP TABLE IF EXISTS $table_name" );
-
-        // Check table.
-        Page::create_or_update_table();
-
-        return json_encode( [ 'status' => 200, 'message' => "Ok" ] );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->reset_database();
     }
 
     /**
@@ -1387,33 +902,8 @@ class Admin_Settings {
      * @return false|string
      */
     public function reset_background_queue() {
-        try {
-            /** @var Archive_Creation_Job $job */
-            $job = Plugin::instance()->get_archive_creation_job();
-
-            // Delete all batches and status for this job.
-            $job->delete_all();
-
-            // Clear any scheduled cron for this job using known hook name.
-            $identifier = 'wp_' . 'archive_creation_job'; // Background_Process identifier is prefix + action
-            $cron_hook  = $identifier . '_cron';
-            while ( $timestamp = wp_next_scheduled( $cron_hook ) ) {
-                wp_unschedule_event( $timestamp, $cron_hook );
-            }
-            wp_clear_scheduled_hook( $cron_hook );
-
-            // Remove process lock transient so a new run can start immediately.
-            $site_id  = function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : null;
-            $lock_key = $identifier . '_process_lock';
-            if ( is_multisite() && ! is_null( $site_id ) ) {
-                $lock_key .= '_site_' . $site_id;
-            }
-            delete_site_transient( $lock_key );
-
-            return json_encode( [ 'status' => 200, 'message' => 'Ok' ] );
-        } catch ( \Throwable $e ) {
-            return json_encode( [ 'status' => 500, 'message' => $e->getMessage() ] );
-        }
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->reset_background_queue();
     }
 
     /**
@@ -1424,31 +914,8 @@ class Admin_Settings {
      * @return false|string
      */
     public function update_from_network( $request ) {
-        $params = $request->get_params();
-
-        if ( $request->get_params() ) {
-            $blog_id = intval( $params['blog_id'] );
-
-            // Get Settings from selected subsite.
-            $options = get_site_option( 'simply-static-' . $blog_id );
-
-            // Output notice if there are no network settings for the blog id.
-            if ( ! $options ) {
-                return json_encode(
-                        [
-                                'status'  => 400,
-                                'message' => "Please save the settings on the selected subsite before importing them into a new site."
-                        ]
-                );
-            }
-
-            // Update current site settings.
-            update_option( 'simply-static', $options );
-
-            return json_encode( [ 'status' => 200, 'message' => "Ok" ] );
-        }
-
-        return json_encode( [ 'status' => 400, 'message' => "No options updated." ] );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->update_from_network( $request );
     }
 
     /**
@@ -1527,14 +994,8 @@ class Admin_Settings {
      * @return false|string
      */
     public function get_activity_log( $request ) {
-        $params       = $request->get_params();
-        $activity_log = Plugin::instance()->get_activity_log( $params['blog_id'] );
-
-        return json_encode( [
-                'status'  => 200,
-                'data'    => $activity_log,
-                'running' => Plugin::instance()->get_archive_creation_job()->is_running(),
-        ] );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->get_activity_log( $request );
     }
 
     /**
@@ -1543,13 +1004,8 @@ class Admin_Settings {
      * @return false|string
      */
     public function get_export_log( $request ) {
-        $params     = $request->get_params();
-        $export_log = Plugin::instance()->get_export_log( $params['per_page'], $params['page'], $params['blog_id'] );
-
-        return json_encode( [
-                'status' => 200,
-                'data'   => $export_log,
-        ] );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->get_export_log( $request );
     }
 
     /**
@@ -1558,32 +1014,8 @@ class Admin_Settings {
      * @return false|string
      */
     public function get_export_type() {
-        // Check the export type.
-        $use_single = get_option( 'simply-static-use-single' );
-        $use_build  = get_option( 'simply-static-use-build' );
-
-        $options = Options::reinstance();
-
-        $export_type    = 'Export';
-        $export_type_id = null;
-
-        if ( ! empty( $use_single ) ) {
-            $export_type    = 'Single';
-            $export_type_id = $use_single;
-        } else if ( ! empty( $use_build ) ) {
-            $export_type    = 'Build';
-            $export_type_id = $use_build;
-        } else if ( $options->get( 'generate_type' ) === 'update' ) {
-            $export_type = 'Update';
-        }
-
-        return json_encode( [
-                'status' => 200,
-                'data'   => [
-                        'export_type'    => $export_type,
-                        'export_type_id' => $export_type_id,
-                ],
-        ] );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->get_export_type();
     }
 
     /**
@@ -1592,47 +1024,8 @@ class Admin_Settings {
      * @return false|string
      */
     public function start_export( $request ) {
-        $params  = $request->get_params();
-        $blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
-        $type    = ! empty( $params['type'] ) ? $params['type'] : 'export';
-
-        // Check if an export is already running
-        $archive_creation_job = Plugin::instance()->get_archive_creation_job();
-        do_action( 'ss_before_perform_archive_running_check', $blog_id, $archive_creation_job );
-        if ( $archive_creation_job->is_running() ) {
-            Util::debug_log( "Export already running. Blocking new export request." );
-            Util::debug_log( "Current task: " . $archive_creation_job->get_current_task() );
-            Util::debug_log( "Is job done: " . ( $archive_creation_job->is_job_done() ? 'true' : 'false' ) );
-
-            // Return a 409 Conflict status code with an error message
-            return json_encode( [
-                    'status'  => 409, // Conflict status code
-                    'message' => __( 'An export is already running. Please wait for it to complete or cancel it before starting a new one.', 'simply-static' )
-            ] );
-        }
-
-        try {
-            do_action( 'ss_before_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
-
-            $type = apply_filters( 'ss_export_type', $type );
-
-            // Only trigger the after action if the export was successfully started
-            if ( Plugin::instance()->run_static_export( $blog_id, $type ) ) {
-                do_action( 'ss_after_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
-            }
-
-            return json_encode( [
-                    'status' => 200,
-            ] );
-
-        } catch ( \Exception $e ) {
-
-            return json_encode( [
-                    'status'  => 500,
-                    'message' => $e->getMessage()
-            ] );
-
-        }
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->start_export( $request );
     }
 
     /**
@@ -1641,17 +1034,8 @@ class Admin_Settings {
      * @return false|string
      */
     public function cancel_export( $request ) {
-        Util::debug_log( "Received request to cancel static archive generation" );
-        $params  = $request->get_params();
-        $blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
-
-        do_action( 'ss_before_perform_archive_action', $blog_id, 'cancel', Plugin::instance()->get_archive_creation_job() );
-
-        Plugin::instance()->cancel_static_export();
-
-        do_action( 'ss_after_perform_archive_action', $blog_id, 'cancel', Plugin::instance()->get_archive_creation_job() );
-
-        return json_encode( [ 'status' => 200 ] );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->cancel_export( $request );
     }
 
     /**
@@ -1660,24 +1044,8 @@ class Admin_Settings {
      * @return false|string JSON-encoded response
      */
     public function clear_temp_files() {
-        try {
-            $setup_task = new Setup_Task();
-            $result     = $setup_task->delete_temp_static_files();
-
-            return json_encode( [
-                    'status'  => 200,
-                    'cleared' => (bool) $result,
-            ] );
-        } catch ( \Throwable $e ) {
-            if ( class_exists( '\\Simply_Static\\Util' ) ) {
-                Util::debug_log( 'Error clearing temporary files via REST: ' . $e->getMessage() );
-            }
-
-            return json_encode( [
-                    'status'  => 500,
-                    'message' => $e->getMessage(),
-            ] );
-        }
+        // Moved to Admin_Rest; keep as thin BC wrapper.
+        return Admin_Rest::get_instance()->clear_temp_files();
     }
 
     /**
@@ -1686,15 +1054,8 @@ class Admin_Settings {
      * @return false|string
      */
     public function is_running( $request ) {
-        $stats = [
-                'status'  => 200,
-                'running' => Plugin::instance()->get_archive_creation_job()->is_running(),
-                'paused'  => Plugin::instance()->get_archive_creation_job()->is_paused()
-        ];
-
-        $stats = apply_filters( 'ss_is_running_statuses', $stats );
-
-        return json_encode( $stats );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->is_running( $request );
     }
 
     /**
@@ -1703,17 +1064,8 @@ class Admin_Settings {
      * @return false|string
      */
     public function pause_export( $request ) {
-        Util::debug_log( "Received request to pause static archive generation" );
-        $params  = $request->get_params();
-        $blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
-
-        do_action( 'ss_before_perform_archive_action', $blog_id, 'pause', Plugin::instance()->get_archive_creation_job() );
-
-        Plugin::instance()->pause_static_export();
-
-        do_action( 'ss_after_perform_archive_action', $blog_id, 'pause', Plugin::instance()->get_archive_creation_job() );
-
-        return json_encode( [ 'status' => 200 ] );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->pause_export( $request );
     }
 
     /**
@@ -1722,17 +1074,8 @@ class Admin_Settings {
      * @return false|string
      */
     public function resume_export( $request ) {
-        Util::debug_log( "Received request to resume static archive generation" );
-        $params  = $request->get_params();
-        $blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
-
-        do_action( 'ss_before_perform_archive_action', $blog_id, 'resume', Plugin::instance()->get_archive_creation_job() );
-
-        Plugin::instance()->resume_static_export();
-
-        do_action( 'ss_after_perform_archive_action', $blog_id, 'resume', Plugin::instance()->get_archive_creation_job() );
-
-        return json_encode( [ 'status' => 200 ] );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->resume_export( $request );
     }
 
     /**
@@ -1741,46 +1084,8 @@ class Admin_Settings {
      * @return false|string
      */
     public function trigger_cron( $request ) {
-        $params  = $request->get_params();
-        $blog_id = ! empty( $params['blog_id'] ) ? (int) $params['blog_id'] : 0;
-
-        if ( ! is_multisite() ) {
-            return json_encode( [
-                    'status'  => 400,
-                    'message' => __( 'This endpoint is only available for multisite installations.', 'simply-static' )
-            ] );
-        }
-
-        if ( empty( $blog_id ) || ! get_blog_details( $blog_id ) ) {
-            return json_encode( [
-                    'status'  => 400,
-                    'message' => __( 'Invalid blog ID provided.', 'simply-static' )
-            ] );
-        }
-
-        try {
-            // Switch to the specified blog
-            switch_to_blog( $blog_id );
-
-            do_action( 'wp_archive_creation_job' );
-
-            // Restore the previous blog
-            restore_current_blog();
-
-            return json_encode( [
-                    'status'  => 200,
-                    'message' => sprintf( __( 'CRON triggered successfully for site %d.', 'simply-static' ), $blog_id )
-            ] );
-
-        } catch ( \Exception $e ) {
-            // Make sure to restore blog context even on error
-            restore_current_blog();
-
-            return json_encode( [
-                    'status'  => 500,
-                    'message' => $e->getMessage()
-            ] );
-        }
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->trigger_cron( $request );
     }
 
     /**
@@ -1789,92 +1094,13 @@ class Admin_Settings {
      * @return false|string
      */
     public function get_crawlers() {
-        // Load the Crawlers class
-        require_once SIMPLY_STATIC_PATH . 'src/crawler/class-ss-crawlers.php';
-
-        // Get the crawler manager
-        $crawlers = \Simply_Static\Crawlers::instance();
-
-        // Get all crawlers for JS
-        $crawlers_for_js = $crawlers->get_crawlers_for_js();
-
-        // Post-process: ensure Pro multilingual crawler shows can_run=false unless a supported plugin is active
-        try {
-            if ( ! function_exists( 'is_plugin_active' ) ) {
-                include_once ABSPATH . 'wp-admin/includes/plugin.php';
-            }
-            $has_multilingual = (
-                    is_plugin_active( 'sitepress-multilingual-cms/sitepress.php' ) ||
-                    is_plugin_active( 'polylang/polylang.php' ) ||
-                    is_plugin_active( 'polylang-pro/polylang.php' ) ||
-                    is_plugin_active( 'translatepress-multilingual/index.php' )
-            );
-            foreach ( $crawlers_for_js as &$crawler_js ) {
-                if ( isset( $crawler_js['id'] ) && 'multilingual' === $crawler_js['id'] ) {
-                    $crawler_js['can_run'] = (bool) $has_multilingual;
-                }
-            }
-            unset( $crawler_js );
-        } catch ( \Throwable $e ) {
-            \Simply_Static\Util::debug_log( 'Post-process crawlers failed: ' . $e->getMessage() );
-        }
-
-        return json_encode( [
-                'status' => 200,
-                'data'   => $crawlers_for_js,
-        ] );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->get_crawlers();
     }
 
     public function get_sites() {
-        $get_sites_args = [
-                "spam"                   => 0,
-                "deleted"                => 0,
-                "archived"               => 0,
-                "network_id"             => get_current_network_id(),
-                "number"                 => 999,
-                "offset"                 => 0,
-                "fields"                 => "ids",
-                "order"                  => "DESC",
-                "orderby"                => "id",
-                "update_site_meta_cache" => false
-        ];
-        // Allow filtering of REST get_sites() args for multisite endpoints
-        $get_sites_args = apply_filters( 'ss_multisite_get_sites_args', $get_sites_args, 'rest_sites' );
-        $site_ids       = get_sites( $get_sites_args );
-
-        /** @var Archive_Creation_Job $job */
-        $job = Plugin::instance()->get_archive_creation_job();
-
-        $sites = [];
-        foreach ( $site_ids as $site_id ) {
-            $site = get_blog_details( $site_id );
-
-            switch_to_blog( $site_id );
-
-            $options = Options::reinstance();
-            $job->set_options( $options );
-            $running = $job->is_running();
-            $paused  = $job->is_paused();
-
-            $sites[] = [
-                    'id'               => $site->blog_id,
-                    'name'             => $site->blogname,
-                    'url'              => $site->siteurl,
-                    'path'             => $site->path,
-                    'running'          => $running,
-                    'paused'           => $paused,
-                    'status'           => $running ? __( 'Running', 'simply-static' ) : ( $paused ? __( 'Paused', 'simply-static' ) : __( 'Idle', 'simply-static' ) ),
-                    'settings_url'     => esc_url( get_admin_url( $site->blog_id ) . 'admin.php?page=simply-static-settings' ),
-                    'activity_log_url' => esc_url( get_admin_url( $site->blog_id ) . 'admin.php?page=simply-static-generate' )
-            ];
-
-            restore_current_blog();
-
-        }
-
-        $sites = apply_filters( 'ss_rest_multisite_get_sites', $sites );
-
-        return wp_send_json_success( $sites );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->get_sites();
     }
 
     /**
@@ -1883,19 +1109,8 @@ class Admin_Settings {
      * @return false|string
      */
     public function get_active_plugins() {
-        if ( ! function_exists( 'get_plugins' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/plugin.php';
-        }
-        $active = (array) Util::get_all_active_plugins();
-        $all    = (array) get_plugins();
-        $list   = [];
-        foreach ( $active as $plugin_file ) {
-            $dir    = dirname( $plugin_file );
-            $label  = isset( $all[ $plugin_file ]['Name'] ) ? $all[ $plugin_file ]['Name'] : $dir;
-            $list[] = [ 'slug' => $dir, 'label' => $label ];
-        }
-
-        return json_encode( [ 'status' => 200, 'data' => $list ] );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->get_active_plugins();
     }
 
     /**
@@ -1904,17 +1119,8 @@ class Admin_Settings {
      * @return false|string
      */
     public function get_active_themes() {
-        $themes      = [];
-        $child_slug  = get_stylesheet();
-        $child       = wp_get_theme( $child_slug );
-        $themes[]    = [ 'slug' => $child_slug, 'label' => $child->get( 'Name' ) ];
-        $parent_slug = get_template();
-        if ( $parent_slug && $parent_slug !== $child_slug ) {
-            $parent   = wp_get_theme( $parent_slug );
-            $themes[] = [ 'slug' => $parent_slug, 'label' => $parent->get( 'Name' ) ];
-        }
-
-        return json_encode( [ 'status' => 200, 'data' => $themes ] );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->get_active_themes();
     }
 
     /**
@@ -1923,37 +1129,8 @@ class Admin_Settings {
      * @return false|string
      */
     public function get_post_types() {
-        // Get all public post types
-        $post_types = get_post_types( [ 'public' => true ], 'objects' );
-
-        // Exclude attachment post type
-        if ( isset( $post_types['attachment'] ) ) {
-            unset( $post_types['attachment'] );
-        }
-
-        // Exclude Elementor's element_library post type
-        if ( isset( $post_types['elementor_library'] ) ) {
-            unset( $post_types['elementor_library'] );
-        }
-
-        // Exclude ssp-form post type
-        if ( isset( $post_types['ssp-form'] ) ) {
-            unset( $post_types['ssp-form'] );
-        }
-
-        // Format post types for JS
-        $post_types_for_js = [];
-        foreach ( $post_types as $post_type ) {
-            $post_types_for_js[] = [
-                    'name'  => $post_type->name,
-                    'label' => $post_type->label,
-            ];
-        }
-
-        return json_encode( [
-                'status' => 200,
-                'data'   => $post_types_for_js,
-        ] );
+        // Deprecated: moved to Admin_Rest
+        return Admin_Rest::get_instance()->get_post_types();
     }
 
     /**

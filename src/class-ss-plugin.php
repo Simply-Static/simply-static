@@ -124,6 +124,8 @@ class Plugin {
 
 				// Boot up admin.
 				Admin_Settings::get_instance();
+				// Register admin REST routes in a dedicated controller.
+				Admin_Rest::get_instance();
 			} );
 		}
 
@@ -185,6 +187,7 @@ class Plugin {
 		require_once $path . 'src/class-ss-page-handlers.php';
 		require_once $path . 'src/class-ss-integrations.php';
 		require_once $path . 'src/admin/inc/class-ss-admin-settings.php';
+		require_once $path . 'src/admin/inc/class-ss-admin-rest.php';
 		require_once $path . 'src/admin/inc/class-ss-admin-meta.php';
 		require_once $path . 'src/admin/inc/class-ss-migrate-settings.php';
 		require_once $path . 'src/class-ss-multisite.php';
