@@ -910,7 +910,8 @@ class Admin_Settings {
                     'themes_to_include',
                     'ss_single_pages',
                     'ss_single_taxonomy_archives',
-                    'ss_webhook_enabled_types'
+                    'ss_webhook_enabled_types',
+                    'ss_single_auto_export_types'
             ];
 
             // Explicit boolean fields that should be normalized to true/false.

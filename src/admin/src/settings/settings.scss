@@ -277,6 +277,11 @@ toplevel_page_simply-static img {
     height: auto;
     background: #f0f0f1;
 
+    .description {
+      font-size: 12px;
+      margin: 5px 0 10px 0;
+    }
+
     /* Smart Crawl */
     .crawler-descriptions {
       margin: 20px 0;
@@ -671,5 +676,5 @@ a.show-nav {
   .reset-bg-btn {
     margin: 10px 0 0 0;
   }
-
 }
+

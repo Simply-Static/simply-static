@@ -42,13 +42,18 @@ function Workflow() {
     const [autoExportDelay, setAutoExportDelay] = useState(3);
     // Webhook settings (moved to dedicated card)
     const [webhookUrl, setWebhookUrl] = useState('');
-    const [webhookEnabledTypes, setWebhookEnabledTypes] = useState(['export','update','build','single']);
+    const [webhookEnabledTypes, setWebhookEnabledTypes] = useState(['export', 'update', 'build', 'single']);
 
     const [incArchives, setIncArchives] = useState(true);
     const [incPagination, setIncPagination] = useState(true);
 
     // Builds toggle
     const [useBuilds, setUseBuilds] = useState(false);
+
+    // Post Types for Auto Export selection
+    const [postTypeSuggestions, setPostTypeSuggestions] = useState([]); // array of labels
+    const [postTypeMap, setPostTypeMap] = useState({}); // label -> name (slug)
+    const [selectedPostTypeLabels, setSelectedPostTypeLabels] = useState([]);
 
     // Load pages suggestions (published pages list) and taxonomies
     useEffect(() => {
@@ -95,6 +100,33 @@ function Workflow() {
             }
         });
 
+        // Post types (for Auto Export selection)
+        apiFetch({path: '/simplystatic/v1/post-types'}).then((resp) => {
+            // API returns {status, data: [{name, label}]}
+            let list = Array.isArray(resp) ? resp : (resp && resp.data ? resp.data : []);
+            const labels = list.map(i => i.label);
+            const map = {};
+            list.forEach(i => map[i.label] = i.name);
+            setPostTypeSuggestions(labels);
+            setPostTypeMap(map);
+
+            // Initialize tokens from settings; default to all public post types when missing
+            const saved = Array.isArray(settings.ss_single_auto_export_types) ? settings.ss_single_auto_export_types : [];
+            let initialSlugs = saved;
+            if (!saved.length) {
+                initialSlugs = list.map(i => i.name);
+            }
+            const toLabels = initialSlugs.map(slug => {
+                const entry = list.find(i => String(i.name) === String(slug));
+                return entry ? entry.label : String(slug);
+            });
+            setSelectedPostTypeLabels(toLabels);
+            if (!saved.length) {
+                // Persist default (all) so UI round-trips
+                updateSetting('ss_single_auto_export_types', initialSlugs);
+            }
+        });
+
         // Initialize toggles from settings; coerce truthiness properly
         setIncArchives(!!settings.ss_single_include_archives || settings.ss_single_include_archives === undefined);
         setIncPagination(!!settings.ss_single_include_pagination || settings.ss_single_include_pagination === undefined);
@@ -110,7 +142,7 @@ function Workflow() {
         }
         // Webhook settings (new)
         setWebhookUrl(settings.ss_webhook_url || settings.ss_single_export_webhook_url || '');
-        const defaultTypes = ['export','update','build','single'];
+        const defaultTypes = ['export', 'update', 'build', 'single'];
         if (Array.isArray(settings.ss_webhook_enabled_types) && settings.ss_webhook_enabled_types.length) {
             setWebhookEnabledTypes(settings.ss_webhook_enabled_types);
         } else {
@@ -143,6 +175,16 @@ function Workflow() {
             return label;
         }).filter(Boolean);
         updateSetting('ss_single_taxonomy_archives', slugs);
+    };
+
+    // Handlers for post type selection token field
+    const onChangePostTypeTokens = (tokens) => {
+        if (!proEnabled) return;
+        setSelectedPostTypeLabels(tokens);
+        const slugs = tokens.map(label => postTypeMap[label] ? postTypeMap[label] : label).filter(Boolean);
+        // Ensure at least one remains (fallback to all if emptied)
+        const finalSlugs = slugs.length ? slugs : Object.values(postTypeMap);
+        updateSetting('ss_single_auto_export_types', finalSlugs);
     };
 
     return (
@@ -191,6 +233,27 @@ function Workflow() {
                                     updateSetting('ss_single_auto_export', value);
                                 }}
                             />
+                            {autoExport && (
+                                <>
+                                    <FormTokenField
+                                        label={__('Auto Export Post Types', 'simply-static')}
+                                        __next40pxDefaultSize
+                                        value={selectedPostTypeLabels}
+                                        suggestions={postTypeSuggestions}
+                                        onChange={onChangePostTypeTokens}
+                                        help={__('Choose which public post types should trigger automatic Single Exports when updated. If none is selected, all public post types are used.', 'simply-static')}
+                                        tokenizeOnSpace={false}
+                                        __experimentalExpandOnFocus={true}
+                                        __experimentalShowHowTo={false}
+                                        maxSuggestions={100}
+                                        className="horizontal-token-field"
+                                        disabled={!proEnabled}
+                                    />
+                                    <p className={'description'}>
+                                        {__('Choose which public post types should trigger automatic Single Exports when updated. If none is selected, all public post types are used.', 'simply-static')}
+                                    </p>
+                                </>
+                            )}
                             {autoExport && (
                                 <InputControl
                                     label={__('Auto export delay (seconds)', 'simply-static')}
@@ -352,13 +415,13 @@ function Workflow() {
                     />
                     <p className={'description'}>{__('Fire for these export types:', 'simply-static')}</p>
                     <div className="ss-webhook-types">
-                        {['export','update','build','single'].map((type) => (
+                        {['export', 'update', 'build', 'single'].map((type) => (
                             <ToggleControl
                                 key={type}
                                 label={
                                     type === 'export' ? __('Export (full)', 'simply-static') :
-                                    type === 'update' ? __('Update', 'simply-static') :
-                                    type === 'build' ? __('Build', 'simply-static') : __('Single', 'simply-static')
+                                        type === 'update' ? __('Update', 'simply-static') :
+                                            type === 'build' ? __('Build', 'simply-static') : __('Single', 'simply-static')
                                 }
                                 checked={webhookEnabledTypes.includes(type)}
                                 disabled={!proEnabled}
