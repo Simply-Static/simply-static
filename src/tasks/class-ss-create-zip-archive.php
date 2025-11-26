@@ -87,13 +87,43 @@ class Create_Zip_Archive_Task extends Task {
 		if ( ! is_dir( $zip_dir ) ) {
 			wp_mkdir_p( $zip_dir );
 		}
+		// Ensure the directory is writable, otherwise ZipArchive::close() may emit warnings
+		if ( ! is_writable( $zip_dir ) ) {
+			return new \WP_Error(
+				'zip_dir_not_writable',
+				sprintf(
+					/* translators: 1: directory path */
+					__( 'The ZIP destination directory is not writable: %s', 'simply-static' ),
+					$zip_dir
+				)
+			);
+		}
+
+		// If a leftover file exists but is not writable/removable, surface a clear error early
+		if ( file_exists( $zip_filename ) && ! is_writable( $zip_filename ) ) {
+			return new \WP_Error(
+				'zip_file_not_writable',
+				sprintf(
+					/* translators: 1: zip file path */
+					__( 'Cannot overwrite ZIP file: %s (permission denied)', 'simply-static' ),
+					$zip_filename
+				)
+			);
+		}
 		// Prefer ZipArchive (ZIP64-capable) when available; fall back to PclZip for legacy environments.
 		if ( class_exists( '\\ZipArchive' ) ) {
 			Util::debug_log( 'Creating zip archive via ZipArchive (ZIP64 capable if libzip supports it)' );
 			$zip = new \ZipArchive();
 			$opened = $zip->open( $zip_filename, \ZipArchive::CREATE | \ZipArchive::OVERWRITE );
 			if ( true !== $opened ) {
-				return new \WP_Error( 'create_zip_failed', __( 'Unable to open ZIP archive for writing', 'simply-static' ) );
+				return new \WP_Error(
+					'create_zip_failed',
+					sprintf(
+						/* translators: 1: zip file path */
+						__( 'Unable to open ZIP archive for writing: %s', 'simply-static' ),
+						$zip_filename
+					)
+				);
 			}
 
 			$base_path = untrailingslashit( $archive_dir );
@@ -107,7 +137,12 @@ class Create_Zip_Archive_Task extends Task {
 					continue;
 				}
 				$local_name = substr( $path, $base_len );
-				$zip->addFile( $path, $local_name );
+				$added = $zip->addFile( $path, $local_name );
+				if ( true !== $added ) {
+					// Log and skip files that cannot be added (unreadable, transiently missing, etc.)
+					Util::debug_log( 'Failed to add file to zip: ' . $path . ' as ' . $local_name );
+					continue;
+				}
 
 				// Periodic progress logging for very large exports.
 				if ( ( ++$count % 1000 ) === 0 ) {
@@ -115,7 +150,19 @@ class Create_Zip_Archive_Task extends Task {
 				}
 			}
 
-			$zip->close();
+			$closed = $zip->close();
+			if ( true !== $closed ) {
+				$status = method_exists( $zip, 'getStatusString' ) ? $zip->getStatusString() : 'unknown error';
+				return new \WP_Error(
+					'zip_close_failed',
+					sprintf(
+						/* translators: 1: zip file path, 2: status message */
+						__( 'Failed to finalize ZIP archive: %1$s (%2$s)', 'simply-static' ),
+						$zip_filename,
+						$status
+					)
+				);
+			}
 
 			do_action( 'ss_zip_file_created', (object) array( 'zipname' => $zip_filename ) );
 
