@@ -28,7 +28,6 @@ function FormSettings() {
     const [useForms, setUseForms] = useState(false);
     const [useComments, setUseComments] = useState(false);
     const [pagesSlugs, setPagesSlugs] = useState(false);
-    const [enableEmbed, setEnableEmbed] = useState(false);
     const [enableCors, setEnableCors] = useState(false);
 
     const setSavingSettings = () => {
@@ -67,12 +66,6 @@ function FormSettings() {
 
         if (settings.use_comments) {
             setUseComments(settings.use_comments);
-        }
-
-        if (settings.enable_embed_dynamic_content) {
-            setEnableEmbed(!!settings.enable_embed_dynamic_content);
-        } else {
-            setEnableEmbed(false);
         }
 
         // Enable CORS (default off)
@@ -189,59 +182,75 @@ function FormSettings() {
                     </CardHeader>
                     <CardBody>
                         <p>{__('We will automatically protect your forms and comments with a captcha on your static site.', 'simply-static')}</p>
-                        <b>{__('Cloudflare Turnstile', 'simply-static')}</b>
-                        <TextControl
-                            label={__('Site Key', 'simply-static')}
-                            help={__('Your public key will be used on the static site.', 'simply-static')}
-                            placeholder={__('Enter your Turnstile site key', 'simply-static')}
-                            __next40pxDefaultSize
-                            __nextHasNoMarginBottom
-                            disabled={('free' === options.plan || !isPro())}
-                            value={settings.cloudflare_turnstile_site_key || ''}
-                            onChange={(value) => updateSetting('cloudflare_turnstile_site_key', value)}
-                        />
-                        <Spacer margin={3}/>
-                        <TextControl
-                            label={__('Secret Key', 'simply-static')}
-                            help={__('Your secret key will be stored in WordPress.', 'simply-static')}
-                            placeholder={__('Enter your Turnstile secret key', 'simply-static')}
-                            type={'password'}
-                            __next40pxDefaultSize
-                            __nextHasNoMarginBottom
-                            disabled={('free' === options.plan || !isPro())}
-                            value={settings.cloudflare_turnstile_secret_key || ''}
-                            onChange={(value) => updateSetting('cloudflare_turnstile_secret_key', value)}
-                        />
-                        <Spacer margin={3}/>
                         <SelectControl
-                            label={__('Theme', 'simply-static')}
-                            help={__('Choose how the widget should look on your site.', 'simply-static')}
+                            label={__('Captcha Service', 'simply-static')}
+                            help={__('Choose which captcha service to use. More options coming soon.', 'simply-static')}
                             __next40pxDefaultSize
                             __nextHasNoMarginBottom
                             disabled={('free' === options.plan || !isPro())}
-                            value={settings.cloudflare_turnstile_theme || 'auto'}
+                            value={settings.captcha_service || 'turnstile'}
                             options={[
-                                { label: __('Auto', 'simply-static'), value: 'auto' },
-                                { label: __('Light', 'simply-static'), value: 'light' },
-                                { label: __('Dark', 'simply-static'), value: 'dark' },
+                                { label: __('Cloudflare Turnstile', 'simply-static'), value: 'turnstile' },
                             ]}
-                            onChange={(value) => updateSetting('cloudflare_turnstile_theme', value)}
+                            onChange={(value) => updateSetting('captcha_service', value)}
                         />
                         <Spacer margin={3}/>
-                        <SelectControl
-                            label={__('Size', 'simply-static')}
-                            help={__('Choose the widget size.', 'simply-static')}
-                            __next40pxDefaultSize
-                            __nextHasNoMarginBottom
-                            disabled={('free' === options.plan || !isPro())}
-                            value={settings.cloudflare_turnstile_size || 'normal'}
-                            options={[
-                                { label: __('Normal', 'simply-static'), value: 'normal' },
-                                { label: __('Flexible', 'simply-static'), value: 'flexible' },
-                                { label: __('Compact', 'simply-static'), value: 'compact' },
-                            ]}
-                            onChange={(value) => updateSetting('cloudflare_turnstile_size', value)}
-                        />
+                        {(settings.captcha_service || 'turnstile') === 'turnstile' && (
+                            <>
+                                <TextControl
+                                    label={__('Site Key', 'simply-static')}
+                                    help={__('Your public key will be used on the static site.', 'simply-static')}
+                                    placeholder={__('Enter your Turnstile site key', 'simply-static')}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
+                                    disabled={('free' === options.plan || !isPro())}
+                                    value={settings.cloudflare_turnstile_site_key || ''}
+                                    onChange={(value) => updateSetting('cloudflare_turnstile_site_key', value)}
+                                />
+                                <Spacer margin={3}/>
+                                <TextControl
+                                    label={__('Secret Key', 'simply-static')}
+                                    help={__('Your secret key will be stored in WordPress.', 'simply-static')}
+                                    placeholder={__('Enter your Turnstile secret key', 'simply-static')}
+                                    type={'password'}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
+                                    disabled={('free' === options.plan || !isPro())}
+                                    value={settings.cloudflare_turnstile_secret_key || ''}
+                                    onChange={(value) => updateSetting('cloudflare_turnstile_secret_key', value)}
+                                />
+                                <Spacer margin={3}/>
+                                <SelectControl
+                                    label={__('Theme', 'simply-static')}
+                                    help={__('Choose how the widget should look on your site.', 'simply-static')}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
+                                    disabled={('free' === options.plan || !isPro())}
+                                    value={settings.cloudflare_turnstile_theme || 'auto'}
+                                    options={[
+                                        { label: __('Auto', 'simply-static'), value: 'auto' },
+                                        { label: __('Light', 'simply-static'), value: 'light' },
+                                        { label: __('Dark', 'simply-static'), value: 'dark' },
+                                    ]}
+                                    onChange={(value) => updateSetting('cloudflare_turnstile_theme', value)}
+                                />
+                                <Spacer margin={3}/>
+                                <SelectControl
+                                    label={__('Size', 'simply-static')}
+                                    help={__('Choose the widget size.', 'simply-static')}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
+                                    disabled={('free' === options.plan || !isPro())}
+                                    value={settings.cloudflare_turnstile_size || 'normal'}
+                                    options={[
+                                        { label: __('Normal', 'simply-static'), value: 'normal' },
+                                        { label: __('Flexible', 'simply-static'), value: 'flexible' },
+                                        { label: __('Compact', 'simply-static'), value: 'compact' },
+                                    ]}
+                                    onChange={(value) => updateSetting('cloudflare_turnstile_size', value)}
+                                />
+                            </>
+                        )}
                     </CardBody>
                 </Card>
                 <Spacer margin={5}/>
@@ -316,74 +325,6 @@ function FormSettings() {
                             onChange={(method) => {
                                 setCorsMethod(method);
                                 updateSetting('fix_cors', method);
-                            }}
-                        />
-                    </>
-                )}
-            </CardBody>
-        </Card>
-        <Spacer margin={5}/>
-        <Card>
-            <CardHeader>
-                <Flex>
-                    <FlexItem>
-                        <b>{__('Embed Dynamic Content (iFrame)', 'simply-static')}<HelperVideo
-                            title={__('Embed Dynamic Content (iFrame)', 'simply-static')}
-                            videoUrl={'https://youtu.be/ZGRaG_Jma7E'}/></b>
-                    </FlexItem>
-                    {('free' === options.plan || !isPro()) &&
-                        <FlexItem>
-                            <ExternalLink
-                                href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
-                        </FlexItem>
-                    }
-                </Flex>
-            </CardHeader>
-            <CardBody>
-                <ToggleControl
-                    label={__('Enable Embed Dynamic Content', 'simply-static')}
-                    __nextHasNoMarginBottom
-                    help={enableEmbed
-                        ? __('Embed settings enabled. Configure the URLs and optional CSS below.', 'simply-static')
-                        : __('Turn on to configure URLs that will be embedded via iFrame on the static site.', 'simply-static')}
-                    disabled={('free' === options.plan || !isPro())}
-                    checked={!!enableEmbed}
-                    onChange={(value) => {
-                        setEnableEmbed(value);
-                        updateSetting('enable_embed_dynamic_content', value);
-                    }}
-                />
-                {enableEmbed && (
-                    <>
-                        <p>
-                            {__('We replace the HTML of the URLs with an iFrame that embeds the content directly from your WordPress website.', 'simply-static')}<br></br>
-                            {__('This way you can use dynamic elements on your static website without the need of a specific integration.', 'simply-static')}
-                        </p>
-                        <Notice status="warning" isDismissible={false}>
-                            <p>
-                                {__('This requires your WordPress website to be online all the time.', 'simply-static')}
-                            </p>
-                        </Notice>
-                        <Spacer margin={5}/>
-                        <TextareaControl
-                            label={__('URLs to embed as an iFrame', 'simply-static')}
-                            placeholder={options.home + "/my-form-page/"}
-                            __nextHasNoMarginBottom
-                            help={__('If you want to embed specific pages from your WordPress website into your static website, add the URLs here (one per line).', 'simply-static')}
-                            disabled={('free' === options.plan || !isPro())}
-                            value={settings.iframe_urls}
-                            onChange={(value) => {
-                                updateSetting('iframe_urls', value);
-                            }}
-                        />
-                        <TextareaControl
-                            label={__('Custom CSS', 'simply-static')}
-                            __nextHasNoMarginBottom
-                            help={__('These styles will only apply to the embedded pages, not your entire website.', 'simply-static')}
-                            disabled={('free' === options.plan || !isPro())}
-                            value={settings.iframe_custom_css}
-                            onChange={(value) => {
-                                updateSetting('iframe_custom_css', value);
                             }}
                         />
                     </>

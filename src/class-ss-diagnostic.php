@@ -358,7 +358,6 @@ class Diagnostic {
 			'paid-memberships-pro',
 			'wp-members',
 			'wp-private-content-plus',
-			'forminator',
 			'catch-infinite-scroll',
 			'ultimate-post',
 			'facetwp',
