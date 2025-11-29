@@ -27,6 +27,7 @@ function FormSettings() {
     const [corsMethod, setCorsMethod] = useState('allowed_http_origins');
     const [useForms, setUseForms] = useState(false);
     const [useComments, setUseComments] = useState(false);
+    const [saveFormEntries, setSaveFormEntries] = useState(true);
     const [pagesSlugs, setPagesSlugs] = useState(false);
     const [enableCors, setEnableCors] = useState(false);
 
@@ -68,6 +69,13 @@ function FormSettings() {
             setUseComments(settings.use_comments);
         }
 
+        // Save Form Entries (default on)
+        if (typeof settings.save_form_entries !== 'undefined') {
+            setSaveFormEntries(!!settings.save_form_entries);
+        } else {
+            setSaveFormEntries(true);
+        }
+
         // Enable CORS (default off)
         if (typeof settings.enable_cors !== 'undefined') {
             setEnableCors(!!settings.enable_cors);
@@ -107,6 +115,23 @@ function FormSettings() {
                         updateSetting('use_forms', value);
                     }}
                 />
+                {useForms && (
+                    <ToggleControl
+                        label={__('Store form entries', 'simply-static')}
+                        __nextHasNoMarginBottom
+                        help={
+                            saveFormEntries
+                                ? __('Store form entries inside WordPress (requires Simply Static Webhook).', 'simply-static')
+                                : __('Do not store form entries in WordPress.', 'simply-static')
+                        }
+                        disabled={('free' === options.plan || !isPro())}
+                        checked={!!saveFormEntries}
+                        onChange={(value) => {
+                            setSaveFormEntries(value);
+                            updateSetting('save_form_entries', value);
+                        }}
+                    />
+                )}
                 {useForms && options.form_connection_url && 'free' !== options.plan &&
                     <Button href={options.form_connection_url}
                             variant="secondary">{__('Create a form connection', 'simply-static')}</Button>
