@@ -110,5 +110,7 @@ return apply_filters( 'ss_compatible_plugins', array(
 	array( 'slug' => 'speculation-rules' ),
 	array( 'slug' => 'view-transitions' ),
 	array( 'slug' => 'nocache-bfcache' ),
+	array( 'slug' => 'advanced-media-offloader' ),
+	array( 'slug' => 'search-with-typesense' )
 ) );
 
