@@ -12,6 +12,322 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Util {
 
+    /**
+     * Return a filterable list of admin-only plugin directory slugs to always exclude
+     * from Enhanced Crawl "Plugins to Include" selections and auto-include logic.
+     *
+     * This centralizes the defaults and mirrors previous lists used in Admin REST and Plugin.
+     *
+     * Filter: `ss_admin_only_plugins` allows adding/removing slugs.
+     *
+     * @return string[] Array of sanitized, unique plugin directory slugs.
+     */
+    public static function get_admin_only_plugins(): array {
+        $defaults = array(
+            'advanced-custom-fields',
+            'secure-custom-fields',
+            'query-monitor',
+            'debug-bar',
+            'health-check',
+            'user-switching',
+            'wp-crontrol',
+            'theme-check',
+            'regenerate-thumbnails',
+            'wp-migrate-db',
+            'wp-migrate-db-pro',
+            'wp-staging',
+            'wp-staging-pro',
+            'rollback',
+            'wp-rollback',
+            'classic-editor',
+            'artiss-transient-cleaner',
+            'updraftplus',
+            'user-switchting',
+            'view-admin-as',
+            'wp-beta-tester',
+            'wp-downgrade',
+            'wp-rest-cache',
+            'wp-reset',
+            'wpvidid-backuprestore',
+            'duplicate-post',
+        );
+
+        /**
+         * Filter the list of admin-only plugin slugs that should be excluded from Enhanced Crawl.
+         *
+         * @param string[] $defaults Directory slugs of admin-only plugins.
+         */
+        $list = apply_filters( 'ss_admin_only_plugins', $defaults );
+
+        if ( ! is_array( $list ) ) {
+            $list = $defaults;
+        }
+        // Sanitize and de-duplicate.
+        $list = array_map( 'sanitize_title', array_filter( array_map( 'strval', $list ) ) );
+
+        return array_values( array_unique( $list ) );
+    }
+
+    /**
+     * Derive a plugin directory slug from a plugin path like akismet/akismet.php.
+     * Returns an empty string if it cannot be derived.
+     *
+     * @param string $plugin_path
+     * @return string
+     */
+    public static function plugin_slug_from_path( string $plugin_path ): string {
+        $dir = trim( dirname( (string) $plugin_path ), '/' );
+        if ( $dir === '' || $dir === '.' ) {
+            return '';
+        }
+        return sanitize_title( $dir );
+    }
+
+    /**
+     * Append a plugin slug to Enhanced Crawl's "Plugins to Include" list and persist.
+     * De-duplicates and sanitizes slugs.
+     *
+     * @param string $slug Plugin directory slug
+     * @return void
+     */
+    public static function add_plugin_to_enhanced_crawl( string $slug ): void {
+        $slug    = sanitize_title( $slug );
+        $options = get_option( 'simply-static' );
+        if ( ! is_array( $options ) ) {
+            $options = array();
+        }
+        $current = array();
+        if ( isset( $options['plugins_to_include'] ) && is_array( $options['plugins_to_include'] ) ) {
+            $current = array_map( 'strval', $options['plugins_to_include'] );
+        }
+        if ( $slug !== '' ) {
+            $current[] = $slug;
+        }
+        $options['plugins_to_include'] = array_values( array_unique( array_map( 'sanitize_title', $current ) ) );
+        update_option( 'simply-static', $options );
+    }
+
+    /**
+     * Remove a plugin slug from Enhanced Crawl's "Plugins to Include" list and persist.
+     *
+     * @param string $slug Plugin directory slug
+     * @return void
+     */
+    public static function remove_plugin_from_enhanced_crawl( string $slug ): void {
+        $options = get_option( 'simply-static' );
+        if ( ! is_array( $options ) ) {
+            $options = array();
+        }
+        $current = array();
+        if ( isset( $options['plugins_to_include'] ) && is_array( $options['plugins_to_include'] ) ) {
+            $current = array_map( 'strval', $options['plugins_to_include'] );
+        }
+        $slug     = sanitize_title( (string) $slug );
+        $filtered = array();
+        foreach ( $current as $item ) {
+            if ( sanitize_title( $item ) !== $slug ) {
+                $filtered[] = $item;
+            }
+        }
+        $options['plugins_to_include'] = array_values( array_unique( array_map( 'sanitize_title', $filtered ) ) );
+        update_option( 'simply-static', $options );
+    }
+
+    /**
+     * Return the active theme slugs: child (stylesheet) and parent (template) if different.
+     *
+     * @return string[]
+     */
+    public static function active_theme_slugs(): array {
+        $theme = function_exists( 'wp_get_theme' ) ? wp_get_theme() : null;
+        if ( ! $theme || ! $theme->exists() ) {
+            return array();
+        }
+        $slugs = array();
+        $stylesheet = $theme->get_stylesheet();
+        if ( ! empty( $stylesheet ) ) {
+            $slugs[] = sanitize_title( $stylesheet );
+        }
+        $template = $theme->get_template();
+        if ( ! empty( $template ) ) {
+            $slugs[] = sanitize_title( $template );
+        }
+        return array_values( array_unique( $slugs ) );
+    }
+
+    /**
+     * Append one or more theme slugs to Enhanced Crawl's "Themes to Include" list and persist.
+     *
+     * @param string[] $slugs
+     * @return void
+     */
+    public static function add_themes_to_enhanced_crawl( array $slugs ): void {
+        $options = get_option( 'simply-static' );
+        if ( ! is_array( $options ) ) {
+            $options = array();
+        }
+        $current = array();
+        if ( isset( $options['themes_to_include'] ) && is_array( $options['themes_to_include'] ) ) {
+            $current = array_map( 'strval', $options['themes_to_include'] );
+        }
+        foreach ( $slugs as $slug ) {
+            $slug = sanitize_title( (string) $slug );
+            if ( $slug !== '' ) {
+                $current[] = $slug;
+            }
+        }
+        $options['themes_to_include'] = array_values( array_unique( array_map( 'sanitize_title', $current ) ) );
+        update_option( 'simply-static', $options );
+    }
+
+    /**
+     * Automatically remove a deactivated plugin from Enhanced Crawl's "Plugins to Include" list.
+     *
+     * Hook callback for `deactivated_plugin`.
+     *
+     * Filters used:
+     * - `ss_auto_remove_on_deactivation` (bool) Gate entire behavior (default true).
+     *
+     * @param string $plugin               Relative plugin path like akismet/akismet.php
+     * @param bool   $network_deactivating True if network-deactivated on multisite
+     * @return void
+     */
+    public static function maybe_auto_remove_deactivated_plugin( $plugin, $network_deactivating ): void {
+        $enabled = apply_filters( 'ss_auto_remove_on_deactivation', true );
+        if ( ! $enabled ) {
+            return;
+        }
+
+        $slug = self::plugin_slug_from_path( (string) $plugin );
+        if ( '' === $slug ) {
+            return;
+        }
+
+        if ( is_multisite() && $network_deactivating ) {
+            $sites = function_exists( 'get_sites' ) ? get_sites( array( 'fields' => 'ids' ) ) : array();
+            if ( is_array( $sites ) ) {
+                foreach ( $sites as $blog_id ) {
+                    switch_to_blog( (int) $blog_id );
+                    self::remove_plugin_from_enhanced_crawl( $slug );
+                    restore_current_blog();
+                }
+            }
+            return;
+        }
+
+        self::remove_plugin_from_enhanced_crawl( $slug );
+    }
+
+    /**
+     * Include the currently active theme (and parent, if child theme is used) into
+     * Enhanced Crawl's "Themes to Include" list whenever the theme is switched.
+     *
+     * Hook callback for `after_switch_theme`.
+     *
+     * Filters used:
+     * - `ss_auto_include_themes_on_switch` (bool) Control if this runs (default true).
+     * - `ss_auto_include_skip_themes` (string[]) Theme slugs to skip.
+     *
+     * @param mixed ...$args Ignored. Present for compatibility with WP action parameters.
+     * @return void
+     */
+    public static function maybe_auto_include_active_theme( ...$args ): void {
+        $enabled = apply_filters( 'ss_auto_include_themes_on_switch', true );
+        if ( ! $enabled ) {
+            return;
+        }
+        $slugs = self::active_theme_slugs();
+
+        $skip = apply_filters( 'ss_auto_include_skip_themes', array() );
+        if ( ! is_array( $skip ) ) {
+            $skip = array();
+        }
+        $skip  = array_map( 'sanitize_title', array_filter( array_map( 'strval', $skip ) ) );
+        $slugs = array_values( array_diff( $slugs, $skip ) );
+        if ( empty( $slugs ) ) {
+            return;
+        }
+
+        self::add_themes_to_enhanced_crawl( $slugs );
+    }
+
+    /**
+     * Automatically add an activated plugin to Enhanced Crawl's "Plugins to Include" list.
+     *
+     * Hook callback for `activated_plugin`. Kept here to avoid bloating Plugin class.
+     *
+     * Filters used:
+     * - `ss_auto_include_on_activation` (bool) Gate entire behavior (default true).
+     * - `ss_auto_include_skip_plugins` (string[]) Additional plugin slugs to skip.
+     * - `ss_admin_only_plugins` (string[]) Centralized admin-only list.
+     * - `ss_auto_include_self_slugs` (string[]) Defaults to ['simply-static','simply-static-pro'].
+     * - `ss_auto_include_debug` (bool) Enable error_log debug lines.
+     *
+     * @param string $plugin        Relative plugin path like akismet/akismet.php
+     * @param bool   $network_wide  True if network-activated on multisite
+     * @return void
+     */
+    public static function maybe_auto_include_activated_plugin( $plugin, $network_wide ): void {
+        // Allow disabling globally.
+        $enabled = apply_filters( 'ss_auto_include_on_activation', true );
+        if ( ! $enabled ) {
+            return;
+        }
+
+        // Derive the plugin directory slug.
+        $slug = self::plugin_slug_from_path( (string) $plugin );
+        if ( '' === $slug ) {
+            return;
+        }
+        $slug_lc = strtolower( $slug );
+
+        // Exclusion lists: admin-only, custom, and self slugs.
+        $admin_only_list = self::get_admin_only_plugins();
+        $admin_only_lc   = array_map( 'strtolower', array_map( 'strval', (array) $admin_only_list ) );
+
+        $custom_skips = apply_filters( 'ss_auto_include_skip_plugins', array() );
+        if ( ! is_array( $custom_skips ) ) {
+            $custom_skips = array();
+        }
+        $custom_skips_lc = array_map( 'strtolower', array_map( 'sanitize_title', array_filter( array_map( 'strval', $custom_skips ) ) ) );
+
+        $self_defaults = array( 'simply-static', 'simply-static-pro' );
+        $self_slugs    = apply_filters( 'ss_auto_include_self_slugs', $self_defaults );
+        if ( ! is_array( $self_slugs ) ) {
+            $self_slugs = $self_defaults;
+        }
+        $self_slugs_lc = array_map( 'strtolower', array_map( 'sanitize_title', array_filter( array_map( 'strval', $self_slugs ) ) ) );
+
+        $skip_lc = array_values( array_unique( array_merge( $admin_only_lc, $custom_skips_lc, $self_slugs_lc ) ) );
+        if ( in_array( $slug_lc, $skip_lc, true ) ) {
+            if ( apply_filters( 'ss_auto_include_debug', false ) ) {
+                error_log( sprintf( '[Simply Static] Auto-include skipped for plugin "%s" (in skip list).', $slug ) );
+            }
+            return;
+        }
+
+        if ( is_multisite() && $network_wide ) {
+            $sites = function_exists( 'get_sites' ) ? get_sites( array( 'fields' => 'ids' ) ) : array();
+            if ( is_array( $sites ) ) {
+                foreach ( $sites as $blog_id ) {
+                    switch_to_blog( (int) $blog_id );
+                    self::add_plugin_to_enhanced_crawl( $slug );
+                    restore_current_blog();
+                }
+            }
+            if ( apply_filters( 'ss_auto_include_debug', false ) ) {
+                error_log( sprintf( '[Simply Static] Auto-included plugin "%s" for %d site(s) via network activation.', $slug, is_array( $sites ) ? count( $sites ) : 0 ) );
+            }
+            return;
+        }
+
+        // Single site or per-site activation.
+        self::add_plugin_to_enhanced_crawl( $slug );
+        if ( apply_filters( 'ss_auto_include_debug', false ) ) {
+            error_log( sprintf( '[Simply Static] Auto-included plugin "%s" on this site.', $slug ) );
+        }
+    }
+
 	/**
 	 * Parse a list of user-provided lines into literals and regex patterns.
 	 * Lines wrapped like /pattern/flags are treated as regex; others as literals.
@@ -556,13 +872,14 @@ class Util {
 	 *
 	 * @return bool
 	 */
-	public static function is_cron(): bool {
-		if ( ! defined( 'DISABLE_WP_CRON' ) || DISABLE_WP_CRON !== true || defined( 'SS_CRON' ) ) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+ public static function is_cron(): bool {
+        // Return false only when WP-Cron is explicitly disabled and no SS_CRON override is set.
+        $wp_cron_disabled = ( defined( 'DISABLE_WP_CRON' ) && ( true === constant( 'DISABLE_WP_CRON' ) ) );
+        if ( $wp_cron_disabled && ! defined( 'SS_CRON' ) ) {
+            return false;
+        }
+        return true;
+    }
 
 	/**
 	 * Get the path from a local URL, removing the protocol and host

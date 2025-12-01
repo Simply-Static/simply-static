@@ -692,7 +692,7 @@ class Admin_Rest {
 
         // Ensure admin-only plugins are never suggested for inclusion in Enhanced Crawl.
         if ( isset( $settings['plugins_to_include'] ) && is_array( $settings['plugins_to_include'] ) ) {
-            $admin_only = $this->get_admin_only_plugins();
+            $admin_only = Util::get_admin_only_plugins();
             if ( ! empty( $admin_only ) ) {
                 $current       = array_map( 'strval', $settings['plugins_to_include'] );
                 $current_lc    = array_map( 'strtolower', $current );
@@ -883,7 +883,7 @@ class Admin_Rest {
 
         // Scrub admin-only plugins from Enhanced Crawl selection before persisting.
         if ( isset( $options['plugins_to_include'] ) && is_array( $options['plugins_to_include'] ) ) {
-            $admin_only = $this->get_admin_only_plugins();
+            $admin_only = Util::get_admin_only_plugins();
             if ( ! empty( $admin_only ) ) {
                 $current       = array_map( 'strval', $options['plugins_to_include'] );
                 $current_lc    = array_map( 'strtolower', $current );
@@ -935,48 +935,7 @@ class Admin_Rest {
         return json_encode( [ 'status' => 200, 'message' => 'Ok' ] );
     }
 
-    /**
-     * Return a filterable list of admin-only plugin directory slugs to always exclude
-     * from the Enhanced Crawl "Plugins to Include" selection.
-     *
-     * @return string[]
-     */
-    private function get_admin_only_plugins() {
-        $defaults = array(
-            'advanced-custom-fields',
-            'secure-custom-fields',
-            'query-monitor',
-            'debug-bar',
-            'health-check',
-            'user-switching',
-            'wp-crontrol',
-            'theme-check',
-            'regenerate-thumbnails',
-            'wp-migrate-db',
-            'wp-migrate-db-pro',
-            'wp-staging',
-            'wp-staging-pro',
-            'rollback',
-            'wp-rollback',
-            'classic-editor',
-            'artiss-transient-cleaner',
-            'updraftplus',
-            'user-switchting',
-            'view-admin-as',
-            'wp-beta-tester',
-            'wp-downgrade',
-            'wp-rest-cache',
-            'wp-reset',
-            'wpvidid-backuprestore',
-            'duplicate-post',
-        );
-        $list = apply_filters( 'ss_admin_only_plugins', $defaults );
-        if ( ! is_array( $list ) ) {
-            return $defaults;
-        }
-        $list = array_map( 'sanitize_title', array_filter( array_map( 'strval', $list ) ) );
-        return array_values( array_unique( $list ) );
-    }
+    // Admin-only plugin list centralized in Util::get_admin_only_plugins().
 
     /**
      * Reset settings to default values via REST API.

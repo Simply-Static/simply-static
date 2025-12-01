@@ -74,6 +74,11 @@ class Plugin {
 			self::$instance = new self();
 			self::$instance->includes();
 
+
+   add_action( 'activated_plugin', array( '\\Simply_Static\\Util', 'maybe_auto_include_activated_plugin' ), 10, 2 );
+   add_action( 'deactivated_plugin', array( '\\Simply_Static\\Util', 'maybe_auto_remove_deactivated_plugin' ), 10, 2 );
+   add_action( 'after_switch_theme', array( '\\Simply_Static\\Util', 'maybe_auto_include_active_theme' ) );
+
 			// Apply hooks after init to avoid loading issues.
 			add_action( 'init', function () {
 				// Run export via WP-Cron.
