@@ -1024,7 +1024,7 @@ class Admin_Rest {
         return json_encode( [ 'status' => 200, 'message' => 'Ok', 'data' => $default_options ] );
     }
 
-    public function maybe_export_404( $request ) { return Admin_Settings::get_instance()->maybe_export_404( $request ); }
+    public function maybe_export_404( $request ) { return Admin_Settings::get_instance()->export_404(); }
 
     /** Reset database (drop and recreate SS pages table) */
     public function reset_database() {
