@@ -28,7 +28,7 @@ function GenerateButtons(props) {
             {!isPaused && hasPauseFeature && <Button
                 label={__('Pause', 'simply-static')}
                 className={"ss-generate-media-button"}
-                showToolTip={true}
+                aria-label={__('Pause', 'simply-static')}
                 onClick={() => pauseExport()}>
                 <Dashicon icon={"controls-pause"}/>
             </Button>
@@ -36,7 +36,7 @@ function GenerateButtons(props) {
             {isPaused && hasResumeFeature && <Button
                 label={__('Resume', 'simply-static')}
                 className={"ss-generate-media-button"}
-                showToolTip={true}
+                aria-label={__('Resume', 'simply-static')}
                 onClick={() => resumeExport()}>
                 <Dashicon icon={"controls-play"}/>
             </Button>
@@ -45,7 +45,7 @@ function GenerateButtons(props) {
                 onClick={() => cancelExport()}
                 label={__('Cancel', 'simply-static')}
                 className={"ss-generate-cancel-button"}
-                showToolTip={true}
+                aria-label={__('Cancel', 'simply-static')}
             >
                 <Dashicon icon={'no'}/>
             </Button> }

@@ -117,7 +117,7 @@ function Site(props) {
                     {!canRunFromNetwork() &&
                         <Button
                             label={'Generate'}
-                            showTooltip={true}
+                            aria-label={__('Generate', 'simply-static')}
                             className={'generate'}
                             disabled
                         >

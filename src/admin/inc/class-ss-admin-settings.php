@@ -205,7 +205,10 @@ class Admin_Settings {
                 'wp-api-fetch',
                 'wp-data',
                 'wp-i18n',
-                'wp-block-editor'
+                'wp-block-editor',
+                'react',
+                'react-dom',
+                'react-jsx-runtime'
         ), SIMPLY_STATIC_VERSION, true );
 
 
