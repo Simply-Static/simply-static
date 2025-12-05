@@ -267,7 +267,10 @@ class Fetch_Urls_Task extends Task {
 						$static_page->set_status_message( __( "Do not follow", 'simply-static' ) );
 					}
 					// and update the URL
-					$redirect_url = str_replace( $origin_url, $destination_url, $redirect_url );
+					// Replace origin host (any scheme) with the configured destination URL to ensure
+					// redirects point to the static site domain even when schemes differ (http/https).
+					$pattern      = '/^(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i';
+					$redirect_url = preg_replace( $pattern, $destination_url, $redirect_url );
 
 				}
 
