@@ -44,7 +44,7 @@ class Elementor_Search_Widget extends Widget_Base {
 	 * @return string Widget title.
 	 */
 	public function get_title() {
-		return __( 'Search', 'simply-static' );
+		return __( 'Static Search', 'simply-static' );
 	}
 
 	/**
@@ -176,28 +176,34 @@ class Elementor_Search_Widget extends Widget_Base {
             $search_type = 'fuse';
         }
 
-        $search_class = 'fuse' === $search_type ? $options->get('fuse_selector') : $options->get('algolia_selector');
+        // Determine selector for the form element (not the input)
+        $form_class = 'fuse' === $search_type ? $options->get('fuse_selector') : $options->get('algolia_selector');
 
-        if ( ! $search_class ) {
-            $search_class = '.search-field';
+        if ( ! $form_class ) {
+            $form_class = '.search-form';
         }
 
-        $search_class = explode(' ', $search_class );
-        $search_class = end( $search_class );
-        if ( $search_class !== null ) {
-            $search_class = ltrim( $search_class, '.' );
+        $form_class = explode( ' ', $form_class );
+        $form_class = end( $form_class );
+        if ( $form_class !== null ) {
+            $form_class = ltrim( $form_class, '.' );
         }
 		?>
 		<div class="simply-static-search-widget">
 			<div class="simply-static-search-wrapper">
-                <input
-                    type="search"
-                    class="<?php echo esc_attr( $search_class ); ?>"
-                    placeholder="<?php echo esc_attr( $placeholder_text ); ?>"
-                    value="<?php echo get_search_query(); ?>"
-                    name="s"
-                    title="<?php echo esc_attr( $placeholder_text ); ?>"
-                />
+				<form role="search" method="get" class="search-form <?php echo esc_attr( $form_class ); ?>" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+					<label>
+						<span class="screen-reader-text"><?php echo esc_html( $placeholder_text ); ?></span>
+						<input
+							type="search"
+							class="simply-static-search-input"
+							placeholder="<?php echo esc_attr( $placeholder_text ); ?>"
+							value="<?php echo get_search_query(); ?>"
+							name="s"
+							title="<?php echo esc_attr( $placeholder_text ); ?>"
+						/>
+					</label>
+				</form>
 
             </div>
 
@@ -221,16 +227,16 @@ class Elementor_Search_Widget extends Widget_Base {
 			$search_type = 'fuse';
 		}
 
-		$search_class = 'fuse' === $search_type ? $options->get('fuse_selector') : $options->get('algolia_selector');
+		$form_class = 'fuse' === $search_type ? $options->get('fuse_selector') : $options->get('algolia_selector');
 
-		if ( ! $search_class ) {
-			$search_class = '.search-field';
+		if ( ! $form_class ) {
+			$form_class = '.search-form';
 		}
 
-		$search_class = explode(' ', $search_class );
-		$search_class = end( $search_class );
-		if ( $search_class !== null ) {
-			$search_class = ltrim( $search_class, '.' );
+		$form_class = explode( ' ', $form_class );
+		$form_class = end( $form_class );
+		if ( $form_class !== null ) {
+			$form_class = ltrim( $form_class, '.' );
 		}
 
 		?>
@@ -239,13 +245,18 @@ class Elementor_Search_Widget extends Widget_Base {
 		#>
 		<div class="simply-static-search-widget">
 			<div class="simply-static-search-wrapper">
-                <input
-                    type="search"
-                    class="<?php echo esc_attr( $search_class ); ?>"
-                    placeholder="{{ placeholder_text }}"
-                    name="s"
-                    title="{{ placeholder_text }}"
-                />
+				<form role="search" method="get" class="search-form <?php echo esc_attr( $form_class ); ?>" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+					<label>
+						<span class="screen-reader-text">{{ placeholder_text }}</span>
+						<input
+							type="search"
+							class="simply-static-search-input"
+							placeholder="{{ placeholder_text }}"
+							name="s"
+							title="{{ placeholder_text }}"
+						/>
+					</label>
+				</form>
             </div>
 		</div>
 		<?php
