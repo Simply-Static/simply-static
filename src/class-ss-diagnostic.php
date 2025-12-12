@@ -55,6 +55,7 @@ class Diagnostic {
 				__( 'Basic Auth', 'simply-static' )  => $this->check_basic_auth_status(),
 				__( 'php-xml', 'simply-static' )     => $this->is_xml_active(),
 				__( 'cURL', 'simply-static' )        => $this->has_curl(),
+				__( 'Docker', 'simply-static' ) => $this->docker_environment_check(),
 			),
 			'WordPress'  => array(
 				__( 'Permalinks', 'simply-static' ) => $this->is_permalink_structure_set(),
@@ -502,6 +503,81 @@ class Diagnostic {
 			'test'        => $test,
 			'description' => __( 'cURL is available', 'simply-static' ),
 			'error'       => sprintf( __( 'cURL version < %s', 'simply-static' ), self::$min_version['curl'] )
+		);
+	}
+
+	/**
+	 * Detect Docker environment and flag common URL misconfiguration.
+	 *
+	 * Many users run WordPress via Docker and access it on the host with a non-standard port
+	 * like http://localhost:8000. From inside the container, that URL is not reachable.
+	 * This check warns in that scenario and links to our docs with the fix.
+	 *
+	 * @return array
+	 */
+	public function docker_environment_check() {
+		// Best-effort Docker detection.
+		$is_docker = file_exists( '/.dockerenv' ) || getenv( 'DOCKER_CONTAINER' ) || getenv( 'AM_I_IN_A_DOCKER_CONTAINER' );
+
+		// If not Docker, pass the check.
+		if ( ! $is_docker ) {
+			return array(
+				'test'        => true,
+				'description' => __( 'Docker not detected', 'simply-static' ),
+				'error'       => __( 'Docker misconfiguration detected', 'simply-static' ), // never shown when test is true
+			);
+		}
+
+		$home   = home_url();
+		$parsed = wp_parse_url( $home );
+		$host   = isset( $parsed['host'] ) ? $parsed['host'] : '';
+		$scheme = isset( $parsed['scheme'] ) ? $parsed['scheme'] : 'http';
+		$port   = isset( $parsed['port'] ) ? intval( $parsed['port'] ) : ( $scheme === 'https' ? 443 : 80 );
+		$server_port = isset( $_SERVER['SERVER_PORT'] ) ? intval( $_SERVER['SERVER_PORT'] ) : null;
+
+		$docs_url = 'https://docs.simplystatic.com/article/151-working-with-docker-environments';
+		$docs_url = esc_url( $docs_url );
+
+		$likely_misconfig = false;
+		$error_message    = '';
+
+		// Typical problematic setup: site is configured as localhost with a non-standard port
+		// which is only available on the host, not from inside the container.
+		if ( in_array( $host, array( 'localhost', '127.0.0.1' ), true ) && ! in_array( $port, array( 80, 443 ), true ) ) {
+			$likely_misconfig = true;
+			$error_message    = sprintf(
+			/* translators: 1: current site url, 2: example of host.docker.internal with port, 3: docs url */
+				__( 'Your WordPress Address appears to be %1$s which is usually not reachable from inside the container. Consider using %2$s (and map host.docker.internal), or the container service name, or adjust your Site URL. See instructions: %3$s', 'simply-static' ),
+				esc_url( $home ),
+				esc_html( sprintf( '%s://host.docker.internal:%d', $scheme, $port ) ),
+				$docs_url
+			);
+		}
+
+		// Another hint: localhost with a different server port.
+		if ( ! $likely_misconfig && in_array( $host, array( 'localhost', '127.0.0.1' ), true ) && $server_port && $port !== $server_port ) {
+			$likely_misconfig = true;
+			$error_message    = sprintf(
+			/* translators: 1: current site url, 2: server port, 3: docs url */
+				__( 'Site URL %1$s uses a different port than the web server (%2$d). This is often unreachable from within the container. See Docker guide: %3$s', 'simply-static' ),
+				esc_url( $home ),
+				$server_port,
+				$docs_url
+			);
+		}
+
+		if ( $likely_misconfig ) {
+			return array(
+				'test'        => false,
+				'description' => __( 'Site URL looks reachable.', 'simply-static' ), // not shown when test is false
+				'error'       => $error_message,
+			);
+		}
+
+		return array(
+			'test'        => true,
+			'description' => __( 'Site URL looks fine for container access.', 'simply-static' ),
+			'error'       => sprintf( __( 'If exports fail, please review: %s', 'simply-static' ), $docs_url ),
 		);
 	}
 
