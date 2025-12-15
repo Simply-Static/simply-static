@@ -1314,17 +1314,39 @@ class Util {
 	public static function get_temp_dir() {
 		$options = get_option( 'simply-static' );
 
-		if ( empty( $options['temp_files_dir'] ) ) {
-			$upload_dir = wp_upload_dir();
-			$temp_dir   = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
-
-			// Check if directory exists.
-			if ( ! is_dir( $temp_dir ) ) {
-				wp_mkdir_p( $temp_dir );
-			}
-
-		} else {
+		// Preferred base temp directory from settings if provided and safe
+		if ( ! empty( $options['temp_files_dir'] ) ) {
 			$temp_dir = $options['temp_files_dir'];
+			// If a stream wrapper path is provided by a plugin (e.g., Infinite Uploads), avoid using it for local temp work.
+			if ( function_exists( 'wp_is_stream' ) && wp_is_stream( $temp_dir ) ) {
+				$temp_dir = '';
+			}
+		} else {
+			$temp_dir = '';
+		}
+
+		// Fallback to uploads dir if not set by option
+		if ( $temp_dir === '' ) {
+			$upload_dir = wp_upload_dir();
+			$basedir    = isset( $upload_dir['basedir'] ) ? $upload_dir['basedir'] : '';
+			// Guard against stream wrappers like iu:// from offload plugins
+			if ( $basedir && ( ! function_exists( 'wp_is_stream' ) || ! wp_is_stream( $basedir ) ) ) {
+				$temp_dir = $basedir . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
+			}
+		}
+
+		// Final fallback to a guaranteed local path under WP_CONTENT_DIR or system temp
+		if ( $temp_dir === '' || ( function_exists( 'wp_is_stream' ) && wp_is_stream( $temp_dir ) ) ) {
+			if ( defined( 'WP_CONTENT_DIR' ) && WP_CONTENT_DIR ) {
+				$temp_dir = rtrim( WP_CONTENT_DIR, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
+			} else {
+				$temp_dir = rtrim( sys_get_temp_dir(), DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
+			}
+		}
+
+		// Ensure directory exists
+		if ( ! is_dir( $temp_dir ) ) {
+			wp_mkdir_p( $temp_dir );
 		}
 
 		return trailingslashit( $temp_dir );
