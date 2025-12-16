@@ -869,13 +869,13 @@ class Url_Extractor {
 	 *
 	 * @return string The CSS with all URLs converted
 	 */
-	private function extract_and_replace_urls_in_css( $text ) {
-		// Decode entities to ensure URLs are detected correctly, using site charset
-		$charset = \get_bloginfo( 'charset' );
-		if ( empty( $charset ) ) {
-			$charset = 'UTF-8';
-		}
-		$text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, $charset );
+ private function extract_and_replace_urls_in_css( $text ) {
+        // Decode entities to ensure URLs are detected correctly, using site charset
+        $charset = \get_bloginfo( 'charset' );
+        if ( empty( $charset ) ) {
+            $charset = 'UTF-8';
+        }
+        $text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, $charset );
 
 		// Pass 1: Handle url(...) constructs with quoted or unquoted values, including relative URLs.
 		// Pattern breakdown:
@@ -913,19 +913,77 @@ class Url_Extractor {
 
 		// Pass 2: Fallback - replace any remaining bare local absolute or protocol-relative URLs by converting them.
 		$escaped_origin = preg_quote( Util::origin_host(), '/' );
-		$text           = preg_replace_callback(
-			'/((?:https?:)?\/\/' . $escaped_origin . ')[^"\')\s;,]+/i',
-			function ( $m ) {
-				$matched_url = $m[0];
-				$updated     = $this->add_to_extracted_urls( $matched_url );
+        $text           = preg_replace_callback(
+            '/((?:https?:)?\/\/' . $escaped_origin . ')[^"\')\s;,]+/i',
+            function ( $m ) {
+                $matched_url = $m[0];
+                $updated     = $this->add_to_extracted_urls( $matched_url );
 
-				return $updated ?: $matched_url;
-			},
-			$text
-		);
+                return $updated ?: $matched_url;
+            },
+            $text
+        );
 
-		return $text;
-	}
+        // Pass 3: Fix HTML numeric entities used inside CSS content strings (e.g., content: "&#61710;" from Elementor/EAEL)
+        // Browsers do not decode HTML entities inside CSS. Convert these to proper CSS escapes like \f10e.
+        if ( apply_filters( 'simply_static_fix_css_content_entities', true, $this->static_page, $this ) ) {
+            $text = $this->convert_css_content_entities_to_escapes( $text );
+        }
+
+        return $text;
+    }
+
+    /**
+     * Convert HTML numeric entities within CSS content property string literals
+     * into CSS escape sequences so icon fonts (e.g., Font Awesome) render correctly.
+     *
+     * Examples:
+     *   content: "&#61710;"  => content: "\f10e"
+     *   content: '\xF10E'    => unchanged
+     *   content: "\f10e"    => unchanged
+     *
+     * Supports both decimal (&#61710;) and hexadecimal (&#xF10E; / &#Xf10e;).
+     */
+    private function convert_css_content_entities_to_escapes( string $css ): string {
+        // Only process quoted values of the content property to avoid false positives
+        return preg_replace_callback(
+            '/(content\s*:\s*)(["\"])((?:\\.|(?!\2).)*?)(\2)/is',
+            function ( $m ) {
+                $prefix = $m[1];
+                $quote  = $m[2];
+                $value  = $m[3];
+
+                // If value already contains a CSS escape (e.g., \f10e), leave those intact
+                // Convert hex entities first: &#xHHHH; or &#Xhhhh;
+                $value = preg_replace_callback(
+                    '/&#x([0-9a-fA-F]+);/i',
+                    function ( $hm ) {
+                        $hex = strtolower( $hm[1] );
+                        // Ensure it is prefixed with a single backslash as a CSS escape
+                        return '\\' . $hex;
+                    },
+                    $value
+                );
+
+                // Convert decimal entities: &#DDDDD;
+                $value = preg_replace_callback(
+                    '/&#([0-9]+);/',
+                    function ( $dm ) {
+                        $dec = (int) $dm[1];
+                        if ( $dec <= 0 ) {
+                            return $dm[0];
+                        }
+                        $hex = dechex( $dec );
+                        return '\\' . strtolower( $hex );
+                    },
+                    $value
+                );
+
+                return $prefix . $quote . $value . $quote;
+            },
+            $css
+        );
+    }
 
 	private function extract_and_replace_urls_in_script( $text ) {
 		$charset = \get_bloginfo( 'charset' );
