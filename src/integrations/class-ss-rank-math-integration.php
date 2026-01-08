@@ -164,9 +164,8 @@ class Rank_Math_Integration extends Integration {
 		$home_http  = set_url_scheme( home_url( '/' ), 'http' );
 		$home_https = set_url_scheme( home_url( '/' ), 'https' );
 		$home_proto = preg_replace( '#^https?:#i', '', $home_https ); // //example.com/...
-
-		$search    = [ rtrim( $home_http, '/' ), rtrim( $home_https, '/' ), rtrim( $home_proto, '/' ) ];
-		$replaced2 = str_replace( $search, rtrim( $destination_url, '/' ), $replaced );
+		$search    = [ untrailingslashit( rtrim( $home_http, '/' ) ), untrailingslashit( rtrim( $home_https, '/' ) ), untrailingslashit( rtrim( $home_proto, '/' ) ) ];
+		$replaced2 = str_replace( $search, untrailingslashit( rtrim( $destination_url, '/' ) ), $replaced );
 
 		// No logging here; just return the updated content if any replacements were made.
 

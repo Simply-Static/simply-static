@@ -53,9 +53,9 @@ class Text_File_Handler extends Page_Handler {
 		$home_https = set_url_scheme( home_url( '/' ), 'https' );
 		$home_proto = preg_replace( '#^https?:#i', '', $home_https ); // //example.com/...
 
-		$search  = [ rtrim( $home_http, '/' ), rtrim( $home_https, '/' ), rtrim( $home_proto, '/' ) ];
-		$replace = array_fill( 0, count( $search ), rtrim( $destination_url, '/' ) );
-		$replaced2 = str_replace( $search, rtrim( $destination_url, '/' ), $replaced );
+		$search  = [ untrailingslashit( rtrim( $home_http, '/' ) ), untrailingslashit( rtrim( $home_https, '/' ) ), untrailingslashit( rtrim( $home_proto, '/' ) ) ];
+		$replace = array_fill( 0, count( $search ), untrailingslashit( rtrim( $destination_url, '/' ) ) );
+		$replaced2 = str_replace( $search, untrailingslashit( rtrim( $destination_url, '/' ) ), $replaced );
 
 		if ( $replaced2 !== $contents ) {
 			@file_put_contents( $full_path, $replaced2 );

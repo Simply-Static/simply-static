@@ -396,7 +396,7 @@ class Url_Extractor {
 
 		// replace wp_json_encode'd urls, as used by WP's `concatemoji`.
 		// e.g. {"concatemoji":"http:\/\/www.example.org\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.6.1"}.
-		$content = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $content );
+		$content = str_replace( addcslashes( untrailingslashit( Util::origin_url() ), '/' ), addcslashes( untrailingslashit( $destination_url ), '/' ), $content );
 
 		// Restore preserved JSON attributes
 		$content = $this->restore_attributes( $content );
@@ -1027,7 +1027,7 @@ class Url_Extractor {
 		$text = preg_replace( '/(["\'(])(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', '$1' . $convert_to, $text );
 
 		// Also replace JSON-encoded URLs
-		$text = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $convert_to, '/' ), $text );
+		$text = str_replace( addcslashes( untrailingslashit( Util::origin_url() ), '/' ), addcslashes( untrailingslashit( $convert_to ), '/' ), $text );
 
 		return $text;
 	}
