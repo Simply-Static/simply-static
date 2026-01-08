@@ -72,6 +72,20 @@ class Elementor_Integration extends Integration {
 		if ( ! $options->get( 'smart_crawl' ) ) {
 			add_action( 'ss_after_setup_task', [ $this, 'register_assets' ] );
 		}
+
+		add_action( 'ssp_before_form_template_scripts', [ $this, 'dequeue_scripts' ] );
+	}
+
+	/**
+	 * Dequeue Elementor scripts on ssp-form single pages.
+	 *
+	 * @return void
+	 */
+	public function dequeue_scripts() {
+		wp_dequeue_script( 'elementor-frontend' );
+		wp_dequeue_script( 'elementor-pro-frontend' );
+		wp_dequeue_script( 'elementor-frontend-modules' );
+		wp_dequeue_script( 'elementor-sticky' );
 	}
 
 	/**
