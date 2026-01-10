@@ -836,6 +836,12 @@ class Util {
 	 * @return string|null                 Absolute URL, or null
 	 */
 	public static function create_offline_path( $extracted_path, $page_path, $iterations = 0 ) {
+		// Normalize page_path to have a trailing slash on initial call
+		// This ensures proper iteration count for paths like /category/syllabus vs /category/syllabus/
+		if ( $iterations === 0 ) {
+			$page_path = trailingslashit( $page_path );
+		}
+
 		// We're done if we get a match between the path of the page and the extracted URL
 		// OR if there are no more slashes to remove
 		if ( strpos( $page_path, '/' ) === false || strpos( $extracted_path, trailingslashit( $page_path ) ) === 0 ) {
