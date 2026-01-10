@@ -1397,4 +1397,59 @@ class Util {
 			}
 		}
 	}
+
+	/**
+	 * Normalize a URL to handle URL-encoded characters in the path.
+	 *
+	 * This function addresses issues with posts that have URL-encoded values
+	 * in their post_name (e.g., "bedo%cc%88" instead of "bedö"). WordPress's
+	 * get_permalink() may double-encode these values, causing the URLs to fail
+	 * during static export.
+	 *
+	 * The function decodes the URL path and re-encodes it properly to ensure
+	 * consistent URL handling.
+	 *
+	 * @param string $url The URL to normalize.
+	 * @return string The normalized URL.
+	 */
+	public static function normalize_url( $url ) {
+		if ( empty( $url ) || ! is_string( $url ) ) {
+			return $url;
+		}
+
+		$parsed = parse_url( $url );
+		if ( $parsed === false || ! isset( $parsed['path'] ) ) {
+			return $url;
+		}
+
+		// Decode the path to handle any double-encoding
+		// We decode twice to handle cases where % was encoded as %25
+		$decoded_path = urldecode( urldecode( $parsed['path'] ) );
+
+		// Re-encode the path properly, but preserve slashes
+		$path_segments = explode( '/', $decoded_path );
+		$encoded_segments = array_map( 'rawurlencode', $path_segments );
+		$normalized_path = implode( '/', $encoded_segments );
+
+		// Rebuild the URL
+		$normalized_url = '';
+		if ( isset( $parsed['scheme'] ) ) {
+			$normalized_url .= $parsed['scheme'] . '://';
+		}
+		if ( isset( $parsed['host'] ) ) {
+			$normalized_url .= $parsed['host'];
+		}
+		if ( isset( $parsed['port'] ) ) {
+			$normalized_url .= ':' . $parsed['port'];
+		}
+		$normalized_url .= $normalized_path;
+		if ( isset( $parsed['query'] ) ) {
+			$normalized_url .= '?' . $parsed['query'];
+		}
+		if ( isset( $parsed['fragment'] ) ) {
+			$normalized_url .= '#' . $parsed['fragment'];
+		}
+
+		return $normalized_url;
+	}
 }

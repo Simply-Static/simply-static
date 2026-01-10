@@ -1168,6 +1168,11 @@ class Url_Extractor {
 	public function add_to_extracted_urls( $extracted_url ) {
 		$url = Util::relative_to_absolute_url( $extracted_url, $this->static_page->url );
 
+		// Normalize URL to handle posts with URL-encoded post_name values
+		if ( $url ) {
+			$url = Util::normalize_url( $url );
+		}
+
 		if ( $url && Util::is_local_url( $url ) ) {
 			// Only add to extracted urls queue if smart_crawl is not enabled
 			if ( ! $this->options->get( 'smart_crawl' ) ) {

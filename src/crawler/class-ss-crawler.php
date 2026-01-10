@@ -108,6 +108,9 @@ abstract class Crawler {
 			\Simply_Static\Util::debug_log( sprintf( 'Processing batch of %d URLs for %s crawler', count( $batch ), $this->name ) );
 
    foreach ( $batch as $url ) {
+				// Normalize URL to handle posts with URL-encoded post_name values
+				$url = \Simply_Static\Util::normalize_url( $url );
+
    				// Skip excluded URLs to avoid adding to DB
    				if ( \Simply_Static\Util::is_url_excluded( $url ) ) {
    					\Simply_Static\Util::debug_log( sprintf( 'Base crawler skipping excluded URL: %s', $url ) );
