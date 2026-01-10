@@ -947,7 +947,7 @@ class Url_Extractor {
     private function convert_css_content_entities_to_escapes( string $css ): string {
         // Only process quoted values of the content property to avoid false positives
         return preg_replace_callback(
-            '/(content\s*:\s*)(["\"])((?:\\.|(?!\2).)*?)(\2)/is',
+            '/(content\s*:\s*)(["\'])((?:\\\\.|(?!\2).)*?)(\2)/is',
             function ( $m ) {
                 $prefix = $m[1];
                 $quote  = $m[2];
