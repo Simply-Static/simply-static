@@ -1412,8 +1412,9 @@ class Util {
 	 * get_permalink() may double-encode these values, causing the URLs to fail
 	 * during static export.
 	 *
-	 * The function decodes the URL path and re-encodes it properly to ensure
-	 * consistent URL handling.
+	 * The function ONLY processes URLs that have double-encoded characters
+	 * (containing %25 which is an encoded %). Other URLs are returned unchanged
+	 * to avoid corrupting properly formatted URLs.
 	 *
 	 * @param string $url The URL to normalize.
 	 * @return string The normalized URL.
@@ -1428,13 +1429,31 @@ class Util {
 			return $url;
 		}
 
+		// Only process URLs that have double-encoded characters (%25 is an encoded %)
+		// This prevents corrupting URLs that are already correctly formatted
+		if ( strpos( $parsed['path'], '%25' ) === false ) {
+			return $url;
+		}
+
 		// Decode the path to handle any double-encoding
 		// We decode twice to handle cases where % was encoded as %25
 		$decoded_path = urldecode( urldecode( $parsed['path'] ) );
 
 		// Re-encode the path properly, but preserve slashes
 		$path_segments = explode( '/', $decoded_path );
-		$encoded_segments = array_map( 'rawurlencode', $path_segments );
+		$encoded_segments = array_map( function( $segment ) {
+			// Use rawurlencode but restore characters that are valid in URL paths
+			// and commonly used in filenames (commas, tildes, etc.)
+			$encoded = rawurlencode( $segment );
+			// Restore safe characters that rawurlencode encodes but are valid in paths
+			// RFC 3986 sub-delims: !$&'()*+,;= and unreserved: -._~
+			$encoded = str_replace(
+				array( '%2C', '%7E', '%21', '%27', '%28', '%29', '%2A', '%40' ),
+				array( ',',   '~',   '!',   "'",   '(',   ')',   '*',   '@' ),
+				$encoded
+			);
+			return $encoded;
+		}, $path_segments );
 		$normalized_path = implode( '/', $encoded_segments );
 
 		// Rebuild the URL
