@@ -15,7 +15,10 @@ class Multilingual_Integration extends Pro_Integration {
 	}
 
 	public function dependency_active() {
-		return is_plugin_active( 'sitepress-multilingual-cms/sitepress.php' );
+		return is_plugin_active( 'sitepress-multilingual-cms/sitepress.php' ) ||
+		       is_plugin_active( 'polylang/polylang.php' ) ||
+		       is_plugin_active( 'polylang-pro/polylang.php' ) ||
+		       is_plugin_active( 'translatepress-multilingual/index.php' );
 	}
 
 }
