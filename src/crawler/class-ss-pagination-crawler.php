@@ -42,6 +42,9 @@ class Pagination_Crawler extends Crawler {
 		// Get pagination for posts with <!--nextpage--> tag
 		$pagination_urls = array_merge( $pagination_urls, $this->get_post_pagination() );
 
+		// Get pagination for custom page templates (pages with custom WP_Query pagination)
+		$pagination_urls = array_merge( $pagination_urls, $this->get_page_template_pagination() );
+
 		return apply_filters( 'simply_static_pagination_urls', $pagination_urls );
 	}
 
@@ -217,5 +220,159 @@ class Pagination_Crawler extends Crawler {
 		}
 
 		return $urls;
+	}
+
+	/**
+	 * Get pagination URLs for custom page templates.
+	 *
+	 * This method fetches pages and scans their rendered HTML for pagination links.
+	 * It detects pagination created by paginate_links() or similar functions in custom templates.
+	 *
+	 * @return array List of pagination URLs found in page templates
+	 */
+	private function get_page_template_pagination() : array {
+		$urls = [];
+
+		// Get selected post types from settings
+		$options             = get_option( 'simply-static' );
+		$selected_post_types = isset( $options['post_types'] ) && is_array( $options['post_types'] ) && ! empty( $options['post_types'] )
+			? $options['post_types']
+			: [];
+
+		// Only process pages if 'page' is in the selected post types (or if no post types are selected)
+		if ( ! empty( $selected_post_types ) && ! in_array( 'page', $selected_post_types ) ) {
+			return $urls;
+		}
+
+		// Get all published pages
+		$pages = get_posts( [
+			'post_type'      => 'page',
+			'posts_per_page' => -1,
+			'post_status'    => 'publish',
+		] );
+
+		/**
+		 * Filter the list of pages to scan for pagination.
+		 *
+		 * This allows developers to limit which pages are scanned for pagination links,
+		 * which can improve performance on sites with many pages.
+		 *
+		 * @param array $pages Array of WP_Post objects to scan for pagination.
+		 */
+		$pages = apply_filters( 'simply_static_pages_to_scan_for_pagination', $pages );
+
+		// Get the site URL for comparison
+		$site_url = trailingslashit( home_url() );
+
+		\Simply_Static\Util::debug_log( sprintf( 'Pagination Crawler: Scanning %d pages for custom pagination links', count( $pages ) ) );
+
+		foreach ( $pages as $page ) {
+			$page_url = get_permalink( $page->ID );
+
+			if ( ! $page_url ) {
+				continue;
+			}
+
+			// Extract pagination URLs from this page and its pagination pages
+			$page_pagination_urls = $this->extract_pagination_urls_from_page( $page_url, $site_url );
+
+			if ( ! empty( $page_pagination_urls ) ) {
+				\Simply_Static\Util::debug_log( sprintf( 'Pagination Crawler: Found %d pagination URLs for page %s', count( $page_pagination_urls ), $page_url ) );
+				$urls = array_merge( $urls, $page_pagination_urls );
+			}
+		}
+
+		// Remove duplicates and return
+		$urls = array_values( array_unique( $urls ) );
+
+		\Simply_Static\Util::debug_log( sprintf( 'Pagination Crawler: Total custom page template pagination URLs found: %d', count( $urls ) ) );
+
+		return $urls;
+	}
+
+	/**
+	 * Extract pagination URLs from a page and recursively from its pagination pages.
+	 *
+	 * @param string $base_page_url The base page URL (without /page/N/).
+	 * @param string $site_url      The site URL.
+	 *
+	 * @return array List of pagination URLs found.
+	 */
+	private function extract_pagination_urls_from_page( string $base_page_url, string $site_url ) : array {
+		$all_pagination_urls = [];
+		$scanned_urls        = [];
+		$urls_to_scan        = [ $base_page_url ];
+
+		// Get the base page path for pattern matching
+		$base_page_path = wp_parse_url( $base_page_url, PHP_URL_PATH );
+		$base_page_path = $base_page_path ? rtrim( $base_page_path, '/' ) : '';
+
+		// Pattern to match pagination links for this specific page
+		// Matches both absolute URLs and relative paths with /page/N/ format
+		$patterns = [
+			// Absolute URL pattern: href="https://example.com/articles/page/2/"
+			'#href=["\'](' . preg_quote( rtrim( $base_page_url, '/' ), '#' ) . '/page/(\d+)/?)["\']#i',
+			// Relative path pattern: href="/articles/page/2/"
+			'#href=["\'](' . preg_quote( $base_page_path, '#' ) . '/page/(\d+)/?)["\']#i',
+		];
+
+		// Limit the number of pages to scan to prevent infinite loops
+		$max_pages_to_scan = apply_filters( 'simply_static_max_pagination_pages_to_scan', 100 );
+		$pages_scanned     = 0;
+
+		while ( ! empty( $urls_to_scan ) && $pages_scanned < $max_pages_to_scan ) {
+			$current_url = array_shift( $urls_to_scan );
+
+			// Skip if already scanned
+			if ( in_array( $current_url, $scanned_urls, true ) ) {
+				continue;
+			}
+
+			$scanned_urls[] = $current_url;
+			$pages_scanned++;
+
+			// Fetch the page content
+			$response = wp_remote_get( $current_url, [
+				'timeout'   => 30,
+				'sslverify' => false,
+			] );
+
+			if ( is_wp_error( $response ) ) {
+				\Simply_Static\Util::debug_log( sprintf( 'Pagination Crawler: Failed to fetch page %s: %s', $current_url, $response->get_error_message() ) );
+				continue;
+			}
+
+			$body = wp_remote_retrieve_body( $response );
+
+			if ( empty( $body ) ) {
+				continue;
+			}
+
+			// Extract pagination URLs from the HTML
+			foreach ( $patterns as $pattern ) {
+				if ( preg_match_all( $pattern, $body, $matches ) ) {
+					foreach ( $matches[1] as $match ) {
+						// Convert relative URLs to absolute
+						if ( strpos( $match, 'http' ) !== 0 ) {
+							$match = $site_url . ltrim( $match, '/' );
+						}
+						// Ensure trailing slash for consistency
+						$pagination_url = trailingslashit( rtrim( $match, '/' ) );
+
+						// Add to results if not already found
+						if ( ! in_array( $pagination_url, $all_pagination_urls, true ) ) {
+							$all_pagination_urls[] = $pagination_url;
+
+							// Add to scan queue if not already scanned
+							if ( ! in_array( $pagination_url, $scanned_urls, true ) && ! in_array( $pagination_url, $urls_to_scan, true ) ) {
+								$urls_to_scan[] = $pagination_url;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return $all_pagination_urls;
 	}
 }
