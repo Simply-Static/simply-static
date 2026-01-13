@@ -121,6 +121,7 @@ trait canProcessPages {
 			}
 		}
 
+		$total_pages     = $this->get_total_pages();
 		$processed_pages = $this->get_processed_pages();
 		$message         = $this->processed_pages_message( $processed_pages, $total_pages );
 		$this->save_status_message( $message );
