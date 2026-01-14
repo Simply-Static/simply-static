@@ -101,7 +101,7 @@ class Fetch_Urls_Task extends Task {
 		do_action(
 			'ss_after_setup_static_page',
 			$static_page,
-			//$pages_remaining
+			$this
 		);
 
 	}
@@ -166,7 +166,7 @@ class Fetch_Urls_Task extends Task {
 		while ( $static_page = array_shift( $static_pages ) ) {
 			$this->check_if_running();
 			Util::debug_log( "URL: " . $static_page->url );
-			$this->save_pages_status( $remaining_counter, (int) $total_pages );
+			//$this->save_pages_status( $remaining_counter, (int) $total_pages );
 			// Decrement after scheduling processing of this page.
 			$remaining_counter = max( 0, $remaining_counter - 1 );
 

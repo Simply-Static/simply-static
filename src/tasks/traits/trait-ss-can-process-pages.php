@@ -76,6 +76,7 @@ trait canProcessPages {
 	 * Process Pages that have to be processed/transferred.
 	 *
 	 * @return bool If true, it's done with all pages. If false, there are still pages to process/transfer.
+	 * @throws \Exception
 	 */
 	public function process_pages() {
 		$pages_to_process       = $this->get_pages_to_process();
@@ -89,10 +90,6 @@ trait canProcessPages {
 			$only_404 = get_option( 'simply-static-404-only' );
 			if ( ! empty( $only_404 ) ) {
 				$message = sprintf( __( 'Transferred %d of %d files', 'simply-static' ), 1, 1 );
-				// Also update pages status so UI counters align.
-				if ( method_exists( $this, 'save_pages_status' ) ) {
-					$this->save_pages_status( 0, 1 );
-				}
 			}
 			$this->save_status_message( $message );
 
