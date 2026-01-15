@@ -533,6 +533,19 @@ class Url_Extractor {
 		// Second pattern: match incomplete conditional comments (without closing tags)
 		$incomplete_conditional_regex = '/<!--\[if[^\]]*\]>((?!<!--\[if).)*?(?=<!--|$)/s';
 
+		// Extract and preserve <xmp> tags to prevent DOMDocument from corrupting their content
+		// The <xmp> tag is deprecated but still used by some plugins like Elementor Code Highlight
+		$xmp_tags        = [];
+		$xmp_placeholder = '<!-- XMP_PLACEHOLDER_%d -->';
+		$xmp_regex       = '/<xmp\b[^>]*>.*?<\/xmp>/is';
+
+		$html_string = preg_replace_callback( $xmp_regex, function ( $matches ) use ( &$xmp_tags, &$xmp_placeholder ) {
+			$index      = count( $xmp_tags );
+			$xmp_tags[] = $matches[0]; // Store the entire xmp tag unchanged
+
+			return sprintf( $xmp_placeholder, $index );
+		}, $html_string );
+
 		// Use regex method to ensure script tags are preserved
 		// Extract script tags, process them for URL replacement, and replace them with placeholders
 		$html_string = preg_replace_callback( $script_regex, function ( $matches ) use ( &$script_placeholder ) {
@@ -777,6 +790,16 @@ class Url_Extractor {
 				$index = (int) $matches[1];
 				if ( isset( $this->script_tags[ $index ] ) ) {
 					return $this->script_tags[ $index ];
+				} else {
+					return '';
+				}
+			}, $html );
+
+			// Restore xmp tags
+			$html = preg_replace_callback( '/<!-- XMP_PLACEHOLDER_(\d+) -->/', function ( $matches ) use ( $xmp_tags ) {
+				$index = (int) $matches[1];
+				if ( isset( $xmp_tags[ $index ] ) ) {
+					return $xmp_tags[ $index ];
 				} else {
 					return '';
 				}
