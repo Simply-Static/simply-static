@@ -41,13 +41,11 @@ class Fetch_Urls_Task extends Task {
 		$this->archive_dir        = $this->options->get_archive_dir();
 		$this->archive_start_time = $this->options->get( 'archive_start_time' );
 		$this->processing_column  = 'last_checked_at';
+		$this->needs_file_path    = false;
 	}
 
 	protected function process_page( $static_page ) {
 		Util::debug_log( "URL: " . $static_page->url );
-		//$this->save_pages_status( $remaining_counter, (int) $total_pages );
-		// Decrement after scheduling processing of this page.
-		//$remaining_counter = max( 0, $remaining_counter - 1 );
 
 		$excludable = apply_filters( 'ss_find_excludable', $this->find_excludable( $static_page ), $static_page );
 		if ( $excludable !== false ) {
@@ -132,6 +130,11 @@ class Fetch_Urls_Task extends Task {
 		return $done;
 	}
 
+	/**
+	 * @deprecated Using trait now to process pages.
+	 * @return bool
+	 * @throws Pause_Exception
+	 */
 	public function old_perform() {
 		$batch_size = apply_filters( 'simply_static_fetch_urls_batch_size', 50 );
 

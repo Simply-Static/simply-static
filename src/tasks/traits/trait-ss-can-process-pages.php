@@ -26,6 +26,13 @@ trait canProcessPages {
 	protected $processing_column = 'last_transferred_at';
 
 	/**
+	 * If this is false, it won't check for file path in queries.
+	 *
+	 * @var bool
+	 */
+	protected $needs_file_path = true;
+
+	/**
 	 * Get batch size.
 	 *
 	 * @return mixed
@@ -82,6 +89,8 @@ trait canProcessPages {
 		$pages_to_process       = $this->get_pages_to_process();
 		$total_pages            = $this->get_total_pages();
 		$pages_to_process_count = count( $pages_to_process );
+
+		Util::debug_log( "TEST. Total pages: " . $total_pages . '; Pages remaining: ' . $pages_to_process_count );
 
 		if ( $pages_to_process_count === 0 ) {
 			$processed_pages = $this->get_processed_pages();
@@ -287,9 +296,15 @@ trait canProcessPages {
 	 * @throws \Exception
 	 */
 	public function get_main_query() {
-		return Page::query()
-		           ->where( "file_path IS NOT NULL" )
-		           ->where( "file_path != ''" );
+
+		$query = Page::query();
+
+		if ( $this->needs_file_path ) {
+			$query->where( "file_path IS NOT NULL" );
+			$query->where( "file_path != ''" );
+		}
+
+		return $query;
 	}
 
 	/**
