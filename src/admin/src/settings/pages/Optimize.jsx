@@ -26,14 +26,11 @@ function Optimize() {
     const [minifyInlineJavascript, setMinifyInlineJavascript] = useState(false);
     const [wpContentDirectory, setWpContentDirectory] = useState('wp-content');
     const [wpIncludesDirectory, setWpIncludesDirectory] = useState('wp-includes');
-    const [wpUploadsDirectory, setWpUploadsDirectory] = useState('wp-content/uploads');
-    const [wpPluginsDirectory, setWpPluginsDirectory] = useState('wp-content/plugins');
-    const [wpThemesDirectory, setWpThemesDirectory] = useState('wp-content/themes');
+    const [wpUploadsDirectory, setWpUploadsDirectory] = useState('uploads');
+    const [wpPluginsDirectory, setWpPluginsDirectory] = useState('plugins');
+    const [wpThemesDirectory, setWpThemesDirectory] = useState('themes');
     const [themeStyleName, setThemeStyleName] = useState('style');
     const [authorUrl, setAuthorUrl] = useState('author');
-    const [hideRESTAPI, setHideRESTAPI] = useState(false);
-    const [hideStyleId, setHideStyleId] = useState(false);
-    const [hideComments, setHideComments] = useState(false);
     const [hideVersion, setHideVersion] = useState(false);
     const [hidePrefetch, setHidePrefetch] = useState(false);
     const [hideGenerator, setHideGenerator] = useState(false);
@@ -44,7 +41,6 @@ function Optimize() {
     const [disableEmbed, setDisableEmbed] = useState(false);
     const [disableDbDebug, setDisableDbDebug] = useState(false);
     const [disableWLW, setDisableWLW] = useState(false);
-    const [disableDirectory, setDisableDirectory] = useState(false);
 
     const [shortPixelResetting, setShortPixelResetting] = useState(false);
 
@@ -126,10 +122,6 @@ function Optimize() {
             setAuthorUrl(settings.author_url);
         }
 
-        if (settings.hide_comments) {
-            setHideComments(settings.hide_comments);
-        }
-
         if (settings.hide_version) {
             setHideVersion(settings.hide_version);
         }
@@ -164,10 +156,6 @@ function Optimize() {
 
         if (settings.disable_wlw_manifest) {
             setDisableWLW(settings.disable_wlw_manifest)
-        }
-
-        if (settings.disable_directory_browsing) {
-            setDisableDirectory(settings.disable_directory_browsing)
         }
 
     }, [settings]);
@@ -467,50 +455,98 @@ function Optimize() {
                     }}
                 />
 
-                <TextControl
-                    label={__('uploads directory', 'simply-static')}
-                    help={__('Replace the "wp-content/uploads" directory.', 'simply-static')}
-                    disabled={('free' === options.plan || !isPro())}
-                    type={"text"}
-                    placeholder={"uploads"}
-                    __next40pxDefaultSize
-                    __nextHasNoMarginBottom
-                    value={wpUploadsDirectory}
-                    onChange={(directory) => {
-                        setWpUploadsDirectory(directory);
-                        updateSetting('wp_uploads_directory', directory);
-                    }}
-                />
+                <div className="ss-directory-input-group">
+                    <label className="components-base-control__label">{__('Uploads directory', 'simply-static')}</label>
+                    <Flex align="flex-start" gap={0}>
+                        <FlexItem>
+                            <TextControl
+                                disabled={true}
+                                type={"text"}
+                                __next40pxDefaultSize
+                                __nextHasNoMarginBottom
+                                value={wpContentDirectory + '/'}
+                                className="ss-directory-prefix"
+                            />
+                        </FlexItem>
+                        <FlexItem isBlock>
+                            <TextControl
+                                disabled={('free' === options.plan || !isPro())}
+                                type={"text"}
+                                placeholder={"uploads"}
+                                __next40pxDefaultSize
+                                __nextHasNoMarginBottom
+                                value={wpUploadsDirectory}
+                                onChange={(directory) => {
+                                    setWpUploadsDirectory(directory);
+                                    updateSetting('wp_uploads_directory', directory);
+                                }}
+                            />
+                        </FlexItem>
+                    </Flex>
+                    <p className="components-base-control__help">{__('Replace the "wp-content/uploads" directory.', 'simply-static')}</p>
+                </div>
 
-                <TextControl
-                    label={__('plugins directory', 'simply-static')}
-                    help={__('Replace the "wp-content/plugins" directory.', 'simply-static')}
-                    disabled={('free' === options.plan || !isPro())}
-                    type={"text"}
-                    placeholder={"plugins"}
-                    __next40pxDefaultSize
-                    __nextHasNoMarginBottom
-                    value={wpPluginsDirectory}
-                    onChange={(directory) => {
-                        setWpPluginsDirectory(directory);
-                        updateSetting('wp_plugins_directory', directory);
-                    }}
-                />
+                <div className="ss-directory-input-group">
+                    <label className="components-base-control__label">{__('Plugins directory', 'simply-static')}</label>
+                    <Flex align="flex-start" gap={0}>
+                        <FlexItem>
+                            <TextControl
+                                disabled={true}
+                                type={"text"}
+                                __next40pxDefaultSize
+                                __nextHasNoMarginBottom
+                                value={wpContentDirectory + '/'}
+                                className="ss-directory-prefix"
+                            />
+                        </FlexItem>
+                        <FlexItem isBlock>
+                            <TextControl
+                                disabled={('free' === options.plan || !isPro())}
+                                type={"text"}
+                                placeholder={"plugins"}
+                                __next40pxDefaultSize
+                                __nextHasNoMarginBottom
+                                value={wpPluginsDirectory}
+                                onChange={(directory) => {
+                                    setWpPluginsDirectory(directory);
+                                    updateSetting('wp_plugins_directory', directory);
+                                }}
+                            />
+                        </FlexItem>
+                    </Flex>
+                    <p className="components-base-control__help">{__('Replace the "wp-content/plugins" directory.', 'simply-static')}</p>
+                </div>
 
-                <TextControl
-                    label={__('themes directory', 'simply-static')}
-                    help={__('Replace the "wp-content/themes" directory.', 'simply-static')}
-                    disabled={('free' === options.plan || !isPro())}
-                    type={"text"}
-                    placeholder={"themes"}
-                    __next40pxDefaultSize
-                    __nextHasNoMarginBottom
-                    value={wpThemesDirectory}
-                    onChange={(directory) => {
-                        setWpThemesDirectory(directory);
-                        updateSetting('wp_themes_directory', directory);
-                    }}
-                />
+                <div className="ss-directory-input-group">
+                    <label className="components-base-control__label">{__('Themes directory', 'simply-static')}</label>
+                    <Flex align="flex-start" gap={0}>
+                        <FlexItem>
+                            <TextControl
+                                disabled={true}
+                                type={"text"}
+                                __next40pxDefaultSize
+                                __nextHasNoMarginBottom
+                                value={wpContentDirectory + '/'}
+                                className="ss-directory-prefix"
+                            />
+                        </FlexItem>
+                        <FlexItem isBlock>
+                            <TextControl
+                                disabled={('free' === options.plan || !isPro())}
+                                type={"text"}
+                                placeholder={"themes"}
+                                __next40pxDefaultSize
+                                __nextHasNoMarginBottom
+                                value={wpThemesDirectory}
+                                onChange={(directory) => {
+                                    setWpThemesDirectory(directory);
+                                    updateSetting('wp_themes_directory', directory);
+                                }}
+                            />
+                        </FlexItem>
+                    </Flex>
+                    <p className="components-base-control__help">{__('Replace the "wp-content/themes" directory.', 'simply-static')}</p>
+                </div>
 
                 <InputControl
                     label={__('Theme style name', 'simply-static')}
@@ -565,16 +601,6 @@ function Optimize() {
             </CardHeader>
             <CardBody>
                 <ToggleControl
-                    label={__('Hide HTML Comments', 'simply-static')}
-                    __nextHasNoMarginBottom
-                    checked={hideComments}
-                    disabled={('free' === options.plan || !isPro())}
-                    onChange={(value) => {
-                        setHideComments(value);
-                        updateSetting('hide_comments', value);
-                    }}
-                />
-                <ToggleControl
                     label={__('Hide WordPress Version', 'simply-static')}
                     __nextHasNoMarginBottom
                     checked={hideVersion}
@@ -612,16 +638,6 @@ function Optimize() {
                     onChange={(value) => {
                         setHideRSD(value);
                         updateSetting('hide_rsd', value);
-                    }}
-                />
-                <ToggleControl
-                    label={__('Hide Emojis if you don\'t use them', 'simply-static')}
-                    __nextHasNoMarginBottom
-                    checked={hideEmojis}
-                    disabled={('free' === options.plan || !isPro())}
-                    onChange={(value) => {
-                        setHideEmojis(value);
-                        updateSetting('hide_emotes', value);
                     }}
                 />
             </CardBody>
@@ -682,6 +698,16 @@ function Optimize() {
                     onChange={(value) => {
                         setDisableWLW(value);
                         updateSetting('disable_wlw_manifest', value);
+                    }}
+                />
+                <ToggleControl
+                    label={__('Disable Emojis', 'simply-static')}
+                    __nextHasNoMarginBottom
+                    checked={hideEmojis}
+                    disabled={('free' === options.plan || !isPro())}
+                    onChange={(value) => {
+                        setHideEmojis(value);
+                        updateSetting('hide_emotes', value);
                     }}
                 />
             </CardBody>

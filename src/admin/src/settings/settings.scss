@@ -678,3 +678,67 @@ a.show-nav {
   }
 }
 
+/* Directory input groups with prefix */
+.ss-directory-input-group {
+  margin-bottom: 15px;
+  max-width: 100%;
+
+  .components-base-control__label {
+    display: block;
+    margin-bottom: 8px;
+    margin-top: 15px;
+  }
+
+  .components-base-control__help {
+    margin-top: 8px;
+    margin-bottom: 0;
+  }
+
+  .components-flex {
+    align-items: stretch;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .components-base-control {
+    margin-bottom: 0;
+  }
+
+  /* Prefix input - fixed width, no flex grow */
+  .components-flex-item:first-child {
+    flex: 0 0 auto;
+    max-width: fit-content;
+
+    .components-base-control {
+      margin-bottom: 0;
+    }
+
+    .ss-directory-prefix,
+    .ss-directory-prefix .components-text-control__input {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      border-right: none;
+      background-color: #f0f0f1;
+      color: #757575;
+      min-width: auto;
+      width: auto;
+    }
+  }
+
+  /* Main input - takes remaining space */
+  .components-flex-item:last-child {
+    flex: 1 1 auto;
+    min-width: 0;
+
+    .components-base-control {
+      margin-bottom: 0;
+    }
+
+    .components-text-control__input {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      width: 100%;
+    }
+  }
+}
+
