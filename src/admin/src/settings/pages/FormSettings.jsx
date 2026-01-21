@@ -30,6 +30,9 @@ function FormSettings() {
     const [saveFormEntries, setSaveFormEntries] = useState(true);
     const [pagesSlugs, setPagesSlugs] = useState(false);
     const [enableCors, setEnableCors] = useState(false);
+    const [detectingCredentials, setDetectingCredentials] = useState(false);
+    const [detectedCredentials, setDetectedCredentials] = useState(null);
+    const [credentialsNotice, setCredentialsNotice] = useState(null);
 
     const setSavingSettings = () => {
         saveSettings();
@@ -52,6 +55,79 @@ function FormSettings() {
             pages.unshift({label: __('No page selected', 'simply-static'), value: ''});
             setPagesSlugs(pages);
         });
+    }
+
+    const detectExistingCredentials = () => {
+        setDetectingCredentials(true);
+        setCredentialsNotice(null);
+        
+        apiFetch({path: '/simplystatic/v1/captcha/detect-credentials'})
+            .then((response) => {
+                setDetectingCredentials(false);
+                
+                if (!response.success) {
+                    setCredentialsNotice({
+                        type: 'error',
+                        message: __('Failed to detect credentials.', 'simply-static')
+                    });
+                    return;
+                }
+                
+                const credentials = response.credentials;
+                const currentService = settings.captcha_service || 'turnstile';
+                
+                // Check for credentials based on current service
+                let foundCredentials = null;
+                let sourceName = '';
+                
+                if (currentService === 'turnstile' && credentials.turnstile && credentials.turnstile.length > 0) {
+                    foundCredentials = credentials.turnstile[0];
+                    sourceName = foundCredentials.source;
+                    
+                    // Apply Turnstile credentials
+                    updateSetting('cloudflare_turnstile_site_key', foundCredentials.site_key);
+                    updateSetting('cloudflare_turnstile_secret_key', foundCredentials.secret_key);
+                    
+                    setCredentialsNotice({
+                        type: 'success',
+                        message: __('Turnstile credentials copied from ', 'simply-static') + sourceName + '!'
+                    });
+                } else if (currentService === 'recaptcha_v3' && credentials.recaptcha && credentials.recaptcha.length > 0) {
+                    foundCredentials = credentials.recaptcha[0];
+                    sourceName = foundCredentials.source;
+                    
+                    // Apply ReCaptcha credentials
+                    updateSetting('recaptcha_site_key', foundCredentials.site_key);
+                    updateSetting('recaptcha_secret_key', foundCredentials.secret_key);
+                    
+                    setCredentialsNotice({
+                        type: 'success',
+                        message: __('ReCaptcha credentials copied from ', 'simply-static') + sourceName + '!'
+                    });
+                } else {
+                    // No credentials found for current service, check if other service has credentials
+                    let alternativeMsg = '';
+                    if (currentService === 'turnstile' && credentials.recaptcha && credentials.recaptcha.length > 0) {
+                        alternativeMsg = __(' ReCaptcha credentials were found - switch to ReCaptcha v3 to use them.', 'simply-static');
+                    } else if (currentService === 'recaptcha_v3' && credentials.turnstile && credentials.turnstile.length > 0) {
+                        alternativeMsg = __(' Turnstile credentials were found - switch to Turnstile to use them.', 'simply-static');
+                    }
+                    
+                    setCredentialsNotice({
+                        type: 'warning',
+                        message: __('No credentials found for the selected captcha service.', 'simply-static') + alternativeMsg
+                    });
+                }
+                
+                setDetectedCredentials(credentials);
+            })
+            .catch((error) => {
+                setDetectingCredentials(false);
+                setCredentialsNotice({
+                    type: 'error',
+                    message: __('Error detecting credentials: ', 'simply-static') + (error.message || __('Unknown error', 'simply-static'))
+                });
+            });
     }
 
     useEffect(() => {
@@ -220,6 +296,36 @@ function FormSettings() {
                             ]}
                             onChange={(value) => updateSetting('captcha_service', value)}
                         />
+                        <Spacer margin={3}/>
+                        {credentialsNotice && (
+                            <Animate type="slide-in" options={{origin: 'top'}}>
+                                {() => (
+                                    <>
+                                        <Notice
+                                            status={credentialsNotice.type}
+                                            isDismissible={true}
+                                            onRemove={() => setCredentialsNotice(null)}
+                                        >
+                                            {credentialsNotice.message}
+                                        </Notice>
+                                        <Spacer margin={3}/>
+                                    </>
+                                )}
+                            </Animate>
+                        )}
+                        <Button
+                            variant="secondary"
+                            disabled={('free' === options.plan || !isPro()) || detectingCredentials}
+                            isBusy={detectingCredentials}
+                            onClick={detectExistingCredentials}
+                        >
+                            {detectingCredentials 
+                                ? __('Detecting...', 'simply-static') 
+                                : __('Copy existing Credentials', 'simply-static')}
+                        </Button>
+                        <p className="components-base-control__help">
+                            {__('Automatically detect and copy captcha credentials from form plugins like Contact Form 7, WPForms, or Fluent Forms.', 'simply-static')}
+                        </p>
                         <Spacer margin={3}/>
                         {(settings.captcha_service || 'turnstile') === 'turnstile' && (
                             <>

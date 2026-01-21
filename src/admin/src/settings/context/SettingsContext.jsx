@@ -111,8 +111,8 @@ function SettingsContextProvider(props) {
     }
 
     const updateSetting = (key, value) => {
-        const updatedSettings = {...settings, [key]: value};
-        setSettings(updatedSettings);
+        // Use functional update to avoid race conditions when calling updateSetting multiple times in quick succession
+        setSettings(prevSettings => ({...prevSettings, [key]: value}));
     };
 
     const getStatus = () => {
