@@ -209,13 +209,14 @@ function FormSettings() {
                         <p>{__('We will automatically protect your forms and comments with a captcha on your static site.', 'simply-static')}</p>
                         <SelectControl
                             label={__('Captcha Service', 'simply-static')}
-                            help={__('Choose which captcha service to use. More options coming soon.', 'simply-static')}
+                            help={__('Choose which captcha service to use.', 'simply-static')}
                             __next40pxDefaultSize
                             __nextHasNoMarginBottom
                             disabled={('free' === options.plan || !isPro())}
                             value={settings.captcha_service || 'turnstile'}
                             options={[
                                 { label: __('Cloudflare Turnstile', 'simply-static'), value: 'turnstile' },
+                                { label: __('Google reCAPTCHA v3', 'simply-static'), value: 'recaptcha_v3' },
                             ]}
                             onChange={(value) => updateSetting('captcha_service', value)}
                         />
@@ -273,6 +274,32 @@ function FormSettings() {
                                         { label: __('Compact', 'simply-static'), value: 'compact' },
                                     ]}
                                     onChange={(value) => updateSetting('cloudflare_turnstile_size', value)}
+                                />
+                            </>
+                        )}
+                        {settings.captcha_service === 'recaptcha_v3' && (
+                            <>
+                                <TextControl
+                                    label={__('Site Key', 'simply-static')}
+                                    help={__('Your public key will be used on the static site.', 'simply-static')}
+                                    placeholder={__('Enter your reCAPTCHA v3 site key', 'simply-static')}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
+                                    disabled={('free' === options.plan || !isPro())}
+                                    value={settings.recaptcha_site_key || ''}
+                                    onChange={(value) => updateSetting('recaptcha_site_key', value)}
+                                />
+                                <Spacer margin={3}/>
+                                <TextControl
+                                    label={__('Secret Key', 'simply-static')}
+                                    help={__('Your secret key will be stored in WordPress.', 'simply-static')}
+                                    placeholder={__('Enter your reCAPTCHA v3 secret key', 'simply-static')}
+                                    type={'password'}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
+                                    disabled={('free' === options.plan || !isPro())}
+                                    value={settings.recaptcha_secret_key || ''}
+                                    onChange={(value) => updateSetting('recaptcha_secret_key', value)}
                                 />
                             </>
                         )}
