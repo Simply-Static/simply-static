@@ -151,7 +151,13 @@ function SettingsContextProvider(props) {
     }
 
     const isStudio = () => {
-        if (options.home.includes('static.studio') || options.home.includes('static1.studio') || options.home.includes('static2.studio')) {
+        // Check for any staticX.studio domain (static.studio, static1.studio, static2.studio, static3.studio, static4.studio, etc.)
+        if (/static\d*\.studio/.test(options.home)) {
+            return true;
+        }
+
+        // Also consider it Studio if the studio helper plugin is active (version_studio is set)
+        if (options.version_studio) {
             return true;
         }
 
