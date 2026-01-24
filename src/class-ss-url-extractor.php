@@ -447,6 +447,35 @@ class Url_Extractor {
 			$tag->setAttribute( 'style', $updated_css );
 		}
 
+		// Handle link tags with data: URIs containing CSS (e.g., inline stylesheets)
+		if ( 'link' === $tag_name && $tag->hasAttribute( 'href' ) ) {
+			$href_value = $tag->getAttribute( 'href' );
+			if ( stripos( $href_value, 'data:' ) === 0 && stripos( $href_value, 'text/css' ) !== false ) {
+				$updated_href = $this->process_data_uri_css( $href_value );
+				$tag->setAttribute( 'href', $updated_href );
+				// Remove href from attributes to avoid double processing
+				$attributes = array_diff( $attributes, array( 'href' ) );
+			}
+		}
+
+		// Handle link tags with rel="preconnect" or rel="dns-prefetch" pointing to origin host
+		if ( 'link' === $tag_name && $tag->hasAttribute( 'rel' ) && $tag->hasAttribute( 'href' ) ) {
+			$rel_value = strtolower( $tag->getAttribute( 'rel' ) );
+			if ( in_array( $rel_value, array( 'preconnect', 'dns-prefetch' ), true ) ) {
+				$href_value = $tag->getAttribute( 'href' );
+				// Check if the href points to the origin host
+				$origin_host = Util::origin_host();
+				if ( stripos( Util::strip_protocol_from_url( $href_value ), $origin_host ) === 0 ) {
+					$destination_url = $this->options->get_destination_url();
+					// Replace the origin host with destination URL
+					$updated_href = preg_replace( '/(https?:)?\/\/' . preg_quote( $origin_host, '/' ) . '/i', $destination_url, $href_value );
+					$tag->setAttribute( 'href', $updated_href );
+					// Remove href from attributes to avoid double processing
+					$attributes = array_diff( $attributes, array( 'href' ) );
+				}
+			}
+		}
+
 		foreach ( $attributes as $attribute_name ) {
 			if ( $tag->hasAttribute( $attribute_name ) ) {
 				$extracted_urls  = array();
@@ -878,6 +907,66 @@ class Url_Extractor {
 	}
 
 	/**
+	 * Process a data: URI containing CSS content
+	 *
+	 * Decodes the CSS content from the data URI, processes URLs within it,
+	 * and re-encodes it back to a data URI format.
+	 *
+	 * @param string $data_uri The data: URI containing CSS
+	 *
+	 * @return string The processed data: URI with URLs replaced
+	 */
+	private function process_data_uri_css( $data_uri ) {
+		// Parse the data URI format: data:[<mediatype>][;base64],<data>
+		// Example: data:text/css;charset=UTF-8,<css content>
+		// Or URL-encoded: data://text/css%3Bcharset%3DUTF-8,%0D%0A<encoded css>
+		
+		// First, try to match the data URI pattern
+		if ( ! preg_match( '/^data:([^,]*),(.*)$/is', $data_uri, $matches ) ) {
+			// Try URL-encoded format (data://)
+			if ( preg_match( '/^data:\/\/([^,]*),(.*)$/is', $data_uri, $matches ) ) {
+				// URL-encoded format detected
+				$media_type = urldecode( $matches[1] );
+				$css_content = urldecode( $matches[2] );
+				
+				// Process URLs in the CSS content
+				$processed_css = $this->force_replace( $css_content );
+				
+				// Re-encode and return
+				return 'data://' . urlencode( $media_type ) . ',' . urlencode( $processed_css );
+			}
+			return $data_uri; // Return unchanged if pattern doesn't match
+		}
+		
+		$media_type = $matches[1];
+		$css_content = $matches[2];
+		$is_base64 = false;
+		
+		// Check if content is base64 encoded
+		if ( stripos( $media_type, ';base64' ) !== false ) {
+			$is_base64 = true;
+			$media_type = str_ireplace( ';base64', '', $media_type );
+			$css_content = base64_decode( $css_content );
+		} else {
+			// URL-decode the content
+			$css_content = urldecode( $css_content );
+		}
+		
+		// Process URLs in the CSS content using force_replace to handle origin URLs
+		$processed_css = $this->force_replace( $css_content );
+		
+		// Re-encode the CSS content
+		if ( $is_base64 ) {
+			$encoded_css = base64_encode( $processed_css );
+			return 'data:' . $media_type . ';base64,' . $encoded_css;
+		} else {
+			// URL-encode the content, preserving the original format
+			$encoded_css = rawurlencode( $processed_css );
+			return 'data:' . $media_type . ',' . $encoded_css;
+		}
+	}
+
+	/**
 	 * Use regex to extract URLs on CSS pages
 	 *
 	 * URLs in CSS follow three basic patterns:
@@ -1051,6 +1140,10 @@ class Url_Extractor {
 
 		// Also replace JSON-encoded URLs
 		$text = str_replace( addcslashes( untrailingslashit( Util::origin_url() ), '/' ), addcslashes( untrailingslashit( $convert_to ), '/' ), $text );
+
+		// Replace URLs in sourceURL and sourceMappingURL comments (used for debugging)
+		// Handles both //# and //@ formats (the latter is deprecated but still used)
+		$text = preg_replace( '/(\/\/[#@]\s*(?:sourceURL|sourceMappingURL)\s*=\s*)(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', '$1' . $convert_to, $text );
 
 		return $text;
 	}
