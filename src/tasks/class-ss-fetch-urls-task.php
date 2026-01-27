@@ -133,6 +133,8 @@ class Fetch_Urls_Task extends Task {
 	/**
 	 * @deprecated Using trait now to process pages.
 	 * @return bool
+	 * @depends Use perform instead. Will be deleted in future versions.
+	 *
 	 * @throws Pause_Exception
 	 */
 	public function old_perform() {
