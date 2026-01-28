@@ -26,6 +26,13 @@ trait canProcessPages {
 	protected $processing_column = 'last_transferred_at';
 
 	/**
+	 * If this is false, it won't check for file path in queries.
+	 *
+	 * @var bool
+	 */
+	protected $needs_file_path = true;
+
+	/**
 	 * Get batch size.
 	 *
 	 * @return mixed
@@ -76,11 +83,14 @@ trait canProcessPages {
 	 * Process Pages that have to be processed/transferred.
 	 *
 	 * @return bool If true, it's done with all pages. If false, there are still pages to process/transfer.
+	 * @throws \Exception
 	 */
 	public function process_pages() {
 		$pages_to_process       = $this->get_pages_to_process();
 		$total_pages            = $this->get_total_pages();
 		$pages_to_process_count = count( $pages_to_process );
+
+		Util::debug_log( "TEST. Total pages: " . $total_pages . '; Pages remaining: ' . $pages_to_process_count );
 
 		if ( $pages_to_process_count === 0 ) {
 			$processed_pages = $this->get_processed_pages();
@@ -89,10 +99,6 @@ trait canProcessPages {
 			$only_404 = get_option( 'simply-static-404-only' );
 			if ( ! empty( $only_404 ) ) {
 				$message = sprintf( __( 'Transferred %d of %d files', 'simply-static' ), 1, 1 );
-				// Also update pages status so UI counters align.
-				if ( method_exists( $this, 'save_pages_status' ) ) {
-					$this->save_pages_status( 0, 1 );
-				}
 			}
 			$this->save_status_message( $message );
 
@@ -121,6 +127,7 @@ trait canProcessPages {
 			}
 		}
 
+		$total_pages     = $this->get_total_pages();
 		$processed_pages = $this->get_processed_pages();
 		$message         = $this->processed_pages_message( $processed_pages, $total_pages );
 		$this->save_status_message( $message );
@@ -289,9 +296,15 @@ trait canProcessPages {
 	 * @throws \Exception
 	 */
 	public function get_main_query() {
-		return Page::query()
-		           ->where( "file_path IS NOT NULL" )
-		           ->where( "file_path != ''" );
+
+		$query = Page::query();
+
+		if ( $this->needs_file_path ) {
+			$query->where( "file_path IS NOT NULL" );
+			$query->where( "file_path != ''" );
+		}
+
+		return $query;
 	}
 
 	/**

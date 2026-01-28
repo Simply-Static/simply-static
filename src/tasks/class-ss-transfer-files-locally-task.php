@@ -75,8 +75,6 @@ class Transfer_Files_Locally_Task extends Task {
 			// If this is a 404-only export, ensure the activity/export log reflects a single transferred file.
 			$only_404 = get_option( 'simply-static-404-only' );
 			if ( ! empty( $only_404 ) ) {
-				// Update pages status to 1 total, 0 remaining and add a clear transfer message.
-				$this->save_pages_status( 0, 1 );
 				$this->save_status_message( sprintf( __( 'Transferred %d of %d files', 'simply-static' ), 1, 1 ) );
 			}
 
