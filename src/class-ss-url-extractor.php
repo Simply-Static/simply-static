@@ -537,6 +537,20 @@ class Url_Extractor {
 		// Preserve JSON attributes before processing
 		$html_string = $this->preserve_attributes( $html_string );
 
+		// Extract and preserve <xmp> tags to prevent DOMDocument from corrupting their content
+		// The <xmp> tag is deprecated but still used by some plugins like Elementor Code Highlight
+		// Using a non-comment placeholder format to avoid being captured by comment extraction
+		$xmp_tags        = [];
+		$xmp_placeholder = '<ss-xmp-placeholder data-index="%d"></ss-xmp-placeholder>';
+		$xmp_regex       = '/<xmp\b[^>]*>.*?<\/xmp>/is';
+
+		$html_string = preg_replace_callback( $xmp_regex, function ( $matches ) use ( &$xmp_tags, &$xmp_placeholder ) {
+			$index      = count( $xmp_tags );
+			$xmp_tags[] = $matches[0]; // Store the entire xmp tag unchanged
+
+			return sprintf( $xmp_placeholder, $index );
+		}, $html_string );
+
 		// Extract and preserve non-conditional HTML comments to avoid altering their content (e.g., commented-out scripts)
 		$html_comments                 = [];
 		$comment_placeholder           = '<!-- COMMENT_PLACEHOLDER_%d -->';
@@ -561,19 +575,6 @@ class Url_Extractor {
 		$complete_conditional_regex = '/<!--\[if[^\]]*\]>.*?<!\[endif\]-->/s';
 		// Second pattern: match incomplete conditional comments (without closing tags)
 		$incomplete_conditional_regex = '/<!--\[if[^\]]*\]>((?!<!--\[if).)*?(?=<!--|$)/s';
-
-		// Extract and preserve <xmp> tags to prevent DOMDocument from corrupting their content
-		// The <xmp> tag is deprecated but still used by some plugins like Elementor Code Highlight
-		$xmp_tags        = [];
-		$xmp_placeholder = '<!-- XMP_PLACEHOLDER_%d -->';
-		$xmp_regex       = '/<xmp\b[^>]*>.*?<\/xmp>/is';
-
-		$html_string = preg_replace_callback( $xmp_regex, function ( $matches ) use ( &$xmp_tags, &$xmp_placeholder ) {
-			$index      = count( $xmp_tags );
-			$xmp_tags[] = $matches[0]; // Store the entire xmp tag unchanged
-
-			return sprintf( $xmp_placeholder, $index );
-		}, $html_string );
 
 		// Use regex method to ensure script tags are preserved
 		// Extract script tags, process them for URL replacement, and replace them with placeholders
@@ -825,7 +826,7 @@ class Url_Extractor {
 			}, $html );
 
 			// Restore xmp tags
-			$html = preg_replace_callback( '/<!-- XMP_PLACEHOLDER_(\d+) -->/', function ( $matches ) use ( $xmp_tags ) {
+			$html = preg_replace_callback( '/<ss-xmp-placeholder data-index="(\d+)"><\/ss-xmp-placeholder>/', function ( $matches ) use ( $xmp_tags ) {
 				$index = (int) $matches[1];
 				if ( isset( $xmp_tags[ $index ] ) ) {
 					return $xmp_tags[ $index ];
