@@ -836,25 +836,20 @@ class Util {
 	 * @return string|null                 Absolute URL, or null
 	 */
 	public static function create_offline_path( $extracted_path, $page_path, $iterations = 0 ) {
-		// Remove trailing slash from page_path on initial call to ensure consistent iteration count.
-		// Paths like /category/syllabus/ and /category/syllabus should produce the same result.
 		if ( $iterations === 0 ) {
-			$page_path = untrailingslashit( $page_path );
+			$page_path = trailingslashit( $page_path );
 		}
 
-		// We're done if we get a match between the path of the page and the extracted URL
-		// OR if there are no more slashes to remove
-		if ( strpos( $page_path, '/' ) === false || strpos( $extracted_path, trailingslashit( $page_path ) ) === 0 ) {
-			$extracted_path = substr( $extracted_path, strlen( $page_path ) );
-			$iterations     = ( $iterations == 0 ) ? 0 : $iterations - 1;
+		if ( $page_path === '/' || strpos( $extracted_path, $page_path ) === 0 ) {
+			$extracted_path = substr( $extracted_path, strlen( $page_path ) === 1 ? 0 : strlen( $page_path ) );
 			$new_path       = '.' . str_repeat( '/..', $iterations ) . self::add_leading_slash( $extracted_path );
 
 			return $new_path;
 		} else {
 			// match everything before the last slash
-			$pattern = '/(.*)\/[^\/]*$/';
+			$pattern = '/(.*)\/[^\/]*\/$/';
 			// remove the last slash and anything after it
-			$new_page_path = preg_replace( $pattern, '$1', $page_path );
+			$new_page_path = preg_replace( $pattern, '$1/', $page_path );
 
 			return self::create_offline_path( $extracted_path, $new_page_path, ++ $iterations );
 		}
