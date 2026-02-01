@@ -111,6 +111,12 @@ class Url_Extractor {
 	protected $options = null;
 
 	/**
+	 * Array to temporarily store preserved xmp tags
+	 * @var array
+	 */
+	private $xmp_tags = [];
+
+	/**
 	 * The url of the site
 	 * @var array
 	 */
@@ -198,6 +204,9 @@ class Url_Extractor {
 	 * @return array
 	 */
 	public function extract_and_update_urls() {
+		// Reset preserved tags for each extraction run
+		$this->xmp_tags = [];
+
 		if ( $this->static_page->is_type( 'html' ) ) {
 			$this->save_body( $this->extract_and_replace_urls_in_html() );
 		}
@@ -345,6 +354,53 @@ class Url_Extractor {
 	}
 
 	/**
+	 * Extract and preserve <xmp> tags to prevent corruption during processing
+	 *
+	 * @param string $content The HTML content
+	 *
+	 * @return string The modified content with placeholders
+	 */
+	private function preserve_xmp_tags( $content ) {
+		// The <xmp> tag is deprecated but still used by some plugins like Elementor Code Highlight
+		// Using a non-comment placeholder format to avoid being captured by comment extraction
+		$placeholder = '<ss-xmp-placeholder data-index="%d"></ss-xmp-placeholder>';
+		$regex       = '/<xmp\b[^>]*>.*?<\/xmp>/is';
+
+		$content = preg_replace_callback( $regex, function ( $matches ) use ( $placeholder ) {
+			$index            = count( $this->xmp_tags );
+			$this->xmp_tags[] = $matches[0]; // Store the entire xmp tag unchanged
+
+			return sprintf( $placeholder, $index );
+		}, $content );
+
+		return $content;
+	}
+
+	/**
+	 * Restore preserved <xmp> tags in HTML content
+	 *
+	 * @param string $content The HTML content with placeholders
+	 *
+	 * @return string The HTML content with restored xmp tags
+	 */
+	private function restore_xmp_tags( $content ) {
+		if ( empty( $this->xmp_tags ) ) {
+			return $content;
+		}
+
+		$content = preg_replace_callback( '/<ss-xmp-placeholder data-index="(\d+)"><\/ss-xmp-placeholder>/', function ( $matches ) {
+			$index = (int) $matches[1];
+			if ( isset( $this->xmp_tags[ $index ] ) ) {
+				return $this->xmp_tags[ $index ];
+			} else {
+				return '';
+			}
+		}, $content );
+
+		return $content;
+	}
+
+	/**
 	 * Replaces origin URL with destination URL in response body
 	 *
 	 * This is a function of last resort for URL replacement. Ideally it was
@@ -366,11 +422,17 @@ class Url_Extractor {
 		// Preserve JSON attributes before replacement
 		$response_body = $this->preserve_attributes( $response_body );
 
+		// Preserve <xmp> tags
+		$response_body = $this->preserve_xmp_tags( $response_body );
+
 		// replace wp_json_encode'd urls, as used by WP's `concatemoji`
 		$response_body = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
 
 		// replace encoded URLs, as found in query params
 		$response_body = preg_replace( '/(https?%3A)?%2F%2F' . addcslashes( urlencode( Util::origin_host() ), '.' ) . '/i', urlencode( $destination_url ), $response_body );
+
+		// Restore preserved <xmp> tags
+		$response_body = $this->restore_xmp_tags( $response_body );
 
 		// Restore preserved JSON attributes
 		$response_body = $this->restore_attributes( $response_body );
@@ -391,12 +453,18 @@ class Url_Extractor {
 		// Preserve JSON attributes before replacement
 		$content = $this->preserve_attributes( $content );
 
+		// Preserve <xmp> tags
+		$content = $this->preserve_xmp_tags( $content );
+
 		// replace any instance of the origin url, whether it starts with https://, http://, or //.
 		$content = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $destination_url, $content );
 
 		// replace wp_json_encode'd urls, as used by WP's `concatemoji`.
 		// e.g. {"concatemoji":"http:\/\/www.example.org\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.6.1"}.
 		$content = str_replace( addcslashes( untrailingslashit( Util::origin_url() ), '/' ), addcslashes( untrailingslashit( $destination_url ), '/' ), $content );
+
+		// Restore preserved <xmp> tags
+		$content = $this->restore_xmp_tags( $content );
 
 		// Restore preserved JSON attributes
 		$content = $this->restore_attributes( $content );
@@ -538,18 +606,7 @@ class Url_Extractor {
 		$html_string = $this->preserve_attributes( $html_string );
 
 		// Extract and preserve <xmp> tags to prevent DOMDocument from corrupting their content
-		// The <xmp> tag is deprecated but still used by some plugins like Elementor Code Highlight
-		// Using a non-comment placeholder format to avoid being captured by comment extraction
-		$xmp_tags        = [];
-		$xmp_placeholder = '<ss-xmp-placeholder data-index="%d"></ss-xmp-placeholder>';
-		$xmp_regex       = '/<xmp\b[^>]*>.*?<\/xmp>/is';
-
-		$html_string = preg_replace_callback( $xmp_regex, function ( $matches ) use ( &$xmp_tags, &$xmp_placeholder ) {
-			$index      = count( $xmp_tags );
-			$xmp_tags[] = $matches[0]; // Store the entire xmp tag unchanged
-
-			return sprintf( $xmp_placeholder, $index );
-		}, $html_string );
+		$html_string = $this->preserve_xmp_tags( $html_string );
 
 		// Extract and preserve non-conditional HTML comments to avoid altering their content (e.g., commented-out scripts)
 		$html_comments                 = [];
@@ -826,14 +883,7 @@ class Url_Extractor {
 			}, $html );
 
 			// Restore xmp tags
-			$html = preg_replace_callback( '/<ss-xmp-placeholder data-index="(\d+)"><\/ss-xmp-placeholder>/', function ( $matches ) use ( $xmp_tags ) {
-				$index = (int) $matches[1];
-				if ( isset( $xmp_tags[ $index ] ) ) {
-					return $xmp_tags[ $index ];
-				} else {
-					return '';
-				}
-			}, $html );
+			$html = $this->restore_xmp_tags( $html );
 
 			// Restore conditional comments
 			$html = preg_replace_callback( '/<!-- CONDITIONAL_COMMENT_PLACEHOLDER_(\d+) -->/', function ( $matches ) use ( $conditional_comments ) {
