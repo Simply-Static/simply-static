@@ -40,16 +40,42 @@ class Uploads_Crawler extends Crawler {
 
 		// Get the uploads directory information
 		$uploads_dir = wp_upload_dir();
+		$base_dir    = $uploads_dir['basedir'];
+		$base_url    = $uploads_dir['baseurl'];
 
-		// Skip if the uploads directory doesn't exist
-		if ( ! is_dir( $uploads_dir['basedir'] ) ) {
-			\Simply_Static\Util::debug_log( "Uploads directory does not exist: " . $uploads_dir['basedir'] );
+		$additional_dirs = [
+			[
+				'basedir' => WP_CONTENT_DIR . '/webp-express/webp-images/uploads',
+				'baseurl' => content_url( 'webp-express/webp-images/uploads' ),
+			],
+		];
 
-			return $media_urls;
+		$additional_dirs = apply_filters( 'ss_uploads_additional_directories', $additional_dirs );
+
+		$scan_dirs = [
+			[
+				'basedir' => $base_dir,
+				'baseurl' => $base_url,
+			],
+		];
+
+		foreach ( $additional_dirs as $additional_dir ) {
+			if ( is_dir( $additional_dir['basedir'] ) ) {
+				$scan_dirs[] = $additional_dir;
+			}
 		}
 
-		// Scan the uploads directory for media files
-		$media_urls = $this->scan_directory_for_media_files( $uploads_dir['basedir'], $uploads_dir['baseurl'] );
+		foreach ( $scan_dirs as $scan_dir ) {
+			// Skip if the directory doesn't exist
+			if ( ! is_dir( $scan_dir['basedir'] ) ) {
+				\Simply_Static\Util::debug_log( "Directory does not exist: " . $scan_dir['basedir'] );
+				continue;
+			}
+
+			// Scan the directory for media files
+			$found_urls = $this->scan_directory_for_media_files( $scan_dir['basedir'], $scan_dir['baseurl'] );
+			$media_urls = array_merge( $media_urls, $found_urls );
+		}
 
 		return $media_urls;
 	}
@@ -66,6 +92,28 @@ class Uploads_Crawler extends Crawler {
 		$uploads_dir = wp_upload_dir();
 		$base_dir    = $uploads_dir['basedir'];
 		$base_url    = $uploads_dir['baseurl'];
+
+		$additional_dirs = [
+			[
+				'basedir' => WP_CONTENT_DIR . '/webp-express/webp-images/uploads',
+				'baseurl' => content_url( 'webp-express/webp-images/uploads' ),
+			],
+		];
+
+		$additional_dirs = apply_filters( 'ss_uploads_additional_directories', $additional_dirs );
+
+		$scan_dirs = [
+			[
+				'basedir' => $base_dir,
+				'baseurl' => $base_url,
+			],
+		];
+
+		foreach ( $additional_dirs as $additional_dir ) {
+			if ( is_dir( $additional_dir['basedir'] ) ) {
+				$scan_dirs[] = $additional_dir;
+			}
+		}
 
 		if ( ! is_dir( $base_dir ) ) {
 			\Simply_Static\Util::debug_log( "Uploads directory does not exist: " . $base_dir );
@@ -118,53 +166,58 @@ class Uploads_Crawler extends Crawler {
 		$batch_size = (int) apply_filters( 'simply_static_crawler_batch_size', 100 );
 		$buffer     = [];
 
-		try {
-			$iterator = new \RecursiveIteratorIterator(
-				new \RecursiveDirectoryIterator( $base_dir, \RecursiveDirectoryIterator::SKIP_DOTS ),
-				\RecursiveIteratorIterator::SELF_FIRST
-			);
+		foreach ( $scan_dirs as $scan_dir ) {
+			$base_dir = $scan_dir['basedir'];
+			$base_url = $scan_dir['baseurl'];
 
-			foreach ( $iterator as $file ) {
-				if ( $file->isDir() ) {
-					continue;
-				}
+			try {
+				$iterator = new \RecursiveIteratorIterator(
+					new \RecursiveDirectoryIterator( $base_dir, \RecursiveDirectoryIterator::SKIP_DOTS ),
+					\RecursiveIteratorIterator::SELF_FIRST
+				);
 
-				$relative_path = \Simply_Static\Util::safe_relative_path( $base_dir, $file->getPathname() );
+				foreach ( $iterator as $file ) {
+					if ( $file->isDir() ) {
+						continue;
+					}
 
-				// Skip files in ignored directories
-				$skip = false;
-				foreach ( (array) $skip_dirs as $skip_dir ) {
-					if ( $skip_dir && strpos( $relative_path, '/' . trim( $skip_dir, '/' ) . '/' ) !== false ) {
-						$skip = true;
-						break;
+					$relative_path = \Simply_Static\Util::safe_relative_path( $base_dir, $file->getPathname() );
+
+					// Skip files in ignored directories
+					$skip = false;
+					foreach ( (array) $skip_dirs as $skip_dir ) {
+						if ( $skip_dir && strpos( $relative_path, '/' . trim( $skip_dir, '/' ) . '/' ) !== false ) {
+							$skip = true;
+							break;
+						}
+					}
+					if ( $skip ) {
+						continue;
+					}
+
+					$ext = strtolower( pathinfo( $relative_path, PATHINFO_EXTENSION ) );
+					if ( ! in_array( $ext, (array) $media_extensions, true ) ) {
+						continue;
+					}
+
+					$url      = \Simply_Static\Util::safe_join_url( $base_url, $relative_path );
+					$buffer[] = $url;
+
+					if ( count( $buffer ) >= $batch_size ) {
+						$count  += $this->enqueue_urls_batch( $buffer );
+						$buffer = [];
+						// Yield to allow other processes to run
+						usleep( 100000 );
 					}
 				}
-				if ( $skip ) {
-					continue;
-				}
-
-				$ext = strtolower( pathinfo( $relative_path, PATHINFO_EXTENSION ) );
-				if ( ! in_array( $ext, (array) $media_extensions, true ) ) {
-					continue;
-				}
-
-				$url      = \Simply_Static\Util::safe_join_url( $base_url, $relative_path );
-				$buffer[] = $url;
-
-				if ( count( $buffer ) >= $batch_size ) {
-					$count  += $this->enqueue_urls_batch( $buffer );
-					$buffer = [];
-					// Yield to allow other processes to run
-					usleep( 100000 );
-				}
+			} catch ( \Exception $e ) {
+				\Simply_Static\Util::debug_log( 'Error streaming uploads crawl: ' . $e->getMessage() );
 			}
+		}
 
-			// Process remaining
-			if ( ! empty( $buffer ) ) {
-				$count += $this->enqueue_urls_batch( $buffer );
-			}
-		} catch ( \Exception $e ) {
-			\Simply_Static\Util::debug_log( 'Error streaming uploads crawl: ' . $e->getMessage() );
+		// Process remaining
+		if ( ! empty( $buffer ) ) {
+			$count += $this->enqueue_urls_batch( $buffer );
 		}
 
 		\Simply_Static\Util::debug_log( sprintf( 'Uploads crawler added %d URLs (streamed)', $count ) );
