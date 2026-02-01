@@ -837,6 +837,16 @@ class Util {
 	 */
 	public static function create_offline_path( $extracted_path, $page_path, $iterations = 0 ) {
 		if ( $iterations === 0 ) {
+			// Remove index.html if it's there
+			$page_path = self::strip_index_filenames_from_url( $page_path );
+
+			// If it's not the root, and it doesn't have a trailing slash,
+			// it's likely a file (like r080108-1.html).
+			// We want to chop off the file part for depth calculation.
+			if ( $page_path !== '/' && substr( $page_path, - 1 ) !== '/' ) {
+				$page_path = dirname( $page_path );
+			}
+
 			$page_path = trailingslashit( $page_path );
 		}
 
