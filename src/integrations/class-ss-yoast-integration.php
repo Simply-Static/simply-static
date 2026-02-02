@@ -183,7 +183,7 @@ class Yoast_Integration extends Integration {
 			$doc = new \DOMDocument();
 			libxml_use_internal_errors( true );
 			$load_options = defined('LIBXML_HTML_NOIMPLIED') ? (LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD) : 0;
-			$doc->loadHTML( $dom, $load_options );
+			$doc->loadHTML( Util::strip_bom( $dom ), $load_options );
 			libxml_clear_errors();
 		} elseif ( $dom instanceof \DOMDocument ) {
 			$doc = $dom;

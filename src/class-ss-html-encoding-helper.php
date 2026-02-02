@@ -31,6 +31,9 @@ class Html_Encoding_Helper {
 	 * @return array{html:string, encoding:string} Array with 'html' (string prepared for DOM) and 'encoding' (DOMDocument encoding to set).
 	 */
 	public static function prepare_html_for_dom( $html_string, $detected_charset, $context = null ) {
+		// Strip UTF-8 BOM if present to prevent DOMDocument from misinterpreting it as text.
+		$html_string = Util::strip_bom( $html_string );
+
 		// Selective pre-encoding configuration
 		$preencode_mode = apply_filters( 'simply_static_preencode_mode', 'bmp_only', $context );
 		$preencode      = apply_filters( 'simply_static_preencode_for_dom', $preencode_mode !== 'none', $detected_charset, $context );

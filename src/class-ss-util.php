@@ -582,6 +582,20 @@ class Util {
 	}
 
 	/**
+	 * Strip UTF-8 BOM from a string
+	 *
+	 * @param string $string String to strip BOM from
+	 * @return string
+	 */
+	public static function strip_bom( $string ) {
+		if ( ! is_string( $string ) ) {
+			return $string;
+		}
+
+		return preg_replace( '/^\xEF\xBB\xBF/', '', $string );
+	}
+
+	/**
 	 * Truncate if a string exceeds a certain length (30 chars by default)
 	 * @return string
 	 */

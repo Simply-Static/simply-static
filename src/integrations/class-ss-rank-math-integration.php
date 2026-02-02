@@ -362,7 +362,7 @@ class Rank_Math_Integration extends Integration {
 			libxml_use_internal_errors( true );
 			// Suppress implied html/body to better preserve fragments if possible.
 			$load_options = defined('LIBXML_HTML_NOIMPLIED') ? (LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD) : 0;
-			$doc->loadHTML( $dom, $load_options );
+			$doc->loadHTML( Util::strip_bom( $dom ), $load_options );
 			libxml_clear_errors();
 		} elseif ( $dom instanceof \DOMDocument ) {
 			$doc = $dom;
