@@ -765,6 +765,19 @@ class Url_Extractor {
 		// Clear any errors
 		libxml_clear_errors();
 
+		// Ensure body classes are preserved (fix for YoastSEO/Astra schema attributes)
+		$body_elements = $dom->getElementsByTagName( 'body' );
+
+		if ( $body_elements->length > 0 ) {
+			$body  = $body_elements->item( 0 );
+			$regex = '/<body\b[^>]*?\sclass\s*=\s*(["\'])(.*?)\1[^>]*>/is';
+
+			if ( preg_match( $regex, $html_string, $matches ) ) {
+				$class_string = $matches[2];
+				$body->setAttribute( 'class', $class_string );
+			}
+		}
+
 		// Create a DOMXPath object to query the DOM
 		$xpath = new DOMXPath( $dom );
 
