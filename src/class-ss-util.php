@@ -419,8 +419,8 @@ class Util {
 		$excluded = array( '.php' );
 		$opts = Options::instance();
 
-		// Exclude debug files (.log, .txt) but not robots.txt, llms.txt, or _redirects
-		if ( preg_match( '/\.(log|txt)$/i', $url ) && strpos( $url, 'debug' ) !== false && strpos( $url, 'robots.txt' ) === false && strpos( $url, 'llms.txt' ) === false && strpos( $url, '_redirects' ) === false ) {
+		// Exclude debug files (.log, .txt) but not robots.txt, llms.txt, _redirects, or _headers
+		if ( preg_match( '/\.(log|txt)$/i', $url ) && strpos( $url, 'debug' ) !== false && strpos( $url, 'robots.txt' ) === false && strpos( $url, 'llms.txt' ) === false && strpos( $url, '_redirects' ) === false && strpos( $url, '_headers' ) === false ) {
 			return true;
 		}
 

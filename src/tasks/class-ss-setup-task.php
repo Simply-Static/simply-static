@@ -96,7 +96,7 @@ class Setup_Task extends Task {
 					$static_page->found_on_id = 0;
 					$path_part = parse_url( $url, PHP_URL_PATH );
 					$lower     = is_string( $path_part ) ? strtolower( $path_part ) : '';
-					if ( $lower === '/robots.txt' || $lower === '/llms.txt' || $lower === '/_redirects' ) {
+					if ( $lower === '/robots.txt' || $lower === '/llms.txt' || $lower === '/_redirects' || $lower === '/_headers' ) {
 						$static_page->handler = Text_File_Handler::class;
 					}
 					$static_page->save();
@@ -172,6 +172,16 @@ class Setup_Task extends Task {
       Util::debug_log( '_redirects inclusion disabled via ss_include_redirects_in_export filter' );
   }
 
+  // Add _headers if exists and not globally disabled.
+  $headers_file = ABSPATH . '_headers';
+  $include_headers = (bool) apply_filters( 'ss_include_headers_in_export', true );
+
+  if ( $include_headers && file_exists( $headers_file ) ) {
+      $file_literals[] = $headers_file;
+  } else if ( ! $include_headers ) {
+      Util::debug_log( '_headers inclusion disabled via ss_include_headers_in_export filter' );
+  }
+
 		// Add feeds if enabled.
 		if ( $this->options->get( 'add_feeds' ) ) {
 			// Create feed directory it doesn't exist.
@@ -222,9 +232,9 @@ class Setup_Task extends Task {
 						$static_page->set_status_message( __( "Additional File", 'simply-static' ) );
 						// setting found_on_id to 0 since this was user-specified
 						$static_page->found_on_id = 0;
-						// Use the Text_File_Handler for robots.txt, llms.txt, and _redirects so URLs are replaced in plain text.
+						// Use the Text_File_Handler for robots.txt, llms.txt, _redirects, and _headers so URLs are replaced in plain text.
 						$base = strtolower( basename( $item ) );
-						if ( $base === 'robots.txt' || $base === 'llms.txt' || $base === '_redirects' ) {
+						if ( $base === 'robots.txt' || $base === 'llms.txt' || $base === '_redirects' || $base === '_headers' ) {
 							$static_page->handler = Text_File_Handler::class;
 						} else {
 							$static_page->handler = Additional_File_Handler::class;
@@ -240,7 +250,7 @@ class Setup_Task extends Task {
 							$static_page = Page::query()->find_or_initialize_by( 'url', $url );
 							$static_page->set_status_message( __( "Additional Dir", 'simply-static' ) );
 							$base = strtolower( basename( $file_name ) );
-							if ( $base === 'robots.txt' || $base === 'llms.txt' || $base === '_redirects' ) {
+							if ( $base === 'robots.txt' || $base === 'llms.txt' || $base === '_redirects' || $base === '_headers' ) {
 								$static_page->handler = Text_File_Handler::class;
 							} else {
 								$static_page->handler = Additional_File_Handler::class;
@@ -284,14 +294,14 @@ class Setup_Task extends Task {
 							if ( @preg_match( $pattern, $rel ) && preg_match( $pattern, $rel ) ) {
 								if ( is_dir( $path ) ) { continue; }
 								$url = self::convert_path_to_url( $path );
-								$static_page = Page::query()->find_or_initialize_by( 'url', $url );
-								$static_page->set_status_message( __( 'Additional File (regex)', 'simply-static' ) );
-								$base = strtolower( basename( $path ) );
-								$static_page->handler = ( $base === 'robots.txt' || $base === 'llms.txt' || $base === '_redirects' ) ? Text_File_Handler::class : Additional_File_Handler::class;
-								$static_page->found_on_id = 0;
-								$static_page->save();
-								$added++;
-								break; // already matched one pattern
+									$static_page = Page::query()->find_or_initialize_by( 'url', $url );
+									$static_page->set_status_message( __( 'Additional File (regex)', 'simply-static' ) );
+									$base = strtolower( basename( $path ) );
+									$static_page->handler = ( $base === 'robots.txt' || $base === 'llms.txt' || $base === '_redirects' || $base === '_headers' ) ? Text_File_Handler::class : Additional_File_Handler::class;
+									$static_page->found_on_id = 0;
+									$static_page->save();
+									$added++;
+									break; // already matched one pattern
 							}
 						}
 						if ( $added >= $max_matches ) { break 2; }

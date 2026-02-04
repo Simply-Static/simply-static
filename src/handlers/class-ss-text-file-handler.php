@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Text_File_Handler extends Page_Handler {
 	/**
 	 * After the file is fetched into the archive directory, replace any origin URLs
-	 * with the destination URL in plain-text files like robots.txt, llms.txt, and _redirects.
+	 * with the destination URL in plain-text files like robots.txt, llms.txt, _redirects, and _headers.
 	 *
 	 * @param string $destination_dir Absolute path to the archive directory.
 	 * @return void
@@ -27,9 +27,9 @@ class Text_File_Handler extends Page_Handler {
 			return;
 		}
 
-		// Only process text files we target: robots.txt, llms.txt, or _redirects
+		// Only process text files we target: robots.txt, llms.txt, _redirects, or _headers
 		$basename = strtolower( basename( $full_path ) );
-		if ( $basename !== 'robots.txt' && $basename !== 'llms.txt' && $basename !== '_redirects' ) {
+		if ( $basename !== 'robots.txt' && $basename !== 'llms.txt' && $basename !== '_redirects' && $basename !== '_headers' ) {
 			return;
 		}
 
