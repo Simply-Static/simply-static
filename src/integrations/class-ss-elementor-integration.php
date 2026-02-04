@@ -46,7 +46,7 @@ class Elementor_Integration extends Integration {
 	 * @return void
 	 */
 	public function run() {
-		//add_filter( 'ss_html_after_restored_attributes', [ $this, 'extract_elementor_settings' ], 20, 2 );
+		add_filter( 'ss_html_after_restored_attributes', [ $this, 'extract_elementor_settings' ], 20, 2 );
 
 		// Register Elementor widgets
 		add_action( 'elementor/widgets/register', [ $this, 'register_widgets' ] );
@@ -74,6 +74,10 @@ class Elementor_Integration extends Integration {
 		}
 
 		add_action( 'ssp_before_form_template_scripts', [ $this, 'dequeue_scripts' ] );
+
+		if ( class_exists( 'simply_static_pro\Single' ) ) {
+			add_filter( 'ssp_single_related_attachment_urls', [ $this, 'add_elementor_thumbnails' ], 10, 2 );
+		}
 	}
 
 	/**
@@ -584,5 +588,94 @@ class Elementor_Integration extends Integration {
 		$flat_array[] = array_merge( $data, $flat_array );
 
 		return $flat_array;
+	}
+
+	/**
+	 * Add Elementor thumbnails to Single Export.
+	 *
+	 * @param array $urls    Existing related URLs.
+	 * @param int   $post_id The post ID being exported.
+	 * @return array
+	 */
+	public function add_elementor_thumbnails( $urls, $post_id ) {
+		$upload_dir = wp_upload_dir();
+		$thumbs_dir = $upload_dir['basedir'] . '/elementor/thumbs';
+
+		if ( ! is_dir( $thumbs_dir ) ) {
+			return $urls;
+		}
+
+		// 1. Try to find thumbnails by parsing the post content/meta
+		$elementor_data = get_post_meta( $post_id, '_elementor_data', true );
+
+		if ( ! empty( $elementor_data ) ) {
+			$data = json_decode( $elementor_data, true );
+
+			if ( $data ) {
+				$flattened = $this->flatten_data( $data );
+				$found_attachment_ids = [];
+
+				foreach ( $flattened as $element ) {
+					if ( ! empty( $element['settings'] ) ) {
+						foreach ( $element['settings'] as $key => $value ) {
+							if ( is_array( $value ) && isset( $value['id'] ) && ! empty( $value['url'] ) ) {
+								$found_attachment_ids[] = $value['id'];
+							}
+						}
+					}
+				}
+
+				$found_attachment_ids = array_unique( array_filter( $found_attachment_ids ) );
+
+				foreach ( $found_attachment_ids as $attachment_id ) {
+					$file = get_attached_file( $attachment_id );
+					if ( ! $file ) {
+						continue;
+					}
+
+					$pathinfo = pathinfo( $file );
+					$basename = $pathinfo['filename'];
+					$ext      = isset( $pathinfo['extension'] ) ? $pathinfo['extension'] : '';
+
+					if ( empty( $ext ) ) {
+						continue;
+					}
+
+					// Search for elementor thumbnails for this attachment
+					$pattern = $thumbs_dir . '/' . $basename . '-*.' . $ext;
+					$files   = glob( $pattern );
+
+					if ( $files ) {
+						foreach ( $files as $thumb_file ) {
+							$thumb_url = $upload_dir['baseurl'] . '/elementor/thumbs/' . basename( $thumb_file );
+							if ( Util::is_local_url( $thumb_url ) ) {
+								$urls[] = $thumb_url;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// 2. Also ensure Elementor CSS for this post is included and its assets are found
+		$css_file = $upload_dir['basedir'] . '/elementor/css/post-' . $post_id . '.css';
+		if ( file_exists( $css_file ) ) {
+			$css_url = $upload_dir['baseurl'] . '/elementor/css/post-' . $post_id . '.css';
+			if ( Util::is_local_url( $css_url ) ) {
+				$urls[] = $css_url;
+
+				$css_content = file_get_contents( $css_file );
+				if ( preg_match_all( '/url\(\s*[\'"]?([^\'"\)]+)[\'"]?\s*\)/i', $css_content, $matches ) ) {
+					foreach ( $matches[1] as $extracted_url ) {
+						$abs_url = Util::relative_to_absolute_url( $extracted_url, $css_url );
+						if ( $abs_url && Util::is_local_url( $abs_url ) ) {
+							$urls[] = $abs_url;
+						}
+					}
+				}
+			}
+		}
+
+		return array_values( array_unique( $urls ) );
 	}
 }
