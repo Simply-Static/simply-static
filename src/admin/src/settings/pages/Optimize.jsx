@@ -42,6 +42,9 @@ function Optimize() {
     const [disableDbDebug, setDisableDbDebug] = useState(false);
     const [disableWLW, setDisableWLW] = useState(false);
 
+    const [versionCss, setVersionCss] = useState(false);
+    const [versionJs, setVersionJs] = useState(false);
+
     const [shortPixelResetting, setShortPixelResetting] = useState(false);
 
     const setSavingSettings = () => {
@@ -156,6 +159,14 @@ function Optimize() {
 
         if (settings.disable_wlw_manifest) {
             setDisableWLW(settings.disable_wlw_manifest)
+        }
+
+        if (settings.version_css) {
+            setVersionCss(settings.version_css);
+        }
+
+        if (settings.version_js) {
+            setVersionJs(settings.version_js);
         }
 
     }, [settings]);
@@ -317,6 +328,54 @@ function Optimize() {
                 }
 
 
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <Flex>
+                    <FlexItem>
+                        <b>{__('Versioning', 'simply-static')}</b>
+                    </FlexItem>
+                    {('free' === options.plan || !isPro()) &&
+                        <FlexItem>
+                            <ExternalLink
+                                href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
+                        </FlexItem>
+                    }
+                </Flex>
+            </CardHeader>
+            <CardBody>
+                <ToggleControl
+                    label={__('Version CSS?', 'simply-static')}
+                    __nextHasNoMarginBottom
+                    help={
+                        versionCss
+                            ? __('Appends a version query string to CSS files.', 'simply-static')
+                            : __('Don\'t append a version query string to CSS files.', 'simply-static')
+                    }
+                    disabled={('free' === options.plan || !isPro())}
+                    checked={versionCss}
+                    onChange={(value) => {
+                        setVersionCss(value);
+                        updateSetting('version_css', value);
+                    }}
+                />
+                <ToggleControl
+                    label={__('Version JavaScript?', 'simply-static')}
+                    __nextHasNoMarginBottom
+                    help={
+                        versionJs
+                            ? __('Appends a version query string to JavaScript files.', 'simply-static')
+                            : __('Don\'t append a version query string to JavaScript files.', 'simply-static')
+                    }
+                    disabled={('free' === options.plan || !isPro())}
+                    checked={versionJs}
+                    onChange={(value) => {
+                        setVersionJs(value);
+                        updateSetting('version_js', value);
+                    }}
+                />
             </CardBody>
         </Card>
         <Spacer margin={5}/>
