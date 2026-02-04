@@ -96,7 +96,7 @@ class Setup_Task extends Task {
 					$static_page->found_on_id = 0;
 					$path_part = parse_url( $url, PHP_URL_PATH );
 					$lower     = is_string( $path_part ) ? strtolower( $path_part ) : '';
-					if ( $lower === '/robots.txt' || $lower === '/llms.txt' ) {
+					if ( $lower === '/robots.txt' || $lower === '/llms.txt' || $lower === '/_redirects' ) {
 						$static_page->handler = Text_File_Handler::class;
 					}
 					$static_page->save();
@@ -157,9 +157,19 @@ class Setup_Task extends Task {
   $include_llms = (bool) apply_filters( 'ss_include_llms_txt_in_export', true );
 
   if ( $include_llms && file_exists( $llms_txt ) ) {
-      $additional_files[] = $llms_txt;
+      $file_literals[] = $llms_txt;
   } else if ( ! $include_llms ) {
       Util::debug_log( 'llms.txt inclusion disabled via ss_include_llms_txt_in_export filter' );
+  }
+
+  // Add _redirects if exists and not globally disabled.
+  $redirects_file = ABSPATH . '_redirects';
+  $include_redirects = (bool) apply_filters( 'ss_include_redirects_in_export', true );
+
+  if ( $include_redirects && file_exists( $redirects_file ) ) {
+      $file_literals[] = $redirects_file;
+  } else if ( ! $include_redirects ) {
+      Util::debug_log( '_redirects inclusion disabled via ss_include_redirects_in_export filter' );
   }
 
 		// Add feeds if enabled.
@@ -189,7 +199,7 @@ class Setup_Task extends Task {
 			);
 
 			// Add feed redirect file to additional files.
-			$additional_files[] = $feed_directory . '/index.html';
+			$file_literals[] = $feed_directory . '/index.html';
 		}
 
 		// Process Additional Files/Directories in batches to reduce peak memory usage.
@@ -212,9 +222,9 @@ class Setup_Task extends Task {
 						$static_page->set_status_message( __( "Additional File", 'simply-static' ) );
 						// setting found_on_id to 0 since this was user-specified
 						$static_page->found_on_id = 0;
-						// Use the Text_File_Handler for robots.txt and llms.txt so URLs are replaced in plain text.
+						// Use the Text_File_Handler for robots.txt, llms.txt, and _redirects so URLs are replaced in plain text.
 						$base = strtolower( basename( $item ) );
-						if ( $base === 'robots.txt' || $base === 'llms.txt' ) {
+						if ( $base === 'robots.txt' || $base === 'llms.txt' || $base === '_redirects' ) {
 							$static_page->handler = Text_File_Handler::class;
 						} else {
 							$static_page->handler = Additional_File_Handler::class;
@@ -230,7 +240,7 @@ class Setup_Task extends Task {
 							$static_page = Page::query()->find_or_initialize_by( 'url', $url );
 							$static_page->set_status_message( __( "Additional Dir", 'simply-static' ) );
 							$base = strtolower( basename( $file_name ) );
-							if ( $base === 'robots.txt' || $base === 'llms.txt' ) {
+							if ( $base === 'robots.txt' || $base === 'llms.txt' || $base === '_redirects' ) {
 								$static_page->handler = Text_File_Handler::class;
 							} else {
 								$static_page->handler = Additional_File_Handler::class;
@@ -277,7 +287,7 @@ class Setup_Task extends Task {
 								$static_page = Page::query()->find_or_initialize_by( 'url', $url );
 								$static_page->set_status_message( __( 'Additional File (regex)', 'simply-static' ) );
 								$base = strtolower( basename( $path ) );
-								$static_page->handler = ( $base === 'robots.txt' || $base === 'llms.txt' ) ? Text_File_Handler::class : Additional_File_Handler::class;
+								$static_page->handler = ( $base === 'robots.txt' || $base === 'llms.txt' || $base === '_redirects' ) ? Text_File_Handler::class : Additional_File_Handler::class;
 								$static_page->found_on_id = 0;
 								$static_page->save();
 								$added++;

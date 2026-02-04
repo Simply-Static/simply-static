@@ -415,8 +415,8 @@ class Fetch_Urls_Task extends Task {
 		$excluded = array( '.php' );
 		$url = $static_page->url;
 
-		// Exclude debug files (.log, .txt) but not robots.txt
-		if ( preg_match( '/\.(log|txt)$/i', $url ) && strpos( $url, 'debug' ) !== false && strpos( $url, 'robots.txt' ) === false ) {
+		// Exclude debug files (.log, .txt) but not robots.txt, llms.txt, or _redirects
+		if ( preg_match( '/\.(log|txt)$/i', $url ) && strpos( $url, 'debug' ) !== false && strpos( $url, 'robots.txt' ) === false && strpos( $url, 'llms.txt' ) === false && strpos( $url, '_redirects' ) === false ) {
 			return true;
 		}
 

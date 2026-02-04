@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Rule File Handler
  *
- * Copies rule text files (e.g., robots.txt, llms.txt) from the archive root
+ * Copies rule text files (e.g., robots.txt, llms.txt, _redirects) from the archive root
  * into the Local Directory destination at the end of a Local Directory transfer.
  */
 class Rule_File_Handler {
@@ -23,11 +23,12 @@ class Rule_File_Handler {
      * @return void
      */
     public static function transfer_rule_files( $destination_dir, $archive_dir ) : void {
-        $filenames = apply_filters( 'ss_rule_files_to_transfer', array( 'robots.txt', 'llms.txt' ) );
+        $filenames = apply_filters( 'ss_rule_files_to_transfer', array( 'robots.txt', 'llms.txt', '_redirects' ) );
 
         // Respect global include flags so site owners can disable transferring these files entirely.
-        $include_robots = (bool) apply_filters( 'ss_include_robots_txt_in_export', true );
-        $include_llms   = (bool) apply_filters( 'ss_include_llms_txt_in_export', true );
+        $include_robots    = (bool) apply_filters( 'ss_include_robots_txt_in_export', true );
+        $include_llms      = (bool) apply_filters( 'ss_include_llms_txt_in_export', true );
+        $include_redirects = (bool) apply_filters( 'ss_include_redirects_in_export', true );
 
         if ( ! $include_robots ) {
             $filenames = array_values( array_diff( (array) $filenames, array( 'robots.txt' ) ) );
@@ -36,6 +37,10 @@ class Rule_File_Handler {
         if ( ! $include_llms ) {
             $filenames = array_values( array_diff( (array) $filenames, array( 'llms.txt' ) ) );
             Util::debug_log( '[Rule File] llms.txt transfer disabled via ss_include_llms_txt_in_export' );
+        }
+        if ( ! $include_redirects ) {
+            $filenames = array_values( array_diff( (array) $filenames, array( '_redirects' ) ) );
+            Util::debug_log( '[Rule File] _redirects transfer disabled via ss_include_redirects_in_export' );
         }
         if ( ! is_array( $filenames ) || empty( $filenames ) ) {
             return;
