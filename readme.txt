@@ -4,7 +4,7 @@ Tags: jamstack, performance, security, static site generator
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag:  3.5.6
+Stable tag:  3.5.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -120,7 +120,7 @@ Get help from the community in the WordPress.org forums.
 
 **Not Suitable For:**
 
-* E-commerce sites (without Pro features)
+* E-commerce sites
 * Membership sites
 * Sites requiring user logins
 * Real-time data updates
@@ -274,6 +274,17 @@ Settings - Configure your static site export options
 Diagnostics - Check your WordPress environment for compatibility
 
 == Changelog ==
+
+= 3.5.7
+
+* replace URLs in data URI's
+* Fetch URLs task using canProcessPages trait
+* improved path construction for offline/relative paths
+* introduced ss_uploads_additional_directories filter
+* ensure body class preservation
+* strip UTF-8 BOM
+* add and transfer _redirects and _headers files
+* improved Elementor thumbnail handling
 
 = 3.5.6 =
 
