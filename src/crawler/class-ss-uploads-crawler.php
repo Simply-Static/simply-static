@@ -48,6 +48,10 @@ class Uploads_Crawler extends Crawler {
 				'basedir' => WP_CONTENT_DIR . '/webp-express/webp-images/uploads',
 				'baseurl' => content_url( 'webp-express/webp-images/uploads' ),
 			],
+			[
+				'basedir' => WP_CONTENT_DIR . '/compressx-nextgen/uploads',
+				'baseurl' => content_url( 'compressx-nextgen/uploads' ),
+			],
 		];
 
 		$additional_dirs = apply_filters( 'ss_uploads_additional_directories', $additional_dirs );
@@ -97,6 +101,10 @@ class Uploads_Crawler extends Crawler {
 			[
 				'basedir' => WP_CONTENT_DIR . '/webp-express/webp-images/uploads',
 				'baseurl' => content_url( 'webp-express/webp-images/uploads' ),
+			],
+			[
+				'basedir' => WP_CONTENT_DIR . '/compressx-nextgen/uploads',
+				'baseurl' => content_url( 'compressx-nextgen/uploads' ),
 			],
 		];
 
