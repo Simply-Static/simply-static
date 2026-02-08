@@ -1002,6 +1002,11 @@ class Util {
 	 * @return string Sanitized filename.
 	 */
 	public static function sanitize_filename( $filename ) {
+		// Do not sanitize the special query string directory
+		if ( $filename === '__qs' ) {
+			return $filename;
+		}
+
 		// Decode any encoded single quotes or other characters
 		$filename = html_entity_decode( $filename, ENT_QUOTES, 'UTF-8' );
 
