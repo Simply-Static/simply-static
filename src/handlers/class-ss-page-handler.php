@@ -34,6 +34,11 @@ class Page_Handler {
 	 * @return mixed
 	 */
 	public function prepare_url( $url ) {
+		// Skip adding query parameters for local assets
+		if ( Util::is_local_asset_url( $url ) ) {
+			return $url;
+		}
+
 		// Parse the URL to check if it already has query parameters
 		$parsed_url = parse_url( $url );
 

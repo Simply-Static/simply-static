@@ -1405,8 +1405,13 @@ class Url_Extractor {
 	 */
 	private function convert_absolute_url( $url ) {
 		$destination_url = $this->options->get_destination_url();
-		$url             = Util::strip_protocol_from_url( $url );
-		$url             = str_replace( Util::origin_host(), $destination_url, $url );
+
+		if ( Util::is_local_url( $url ) ) {
+			$path           = Util::get_path_from_local_url( $url );
+			$sanitized_path = Util::sanitize_local_path( $path );
+
+			return untrailingslashit( $destination_url ) . $sanitized_path;
+		}
 
 		return $url;
 	}
@@ -1419,10 +1424,10 @@ class Url_Extractor {
 	 * @return string      Relative path for the URL
 	 */
 	private function convert_relative_url( $url ) {
-		$url = Util::get_path_from_local_url( $url );
-		$url = $this->options->get( 'relative_path' ) . $url;
+		$path           = Util::get_path_from_local_url( $url );
+		$sanitized_path = Util::sanitize_local_path( $path );
 
-		return $url;
+		return $this->options->get( 'relative_path' ) . $sanitized_path;
 	}
 
 	/**
@@ -1444,11 +1449,14 @@ class Url_Extractor {
 	 */
 	private function convert_offline_url( $url ) {
 		// remove the scheme/host from the url
-		$page_path      = Util::get_path_from_local_url( $this->static_page->url );
-		$extracted_path = Util::get_path_from_local_url( $url );
+		$page_path           = Util::get_path_from_local_url( $this->static_page->url );
+		$sanitized_page_path = Util::sanitize_local_path( $page_path );
+
+		$extracted_path           = Util::get_path_from_local_url( $url );
+		$sanitized_extracted_path = Util::sanitize_local_path( $extracted_path );
 
 		// create a path from one page to the other
-		$path = Util::create_offline_path( $extracted_path, $page_path );
+		$path = Util::create_offline_path( $sanitized_extracted_path, $sanitized_page_path );
 
 		$path_info = Util::url_path_info( $url );
 		if ( $path_info['extension'] === '' ) {

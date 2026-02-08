@@ -889,7 +889,15 @@ class Util {
 	 * @return boolean      true if URL is local, false otherwise
 	 */
 	public static function is_local_url( $url ) {
-		return apply_filters( 'ss_is_local_url', ( stripos( self::strip_protocol_from_url( $url ), self::origin_host() ) === 0 ) );
+		$url_host = self::strip_protocol_from_url( self::remove_params_and_fragment( $url ) );
+		// Strip port if present
+		$url_host = preg_replace( '/:\d+/', '', $url_host );
+
+		$origin_host = self::origin_host();
+		// Strip port if present
+		$origin_host = preg_replace( '/:\d+/', '', $origin_host );
+
+		return apply_filters( 'ss_is_local_url', ( stripos( $url_host, $origin_host ) === 0 ) );
 	}
 
 	/**
@@ -916,6 +924,7 @@ class Util {
 	public static function get_path_from_local_url( $url ) {
 		$url = self::strip_protocol_from_url( $url );
 		$url = str_replace( self::origin_host(), '', $url );
+		$url = str_replace( preg_replace( '/:\d+/', '', self::origin_host() ), '', $url );
 
 		return $url;
 	}
@@ -984,6 +993,54 @@ class Util {
 	 */
 	public static function formatted_datetime() {
 		return current_time( 'Y-m-d H:i:s' );
+	}
+
+	/**
+	 * Sanitize filename to remove problematic Unicode characters
+	 *
+	 * @param string $filename Filename to sanitize.
+	 * @return string Sanitized filename.
+	 */
+	public static function sanitize_filename( $filename ) {
+		// Decode any encoded single quotes or other characters
+		$filename = html_entity_decode( $filename, ENT_QUOTES, 'UTF-8' );
+
+		// Use WordPress's remove_accents to handle many non-ASCII characters gracefully
+		if ( function_exists( 'remove_accents' ) ) {
+			$filename = remove_accents( $filename );
+		}
+
+		// Remove bullet points, ellipses, copyright symbols, and private use characters.
+		$filename = preg_replace( '/[\x{2022}\x{2026}\x{00A9}\x{E000}-\x{F8FF}]/u', '-', $filename );
+
+		// Use WordPress's built-in sanitizer for remaining characters
+		return sanitize_file_name( $filename );
+	}
+
+	/**
+	 * Sanitize each segment of a path.
+	 *
+	 * @param string $path Path to sanitize.
+	 * @return string Sanitized path.
+	 */
+	public static function sanitize_path( $path ) {
+		$segments           = explode( '/', $path );
+		$sanitized_segments = array_map( [ self::class, 'sanitize_filename' ], $segments );
+
+		return implode( '/', $sanitized_segments );
+	}
+
+	/**
+	 * Sanitize a local path (sans host) while preserving query and fragment.
+	 *
+	 * @param string $path The path to sanitize.
+	 * @return string Sanitized path with original query/fragment.
+	 */
+	public static function sanitize_local_path( $path ) {
+		$clean_path     = self::remove_params_and_fragment( $path );
+		$query_fragment = substr( $path, strlen( $clean_path ) );
+
+		return self::sanitize_path( (string) urldecode( $clean_path ) ) . $query_fragment;
 	}
 
 	/**

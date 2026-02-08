@@ -107,7 +107,7 @@ class Url_Fetcher {
 		// Check if the URL is a local asset (file) that we can copy directly
 		if ( $is_local_asset ) {
 			// Get the local path for the URL using the original URL without query parameters
-			$local_path = Util::get_path_from_local_url( $original_url );
+			$local_path = Util::get_path_from_local_url( Util::remove_params_and_fragment( $original_url ) );
 			$file_path  = ABSPATH . ltrim( $local_path, '/' );
 
 			Util::debug_log( "Local path: " . $local_path . " - Full file path: " . $file_path );
@@ -154,7 +154,7 @@ class Url_Fetcher {
 				$recovered = false;
 				// Attempt 1: If it is a local asset, try copying directly from disk again.
 				if ( isset( $is_local_asset ) && $is_local_asset ) {
-					$local_path = Util::get_path_from_local_url( $original_url );
+					$local_path = Util::get_path_from_local_url( Util::remove_params_and_fragment( $original_url ) );
 					$file_path  = ABSPATH . ltrim( $local_path, '/' );
 					if ( file_exists( $file_path ) && is_readable( $file_path ) ) {
 						$recovered = copy( $file_path, $temp_filename );
@@ -244,8 +244,23 @@ class Url_Fetcher {
 				}
 
 				Util::debug_log( "Renaming temp file from " . $temp_filename . " to " . $file_path );
-				rename( $temp_filename, $file_path );
-				$static_page->get_handler()->after_file_fetch( $this->archive_dir );
+				$renamed = rename( $temp_filename, $file_path );
+
+				if ( ! $renamed ) {
+					Util::debug_log( "Failed to rename temp file. Attempting copy + unlink fallback." );
+					$copied = copy( $temp_filename, $file_path );
+					if ( $copied ) {
+						unlink( $temp_filename );
+						$renamed = true;
+					} else {
+						Util::debug_log( "Failed to copy temp file to destination: " . $file_path );
+						$static_page->set_error_message( 'Failed to save fetched file to archive' );
+					}
+				}
+
+				if ( $renamed ) {
+					$static_page->get_handler()->after_file_fetch( $this->archive_dir );
+				}
 			} else {
 				Util::debug_log( "We weren't able to establish a filename; deleting temp file" );
 				unlink( $temp_filename );
@@ -410,7 +425,8 @@ class Url_Fetcher {
 
 		// Prevent query-string URLs from overwriting base paths by placing them in a deterministic subdirectory based on the query string.
 		// Exception: native WordPress search (query parameter `s`) should NOT use a hash subdirectory.
-  if ( ! empty( $url_parts['query'] ) ) {
+		// Assets (JS, CSS, fonts) should ALSO NOT use a hash subdirectory, as their query strings are usually just for cache busting.
+  if ( ! empty( $url_parts['query'] ) && ! Util::is_local_asset_url( $static_page->url ) ) {
             $relative_file_dir = Util::add_trailing_directory_separator( $relative_file_dir );
             $use_hash_dir      = true;
             parse_str( (string) $url_parts['query'], $qs_args );
@@ -462,12 +478,15 @@ class Url_Fetcher {
 		$path_info         = apply_filters( 'simply_static_page_path_info', $page_handler->get_path_info( $path_info ), $static_page );
 		$relative_file_dir = apply_filters( 'simple_static_page_relative_file_dir', $page_handler->get_relative_dir( $relative_file_dir ), $static_page );
 
-		$create_dir = wp_mkdir_p( $this->archive_dir . urldecode( $relative_file_dir ) );
+		$sanitized_relative_dir = Util::sanitize_path( (string) urldecode( $relative_file_dir ) );
+		$sanitized_filename     = Util::sanitize_filename( (string) $path_info['filename'] );
+
+		$create_dir = wp_mkdir_p( $this->archive_dir . $sanitized_relative_dir );
 		if ( $create_dir === false ) {
-			Util::debug_log( "Unable to create temporary directory: " . $this->archive_dir . urldecode( $relative_file_dir ) );
+			Util::debug_log( "Unable to create temporary directory: " . $this->archive_dir . $sanitized_relative_dir );
 			$static_page->set_error_message( 'Unable to create temporary directory' );
 		} else {
-			$relative_filename = urldecode( $relative_file_dir ) . $path_info['filename'] . ( $path_info['extension'] ? '.' . $path_info['extension'] : '' );
+			$relative_filename = $sanitized_relative_dir . $sanitized_filename . ( $path_info['extension'] ? '.' . $path_info['extension'] : '' );
 			Util::debug_log( "New filename for static page: " . $relative_filename );
 
 			// check that file doesn't exist OR exists but is writeable
