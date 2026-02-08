@@ -92,7 +92,7 @@ class Vendor_Files_Crawler extends Crawler {
 
 		// Common vendor file extensions
 		$vendor_extensions = [
-			'js', 'css', 'woff', 'woff2', 'ttf', 'eot', 'otf', 'svg'
+			'js', 'css', 'woff', 'woff2', 'ttf', 'eot', 'otf', 'svg', 'json'
 		];
 
 		foreach ($active_plugins as $plugin) {
@@ -161,7 +161,7 @@ class Vendor_Files_Crawler extends Crawler {
 
 		// Common vendor file extensions
 		$vendor_extensions = [
-			'js', 'css', 'woff', 'woff2', 'ttf', 'eot', 'otf', 'svg'
+			'js', 'css', 'woff', 'woff2', 'ttf', 'eot', 'otf', 'svg', 'json'
 		];
 
 		// Check each vendor directory in the active theme

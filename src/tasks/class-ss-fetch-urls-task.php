@@ -422,64 +422,8 @@ class Fetch_Urls_Task extends Task {
 	 *
 	 * @return bool
 	 */
- public function find_excludable( $static_page ) {
- 		// Delegate exclusion decision to central utility for consistency with crawlers
- 		if ( \Simply_Static\Util::is_url_excluded( $static_page->url ) ) {
- 			return true;
- 		}
-		$excluded = array( '.php' );
-		$url = $static_page->url;
-
-		// Exclude debug files (.log, .txt) but not robots.txt, llms.txt, _redirects, or _headers
-		if ( preg_match( '/\.(log|txt)$/i', $url ) && strpos( $url, 'debug' ) !== false && strpos( $url, 'robots.txt' ) === false && strpos( $url, 'llms.txt' ) === false && strpos( $url, '_redirects' ) === false && strpos( $url, '_headers' ) === false ) {
-			return true;
-		}
-
-		// Exclude feeds if add_feeds is not true.
-		if ( ! $this->options->get( 'add_feeds' ) ) {
-			// Only exclude WordPress XML feeds (ending with /feed/ or ?feed= parameter)
-			if ( preg_match( '/(\/feed\/?$|\?feed=|\/feed\/|\/rss\/?$|\/atom\/?$)/i', $url ) ) {
-				return true;
-			}
-		}
-
-		// Exclude Rest API if add_rest_api is not true.
-		if ( ! $this->options->get( 'add_rest_api' ) ) {
-			$excluded[] = 'wp-json';
-		}
-
-		if ( ! empty( $this->options->get( 'urls_to_exclude' ) ) ) {
-			if ( is_array( $this->options->get( 'urls_to_exclude' ) ) ) {
-				$excluded_by_option = wp_list_pluck( $this->options->get( 'urls_to_exclude' ), 'url' );
-			} else {
-				$excluded_by_option = explode( "\n", $this->options->get( 'urls_to_exclude' ) );
-			}
-
-			if ( is_array( $excluded_by_option ) ) {
-				$excluded = array_merge( $excluded, $excluded_by_option );
-			}
-
-		}
-
-		if ( apply_filters( 'simply_static_exclude_temp_dir', true ) ) {
-			$excluded[] = Util::get_temp_dir_url();
-		}
-
-		$excluded = apply_filters( 'ss_excluded_by_default', $excluded );
-
-		if ( $excluded ) {
-			$excluded = array_filter( $excluded );
-		}
-
-		if ( ! empty( $excluded ) ) {
-			foreach ( $excluded as $excludable ) {
-				if ( strpos( $url, $excludable ) !== false ) {
-					return true;
-				}
-			}
-		}
-
-		return false;
+	public function find_excludable( $static_page ) {
+		return \Simply_Static\Util::is_url_excluded( $static_page->url );
 	}
 
 	/**

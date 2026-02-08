@@ -163,7 +163,8 @@ class Uploads_Crawler extends Crawler {
 			'xls',
 			'xlsx',
 			'ppt',
-			'pptx'
+			'pptx',
+			'json'
 		];
 		$media_extensions = apply_filters( 'ss_uploads_media_extensions', $media_extensions );
 
@@ -306,7 +307,8 @@ class Uploads_Crawler extends Crawler {
 			'xls',
 			'xlsx',
 			'ppt',
-			'pptx'
+			'pptx',
+			'json'
 		];
 
 		// Skip these directories

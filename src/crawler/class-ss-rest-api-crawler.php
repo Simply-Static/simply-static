@@ -74,11 +74,10 @@ class Rest_Api_Crawler extends Crawler {
 
 			// Build the full URL for this route
 			$route_clean = $route !== null ? ltrim( $route, '/' ) : '';
-			$route_url = $rest_url . $route_clean;
+			$route_url = untrailingslashit( $rest_url ) . '/' . $route_clean;
 
 			// Remove any regex patterns from the URL
 			$route_url = preg_replace( '/\(\?[^)]+\)/', '', $route_url );
-			$route_url = str_replace( '//', '/', $route_url );
 
 			// Add the route URL if it's valid
 			if ( filter_var( $route_url, FILTER_VALIDATE_URL ) ) {
