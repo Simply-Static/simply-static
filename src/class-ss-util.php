@@ -416,6 +416,11 @@ class Util {
 	 * @return bool
 	 */
 	public static function is_url_excluded( string $url ): bool {
+		// Never exclude core WordPress or Simply Static assets
+		if ( self::is_core_include_asset( $url ) ) {
+			return false;
+		}
+
 		$excluded = array( '.php' );
 		$opts = Options::instance();
 
@@ -1002,23 +1007,21 @@ class Util {
 	 * @return string Sanitized filename.
 	 */
 	public static function sanitize_filename( $filename ) {
-		// Do not sanitize the special query string directory
-		if ( $filename === '__qs' ) {
+		if ( $filename === '__qs' ) return $filename;
+
+		// Bypass for safe ASCII (alphanumerics, hyphens, underscores, dots)
+		if ( preg_match( '/^[a-zA-Z0-9\-_.]+$/', $filename ) && substr( $filename, -1 ) !== '.' ) {
 			return $filename;
 		}
 
-		// Decode any encoded single quotes or other characters
 		$filename = html_entity_decode( $filename, ENT_QUOTES, 'UTF-8' );
-
-		// Use WordPress's remove_accents to handle many non-ASCII characters gracefully
 		if ( function_exists( 'remove_accents' ) ) {
 			$filename = remove_accents( $filename );
 		}
 
-		// Remove bullet points, ellipses, copyright symbols, and private use characters.
+		// Remove bullet points, ellipses, copyright, and private use characters
 		$filename = preg_replace( '/[\x{2022}\x{2026}\x{00A9}\x{E000}-\x{F8FF}]/u', '-', $filename );
 
-		// Use WordPress's built-in sanitizer for remaining characters
 		return sanitize_file_name( $filename );
 	}
 
@@ -1125,6 +1128,20 @@ class Util {
 		}
 
 		return in_array( $path_info['extension'], $allowed_asset_extensions, true );
+	}
+
+	/**
+	 * Check if a URL belongs to core WordPress or Simply Static assets that should never be excluded.
+	 *
+	 * @param string $url The URL to check.
+	 * @return bool True if it's a core include asset.
+	 */
+	public static function is_core_include_asset( string $url ): bool {
+		$core_paths = [ includes_url(), plugins_url() . '/simply-static/', plugins_url() . '/simply-static-pro/' ];
+		foreach ( $core_paths as $path ) {
+			if ( strpos( $url, $path ) !== false ) return self::is_local_asset_url( $url );
+		}
+		return false;
 	}
 
 	/**
