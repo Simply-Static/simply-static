@@ -4,7 +4,7 @@ Tags: jamstack, performance, security, static site generator
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag:  3.5.7
+Stable tag:  3.5.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -275,7 +275,20 @@ Diagnostics - Check your WordPress environment for compatibility
 
 == Changelog ==
 
-= 3.5.7
+= 3.5.8 =
+
+* added max fetch attempts for problematic URLs
+* robust file hashing using try-catch blocks
+* centralized filename and path sanitization
+* improved handling of Unicode characters in filenames
+* improved asset discovery and handling
+* fixed fallback path for local asset fetching
+* robust file saving with rename success check and fallback
+* improved Page_Handler to skip unnecessary parameters for assets
+* improved path-agnostic URL handling for local assets
+* improved WP Includes crawler to support interactivity API and new emoji scripts
+
+= 3.5.7 =
 
 * replace URLs in data URI's
 * Fetch URLs task using canProcessPages trait
