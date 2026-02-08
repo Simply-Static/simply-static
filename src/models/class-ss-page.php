@@ -47,6 +47,7 @@ class Page extends Model {
 		'status_message'      => 'VARCHAR(255) NULL',
 		'handler'             => 'VARCHAR(255) NULL',
 		'json'                => 'TEXT NULL',
+		'fetch_attempts'      => 'INT(11) NOT NULL DEFAULT 0',
 		'last_checked_at'     => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
 		'last_modified_at'    => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",
 		'last_transferred_at' => "DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'",

@@ -110,6 +110,10 @@ trait canProcessPages {
 				$this->check_if_running();
 			}
 
+			// Increment fetch attempts.
+			$static_page->fetch_attempts = (int) $static_page->fetch_attempts + 1;
+			$static_page->save();
+
 			try {
 				$this->process_page( $static_page );
 
@@ -221,6 +225,8 @@ trait canProcessPages {
 			$query->where( "( ( {$this->processing_column} < last_modified_at AND {$this->processing_column} < ? ) OR {$this->processing_column} IS NULL )", $start_time );
 		}
 
+		$query->where( "fetch_attempts < 3" );
+
 		// Modify the query based on post id column.
 		$post_id = get_option( 'simply-static-use-single' );
 
@@ -285,6 +291,8 @@ trait canProcessPages {
 		if ( ! empty( $build_id ) ) {
 			$query->where( "build_id = ?", $build_id );
 		}
+
+		$query->where( "fetch_attempts < 3" );
 
 		return $query->count();
 	}

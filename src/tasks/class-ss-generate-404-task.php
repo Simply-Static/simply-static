@@ -153,7 +153,15 @@ class Generate_404_Task extends Task {
 		$file = $this->archive_dir . $static_page->file_path;
 
 		Util::debug_log( "We're saving this URL; keeping the static file" );
-		$sha1 = sha1_file( $file );
+
+		try {
+			$sha1 = sha1_file( $file );
+			if ( false === $sha1 ) {
+				$sha1 = '';
+			}
+		} catch ( \Exception $e ) {
+			$sha1 = '';
+		}
 
 		// if the content is identical, move on to the next file
 		if ( $static_page->is_content_identical( $sha1 ) ) {

@@ -47,6 +47,8 @@ class Setup_Task extends Task {
 
 		if ( empty( $use_build ) && empty( $use_single ) && 'export' === $type ) {
 			Page::query()->delete_all();
+		} else {
+			Page::query()->update_all( array( 'fetch_attempts' => 0 ) );
 		}
 
 		// add origin url and additional urls/files to database.
