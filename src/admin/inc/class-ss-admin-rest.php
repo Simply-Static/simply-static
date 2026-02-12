@@ -340,10 +340,8 @@ class Admin_Rest {
         foreach ( $site_ids as $site_id ) {
             $site = get_blog_details( $site_id );
 
-            switch_to_blog( $site_id );
+            $this->switch_to_blog_and_refresh_options( $site_id );
 
-            $options = Options::reinstance();
-            $job->set_options( $options );
             $running = $job->is_running();
             $paused  = $job->is_paused();
 
@@ -359,7 +357,7 @@ class Admin_Rest {
                 'activity_log_url' => esc_url( get_admin_url( $site->blog_id ) . 'admin.php?page=simply-static-generate' ),
             ];
 
-            restore_current_blog();
+            $this->restore_current_blog_and_refresh_options();
         }
 
         $sites = apply_filters( 'ss_rest_multisite_get_sites', $sites );
@@ -388,12 +386,12 @@ class Admin_Rest {
 
         try {
             // Switch to the specified blog
-            switch_to_blog( $blog_id );
+            $this->switch_to_blog_and_refresh_options( $blog_id );
 
             do_action( 'wp_archive_creation_job' );
 
             // Restore the previous blog
-            restore_current_blog();
+            $this->restore_current_blog_and_refresh_options();
 
             return json_encode( [
                 'status'  => 200,
@@ -401,7 +399,7 @@ class Admin_Rest {
             ] );
         } catch ( \Exception $e ) {
             // Make sure to restore blog context even on error
-            restore_current_blog();
+            $this->restore_current_blog_and_refresh_options();
 
             return json_encode( [
                 'status'  => 500,
@@ -1129,19 +1127,43 @@ class Admin_Rest {
 
     /** Activity log */
     public function get_activity_log( $request ) {
-        $params       = $request->get_params();
-        $activity_log = Plugin::instance()->get_activity_log( $params['blog_id'] );
+        $params  = $request->get_params();
+        $blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
+
+        if ( $blog_id && is_multisite() ) {
+            $this->switch_to_blog_and_refresh_options( $blog_id );
+        }
+
+        $activity_log = Plugin::instance()->get_activity_log( $blog_id );
+
+        $running = Plugin::instance()->get_archive_creation_job()->is_running();
+
+        if ( $blog_id && is_multisite() ) {
+            $this->restore_current_blog_and_refresh_options();
+        }
+
         return json_encode( [
             'status'  => 200,
             'data'    => $activity_log,
-            'running' => Plugin::instance()->get_archive_creation_job()->is_running(),
+            'running' => $running,
         ] );
     }
 
     /** Export log */
     public function get_export_log( $request ) {
         $params     = $request->get_params();
-        $export_log = Plugin::instance()->get_export_log( $params['per_page'], $params['page'], $params['blog_id'] );
+        $blog_id    = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
+
+        if ( $blog_id && is_multisite() ) {
+            $this->switch_to_blog_and_refresh_options( $blog_id );
+        }
+
+        $export_log = Plugin::instance()->get_export_log( $params['per_page'], $params['page'], $blog_id );
+
+        if ( $blog_id && is_multisite() ) {
+            $this->restore_current_blog_and_refresh_options();
+        }
+
         return json_encode( [ 'status' => 200, 'data' => $export_log ] );
     }
 
@@ -1153,6 +1175,10 @@ class Admin_Rest {
         $blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
         $type    = ! empty( $params['type'] ) ? $params['type'] : 'export';
 
+        if ( $blog_id && is_multisite() ) {
+            $this->switch_to_blog_and_refresh_options( $blog_id );
+        }
+
         // Check if an export is already running
         $archive_creation_job = Plugin::instance()->get_archive_creation_job();
         do_action( 'ss_before_perform_archive_running_check', $blog_id, $archive_creation_job );
@@ -1160,6 +1186,10 @@ class Admin_Rest {
             Util::debug_log( "Export already running. Blocking new export request." );
             Util::debug_log( "Current task: " . $archive_creation_job->get_current_task() );
             Util::debug_log( "Is job done: " . ( $archive_creation_job->is_job_done() ? 'true' : 'false' ) );
+
+            if ( $blog_id && is_multisite() ) {
+                $this->restore_current_blog_and_refresh_options();
+            }
 
             return json_encode( [
                 'status'  => 409,
@@ -1176,8 +1206,16 @@ class Admin_Rest {
                 do_action( 'ss_after_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
             }
 
+            if ( $blog_id && is_multisite() ) {
+                $this->restore_current_blog_and_refresh_options();
+            }
+
             return json_encode( [ 'status' => 200 ] );
         } catch ( \Exception $e ) {
+            if ( $blog_id && is_multisite() ) {
+                $this->restore_current_blog_and_refresh_options();
+            }
+
             return json_encode( [ 'status' => 500, 'message' => $e->getMessage() ] );
         }
     }
@@ -1188,9 +1226,17 @@ class Admin_Rest {
         $params  = $request->get_params();
         $blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
 
+        if ( $blog_id && is_multisite() ) {
+            $this->switch_to_blog_and_refresh_options( $blog_id );
+        }
+
         do_action( 'ss_before_perform_archive_action', $blog_id, 'cancel', Plugin::instance()->get_archive_creation_job() );
         Plugin::instance()->cancel_static_export();
         do_action( 'ss_after_perform_archive_action', $blog_id, 'cancel', Plugin::instance()->get_archive_creation_job() );
+
+        if ( $blog_id && is_multisite() ) {
+            $this->restore_current_blog_and_refresh_options();
+        }
 
         return json_encode( [ 'status' => 200 ] );
     }
@@ -1201,9 +1247,17 @@ class Admin_Rest {
         $params  = $request->get_params();
         $blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
 
+        if ( $blog_id && is_multisite() ) {
+            $this->switch_to_blog_and_refresh_options( $blog_id );
+        }
+
         do_action( 'ss_before_perform_archive_action', $blog_id, 'pause', Plugin::instance()->get_archive_creation_job() );
         Plugin::instance()->pause_static_export();
         do_action( 'ss_after_perform_archive_action', $blog_id, 'pause', Plugin::instance()->get_archive_creation_job() );
+
+        if ( $blog_id && is_multisite() ) {
+            $this->restore_current_blog_and_refresh_options();
+        }
 
         return json_encode( [ 'status' => 200 ] );
     }
@@ -1214,21 +1268,41 @@ class Admin_Rest {
         $params  = $request->get_params();
         $blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
 
+        if ( $blog_id && is_multisite() ) {
+            $this->switch_to_blog_and_refresh_options( $blog_id );
+        }
+
         do_action( 'ss_before_perform_archive_action', $blog_id, 'resume', Plugin::instance()->get_archive_creation_job() );
         Plugin::instance()->resume_static_export();
         do_action( 'ss_after_perform_archive_action', $blog_id, 'resume', Plugin::instance()->get_archive_creation_job() );
+
+        if ( $blog_id && is_multisite() ) {
+            $this->restore_current_blog_and_refresh_options();
+        }
 
         return json_encode( [ 'status' => 200 ] );
     }
 
     /** Is running */
     public function is_running( $request ) {
+        $params  = $request->get_params();
+        $blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
+
+        if ( $blog_id && is_multisite() ) {
+            $this->switch_to_blog_and_refresh_options( $blog_id );
+        }
+
         $stats = [
             'status'  => 200,
             'running' => Plugin::instance()->get_archive_creation_job()->is_running(),
             'paused'  => Plugin::instance()->get_archive_creation_job()->is_paused()
         ];
         $stats = apply_filters( 'ss_is_running_statuses', $stats );
+
+        if ( $blog_id && is_multisite() ) {
+            $this->restore_current_blog_and_refresh_options();
+        }
+
         return json_encode( $stats );
     }
 
@@ -1258,5 +1332,36 @@ class Admin_Rest {
                 'message' => $e->getMessage(),
             ] );
         }
+    }
+
+    /**
+     * Switch to blog and refresh options references.
+     *
+     * @param int $blog_id Blog ID.
+     * @return void
+     */
+    private function switch_to_blog_and_refresh_options( $blog_id ) {
+        if ( ! $blog_id || ! is_multisite() ) {
+            return;
+        }
+        switch_to_blog( $blog_id );
+        $options = Options::reinstance();
+        Plugin::instance()->set_options( $options );
+        Plugin::instance()->get_archive_creation_job()->set_options( $options );
+    }
+
+    /**
+     * Restore current blog and refresh options references.
+     *
+     * @return void
+     */
+    private function restore_current_blog_and_refresh_options() {
+        if ( ! is_multisite() ) {
+            return;
+        }
+        restore_current_blog();
+        $options = Options::reinstance();
+        Plugin::instance()->set_options( $options );
+        Plugin::instance()->get_archive_creation_job()->set_options( $options );
     }
 }

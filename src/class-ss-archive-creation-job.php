@@ -333,7 +333,9 @@ class Archive_Creation_Job extends Background_Process {
 			}*/
 
 			$end_time    = Util::formatted_datetime();
-			$this->options->set( 'archive_end_time', $end_time );
+			$this->options
+				->set( 'archive_end_time', $end_time )
+				->save();
 
 			$cancel_task = new Cancel_Task();
 			$cancel_task->perform();

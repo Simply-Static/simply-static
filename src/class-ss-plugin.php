@@ -210,6 +210,26 @@ class Plugin {
 	}
 
 	/**
+	 * Get Options instance.
+	 *
+	 * @return Options|null
+	 */
+	public function get_options() {
+		return $this->options;
+	}
+
+	/**
+	 * Set Options instance.
+	 *
+	 * @param Options $options Options instance.
+	 *
+	 * @return void
+	 */
+	public function set_options( Options $options ) {
+		$this->options = $options;
+	}
+
+	/**
 	 * Handle static export.
 	 *
 	 * @param int $blog_id given blog id.
