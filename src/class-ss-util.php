@@ -1020,7 +1020,11 @@ class Util {
 		}
 
 		// Remove bullet points, ellipses, copyright, and private use characters
-		$filename = preg_replace( '/[\x{2022}\x{2026}\x{00A9}\x{E000}-\x{F8FF}]/u', '-', $filename );
+		$filename = preg_replace( '/[\x{2022}\x{2026}\x{00A9}\x{E000}-\x{F8FF}]/u', '-', (string) $filename );
+
+		if ( is_null( $filename ) ) {
+			$filename = '';
+		}
 
 		return sanitize_file_name( $filename );
 	}
@@ -1048,7 +1052,7 @@ class Util {
 		$clean_path     = self::remove_params_and_fragment( $path );
 		$query_fragment = substr( $path, strlen( $clean_path ) );
 
-		return self::sanitize_path( (string) urldecode( $clean_path ) ) . $query_fragment;
+		return self::sanitize_path( urldecode( $clean_path ) ) . $query_fragment;
 	}
 
 	/**
