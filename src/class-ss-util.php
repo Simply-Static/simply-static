@@ -1036,6 +1036,21 @@ class Util {
 	public static function sanitize_filename( $filename ) {
 		if ( $filename === '__qs' ) return $filename;
 
+		/**
+		 * Filter whether to preserve original filenames without sanitization.
+		 *
+		 * When true, spaces and special characters in filenames are preserved
+		 * instead of being converted to hyphens. This is useful for sites with
+		 * large existing static structures that rely on original filenames.
+		 *
+		 * @since 3.6.0.1
+		 *
+		 * @param bool $preserve Whether to preserve original filenames. Default false.
+		 */
+		if ( apply_filters( 'ss_preserve_original_filenames', false ) ) {
+			return $filename;
+		}
+
 		// Bypass for safe ASCII (alphanumerics, hyphens, underscores, dots)
 		if ( preg_match( '/^[a-zA-Z0-9\-_.]+$/', $filename ) && substr( $filename, -1 ) !== '.' ) {
 			return $filename;
