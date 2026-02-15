@@ -152,7 +152,7 @@ function SettingsContextProvider(props) {
 
     const isStudio = () => {
         // Check for any staticX.studio domain (static.studio, static1.studio, static2.studio, static3.studio, static4.studio, etc.)
-        if (/static\d*\.studio/.test(options.home)) {
+        if (/(static\d*|onstatic)\.studio/.test(options.home)) {
             return true;
         }
 
