@@ -63,8 +63,10 @@ class Config_Files_Crawler extends Crawler {
 			return $config_urls;
 		}
 
-		// Get all JSON files in the directory
-		$files = glob( $configs_dir . '*.json' );
+		// Get all JSON and HTML files in the directory
+		$json_files = glob( $configs_dir . '*.json' );
+		$html_files = glob( $configs_dir . '*.html' );
+		$files = array_merge( $json_files ?: [], $html_files ?: [] );
 
 		foreach ( $files as $file ) {
 			// Get the filename
