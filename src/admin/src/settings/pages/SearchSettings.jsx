@@ -316,6 +316,9 @@ function SearchSettings() {
                                 updateSetting('fuse_selector', selector);
                             }}
                         />
+                        <Notice status="warning" isDismissible={false}>
+                            {__('If you have multiple search elements with different CSS selectors, separate them by a comma (,) such as: .search-form, .custom-search-form', 'simply-static')}
+                        </Notice>
                         <NumberControl
                             label={__('Threshold', 'simply-static')}
                             isShiftStepEnabled={ true }
