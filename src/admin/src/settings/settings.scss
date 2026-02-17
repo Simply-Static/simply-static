@@ -507,6 +507,10 @@ toplevel_page_simply-static img {
 
 }
 
+.log-table-container .rdt_Pagination select + svg {
+  display: none;
+}
+
 .components-modal__frame.simply-static-video-modal {
   border-radius: 0;
 }
