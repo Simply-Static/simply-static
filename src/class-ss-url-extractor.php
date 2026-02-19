@@ -528,20 +528,21 @@ class Url_Extractor {
 			}
 		}
 
-		// Handle link tags with rel="preconnect" or rel="dns-prefetch" pointing to origin host
+		// Handle link tags with rel="preconnect" or rel="dns-prefetch" pointing to origin host.
+		// These tags are browser hints for establishing early connections to external servers.
+		// In a static export, referencing the origin (WordPress) host is both useless and a security
+		// concern as it exposes the staging/source URL. Remove these tags entirely.
 		if ( 'link' === $tag_name && $tag->hasAttribute( 'rel' ) && $tag->hasAttribute( 'href' ) ) {
-			$rel_value = strtolower( $tag->getAttribute( 'rel' ) );
+			$rel_value = strtolower( trim( $tag->getAttribute( 'rel' ) ) );
 			if ( in_array( $rel_value, array( 'preconnect', 'dns-prefetch' ), true ) ) {
 				$href_value = $tag->getAttribute( 'href' );
 				// Check if the href points to the origin host
 				$origin_host = Util::origin_host();
 				if ( stripos( Util::strip_protocol_from_url( $href_value ), $origin_host ) === 0 ) {
-					$destination_url = $this->options->get_destination_url();
-					// Replace the origin host with destination URL
-					$updated_href = preg_replace( '/(https?:)?\/\/' . preg_quote( $origin_host, '/' ) . '/i', $destination_url, $href_value );
-					$tag->setAttribute( 'href', $updated_href );
-					// Remove href from attributes to avoid double processing
-					$attributes = array_diff( $attributes, array( 'href' ) );
+					// Remove the tag from the DOM entirely
+					$tag->parentNode->removeChild( $tag );
+
+					return;
 				}
 			}
 		}
