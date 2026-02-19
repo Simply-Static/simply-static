@@ -33,7 +33,7 @@ class Post_Type_Crawler extends Crawler {
 	 *
 	 * @return array List of post type URLs
 	 */
-	public function detect() : array {
+	public function detect(): array {
 		$post_urls = [];
 
 		// Get all public post types
@@ -70,10 +70,11 @@ class Post_Type_Crawler extends Crawler {
 				'post_type'      => $post_type,
 				'posts_per_page' => -1,
 				'post_status'    => 'publish',
+				'fields'         => 'ids',
 			] );
 
-			foreach ( $posts as $post ) {
-				$permalink = get_permalink( $post->ID );
+			foreach ( $posts as $post_id ) {
+				$permalink = get_permalink( $post_id );
 
 				if ( ! is_string( $permalink ) ) {
 					continue;

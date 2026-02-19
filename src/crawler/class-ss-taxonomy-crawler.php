@@ -33,34 +33,35 @@ class Taxonomy_Crawler extends Crawler {
 	 *
 	 * @return array List of taxonomy URLs
 	 */
-	public function detect() : array {
+	public function detect(): array {
 		$taxonomy_urls = [];
-		
+
 		// Get all public taxonomies
 		$taxonomies = get_taxonomies( [ 'public' => true ], 'names' );
-		
+
 		foreach ( $taxonomies as $taxonomy ) {
 			// Get all terms for this taxonomy
 			$terms = get_terms( [
 				'taxonomy'   => $taxonomy,
 				'hide_empty' => true,
+				'fields'     => 'ids',
 			] );
-			
+
 			if ( is_wp_error( $terms ) ) {
 				continue;
 			}
-			
-			foreach ( $terms as $term ) {
-				$term_link = get_term_link( $term );
-				
+
+			foreach ( $terms as $term_id ) {
+				$term_link = get_term_link( $term_id, $taxonomy );
+
 				if ( is_wp_error( $term_link ) ) {
 					continue;
 				}
-				
+
 				$taxonomy_urls[] = $term_link;
 			}
 		}
-		
+
 		return $taxonomy_urls;
 	}
 }
