@@ -141,9 +141,6 @@ class Divi_Integration extends Integration {
 			}
 		}
 
-		if ( 0 === $changed_total ) {
-			Util::debug_log( 'Divi Integration: no performance options needed changes or were not found.' );
-		}
 	}
 
 	/**
