@@ -211,6 +211,8 @@ class Url_Extractor {
 
 		if ( $this->static_page->is_type( 'html' ) ) {
 			$this->save_body( $this->extract_and_replace_urls_in_html() );
+			$body = apply_filters( 'ss_after_replace_urls_in_html', $this->get_body(), $this->static_page );
+			$this->save_body( $body );
 		}
 
 		// Treat as CSS either by content-type or by file extension fallback (handles servers sending wrong or missing headers)
@@ -441,6 +443,7 @@ class Url_Extractor {
 
 		$this->save_body( $response_body );
 	}
+
 
 	/**
 	 * Force Replace the origin URL from the content with the destination URL.

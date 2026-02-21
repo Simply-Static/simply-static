@@ -71,6 +71,62 @@ class Divi_Integration extends Integration {
 	 */
 	public function run() {
 		$this->disable_divi_performance_options();
+		add_filter( 'ss_after_replace_urls_in_html', [ $this, 'replace_data_fac_urls' ], 10, 2 );
+	}
+
+	/**
+	 * Replace base64-encoded URLs stored in Divi's data-fac navigation attribute.
+	 *
+	 * Divi stores navigation link URLs as base64-encoded strings:
+	 * <span class="fac_menu" data-fac="BASE64_ENCODED_URL">Link</span>
+	 *
+	 * This method decodes each data-fac value, replaces the origin URL with the
+	 * destination URL, and re-encodes the result so the static site links correctly.
+	 *
+	 * @param string $body        The HTML body.
+	 * @param Page   $static_page The static page being processed.
+	 *
+	 * @return string Updated HTML body.
+	 */
+	public function replace_data_fac_urls( string $body, $static_page ): string {
+		if ( ! $this->dependency_active() ) {
+			return $body;
+		}
+
+		$destination_url = Options::instance()->get_destination_url();
+		$attrs           = apply_filters( 'ss_divi_base64_url_attributes', array( 'data-fac' ) );
+
+		foreach ( $attrs as $attr ) {
+			$attr_pattern = preg_quote( $attr, '/' );
+			$body         = preg_replace_callback(
+				'/' . $attr_pattern . '=(["\'])([A-Za-z0-9+\/=]+)\1/i',
+				function ( $matches ) use ( $destination_url, $attr ) {
+					$quote   = $matches[1];
+					$encoded = $matches[2];
+					$decoded = base64_decode( $encoded, true );
+
+					// Only process values that look like URLs containing our origin host.
+					if ( false === $decoded || strpos( $decoded, Util::origin_host() ) === false ) {
+						return $matches[0];
+					}
+
+					$updated = preg_replace(
+						'/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i',
+						$destination_url,
+						$decoded
+					);
+
+					$re_encoded = base64_encode( $updated );
+
+					Util::debug_log( sprintf( 'Divi: replaced base64 URL in %s: %s → %s', $attr, $decoded, $updated ) );
+
+					return $attr . '=' . $quote . $re_encoded . $quote;
+				},
+				$body
+			);
+		}
+
+		return $body;
 	}
 
 	/**
