@@ -945,6 +945,24 @@ class Url_Extractor {
 
 			$html = apply_filters( 'ss_html_after_restored_attributes', $html, $this );
 
+			// Use regex to double-check <style> attributes for things like @font-face URLs.
+			$origin_host = Util::origin_host();
+
+			if ( strpos( $html, $origin_host ) !== false ) {
+				$html = preg_replace_callback(
+					'/<style\b[^>]*>(.*?)<\/style>/is',
+					function ( $style_match ) use ( $origin_host ) {
+						if ( strpos( $style_match[1], $origin_host ) === false ) {
+							return $style_match[0];
+						}
+						$updated_css = $this->extract_and_replace_urls_in_css( $style_match[1] );
+
+						return str_replace( $style_match[1], $updated_css, $style_match[0] );
+					},
+					$html
+				);
+			}
+
 			return $html;
 		}
 	}
@@ -990,48 +1008,51 @@ class Url_Extractor {
 		// Parse the data URI format: data:[<mediatype>][;base64],<data>
 		// Example: data:text/css;charset=UTF-8,<css content>
 		// Or URL-encoded: data://text/css%3Bcharset%3DUTF-8,%0D%0A<encoded css>
-		
+
 		// First, try to match the data URI pattern
 		if ( ! preg_match( '/^data:([^,]*),(.*)$/is', $data_uri, $matches ) ) {
 			// Try URL-encoded format (data://)
 			if ( preg_match( '/^data:\/\/([^,]*),(.*)$/is', $data_uri, $matches ) ) {
 				// URL-encoded format detected
-				$media_type = urldecode( $matches[1] );
+				$media_type  = urldecode( $matches[1] );
 				$css_content = urldecode( $matches[2] );
-				
+
 				// Process URLs in the CSS content
 				$processed_css = $this->force_replace( $css_content );
-				
+
 				// Re-encode and return
 				return 'data://' . urlencode( $media_type ) . ',' . urlencode( $processed_css );
 			}
+
 			return $data_uri; // Return unchanged if pattern doesn't match
 		}
-		
-		$media_type = $matches[1];
+
+		$media_type  = $matches[1];
 		$css_content = $matches[2];
-		$is_base64 = false;
-		
+		$is_base64   = false;
+
 		// Check if content is base64 encoded
 		if ( stripos( $media_type, ';base64' ) !== false ) {
-			$is_base64 = true;
-			$media_type = str_ireplace( ';base64', '', $media_type );
+			$is_base64   = true;
+			$media_type  = str_ireplace( ';base64', '', $media_type );
 			$css_content = base64_decode( $css_content );
 		} else {
 			// URL-decode the content
 			$css_content = urldecode( $css_content );
 		}
-		
+
 		// Process URLs in the CSS content using force_replace to handle origin URLs
 		$processed_css = $this->force_replace( $css_content );
-		
+
 		// Re-encode the CSS content
 		if ( $is_base64 ) {
 			$encoded_css = base64_encode( $processed_css );
+
 			return 'data:' . $media_type . ';base64,' . $encoded_css;
 		} else {
 			// URL-encode the content, preserving the original format
 			$encoded_css = rawurlencode( $processed_css );
+
 			return 'data:' . $media_type . ',' . $encoded_css;
 		}
 	}
@@ -1051,13 +1072,13 @@ class Url_Extractor {
 	 *
 	 * @return string The CSS with all URLs converted
 	 */
- private function extract_and_replace_urls_in_css( $text ) {
-        // Decode entities to ensure URLs are detected correctly, using site charset
-        $charset = \get_bloginfo( 'charset' );
-        if ( empty( $charset ) ) {
-            $charset = 'UTF-8';
-        }
-        $text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, $charset );
+	private function extract_and_replace_urls_in_css( $text ) {
+		// Decode entities to ensure URLs are detected correctly, using site charset
+		$charset = \get_bloginfo( 'charset' );
+		if ( empty( $charset ) ) {
+			$charset = 'UTF-8';
+		}
+		$text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, $charset );
 
 		// Pass 1: Handle url(...) constructs with quoted or unquoted values, including relative URLs.
 		// Pattern breakdown:
@@ -1095,77 +1116,79 @@ class Url_Extractor {
 
 		// Pass 2: Fallback - replace any remaining bare local absolute or protocol-relative URLs by converting them.
 		$escaped_origin = preg_quote( Util::origin_host(), '/' );
-        $text           = preg_replace_callback(
-            '/((?:https?:)?\/\/' . $escaped_origin . ')[^"\')\s;,]+/i',
-            function ( $m ) {
-                $matched_url = $m[0];
-                $updated     = $this->add_to_extracted_urls( $matched_url );
+		$text           = preg_replace_callback(
+			'/((?:https?:)?\/\/' . $escaped_origin . ')[^"\')\s;,]+/i',
+			function ( $m ) {
+				$matched_url = $m[0];
+				$updated     = $this->add_to_extracted_urls( $matched_url );
 
-                return $updated ?: $matched_url;
-            },
-            $text
-        );
+				return $updated ?: $matched_url;
+			},
+			$text
+		);
 
-        // Pass 3: Fix HTML numeric entities used inside CSS content strings (e.g., content: "&#61710;" from Elementor/EAEL)
-        // Browsers do not decode HTML entities inside CSS. Convert these to proper CSS escapes like \f10e.
-        if ( apply_filters( 'simply_static_fix_css_content_entities', true, $this->static_page, $this ) ) {
-            $text = $this->convert_css_content_entities_to_escapes( $text );
-        }
+		// Pass 3: Fix HTML numeric entities used inside CSS content strings (e.g., content: "&#61710;" from Elementor/EAEL)
+		// Browsers do not decode HTML entities inside CSS. Convert these to proper CSS escapes like \f10e.
+		if ( apply_filters( 'simply_static_fix_css_content_entities', true, $this->static_page, $this ) ) {
+			$text = $this->convert_css_content_entities_to_escapes( $text );
+		}
 
-        return $text;
-    }
+		return $text;
+	}
 
-    /**
-     * Convert HTML numeric entities within CSS content property string literals
-     * into CSS escape sequences so icon fonts (e.g., Font Awesome) render correctly.
-     *
-     * Examples:
-     *   content: "&#61710;"  => content: "\f10e"
-     *   content: '\xF10E'    => unchanged
-     *   content: "\f10e"    => unchanged
-     *
-     * Supports both decimal (&#61710;) and hexadecimal (&#xF10E; / &#Xf10e;).
-     */
-    private function convert_css_content_entities_to_escapes( string $css ): string {
-        // Only process quoted values of the content property to avoid false positives
-        return preg_replace_callback(
-            '/(content\s*:\s*)(["\'])((?:\\\\.|(?!\2).)*?)(\2)/is',
-            function ( $m ) {
-                $prefix = $m[1];
-                $quote  = $m[2];
-                $value  = $m[3];
+	/**
+	 * Convert HTML numeric entities within CSS content property string literals
+	 * into CSS escape sequences so icon fonts (e.g., Font Awesome) render correctly.
+	 *
+	 * Examples:
+	 *   content: "&#61710;"  => content: "\f10e"
+	 *   content: '\xF10E'    => unchanged
+	 *   content: "\f10e"    => unchanged
+	 *
+	 * Supports both decimal (&#61710;) and hexadecimal (&#xF10E; / &#Xf10e;).
+	 */
+	private function convert_css_content_entities_to_escapes( string $css ): string {
+		// Only process quoted values of the content property to avoid false positives
+		return preg_replace_callback(
+			'/(content\s*:\s*)(["\'])((?:\\\\.|(?!\2).)*?)(\2)/is',
+			function ( $m ) {
+				$prefix = $m[1];
+				$quote  = $m[2];
+				$value  = $m[3];
 
-                // If value already contains a CSS escape (e.g., \f10e), leave those intact
-                // Convert hex entities first: &#xHHHH; or &#Xhhhh;
-                $value = preg_replace_callback(
-                    '/&#x([0-9a-fA-F]+);/i',
-                    function ( $hm ) {
-                        $hex = strtolower( $hm[1] );
-                        // Ensure it is prefixed with a single backslash as a CSS escape
-                        return '\\' . $hex;
-                    },
-                    $value
-                );
+				// If value already contains a CSS escape (e.g., \f10e), leave those intact
+				// Convert hex entities first: &#xHHHH; or &#Xhhhh;
+				$value = preg_replace_callback(
+					'/&#x([0-9a-fA-F]+);/i',
+					function ( $hm ) {
+						$hex = strtolower( $hm[1] );
 
-                // Convert decimal entities: &#DDDDD;
-                $value = preg_replace_callback(
-                    '/&#([0-9]+);/',
-                    function ( $dm ) {
-                        $dec = (int) $dm[1];
-                        if ( $dec <= 0 ) {
-                            return $dm[0];
-                        }
-                        $hex = dechex( $dec );
-                        return '\\' . strtolower( $hex );
-                    },
-                    $value
-                );
+						// Ensure it is prefixed with a single backslash as a CSS escape
+						return '\\' . $hex;
+					},
+					$value
+				);
 
-                return $prefix . $quote . $value . $quote;
-            },
-            $css
-        );
-    }
+				// Convert decimal entities: &#DDDDD;
+				$value = preg_replace_callback(
+					'/&#([0-9]+);/',
+					function ( $dm ) {
+						$dec = (int) $dm[1];
+						if ( $dec <= 0 ) {
+							return $dm[0];
+						}
+						$hex = dechex( $dec );
+
+						return '\\' . strtolower( $hex );
+					},
+					$value
+				);
+
+				return $prefix . $quote . $value . $quote;
+			},
+			$css
+		);
+	}
 
 	private function extract_and_replace_urls_in_script( $text ) {
 		$charset = \get_bloginfo( 'charset' );
