@@ -26,7 +26,8 @@ function GeneralSettings() {
         setSettingsSaved,
         isPro,
         isRunning,
-        setIsRunning
+        setIsRunning,
+        isStudio
     } = useContext(SettingsContext);
 
     const [replaceType, setReplaceType] = useState('relative');
@@ -302,6 +303,7 @@ function GeneralSettings() {
                     value={replaceType}
                     __next40pxDefaultSize
                     __nextHasNoMarginBottom
+                    disabled={isStudio()}
                     options={[
                         {label: __('Absolute URLs', 'simply-static'), value: 'absolute'},
                         {label: __('Relative Path', 'simply-static'), value: 'relative'},
@@ -321,6 +323,7 @@ function GeneralSettings() {
                                     value={scheme}
                                     __next40pxDefaultSize
                                     __nextHasNoMarginBottom
+                                    disabled={isStudio()}
                                     options={[
                                         {label: 'https://', value: 'https://'},
                                         {label: 'http://', value: 'http://'},
