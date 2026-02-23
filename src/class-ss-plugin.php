@@ -373,13 +373,15 @@ class Plugin {
 	/**
 	 * Get export log data.
 	 *
-	 * @param int $per_page given per page.
-	 * @param int $current_page given current page.
-	 * @param int $blog_id given blog id.
+	 * @param int    $per_page given per page.
+	 * @param int    $current_page given current page.
+	 * @param int    $blog_id given blog id.
+	 * @param string $search optional search term to filter by URL, status code, or notes.
 	 *
 	 * @return array
 	 */
-	public function get_export_log( $per_page, $current_page = 1, $blog_id = 0 ) {
+	public function get_export_log( $per_page, $current_page = 1, $blog_id = 0, $search = '' ) {
+		global $wpdb;
 
 		$blog_id = $blog_id ?: get_current_blog_id();
 
@@ -388,18 +390,43 @@ class Plugin {
 		$per_page = $per_page ?: 25;
 		$offset   = ( intval( $current_page ) - 1 ) * intval( $per_page );
 
-		$static_pages = apply_filters(
-			'ss_total_pages_log',
-			Page::query()
-			    ->limit( $per_page )
-			    ->offset( $offset )
-			    ->order( 'http_status_code DESC' )
-			    ->find()
-		);
+		$query = Page::query()
+		    ->limit( $per_page )
+		    ->offset( $offset )
+		    ->order( 'http_status_code DESC' );
 
-		$http_status_codes  = Page::get_http_status_codes_summary();
-		$total_static_pages = apply_filters( 'ss_total_pages', array_sum( array_values( $http_status_codes ) ) );
-		$total_pages        = ceil( $total_static_pages / $per_page );
+		if ( ! empty( $search ) ) {
+			$like = '%' . $wpdb->esc_like( $search ) . '%';
+			$query->where(
+				$wpdb->prepare(
+					'(url LIKE %s OR http_status_code LIKE %s OR status_message LIKE %s)',
+					$like,
+					$like,
+					$like
+				)
+			);
+		}
+
+		$static_pages = apply_filters( 'ss_total_pages_log', $query->find() );
+
+		if ( ! empty( $search ) ) {
+			$like               = '%' . $wpdb->esc_like( $search ) . '%';
+			$count_query        = Page::query();
+			$count_query->where(
+				$wpdb->prepare(
+					'(url LIKE %s OR http_status_code LIKE %s OR status_message LIKE %s)',
+					$like,
+					$like,
+					$like
+				)
+			);
+			$total_static_pages = apply_filters( 'ss_total_pages', (int) $count_query->count() );
+		} else {
+			$http_status_codes  = Page::get_http_status_codes_summary();
+			$total_static_pages = apply_filters( 'ss_total_pages', array_sum( array_values( $http_status_codes ) ) );
+		}
+
+		$total_pages = ceil( $total_static_pages / $per_page );
 
 		do_action( 'ss_after_render_export_log', $blog_id, $this->get_archive_creation_job() );
 

@@ -12,9 +12,6 @@ function ExportLog() {
     const [perPageExportLog, setPerPageExportLog] = useState(25);
     const [exportPage, setExportPage] = useState(0);
     const [filterText, setFilterText] = useState('');
-    const [allData, setAllData] = useState([]);
-    const [loadingAllData, setLoadingAllData] = useState(false);
-    const [totalPages, setTotalPages] = useState(0);
     const [exportType, setExportType] = useState('export');
     const [exportTypeId, setExportTypeId] = useState(null);
 
@@ -139,20 +136,13 @@ function ExportLog() {
         getExportLog(page, true);
     };
 
-    const handleSearch = async (e) => {
+    const handleSearch = (e) => {
         const searchTerm = e.target.value;
         setFilterText(searchTerm);
-
-        // If search term is not empty and we don't have all data yet, fetch all data
-        // But only if we're not running a Build or Single export
-        if (searchTerm && allData.length === 0 && exportType !== 'Build' && exportType !== 'Single') {
-            await fetchAllData();
-            setLastAllDataFetch(Date.now()); // Update the timestamp after fetching
-        }
+        getExportLog(1, true, searchTerm);
     };
 
-
-    function getExportLog(page, force = false) {
+    function getExportLog(page, force = false, search = filterText) {
         page = page ?? 1;
 
         if (page !== exportPage || force) {
@@ -160,18 +150,13 @@ function ExportLog() {
         }
 
         apiFetch({
-            path: `/simplystatic/v1/export-log?page=${page}&per_page=${perPageExportLog}&blog_id=${blogId}&is_network_admin=${options.is_network}`,
+            path: `/simplystatic/v1/export-log?page=${page}&per_page=${perPageExportLog}&blog_id=${blogId}&is_network_admin=${options.is_network}&search=${encodeURIComponent(search)}`,
             method: 'GET',
         }).then(resp => {
             var json = JSON.parse(resp);
             if (page !== exportPage || force) {
                 setExportLog(json.data);
                 setLoadingExportLog(false);
-
-                // Calculate total pages
-                const total = json.data.total_static_pages || 0;
-                const calculatedTotalPages = Math.ceil(total / perPageExportLog);
-                setTotalPages(calculatedTotalPages);
             } else {
                 exportLog.total_static_pages = json.data.total_static_pages;
                 setExportLog(exportLog);
@@ -180,96 +165,8 @@ function ExportLog() {
         });
     }
 
-    // Function to fetch all data for search
-    async function fetchAllData() {
-        setLoadingAllData(true);
-
-        try {
-            // First, get the first page to determine total pages
-            const firstPageResponse = await apiFetch({
-                path: `/simplystatic/v1/export-log?page=1&per_page=${perPageExportLog}&blog_id=${blogId}&is_network_admin=${options.is_network}`,
-                method: 'GET',
-            });
-
-            const firstPageJson = JSON.parse(firstPageResponse);
-            const totalItems = firstPageJson.data.total_static_pages || 0;
-            let calculatedTotalPages = Math.ceil(totalItems / perPageExportLog);
-
-            // For very large sites, limit the number of pages we fetch to avoid timeouts
-            const MAX_PAGES_TO_FETCH = 20; // This will fetch up to 500 items with default perPage of 25
-            if (calculatedTotalPages > MAX_PAGES_TO_FETCH) {
-                console.log(`Site has ${calculatedTotalPages} pages of data, limiting to ${MAX_PAGES_TO_FETCH} pages to prevent timeouts`);
-                calculatedTotalPages = MAX_PAGES_TO_FETCH;
-            }
-
-            // Instead of fetching all pages at once, fetch them in batches
-            const BATCH_SIZE = 5; // Process 5 pages at a time
-            let allPages = [];
-
-            // Add the first page data we already fetched
-            if (firstPageJson.data && firstPageJson.data.static_pages) {
-                allPages = [...firstPageJson.data.static_pages];
-            }
-
-            // Process remaining pages in batches
-            for (let batchStart = 2; batchStart <= calculatedTotalPages; batchStart += BATCH_SIZE) {
-                const batchEnd = Math.min(batchStart + BATCH_SIZE - 1, calculatedTotalPages);
-                console.log(`Fetching batch of pages ${batchStart} to ${batchEnd}`);
-
-                // Create batch of promises
-                const batchPromises = [];
-                for (let i = batchStart; i <= batchEnd; i++) {
-                    batchPromises.push(
-                        apiFetch({
-                            path: `/simplystatic/v1/export-log?page=${i}&per_page=${perPageExportLog}&blog_id=${blogId}&is_network_admin=${options.is_network}`,
-                            method: 'GET',
-                        })
-                    );
-                }
-
-                // Execute batch of promises
-                const batchResponses = await Promise.all(batchPromises);
-
-                // Process batch responses
-                batchResponses.forEach(response => {
-                    const json = JSON.parse(response);
-                    if (json.data && json.data.static_pages) {
-                        allPages = [...allPages, ...json.data.static_pages];
-                    }
-                });
-            }
-
-            // Update state with the fetched data
-            setAllData(allPages);
-
-            // Log for debugging
-            console.log(`Fetched ${allPages.length} total items from ${calculatedTotalPages} pages (out of ${Math.ceil(totalItems / perPageExportLog)} total pages)`);
-
-            return allPages;
-        } catch (error) {
-            console.error('Error fetching all data:', error);
-            return [];
-        } finally {
-            setLoadingAllData(false);
-        }
-    }
-
-    // Track the last time we fetched all data
-    const [lastAllDataFetch, setLastAllDataFetch] = useState(0);
-
     useInterval(() => {
         getExportLog();
-
-        // If we have a search term and already have all data, refresh the all data
-        // but limit how often we do this to prevent overloading the server
-        const currentTime = Date.now();
-        const ALL_DATA_REFRESH_INTERVAL = 30000; // 30 seconds between full refreshes
-
-        if (filterText && allData.length > 0 && (currentTime - lastAllDataFetch > ALL_DATA_REFRESH_INTERVAL)) {
-            console.log('Refreshing all data for search (30-second interval)');
-            fetchAllData();
-            setLastAllDataFetch(currentTime);
-        }
     }, isRunning ? 5000 : null);
 
     useEffect(() => {
@@ -294,23 +191,6 @@ function ExportLog() {
         }
     }, [isRunning]);
 
-    // Filter data based on search term
-    // When running a Build or Single export, only search in the current export log data
-    const dataToFilter = (filterText && allData.length > 0 && exportType !== 'Build' && exportType !== 'Single') 
-        ? allData 
-        : (exportLog.static_pages || []);
-    const filteredData = dataToFilter.filter(
-        item => {
-            if (!filterText) return true;
-            const searchTerm = filterText.toLowerCase();
-            return (
-                (item.code && item.code.toString().toLowerCase().includes(searchTerm)) ||
-                (item.url && item.url.toLowerCase().includes(searchTerm)) ||
-                (item.notes && item.notes.toLowerCase().includes(searchTerm))
-            );
-        }
-    );
-
     return (
         <div className={"log-table-container"}>
             <Flex>
@@ -327,23 +207,21 @@ function ExportLog() {
             </Flex>
             <DataTable
                 columns={columns}
-                data={filterText ? filteredData : (exportLog.static_pages || [])}
+                data={exportLog.static_pages || []}
                 pagination
-                paginationServer={!filterText}
-                paginationTotalRows={filterText ? filteredData.length : exportLog.total_static_pages}
+                paginationServer
+                paginationTotalRows={exportLog.total_static_pages}
                 paginationPerPage={25}
                 paginationRowsPerPageOptions={[25, 50, 100, 200]}
-                progressPending={loadingExportLog || (loadingAllData && filterText)}
+                progressPending={loadingExportLog}
                 progressComponent={
                     <div style={{padding: '24px', textAlign: 'center'}}>
                         <Spinner/>
-                        <div style={{marginTop: '8px'}}>
-                            {loadingAllData && filterText ? 'Loading all data for search...' : 'Loading...'}
-                        </div>
+                        <div style={{marginTop: '8px'}}>Loading...</div>
                     </div>
                 }
                 onChangeRowsPerPage={handlePerRowsChange}
-                onChangePage={filterText ? undefined : handlePageChange}
+                onChangePage={handlePageChange}
             />
         </div>
     )

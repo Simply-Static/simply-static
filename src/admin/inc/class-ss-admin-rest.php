@@ -1153,12 +1153,13 @@ class Admin_Rest {
     public function get_export_log( $request ) {
         $params     = $request->get_params();
         $blog_id    = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
+        $search     = ! empty( $params['search'] ) ? sanitize_text_field( $params['search'] ) : '';
 
         if ( $blog_id && is_multisite() ) {
             $this->switch_to_blog_and_refresh_options( $blog_id );
         }
 
-        $export_log = Plugin::instance()->get_export_log( $params['per_page'], $params['page'], $blog_id );
+        $export_log = Plugin::instance()->get_export_log( $params['per_page'], $params['page'], $blog_id, $search );
 
         if ( $blog_id && is_multisite() ) {
             $this->restore_current_blog_and_refresh_options();
