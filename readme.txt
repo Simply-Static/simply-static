@@ -71,7 +71,7 @@ Perfect for developers self-hosting client sites, agencies managing infrastructu
 [Get Simply Static Pro](https://simplystatic.com/simply-static-pro/)
 
 = Simply Static Studio - For Businesses & Content Creators =
-From $19/month
+From $9/month
 All-in-one managed WordPress hosting. Zero maintenance. Maximum security.
 
 * Fully managed WordPress hosting
@@ -202,7 +202,7 @@ Simply Static Pro and Studio are optional premium products for advanced features
 = What's the difference between the free plugin, Pro, and Studio? =
 Free: Generate static sites, export as ZIP or to local directory. Perfect for testing and simple exports.
 Pro ($99-299/year): Advanced deployment, automation, forms, search, WP-CLI. For developers and agencies self-hosting.
-Studio (from $19/month): All-in-one managed hosting. We handle WordPress, static hosting, backups, SSL, everything. For businesses who want zero maintenance.
+Studio (from $9/month): All-in-one managed hosting. We handle WordPress, static hosting, backups, SSL, everything. For businesses who want zero maintenance.
 See detailed comparison
 = Can I use the free version for production sites? =
 Yes, but you'll need to manually upload the ZIP file to your hosting provider each time you update your site.
