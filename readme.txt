@@ -4,7 +4,7 @@ Tags: jamstack, performance, security, static site generator
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag:  3.6.0
+Stable tag:  3.6.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -274,6 +274,13 @@ Settings - Configure your static site export options
 Diagnostics - Check your WordPress environment for compatibility
 
 == Changelog ==
+
+= 3.6.1 =
+
+* small admin UX fixes
+* server-side implementation for pagination-based search in export log
+* DIVI integration: replace base64 encoded navigation URLs
+* handle @font-face URLs if skipped by DomDocument (regex)
 
 = 3.6.0 =
 
