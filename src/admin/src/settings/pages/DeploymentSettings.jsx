@@ -33,6 +33,7 @@ function DeploymentSettings() {
     const [githubAccountType, setGithubAccountType] = useState('personal');
     const [githubVisibility, setGithubVisibility] = useState('private');
     const [emptyBucketBeforeExport, setEmptyBucketBeforeExport] = useState(false);
+    const [awsDisableAcl, setAwsDisableAcl] = useState(false);
     const [throttleGitHubRequests, setThrottleGitHubRequests] = useState(false);
     const [region, setRegion] = useState('us-east-2');
     const [awsAuthMethod, setAwsAuthMethod] = useState('aws-iam-key');
@@ -88,6 +89,10 @@ function DeploymentSettings() {
 
         if (settings.aws_empty) {
             setEmptyBucketBeforeExport(settings.aws_empty);
+        }
+
+        if (settings.aws_disable_acl) {
+            setAwsDisableAcl(settings.aws_disable_acl);
         }
 
         if (settings.aws_auth_method) {
@@ -786,6 +791,22 @@ function DeploymentSettings() {
                             value={settings.aws_webhook_url}
                             onChange={(webhook) => {
                                 updateSetting('aws_webhook_url', webhook);
+                            }}
+                        />
+
+                        <ToggleControl
+                            label={__('Disable ACL on uploads?', 'simply-static')}
+                            help={
+                                awsDisableAcl
+                                    ? __('ACL header will not be sent. Required for buckets with "Bucket owner enforced" (ACLs disabled).', 'simply-static')
+                                    : __('ACL header will be sent with uploads. Disable this if your bucket has ACLs disabled.', 'simply-static')
+                            }
+                            disabled={('free' === options.plan || !isPro())}
+                            __nextHasNoMarginBottom
+                            checked={awsDisableAcl}
+                            onChange={(value) => {
+                                setAwsDisableAcl(value);
+                                updateSetting('aws_disable_acl', value);
                             }}
                         />
 
