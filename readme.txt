@@ -4,7 +4,7 @@ Tags: jamstack, performance, security, static site generator
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag:  3.6.1.2
+Stable tag:  3.6.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -275,9 +275,11 @@ Diagnostics - Check your WordPress environment for compatibility
 
 == Changelog ==
 
-= 3.6.1.2 =
+= 3.6.2 =
 
 * admin UI tweak (ACL toggle)
+* reset site lock (MU setups)
+* improved memory efficiency for Elementor Crawler
 * readme changes
 
 = 3.6.1 =
