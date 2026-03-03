@@ -44,15 +44,12 @@ class Elementor_Crawler extends Crawler {
 		$wp_path  = ABSPATH;
 
 		$directories = [
-			'/wp-content/uploads/elementor'              => $wp_path . 'wp-content/uploads/elementor',
-			'/wp-content/uploads/elementor/css'          => $wp_path . 'wp-content/uploads/elementor/css',
-			// Elementor plugin assets
-			'/wp-content/plugins/elementor/assets'       => $wp_path . 'wp-content/plugins/elementor/assets',
-			'/wp-content/plugins/elementor/assets/js'    => $wp_path . 'wp-content/plugins/elementor/assets/js',
-			'/wp-content/plugins/elementor/assets/css'   => $wp_path . 'wp-content/plugins/elementor/assets/css',
-			'/wp-content/plugins/elementor/assets/lib'   => $wp_path . 'wp-content/plugins/elementor/assets/lib',
+			// Elementor uploads directory (recursive scan covers /css subdirectory)
+			'/wp-content/uploads/elementor'        => $wp_path . 'wp-content/uploads/elementor',
+			// Elementor plugin assets (recursive scan covers js/, css/, lib/ subdirectories)
+			'/wp-content/plugins/elementor/assets' => $wp_path . 'wp-content/plugins/elementor/assets',
 			// Core jQuery (Elementor relies on this)
-			'/wp-includes/js/jquery'                     => $wp_path . 'wp-includes/js/jquery',
+			'/wp-includes/js/jquery'               => $wp_path . 'wp-includes/js/jquery',
 		];
 
 		// Stream files from the directories
@@ -66,11 +63,13 @@ class Elementor_Crawler extends Crawler {
 					new \RecursiveDirectoryIterator( $dir_path, \RecursiveDirectoryIterator::SKIP_DOTS ),
 					\RecursiveIteratorIterator::SELF_FIRST
 				);
-				foreach ( $it as $file ) {
-					if ( $file->isDir() ) { continue; }
-					// Build a safe relative path from the directory prefix
-					$rel = \Simply_Static\Util::safe_relative_path( $dir_path, $file->getPathname() );
-					$batch[] = \Simply_Static\Util::safe_join_url( $site_url . $url_path, $rel );
+ 			foreach ( $it as $file ) {
+ 				if ( $file->isDir() ) { continue; }
+ 				// Skip PHP files — they are never served as static assets
+ 				if ( strtolower( $file->getExtension() ) === 'php' ) { continue; }
+ 				// Build a safe relative path from the directory prefix
+ 				$rel = \Simply_Static\Util::safe_relative_path( $dir_path, $file->getPathname() );
+ 				$batch[] = \Simply_Static\Util::safe_join_url( $site_url . $url_path, $rel );
 					if ( count( $batch ) >= $batch_sz ) {
 						$count += $this->enqueue_urls_batch( $batch );
 						$batch = [];
@@ -89,33 +88,46 @@ class Elementor_Crawler extends Crawler {
 			$batch = [];
 		}
 
-		// Stream Lottie URLs if Elementor Pro is active
+		// Stream Lottie URLs if Elementor Pro is active — paginated to avoid loading all meta at once
 		if ( $this->is_elementor_pro_active() ) {
 			global $wpdb;
-			$rows = $wpdb->get_results( "SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key='_elementor_data'", ARRAY_A );
-			if ( $rows ) {
-				foreach ( $rows as $row ) {
-					if ( empty( $row['meta_value'] ) ) { continue; }
-					$decoded = json_decode( $row['meta_value'], true );
-					if ( ! $decoded || ! is_array( $decoded ) ) { continue; }
-					foreach ( $decoded as $widget_data ) {
-						$flat_widget = $this->flatten_data( $widget_data );
-						foreach ( (array) $flat_widget as $item ) {
-							if ( empty( $item['widgetType'] ) || 'lottie' !== $item['widgetType'] ) { continue; }
-							if ( empty( $item['settings']['source_json'] ) ) { continue; }
-							$src = $item['settings']['source_json'];
-							if ( empty( $src['source'] ) || $src['source'] !== 'library' ) { continue; }
-							if ( empty( $src['url'] ) ) { continue; }
-							$batch[] = $src['url'];
-							if ( count( $batch ) >= $batch_sz ) {
-								$count += $this->enqueue_urls_batch( $batch );
-								$batch = [];
-								usleep( 100000 );
+			$lottie_offset     = 0;
+			$lottie_chunk_size = 20;
+			do {
+				$rows = $wpdb->get_results(
+					$wpdb->prepare(
+						"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key='_elementor_data' LIMIT %d OFFSET %d",
+						$lottie_chunk_size,
+						$lottie_offset
+					),
+					ARRAY_A
+				);
+				if ( $rows ) {
+					foreach ( $rows as $row ) {
+						if ( empty( $row['meta_value'] ) ) { continue; }
+						$decoded = json_decode( $row['meta_value'], true );
+						if ( ! $decoded || ! is_array( $decoded ) ) { continue; }
+						foreach ( $decoded as $widget_data ) {
+							$flat_widget = $this->flatten_data( $widget_data );
+							foreach ( (array) $flat_widget as $item ) {
+								if ( empty( $item['widgetType'] ) || 'lottie' !== $item['widgetType'] ) { continue; }
+								if ( empty( $item['settings']['source_json'] ) ) { continue; }
+								$src = $item['settings']['source_json'];
+								if ( empty( $src['source'] ) || $src['source'] !== 'library' ) { continue; }
+								if ( empty( $src['url'] ) ) { continue; }
+								$batch[] = $src['url'];
+								if ( count( $batch ) >= $batch_sz ) {
+									$count += $this->enqueue_urls_batch( $batch );
+									$batch = [];
+									usleep( 100000 );
+								}
 							}
 						}
 					}
 				}
-			}
+				$lottie_offset += $lottie_chunk_size;
+				$wpdb->flush();
+			} while ( $rows && count( $rows ) === $lottie_chunk_size );
 		}
 
 		// Flush remaining
@@ -134,9 +146,10 @@ class Elementor_Crawler extends Crawler {
 	 * @return int
 	 */
 	private function enqueue_urls_batch( array $urls ): int {
+		global $wpdb;
 		$count = 0;
 		\Simply_Static\Util::debug_log( sprintf( 'Processing batch of %d URLs for %s crawler', count( $urls ), $this->name ) );
-  foreach ( $urls as $url ) {
+		foreach ( $urls as $url ) {
 			// Skip URLs that are excluded by settings/patterns
 			if ( \Simply_Static\Util::is_url_excluded( $url ) ) {
 				\Simply_Static\Util::debug_log( sprintf( 'Elementor crawler skipping excluded URL: %s', $url ) );
@@ -148,6 +161,8 @@ class Elementor_Crawler extends Crawler {
 			$static_page->save();
 			$count++;
 		}
+		// Free wpdb cached query results to prevent memory accumulation across batches
+		$wpdb->flush();
 		return $count;
 	}
 
@@ -198,17 +213,12 @@ class Elementor_Crawler extends Crawler {
 
 		// Directories to scan
 		$directories = [
-			// Elementor uploads directory
-			'/wp-content/uploads/elementor' => $wp_path . 'wp-content/uploads/elementor',
-			// Elementor CSS directory (for post CSS files)
-			'/wp-content/uploads/elementor/css' => $wp_path . 'wp-content/uploads/elementor/css',
-			// Elementor plugin assets
-			'/wp-content/plugins/elementor/assets'     => $wp_path . 'wp-content/plugins/elementor/assets',
-			'/wp-content/plugins/elementor/assets/js'  => $wp_path . 'wp-content/plugins/elementor/assets/js',
-			'/wp-content/plugins/elementor/assets/css' => $wp_path . 'wp-content/plugins/elementor/assets/css',
-			'/wp-content/plugins/elementor/assets/lib' => $wp_path . 'wp-content/plugins/elementor/assets/lib',
+			// Elementor uploads directory (recursive scan covers /css subdirectory)
+			'/wp-content/uploads/elementor'        => $wp_path . 'wp-content/uploads/elementor',
+			// Elementor plugin assets (recursive scan covers js/, css/, lib/ subdirectories)
+			'/wp-content/plugins/elementor/assets' => $wp_path . 'wp-content/plugins/elementor/assets',
 			// jQuery directory
-			'/wp-includes/js/jquery' => $wp_path . 'wp-includes/js/jquery',
+			'/wp-includes/js/jquery'               => $wp_path . 'wp-includes/js/jquery',
 		];
 
 		// Scan each directory and add files to asset URLs
@@ -367,9 +377,13 @@ class Elementor_Crawler extends Crawler {
 				\RecursiveIteratorIterator::SELF_FIRST
 			);
 
-			foreach ( $iterator as $file ) {
+ 		foreach ( $iterator as $file ) {
 				// Skip directories
 				if ( $file->isDir() ) {
+					continue;
+				}
+				// Skip PHP files — they are never served as static assets
+				if ( strtolower( $file->getExtension() ) === 'php' ) {
 					continue;
 				}
 				
