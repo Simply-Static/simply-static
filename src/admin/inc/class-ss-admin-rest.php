@@ -73,6 +73,14 @@ class Admin_Rest {
                     return current_user_can( apply_filters( 'ss_user_capability', 'manage_network', 'cron' ) );
                 },
             ) );
+
+            register_rest_route( 'simplystatic/v1', '/reset-export-lock', array(
+                'methods'             => 'POST',
+                'callback'            => [ $this, 'reset_export_lock' ],
+                'permission_callback' => function () {
+                    return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+                },
+            ) );
         }
 
         // Data providers
@@ -425,6 +433,16 @@ class Admin_Rest {
         ];
 
         return json_encode( $stats );
+    }
+
+    /** Multisite: reset a stale export lock left by a crashed/interrupted export. */
+    public function reset_export_lock() {
+        delete_site_option( Plugin::SLUG . '_multisite_export_running' );
+
+        return json_encode( [
+            'status'  => 200,
+            'message' => __( 'Export lock cleared.', 'simply-static' ),
+        ] );
     }
 
     /** Data: public post types (filtered) */

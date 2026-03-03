@@ -43,7 +43,19 @@ function SidebarSite( props = null ) {
     const [isUpdatingFromNetwork, setIsUpdatingFromNetwork] = useState(false);
     const [selectedExportType, setSelectedExportType] = useState('export');
     const [canRunExport, setCanRunExport] = useState(true);
+    const [isResettingLock, setIsResettingLock] = useState(false);
 
+
+    const resetExportLock = () => {
+        setIsResettingLock(true);
+        apiFetch({
+            path: '/simplystatic/v1/reset-export-lock',
+            method: 'POST'
+        }).then(() => {
+            setIsResettingLock(false);
+            setCanRunExport(true);
+        });
+    }
 
     if ( options.is_multisite ) {
 
@@ -246,7 +258,6 @@ function SidebarSite( props = null ) {
 
             {!canRunExport && options.is_multisite && <>
                 <Button
-
                     disabled={true}
                     className={'generate'}
                 >
@@ -260,6 +271,14 @@ function SidebarSite( props = null ) {
                     href={"https://simplystatic.com/pricing/"}
                 >
                     { __('An export from another site is running. Upgrade to queue them.', 'simply-static') }
+                </Button>
+                <Button
+                    variant={'link'}
+                    isBusy={isResettingLock}
+                    disabled={isResettingLock}
+                    onClick={resetExportLock}
+                >
+                    { __('Reset export lock', 'simply-static') }
                 </Button>
             </>}
         </div>
