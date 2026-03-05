@@ -566,14 +566,44 @@ class Url_Extractor {
 					if ( filter_var( $attribute_value, FILTER_VALIDATE_URL ) ) {
 						$extracted_urls[] = $attribute_value;
 					}
-				} else {
-					// srcset is a fair bit different from most html
-					if ( $attribute_name === 'srcset' || $attribute_name === 'data-srcset' ) {
-						$extracted_urls = $this->extract_urls_from_srcset( $attribute_value );
-					} else {
-						$extracted_urls[] = $attribute_value;
-					}
-				}
+ 			} else {
+ 				// srcset is a fair bit different from most html
+ 				if ( $attribute_name === 'srcset' || $attribute_name === 'data-srcset' ) {
+ 					// Process each srcset entry individually and reconstruct the attribute.
+ 					// This avoids str_replace substring collisions that would corrupt Cloudinary
+ 					// transformation parameters like f_auto,q_auto or w_300,h_195,c_scale which
+ 					// contain commas that must be preserved verbatim inside each URL.
+ 					$strict_url_validation_srcset = apply_filters( 'simply_static_strict_url_validation', false );
+ 					$updated_entries              = array();
+ 					foreach ( preg_split( '/,(?:\s*(?=https?:\/\/|\/\/|\/[^\/])|\s+)/', $attribute_value ) as $srcset_entry ) {
+ 						$srcset_entry = trim( $srcset_entry );
+ 						if ( $srcset_entry === '' ) {
+ 							continue;
+ 						}
+ 						// Separate the URL from the optional width/density descriptor (e.g. "1500w", "2x").
+ 						$descriptor = '';
+ 						$url_part   = $srcset_entry;
+ 						if ( preg_match( '/^(.*\S)\s+([\d.]+[xw])\s*$/i', $srcset_entry, $entry_match ) ) {
+ 							$url_part   = $entry_match[1];
+ 							$descriptor = ' ' . $entry_match[2];
+ 						}
+ 						// Skip pure-number artifacts (bare descriptors parsed without a URL).
+ 						if ( preg_match( '/^\d+$/', trim( $url_part ) ) ) {
+ 							continue;
+ 						}
+ 						if ( $strict_url_validation_srcset && ! filter_var( $url_part, FILTER_VALIDATE_URL ) ) {
+ 							$updated_entries[] = $url_part . $descriptor;
+ 							continue;
+ 						}
+ 						$updated_url       = $this->add_to_extracted_urls( $url_part );
+ 						$updated_entries[] = ( ! is_null( $updated_url ) && $updated_url !== '' ? $updated_url : $url_part ) . $descriptor;
+ 					}
+ 					$tag->setAttribute( $attribute_name, implode( ', ', $updated_entries ) );
+ 					continue; // Srcset fully handled above; skip the generic str_replace loop.
+ 				} else {
+ 					$extracted_urls[] = $attribute_value;
+ 				}
+ 			}
 
 				$strict_url_validation = apply_filters( 'simply_static_strict_url_validation', false );
 
@@ -977,9 +1007,12 @@ class Url_Extractor {
 	private function extract_urls_from_srcset( $srcset ) {
 		$extracted_urls = array();
 
-		// Split on commas followed by whitespace only (the standard srcset entry separator).
-		// This preserves commas inside URLs, e.g. Cloudinary transformation params like f_auto,q_auto.
-		foreach ( preg_split( '/,\s+/', $srcset ) as $url_and_descriptor ) {
+		// Split srcset entries on commas, but only when:
+		//   (a) the comma is followed (with optional whitespace) by a URL start: https://, //, or /path
+		//   (b) OR the comma is followed by at least one whitespace (catches bare relative URLs)
+		// This preserves commas that are INSIDE Cloudinary transformation params like
+		// f_auto,q_auto or w_300,h_195,c_scale, which never start with a URL scheme or slash.
+		foreach ( preg_split( '/,(?:\s*(?=https?:\/\/|\/\/|\/[^\/])|\s+)/', $srcset ) as $url_and_descriptor ) {
 			// remove the (optional) descriptor
 			// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-srcset
 			$url_without_descriptor = trim( preg_replace( '/[\d\.]+[xw]\s*$/', '', $url_and_descriptor ) );
