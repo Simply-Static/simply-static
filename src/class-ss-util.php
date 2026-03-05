@@ -426,6 +426,7 @@ class Util {
 
 		// Exclude debug files (.log, .txt) but not robots.txt, llms.txt, _redirects, or _headers
 		if ( preg_match( '/\.(log|txt)$/i', $url ) && strpos( $url, 'debug' ) !== false && strpos( $url, 'robots.txt' ) === false && strpos( $url, 'llms.txt' ) === false && strpos( $url, '_redirects' ) === false && strpos( $url, '_headers' ) === false ) {
+			self::debug_log( sprintf( 'Excluding URL "%s" — matched built-in rule: debug log file pattern', $url ) );
 			return true;
 		}
 
@@ -433,6 +434,7 @@ class Util {
 		if ( ! $opts->get( 'add_feeds' ) ) {
 			// Only exclude WordPress feed-style URLs
 			if ( preg_match( '/(\/feed\/?$|\?feed=|\/feed\/|\/rss\/?$|\/atom\/?$)/i', $url ) ) {
+				self::debug_log( sprintf( 'Excluding URL "%s" — matched built-in rule: feed URL (add_feeds is disabled)', $url ) );
 				return true;
 			}
 		}
@@ -476,7 +478,10 @@ class Util {
 		// First test regex patterns if provided
 		foreach ( (array) $regex_patterns as $pattern ) {
 			if ( @preg_match( $pattern, $url ) ) {
-				if ( preg_match( $pattern, $url ) ) { return true; }
+				if ( preg_match( $pattern, $url ) ) {
+					self::debug_log( sprintf( 'Excluding URL "%s" — matched regex exclusion rule: %s', $url, $pattern ) );
+					return true;
+				}
 			}
 		}
 
@@ -484,6 +489,7 @@ class Util {
 		if ( ! empty( $excluded ) ) {
 			foreach ( $excluded as $excludable ) {
 				if ( stripos( $url, $excludable ) !== false ) {
+					self::debug_log( sprintf( 'Excluding URL "%s" — matched literal exclusion rule: "%s"', $url, $excludable ) );
 					return true;
 				}
 			}
