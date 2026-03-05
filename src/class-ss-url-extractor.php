@@ -977,7 +977,9 @@ class Url_Extractor {
 	private function extract_urls_from_srcset( $srcset ) {
 		$extracted_urls = array();
 
-		foreach ( explode( ',', $srcset ) as $url_and_descriptor ) {
+		// Split on commas followed by whitespace only (the standard srcset entry separator).
+		// This preserves commas inside URLs, e.g. Cloudinary transformation params like f_auto,q_auto.
+		foreach ( preg_split( '/,\s+/', $srcset ) as $url_and_descriptor ) {
 			// remove the (optional) descriptor
 			// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-srcset
 			$url_without_descriptor = trim( preg_replace( '/[\d\.]+[xw]\s*$/', '', $url_and_descriptor ) );
