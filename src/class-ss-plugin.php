@@ -109,7 +109,8 @@ class Plugin {
 				// Set up defaults.
 				self::$instance->options              = Options::instance();
 				self::$instance->view                 = new View();
-				self::$instance->archive_creation_job = new Archive_Creation_Job();
+				$archive_job_class = apply_filters( 'ss_archive_creation_job_class', '\\Simply_Static\\Archive_Creation_Job' );
+				self::$instance->archive_creation_job = new $archive_job_class();
 				self::$instance->page_handlers        = new Page_Handlers();
 
 				// Set up pagination.
