@@ -1093,6 +1093,16 @@ class Util {
 	/**
 	 * Sanitize a local path (sans host) while preserving query and fragment.
 	 *
+	 * Uses the same filename/extension splitting logic as
+	 * create_directories_for_static_page() to ensure that the sanitized URL
+	 * written into HTML always matches the filename stored on disk.
+	 *
+	 * Previously the whole last path segment (e.g. "file.main.css") was passed
+	 * to sanitize_filename() in one piece, causing WordPress's
+	 * sanitize_file_name() to treat intermediate dots as suspect extensions and
+	 * append underscores (e.g. "file.main_.css"), while the file-save path
+	 * split the extension first and sanitized only the base name.
+	 *
 	 * @param string $path The path to sanitize.
 	 * @return string Sanitized path with original query/fragment.
 	 */
@@ -1100,7 +1110,27 @@ class Util {
 		$clean_path     = self::remove_params_and_fragment( $path );
 		$query_fragment = substr( $path, strlen( $clean_path ) );
 
-		return self::sanitize_path( urldecode( $clean_path ) ) . $query_fragment;
+		$decoded_path = urldecode( $clean_path );
+
+		// Split into directory and filename+extension using the same helper
+		// that the file-save path uses, so both sides agree on what the
+		// "filename" vs "extension" portions are.
+		$path_info = self::url_path_info( $decoded_path );
+
+		// Sanitize directory segments (these have no extension to worry about).
+		$sanitized_dir = self::sanitize_path( $path_info['dirname'] );
+
+		// Sanitize only the base filename (without extension), mirroring
+		// create_directories_for_static_page().
+		$sanitized_filename = self::sanitize_filename( $path_info['filename'] );
+
+		// Reassemble: dir + sanitized basename + .extension
+		$result = $sanitized_dir . $sanitized_filename;
+		if ( ! empty( $path_info['extension'] ) ) {
+			$result .= '.' . $path_info['extension'];
+		}
+
+		return $result . $query_fragment;
 	}
 
 	/**
