@@ -228,10 +228,16 @@ trait canProcessPages {
 		$query->where( "fetch_attempts < 3" );
 
 		// Modify the query based on post id column.
-		$post_id = get_option( 'simply-static-use-single' );
+		$use_single = get_option( 'simply-static-use-single' );
 
-		if ( ! empty( $post_id ) ) {
-			$query->where( "post_id = ?", $post_id );
+		if ( ! empty( $use_single ) ) {
+			$ids = array_map( 'intval', explode( ',', $use_single ) );
+			if ( count( $ids ) === 1 ) {
+				$query->where( "post_id = ?", $ids[0] );
+			} else {
+				$in_clause = implode( ',', $ids );
+				$query->where( "post_id IN ({$in_clause})" );
+			}
 		}
 
 		// Modify the query based on build id column.
@@ -279,10 +285,16 @@ trait canProcessPages {
 		}
 
 		// Modify the query based on post id column.
-		$post_id = get_option( 'simply-static-use-single' );
+		$use_single = get_option( 'simply-static-use-single' );
 
-		if ( ! empty( $post_id ) ) {
-			$query->where( "post_id = ?", $post_id );
+		if ( ! empty( $use_single ) ) {
+			$ids = array_map( 'intval', explode( ',', $use_single ) );
+			if ( count( $ids ) === 1 ) {
+				$query->where( "post_id = ?", $ids[0] );
+			} else {
+				$in_clause = implode( ',', $ids );
+				$query->where( "post_id IN ({$in_clause})" );
+			}
 		}
 
 		// Modify the query based on build id column.
