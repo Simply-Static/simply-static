@@ -243,18 +243,87 @@ class Url_Fetcher {
 					$temp_filename = str_replace( '\/', '/', $temp_filename );
 				}
 
-				Util::debug_log( "Renaming temp file from " . $temp_filename . " to " . $file_path );
-				$renamed = rename( $temp_filename, $file_path );
+ 			Util::debug_log( "Renaming temp file from " . $temp_filename . " to " . $file_path );
 
-				if ( ! $renamed ) {
-					Util::debug_log( "Failed to rename temp file. Attempting copy + unlink fallback." );
-					$copied = copy( $temp_filename, $file_path );
-					if ( $copied ) {
+				// Guard against race conditions: if the destination file already
+				// exists with content (written by a concurrent worker), skip the
+				// rename so we don't overwrite a valid file with a potentially
+				// empty or truncated one.
+				$temp_size = file_exists( $temp_filename ) ? filesize( $temp_filename ) : 0;
+				if ( file_exists( $file_path ) && filesize( $file_path ) > 0 ) {
+					Util::debug_log( "Destination file already exists with content, skipping rename to avoid race condition: " . $file_path );
+					// Clean up the temp file since we don't need it.
+					if ( file_exists( $temp_filename ) ) {
 						unlink( $temp_filename );
-						$renamed = true;
+					}
+					$renamed = true;
+				} elseif ( $temp_size === 0 && file_exists( $file_path ) && filesize( $file_path ) === 0 ) {
+					// Both temp and destination are 0-byte — nothing useful to do,
+					// but treat as success so the page record is marked processed.
+					Util::debug_log( "Both temp and destination are empty, skipping rename: " . $file_path );
+					if ( file_exists( $temp_filename ) ) {
+						unlink( $temp_filename );
+					}
+					$renamed = true;
+				} else {
+					// Use exclusive file locking to prevent concurrent writes to
+					// the same destination from producing a corrupt / 0-byte file.
+					$lock_file = $file_path . '.lock';
+					$lock_fh   = fopen( $lock_file, 'w' );
+
+					if ( $lock_fh && flock( $lock_fh, LOCK_EX ) ) {
+						// Re-check after acquiring the lock — another worker may
+						// have finished writing while we were waiting.
+						clearstatcache( true, $file_path );
+						if ( file_exists( $file_path ) && filesize( $file_path ) > 0 ) {
+							Util::debug_log( "Destination written by another worker while waiting for lock, skipping: " . $file_path );
+							if ( file_exists( $temp_filename ) ) {
+								unlink( $temp_filename );
+							}
+							$renamed = true;
+						} else {
+							$renamed = rename( $temp_filename, $file_path );
+
+							if ( ! $renamed ) {
+								Util::debug_log( "Failed to rename temp file. Attempting copy + unlink fallback." );
+								$copied = copy( $temp_filename, $file_path );
+								if ( $copied ) {
+									if ( file_exists( $temp_filename ) ) {
+										unlink( $temp_filename );
+									}
+									$renamed = true;
+								} else {
+									Util::debug_log( "Failed to copy temp file to destination: " . $file_path );
+									$static_page->set_error_message( 'Failed to save fetched file to archive' );
+								}
+							}
+						}
+
+						flock( $lock_fh, LOCK_UN );
+						fclose( $lock_fh );
+						@unlink( $lock_file );
 					} else {
-						Util::debug_log( "Failed to copy temp file to destination: " . $file_path );
-						$static_page->set_error_message( 'Failed to save fetched file to archive' );
+						// Could not obtain lock — fall back to direct rename.
+						Util::debug_log( "Could not obtain lock file, falling back to direct rename." );
+						$renamed = rename( $temp_filename, $file_path );
+
+						if ( ! $renamed ) {
+							Util::debug_log( "Failed to rename temp file. Attempting copy + unlink fallback." );
+							$copied = copy( $temp_filename, $file_path );
+							if ( $copied ) {
+								if ( file_exists( $temp_filename ) ) {
+									unlink( $temp_filename );
+								}
+								$renamed = true;
+							} else {
+								Util::debug_log( "Failed to copy temp file to destination: " . $file_path );
+								$static_page->set_error_message( 'Failed to save fetched file to archive' );
+							}
+						}
+
+						if ( $lock_fh ) {
+							fclose( $lock_fh );
+						}
 					}
 				}
 
