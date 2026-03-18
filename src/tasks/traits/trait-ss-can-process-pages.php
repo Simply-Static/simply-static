@@ -105,10 +105,33 @@ trait canProcessPages {
 			return true; // No Pages to process anymore. It's done.
 		}
 
-		while ( $static_page = array_shift( $pages_to_process ) ) {
+ 	while ( $static_page = array_shift( $pages_to_process ) ) {
 			if ( method_exists( $this, 'check_if_running' ) ) {
 				$this->check_if_running();
 			}
+
+			// Atomically claim this page so that concurrent workers (e.g.
+			// overlapping PHP-FPM requests in web export mode) cannot process
+			// the same page simultaneously, which would cause file corruption
+			// (0-byte files) due to concurrent file_put_contents writes.
+			global $wpdb;
+			$table_name = Page::table_name();
+			$start_time = $this->get_start_time();
+			$now        = Util::formatted_datetime();
+			$claimed    = $wpdb->query( $wpdb->prepare(
+				"UPDATE {$table_name} SET {$this->processing_column} = %s WHERE id = %d AND ( {$this->processing_column} IS NULL OR {$this->processing_column} < %s )",
+				$now,
+				$static_page->id,
+				$start_time
+			) );
+
+			if ( ! $claimed ) {
+				Util::debug_log( 'Skipping page (already claimed by another worker): ' . $static_page->url );
+				continue;
+			}
+
+			// Refresh the in-memory object so it reflects the claimed timestamp.
+			$static_page->{$this->processing_column} = $now;
 
 			// Increment fetch attempts.
 			$static_page->fetch_attempts = (int) $static_page->fetch_attempts + 1;
@@ -121,11 +144,21 @@ trait canProcessPages {
 				$static_page->save();
 			} catch ( Skip_Further_Processing_Exception $e ) {
 				Util::debug_log( 'Encountered Processing Error. We are skipping further until next iteration. Error: ' . $e->getMessage() );
+				// Reset the claim so the page can be retried on next iteration.
+				$wpdb->query( $wpdb->prepare(
+					"UPDATE {$table_name} SET {$this->processing_column} = NULL WHERE id = %d",
+					$static_page->id
+				) );
 				$static_page->set_error_message( $e->getMessage() );
 				$static_page->save();
 				break;
 			} catch ( \Exception $e ) {
 				Util::debug_log( 'Page URL: ' . $static_page->url . ' not being processed. Error: ' . $e->getMessage() );
+				// Reset the claim so the page can be retried on next iteration.
+				$wpdb->query( $wpdb->prepare(
+					"UPDATE {$table_name} SET {$this->processing_column} = NULL WHERE id = %d",
+					$static_page->id
+				) );
 				$static_page->set_error_message( $e->getMessage() );
 				$static_page->save();
 			}
