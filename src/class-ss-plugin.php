@@ -396,6 +396,18 @@ class Plugin {
 		    ->offset( $offset )
 		    ->order( 'http_status_code DESC' );
 
+		// Restrict to single-export pages when a single export is active.
+		$use_single = get_option( 'simply-static-use-single' );
+		if ( ! empty( $use_single ) ) {
+			$ids = array_map( 'intval', explode( ',', $use_single ) );
+			if ( count( $ids ) === 1 ) {
+				$query->where( 'post_id = ?', $ids[0] );
+			} else {
+				$in_clause = implode( ',', $ids );
+				$query->where( "post_id IN ({$in_clause})" );
+			}
+		}
+
 		if ( ! empty( $search ) ) {
 			$like = '%' . $wpdb->esc_like( $search ) . '%';
 			$query->where(
@@ -413,6 +425,16 @@ class Plugin {
 		if ( ! empty( $search ) ) {
 			$like               = '%' . $wpdb->esc_like( $search ) . '%';
 			$count_query        = Page::query();
+
+			// Restrict count to single-export pages as well.
+			if ( ! empty( $use_single ) ) {
+				if ( count( $ids ) === 1 ) {
+					$count_query->where( 'post_id = ?', $ids[0] );
+				} else {
+					$count_query->where( "post_id IN ({$in_clause})" );
+				}
+			}
+
 			$count_query->where(
 				$wpdb->prepare(
 					'(url LIKE %s OR http_status_code LIKE %s OR status_message LIKE %s)',
@@ -423,8 +445,20 @@ class Plugin {
 			);
 			$total_static_pages = apply_filters( 'ss_total_pages', (int) $count_query->count() );
 		} else {
-			$http_status_codes  = Page::get_http_status_codes_summary();
-			$total_static_pages = apply_filters( 'ss_total_pages', array_sum( array_values( $http_status_codes ) ) );
+			if ( ! empty( $use_single ) ) {
+				// For single exports, count only the pages belonging to the exported post(s).
+				$count_query = Page::query();
+				if ( count( $ids ) === 1 ) {
+					$count_query->where( 'post_id = ?', $ids[0] );
+				} else {
+					$count_query->where( "post_id IN ({$in_clause})" );
+				}
+				$total_static_pages = apply_filters( 'ss_total_pages', (int) $count_query->count() );
+				$http_status_codes  = Page::get_http_status_codes_summary();
+			} else {
+				$http_status_codes  = Page::get_http_status_codes_summary();
+				$total_static_pages = apply_filters( 'ss_total_pages', array_sum( array_values( $http_status_codes ) ) );
+			}
 		}
 
 		$total_pages = ceil( $total_static_pages / $per_page );
