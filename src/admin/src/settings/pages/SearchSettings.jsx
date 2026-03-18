@@ -319,6 +319,7 @@ function SearchSettings() {
                         <Notice status="warning" isDismissible={false}>
                             {__('If you have multiple search elements with different CSS selectors, separate them by a comma (,) such as: .search-form, .custom-search-form', 'simply-static')}
                         </Notice>
+                        <Spacer margin={5} />
                         <NumberControl
                             label={__('Threshold', 'simply-static')}
                             isShiftStepEnabled={ true }
@@ -335,6 +336,84 @@ function SearchSettings() {
                                 updateSetting('fuse_threshold', threshold);
                             }}
                         />
+                        <Spacer margin={5} />
+                        <ToggleControl
+                            label={__('Use Extended Search', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={__('Enable Fuse.js extended search operators such as exact match, prefix, suffix, and inverse match.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            checked={settings.fuse_use_extended_search}
+                            onChange={(value) => {
+                                updateSetting('fuse_use_extended_search', value);
+                            }}
+                        />
+                        <ToggleControl
+                            label={__('Ignore Location', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={__('When enabled, the search will look for a match anywhere in the string, regardless of position. By default, Fuse.js favors matches near the beginning of a string.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            checked={settings.fuse_ignore_location}
+                            onChange={(value) => {
+                                updateSetting('fuse_ignore_location', value);
+                            }}
+                        />
+                        <Spacer margin={5} />
+                        <h4>{__('Weight', 'simply-static')}</h4>
+                        <p>{__('Weighted search allows you to prioritize certain fields in your search results. A higher weight means results matching that field will appear higher in the results list. Default weight is 1.', 'simply-static')}</p>
+                        <Spacer margin={3} />
+                        <Flex gap={4} align="flex-start" wrap={true}>
+                            <FlexItem style={{flex: 1, minWidth: '120px'}}>
+                                <NumberControl
+                                    label={__('Title Weight', 'simply-static')}
+                                    isShiftStepEnabled={ true }
+                                    step={ 1 }
+                                    min={1}
+                                    max={10}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
+                                    disabled={('free' === options.plan || !isPro())}
+                                    value={settings.fuse_weight_title ?? 1}
+                                    placeholder={1}
+                                    onChange={(value) => {
+                                        updateSetting('fuse_weight_title', value);
+                                    }}
+                                />
+                            </FlexItem>
+                            <FlexItem style={{flex: 1, minWidth: '120px'}}>
+                                <NumberControl
+                                    label={__('Content Weight', 'simply-static')}
+                                    isShiftStepEnabled={ true }
+                                    step={ 1 }
+                                    min={1}
+                                    max={10}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
+                                    disabled={('free' === options.plan || !isPro())}
+                                    value={settings.fuse_weight_content ?? 1}
+                                    placeholder={1}
+                                    onChange={(value) => {
+                                        updateSetting('fuse_weight_content', value);
+                                    }}
+                                />
+                            </FlexItem>
+                            <FlexItem style={{flex: 1, minWidth: '120px'}}>
+                                <NumberControl
+                                    label={__('Excerpt Weight', 'simply-static')}
+                                    isShiftStepEnabled={ true }
+                                    step={ 1 }
+                                    min={1}
+                                    max={10}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
+                                    disabled={('free' === options.plan || !isPro())}
+                                    value={settings.fuse_weight_excerpt ?? 1}
+                                    placeholder={1}
+                                    onChange={(value) => {
+                                        updateSetting('fuse_weight_excerpt', value);
+                                    }}
+                                />
+                            </FlexItem>
+                        </Flex>
                     </CardBody>
                 </Card>
             </>
