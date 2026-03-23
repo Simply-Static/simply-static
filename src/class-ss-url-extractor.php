@@ -167,11 +167,22 @@ class Url_Extractor {
 	 * @return int|false
 	 */
 	public function save_body( $content ) {
+		// Ensure content is always a string before passing through filters.
+		// Prevents null propagation from upstream callers or failing regex operations.
+		if ( null === $content ) {
+			$content = '';
+		}
+
 		$content = apply_filters( 'simply_static_content_before_save', $content, $this );
 
+		// Guard against filters returning null (e.g. due to PCRE backtrack/recursion limit errors).
+		if ( null === $content ) {
+			$content = '';
+		}
+
 		// Restore script tags if they exist and there are placeholders in the content
-		if ( ! empty( $this->script_tags ) && strpos( $content, 'SCRIPT_PLACEHOLDER' ) !== false ) {
-			$content = preg_replace_callback( '/<!-- SCRIPT_PLACEHOLDER_(\d+) -->/', function ( $matches ) {
+		if ( ! empty( $this->script_tags ) && is_string( $content ) && strpos( $content, 'SCRIPT_PLACEHOLDER' ) !== false ) {
+			$_result = preg_replace_callback( '/<!-- SCRIPT_PLACEHOLDER_(\d+) -->/', function ( $matches ) {
 				$index = (int) $matches[1];
 				if ( isset( $this->script_tags[ $index ] ) ) {
 					return $this->script_tags[ $index ];
@@ -179,6 +190,9 @@ class Url_Extractor {
 					return '';
 				}
 			}, $content );
+			if ( null !== $_result ) {
+				$content = $_result;
+			}
 		}
 
 		return file_put_contents( $this->options->get_archive_dir() . $this->static_page->file_path, $content );
@@ -648,12 +662,15 @@ class Url_Extractor {
 		$html_comments                 = [];
 		$comment_placeholder           = '<!-- COMMENT_PLACEHOLDER_%d -->';
 		$non_conditional_comment_regex = '/<!--(?!\s*\[if).*?-->/s';
-		$html_string                   = preg_replace_callback( $non_conditional_comment_regex, function ( $matches ) use ( &$html_comments, &$comment_placeholder ) {
+		$_result = preg_replace_callback( $non_conditional_comment_regex, function ( $matches ) use ( &$html_comments, &$comment_placeholder ) {
 			$index           = count( $html_comments );
 			$html_comments[] = $matches[0];
 
 			return sprintf( $comment_placeholder, $index );
 		}, $html_string );
+		if ( null !== $_result ) {
+			$html_string = $_result;
+		}
 
 		// Next, extract and save all script tags using regex to ensure they're preserved
 		$this->script_tags  = []; // Reset the array for each call
@@ -671,7 +688,7 @@ class Url_Extractor {
 
 		// Use regex method to ensure script tags are preserved
 		// Extract script tags, process them for URL replacement, and replace them with placeholders
-		$html_string = preg_replace_callback( $script_regex, function ( $matches ) use ( &$script_placeholder ) {
+		$_result = preg_replace_callback( $script_regex, function ( $matches ) use ( &$script_placeholder ) {
 			$index      = count( $this->script_tags );
 			$script_tag = $matches[0]; // The entire script tag
 
@@ -708,9 +725,12 @@ class Url_Extractor {
 
 			return sprintf( $script_placeholder, $index );
 		}, $html_string );
+		if ( null !== $_result ) {
+			$html_string = $_result;
+		}
 
 		// First, extract and preserve complete conditional comments
-		$html_string = preg_replace_callback( $complete_conditional_regex, function ( $matches ) use ( &$conditional_placeholder, &$conditional_comments ) {
+		$_result = preg_replace_callback( $complete_conditional_regex, function ( $matches ) use ( &$conditional_placeholder, &$conditional_comments ) {
 			$index               = count( $conditional_comments );
 			$conditional_comment = $matches[0]; // The complete conditional comment
 
@@ -733,9 +753,12 @@ class Url_Extractor {
 
 			return sprintf( $conditional_placeholder, $index );
 		}, $html_string );
+		if ( null !== $_result ) {
+			$html_string = $_result;
+		}
 
 		// Then, extract and fix incomplete conditional comments
-		$html_string = preg_replace_callback( $incomplete_conditional_regex, function ( $matches ) use ( &$conditional_placeholder, &$conditional_comments ) {
+		$_result = preg_replace_callback( $incomplete_conditional_regex, function ( $matches ) use ( &$conditional_placeholder, &$conditional_comments ) {
 			$index               = count( $conditional_comments );
 			$conditional_comment = $matches[0]; // The incomplete conditional comment
 
@@ -767,6 +790,9 @@ class Url_Extractor {
 			// If it's not actually an incomplete conditional comment, return it unchanged
 			return $conditional_comment;
 		}, $html_string );
+		if ( null !== $_result ) {
+			$html_string = $_result;
+		}
 
 		// If there's no HTML to process, return early to avoid DOM warnings/errors
 		if ( ! is_string( $html_string ) || trim( $html_string ) === '' ) {
@@ -922,7 +948,7 @@ class Url_Extractor {
 			$html = $dom->saveHTML();
 
 			// Restore script tags
-			$html = preg_replace_callback( '/<!-- SCRIPT_PLACEHOLDER_(\d+) -->/', function ( $matches ) {
+			$_result = preg_replace_callback( '/<!-- SCRIPT_PLACEHOLDER_(\d+) -->/', function ( $matches ) {
 				$index = (int) $matches[1];
 				if ( isset( $this->script_tags[ $index ] ) ) {
 					return $this->script_tags[ $index ];
@@ -930,12 +956,15 @@ class Url_Extractor {
 					return '';
 				}
 			}, $html );
+			if ( null !== $_result ) {
+				$html = $_result;
+			}
 
 			// Restore xmp tags
 			$html = $this->restore_xmp_tags( $html );
 
 			// Restore conditional comments
-			$html = preg_replace_callback( '/<!-- CONDITIONAL_COMMENT_PLACEHOLDER_(\d+) -->/', function ( $matches ) use ( $conditional_comments ) {
+			$_result = preg_replace_callback( '/<!-- CONDITIONAL_COMMENT_PLACEHOLDER_(\d+) -->/', function ( $matches ) use ( $conditional_comments ) {
 				$index = (int) $matches[1];
 				if ( isset( $conditional_comments[ $index ] ) ) {
 					return $conditional_comments[ $index ];
@@ -943,13 +972,19 @@ class Url_Extractor {
 					return '';
 				}
 			}, $html );
+			if ( null !== $_result ) {
+				$html = $_result;
+			}
 
 			// Restore non-conditional comments exactly as they were
-			$html = preg_replace_callback( '/<!-- COMMENT_PLACEHOLDER_(\d+) -->/', function ( $matches ) use ( $html_comments ) {
+			$_result = preg_replace_callback( '/<!-- COMMENT_PLACEHOLDER_(\d+) -->/', function ( $matches ) use ( $html_comments ) {
 				$index = (int) $matches[1];
 
 				return isset( $html_comments[ $index ] ) ? $html_comments[ $index ] : '';
 			}, $html );
+			if ( null !== $_result ) {
+				$html = $_result;
+			}
 
 			// Restore JSON attributes
 			$html = $this->restore_attributes( $html );
@@ -979,7 +1014,7 @@ class Url_Extractor {
 			$origin_host = Util::origin_host();
 
 			if ( strpos( $html, $origin_host ) !== false ) {
-				$html = preg_replace_callback(
+				$_result = preg_replace_callback(
 					'/<style\b[^>]*>(.*?)<\/style>/is',
 					function ( $style_match ) use ( $origin_host ) {
 						if ( strpos( $style_match[1], $origin_host ) === false ) {
@@ -991,6 +1026,9 @@ class Url_Extractor {
 					},
 					$html
 				);
+				if ( null !== $_result ) {
+					$html = $_result;
+				}
 			}
 
 			return $html;
