@@ -137,6 +137,9 @@ class Create_Zip_Archive_Task extends Task {
 					continue;
 				}
 				$local_name = substr( $path, $base_len );
+				// ZIP specification requires forward slashes as directory separators.
+				// On Windows, paths use backslashes which causes flat ZIP entries.
+				$local_name = str_replace( '\\', '/', $local_name );
 				$added = $zip->addFile( $path, $local_name );
 				if ( true !== $added ) {
 					// Log and skip files that cannot be added (unreadable, transiently missing, etc.)
