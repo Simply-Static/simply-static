@@ -174,11 +174,62 @@ class Admin_Settings {
             } );
         }
 
-        // Minimal mode: hide the sidebar menu via CSS but keep pages registered & accessible.
+        // Minimal mode: hide the top-level sidebar menu and add a link under Tools → Simply Static.
         if ( $hide_menu ) {
             add_action( 'admin_head', function () {
                 echo '<style>#toplevel_page_simply-static-generate{display:none!important;}</style>';
             } );
+
+            // Register a Tools submenu that links directly to the original page.
+            global $submenu;
+            $submenu['tools.php'][] = array(
+                __( 'Simply Static', 'simply-static' ),
+                apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ),
+                admin_url( 'admin.php?page=simply-static-generate' ),
+            );
+
+            // Make the Tools menu open and Simply Static highlighted when on any SS page.
+            add_filter( 'parent_file', function ( $parent_file ) {
+                $screen = get_current_screen();
+                if ( $screen && isset( $_GET['page'] ) && strpos( $_GET['page'], 'simply-static' ) === 0 ) {
+                    return 'tools.php';
+                }
+                return $parent_file;
+            } );
+
+            add_filter( 'submenu_file', function ( $submenu_file, $parent_file ) {
+                if ( isset( $_GET['page'] ) && strpos( $_GET['page'], 'simply-static' ) === 0 ) {
+                    return admin_url( 'admin.php?page=simply-static-generate' );
+                }
+                return $submenu_file;
+            }, 10, 2 );
+
+            // Force the Tools menu open via JS when on any SS page (handles WP menu state conflicts).
+            if ( isset( $_GET['page'] ) && strpos( $_GET['page'], 'simply-static' ) === 0 ) {
+                add_action( 'admin_footer', function () {
+                    ?>
+                    <script type="text/javascript">
+                        (function(){
+                            // Remove active state from the hidden SS top-level menu.
+                            var ssMenu = document.getElementById('toplevel_page_simply-static-generate');
+                            if (ssMenu) {
+                                ssMenu.className = ssMenu.className
+                                    .replace(/wp-has-current-submenu/g, 'wp-not-current-submenu')
+                                    .replace(/wp-menu-open/g, '');
+                            }
+                            // Add active/open state to the Tools menu.
+                            var toolsMenu = document.getElementById('menu-tools');
+                            if (toolsMenu) {
+                                toolsMenu.className = toolsMenu.className
+                                    .replace(/wp-not-current-submenu/g, '')
+                                    .replace(/wp-menu-open/g, '');
+                                toolsMenu.className += ' wp-has-current-submenu wp-menu-open';
+                            }
+                        })();
+                    </script>
+                    <?php
+                } );
+            }
         }
     }
 
