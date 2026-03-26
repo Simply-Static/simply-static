@@ -44,6 +44,7 @@ class Integrations {
 			'delay'             => Delay_Integration::class,
 			'multisite'         => Multisite_Integration::class,
 			'the-events-calendar' => The_Events_Calendar_Integration::class,
+			'ss-minimal-mode'     => SS_Minimal_Mode_Integration::class,
 		] );
 	}
 
@@ -77,5 +78,6 @@ class Integrations {
 		require_once $path . 'pro/class-ss-nsg-seo-generator-integration.php';
 		require_once $path . 'pro/class-ss-multisite-integration.php';
 		require_once $path . 'pro/class-ss-the-events-calendar-integration.php';
+		require_once $path . 'pro/class-ss-minimal-mode-integration.php';
 	}
 }

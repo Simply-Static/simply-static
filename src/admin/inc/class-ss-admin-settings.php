@@ -93,9 +93,7 @@ class Admin_Settings {
      * @return void
      */
     public function add_menu() {
-        if ( apply_filters( 'ss_hide_admin_menu', false ) ) {
-            return;
-        }
+        $hide_menu = apply_filters( 'ss_hide_admin_menu', false );
 
         // Generate settings page.
         add_menu_page(
@@ -173,6 +171,13 @@ class Admin_Settings {
                     });
                 </script>
                 <?php
+            } );
+        }
+
+        // Minimal mode: hide the sidebar menu via CSS but keep pages registered & accessible.
+        if ( $hide_menu ) {
+            add_action( 'admin_head', function () {
+                echo '<style>#toplevel_page_simply-static-generate{display:none!important;}</style>';
             } );
         }
     }
