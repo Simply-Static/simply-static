@@ -142,7 +142,7 @@ class Yoast_Integration extends Integration {
 
 		// Extract individual sitemap URLs from sitemap_index.xml
 		$sitemap_index_url = \WPSEO_Sitemaps_Router::get_base_url( 'sitemap_index.xml' );
-		$response = wp_remote_get( $sitemap_index_url, array( 'timeout' => 30 ) );
+		$response = $this->auth_remote_get( $sitemap_index_url, array( 'timeout' => 30 ) );
 
 		if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 ) {
 			$xml_content = wp_remote_retrieve_body( $response );
@@ -232,7 +232,7 @@ class Yoast_Integration extends Integration {
 		}
 
 		$sitemap_index_url = \WPSEO_Sitemaps_Router::get_base_url( 'sitemap_index.xml' );
-		$response = wp_remote_get( $sitemap_index_url, array( 'timeout' => 30 ) );
+		$response = $this->auth_remote_get( $sitemap_index_url, array( 'timeout' => 30 ) );
 
 		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
 			Util::debug_log( 'Failed to fetch sitemap index: ' . $sitemap_index_url );
@@ -310,7 +310,7 @@ class Yoast_Integration extends Integration {
 		// robots.txt via public endpoint
 		if ( $include_robots && ! file_exists( $robots_physical ) ) {
 			$robots_url = home_url( '/robots.txt' );
-			$response   = wp_remote_get( $robots_url, [ 'timeout' => 20 ] );
+			$response   = $this->auth_remote_get( $robots_url, [ 'timeout' => 20 ] );
 			if ( ! is_wp_error( $response ) && (int) wp_remote_retrieve_response_code( $response ) === 200 ) {
 				$body = wp_remote_retrieve_body( $response );
 				$body = is_string( $body ) ? $body : '';
@@ -329,7 +329,7 @@ class Yoast_Integration extends Integration {
 		// llms.txt via public endpoint (if available)
 		if ( $include_llms && ! file_exists( $llms_physical ) ) {
 			$llms_url = home_url( '/llms.txt' );
-			$response = wp_remote_get( $llms_url, [ 'timeout' => 20 ] );
+			$response = $this->auth_remote_get( $llms_url, [ 'timeout' => 20 ] );
 			if ( ! is_wp_error( $response ) && (int) wp_remote_retrieve_response_code( $response ) === 200 ) {
 				$body = wp_remote_retrieve_body( $response );
 				$body = is_string( $body ) ? $body : '';

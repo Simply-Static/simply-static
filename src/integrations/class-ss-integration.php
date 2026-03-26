@@ -144,6 +144,38 @@ abstract class Integration {
 	}
 
 	/**
+	 * Perform a wp_remote_get request with Basic Auth headers when configured.
+	 *
+	 * On environments that require HTTP Basic Auth (e.g. Simply Static Studio),
+	 * plain wp_remote_get calls will fail with 401. This helper mirrors the
+	 * authentication logic used by Url_Fetcher::remote_get().
+	 *
+	 * @param string $url  URL to fetch.
+	 * @param array  $args Optional. Additional arguments for wp_remote_get.
+	 *
+	 * @return array|\WP_Error Response or WP_Error on failure.
+	 */
+	protected function auth_remote_get( $url, $args = [] ) {
+		$options  = Options::instance();
+		$username = $options->get( 'http_basic_auth_username' );
+		$password = $options->get( 'http_basic_auth_password' );
+
+		// Disable SSL verification to match Url_Fetcher::remote_get() behaviour.
+		// Studio and other self-hosted environments may use certificates that
+		// cannot be verified by the server's CA bundle, causing silent failures.
+		if ( ! isset( $args['sslverify'] ) ) {
+			$args['sslverify'] = false;
+		}
+
+		if ( ! empty( $username ) && ! empty( $password ) ) {
+			$args['headers'] = isset( $args['headers'] ) ? $args['headers'] : [];
+			$args['headers']['Authorization'] = 'Basic ' . base64_encode( $username . ':' . $password );
+		}
+
+		return wp_remote_get( $url, apply_filters( 'ss_remote_get_args', $args ) );
+	}
+
+	/**
 	 * Include File.
 	 *
 	 * @param string $path given path.

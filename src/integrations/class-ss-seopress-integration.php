@@ -78,7 +78,7 @@ class SEOPress_Integration extends Integration {
 
 		// Extract individual sitemap URLs from sitemaps.xml
 		$sitemap_url = home_url( 'sitemaps.xml' );
-		$response = wp_remote_get( $sitemap_url, array( 'timeout' => 30 ) );
+		$response = $this->auth_remote_get( $sitemap_url, array( 'timeout' => 30 ) );
 
 		if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 ) {
 			$xml_content = wp_remote_retrieve_body( $response );
@@ -108,7 +108,7 @@ class SEOPress_Integration extends Integration {
 	 */
 	protected function extract_sitemap_urls_from_index() {
 		$sitemap_url = home_url( 'sitemaps.xml' );
-		$response = wp_remote_get( $sitemap_url, array( 'timeout' => 30 ) );
+		$response = $this->auth_remote_get( $sitemap_url, array( 'timeout' => 30 ) );
 
 		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
 			Util::debug_log( 'Failed to fetch sitemap index: ' . $sitemap_url );
