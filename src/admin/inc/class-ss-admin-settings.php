@@ -93,7 +93,7 @@ class Admin_Settings {
      * @return void
      */
     public function add_menu() {
-        $hide_menu = apply_filters( 'ss_hide_admin_menu', false );
+        $hide_menu  = apply_filters( 'ss_hide_admin_menu', false );
 
         // Generate settings page.
         add_menu_page(
@@ -182,8 +182,9 @@ class Admin_Settings {
 
             // Register a Tools submenu that links directly to the original page.
             global $submenu;
+            $tools_brand = defined( 'SSS_VERSION' ) ? __( 'Simply Static Studio', 'simply-static' ) : __( 'Simply Static', 'simply-static' );
             $submenu['tools.php'][] = array(
-                __( 'Simply Static', 'simply-static' ),
+                $tools_brand,
                 apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ),
                 admin_url( 'admin.php?page=simply-static-generate' ),
             );
