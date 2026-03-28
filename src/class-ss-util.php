@@ -650,6 +650,11 @@ class Util {
 			return $url;
 		}
 
+		$options = Options::instance();
+		if ( 'absolute' !== $options->get( 'destination_url_type' ) ) {
+			return $url;
+		}
+
 		$static_site_url = untrailingslashit( self::get_static_site_url() );
 		if ( $static_site_url === '' ) {
 			return $url;
