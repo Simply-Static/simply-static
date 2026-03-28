@@ -375,25 +375,7 @@ class Yoast_Integration extends Integration {
 	 * @return string
 	 */
 	private function replace_urls_in_text( $content ) {
-		if ( ! is_string( $content ) || $content === '' ) {
-			return $content;
-		}
-		$options         = Options::instance();
-		$destination_url = rtrim( $options->get_destination_url(), '/' );
-		if ( empty( $destination_url ) ) {
-			return $content;
-		}
-		$origin_host  = Util::origin_host();
-		$host_no_port = preg_replace( '/:\\d+$/', '', (string) $origin_host );
-		$pattern      = '/(?:https?:)?\\/\\/' . preg_quote( $host_no_port, '/' ) . '(?::\\d+)?/i';
-		$replaced     = preg_replace( $pattern, $destination_url, $content );
-
-		$home_http  = set_url_scheme( home_url( '/' ), 'http' );
-		$home_https = set_url_scheme( home_url( '/' ), 'https' );
-		$home_proto = preg_replace( '#^https?:#i', '', $home_https );
-		$search    = [ untrailingslashit( rtrim( $home_http, '/' ) ), untrailingslashit( rtrim( $home_https, '/' ) ), untrailingslashit( rtrim( $home_proto, '/' ) ) ];
-		$replaced2 = str_replace( $search, untrailingslashit( rtrim( $destination_url, '/' ) ), $replaced );
-		return $replaced2;
+		return Util::replace_origin_urls_in_text( $content );
 	}
 
 	/**

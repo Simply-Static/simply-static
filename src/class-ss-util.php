@@ -612,6 +612,115 @@ class Util {
 	}
 
 	/**
+	 * Get the destination base used when rewriting plain-text file URLs.
+	 *
+	 * This mirrors how absolute/relative/offline URLs are written elsewhere in
+	 * the exporter while allowing an empty string for root-relative exports.
+	 *
+	 * @return string|null
+	 */
+	public static function get_text_file_destination_base() {
+		$options = Options::instance();
+
+		switch ( $options->get( 'destination_url_type' ) ) {
+			case 'absolute':
+				$destination_url = untrailingslashit( (string) $options->get_destination_url() );
+				return $destination_url === '' ? null : $destination_url;
+			case 'relative':
+				$relative_path = (string) $options->get( 'relative_path' );
+				return $relative_path === '' ? '' : untrailingslashit( $relative_path );
+			default:
+				return untrailingslashit( (string) $options->get_destination_url() );
+		}
+	}
+
+	/**
+	 * Convert a sitemap reference found in robots.txt to a fully qualified URL.
+	 *
+	 * Search engines expect the robots.txt Sitemap directive to point to a
+	 * complete URL. For relative exports we therefore promote local sitemap
+	 * paths to the deployed static site URL instead of returning a relative path.
+	 *
+	 * @param string $url Sitemap URL or path.
+	 *
+	 * @return string
+	 */
+	public static function convert_text_file_sitemap_url( $url ) {
+		if ( ! is_string( $url ) || $url === '' ) {
+			return $url;
+		}
+
+		$options = Options::instance();
+		if ( 'absolute' !== $options->get( 'destination_url_type' ) ) {
+			return $url;
+		}
+
+		$static_site_url = untrailingslashit( self::get_static_site_url() );
+		if ( $static_site_url === '' ) {
+			return $url;
+		}
+
+		$absolute_url = self::relative_to_absolute_url( $url, trailingslashit( self::origin_url() ) . 'robots.txt' );
+		if ( ! is_string( $absolute_url ) || $absolute_url === '' || ! self::is_local_url( $absolute_url ) ) {
+			return $url;
+		}
+
+		$sanitized_path = self::sanitize_local_path( self::get_path_from_local_url( $absolute_url ) );
+
+		return $static_site_url . $sanitized_path;
+	}
+
+	/**
+	 * Replace local origin URLs in exported plain-text files such as robots.txt.
+	 *
+	 * @param string $content File content to update.
+	 *
+	 * @return string
+	 */
+	public static function replace_origin_urls_in_text( $content ) {
+		if ( ! is_string( $content ) || $content === '' ) {
+			return $content;
+		}
+
+		$sitemap_placeholders = array();
+		$content              = preg_replace_callback(
+			'/(^\s*Sitemap:\s*)(\S+)/im',
+			function ( $matches ) use ( &$sitemap_placeholders ) {
+				$placeholder = '__SIMPLY_STATIC_SITEMAP_' . count( $sitemap_placeholders ) . '__';
+				$sitemap_placeholders[ $placeholder ] = $matches[1] . self::convert_text_file_sitemap_url( $matches[2] );
+				return $placeholder;
+			},
+			$content
+		);
+
+		$destination_base = self::get_text_file_destination_base();
+		if ( null === $destination_base ) {
+			return empty( $sitemap_placeholders ) ? $content : strtr( $content, $sitemap_placeholders );
+		}
+
+		$origin_base  = trailingslashit( self::origin_url() );
+		$origin_http  = set_url_scheme( $origin_base, 'http' );
+		$origin_https = set_url_scheme( $origin_base, 'https' );
+		$origin_proto = preg_replace( '#^https?:#i', '', $origin_https );
+		$search       = [
+			untrailingslashit( rtrim( $origin_http, '/' ) ),
+			untrailingslashit( rtrim( $origin_https, '/' ) ),
+			untrailingslashit( rtrim( $origin_proto, '/' ) ),
+		];
+		$content    = str_replace( $search, $destination_base, $content );
+
+		$origin_host  = self::origin_host();
+		$host_no_port = preg_replace( '/:\\d+$/', '', (string) $origin_host );
+		$pattern      = '/(?:https?:)?\\/\\/' . preg_quote( $host_no_port, '/' ) . '(?::\\d+)?/i';
+		$replaced     = preg_replace( $pattern, $destination_base, $content );
+		if ( is_string( $replaced ) ) {
+			$content = $replaced;
+		}
+
+		return empty( $sitemap_placeholders ) ? $content : strtr( $content, $sitemap_placeholders );
+	}
+
+	/**
 	 * Get the protocol used for the origin URL
 	 * @return string http or https
 	 */
