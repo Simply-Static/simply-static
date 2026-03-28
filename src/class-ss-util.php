@@ -612,6 +612,108 @@ class Util {
 	}
 
 	/**
+	 * Get the destination base used when rewriting plain-text file URLs.
+	 *
+	 * This mirrors how absolute/relative/offline URLs are written elsewhere in
+	 * the exporter while allowing an empty string for root-relative exports.
+	 *
+	 * @return string|null
+	 */
+	public static function get_text_file_destination_base() {
+		$options = Options::instance();
+
+		switch ( $options->get( 'destination_url_type' ) ) {
+			case 'absolute':
+				$destination_url = untrailingslashit( (string) $options->get_destination_url() );
+				return $destination_url === '' ? null : $destination_url;
+			case 'relative':
+				$relative_path = (string) $options->get( 'relative_path' );
+				return $relative_path === '' ? '' : untrailingslashit( $relative_path );
+			default:
+				return untrailingslashit( (string) $options->get_destination_url() );
+		}
+	}
+
+	/**
+	 * Convert a local URL reference found inside a plain-text export file.
+	 *
+	 * @param string $url URL or path to convert.
+	 * @param string $page_url Base page URL used for relative references.
+	 *
+	 * @return string
+	 */
+	public static function convert_text_file_local_url( $url, $page_url = '' ) {
+		if ( ! is_string( $url ) || $url === '' ) {
+			return $url;
+		}
+
+		$base_url = is_string( $page_url ) && $page_url !== '' ? $page_url : trailingslashit( self::origin_url() );
+		$absolute_url = self::relative_to_absolute_url( $url, $base_url );
+
+		if ( ! is_string( $absolute_url ) || $absolute_url === '' || ! self::is_local_url( $absolute_url ) ) {
+			return $url;
+		}
+
+		$destination_base = self::get_text_file_destination_base();
+		if ( null === $destination_base ) {
+			return $url;
+		}
+
+		$sanitized_path = self::sanitize_local_path( self::get_path_from_local_url( $absolute_url ) );
+
+		return $destination_base . $sanitized_path;
+	}
+
+	/**
+	 * Replace local origin URLs in exported plain-text files such as robots.txt.
+	 *
+	 * @param string $content File content to update.
+	 *
+	 * @return string
+	 */
+	public static function replace_origin_urls_in_text( $content ) {
+		if ( ! is_string( $content ) || $content === '' ) {
+			return $content;
+		}
+
+		$destination_base = self::get_text_file_destination_base();
+		if ( null === $destination_base ) {
+			return $content;
+		}
+
+		$origin_base  = trailingslashit( self::origin_url() );
+		$origin_http  = set_url_scheme( $origin_base, 'http' );
+		$origin_https = set_url_scheme( $origin_base, 'https' );
+		$origin_proto = preg_replace( '#^https?:#i', '', $origin_https );
+		$search       = [
+			untrailingslashit( rtrim( $origin_http, '/' ) ),
+			untrailingslashit( rtrim( $origin_https, '/' ) ),
+			untrailingslashit( rtrim( $origin_proto, '/' ) ),
+		];
+		$content    = str_replace( $search, $destination_base, $content );
+
+		$origin_host  = self::origin_host();
+		$host_no_port = preg_replace( '/:\\d+$/', '', (string) $origin_host );
+		$pattern      = '/(?:https?:)?\\/\\/' . preg_quote( $host_no_port, '/' ) . '(?::\\d+)?/i';
+		$replaced     = preg_replace( $pattern, $destination_base, $content );
+		if ( is_string( $replaced ) ) {
+			$content = $replaced;
+		}
+
+		// Some plugins emit sitemap targets as root-relative paths, so rewrite
+		// those explicitly based on the active destination URL mode.
+		$replaced = preg_replace_callback(
+			'/(^\s*Sitemap:\s*)(\S+)/im',
+			function ( $matches ) {
+				return $matches[1] . self::convert_text_file_local_url( $matches[2], trailingslashit( self::origin_url() ) . 'robots.txt' );
+			},
+			$content
+		);
+
+		return is_string( $replaced ) ? $replaced : $content;
+	}
+
+	/**
 	 * Get the protocol used for the origin URL
 	 * @return string http or https
 	 */
