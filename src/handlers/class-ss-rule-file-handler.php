@@ -69,10 +69,18 @@ class Rule_File_Handler {
                 wp_mkdir_p( $dest_dir );
             }
 
-            if ( ! @copy( $source, $dest ) ) {
-                Util::debug_log( '[Rule File] Failed to copy ' . $source . ' to ' . $dest );
+            $contents = @file_get_contents( $source );
+            if ( false === $contents ) {
+                Util::debug_log( '[Rule File] Failed to read ' . $source );
+                continue;
+            }
+
+            $processed = Util::replace_origin_urls_in_text( $contents );
+
+            if ( false === @file_put_contents( $dest, $processed ) ) {
+                Util::debug_log( '[Rule File] Failed to write ' . $source . ' to ' . $dest );
             } else {
-                Util::debug_log( '[Rule File] Copied: ' . $dest );
+                Util::debug_log( '[Rule File] Wrote processed file: ' . $dest );
             }
         }
     }
