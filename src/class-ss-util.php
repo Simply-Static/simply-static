@@ -635,33 +635,34 @@ class Util {
 	}
 
 	/**
-	 * Convert a local URL reference found inside a plain-text export file.
+	 * Convert a sitemap reference found in robots.txt to a fully qualified URL.
 	 *
-	 * @param string $url URL or path to convert.
-	 * @param string $page_url Base page URL used for relative references.
+	 * Search engines expect the robots.txt Sitemap directive to point to a
+	 * complete URL. For relative exports we therefore promote local sitemap
+	 * paths to the deployed static site URL instead of returning a relative path.
+	 *
+	 * @param string $url Sitemap URL or path.
 	 *
 	 * @return string
 	 */
-	public static function convert_text_file_local_url( $url, $page_url = '' ) {
+	public static function convert_text_file_sitemap_url( $url ) {
 		if ( ! is_string( $url ) || $url === '' ) {
 			return $url;
 		}
 
-		$base_url = is_string( $page_url ) && $page_url !== '' ? $page_url : trailingslashit( self::origin_url() );
-		$absolute_url = self::relative_to_absolute_url( $url, $base_url );
-
-		if ( ! is_string( $absolute_url ) || $absolute_url === '' || ! self::is_local_url( $absolute_url ) ) {
+		$static_site_url = untrailingslashit( self::get_static_site_url() );
+		if ( $static_site_url === '' ) {
 			return $url;
 		}
 
-		$destination_base = self::get_text_file_destination_base();
-		if ( null === $destination_base ) {
+		$absolute_url = self::relative_to_absolute_url( $url, trailingslashit( self::origin_url() ) . 'robots.txt' );
+		if ( ! is_string( $absolute_url ) || $absolute_url === '' || ! self::is_local_url( $absolute_url ) ) {
 			return $url;
 		}
 
 		$sanitized_path = self::sanitize_local_path( self::get_path_from_local_url( $absolute_url ) );
 
-		return $destination_base . $sanitized_path;
+		return $static_site_url . $sanitized_path;
 	}
 
 	/**
@@ -676,9 +677,20 @@ class Util {
 			return $content;
 		}
 
+		$sitemap_placeholders = array();
+		$content              = preg_replace_callback(
+			'/(^\s*Sitemap:\s*)(\S+)/im',
+			function ( $matches ) use ( &$sitemap_placeholders ) {
+				$placeholder = '__SIMPLY_STATIC_SITEMAP_' . count( $sitemap_placeholders ) . '__';
+				$sitemap_placeholders[ $placeholder ] = $matches[1] . self::convert_text_file_sitemap_url( $matches[2] );
+				return $placeholder;
+			},
+			$content
+		);
+
 		$destination_base = self::get_text_file_destination_base();
 		if ( null === $destination_base ) {
-			return $content;
+			return empty( $sitemap_placeholders ) ? $content : strtr( $content, $sitemap_placeholders );
 		}
 
 		$origin_base  = trailingslashit( self::origin_url() );
@@ -700,17 +712,7 @@ class Util {
 			$content = $replaced;
 		}
 
-		// Some plugins emit sitemap targets as root-relative paths, so rewrite
-		// those explicitly based on the active destination URL mode.
-		$replaced = preg_replace_callback(
-			'/(^\s*Sitemap:\s*)(\S+)/im',
-			function ( $matches ) {
-				return $matches[1] . self::convert_text_file_local_url( $matches[2], trailingslashit( self::origin_url() ) . 'robots.txt' );
-			},
-			$content
-		);
-
-		return is_string( $replaced ) ? $replaced : $content;
+		return empty( $sitemap_placeholders ) ? $content : strtr( $content, $sitemap_placeholders );
 	}
 
 	/**
