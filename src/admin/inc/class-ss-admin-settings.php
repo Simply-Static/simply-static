@@ -174,7 +174,7 @@ class Admin_Settings {
             } );
         }
 
-        // Minimal mode: hide the top-level sidebar menu and add a link under Tools → Simply Static.
+      		// Command Center: hide the top-level sidebar menu and add a link under Tools → Simply Static.
         if ( $hide_menu ) {
             add_action( 'admin_head', function () {
                 echo '<style>#toplevel_page_simply-static-generate{display:none!important;}</style>';
