@@ -8,7 +8,7 @@ const {__} = wp.i18n;
 function ActivityLog() {
     const {isRunning, isResumed, isPaused, blogId} = useContext(SettingsContext);
     const [terminalLineData, setTerminalLineData] = useState([
-        <TerminalOutput key="waiting">Waiting for new export..</TerminalOutput>
+        <TerminalOutput key="waiting">Waiting for new push..</TerminalOutput>
     ]);
 
     function refreshActivityLog() {
@@ -39,10 +39,10 @@ function ActivityLog() {
 
     useEffect(() => {
         if (isRunning && !isResumed) {
-            setTerminalLineData([<TerminalOutput key="waiting">Waiting for new export..</TerminalOutput>]);
+            setTerminalLineData([<TerminalOutput key="waiting">Waiting for new push..</TerminalOutput>]);
         }
         if (isRunning && isResumed) {
-            setTerminalLineData([<TerminalOutput key="resuming">Resuming the export..</TerminalOutput>]);
+            setTerminalLineData([<TerminalOutput key="resuming">Resuming the push..</TerminalOutput>]);
         }
 
         refreshActivityLog();

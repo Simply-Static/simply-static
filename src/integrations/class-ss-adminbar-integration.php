@@ -100,6 +100,31 @@ class SS_Adminbar_Integration extends Integration {
 				] );
 			}
 		}
+
+		// Upsell links for free-only users.
+		if ( ! class_exists( 'simply_static_pro\Single' ) ) {
+			$admin_bar->add_node( [
+				'id'     => 'ss-admin-bar-pro-upsell',
+				'parent' => 'ss-admin-bar',
+ 			'title'  => '<span class="ss-pro-upsell">' . esc_html__( 'Simply Static Pro', 'simply-static' ) . '</span>',
+				'href'   => 'https://simplystatic.com/simply-static-pro/?utm_source=wordpress&utm_medium=adminbar&utm_campaign=upsell',
+				'meta'   => [
+					'target' => '_blank',
+					'class'  => 'ss-pro-upsell-item',
+				],
+			] );
+
+			$admin_bar->add_node( [
+				'id'     => 'ss-admin-bar-studio-upsell',
+				'parent' => 'ss-admin-bar',
+ 			'title'  => '<span class="ss-pro-upsell">' . esc_html__( 'Simply Static Studio', 'simply-static' ) . '</span>',
+				'href'   => 'https://simplystatic.com/simply-static-studio/?utm_source=wordpress&utm_medium=adminbar&utm_campaign=upsell',
+				'meta'   => [
+					'target' => '_blank',
+					'class'  => 'ss-pro-upsell-item',
+				],
+			] );
+		}
 	}
 
 
@@ -193,8 +218,19 @@ class SS_Adminbar_Integration extends Integration {
 				opacity: 0.9;
 				vertical-align: middle;
 			}
-			/* Ensure label aligns nicely */
+ 		/* Ensure label aligns nicely */
 			#wpadminbar #wp-admin-bar-ss-admin-bar > .ab-item .ab-label { line-height: 20px; }
+ 		/* Pro & Studio upsell highlight */
+			#wpadminbar #wp-admin-bar-ss-admin-bar-pro-upsell .ss-pro-upsell,
+			#wpadminbar #wp-admin-bar-ss-admin-bar-studio-upsell .ss-pro-upsell {
+				color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9)) !important;
+				font-weight: 600;
+			}
+			#wpadminbar #wp-admin-bar-ss-admin-bar-pro-upsell:hover .ss-pro-upsell,
+			#wpadminbar #wp-admin-bar-ss-admin-bar-studio-upsell:hover .ss-pro-upsell {
+				color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9)) !important;
+				opacity: 0.8;
+			}
 		</style>
 		<script id="ss-admin-bar-inline-js">
 		(function(){

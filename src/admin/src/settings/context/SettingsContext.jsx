@@ -17,7 +17,7 @@ function SettingsContextProvider(props) {
     const [passedChecks, setPassedChecks] = useState('yes');
     const [blogId, setBlogId] = useState(1);
     const [queuedIntegrations, setQueuedIntegrations] = useState([]);
-    const [showMobileNav, setShowMobileNav] = useState(true);
+    const [showMobileNav, setShowMobileNav] = useState(false);
 
     const getSettings = () => {
         apiFetch({path: '/simplystatic/v1/settings'}).then((options) => {

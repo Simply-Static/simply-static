@@ -1,7 +1,7 @@
 import {Button, Dashicon} from "@wordpress/components";
 const {__} = wp.i18n;
 function GenerateButtons(props) {
-    const { children, canGenerate, isPaused, isDelayed, startExport, cancelExport, pauseExport, resumeExport } = props;
+    const { children, canGenerate, isPaused, isDelayed, startExport, cancelExport, pauseExport, resumeExport, buttonLabel } = props;
     const hasPauseFeature = typeof pauseExport === 'function';
     const hasCancelFeature = typeof cancelExport === 'function';
     const hasResumeFeature = typeof resumeExport === 'function';
@@ -17,7 +17,7 @@ function GenerateButtons(props) {
         >
             {canGenerate && <>
                 <Dashicon icon="update"/>
-                {__('Generate', 'simply-static')}
+                {buttonLabel || __('Push', 'simply-static')}
             </>}
 
             {canGenerate && isDelayed>0 && <> {isDelayed}s</>}

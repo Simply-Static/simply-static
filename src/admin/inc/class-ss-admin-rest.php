@@ -124,6 +124,15 @@ class Admin_Rest {
             },
         ) );
 
+        // Unpushed changes count
+        register_rest_route( 'simplystatic/v1', '/unpushed-changes', array(
+            'methods'             => 'GET',
+            'callback'            => [ $this, 'get_unpushed_changes' ],
+            'permission_callback' => function () {
+                return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+            },
+        ) );
+
         // Export type helper
         register_rest_route( 'simplystatic/v1', '/export-type', array(
             'methods'             => 'GET',
@@ -591,6 +600,62 @@ class Admin_Rest {
                 'export_type_id' => $export_type_id,
             ],
         ] );
+    }
+
+    /**
+     * Count unpushed changes since the last export.
+     *
+     * Considers:
+     * 1. Posts/pages modified after the last export end time.
+     * 2. Rows in the Pro delete-tracker table (if it exists).
+     *
+     * @return string JSON response with total count.
+     */
+    public function get_unpushed_changes() {
+        global $wpdb;
+
+        $options          = Options::reinstance();
+        $last_export_end  = $options->get( 'archive_end_time' );
+        $modified_count   = 0;
+        $deleted_count    = 0;
+
+        // 1. Count posts modified since last export.
+        if ( ! empty( $last_export_end ) ) {
+            $post_types = get_post_types( array( 'public' => true ), 'names' );
+            $placeholders = implode( ',', array_fill( 0, count( $post_types ), '%s' ) );
+
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $modified_count = (int) $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ({$placeholders}) AND post_modified_gmt > %s",
+                    array_merge( array_values( $post_types ), array( $last_export_end ) )
+                )
+            );
+        }
+
+        // 2. Count rows in the delete tracker table (Pro feature).
+        $delete_table = $wpdb->prefix . 'simply_static_delete_pages';
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $table_exists = $wpdb->get_var( "SHOW TABLES LIKE '{$delete_table}'" );
+        if ( $table_exists === $delete_table ) {
+            $deleted_count = (int) $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COUNT(*) FROM {$delete_table} WHERE site_id = %d",
+                    get_current_blog_id()
+                )
+            );
+        }
+
+        $total = $modified_count + $deleted_count;
+
+        return json_encode( array(
+            'status' => 200,
+            'data'   => array(
+                'total'          => $total,
+                'modified_count' => $modified_count,
+                'deleted_count'  => $deleted_count,
+            ),
+        ) );
     }
 
     /**

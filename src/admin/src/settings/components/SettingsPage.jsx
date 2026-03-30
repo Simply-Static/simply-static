@@ -30,6 +30,7 @@ import Workflow from "../pages/Workflow";
 import {SettingsContext} from "../context/SettingsContext";
 import SidebarMultisite from "./SidebarMultisite";
 import SidebarSite from "./SidebarSite";
+import PromoSidebar from "./PromoSidebar";
 
 const {__} = wp.i18n;
 
@@ -77,18 +78,35 @@ function SettingsPage() {
     return (
         <div className={"plugin-settings-container"} >
             <NavigatorProvider initialPath={initialPage} style={{minHeight: minHeight() + "px"}}>
+                <a onClick={() => {
+                    setShowMobileNav(true);
+                }} className={"show-nav"}><Dashicon icon="align-center"/> {__('Toggle menu', 'simply-static')}</a>
+                {showMobileNav &&
+                    <div className="mobile-nav-overlay">
+                        <div className="mobile-nav-header">
+                            <span>{__('Menu', 'simply-static')}</span>
+                            <Button isSmall variant="tertiary" onClick={() => setShowMobileNav(false)}>
+                                <Dashicon icon="no-alt" />
+                            </Button>
+                        </div>
+                        <div className="mobile-nav-content">
+                            {options.is_network ?
+                                <SidebarMultisite />
+                                :
+                                <SidebarSite setActiveItem={setActiveItem} activeItem={activeItem} />
+                            }
+                        </div>
+                    </div>
+                }
                 <Flex>
-                    <a onClick={() => {
-                        setShowMobileNav(!showMobileNav);
-                    }} className={"show-nav"}><Dashicon icon="align-center"/> {__('Toggle menu', 'simply-static')}</a>
-                    <FlexItem className={showMobileNav ? 'toggle-nav sidebar' : 'sidebar'}>
+                    <FlexItem className="sidebar">
                         {options.is_network ?
                              <SidebarMultisite />
                             :
                             <SidebarSite setActiveItem={setActiveItem} activeItem={activeItem} />
                         }
                     </FlexItem>
-                    <FlexItem isBlock={true} className={!showMobileNav ? 'toggle-nav' : ''}>
+                    <FlexItem isBlock={true}>
                         <div className={"plugin-settings"}>
                             {'no' === passedChecks && !options.is_network ?
                                 <Animate type="slide-in" options={{origin: 'top'}}>
@@ -97,7 +115,7 @@ function SettingsPage() {
                                         <Notice status="notice" isDismissible={false}
                                                 className={activeItem == '/' ? 'diagnostics-notice diagnostics-notice-generate' : 'diagnostics-notice'}>
                                             <p>
-                                                {__('There are errors in diagnostics that may negatively affect your static export.', 'simply-static')}<br></br>
+                                                {__('There are errors in diagnostics that may negatively affect your static push.', 'simply-static')}<br></br>
                                                 {__('Please review them and get them fixed to avoid problems.', 'simply-static')}
                                             </p>
                                             <NavigatorButton isSecondary onClick={() => {
@@ -197,6 +215,11 @@ function SettingsPage() {
                             }
                         </div>
                     </FlexItem>
+                    {'pro' !== options.plan &&
+                        <FlexItem className={"promo-sidebar-container"}>
+                            <PromoSidebar/>
+                        </FlexItem>
+                    }
                 </Flex>
             </NavigatorProvider>
         </div>

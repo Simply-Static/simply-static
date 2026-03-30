@@ -98,16 +98,6 @@ function IntegrationsSettings() {
     const canNotRunIntegrations = Object.keys(options.integrations).filter( ( item ) => { return !options.integrations[item].can_run && !options.integrations[item].always_active });
 
     return (<div className={"inner-settings"}>
-        <Card>
-            <CardHeader>
-                <b>{__('Integrations', 'simply-static')}</b>
-            </CardHeader>
-            <CardBody>
-                {__('Control Integrations that will be active during the export of the static site.', 'simply-static')}
-                <Spacer margin={10} />
-            </CardBody>
-        </Card>
-        <Spacer margin={5}/>
         {canRunIntegrations.map( ( item ) => {
             const integration = options.integrations[item];
             return <Integration key={integration.id || item} integration={integration} settings={settings} toggleIntegration={toggleIntegration} />

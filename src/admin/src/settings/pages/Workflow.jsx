@@ -193,7 +193,7 @@ function Workflow() {
                 <CardHeader>
                     <Flex>
                         <FlexItem>
-                            <strong>{__('Single Exports', 'simply-static')}</strong>
+                            <strong>{__('Single Push', 'simply-static')}</strong>
                         </FlexItem>
                         {('free' === options.plan || !proEnabled) && (
                             <FlexItem>
@@ -206,7 +206,7 @@ function Workflow() {
                 </CardHeader>
                 <CardBody>
                     <ToggleControl
-                        label={__('Use Single Exports?', 'simply-static')}
+                        label={__('Use Single Push?', 'simply-static')}
                         help={useSingleExports
                             ? __('Quickly push updates to your static site while editing pages/posts.', 'simply-static')
                             : __('Do not allow quick updates while editing posts/pages.', 'simply-static')}
@@ -221,10 +221,10 @@ function Workflow() {
                     {useSingleExports && (
                         <>
                             <ToggleControl
-                                label={__('Use Auto Export?', 'simply-static')}
+                                label={__('Use Auto Push?', 'simply-static')}
                                 help={autoExport
-                                    ? __('Automatically schedule a Single Export when a post/page is updated/published.', 'simply-static')
-                                    : __('Do not automatically run Single Export when a post/page is updated/published.', 'simply-static')}
+                                    ? __('Automatically schedule a Single Push when a post/page is updated/published.', 'simply-static')
+                                    : __('Do not automatically run Single Push when a post/page is updated/published.', 'simply-static')}
                                 checked={!!autoExport}
                                 disabled={!proEnabled}
                                 onChange={(value) => {
@@ -236,12 +236,12 @@ function Workflow() {
                             {autoExport && (
                                 <>
                                     <FormTokenField
-                                        label={__('Auto Export Post Types', 'simply-static')}
+                                        label={__('Auto Push Post Types', 'simply-static')}
                                         __next40pxDefaultSize
                                         value={selectedPostTypeLabels}
                                         suggestions={postTypeSuggestions}
                                         onChange={onChangePostTypeTokens}
-                                        help={__('Choose which public post types should trigger automatic Single Exports when updated. If none is selected, all public post types are used.', 'simply-static')}
+                                        help={__('Choose which public post types should trigger automatic single pushes when updated. If none is selected, all public post types are used.', 'simply-static')}
                                         tokenizeOnSpace={false}
                                         __experimentalExpandOnFocus={true}
                                         __experimentalShowHowTo={false}
@@ -250,14 +250,14 @@ function Workflow() {
                                         disabled={!proEnabled}
                                     />
                                     <p className={'description'}>
-                                        {__('Choose which public post types should trigger automatic Single Exports when updated. If none is selected, all public post types are used.', 'simply-static')}
+                                        {__('Choose which public post types should trigger automatic single pushes when updated. If none is selected, all public post types are used.', 'simply-static')}
                                     </p>
                                 </>
                             )}
                             {autoExport && (
                                 <InputControl
-                                    label={__('Auto export delay (seconds)', 'simply-static')}
-                                    help={__('Delay before the automatic Single Export starts after a change is detected.', 'simply-static')}
+                                    label={__('Auto push delay (seconds)', 'simply-static')}
+                                    help={__('Delay before the automatic Single Push starts after a change is detected.', 'simply-static')}
                                     type="number"
                                     min={0}
                                     value={autoExportDelay}
@@ -278,7 +278,7 @@ function Workflow() {
                                 value={selectedPageLabels}
                                 suggestions={pageSuggestions}
                                 onChange={onChangeTokens}
-                                help={__('Select which pages should start a Single Export. If none selected, we use your homepage.', 'simply-static')}
+                                help={__('Select which pages should start a Single Push. If none selected, we use your homepage.', 'simply-static')}
                                 tokenizeOnSpace={false}
                                 __experimentalExpandOnFocus={true}
                                 __experimentalShowHowTo={false}
@@ -287,7 +287,7 @@ function Workflow() {
                                 disabled={!proEnabled}
                             />
                             <p className={'description'}>
-                                {__('Choose which pages/files should be updated when running a Single Export.', 'simply-static')}
+                                {__('Choose which pages/files should be updated when running a Single Push.', 'simply-static')}
                             </p>
                             <Spacer margin={2}/>
                             <FormTokenField
@@ -306,13 +306,13 @@ function Workflow() {
                                 disabled={!proEnabled}
                             />
                             <p className={'description'}>
-                                {__('Choose which taxonomies should be updated when running a Single Export.', 'simply-static')}
+                                {__('Choose which taxonomies should be updated when running a Single Push.', 'simply-static')}
                             </p>
                             <Spacer margin={2}/>
                             <ToggleControl
                                 label={__('Update archives (author/date/post_type)', 'simply-static')}
                                 help={incArchives
-                                    ? __('Update archive URLs when running a Single Export.', 'simply-static')
+                                    ? __('Update archive URLs when running a Single Push.', 'simply-static')
                                     : __('Do not update archive URLs.', 'simply-static')}
                                 checked={!!incArchives}
                                 disabled={!proEnabled}
@@ -325,7 +325,7 @@ function Workflow() {
                             <ToggleControl
                                 label={__('Update pagination', 'simply-static')}
                                 help={incPagination
-                                    ? __('Update pagination URLs when running a Single Export.', 'simply-static')
+                                    ? __('Update pagination URLs when running a Single Push.', 'simply-static')
                                     : __('Do not update pagination URLs.', 'simply-static')}
                                 checked={!!incPagination}
                                 disabled={!proEnabled}
@@ -338,7 +338,7 @@ function Workflow() {
                             <ToggleControl
                                 label={__('Update XML sitemap', 'simply-static')}
                                 help={updateXmlSitemap
-                                    ? __('Update XML sitemaps when running a Single Export.', 'simply-static')
+                                    ? __('Update XML sitemaps when running a Single Push.', 'simply-static')
                                     : __('Do not update XML sitemaps.', 'simply-static')}
                                 checked={!!updateXmlSitemap}
                                 disabled={!proEnabled}
@@ -357,7 +357,7 @@ function Workflow() {
                 <CardHeader>
                     <Flex>
                         <FlexItem>
-                            <strong>{__('Build Exports', 'simply-static')}</strong>
+                            <strong>{__('Builds', 'simply-static')}</strong>
                         </FlexItem>
                         {('free' === options.plan || !proEnabled) && (
                             <FlexItem>
@@ -370,10 +370,10 @@ function Workflow() {
                 </CardHeader>
                 <CardBody>
                     <ToggleControl
-                        label={__('Use Build Exports?', 'simply-static')}
+                        label={__('Enable Builds', 'simply-static')}
                         help={useBuilds
-                            ? __('Use build exports to quickly update a list of pages and files on your static site.', 'simply-static')
-                            : __('Build Exports are disabled.', 'simply-static')}
+                            ? __('Use builds to quickly update a list of pages and files on your static site.', 'simply-static')
+                            : __('Builds are disabled.', 'simply-static')}
                         checked={!!useBuilds}
                         disabled={!proEnabled}
                         onChange={(value) => {
@@ -411,15 +411,15 @@ function Workflow() {
                             setWebhookUrl(value);
                             updateSetting('ss_webhook_url', value);
                         }}
-                        help={__('Simply Static will POST a JSON payload to this URL after exports finish.', 'simply-static')}
+                        help={__('Simply Static will POST a JSON payload to this URL after pushes finish.', 'simply-static')}
                     />
-                    <p className={'description'}>{__('Fire for these export types:', 'simply-static')}</p>
+                    <p className={'description'}>{__('Fire for these push types:', 'simply-static')}</p>
                     <div className="ss-webhook-types">
                         {['export', 'update', 'build', 'single'].map((type) => (
                             <ToggleControl
                                 key={type}
                                 label={
-                                    type === 'export' ? __('Export (full)', 'simply-static') :
+                                    type === 'export' ? __('Full Site', 'simply-static') :
                                         type === 'update' ? __('Update', 'simply-static') :
                                             type === 'build' ? __('Build', 'simply-static') : __('Single', 'simply-static')
                                 }

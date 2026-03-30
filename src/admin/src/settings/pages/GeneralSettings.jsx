@@ -751,11 +751,11 @@ function GeneralSettings() {
                                     }).catch(() => {
                                         // Reset running flag on error
                                         setIsRunning(false);
-                                        alert(__('Failed to start 404 export.', 'simply-static'));
+                                        alert(__('Failed to start 404 push.', 'simply-static'));
                                     });
                                 }}
                             >
-                                {__('Export 404 Page', 'simply-static')}
+                                {__('Push 404 Page', 'simply-static')}
                             </Button>
                         )}
                     </>

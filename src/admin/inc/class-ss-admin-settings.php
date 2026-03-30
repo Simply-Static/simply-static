@@ -148,6 +148,19 @@ class Admin_Settings {
         }
 
         if ( ! defined( 'SIMPLY_STATIC_PRO_VERSION' ) ) {
+            // Add Simply Static Pro submenu that links to external URL
+            add_submenu_page(
+                    'simply-static-generate',
+                    __( 'Simply Static Pro', 'simply-static' ),
+                    __( 'Simply Static Pro<i class="dashicons dashicons-external" style="font-size:12px;vertical-align:-2px;height:10px;"></i>', 'simply-static' ),
+                    apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ),
+                    'simply-static-pro-link',
+                    function () {
+                        exit;
+                    },
+                    99
+            );
+
             // Add Simply Static Studio submenu that links to external URL
             add_submenu_page(
                     'simply-static-generate',
@@ -161,13 +174,22 @@ class Admin_Settings {
                     100
             );
 
-            // Add JavaScript to open the Studio link in a new tab
+            // Add JavaScript to open the Pro and Studio links in new tabs + purple highlight
             add_action( 'admin_footer', function () {
                 ?>
                 <script type="text/javascript">
                     jQuery(document).ready(function ($) {
-                        // Find the Simply Static Studio menu item and modify its behavior
-                        $('a[href="admin.php?page=simply-static-studio"]').attr('href', 'https://simplystatic.com/simply-static-studio/').attr('target', '_blank');
+                        var accentColor = getComputedStyle(document.documentElement).getPropertyValue('--wp-admin-theme-color').trim() || '#3858e9';
+                        // Find the Simply Static Pro menu item and modify its behavior
+                        $('a[href="admin.php?page=simply-static-pro-link"]').attr('href', 'https://simplystatic.com/simply-static-pro/?utm_source=wordpress&utm_medium=submenu&utm_campaign=upsell').attr('target', '_blank');
+                        // Find the Static Studio menu item and modify its behavior
+                        $('a[href="admin.php?page=simply-static-studio"]').attr('href', 'https://simplystatic.com/simply-static-studio/?utm_source=wordpress&utm_medium=submenu&utm_campaign=upsell').attr('target', '_blank');
+                        // Apply persistent highlight color via JS to avoid CSS override
+                        var $promoLinks = $('a[href*="simplystatic.com/simply-static-pro"], a[href*="simplystatic.com/simply-static-studio"]');
+                        $promoLinks.css({ 'color': accentColor, 'font-weight': '600' });
+                        // Re-apply on hover/focus to prevent WP core styles from overriding
+                        $promoLinks.on('mouseenter focus', function() { $(this).css('color', accentColor); });
+                        $promoLinks.on('mouseleave blur', function() { $(this).css('color', accentColor); });
                     });
                 </script>
                 <?php

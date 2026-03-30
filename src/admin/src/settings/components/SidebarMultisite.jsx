@@ -12,8 +12,6 @@ function SidebarMultisite( props = null ) {
             <img alt="Logo"
                  src={options.logo}/>
         </div>
-        <VersionInfo/>
-
         <Spacer margin={5}/>
         <Spacer margin={5}/>
         <Button href="https://simplystatic.com/changelogs/" target="_blank">
@@ -28,6 +26,7 @@ function SidebarMultisite( props = null ) {
                     icon="admin-site-alt3"/>Simply Static Pro
             </Button>
         }
+        <VersionInfo/>
     </Card>);
 }
 

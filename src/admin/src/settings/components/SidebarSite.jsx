@@ -6,7 +6,8 @@ import {
     Card,
     CardBody,
     Dashicon, Notice,
-    SelectControl
+    SelectControl,
+    Tooltip
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from "@wordpress/element";
 import {SettingsContext} from "../context/SettingsContext";
@@ -16,7 +17,7 @@ import EnvironmentSidebar from "./EnvironmentSidebar";
 import apiFetch from "@wordpress/api-fetch";
 import useInterval from "../../hooks/useInterval";
 
-const {__} = wp.i18n;
+const {__, sprintf} = wp.i18n;
 function SidebarSite( props = null ) {
     const {
         isRunning,
@@ -44,6 +45,7 @@ function SidebarSite( props = null ) {
     const [selectedExportType, setSelectedExportType] = useState('export');
     const [canRunExport, setCanRunExport] = useState(true);
     const [isResettingLock, setIsResettingLock] = useState(false);
+    const [unpushedChanges, setUnpushedChanges] = useState(0);
 
 
     const resetExportLock = () => {
@@ -100,11 +102,27 @@ function SidebarSite( props = null ) {
 
     }, [options, isRunning, isPaused]);
 
-    // Set the default export type when the component mounts or when settings change
+    // Fetch unpushed changes count on mount and after each export finishes.
     useEffect(() => {
-        // Always use 'export' as the default option
-        setSelectedExportType('export');
-    }, [settings]);
+        apiFetch({
+            path: '/simplystatic/v1/unpushed-changes',
+            method: 'GET',
+        }).then(resp => {
+            const json = JSON.parse(resp);
+            const total = json.data ? json.data.total : 0;
+            setUnpushedChanges(total);
+
+            // Auto-select "Export Changes" when there are unpushed changes and Pro is available.
+            if (total > 0 && 'pro' === options.plan && isPro() && 'zip' !== settings.delivery_method && 'tiiny' !== settings.delivery_method) {
+                setSelectedExportType('update');
+            } else {
+                setSelectedExportType('export');
+            }
+        }).catch(() => {
+            setUnpushedChanges(0);
+            setSelectedExportType('export');
+        });
+    }, [settings, isRunning]);
 
     const startExport = () => {
         setDisabledButton(true);
@@ -216,8 +234,6 @@ function SidebarSite( props = null ) {
             <img alt="Logo"
                  src={options.logo}/>
         </div>
-        <VersionInfo/>
-
         <div className={`generate-container ${disabledButton ? 'generating' : ''}`}>
             <SelectControl
                 className={'generate-type'}
@@ -229,14 +245,14 @@ function SidebarSite( props = null ) {
                     setSelectedExportType(value);
                 }}
             >
-                <option value="export">{__('Export', 'simply-static')}</option>
+                <option value="export">{__('Full Site', 'simply-static')}</option>
                 {'zip' !== settings.delivery_method && 'tiiny' !== settings.delivery_method &&
                     <>
                         {'pro' === options.plan && isPro() ?
-                            <option value="update">{__('Export Changes', 'simply-static')}</option>
+                            <option value="update">{__('Changes Only', 'simply-static')}</option>
                             :
                             <option disabled
-                                    value="update">{__('Export Changes (Requires Simply Static Pro)', 'simply-static')}</option>
+                                    value="update">{__('Changes Only (Requires Simply Static Pro)', 'simply-static')}</option>
                         }
                     </>
                 }
@@ -253,7 +269,21 @@ function SidebarSite( props = null ) {
                     isPaused={isPaused}
                     isResumed={isResumed}
                     isDelayed={isDelayed}
+                    buttonLabel={__('Push', 'simply-static')}
                 />
+            }
+
+            {unpushedChanges > 0 && !isRunning && !isPaused && ('pro' === options.plan && isPro()) &&
+                <Notice status="info" isDismissible={false} className={"unpushed-changes-notice"}>
+                    <p>{sprintf(__('You have %d unpushed changes.', 'simply-static'), unpushedChanges)}</p>
+                </Notice>
+            }
+            {unpushedChanges > 0 && !isRunning && !isPaused && !('pro' === options.plan && isPro()) &&
+                <Tooltip text={__('Upgrade to Simply Static Pro to push only changes.', 'simply-static')}>
+                    <Notice status="info" isDismissible={false} className={"unpushed-changes-notice"}>
+                        <p>{sprintf(__('You have %d unpushed changes.', 'simply-static'), unpushedChanges)}</p>
+                    </Notice>
+                </Tooltip>
             }
 
             {!canRunExport && options.is_multisite && <>
@@ -262,7 +292,7 @@ function SidebarSite( props = null ) {
                     className={'generate'}
                 >
                     <Dashicon icon="update"/>
-                    {__('Generate', 'simply-static')}
+                    {__('Push', 'simply-static')}
 
                 </Button>
                 <Button
@@ -270,7 +300,7 @@ function SidebarSite( props = null ) {
                     variant={'link'}
                     href={"https://simplystatic.com/pricing/"}
                 >
-                    { __('An export from another site is running. Upgrade to queue them.', 'simply-static') }
+                    { __('A push from another site is running. Upgrade to queue them.', 'simply-static') }
                 </Button>
                 <Button
                     variant={'link'}
@@ -278,7 +308,7 @@ function SidebarSite( props = null ) {
                     disabled={isResettingLock}
                     onClick={resetExportLock}
                 >
-                    { __('Reset export lock', 'simply-static') }
+                    { __('Reset push lock', 'simply-static') }
                 </Button>
             </>}
         </div>
@@ -474,6 +504,7 @@ function SidebarSite( props = null ) {
                 <Dashicon icon="edit"/> {__('Tutorials', 'simply-static')}
             </Button>
         </CardBody>
+        <VersionInfo/>
     </Card>
 }
 
