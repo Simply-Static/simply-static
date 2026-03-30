@@ -16,6 +16,14 @@ function Integration({integration, settings, toggleIntegration}) {
 
     let canUse = options.plan === 'pro' || !isPro;
 
+    // Auto-disable admin bar when command center is active.
+    const isAdminBar = integration.id === 'ss-adminbar';
+    let commandCenterActive = false;
+    if ( isAdminBar && typeof settings.integrations !== 'undefined' && settings.integrations !== false ) {
+        commandCenterActive = settings.integrations.indexOf( 'ss-command-center' ) >= 0;
+    }
+    const forceDisabled = isAdminBar && commandCenterActive;
+
     return <Card>
         <CardHeader className={'ss-integration'}>
             <Flex align="flex-start" justify="space-between">
@@ -46,15 +54,17 @@ function Integration({integration, settings, toggleIntegration}) {
                             {__('Requires Simply Static Pro', 'simply-static')}
                         </Button></div>}</span>}
                     {(canRun && canUse && !alwaysActive) &&
-                        <Flex justify="flex-end">
+                        <Flex justify="flex-end" direction="column" style={{ alignItems: 'flex-end' }}>
                             <ToggleControl
                                 className={'integration-toggle'}
                                 __nextHasNoMarginBottom
-                                checked={isActive}
+                                checked={forceDisabled ? false : isActive}
+                                disabled={forceDisabled}
                                 onChange={(value) => {
                                     toggleIntegration(integration.id, value);
                                 }}
                             />
+                            {forceDisabled && <em style={{ fontSize: '12px', color: '#757575' }}>{__('Disabled by Command Center', 'simply-static')}</em>}
                         </Flex>
                     }
                     {(canRun && canUse && alwaysActive) && <em>Always Active</em>}
