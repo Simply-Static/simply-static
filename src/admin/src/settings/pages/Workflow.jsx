@@ -50,6 +50,9 @@ function Workflow() {
     // Builds toggle
     const [useBuilds, setUseBuilds] = useState(false);
 
+    // Tools submenu toggle
+    const [toolsSubmenu, setToolsSubmenu] = useState(false);
+
     // Post Types for Auto Export selection
     const [postTypeSuggestions, setPostTypeSuggestions] = useState([]); // array of labels
     const [postTypeMap, setPostTypeMap] = useState({}); // label -> name (slug)
@@ -132,6 +135,8 @@ function Workflow() {
         setIncPagination(!!settings.ss_single_include_pagination || settings.ss_single_include_pagination === undefined);
         // Initialize Builds toggle (default to false when undefined)
         setUseBuilds(!!settings.ss_use_builds);
+        // Initialize Tools submenu toggle
+        setToolsSubmenu(!!settings.ss_tools_submenu);
         // Auto export and delay
         setAutoExport(!!settings.ss_single_auto_export);
         if (typeof settings.ss_single_auto_export_delay !== 'undefined') {
@@ -380,6 +385,38 @@ function Workflow() {
                             if (!proEnabled) return;
                             setUseBuilds(value);
                             updateSetting('ss_use_builds', value);
+                        }}
+                    />
+                </CardBody>
+            </Card>
+            <Spacer margin={5}/>
+            <Card>
+                <CardHeader>
+                    <Flex>
+                        <FlexItem>
+                            <strong>{__('Tools Submenu', 'simply-static')}</strong>
+                        </FlexItem>
+                        {('free' === options.plan || !proEnabled) && (
+                            <FlexItem>
+                                <ExternalLink href="https://simplystatic.com">
+                                    {__('Requires Simply Static Pro', 'simply-static')}
+                                </ExternalLink>
+                            </FlexItem>
+                        )}
+                    </Flex>
+                </CardHeader>
+                <CardBody>
+                    <ToggleControl
+                        label={__('Move menu to Tools submenu', 'simply-static')}
+                        help={toolsSubmenu
+                            ? __('The Simply Static menu is placed under the Tools menu in the admin sidebar.', 'simply-static')
+                            : __('The Simply Static menu is shown as a top-level item in the admin sidebar.', 'simply-static')}
+                        checked={!!toolsSubmenu}
+                        disabled={!proEnabled}
+                        onChange={(value) => {
+                            if (!proEnabled) return;
+                            setToolsSubmenu(value);
+                            updateSetting('ss_tools_submenu', value);
                         }}
                     />
                 </CardBody>

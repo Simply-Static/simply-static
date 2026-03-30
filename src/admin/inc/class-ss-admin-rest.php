@@ -911,6 +911,7 @@ class Admin_Rest {
             'ss_single_include_pagination',
             'ss_single_export_add_xml_sitemap',
             'ss_single_auto_export',
+            'ss_tools_submenu',
         ];
 
         foreach ( $options as $key => $value ) {
