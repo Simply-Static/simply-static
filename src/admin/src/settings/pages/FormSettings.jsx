@@ -74,7 +74,7 @@ function FormSettings() {
                 }
                 
                 const credentials = response.credentials;
-                const currentService = settings.captcha_service || 'turnstile';
+                const currentService = settings.captcha_service || '';
                 
                 // Check for credentials based on current service
                 let foundCredentials = null;
@@ -289,8 +289,9 @@ function FormSettings() {
                             __next40pxDefaultSize
                             __nextHasNoMarginBottom
                             disabled={('free' === options.plan || !isPro())}
-                            value={settings.captcha_service || 'turnstile'}
+                            value={settings.captcha_service || ''}
                             options={[
+                                { label: __('Choose Service', 'simply-static'), value: '' },
                                 { label: __('Cloudflare Turnstile', 'simply-static'), value: 'turnstile' },
                                 { label: __('Google reCAPTCHA v3', 'simply-static'), value: 'recaptcha_v3' },
                             ]}
@@ -327,7 +328,7 @@ function FormSettings() {
                             {__('Automatically detect and copy captcha credentials from form plugins like Contact Form 7, WPForms, or Fluent Forms.', 'simply-static')}
                         </p>
                         <Spacer margin={3}/>
-                        {(settings.captcha_service || 'turnstile') === 'turnstile' && (
+                        {settings.captcha_service === 'turnstile' && (
                             <>
                                 <TextControl
                                     label={__('Site Key', 'simply-static')}
