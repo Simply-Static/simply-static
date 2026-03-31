@@ -13,6 +13,71 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Util {
 
 	/**
+	 * Return a list of plugin directory slugs that must always be present in the
+	 * Enhanced Crawl "Plugins to Include" list. These cannot be removed by users.
+	 *
+	 * Filter: `ss_required_plugins` allows adding slugs (removing built-ins is not possible).
+	 *
+	 * @return string[] Array of sanitized, unique plugin directory slugs.
+	 */
+	public static function get_required_plugins(): array {
+		$defaults = array(
+			'simply-static-pro',
+		);
+
+		/**
+		 * Filter the list of required plugin slugs that must always be included in Enhanced Crawl.
+		 *
+		 * @param string[] $defaults Directory slugs of required plugins.
+		 */
+		$list = apply_filters( 'ss_required_plugins', $defaults );
+
+		if ( ! is_array( $list ) ) {
+			$list = $defaults;
+		}
+
+		// Ensure built-in required plugins cannot be removed via the filter.
+		$list = array_merge( $defaults, $list );
+
+		$list = array_map( 'sanitize_title', array_filter( array_map( 'strval', $list ) ) );
+
+		return array_values( array_unique( $list ) );
+	}
+
+	/**
+	 * Ensure that all required plugins are present in a given list of plugin slugs.
+	 * Only adds required plugins that are currently active.
+	 *
+	 * @param string[] $slugs Current list of plugin slugs.
+	 *
+	 * @return string[] Updated list with required plugins guaranteed.
+	 */
+	public static function ensure_required_plugins( array $slugs ): array {
+		$required = self::get_required_plugins();
+		$active   = self::get_all_active_plugins();
+
+		$active_slugs = array();
+		foreach ( $active as $plugin_path ) {
+			$s = self::plugin_slug_from_path( $plugin_path );
+			if ( '' !== $s ) {
+				$active_slugs[] = strtolower( $s );
+			}
+		}
+
+		$slugs_lc = array_map( 'strtolower', $slugs );
+
+		foreach ( $required as $req ) {
+			$req_lc = strtolower( $req );
+			if ( in_array( $req_lc, $active_slugs, true ) && ! in_array( $req_lc, $slugs_lc, true ) ) {
+				$slugs[]   = $req;
+				$slugs_lc[] = $req_lc;
+			}
+		}
+
+		return array_values( array_unique( $slugs ) );
+	}
+
+	/**
 	 * Return a filterable list of admin-only plugin directory slugs to always exclude
 	 * from Enhanced Crawl "Plugins to Include" selections and auto-include logic.
 	 *
@@ -118,6 +183,13 @@ class Util {
 	 * @return void
 	 */
 	public static function remove_plugin_from_enhanced_crawl( string $slug ): void {
+		// Never allow removal of required plugins.
+		$required    = self::get_required_plugins();
+		$required_lc = array_map( 'strtolower', $required );
+		if ( in_array( strtolower( sanitize_title( $slug ) ), $required_lc, true ) ) {
+			return;
+		}
+
 		$options = get_option( 'simply-static' );
 		if ( ! is_array( $options ) ) {
 			$options = array();

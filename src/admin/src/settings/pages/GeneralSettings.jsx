@@ -192,7 +192,14 @@ function GeneralSettings() {
                 const saved = Array.isArray(settings.plugins_to_include) ? settings.plugins_to_include : [];
                 const allSlugs = list.map(p => p.slug);
                 const valid = saved.filter(slug => allSlugs.includes(slug));
-                const initial = valid.length > 0 ? valid : allSlugs;
+                let initial = valid.length > 0 ? valid : allSlugs;
+                // Ensure required plugins are always included.
+                const requiredSlugs = list.filter(p => p.required).map(p => p.slug);
+                requiredSlugs.forEach(slug => {
+                    if (!initial.includes(slug)) {
+                        initial = [...initial, slug];
+                    }
+                });
                 setSelectedPlugins(initial);
                 updateSetting('plugins_to_include', initial);
             })
@@ -562,9 +569,16 @@ function GeneralSettings() {
                                                     }) : []}
                                                     suggestions={plugins.map(p => p.label)}
                                                     onChange={(value) => {
-                                                        const selected = value.map(label => {
+                                                        let selected = value.map(label => {
                                                             let pl = plugins.find(p => p.label === label) || plugins.find(p => p.label.toLowerCase() === String(label).toLowerCase()) || plugins.find(p => p.slug === label);
                                                             return pl ? pl.slug : label;
+                                                        });
+                                                        // Re-add required plugins that cannot be removed.
+                                                        const requiredSlugs = plugins.filter(p => p.required).map(p => p.slug);
+                                                        requiredSlugs.forEach(slug => {
+                                                            if (!selected.includes(slug)) {
+                                                                selected = [...selected, slug];
+                                                            }
                                                         });
                                                         setSelectedPlugins(selected);
                                                         updateSetting('plugins_to_include', selected);

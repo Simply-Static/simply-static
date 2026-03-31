@@ -508,13 +508,19 @@ class Admin_Rest {
         if ( ! function_exists( 'get_plugins' ) ) {
             require_once ABSPATH . 'wp-admin/includes/plugin.php';
         }
-        $active = (array) Util::get_all_active_plugins();
-        $all    = (array) get_plugins();
-        $list   = [];
+        $active   = (array) Util::get_all_active_plugins();
+        $all      = (array) get_plugins();
+        $required = Util::get_required_plugins();
+        $req_lc   = array_map( 'strtolower', $required );
+        $list     = [];
         foreach ( $active as $plugin_file ) {
             $dir    = dirname( $plugin_file );
             $label  = isset( $all[ $plugin_file ]['Name'] ) ? $all[ $plugin_file ]['Name'] : $dir;
-            $list[] = [ 'slug' => $dir, 'label' => $label ];
+            $list[] = [
+                'slug'     => $dir,
+                'label'    => $label,
+                'required' => in_array( strtolower( sanitize_title( $dir ) ), $req_lc, true ),
+            ];
         }
 
         return json_encode( [ 'status' => 200, 'data' => $list ] );
@@ -792,6 +798,11 @@ class Admin_Rest {
             }
         }
 
+        // Ensure required plugins (e.g. Simply Static Pro) are always present.
+        if ( isset( $settings['plugins_to_include'] ) && is_array( $settings['plugins_to_include'] ) ) {
+            $settings['plugins_to_include'] = Util::ensure_required_plugins( $settings['plugins_to_include'] );
+        }
+
         return $settings;
     }
 
@@ -982,6 +993,11 @@ class Admin_Rest {
                 }
                 $options['plugins_to_include'] = $rebuild;
             }
+        }
+
+        // Ensure required plugins (e.g. Simply Static Pro) are always present.
+        if ( isset( $options['plugins_to_include'] ) && is_array( $options['plugins_to_include'] ) ) {
+            $options['plugins_to_include'] = Util::ensure_required_plugins( $options['plugins_to_include'] );
         }
 
         // Multisite: also persist per-site copy under site option when not main site
