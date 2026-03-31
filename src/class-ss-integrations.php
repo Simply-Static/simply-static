@@ -45,6 +45,7 @@ class Integrations {
 			'multisite'         => Multisite_Integration::class,
 			'the-events-calendar' => The_Events_Calendar_Integration::class,
 			'ss-command-center'   => SS_Command_Center_Integration::class,
+			'markdown'            => Markdown_Integration::class,
 		] );
 	}
 
@@ -79,5 +80,6 @@ class Integrations {
 		require_once $path . 'pro/class-ss-multisite-integration.php';
 		require_once $path . 'pro/class-ss-the-events-calendar-integration.php';
 		require_once $path . 'pro/class-ss-command-center-integration.php';
+		require_once $path . 'pro/class-ss-markdown-integration.php';
 	}
 }
