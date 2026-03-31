@@ -11,12 +11,12 @@
   "author": "",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "@wordpress/dom-ready": "^3.50.0",
-    "@wordpress/element": "^5.26.0",
-    "@wordpress/i18n": "^4.50.0",
-    "@wordpress/scripts": "^27.0.0"
+    "@wordpress/dom-ready": "^4.42.0",
+    "@wordpress/element": "^6.42.0",
+    "@wordpress/i18n": "^6.15.0",
+    "@wordpress/scripts": "^31.7.0"
   },
   "dependencies": {
-    "debounce": "^2.0.0"
+    "debounce": "^3.0.0"
   }
 }
