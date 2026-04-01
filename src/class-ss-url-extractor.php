@@ -53,6 +53,7 @@ class Url_Extractor {
 		'blockquote' => array( 'cite' ),
 		'del'        => array( 'cite' ),
 		'frame'      => array( 'longdesc', 'src' ),
+		'iframe'     => array( 'src' ),
 		'head'       => array( 'profile' ),
 		'ins'        => array( 'cite' ),
 		'object'     => array( 'archive', 'classid', 'codebase', 'data', 'usemap' ),
@@ -94,7 +95,7 @@ class Url_Extractor {
 		'wml'      => array( 'xmlns' ),
 
 		'meta' => array( 'content' ),
-		'link' => array( 'href' ),
+		'link' => array( 'href', 'data-pmdelayedstyle' ),
 		'atom' => array( 'href' ),
 	);
 
@@ -492,6 +493,64 @@ class Url_Extractor {
 	}
 
 	/**
+	 * Replace origin URLs found in data-* attributes across all DOM elements.
+	 *
+	 * Scans every element for attributes whose name starts with "data-" and
+	 * whose value contains the origin host. When found, the origin URL is
+	 * replaced with the destination URL. This catches custom plugin attributes
+	 * like data-pmdelayedstyle, data-lazy-src, etc. that are not listed in
+	 * the static $match_tags array.
+	 *
+	 * @param \DOMXPath $xpath The XPath instance for the current DOM.
+	 *
+	 * @return void
+	 */
+	private function replace_origin_urls_in_data_attributes( $xpath ) {
+		$origin_host = Util::origin_host();
+
+		// Query all elements that have at least one attribute (performance guard).
+		$elements = $xpath->query( '//*[@*]' );
+
+		if ( ! $elements || $elements->length === 0 ) {
+			return;
+		}
+
+		foreach ( $elements as $element ) {
+			if ( ! $element->hasAttributes() ) {
+				continue;
+			}
+
+			// Iterate over a snapshot of attribute names to avoid issues when mutating.
+			$attrs_to_check = [];
+			foreach ( $element->attributes as $attr ) {
+				if ( strpos( $attr->name, 'data-' ) === 0 ) {
+					$attrs_to_check[] = $attr->name;
+				}
+			}
+
+			foreach ( $attrs_to_check as $attr_name ) {
+				$value = $element->getAttribute( $attr_name );
+
+				if ( empty( $value ) || stripos( $value, $origin_host ) === false ) {
+					continue;
+				}
+
+				// Skip if the attribute value is valid JSON (e.g. Elementor data-settings).
+				if ( $this->is_valid_json( $value ) ) {
+					continue;
+				}
+
+				// Try to process as a URL and replace with the destination.
+				$updated_url = $this->add_to_extracted_urls( $value );
+
+				if ( ! is_null( $updated_url ) ) {
+					$element->setAttribute( $attr_name, $updated_url );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Replaces origin URL with destination URL in response body
 	 *
 	 * This is a function of last resort for URL replacement. Ideally it was
@@ -857,6 +916,12 @@ class Url_Extractor {
 					}
 				}
 			}
+
+			// Replace origin URLs in data-* attributes across all elements.
+			// Some plugins use custom data attributes (e.g. data-pmdelayedstyle, data-lazy-src)
+			// that contain URLs pointing to the origin. These are not covered by $match_tags
+			// and would otherwise leak the WordPress origin URL in the static export.
+			$this->replace_origin_urls_in_data_attributes( $xpath );
 
 			// handle 'style' tag differently, since we need to parse the content.
 			$parse_inline_style = apply_filters( 'ss_parse_inline_style', true );
