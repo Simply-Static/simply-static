@@ -633,23 +633,38 @@ class Admin_Rest {
             // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $modified_count = (int) $wpdb->get_var(
                 $wpdb->prepare(
-                    "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ({$placeholders}) AND post_modified_gmt > %s",
+                    "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ({$placeholders}) AND post_modified > %s",
                     array_merge( array_values( $post_types ), array( $last_export_end ) )
                 )
             );
         }
 
         // 2. Count rows in the delete tracker table (Pro feature).
+        //    Only count rows added after the last export so that stale/structural
+        //    entries (e.g. plugin_deactivate) already handled by an export are excluded.
         $delete_table = $wpdb->prefix . 'simply_static_delete_pages';
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $table_exists = $wpdb->get_var( "SHOW TABLES LIKE '{$delete_table}'" );
         if ( $table_exists === $delete_table ) {
-            $deleted_count = (int) $wpdb->get_var(
-                $wpdb->prepare(
-                    "SELECT COUNT(*) FROM {$delete_table} WHERE site_id = %d",
-                    get_current_blog_id()
-                )
-            );
+            if ( ! empty( $last_export_end ) ) {
+                // deleted_at is stored in GMT; convert local archive_end_time to GMT for comparison.
+                $last_export_end_gmt = get_gmt_from_date( $last_export_end );
+                $deleted_count = (int) $wpdb->get_var(
+                    $wpdb->prepare(
+                        "SELECT COUNT(*) FROM {$delete_table} WHERE site_id = %d AND deleted_at > %s",
+                        get_current_blog_id(),
+                        $last_export_end_gmt
+                    )
+                );
+            } else {
+                // No previous export — count all tracked deletions.
+                $deleted_count = (int) $wpdb->get_var(
+                    $wpdb->prepare(
+                        "SELECT COUNT(*) FROM {$delete_table} WHERE site_id = %d",
+                        get_current_blog_id()
+                    )
+                );
+            }
         }
 
         $total = $modified_count + $deleted_count;
