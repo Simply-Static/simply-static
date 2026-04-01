@@ -17,7 +17,7 @@ import HelperVideo from "../components/HelperVideo";
 const {__} = wp.i18n;
 
 function Optimize() {
-    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved, isPro} = useContext(SettingsContext);
+    const {settings, updateSetting, saveSettings, settingsSaved, setSettingsSaved, isPro, isStudio} = useContext(SettingsContext);
     const [minifyFiles, setMinifyFiles] = useState(false);
     const [minifyHtml, setMinifyHtml] = useState(false);
     const [minifyCss, setMinifyCss] = useState(false);
@@ -172,7 +172,7 @@ function Optimize() {
     }, [settings]);
 
     return (<div className={"inner-settings"}>
-        <Card>
+        {!isStudio() && <Card>
             <CardHeader>
                 <Flex>
                     <FlexItem>
@@ -329,8 +329,8 @@ function Optimize() {
 
 
             </CardBody>
-        </Card>
-        <Spacer margin={5}/>
+        </Card>}
+        {!isStudio() && <Spacer margin={5}/>}
         <Card>
             <CardHeader>
                 <Flex>
@@ -378,7 +378,7 @@ function Optimize() {
                 />
             </CardBody>
         </Card>
-        <Spacer margin={5}/>
+        {!isStudio() && <><Spacer margin={5}/>
         <Card>
             <CardHeader>
                 <Flex>
@@ -468,7 +468,7 @@ function Optimize() {
                 </>}
             </CardBody>
         </Card>
-        <Spacer margin={5}/>
+        <Spacer margin={5}/></>}
         <Card>
             <CardHeader>
                 <Flex>
