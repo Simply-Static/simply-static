@@ -4,7 +4,7 @@ Tags: jamstack, performance, security, static site generator
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag:  3.6.5
+Stable tag:  3.6.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -274,6 +274,16 @@ Settings - Configure your static site export options
 Diagnostics - Check your WordPress environment for compatibility
 
 == Changelog ==
+
+= 3.6.6 =
+
+* search and replace all kinds of data attributes
+* added dashboard widget
+* post_modified instead of post_modified_gmt for timestamps
+* updated all NPM packages to the latest stable versions
+* improved enhanced crawl automation
+* improved copy and UX in settings
+* Basic Auth handler for files like robots.txt, llms.txt etc
 
 = 3.6.5 =
 
