@@ -238,74 +238,78 @@ class Diagnostic {
 			'error'       => __( 'Please disable caching before running a static export', 'simply-static' ),
 		);
 
+		if ( ! function_exists( 'is_plugin_active' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
 		// W3 Total Cache.
-		if ( defined( 'W3TC_VERSION' ) && in_array( 'w3-total-cache', $incompatible_plugins ) ) {
+		if ( defined( 'W3TC_VERSION' ) && is_plugin_active( 'w3-total-cache/w3-total-cache.php' ) && in_array( 'w3-total-cache', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'W3 Total Cache' ) );
 		}
 
 		// WP Fastest Cache.
-		if ( defined( 'WPFC_WP_PLUGIN_DIR' ) && in_array( 'wp-fastest-cache', $incompatible_plugins ) ) {
+		if ( defined( 'WPFC_WP_PLUGIN_DIR' ) && is_plugin_active( 'wp-fastest-cache/wpFastestCache.php' ) && in_array( 'wp-fastest-cache', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'WP Fastest Cache' ) );
 		}
 
 		// WP Rocket.
-		if ( defined( 'WP_ROCKET_VERSION' ) && in_array( 'wp-rocket', $incompatible_plugins ) ) {
+		if ( defined( 'WP_ROCKET_VERSION' ) && is_plugin_active( 'wp-rocket/wp-rocket.php' ) && in_array( 'wp-rocket', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'WP Rocket' ) );
 		}
 
 		// Litespeed Cache.
-		if ( defined( 'LSCWP_V' ) && in_array( 'litespeed-cache', $incompatible_plugins ) ) {
+		if ( defined( 'LSCWP_V' ) && is_plugin_active( 'litespeed-cache/litespeed-cache.php' ) && in_array( 'litespeed-cache', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'LiteSpeed Cache' ) );
 		}
 
 		// Speed Optimizer (Siteground)
-		if ( defined( 'SiteGround_Optimizer\VERSION' ) && in_array( 'sg-cachepress', $incompatible_plugins ) ) {
+		if ( defined( 'SiteGround_Optimizer\VERSION' ) && is_plugin_active( 'sg-cachepress/sg-cachepress.php' ) && in_array( 'sg-cachepress', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Speed Optimizer' ) );
 		}
 
 		// WP Super Cache.
-		if ( defined( 'WPSC_VERSION' ) && in_array( 'wp-super-cache', $incompatible_plugins ) ) {
+		if ( defined( 'WPSC_VERSION' ) && is_plugin_active( 'wp-super-cache/wp-cache.php' ) && in_array( 'wp-super-cache', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'WP Super Cache' ) );
 		}
 
 		// Hummingbird.
-		if ( defined( 'WPHB_VERSION' ) && in_array( 'hummingbird-performance', $incompatible_plugins ) ) {
+		if ( defined( 'WPHB_VERSION' ) && is_plugin_active( 'hummingbird-performance/wp-hummingbird.php' ) && in_array( 'hummingbird-performance', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Hummingbird' ) );
 		}
 
 		// Autoptimize.
-		if ( defined( 'AUTOPTIMIZE_PLUGIN_VERSION' ) && in_array( 'autoptimize', $incompatible_plugins ) ) {
+		if ( defined( 'AUTOPTIMIZE_PLUGIN_VERSION' ) && is_plugin_active( 'autoptimize/autoptimize.php' ) && in_array( 'autoptimize', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Autoptimize' ) );
 		}
 
 		// Breeze (Cloudways)
-		if ( defined( 'BREEZE_VERSION' ) && in_array( 'breeze', $incompatible_plugins ) ) {
+		if ( defined( 'BREEZE_VERSION' ) && is_plugin_active( 'breeze/breeze.php' ) && in_array( 'breeze', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Breeze' ) );
 		}
 
 		// Cache Enabler.
-		if ( defined( 'CACHE_ENABLER_VERSION' ) && in_array( 'cache-enabler', $incompatible_plugins ) ) {
+		if ( defined( 'CACHE_ENABLER_VERSION' ) && is_plugin_active( 'cache-enabler/cache-enabler.php' ) && in_array( 'cache-enabler', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Cache Enabler' ) );
 		}
 
 		// Redis Object Cache.
-		if ( defined( 'WP_REDIS_VERSION' ) && in_array( 'wp-redis', $incompatible_plugins ) ) {
+		if ( defined( 'WP_REDIS_VERSION' ) && is_plugin_active( 'redis-cache/redis-cache.php' ) && in_array( 'wp-redis', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Redis Object Cache' ) );
 		}
 
 		// Cloudflare.
-		if ( defined( 'CLOUDFLARE_PLUGIN_DIR' ) && in_array( 'cloudflare', $incompatible_plugins ) ) {
+		if ( defined( 'CLOUDFLARE_PLUGIN_DIR' ) && is_plugin_active( 'cloudflare/cloudflare.php' ) && in_array( 'cloudflare', $incompatible_plugins ) ) {
 			$response['test']  = false;
 			$response['error'] = sprintf( esc_html__( 'Please disable caching (%s) before running a static export.', 'simply-static' ), esc_html( 'Cloudflare' ) );
 		}
