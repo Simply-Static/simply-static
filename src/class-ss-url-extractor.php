@@ -1012,6 +1012,12 @@ class Url_Extractor {
 			// Save the HTML document
 			$html = $dom->saveHTML();
 
+			// Remove closing tags for HTML5 void elements that DOMDocument incorrectly adds.
+			// PHP's DOMDocument does not recognize newer HTML5 void elements like <source>,
+			// so saveHTML() may output e.g. </source>, causing W3C validation errors.
+			$html5_void_elements = array( 'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr' );
+			$html = preg_replace( '#</(' . implode( '|', $html5_void_elements ) . ')>#i', '', $html );
+
 			// Restore script tags
 			$_result = preg_replace_callback( '/<!-- SCRIPT_PLACEHOLDER_(\d+) -->/', function ( $matches ) {
 				$index = (int) $matches[1];
