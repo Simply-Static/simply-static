@@ -117,8 +117,6 @@ class Upgrade_Handler {
 			's3_access_secret'              => '',
 			's3_bucket'                     => '',
 			's3_subdirectory'               => '',
-			'fix_cors'                      => 'allowed_http_origins',
-			'static_url'                    => '',
 			'use_forms'                     => false,
 			'use_comments'                  => false,
 			'comment_redirect'              => '',

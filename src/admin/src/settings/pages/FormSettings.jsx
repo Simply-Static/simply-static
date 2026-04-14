@@ -24,12 +24,10 @@ function FormSettings() {
         setSettingsSaved,
         isPro
     } = useContext(SettingsContext);
-    const [corsMethod, setCorsMethod] = useState('allowed_http_origins');
     const [useForms, setUseForms] = useState(false);
     const [useComments, setUseComments] = useState(false);
     const [saveFormEntries, setSaveFormEntries] = useState(true);
     const [pagesSlugs, setPagesSlugs] = useState(false);
-    const [enableCors, setEnableCors] = useState(false);
     const [detectingCredentials, setDetectingCredentials] = useState(false);
     const [detectedCredentials, setDetectedCredentials] = useState(null);
     const [credentialsNotice, setCredentialsNotice] = useState(null);
@@ -133,10 +131,6 @@ function FormSettings() {
     useEffect(() => {
         getPages();
 
-        if (settings.fix_cors) {
-            setCorsMethod(settings.fix_cors);
-        }
-
         if (settings.use_forms) {
             setUseForms(settings.use_forms);
         }
@@ -152,12 +146,6 @@ function FormSettings() {
             setSaveFormEntries(true);
         }
 
-        // Enable CORS (default off)
-        if (typeof settings.enable_cors !== 'undefined') {
-            setEnableCors(!!settings.enable_cors);
-        } else {
-            setEnableCors(false);
-        }
     }, [settings]);
 
     return (<div className={"inner-settings"}>
@@ -416,81 +404,6 @@ function FormSettings() {
             </>
         )}
 
-        <Card>
-            <CardHeader>
-                <Flex>
-                    <FlexItem>
-                        <b>{__('CORS', 'simply-static')}<HelperVideo
-                            title={__('How to deal with CORS', 'simply-static')}
-                            videoUrl={'https://youtu.be/fArtvZhkU14'}/></b>
-                    </FlexItem>
-                    {('free' === options.plan || !isPro()) &&
-                        <FlexItem>
-                            <ExternalLink
-                                href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
-                        </FlexItem>
-                    }
-                </Flex>
-            </CardHeader>
-            <CardBody>
-                <ToggleControl
-                    label={__('Enable CORS', 'simply-static')}
-                    __nextHasNoMarginBottom
-                    help={enableCors
-                        ? __('CORS settings enabled. Configure options below.', 'simply-static')
-                        : __('Turn on to configure CORS for Forms and Comments requests.', 'simply-static')}
-                    disabled={('free' === options.plan || !isPro())}
-                    checked={!!enableCors}
-                    onChange={(value) => {
-                        setEnableCors(value);
-                        updateSetting('enable_cors', value);
-                    }}
-                />
-                {enableCors && (
-                    <>
-                        <p>
-                            {__('When using Forms and Comments in Simply Static Pro you may encounter CORS issues as you make requests from your static website to your original one.', 'simply-static')}
-                        </p>
-                        <Notice status="warning" isDismissible={false}>
-                            <p>
-                                {__('Due to the variety of server setups out there, you may need to make changes on your server.', 'simply-static')}
-                            </p>
-                        </Notice>
-                        <Spacer margin={5}/>
-                        <TextControl
-                            label={__('Static URL', 'simply-static')}
-                            type={"url"}
-                            placeholder={'https://static-site.com'}
-                            __next40pxDefaultSize
-                            __nextHasNoMarginBottom
-                            help={__('Add the URL of your static website to allow CORS from it.', 'simply-static')}
-                            disabled={('free' === options.plan || !isPro())}
-                            value={settings.static_url}
-                            onChange={(url) => {
-                                updateSetting('static_url', url);
-                            }}
-                        />
-                        <SelectControl
-                            label={__('Select CORS method', 'simply-static')}
-                            value={corsMethod}
-                            __next40pxDefaultSize
-                            __nextHasNoMarginBottom
-                            help={__('Choose one of the methods to allow CORS for your website.', 'simply-static')}
-                            disabled={('free' === options.plan || !isPro())}
-                            options={[
-                                {label: 'allowed_http_origins', value: 'allowed_http_origins'},
-                                {label: 'wp_headers', value: 'wp_headers'},
-                            ]}
-                            onChange={(method) => {
-                                setCorsMethod(method);
-                                updateSetting('fix_cors', method);
-                            }}
-                        />
-                    </>
-                )}
-            </CardBody>
-        </Card>
-        <Spacer margin={5}/>
         {settingsSaved &&
             <>
                 <Animate type="slide-in" options={{origin: 'top'}}>
