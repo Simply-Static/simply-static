@@ -130,6 +130,12 @@ class Url_Extractor {
 	private $script_tags = array();
 
 	/**
+	 * Array to temporarily store preserved SVG data URIs from style attributes
+	 * @var array
+	 */
+	private $svg_data_uris = [];
+
+	/**
 	 * Constructor
 	 *
 	 * @param string $static_page Simply_Static\Page to extract URLs from
@@ -367,6 +373,73 @@ class Url_Extractor {
 			if ( strpos( $content, $placeholder ) !== false ) {
 				$content = str_replace( $placeholder, $entity, $content );
 			}
+		}
+
+		return $content;
+	}
+
+	/**
+	 * Preserve SVG data URIs inside style attributes to prevent DOMDocument from mangling them.
+	 *
+	 * DOMDocument parses raw <svg>...</svg> markup inside attribute values as actual elements,
+	 * which strips closing tags like </svg>. This method encodes them before DOM processing.
+	 *
+	 * @param string $content The HTML content
+	 *
+	 * @return string The modified content with encoded SVG data URIs
+	 */
+	private function preserve_svg_data_uris( $content ) {
+		$this->svg_data_uris = [];
+
+		// Match style attributes whose value contains an SVG data URI with raw markup.
+		// We match style="..." or style='...' and check for data:image/svg+xml with <svg inside.
+		$_result = preg_replace_callback(
+			'/(<[^>]+\s)style\s*=\s*"([^"]*data:image\/svg\+xml[^"]*<svg[^"]*)"/is',
+			function ( $matches ) {
+				$index                 = count( $this->svg_data_uris );
+				$this->svg_data_uris[] = $matches[2];
+
+				return $matches[1] . 'style="SS_SVG_DATA_URI_PLACEHOLDER_' . $index . '"';
+			},
+			$content
+		);
+		if ( null !== $_result ) {
+			$content = $_result;
+		}
+
+		// Same for single-quoted style attributes
+		$_result = preg_replace_callback(
+			"/(<[^>]+\s)style\s*=\s*'([^']*data:image\/svg\+xml[^']*<svg[^']*)'/is",
+			function ( $matches ) {
+				$index                 = count( $this->svg_data_uris );
+				$this->svg_data_uris[] = $matches[2];
+
+				return $matches[1] . "style='SS_SVG_DATA_URI_PLACEHOLDER_" . $index . "'";
+			},
+			$content
+		);
+		if ( null !== $_result ) {
+			$content = $_result;
+		}
+
+		return $content;
+	}
+
+	/**
+	 * Restore preserved SVG data URIs in style attributes after DOM processing.
+	 *
+	 * @param string $content The HTML content with placeholders
+	 *
+	 * @return string The HTML content with restored SVG data URIs
+	 */
+	private function restore_svg_data_uris( $content ) {
+		if ( empty( $this->svg_data_uris ) ) {
+			return $content;
+		}
+
+		foreach ( $this->svg_data_uris as $index => $original ) {
+			$placeholder = 'SS_SVG_DATA_URI_PLACEHOLDER_' . $index;
+			$content     = str_replace( $placeholder, $original, $content );
 		}
 
 		return $content;
@@ -717,6 +790,9 @@ class Url_Extractor {
 		// Extract and preserve <xmp> tags to prevent DOMDocument from corrupting their content
 		$html_string = $this->preserve_xmp_tags( $html_string );
 
+		// Preserve SVG data URIs in style attributes before DOMDocument mangles them
+		$html_string = $this->preserve_svg_data_uris( $html_string );
+
 		// Extract and preserve non-conditional HTML comments to avoid altering their content (e.g., commented-out scripts)
 		$html_comments                 = [];
 		$comment_placeholder           = '<!-- COMMENT_PLACEHOLDER_%d -->';
@@ -1033,6 +1109,9 @@ class Url_Extractor {
 
 			// Restore xmp tags
 			$html = $this->restore_xmp_tags( $html );
+
+			// Restore SVG data URIs in style attributes
+			$html = $this->restore_svg_data_uris( $html );
 
 			// Restore conditional comments
 			$_result = preg_replace_callback( '/<!-- CONDITIONAL_COMMENT_PLACEHOLDER_(\d+) -->/', function ( $matches ) use ( $conditional_comments ) {
