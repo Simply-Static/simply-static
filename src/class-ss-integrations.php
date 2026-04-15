@@ -34,7 +34,7 @@ class Integrations {
 			'divi'              => Divi_Integration::class,
 			'cookieyes'         => CookieYes_Integration::class,
 			'complianz'         => Complianz_Integration::class,
-			//'search-and-filter' => SearchAndFilter_Integration::class,
+			'search-and-filter' => SearchAndFilter_Integration::class,
 			'multilingual'      => Multilingual_Integration::class,
 			'github'            => Github_Integration::class,
 			'shortpixel'        => Shortpixel_Integration::class,

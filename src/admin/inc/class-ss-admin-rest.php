@@ -328,6 +328,14 @@ class Admin_Rest {
                 return current_user_can( apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ) );
             },
         ) );
+
+        register_rest_route( 'simplystatic/v1', '/install-studio-migrate', array(
+            'methods'             => 'POST',
+            'callback'            => [ $this, 'install_studio_migrate' ],
+            'permission_callback' => function () {
+                return current_user_can( 'install_plugins' ) && current_user_can( 'activate_plugins' );
+            },
+        ) );
     }
 
     // ---- Endpoint implementations (migrated from Admin_Settings) ----
@@ -1448,6 +1456,83 @@ class Admin_Rest {
                 'message' => $e->getMessage(),
             ] );
         }
+    }
+
+    /**
+     * Install and activate the Static Studio migration plugin.
+     *
+     * Downloads the plugin from the Static Studio API, installs it,
+     * activates it and returns the redirect URL to the migration page.
+     *
+     * @return \WP_REST_Response
+     */
+    public function install_studio_migrate() {
+        $plugin_slug = 'simply-static-studio-backup-migrate/simply-static-studio-backup-migrate.php';
+        $plugin_zip  = 'https://api.static.studio/storage/v1/object/public/plugins/simply-static-studio-backup-migrate.zip';
+        $redirect    = admin_url( 'tools.php?page=studio-backup' );
+
+        // Already active — just redirect.
+        if ( is_plugin_active( $plugin_slug ) ) {
+            return new \WP_REST_Response( [
+                'success'  => true,
+                'redirect' => $redirect,
+            ] );
+        }
+
+        // Already installed but not active — activate it.
+        if ( file_exists( WP_PLUGIN_DIR . '/' . $plugin_slug ) ) {
+            $result = activate_plugin( $plugin_slug );
+
+            if ( is_wp_error( $result ) ) {
+                return new \WP_REST_Response( [
+                    'success' => false,
+                    'message' => $result->get_error_message(),
+                ], 500 );
+            }
+
+            return new \WP_REST_Response( [
+                'success'  => true,
+                'redirect' => $redirect,
+            ] );
+        }
+
+        // Not installed — download and install.
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+        require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+        require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+        $skin      = new \WP_Ajax_Upgrader_Skin();
+        $upgrader  = new \Plugin_Upgrader( $skin );
+        $installed = $upgrader->install( $plugin_zip );
+
+        if ( is_wp_error( $installed ) ) {
+            return new \WP_REST_Response( [
+                'success' => false,
+                'message' => $installed->get_error_message(),
+            ], 500 );
+        }
+
+        if ( ! $installed ) {
+            return new \WP_REST_Response( [
+                'success' => false,
+                'message' => __( 'Plugin installation failed.', 'simply-static' ),
+            ], 500 );
+        }
+
+        $result = activate_plugin( $plugin_slug );
+
+        if ( is_wp_error( $result ) ) {
+            return new \WP_REST_Response( [
+                'success' => false,
+                'message' => $result->get_error_message(),
+            ], 500 );
+        }
+
+        return new \WP_REST_Response( [
+            'success'  => true,
+            'redirect' => $redirect,
+        ] );
     }
 
     /**

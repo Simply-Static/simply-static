@@ -28,6 +28,8 @@ function DeploymentSettings() {
         isPro,
         isStudio
     } = useContext(SettingsContext);
+    const [installingMigrate, setInstallingMigrate] = useState(false);
+    const [migrateError, setMigrateError] = useState('');
     const [deliveryMethod, setDeliveryMethod] = useState('zip');
     const [clearDirectory, setClearDirectory] = useState(false);
     const [githubAccountType, setGithubAccountType] = useState('personal');
@@ -113,7 +115,68 @@ function DeploymentSettings() {
 
     }, [settings]);
 
+    const installAndActivateMigrate = () => {
+        // Already active — just redirect.
+        if (options.studio_migrate_active) {
+            window.location.href = options.studio_migrate_url;
+            return;
+        }
+
+        setInstallingMigrate(true);
+        setMigrateError('');
+
+        apiFetch({
+            path: '/simplystatic/v1/install-studio-migrate',
+            method: 'POST',
+        }).then((response) => {
+            if (response && response.success && response.redirect) {
+                window.location.href = response.redirect;
+            } else {
+                setMigrateError(response?.message || __('Something went wrong.', 'simply-static'));
+                setInstallingMigrate(false);
+            }
+        }).catch((error) => {
+            setMigrateError(error?.message || __('Something went wrong.', 'simply-static'));
+            setInstallingMigrate(false);
+        });
+    };
+
     return (<div className={"inner-settings"}>
+        {!isStudio() && !isPro() &&
+            <>
+                <Card>
+                    <CardBody>
+                        <Flex direction="column" gap={2}>
+                            <p style={{margin: 0}}>
+                                <strong>{__('⚡ Migrate to Static Studio', 'simply-static')}</strong>{' — '}
+                                {__('The all-in-one Static WordPress cloud-hosting platform. Enjoy secure WordPress, the fastest exports, and the best-performing static site hosting in one package.', 'simply-static')}
+                            </p>
+                            {migrateError && !installingMigrate &&
+                                <Notice status="error" isDismissible={false}>
+                                    <p>{migrateError}</p>
+                                </Notice>
+                            }
+                            <div>
+                                <Button
+                                    variant="primary"
+                                    isBusy={installingMigrate}
+                                    disabled={installingMigrate}
+                                    onClick={installAndActivateMigrate}
+                                >
+                                    {installingMigrate
+                                        ? __('Installing…', 'simply-static')
+                                        : (options.studio_migrate_active
+                                            ? __('Open Migration Settings', 'simply-static')
+                                            : __('Install & Activate Migration Plugin', 'simply-static'))
+                                    }
+                                </Button>
+                            </div>
+                        </Flex>
+                    </CardBody>
+                </Card>
+                <Spacer margin={5}/>
+            </>
+        }
         <Card>
             <CardHeader>
                 <b>{__('Deployment Settings', 'simply-static')}</b>
@@ -141,15 +204,36 @@ function DeploymentSettings() {
                     <b>{__('Static Studio', 'simply-static')}</b>
                 </CardHeader>
                 <CardBody>
-                    <p>
+                    <p style={{marginTop: 0, marginBottom: '4px'}}>
                         {__('The all-in-one Static WordPress cloud-hosting platform.', 'simply-static')}
                     </p>
-                    <p>
+                    <p style={{marginTop: 0, marginBottom: '4px'}}>
                         {__('Enjoy secure WordPress, the fastest exports, and the best-performing static site hosting in one package.', 'simply-static')}
                     </p>
-                    <p>
-                    <a className={"button button-primary"} href={"https://simplystatic.com/simply-static-studio/"} target={"_blank"}>Check out Static Studio</a>
+                    <p style={{marginTop: 0, marginBottom: '12px'}}>
+                        {__('Migrate your existing WordPress site to Static Studio with one click.', 'simply-static')}
                     </p>
+                    {migrateError && !installingMigrate &&
+                        <Notice status="error" isDismissible={false}>
+                            <p>{migrateError}</p>
+                        </Notice>
+                    }
+                    <Flex direction="row" gap={3}>
+                        <Button
+                            variant="primary"
+                            isBusy={installingMigrate}
+                            disabled={installingMigrate}
+                            onClick={installAndActivateMigrate}
+                        >
+                            {installingMigrate
+                                ? __('Installing…', 'simply-static')
+                                : (options.studio_migrate_active
+                                    ? __('Open Migration Settings', 'simply-static')
+                                    : __('Install & Activate Migration Plugin', 'simply-static'))
+                            }
+                        </Button>
+                        <a className={"button"} href={"https://simplystatic.com/simply-static-studio/"} target={"_blank"}>{__('Learn more about Static Studio', 'simply-static')}</a>
+                    </Flex>
                 </CardBody>
             </Card>
         }

@@ -450,6 +450,11 @@ class Admin_Settings {
             $args['form_connection_url'] = esc_url( get_admin_url() . 'post-new.php?post_type=ssp-form' );
         }
 
+        // Studio migration plugin status.
+        $studio_migrate_slug          = 'simply-static-studio-backup-migrate/simply-static-studio-backup-migrate.php';
+        $args['studio_migrate_active'] = is_plugin_active( $studio_migrate_slug );
+        $args['studio_migrate_url']    = admin_url( 'tools.php?page=studio-backup' );
+
         wp_localize_script( 'simplystatic-settings', 'options', $args );
 
         // Make the blocks translatable.
