@@ -281,6 +281,7 @@ Diagnostics - Check your WordPress environment for compatibility
 * removed CORS settings (no longer needed)
 * improved cache detection (Hostinger)
 * avoid auto-closing HTML5 tags
+* auto cache busting
 
 = 3.6.6 =
 
