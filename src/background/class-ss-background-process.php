@@ -710,8 +710,15 @@ abstract class Background_Process extends Async_Request {
 				$this->switched_to_blog = true;
 			}
 
-			foreach ( $batch->data as $key => $value ) {
+ 		foreach ( $batch->data as $key => $value ) {
 				$task = $this->task( $value );
+
+				// Refresh the process lock after each task so that long-running
+				// perform() calls (e.g. minify, github_commit) do not cause the
+				// transient lock to expire while processing is still active.
+				// Without this, the cron healthcheck sees no lock and dispatches
+				// a second concurrent worker, leading to race conditions.
+				$this->lock_process( false );
 
 				if ( false !== $task ) {
 					$batch->data[ $key ] = $task;

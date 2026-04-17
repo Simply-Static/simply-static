@@ -125,8 +125,7 @@ trait canProcessPages {
 				$start_time
 			) );
 
-			if ( ! $claimed ) {
-				Util::debug_log( 'Skipping page (already claimed by another worker): ' . $static_page->url );
+ 		if ( ! $claimed ) {
 				continue;
 			}
 
