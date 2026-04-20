@@ -90,6 +90,7 @@ class Theme_Assets_Crawler extends Crawler {
 		];
 		$skip_dirs  = apply_filters( 'ss_skip_crawl_theme_directories', [
 			'.git',
+			'node_modules',
 			'vendor/bin',
 			'vendor/composer',
 			'tests'
@@ -238,6 +239,7 @@ class Theme_Assets_Crawler extends Crawler {
 		// Skip these directories
 		$skip_dirs = apply_filters( 'ss_skip_crawl_theme_directories', [
 			'.git',
+			'node_modules',
 			'vendor/bin',
 			'vendor/composer',
 			'tests'
