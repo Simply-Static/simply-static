@@ -25,6 +25,7 @@ function FormSettings() {
         isPro
     } = useContext(SettingsContext);
     const [useForms, setUseForms] = useState(false);
+    const [useFormConditionalLoading, setUseFormConditionalLoading] = useState(false);
     const [useComments, setUseComments] = useState(false);
     const [saveFormEntries, setSaveFormEntries] = useState(true);
     const [pagesSlugs, setPagesSlugs] = useState(false);
@@ -146,6 +147,10 @@ function FormSettings() {
             setSaveFormEntries(true);
         }
 
+        if (typeof settings.use_form_conditional_loading !== 'undefined') {
+            setUseFormConditionalLoading(!!settings.use_form_conditional_loading);
+        }
+
     }, [settings]);
 
     return (<div className={"inner-settings"}>
@@ -193,6 +198,23 @@ function FormSettings() {
                         onChange={(value) => {
                             setSaveFormEntries(value);
                             updateSetting('save_form_entries', value);
+                        }}
+                    />
+                )}
+                {useForms && (
+                    <ToggleControl
+                        label={__('Enable conditional loading', 'simply-static')}
+                        __nextHasNoMarginBottom
+                        help={
+                            useFormConditionalLoading
+                                ? __('Form scripts are only loaded on pages that contain a connected form.', 'simply-static')
+                                : __('Form scripts are loaded on all pages for maximum compatibility.', 'simply-static')
+                        }
+                        disabled={('free' === options.plan || !isPro())}
+                        checked={useFormConditionalLoading}
+                        onChange={(value) => {
+                            setUseFormConditionalLoading(value);
+                            updateSetting('use_form_conditional_loading', value);
                         }}
                     />
                 )}

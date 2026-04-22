@@ -118,6 +118,7 @@ class Upgrade_Handler {
 			's3_bucket'                     => '',
 			's3_subdirectory'               => '',
 			'use_forms'                     => false,
+			'use_form_conditional_loading'  => false,
 			'use_comments'                  => false,
 			'comment_redirect'              => '',
 			'use_search'                    => false,
