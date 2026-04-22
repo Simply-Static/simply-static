@@ -379,10 +379,11 @@ class Url_Extractor {
 	}
 
 	/**
-	 * Preserve SVG data URIs inside style attributes to prevent DOMDocument from mangling them.
+	 * Preserve SVG data URIs to prevent DOMDocument from mangling them.
 	 *
-	 * DOMDocument parses raw <svg>...</svg> markup inside attribute values as actual elements,
-	 * which strips closing tags like </svg>. This method encodes them before DOM processing.
+	 * DOMDocument parses raw <svg>...</svg> markup inside attribute values and
+	 * <style> tag content as actual elements, which strips closing tags like </svg>.
+	 * This method encodes them before DOM processing.
 	 *
 	 * @param string $content The HTML content
 	 *
@@ -415,6 +416,40 @@ class Url_Extractor {
 				$this->svg_data_uris[] = $matches[2];
 
 				return $matches[1] . "style='SS_SVG_DATA_URI_PLACEHOLDER_" . $index . "'";
+			},
+			$content
+		);
+		if ( null !== $_result ) {
+			$content = $_result;
+		}
+
+		// Preserve SVG data URIs inside CSS url() constructs (typically found in <style> blocks).
+		// DOMDocument would otherwise parse <svg>...</svg> inside these as real SVG elements
+		// and strip the closing </svg> tag, breaking the inline SVG image.
+
+		// Double-quoted url("data:image/svg+xml......</svg>")
+		$_result = preg_replace_callback(
+			"/url\(\s*\"(data:image\/svg\+xml(?:[^\"\\\\]|\\\\.)*<\/svg>)\"\s*\)/is",
+			function ( $matches ) {
+				$index                 = count( $this->svg_data_uris );
+				$this->svg_data_uris[] = $matches[0];
+
+				return 'SS_SVG_DATA_URI_PLACEHOLDER_' . $index;
+			},
+			$content
+		);
+		if ( null !== $_result ) {
+			$content = $_result;
+		}
+
+		// Single-quoted url('data:image/svg+xml......</svg>')
+		$_result = preg_replace_callback(
+			"/url\(\s*'(data:image\/svg\+xml(?:[^'\\\\]|\\\\.)*<\/svg>)'\s*\)/is",
+			function ( $matches ) {
+				$index                 = count( $this->svg_data_uris );
+				$this->svg_data_uris[] = $matches[0];
+
+				return 'SS_SVG_DATA_URI_PLACEHOLDER_' . $index;
 			},
 			$content
 		);
