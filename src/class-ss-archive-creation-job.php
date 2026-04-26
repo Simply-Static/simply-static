@@ -39,6 +39,17 @@ class Archive_Creation_Job extends Background_Process {
 	protected $task_list = array();
 
 	/**
+	 * Whether this process is currently executing a task.
+	 *
+	 * Used by shutdown_handler() to distinguish fatal errors that occur
+	 * during actual background task processing from fatal errors on
+	 * unrelated page loads (e.g. a broken theme template).
+	 *
+	 * @var bool
+	 */
+	protected $is_task_processing = false;
+
+	/**
 	 * Performs initializion of the options structure
 	 *
 	 * @param string $option_key The options key name
@@ -201,6 +212,7 @@ class Archive_Creation_Job extends Background_Process {
 	 * @return false|string       task name to process, or false if done
 	 */
 	protected function task( $task_name ) {
+		$this->is_task_processing = true;
 		$this->set_current_task( $task_name );
 
 		Util::debug_log( "Current task: " . $task_name );
@@ -471,6 +483,16 @@ class Archive_Creation_Job extends Background_Process {
 	 */
 	public function shutdown_handler() {
 		// Note: this function must be public in order to function properly.
+
+		// Only act when this process is actually executing a background task.
+		// Without this guard, a fatal error on any WordPress page load
+		// (e.g. a broken theme template fetched by the crawler) would cancel
+		// the running export because the constructor registers this handler
+		// on every request where a job is active.
+		if ( ! $this->is_task_processing ) {
+			return;
+		}
+
 		$error = error_get_last();
 		// only trigger on actual errors, not warnings or notices
 		if ( $error && in_array( $error['type'], array( E_ERROR, E_CORE_ERROR, E_USER_ERROR ) ) ) {
