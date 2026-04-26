@@ -460,6 +460,17 @@ class Fetch_Urls_Task extends Task {
 		}
 
 		$child_static_page = Page::query()->find_or_create_by( 'url', $child_url );
+
+		// During single exports, ensure discovered assets inherit the parent's
+		// post_id so they pass the post_id filter in get_pages_to_process_sql().
+		// This must run outside the found_on_id/updated_at guard below because
+		// crawlers may have already touched the record in this same export
+		// (setting found_on_id and updated_at) without assigning a post_id.
+		if ( ! $child_static_page->post_id && $static_page->post_id ) {
+			$child_static_page->post_id = $static_page->post_id;
+			$child_static_page->save();
+		}
+
 		if ( $child_static_page->found_on_id === null || $child_static_page->updated_at < $this->archive_start_time ) {
 			$child_static_page->found_on_id = $static_page->id;
 			if ( ! $child_static_page->post_id ) {
