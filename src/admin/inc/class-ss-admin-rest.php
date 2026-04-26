@@ -1416,11 +1416,21 @@ class Admin_Rest {
             $this->switch_to_blog_and_refresh_options( $blog_id );
         }
 
+        $job   = Plugin::instance()->get_archive_creation_job();
         $stats = [
             'status'  => 200,
-            'running' => Plugin::instance()->get_archive_creation_job()->is_running(),
-            'paused'  => Plugin::instance()->get_archive_creation_job()->is_paused()
+            'running' => $job->is_running(),
+            'paused'  => $job->is_paused()
         ];
+
+        // Kickstart fallback: if the job is "running" but no process lock
+        // is held (i.e. the loopback dispatch never arrived or was lost),
+        // re-dispatch to resume processing. On hosts where the loopback is
+        // broken this will automatically use inline processing.
+        if ( ! empty( $stats['running'] ) && empty( $stats['paused'] ) && ! $job->is_processing() ) {
+            $job->dispatch();
+        }
+
         $stats = apply_filters( 'ss_is_running_statuses', $stats );
 
         if ( $blog_id && is_multisite() ) {

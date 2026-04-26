@@ -97,6 +97,13 @@ abstract class Background_Process extends Async_Request {
 	protected $seconds_between_batches = 0;
 
 	/**
+	 * Whether this dispatch is currently running inline (not via loopback).
+	 *
+	 * @var bool
+	 */
+	protected $is_inline = false;
+
+	/**
 	 * The status set when process is cancelling.
 	 *
 	 * @var int
@@ -145,6 +152,10 @@ abstract class Background_Process extends Async_Request {
 	/**
 	 * Schedule the cron healthcheck and dispatch an async request to start processing the queue.
 	 *
+	 * If the server cannot reach itself via the loopback URL (a common issue on
+	 * certain hosting environments), processing falls back to running inline
+	 * via a shutdown function so the export still completes.
+	 *
 	 * @access public
 	 * @return array|WP_Error|false HTTP Response array, WP_Error on failure, or false if not attempted.
 	 */
@@ -170,8 +181,124 @@ abstract class Background_Process extends Async_Request {
 		// Schedule the cron healthcheck.
 		$this->schedule_event();
 
+		// If the loopback is known to be broken, skip the remote POST and
+		// process the queue inline via a shutdown function.
+		if ( ! $this->is_loopback_available() ) {
+			return $this->dispatch_inline();
+		}
+
 		// Perform remote post.
-		return parent::dispatch();
+		$response = parent::dispatch();
+
+		// If the remote POST fails, mark loopback as unavailable and fall back
+		// to inline processing so the current dispatch is not lost.
+		if ( is_wp_error( $response ) ) {
+			set_site_transient( $this->identifier . '_loopback_available', 'no', HOUR_IN_SECONDS );
+
+			return $this->dispatch_inline();
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Check whether the server can reach itself via the loopback URL.
+	 *
+	 * The result is cached in a site transient for one hour. If the loopback
+	 * has not been tested yet, a quick blocking request is made to admin-ajax.php
+	 * and the result is stored for future dispatches.
+	 *
+	 * @return bool True if the loopback works, false otherwise.
+	 */
+	protected function is_loopback_available() {
+		/**
+		 * Filter to override the loopback availability check.
+		 *
+		 * Return true to force async dispatch, false to force inline processing.
+		 * Return null to use the automatic detection (default).
+		 *
+		 * @param null|bool $available Null for auto-detect, bool to override.
+		 */
+		$override = apply_filters( $this->identifier . '_loopback_available', null );
+
+		if ( is_bool( $override ) ) {
+			return $override;
+		}
+
+		$transient_key = $this->identifier . '_loopback_available';
+		$cached        = get_site_transient( $transient_key );
+
+		if ( 'yes' === $cached ) {
+			return true;
+		}
+
+		if ( 'no' === $cached ) {
+			return false;
+		}
+
+		// Not cached yet — perform a quick blocking test.
+		$url  = admin_url( 'admin-ajax.php' );
+		$args = array(
+			'timeout'   => 5,
+			'blocking'  => true,
+			'body'      => array( 'action' => 'heartbeat' ),
+			'cookies'   => $_COOKIE,
+			'sslverify' => apply_filters( 'https_local_ssl_verify', false ),
+		);
+
+		$response = wp_remote_post( esc_url_raw( $url ), $args );
+
+		if ( is_wp_error( $response ) ) {
+			Util::debug_log( 'Loopback test failed: ' . $response->get_error_message() . '. Falling back to inline processing.' );
+			set_site_transient( $transient_key, 'no', HOUR_IN_SECONDS );
+
+			return false;
+		}
+
+		set_site_transient( $transient_key, 'yes', HOUR_IN_SECONDS );
+
+		return true;
+	}
+
+	/**
+	 * Process the queue inline via a shutdown function.
+	 *
+	 * This is a fallback for environments where the loopback wp_remote_post()
+	 * to admin-ajax.php fails (DNS, reverse-proxy, firewall, or hosting issues).
+	 * The queue is processed in the current PHP process after the response has
+	 * been sent, keeping the UI responsive.
+	 *
+	 * @return bool True to indicate inline dispatch was scheduled.
+	 */
+	protected function dispatch_inline() {
+		$this->is_inline = true;
+
+		// Prevent wp_die() from terminating the shutdown function.
+		// handle() calls maybe_wp_die() at the end, which would otherwise
+		// kill execution before chained batches can run.
+		add_filter( $this->identifier . '_wp_die', '__return_false' );
+
+		$process = $this;
+
+		register_shutdown_function( function () use ( $process ) {
+			// Don't run if another process already holds the lock.
+			if ( $process->is_processing() ) {
+				return;
+			}
+
+			// Access the protected handle() method via Closure binding.
+			// handle() acquires the lock, processes batches, unlocks, and
+			// either re-dispatches (which will again use inline) or completes.
+			$handler = \Closure::bind( function () {
+				$this->handle();
+			}, $process, get_class( $process ) );
+
+			if ( $handler ) {
+				$handler();
+			}
+		} );
+
+		return true;
 	}
 
 	/**
