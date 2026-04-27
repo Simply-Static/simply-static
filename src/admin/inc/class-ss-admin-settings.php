@@ -95,14 +95,17 @@ class Admin_Settings {
     public function add_menu() {
         $hide_menu  = apply_filters( 'ss_hide_admin_menu', false );
 
+        $menu_title = apply_filters( 'ss_menu_title', __( 'Simply Static', 'simply-static' ) );
+        $menu_icon  = apply_filters( 'ss_menu_icon', SIMPLY_STATIC_URL . '/assets/simply-static-icon.svg' );
+
         // Generate settings page.
         add_menu_page(
-                __( 'Simply Static', 'simply-static' ),
-                __( 'Simply Static', 'simply-static' ),
+                $menu_title,
+                $menu_title,
                 apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ),
                 'simply-static-generate',
                 array( $this, 'render_settings' ),
-                SIMPLY_STATIC_URL . '/assets/simply-static-icon.svg',
+                $menu_icon,
                 apply_filters( 'ss_menu_position', 100 )
         );
 
@@ -355,7 +358,7 @@ class Admin_Settings {
                 array(
                         'screen'           => 'simplystatic-settings',
                         'version'          => SIMPLY_STATIC_VERSION,
-                        'logo'             => SIMPLY_STATIC_URL . '/assets/simply-static-logo.svg',
+                        'logo'             => apply_filters( 'ss_admin_logo', SIMPLY_STATIC_URL . '/assets/simply-static-logo.svg' ),
                         'plan'             => 'free',
                         'initial'          => $initial,
                         'home'             => home_url(),
