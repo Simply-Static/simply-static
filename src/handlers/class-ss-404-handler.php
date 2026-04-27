@@ -23,11 +23,17 @@ class Handler_404 extends Page_Handler {
      * @return string
      */
     public function get_relative_dir( $dir ) {
-        return '404/';
+        return '';
+    }
+
+    public function get_path_info( $path_info ) {
+        $path_info['filename'] = '404';
+        $path_info['extension'] = 'html';
+        return $path_info;
     }
 
     /**
-     * Hook callback: copy 404/index.html into Local Directory.
+     * Hook callback: copy 404.html into Local Directory.
      *
      * @param string                        $destination_dir Absolute Local Directory path.
      * @param string                        $archive_dir     Absolute archive (temp) path.
@@ -36,17 +42,12 @@ class Handler_404 extends Page_Handler {
      */
     public static function transfer_404_page( $destination_dir, $archive_dir, $task = null ) : void {
         try {
-            $source = untrailingslashit( $archive_dir ) . DIRECTORY_SEPARATOR . '404' . DIRECTORY_SEPARATOR . 'index.html';
+            $source = untrailingslashit( $archive_dir ) . DIRECTORY_SEPARATOR . '404.html';
             if ( ! file_exists( $source ) ) {
                 return;
             }
 
-            $dest_dir = untrailingslashit( $destination_dir ) . DIRECTORY_SEPARATOR . '404';
-            if ( ! is_dir( $dest_dir ) ) {
-                wp_mkdir_p( $dest_dir );
-            }
-
-            $dest = $dest_dir . DIRECTORY_SEPARATOR . 'index.html';
+            $dest = untrailingslashit( $destination_dir ) . DIRECTORY_SEPARATOR . '404.html';
             // Do not overwrite an existing 404 file.
             if ( file_exists( $dest ) ) {
                 return;

@@ -58,7 +58,7 @@ class Generate_404_Task extends Task {
 				$static_page->id                  = 0;
 				$static_page->build_id            = 0;
 				$static_page->url                 = $permalink;
-				$static_page->handler             = Handler_404::class; // Save under 404/
+ 			$static_page->handler             = Handler_404::class; // Save as 404.html
 				$static_page->error_message       = '';
 				$static_page->found_on_id         = 0;
 				$static_page->redirect_url        = '';
