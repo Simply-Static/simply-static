@@ -55,6 +55,7 @@ function Optimize() {
     const [cssOptimizeDeferJs, setCssOptimizeDeferJs] = useState(false);
     const [cssOptimizeGoogleFonts, setCssOptimizeGoogleFonts] = useState(false);
     const [cssOptimizeNoscript, setCssOptimizeNoscript] = useState(false);
+    const [cssOptimizeDelayJs, setCssOptimizeDelayJs] = useState(false);
 
     const [versionCss, setVersionCss] = useState(false);
     const [versionJs, setVersionJs] = useState(false);
@@ -193,6 +194,10 @@ function Optimize() {
 
         if (settings.css_optimize_noscript) {
             setCssOptimizeNoscript(settings.css_optimize_noscript);
+        }
+
+        if (settings.css_optimize_delay_js) {
+            setCssOptimizeDelayJs(settings.css_optimize_delay_js);
         }
 
         if (settings.version_css) {
@@ -460,6 +465,32 @@ function Optimize() {
                                 updateSetting('css_optimize_noscript', value);
                             }}
                         />
+
+                        <ToggleControl
+                            label={__('Delay Non-Critical JavaScript', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={__('Delay third-party scripts (analytics, tag managers, tracking pixels) until user interaction to reduce Total Blocking Time. Scripts load on first click, scroll, or keypress.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            checked={cssOptimizeDelayJs}
+                            onChange={(value) => {
+                                setCssOptimizeDelayJs(value);
+                                updateSetting('css_optimize_delay_js', value);
+                            }}
+                        />
+
+                        {cssOptimizeDelayJs && <>
+                            <TextareaControl
+                                label={__('Additional Delay Patterns', 'simply-static')}
+                                __nextHasNoMarginBottom
+                                help={__('Additional glob patterns for scripts to delay (one per line). Built-in patterns already cover Google Tag Manager, Google Analytics, HubSpot, Facebook Pixel, Hotjar, Clarity, and Cloudflare Insights.', 'simply-static')}
+                                disabled={('free' === options.plan || !isPro())}
+                                value={settings.css_optimize_delay_js_patterns}
+                                placeholder={'*example-tracking.com*\n*custom-analytics*'}
+                                onChange={(patterns) => {
+                                    updateSetting('css_optimize_delay_js_patterns', patterns);
+                                }}
+                            />
+                        </>}
                     </>
                 }
             </CardBody>
