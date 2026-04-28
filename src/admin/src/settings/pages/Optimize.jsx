@@ -50,6 +50,12 @@ function Optimize() {
     const [disableDbDebug, setDisableDbDebug] = useState(false);
     const [disableWLW, setDisableWLW] = useState(false);
 
+    const [cssOptimize, setCssOptimize] = useState(false);
+    const [cssOptimizeDeferCss, setCssOptimizeDeferCss] = useState(false);
+    const [cssOptimizeDeferJs, setCssOptimizeDeferJs] = useState(false);
+    const [cssOptimizeGoogleFonts, setCssOptimizeGoogleFonts] = useState(false);
+    const [cssOptimizeNoscript, setCssOptimizeNoscript] = useState(false);
+
     const [versionCss, setVersionCss] = useState(false);
     const [versionJs, setVersionJs] = useState(false);
 
@@ -167,6 +173,26 @@ function Optimize() {
 
         if (settings.disable_wlw_manifest) {
             setDisableWLW(settings.disable_wlw_manifest)
+        }
+
+        if (settings.use_css_optimize) {
+            setCssOptimize(settings.use_css_optimize);
+        }
+
+        if (settings.css_optimize_defer_css) {
+            setCssOptimizeDeferCss(settings.css_optimize_defer_css);
+        }
+
+        if (settings.css_optimize_defer_js) {
+            setCssOptimizeDeferJs(settings.css_optimize_defer_js);
+        }
+
+        if (settings.css_optimize_google_fonts) {
+            setCssOptimizeGoogleFonts(settings.css_optimize_google_fonts);
+        }
+
+        if (settings.css_optimize_noscript) {
+            setCssOptimizeNoscript(settings.css_optimize_noscript);
         }
 
         if (settings.version_css) {
@@ -338,7 +364,107 @@ function Optimize() {
 
             </CardBody>
         </Card>}
-        {!isStudio() && <Spacer margin={5}/>}
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <Flex>
+                    <FlexItem>
+                        <b>{__('CSS & JS Optimizer', 'simply-static')}</b>
+                    </FlexItem>
+                    {('free' === options.plan || !isPro()) &&
+                        <FlexItem>
+                            <ExternalLink
+                                href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
+                        </FlexItem>
+                    }
+                </Flex>
+            </CardHeader>
+            <CardBody>
+                <p>{__('Eliminate render-blocking CSS and JavaScript resources to improve Lighthouse scores and page load speed.', 'simply-static')}</p>
+                <ToggleControl
+                    label={__('Enable CSS & JS Optimizer?', 'simply-static')}
+                    __nextHasNoMarginBottom
+                    help={
+                        cssOptimize
+                            ? __('Optimize render-blocking resources during static export.', 'simply-static')
+                            : __('Don\'t optimize render-blocking resources.', 'simply-static')
+                    }
+                    disabled={('free' === options.plan || !isPro())}
+                    checked={cssOptimize}
+                    onChange={(value) => {
+                        setCssOptimize(value);
+                        updateSetting('use_css_optimize', value);
+                    }}
+                />
+
+                {cssOptimize &&
+                    <>
+                        <ToggleControl
+                            label={__('Defer Non-Critical CSS', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={__('Convert non-critical stylesheets to load asynchronously using the media="print" pattern.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            checked={cssOptimizeDeferCss}
+                            onChange={(value) => {
+                                setCssOptimizeDeferCss(value);
+                                updateSetting('css_optimize_defer_css', value);
+                            }}
+                        />
+
+                        {cssOptimizeDeferCss && <>
+                            <TextareaControl
+                                label={__('Critical CSS Patterns', 'simply-static')}
+                                __nextHasNoMarginBottom
+                                help={__('Glob patterns for stylesheets that must remain render-blocking (one per line). Default: */style.css, */styles.css, */global.css, */theme*.css, */wp-block-*.css', 'simply-static')}
+                                disabled={('free' === options.plan || !isPro())}
+                                value={settings.css_optimize_critical_patterns}
+                                placeholder={'*/style.css\n*/styles.css\n*/global.css\n*/theme*.css\n*/wp-block-*.css'}
+                                onChange={(patterns) => {
+                                    updateSetting('css_optimize_critical_patterns', patterns);
+                                }}
+                            />
+                        </>}
+
+                        <ToggleControl
+                            label={__('Defer Synchronous Scripts', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={__('Add the defer attribute to render-blocking scripts. Preserves execution order (safe for jQuery dependencies).', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            checked={cssOptimizeDeferJs}
+                            onChange={(value) => {
+                                setCssOptimizeDeferJs(value);
+                                updateSetting('css_optimize_defer_js', value);
+                            }}
+                        />
+
+                        <ToggleControl
+                            label={__('Optimize Google Fonts', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={__('Preload Google Fonts stylesheets, inject preconnect hints, and add display=swap for faster font loading.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            checked={cssOptimizeGoogleFonts}
+                            onChange={(value) => {
+                                setCssOptimizeGoogleFonts(value);
+                                updateSetting('css_optimize_google_fonts', value);
+                            }}
+                        />
+
+                        <ToggleControl
+                            label={__('Inject Noscript Fallback', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={__('Add a <noscript> block with the original stylesheet links for users with JavaScript disabled.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            checked={cssOptimizeNoscript}
+                            onChange={(value) => {
+                                setCssOptimizeNoscript(value);
+                                updateSetting('css_optimize_noscript', value);
+                            }}
+                        />
+                    </>
+                }
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
         <Card>
             <CardHeader>
                 <Flex>
