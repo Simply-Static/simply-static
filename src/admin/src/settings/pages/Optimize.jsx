@@ -482,7 +482,7 @@ function Optimize() {
                             <TextareaControl
                                 label={__('Additional Delay Patterns', 'simply-static')}
                                 __nextHasNoMarginBottom
-                                help={__('Additional glob patterns for scripts to delay (one per line). Built-in patterns already cover Google Tag Manager, Google Analytics, HubSpot, Facebook Pixel, Hotjar, Clarity, and Cloudflare Insights.', 'simply-static')}
+                                help={__('Additional glob patterns for scripts to delay (one per line). Built-in patterns already cover Google (Tag Manager, Analytics, Ads, ReCaptcha), HubSpot, Facebook/Meta Pixel, Hotjar, Clarity, Bing UET, Cloudflare (Insights, Turnstile), CleanTalk, Matomo/Piwik, Plausible, Twitter/X, LinkedIn, Pinterest, Tawk.to, Crisp, LiveChat, Intercom, Drift, Tidio, Segment, Amplitude, Mixpanel, Optimizely, Mouseflow, Lucky Orange, Crazy Egg, FullStory, LogRocket, and Sentry.', 'simply-static')}
                                 disabled={('free' === options.plan || !isPro())}
                                 value={settings.css_optimize_delay_js_patterns}
                                 placeholder={'*example-tracking.com*\n*custom-analytics*'}
