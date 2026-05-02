@@ -153,6 +153,7 @@ class Upgrade_Handler {
 			'css_optimize_noscript'           => false,
 			'css_optimize_delay_js'           => false,
 			'css_optimize_delay_js_patterns'  => '',
+			'css_optimize_defer_js_excludes'  => '',
 			'css_optimize_critical_patterns'  => '',
 			'generate_404'                  => false,
             'custom_404_page'              => 0,

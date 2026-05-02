@@ -442,6 +442,20 @@ function Optimize() {
                             }}
                         />
 
+                        {cssOptimizeDeferJs && <>
+                            <TextareaControl
+                                label={__('Defer Exclude Patterns', 'simply-static')}
+                                __nextHasNoMarginBottom
+                                help={__('Additional glob patterns for scripts to exclude from deferral (one per line). Built-in patterns already exclude WordPress core scripts: jQuery, wp-i18n, wp-hooks, wp-url, wp-api-fetch, and wp-api.', 'simply-static')}
+                                disabled={('free' === options.plan || !isPro())}
+                                value={settings.css_optimize_defer_js_excludes}
+                                placeholder={'*my-critical-script.js*\n*another-script*'}
+                                onChange={(patterns) => {
+                                    updateSetting('css_optimize_defer_js_excludes', patterns);
+                                }}
+                            />
+                        </>}
+
                         <ToggleControl
                             label={__('Optimize Google Fonts', 'simply-static')}
                             __nextHasNoMarginBottom

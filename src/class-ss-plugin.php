@@ -448,6 +448,7 @@ class Plugin {
 				)
 			);
 			$total_static_pages = apply_filters( 'ss_total_pages', (int) $count_query->count() );
+			$http_status_codes  = Page::get_http_status_codes_summary();
 		} else {
 			if ( ! empty( $use_single ) ) {
 				// For single exports, count only the pages belonging to the exported post(s).
