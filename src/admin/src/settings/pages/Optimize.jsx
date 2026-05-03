@@ -516,13 +516,18 @@ function Optimize() {
             </CardBody>
         </Card>
         <Spacer margin={5}/>
-        {isStudio() &&
-            <><Card>
+        <Card>
                 <CardHeader>
                     <Flex>
                         <FlexItem>
                             <b>{__('Critical CSS', 'simply-static')}</b>
                         </FlexItem>
+                        {!isStudio() &&
+                            <FlexItem>
+                                <ExternalLink
+                                    href="https://simplystatic.com/simply-static-studio/"> {__('Requires Simply Static Studio', 'simply-static')}</ExternalLink>
+                            </FlexItem>
+                        }
                     </Flex>
                 </CardHeader>
                 <CardBody>
@@ -535,6 +540,7 @@ function Optimize() {
                                 ? __('Critical CSS will be generated during static export.', 'simply-static')
                                 : __('Don\'t generate critical CSS.', 'simply-static')
                         }
+                        disabled={!isStudio()}
                         checked={criticalCss}
                         onChange={(value) => {
                             setCriticalCss(value);
@@ -547,6 +553,7 @@ function Optimize() {
                             label={__('Additional URLs', 'simply-static')}
                             __nextHasNoMarginBottom
                             help={__('By default, critical CSS is generated from the homepage only. Add additional page URLs here (one per line) if those pages have significantly different styles.', 'simply-static')}
+                            disabled={!isStudio()}
                             value={settings.critical_css_additional_urls}
                             placeholder={'https://example.com/about\nhttps://example.com/contact'}
                             onChange={(urls) => {
@@ -557,8 +564,6 @@ function Optimize() {
                 </CardBody>
             </Card>
             <Spacer margin={5}/>
-            </>
-        }
         <Card>
             <CardHeader>
                 <Flex>
