@@ -155,6 +155,8 @@ class Upgrade_Handler {
 			'css_optimize_delay_js_patterns'  => '',
 			'css_optimize_defer_js_excludes'  => '',
 			'css_optimize_critical_patterns'  => '',
+			'use_critical_css'                => false,
+			'critical_css_additional_urls'    => '',
 			'generate_404'                  => false,
             'custom_404_page'              => 0,
 			'add_feeds'                     => false,

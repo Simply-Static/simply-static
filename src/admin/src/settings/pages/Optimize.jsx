@@ -57,6 +57,8 @@ function Optimize() {
     const [cssOptimizeNoscript, setCssOptimizeNoscript] = useState(false);
     const [cssOptimizeDelayJs, setCssOptimizeDelayJs] = useState(false);
 
+    const [criticalCss, setCriticalCss] = useState(false);
+
     const [versionCss, setVersionCss] = useState(false);
     const [versionJs, setVersionJs] = useState(false);
 
@@ -198,6 +200,10 @@ function Optimize() {
 
         if (settings.css_optimize_delay_js) {
             setCssOptimizeDelayJs(settings.css_optimize_delay_js);
+        }
+
+        if (settings.use_critical_css) {
+            setCriticalCss(settings.use_critical_css);
         }
 
         if (settings.version_css) {
@@ -510,6 +516,49 @@ function Optimize() {
             </CardBody>
         </Card>
         <Spacer margin={5}/>
+        {isStudio() &&
+            <><Card>
+                <CardHeader>
+                    <Flex>
+                        <FlexItem>
+                            <b>{__('Critical CSS', 'simply-static')}</b>
+                        </FlexItem>
+                    </Flex>
+                </CardHeader>
+                <CardBody>
+                    <p>{__('Generate critical above-the-fold CSS to eliminate render-blocking stylesheets and improve page load speed. Critical CSS is generated for the homepage and injected into every page.', 'simply-static')}</p>
+                    <ToggleControl
+                        label={__('Enable Critical CSS Generation?', 'simply-static')}
+                        __nextHasNoMarginBottom
+                        help={
+                            criticalCss
+                                ? __('Critical CSS will be generated during static export.', 'simply-static')
+                                : __('Don\'t generate critical CSS.', 'simply-static')
+                        }
+                        checked={criticalCss}
+                        onChange={(value) => {
+                            setCriticalCss(value);
+                            updateSetting('use_critical_css', value);
+                        }}
+                    />
+
+                    {criticalCss && <>
+                        <TextareaControl
+                            label={__('Additional URLs', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={__('By default, critical CSS is generated from the homepage only. Add additional page URLs here (one per line) if those pages have significantly different styles.', 'simply-static')}
+                            value={settings.critical_css_additional_urls}
+                            placeholder={'https://example.com/about\nhttps://example.com/contact'}
+                            onChange={(urls) => {
+                                updateSetting('critical_css_additional_urls', urls);
+                            }}
+                        />
+                    </>}
+                </CardBody>
+            </Card>
+            <Spacer margin={5}/>
+            </>
+        }
         <Card>
             <CardHeader>
                 <Flex>
