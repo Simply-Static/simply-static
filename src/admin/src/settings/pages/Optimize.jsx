@@ -560,6 +560,17 @@ function Optimize() {
                                 updateSetting('critical_css_additional_urls', urls);
                             }}
                         />
+                        <TextareaControl
+                            label={__('Custom CSS', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={__('Add custom CSS that will be appended to the generated critical CSS. Use this to fix minor visual glitches.', 'simply-static')}
+                            disabled={!isStudio()}
+                            value={settings.critical_css_custom}
+                            placeholder={'.header { position: sticky; top: 0; }'}
+                            onChange={(css) => {
+                                updateSetting('critical_css_custom', css);
+                            }}
+                        />
                     </>}
                 </CardBody>
             </Card>
