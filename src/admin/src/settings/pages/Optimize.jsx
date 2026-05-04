@@ -169,6 +169,7 @@ function Optimize() {
 
                 {minifyFiles &&
                     <>
+                        {!isStudio() && <>
                         <h4 style={{marginTop: '16px', marginBottom: '8px'}}>{__('Minify', 'simply-static')}</h4>
 
                         <ToggleControl
@@ -238,6 +239,7 @@ function Optimize() {
                                 updateSetting('css_js_aggregate_protect_jquery', value);
                             }}
                         />
+                        </>}
 
                         <h4 style={{marginTop: '16px', marginBottom: '8px'}}>{__('Aggregate', 'simply-static')}</h4>
 
