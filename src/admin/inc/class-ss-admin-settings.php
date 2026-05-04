@@ -344,6 +344,7 @@ class Admin_Settings {
                 '/forms',
                 '/search',
                 '/optimize',
+                '/hide-wp',
                 '/workflow',
                 '/utilities',
                 '/integrations',

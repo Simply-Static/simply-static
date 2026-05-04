@@ -26,6 +26,7 @@ import IntegrationsSettings from "../pages/IntegrationsSettings";
 import UAMSettings from "../pages/UAMSettings";
 import Generate from "../pages/Generate";
 import Optimize from "../pages/Optimize";
+import HideWP from "../pages/HideWP";
 import Workflow from "../pages/Workflow";
 import {SettingsContext} from "../context/SettingsContext";
 import SidebarMultisite from "./SidebarMultisite";
@@ -186,6 +187,11 @@ function SettingsPage() {
                             {activeItem === '/optimize' &&
                                 <NavigatorScreen path="/optimize">
                                     <Optimize/>
+                                </NavigatorScreen>
+                            }
+                            {activeItem === '/hide-wp' &&
+                                <NavigatorScreen path="/hide-wp">
+                                    <HideWP/>
                                 </NavigatorScreen>
                             }
                             {activeItem === '/workflow' &&

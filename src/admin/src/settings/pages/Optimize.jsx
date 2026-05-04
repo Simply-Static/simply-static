@@ -4,7 +4,6 @@ import {
     CardBody,
     CardHeader,
     __experimentalSpacer as Spacer,
-    __experimentalInputControl as InputControl,
     Notice,
     Animate,
     ToggleControl, TextControl, Dashicon, Flex, FlexItem, ExternalLink, TextareaControl,
@@ -27,35 +26,18 @@ function Optimize() {
         isStudio
     } = useContext(SettingsContext);
     const [minifyFiles, setMinifyFiles] = useState(false);
-    const [minifyHtml, setMinifyHtml] = useState(false);
     const [minifyCss, setMinifyCss] = useState(false);
-    const [minifyInlineCss, setMinifyInlineCss] = useState(false);
     const [minifyJavascript, setMinifyJavascript] = useState(false);
-    const [minifyInlineJavascript, setMinifyInlineJavascript] = useState(false);
-    const [wpContentDirectory, setWpContentDirectory] = useState('wp-content');
-    const [wpIncludesDirectory, setWpIncludesDirectory] = useState('wp-includes');
-    const [wpUploadsDirectory, setWpUploadsDirectory] = useState('uploads');
-    const [wpPluginsDirectory, setWpPluginsDirectory] = useState('plugins');
-    const [wpThemesDirectory, setWpThemesDirectory] = useState('themes');
-    const [themeStyleName, setThemeStyleName] = useState('style');
-    const [authorUrl, setAuthorUrl] = useState('author');
-    const [hideVersion, setHideVersion] = useState(false);
-    const [hidePrefetch, setHidePrefetch] = useState(false);
-    const [hideGenerator, setHideGenerator] = useState(false);
-    const [hideRSD, setHideRSD] = useState(false);
-    const [hideEmojis, setHideEmojis] = useState(false);
-
-    const [disableXMLRPC, setDisableXMLRPC] = useState(false);
-    const [disableEmbed, setDisableEmbed] = useState(false);
-    const [disableDbDebug, setDisableDbDebug] = useState(false);
-    const [disableWLW, setDisableWLW] = useState(false);
 
     const [cssOptimize, setCssOptimize] = useState(false);
     const [cssOptimizeDeferCss, setCssOptimizeDeferCss] = useState(false);
     const [cssOptimizeDeferJs, setCssOptimizeDeferJs] = useState(false);
     const [cssOptimizeGoogleFonts, setCssOptimizeGoogleFonts] = useState(false);
-    const [cssOptimizeNoscript, setCssOptimizeNoscript] = useState(false);
     const [cssOptimizeDelayJs, setCssOptimizeDelayJs] = useState(false);
+
+    const [cssJsAggregateCss, setCssJsAggregateCss] = useState(false);
+    const [cssJsAggregateJs, setCssJsAggregateJs] = useState(false);
+    const [cssJsAggregateProtectJquery, setCssJsAggregateProtectJquery] = useState(false);
 
     const [criticalCss, setCriticalCss] = useState(false);
 
@@ -94,89 +76,14 @@ function Optimize() {
             setMinifyFiles(settings.use_minify);
         }
 
-        if (settings.minify_html) {
-            setMinifyHtml(settings.minify_html);
-        }
-
         if (settings.minify_css) {
             setMinifyCss(settings.minify_css);
-        }
-
-        if (settings.minify_inline_css) {
-            setMinifyInlineCss(settings.minify_inline_css);
         }
 
         if (settings.minify_js) {
             setMinifyJavascript(settings.minify_js);
         }
 
-        if (settings.minify_inline_js) {
-            setMinifyInlineJavascript(settings.minify_inline_js);
-        }
-
-        if (settings.wp_content_directory) {
-            setWpContentDirectory(settings.wp_content_directory);
-        }
-
-        if (settings.wp_includes_directory) {
-            setWpIncludesDirectory(settings.wp_includes_directory);
-        }
-
-        if (settings.wp_uploads_directory) {
-            setWpUploadsDirectory(settings.wp_uploads_directory);
-        }
-
-        if (settings.wp_plugins_directory) {
-            setWpPluginsDirectory(settings.wp_plugins_directory);
-        }
-
-        if (settings.wp_themes_directory) {
-            setWpThemesDirectory(settings.wp_themes_directory);
-        }
-
-        if (settings.theme_style_name) {
-            setThemeStyleName(settings.theme_style_name);
-        }
-
-        if (settings.author_url) {
-            setAuthorUrl(settings.author_url);
-        }
-
-        if (settings.hide_version) {
-            setHideVersion(settings.hide_version);
-        }
-
-        if (settings.hide_generator) {
-            setHideGenerator(settings.hide_generator);
-        }
-
-        if (settings.hide_prefetch) {
-            setHidePrefetch(settings.hide_prefetch);
-        }
-
-        if (settings.hide_rsd) {
-            setHideRSD(settings.hide_rsd);
-        }
-
-        if (settings.hide_emotes) {
-            setHideEmojis(settings.hide_emotes)
-        }
-
-        if (settings.disable_xmlrpc) {
-            setDisableXMLRPC(settings.disable_xmlrpc)
-        }
-
-        if (settings.disable_embed) {
-            setDisableEmbed(settings.disable_embed)
-        }
-
-        if (settings.disable_db_debug) {
-            setDisableDbDebug(settings.disable_db_debug)
-        }
-
-        if (settings.disable_wlw_manifest) {
-            setDisableWLW(settings.disable_wlw_manifest)
-        }
 
         if (settings.use_css_optimize) {
             setCssOptimize(settings.use_css_optimize);
@@ -194,13 +101,22 @@ function Optimize() {
             setCssOptimizeGoogleFonts(settings.css_optimize_google_fonts);
         }
 
-        if (settings.css_optimize_noscript) {
-            setCssOptimizeNoscript(settings.css_optimize_noscript);
-        }
-
         if (settings.css_optimize_delay_js) {
             setCssOptimizeDelayJs(settings.css_optimize_delay_js);
         }
+
+        if (settings.css_js_aggregate_css) {
+            setCssJsAggregateCss(settings.css_js_aggregate_css);
+        }
+
+        if (settings.css_js_aggregate_js) {
+            setCssJsAggregateJs(settings.css_js_aggregate_js);
+        }
+
+        if (settings.css_js_aggregate_protect_jquery) {
+            setCssJsAggregateProtectJquery(settings.css_js_aggregate_protect_jquery);
+        }
+
 
         if (settings.use_critical_css) {
             setCriticalCss(settings.use_critical_css);
@@ -217,11 +133,11 @@ function Optimize() {
     }, [settings]);
 
     return (<div className={"inner-settings"}>
-        {!isStudio() && <Card>
+        <Card>
             <CardHeader>
                 <Flex>
                     <FlexItem>
-                        <b>{__('Minify', 'simply-static')}<HelperVideo
+                        <b>{__('Minify & Aggregation', 'simply-static')}<HelperVideo
                             title={__('How to minify HTML, CSS and JavaScript?', 'simply-static')}
                             videoUrl={'https://youtu.be/52IKv5ai-i4'}/></b>
                     </FlexItem>
@@ -234,13 +150,14 @@ function Optimize() {
                 </Flex>
             </CardHeader>
             <CardBody>
+                <p>{__('Minify and aggregate CSS, JavaScript, and HTML files to reduce file sizes and HTTP requests for faster page loads.', 'simply-static')}</p>
                 <ToggleControl
-                    label={__('Minify Files?', 'simply-static')}
+                    label={__('Enable Minify & Aggregation?', 'simply-static')}
                     __nextHasNoMarginBottom
                     help={
                         minifyFiles
-                            ? __('Enable minify files on your static website.', 'simply-static')
-                            : __('Don\'t enable minify files on your static website.', 'simply-static')
+                            ? __('Minify and aggregate files on your static website.', 'simply-static')
+                            : __('Don\'t minify or aggregate files on your static website.', 'simply-static')
                     }
                     disabled={('free' === options.plan || !isPro())}
                     checked={minifyFiles}
@@ -252,34 +169,7 @@ function Optimize() {
 
                 {minifyFiles &&
                     <>
-                        <ToggleControl
-                            label={__('Minify HTML', 'simply-static')}
-                            __nextHasNoMarginBottom
-                            help={
-                                minifyHtml
-                                    ? __('Minify HTML files.', 'simply-static')
-                                    : __('Don\'t minify HTML files.', 'simply-static')
-                            }
-                            disabled={('free' === options.plan || !isPro())}
-                            checked={minifyHtml}
-                            onChange={(value) => {
-                                setMinifyHtml(value);
-                                updateSetting('minify_html', value);
-                            }}
-                        />
-
-                        {minifyHtml && <ToggleControl
-                            label={__('Leave quotes inside HTML attributes', 'simply-static')}
-                            __nextHasNoMarginBottom
-                            help={
-                                __('If there are issues with comments or JavaScript when minifying HTML, toggle this ON.', 'simply-static')
-                            }
-                            disabled={('free' === options.plan || !isPro())}
-                            checked={!!settings.minify_html_leave_quotes}
-                            onChange={(value) => {
-                                updateSetting('minify_html_leave_quotes', value);
-                            }}
-                        />}
+                        <h4 style={{marginTop: '16px', marginBottom: '8px'}}>{__('Minify', 'simply-static')}</h4>
 
                         <ToggleControl
                             label={__('Minify CSS', 'simply-static')}
@@ -307,23 +197,8 @@ function Optimize() {
                                     updateSetting('minify_css_exclude', excludes);
                                 }}
                             />
-                            <ToggleControl
-                                label={__('Minify Inline CSS', 'simply-static')}
-                                __nextHasNoMarginBottom
-                                help={
-                                    minifyInlineCss
-                                        ? __('Minify Inline CSS.', 'simply-static')
-                                        : __('Don\'t minify Inline CSS.', 'simply-static')
-                                }
-                                disabled={('free' === options.plan || !isPro())}
-                                checked={minifyInlineCss}
-                                onChange={(value) => {
-                                    setMinifyInlineCss(value);
-                                    updateSetting('minify_inline_css', value);
-                                }}
-                            />
-                        </>
-                        }
+                        </>}
+
                         <ToggleControl
                             label={__('Minify JavaScript', 'simply-static')}
                             __nextHasNoMarginBottom
@@ -339,7 +214,6 @@ function Optimize() {
                                 updateSetting('minify_js', value);
                             }}
                         />
-
                         {minifyJavascript && <>
                             <TextareaControl
                                 label={__('Exclude JavaScript URLs', 'simply-static')}
@@ -351,36 +225,68 @@ function Optimize() {
                                     updateSetting('minify_js_exclude', excludes);
                                 }}
                             />
-                            <ToggleControl
-                                label={__('Minify Inline JavaScript', 'simply-static')}
-                                __nextHasNoMarginBottom
-                                help={
-                                    minifyInlineJavascript
-                                        ? __('Minify Inline JavaScript.', 'simply-static')
-                                        : __('Don\'t minify Inline JavaScript.', 'simply-static')
-                                }
-                                disabled={('free' === options.plan || !isPro())}
-                                checked={minifyInlineJavascript}
-                                onChange={(value) => {
-                                    setMinifyInlineJavascript(value);
-                                    updateSetting('minify_inline_js', value);
-                                }}
-                            />
+                        </>}
 
-                        </>
-                        }
+                        <ToggleControl
+                            label={__('Protect jQuery Globals', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={__('Prevent mangling of jQuery, $, and wp global variables during JS minification.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            checked={cssJsAggregateProtectJquery}
+                            onChange={(value) => {
+                                setCssJsAggregateProtectJquery(value);
+                                updateSetting('css_js_aggregate_protect_jquery', value);
+                            }}
+                        />
+
+                        <h4 style={{marginTop: '16px', marginBottom: '8px'}}>{__('Aggregate', 'simply-static')}</h4>
+
+                        <ToggleControl
+                            label={__('Aggregate CSS', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={__('Combine multiple CSS files into fewer bundles grouped by media attribute and deferral status.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            checked={cssJsAggregateCss}
+                            onChange={(value) => {
+                                setCssJsAggregateCss(value);
+                                updateSetting('css_js_aggregate_css', value);
+                            }}
+                        />
+
+                        <ToggleControl
+                            label={__('Aggregate JavaScript', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={__('Combine multiple JS files into fewer bundles grouped by loading attributes (defer, async, delayed) and position (head/body).', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            checked={cssJsAggregateJs}
+                            onChange={(value) => {
+                                setCssJsAggregateJs(value);
+                                updateSetting('css_js_aggregate_js', value);
+                            }}
+                        />
+
+                        <TextareaControl
+                            label={__('Exclude Patterns', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={__('Glob patterns for files to exclude from aggregation (one per line). Use this for scripts that break when concatenated, such as Google Maps init scripts, payment gateway SDKs, or scripts using document.write().', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            value={settings.css_js_aggregate_exclude_patterns}
+                            placeholder={'*maps*\n*stripe*\n*paypal*'}
+                            onChange={(patterns) => {
+                                updateSetting('css_js_aggregate_exclude_patterns', patterns);
+                            }}
+                        />
+
                     </>
                 }
-
-
             </CardBody>
-        </Card>}
+        </Card>
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
                 <Flex>
                     <FlexItem>
-                        <b>{__('CSS & JS Optimizer', 'simply-static')}</b>
+                        <b>{__('Defer & Delay', 'simply-static')}</b>
                     </FlexItem>
                     {('free' === options.plan || !isPro()) &&
                         <FlexItem>
@@ -393,7 +299,7 @@ function Optimize() {
             <CardBody>
                 <p>{__('Eliminate render-blocking CSS and JavaScript resources to improve Lighthouse scores and page load speed.', 'simply-static')}</p>
                 <ToggleControl
-                    label={__('Enable CSS & JS Optimizer?', 'simply-static')}
+                    label={__('Enable Defer & Delay?', 'simply-static')}
                     __nextHasNoMarginBottom
                     help={
                         cssOptimize
@@ -475,18 +381,6 @@ function Optimize() {
                         />
 
                         <ToggleControl
-                            label={__('Inject Noscript Fallback', 'simply-static')}
-                            __nextHasNoMarginBottom
-                            help={__('Add a <noscript> block with the original stylesheet links for users with JavaScript disabled.', 'simply-static')}
-                            disabled={('free' === options.plan || !isPro())}
-                            checked={cssOptimizeNoscript}
-                            onChange={(value) => {
-                                setCssOptimizeNoscript(value);
-                                updateSetting('css_optimize_noscript', value);
-                            }}
-                        />
-
-                        <ToggleControl
                             label={__('Delay Non-Critical JavaScript', 'simply-static')}
                             __nextHasNoMarginBottom
                             help={__('Delay third-party scripts (analytics, tag managers, tracking pixels) until user interaction to reduce Total Blocking Time. Scripts load on first click, scroll, or keypress.', 'simply-static')}
@@ -515,6 +409,98 @@ function Optimize() {
                 }
             </CardBody>
         </Card>
+        <Spacer margin={5}/>
+        {!isStudio() &&
+            <Card>
+                <CardHeader>
+                    <Flex>
+                        <FlexItem>
+                            <b>{__('Image Optimization', 'simply-static')}<HelperVideo
+                                title={__('How to optimize images with ShortPixel?', 'simply-static')}
+                                videoUrl={'https://youtu.be/OIfKcXz3cxY'}/></b>
+                        </FlexItem>
+                        {('free' === options.plan || !isPro()) &&
+                            <FlexItem>
+                                <ExternalLink
+                                    href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
+                            </FlexItem>
+                        }
+                    </Flex>
+                </CardHeader>
+                <CardBody>
+                    <ToggleControl
+                        label={__('Optimize Images with ShortPixel?', 'simply-static')}
+                        __nextHasNoMarginBottom
+                        help={
+                            settings.shortpixel_enabled
+                                ? __('Optimize images with the ShortPixel API.', 'simply-static')
+                                : __('Don\'t optimize images with the ShortPixel API.', 'simply-static')
+                        }
+                        disabled={('free' === options.plan || !isPro())}
+                        checked={!!settings.shortpixel_enabled}
+                        onChange={(value) => {
+                            updateSetting('shortpixel_enabled', value);
+                        }}
+                    />
+
+                    {settings.shortpixel_enabled && <>
+                        <TextControl
+                            label={__('ShortPixel API Key', 'simply-static')}
+                            type={"password"}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            value={settings.shortpixel_api_key}
+                            disabled={('free' === options.plan || !isPro())}
+                            onChange={(apiKey) => {
+                                updateSetting('shortpixel_api_key', apiKey);
+                            }}
+                        />
+                        <ToggleControl
+                            label={__('Convert to webP', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={
+                                settings.shortpixel_webp_enabled
+                                    ? __('Convert images to webp format.', 'simply-static')
+                                    : __('Don\'t convert images to webp format', 'simply-static')
+                            }
+                            checked={!!settings.shortpixel_webp_enabled}
+                            disabled={('free' === options.plan || !isPro())}
+                            onChange={(value) => {
+                                updateSetting('shortpixel_webp_enabled', value);
+                            }}
+                        />
+                        <ToggleControl
+                            label={__('Backup the original images?', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={
+                                settings.shortpixel_backup_enabled
+                                    ? __('Back original images.', 'simply-static')
+                                    : __('Don\'t backup original images.', 'simply-static')
+                            }
+                            checked={!!settings.shortpixel_backup_enabled}
+                            disabled={('free' === options.plan || !isPro())}
+                            onChange={(value) => {
+                                updateSetting('shortpixel_backup_enabled', value);
+                            }}
+                        />
+                        {settings.shortpixel_backup_enabled && <>
+                            <Notice status={'warning'} isDismissible={false}>
+                                {__('It will preserve every image which might increase your disk space usage.', 'simply-static')}
+                            </Notice>
+                            <Spacer padding={1}></Spacer>
+                            <Button disabled={shortPixelResetting} onClick={restoreBackups}
+                                    variant="secondary">
+                                {!shortPixelResetting && __('Restore Original Images', 'simply-static')}
+                                {shortPixelResetting && [
+                                    <Dashicon icon="update spin"/>,
+                                    __('Restoring...', 'simply-static')
+                                ]}
+                            </Button>
+                        </>}
+                    </>}
+                </CardBody>
+            </Card>
+        }
         <Spacer margin={5}/>
         <Card>
                 <CardHeader>
@@ -618,401 +604,6 @@ function Optimize() {
                     onChange={(value) => {
                         setVersionJs(value);
                         updateSetting('version_js', value);
-                    }}
-                />
-            </CardBody>
-        </Card>
-        <Spacer margin={5}/>
-        {!isStudio() &&
-            <Card>
-                <CardHeader>
-                    <Flex>
-                        <FlexItem>
-                            <b>{__('Image Optimization', 'simply-static')}<HelperVideo
-                                title={__('How to optimize images with ShortPixel?', 'simply-static')}
-                                videoUrl={'https://youtu.be/OIfKcXz3cxY'}/></b>
-                        </FlexItem>
-                        {('free' === options.plan || !isPro()) &&
-                            <FlexItem>
-                                <ExternalLink
-                                    href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
-                            </FlexItem>
-                        }
-                    </Flex>
-                </CardHeader>
-                <CardBody>
-                    <ToggleControl
-                        label={__('Optimize Images with ShortPixel?', 'simply-static')}
-                        __nextHasNoMarginBottom
-                        help={
-                            settings.shortpixel_enabled
-                                ? __('Optimize images with the ShortPixel API.', 'simply-static')
-                                : __('Don\'t optimize images with the ShortPixel API.', 'simply-static')
-                        }
-                        disabled={('free' === options.plan || !isPro())}
-                        checked={!!settings.shortpixel_enabled}
-                        onChange={(value) => {
-                            updateSetting('shortpixel_enabled', value);
-                        }}
-                    />
-
-                    {settings.shortpixel_enabled && <>
-                        <TextControl
-                            label={__('ShortPixel API Key', 'simply-static')}
-                            type={"password"}
-                            __next40pxDefaultSize
-                            __nextHasNoMarginBottom
-                            value={settings.shortpixel_api_key}
-                            disabled={('free' === options.plan || !isPro())}
-                            onChange={(apiKey) => {
-                                updateSetting('shortpixel_api_key', apiKey);
-                            }}
-                        />
-                        <ToggleControl
-                            label={__('Convert to webP', 'simply-static')}
-                            __nextHasNoMarginBottom
-                            help={
-                                settings.shortpixel_webp_enabled
-                                    ? __('Convert images to webp format.', 'simply-static')
-                                    : __('Don\'t convert images to webp format', 'simply-static')
-                            }
-                            checked={!!settings.shortpixel_webp_enabled}
-                            disabled={('free' === options.plan || !isPro())}
-                            onChange={(value) => {
-                                updateSetting('shortpixel_webp_enabled', value);
-                            }}
-                        />
-                        <ToggleControl
-                            label={__('Backup the original images?', 'simply-static')}
-                            __nextHasNoMarginBottom
-                            help={
-                                settings.shortpixel_backup_enabled
-                                    ? __('Back original images.', 'simply-static')
-                                    : __('Don\'t backup original images.', 'simply-static')
-                            }
-                            checked={!!settings.shortpixel_backup_enabled}
-                            disabled={('free' === options.plan || !isPro())}
-                            onChange={(value) => {
-                                updateSetting('shortpixel_backup_enabled', value);
-                            }}
-                        />
-                        {settings.shortpixel_backup_enabled && <>
-                            <Notice status={'warning'} isDismissible={false}>
-                                {__('It will preserve every image which might increase your disk space usage.', 'simply-static')}
-                            </Notice>
-                            <Spacer padding={1}></Spacer>
-                            <Button disabled={shortPixelResetting} onClick={restoreBackups}
-                                    variant="secondary">
-                                {!shortPixelResetting && __('Restore Original Images', 'simply-static')}
-                                {shortPixelResetting && [
-                                    <Dashicon icon="update spin"/>,
-                                    __('Restoring...', 'simply-static')
-                                ]}
-                            </Button>
-                        </>}
-                    </>}
-                </CardBody>
-            </Card>
-        }
-        <Spacer margin={5}/>
-        <Card>
-            <CardHeader>
-                <Flex>
-                    <FlexItem>
-                        <b>{__('Replace', 'simply-static')}<HelperVideo
-                            title={__('How to replace WP default paths', 'simply-static')}
-                            videoUrl={'https://youtu.be/GedyNJJMGaY'}/></b>
-                    </FlexItem>
-                    {('free' === options.plan || !isPro()) &&
-                        <FlexItem>
-                            <ExternalLink
-                                href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
-                        </FlexItem>
-                    }
-                </Flex>
-            </CardHeader>
-            <CardBody>
-                <TextControl
-                    label={__('wp-content directory', 'simply-static')}
-                    help={__('Replace the "wp-content" directory.', 'simply-static')}
-                    disabled={('free' === options.plan || !isPro())}
-                    type={"text"}
-                    placeholder={"wp-content"}
-                    __next40pxDefaultSize
-                    __nextHasNoMarginBottom
-                    value={wpContentDirectory}
-                    onChange={(directory) => {
-                        updateSetting('wp_content_directory', directory);
-                    }}
-                />
-
-                <TextControl
-                    label={__('wp-includes directory', 'simply-static')}
-                    help={__('Replace the "wp-includes" directory.', 'simply-static')}
-                    disabled={('free' === options.plan || !isPro())}
-                    type={"text"}
-                    placeholder={"wp-includes"}
-                    __next40pxDefaultSize
-                    __nextHasNoMarginBottom
-                    value={wpIncludesDirectory}
-                    onChange={(directory) => {
-                        updateSetting('wp_includes_directory', directory);
-                    }}
-                />
-
-                <div className="ss-directory-input-group">
-                    <label className="components-base-control__label">{__('Uploads directory', 'simply-static')}</label>
-                    <Flex align="flex-start" gap={0}>
-                        <FlexItem>
-                            <TextControl
-                                disabled={true}
-                                type={"text"}
-                                __next40pxDefaultSize
-                                __nextHasNoMarginBottom
-                                value={wpContentDirectory + '/'}
-                                className="ss-directory-prefix"
-                            />
-                        </FlexItem>
-                        <FlexItem isBlock>
-                            <TextControl
-                                disabled={('free' === options.plan || !isPro())}
-                                type={"text"}
-                                placeholder={"uploads"}
-                                __next40pxDefaultSize
-                                __nextHasNoMarginBottom
-                                value={wpUploadsDirectory}
-                                onChange={(directory) => {
-                                    setWpUploadsDirectory(directory);
-                                    updateSetting('wp_uploads_directory', directory);
-                                }}
-                            />
-                        </FlexItem>
-                    </Flex>
-                    <p className="components-base-control__help">{__('Replace the "wp-content/uploads" directory.', 'simply-static')}</p>
-                </div>
-
-                <div className="ss-directory-input-group">
-                    <label className="components-base-control__label">{__('Plugins directory', 'simply-static')}</label>
-                    <Flex align="flex-start" gap={0}>
-                        <FlexItem>
-                            <TextControl
-                                disabled={true}
-                                type={"text"}
-                                __next40pxDefaultSize
-                                __nextHasNoMarginBottom
-                                value={wpContentDirectory + '/'}
-                                className="ss-directory-prefix"
-                            />
-                        </FlexItem>
-                        <FlexItem isBlock>
-                            <TextControl
-                                disabled={('free' === options.plan || !isPro())}
-                                type={"text"}
-                                placeholder={"plugins"}
-                                __next40pxDefaultSize
-                                __nextHasNoMarginBottom
-                                value={wpPluginsDirectory}
-                                onChange={(directory) => {
-                                    setWpPluginsDirectory(directory);
-                                    updateSetting('wp_plugins_directory', directory);
-                                }}
-                            />
-                        </FlexItem>
-                    </Flex>
-                    <p className="components-base-control__help">{__('Replace the "wp-content/plugins" directory.', 'simply-static')}</p>
-                </div>
-
-                <div className="ss-directory-input-group">
-                    <label className="components-base-control__label">{__('Themes directory', 'simply-static')}</label>
-                    <Flex align="flex-start" gap={0}>
-                        <FlexItem>
-                            <TextControl
-                                disabled={true}
-                                type={"text"}
-                                __next40pxDefaultSize
-                                __nextHasNoMarginBottom
-                                value={wpContentDirectory + '/'}
-                                className="ss-directory-prefix"
-                            />
-                        </FlexItem>
-                        <FlexItem isBlock>
-                            <TextControl
-                                disabled={('free' === options.plan || !isPro())}
-                                type={"text"}
-                                placeholder={"themes"}
-                                __next40pxDefaultSize
-                                __nextHasNoMarginBottom
-                                value={wpThemesDirectory}
-                                onChange={(directory) => {
-                                    setWpThemesDirectory(directory);
-                                    updateSetting('wp_themes_directory', directory);
-                                }}
-                            />
-                        </FlexItem>
-                    </Flex>
-                    <p className="components-base-control__help">{__('Replace the "wp-content/themes" directory.', 'simply-static')}</p>
-                </div>
-
-                <InputControl
-                    label={__('Theme style name', 'simply-static')}
-                    help={__('Replace the style.css filename.', 'simply-static')}
-                    disabled={('free' === options.plan || !isPro())}
-                    type={"text"}
-                    className={"ss-theme-style-name"}
-                    suffix={'.css'}
-                    placeholder={"style"}
-                    __next40pxDefaultSize
-                    __nextHasNoMarginBottom
-                    value={themeStyleName}
-                    onChange={(style) => {
-                        setThemeStyleName(style);
-                        updateSetting('theme_style_name', style);
-                    }}
-                />
-
-                <TextControl
-                    label={__('Author URL', 'simply-static')}
-                    help={__('Replace the author url.', 'simply-static')}
-                    disabled={('free' === options.plan || !isPro())}
-                    type={"text"}
-                    placeholder={"author"}
-                    __next40pxDefaultSize
-                    __nextHasNoMarginBottom
-                    value={authorUrl}
-                    onChange={(url) => {
-                        setAuthorUrl(url);
-                        updateSetting('author_url', url);
-                    }}
-                />
-
-            </CardBody>
-        </Card>
-        <Spacer margin={5}/>
-        <Card>
-            <CardHeader>
-                <Flex>
-                    <FlexItem>
-                        <b>{__('Hide', 'simply-static')}<HelperVideo
-                            title={__('How to hide and disable WP core features', 'simply-static')}
-                            videoUrl={'https://youtu.be/GijIsrfFB8o'}/></b>
-                    </FlexItem>
-                    {('free' === options.plan || !isPro()) &&
-                        <FlexItem>
-                            <ExternalLink
-                                href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
-                        </FlexItem>
-                    }
-                </Flex>
-            </CardHeader>
-            <CardBody>
-                <ToggleControl
-                    label={__('Hide WordPress Version', 'simply-static')}
-                    __nextHasNoMarginBottom
-                    checked={hideVersion}
-                    disabled={('free' === options.plan || !isPro())}
-                    onChange={(value) => {
-                        setHideVersion(value);
-                        updateSetting('hide_version', value);
-                    }}
-                />
-                <ToggleControl
-                    label={__('Hide WordPress Generator Meta', 'simply-static')}
-                    __nextHasNoMarginBottom
-                    checked={hideGenerator}
-                    disabled={('free' === options.plan || !isPro())}
-                    onChange={(value) => {
-                        setHideGenerator(value);
-                        updateSetting('hide_generator', value);
-                    }}
-                />
-                <ToggleControl
-                    label={__('Hide DNS Prefetch WordPress link', 'simply-static')}
-                    __nextHasNoMarginBottom
-                    checked={hidePrefetch}
-                    disabled={('free' === options.plan || !isPro())}
-                    onChange={(value) => {
-                        setHidePrefetch(value);
-                        updateSetting('hide_prefetch', value);
-                    }}
-                />
-                <ToggleControl
-                    label={__('Hide RSD Header', 'simply-static')}
-                    __nextHasNoMarginBottom
-                    checked={hideRSD}
-                    disabled={('free' === options.plan || !isPro())}
-                    onChange={(value) => {
-                        setHideRSD(value);
-                        updateSetting('hide_rsd', value);
-                    }}
-                />
-            </CardBody>
-        </Card>
-        <Spacer margin={5}/>
-        <Card>
-            <CardHeader>
-                <Flex>
-                    <FlexItem>
-                        <b>{__('Disable', 'simply-static')}<HelperVideo
-                            title={__('How to hide and disable WP core features', 'simply-static')}
-                            videoUrl={'https://youtu.be/GijIsrfFB8o'}/></b>
-                    </FlexItem>
-                    {('free' === options.plan || !isPro()) &&
-                        <FlexItem>
-                            <ExternalLink
-                                href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
-                        </FlexItem>
-                    }
-                </Flex>
-            </CardHeader>
-            <CardBody>
-                <ToggleControl
-                    label={__('Disable XML-RPC', 'simply-static')}
-                    __nextHasNoMarginBottom
-                    checked={disableXMLRPC}
-                    disabled={('free' === options.plan || !isPro())}
-                    onChange={(value) => {
-                        setDisableXMLRPC(value);
-                        updateSetting('disable_xmlrpc', value);
-                    }}
-                />
-                <ToggleControl
-                    label={__('Disable Embed Scripts', 'simply-static')}
-                    __nextHasNoMarginBottom
-                    checked={disableEmbed}
-                    disabled={('free' === options.plan || !isPro())}
-                    onChange={(value) => {
-                        setDisableEmbed(value);
-                        updateSetting('disable_embed', value);
-                    }}
-                />
-                <ToggleControl
-                    label={__('Disable DB Debug in Frontend', 'simply-static')}
-                    __nextHasNoMarginBottom
-                    checked={disableDbDebug}
-                    disabled={('free' === options.plan || !isPro())}
-                    onChange={(value) => {
-                        setDisableDbDebug(value);
-                        updateSetting('disable_db_debug', value);
-                    }}
-                />
-                <ToggleControl
-                    label={__('Disable WLW Manifest Scripts', 'simply-static')}
-                    __nextHasNoMarginBottom
-                    checked={disableWLW}
-                    disabled={('free' === options.plan || !isPro())}
-                    onChange={(value) => {
-                        setDisableWLW(value);
-                        updateSetting('disable_wlw_manifest', value);
-                    }}
-                />
-                <ToggleControl
-                    label={__('Disable Emojis', 'simply-static')}
-                    __nextHasNoMarginBottom
-                    checked={hideEmojis}
-                    disabled={('free' === options.plan || !isPro())}
-                    onChange={(value) => {
-                        setHideEmojis(value);
-                        updateSetting('hide_emotes', value);
                     }}
                 />
             </CardBody>

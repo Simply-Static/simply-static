@@ -32,6 +32,7 @@ function UAMSettings() {
         { key: 'forms', label: __('Forms', 'simply-static'), route: '/forms' },
         { key: 'search', label: __('Search', 'simply-static'), route: '/search' },
         { key: 'optimize', label: __('Optimize', 'simply-static'), route: '/optimize' },
+        { key: 'hide-wp', label: __('Hide WP', 'simply-static'), route: '/hide-wp' },
         { key: 'workflow', label: __('Workflow', 'simply-static'), route: '/workflow' },
     ]), []);
 

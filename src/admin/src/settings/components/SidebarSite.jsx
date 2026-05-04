@@ -225,7 +225,7 @@ function SidebarSite( props = null ) {
 
     // Section visibility: hide entire card sections when none of their pages are allowed
     const hasAnyTools = ['/', '/diagnostics'].some(isAllowed);
-    const hasAnySettings = ['/general', '/deployment', '/forms', '/search', '/optimize', '/workflow'].some(isAllowed);
+    const hasAnySettings = ['/general', '/deployment', '/forms', '/search', '/optimize', '/hide-wp', '/workflow'].some(isAllowed);
     // Include UAM route in Advanced only as a possible member; if UAM is disabled server-side it won't be in allowed_pages anyway
     const hasAnyAdvanced = ['/integrations', '/utilities', '/debug', '/uam'].some(isAllowed);
 
@@ -434,14 +434,14 @@ function SidebarSite( props = null ) {
                         <Dashicon icon="dashboard"/> {__('Optimize', 'simply-static')}
                     </NavigatorButton>
                     )}
-                    {isAllowed('/workflow') && (
+                    {isAllowed('/hide-wp') && (
                     <NavigatorButton onClick={() => {
-                        setActiveItem('/workflow')
+                        setActiveItem('/hide-wp')
                         setShowMobileNav(!showMobileNav);
                     }}
-                                     className={activeItem === '/workflow' ? 'is-active-item' : ''}
-                                     path="/workflow">
-                        <Dashicon icon="randomize"/> {__('Workflow', 'simply-static')}
+                                     className={activeItem === '/hide-wp' ? 'is-active-item' : ''}
+                                     path="/hide-wp">
+                        <Dashicon icon="hidden"/> {__('Hide WP', 'simply-static')}
                     </NavigatorButton>
                     )}
                 </>
@@ -457,6 +457,16 @@ function SidebarSite( props = null ) {
                              className={activeItem === '/integrations' ? 'is-active-item' : ''}
                              path="/integrations">
                 <Dashicon icon="block-default"/> {__('Integrations', 'simply-static')}
+            </NavigatorButton>
+            )}
+            {isAllowed('/workflow') && (
+            <NavigatorButton onClick={() => {
+                setActiveItem('/workflow')
+                setShowMobileNav(!showMobileNav);
+            }}
+                             className={activeItem === '/workflow' ? 'is-active-item' : ''}
+                             path="/workflow">
+                <Dashicon icon="randomize"/> {__('Workflow', 'simply-static')}
             </NavigatorButton>
             )}
             {isAllowed('/utilities') && (

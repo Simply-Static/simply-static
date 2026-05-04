@@ -58,9 +58,10 @@ class Discover_Urls_Task extends Task {
 			// Only show individual crawler messages for full exports
 			$generate_type = $this->options->get( 'generate_type' );
 			if ( $generate_type === 'export' ) {
-				// Save the status message
-				$message = sprintf( __( "Added %d URLs via %s Crawler", 'simply-static' ),
-					$urls_added, 
+ 				// Save the status message
+				$message = sprintf(
+					_n( 'Added %d URL via %s Crawler', 'Added %d URLs via %s Crawler', $urls_added, 'simply-static' ),
+					$urls_added,
 					$crawler->js_object()['name']
 				);
 				$this->save_status_message( $message );
@@ -78,7 +79,10 @@ class Discover_Urls_Task extends Task {
 		$generate_type = $this->options->get( 'generate_type' );
 		if ( $generate_type === 'export' ) {
 			// Save the final status message
-			$message = sprintf( __( "Added %d URLs via Crawler", 'simply-static' ), $new_urls_for_export );
+ 		$message = sprintf(
+ 			_n( 'Added %d URL via Crawler', 'Added %d URLs via Crawler', $new_urls_for_export, 'simply-static' ),
+ 			$new_urls_for_export
+ 		);
 			$this->save_status_message( $message );
 		}
 
