@@ -52,7 +52,7 @@ Your WordPress site stays private and secure. Your static site is what visitors 
 The free version is perfect for simple static exports, but if you need advanced deployment, automation, and powerful features, check out our premium solutions.
 
 = Simply Static Pro - For Developers & Agencies =
-$99/year per site | $299/year unlimited sites
+$129/year per site | $399/year unlimited sites
 Deploy to any platform. Automate everything. Keep 100% of your profit margins.
 
 * Deploy to GitHub, Netlify, Cloudflare Pages, AWS S3, BunnyCDN, SFTP
@@ -71,7 +71,7 @@ Perfect for developers self-hosting client sites, agencies managing infrastructu
 [Get Simply Static Pro](https://simplystatic.com/simply-static-pro/)
 
 = Simply Static Studio - For Businesses & Content Creators =
-From $11/month
+From $19/month
 All-in-one managed WordPress hosting. Zero maintenance. Maximum security.
 
 * Fully managed WordPress hosting
@@ -201,8 +201,8 @@ Yes! The core plugin is 100% free and open source. It provides everything you ne
 Simply Static Pro and Studio are optional premium products for advanced features like automated deployment, forms, search, and managed hosting.
 = What's the difference between the free plugin, Pro, and Studio? =
 Free: Generate static sites, export as ZIP or to local directory. Perfect for testing and simple exports.
-Pro ($99-299/year): Advanced deployment, automation, forms, search, WP-CLI. For developers and agencies self-hosting.
-Studio (from $11/month): All-in-one managed hosting. We handle WordPress, static hosting, backups, SSL, everything. For businesses who want zero maintenance.
+Pro ($129-399/year): Advanced deployment, automation, forms, search, WP-CLI. For developers and agencies self-hosting.
+Studio (from $19/month): All-in-one managed hosting. We handle WordPress, static hosting, backups, SSL, everything. For businesses who want zero maintenance.
 See detailed comparison
 = Can I use the free version for production sites? =
 Yes, but you'll need to manually upload the ZIP file to your hosting provider each time you update your site.
