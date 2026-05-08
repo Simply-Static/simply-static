@@ -59,6 +59,9 @@ class Post_Type_Crawler extends Crawler {
 			$post_types = array_intersect( $post_types, $options['post_types'] );
 		}
 
+		// Collect IDs of all currently published posts so we can clean up stale entries.
+		$published_post_ids = [];
+
 		foreach ( $post_types as $post_type ) {
 			// Skip attachments as they're handled differently
 			if ( $post_type === 'attachment' ) {
@@ -73,6 +76,7 @@ class Post_Type_Crawler extends Crawler {
 			] );
 
 			foreach ( $posts as $post ) {
+				$published_post_ids[] = $post->ID;
 				$permalink = get_permalink( $post->ID );
 
 				if ( ! is_string( $permalink ) ) {
@@ -83,6 +87,30 @@ class Post_Type_Crawler extends Crawler {
 			}
 		}
 
+		// Remove stale pages table entries for posts that are no longer published
+		// (e.g. trashed, drafted, or deleted). This prevents non-full exports from
+		// re-fetching content that should no longer appear on the static site.
+		$this->cleanup_non_published_pages( $published_post_ids );
+
 		return $post_urls;
+	}
+
+	/**
+	 * Remove pages table entries whose post_id refers to a post that is no longer published.
+	 *
+	 * @param array $published_post_ids IDs of all currently published posts.
+	 */
+	private function cleanup_non_published_pages( array $published_post_ids ) : void {
+		global $wpdb;
+		$table = $wpdb->prefix . 'simply_static_pages';
+
+		if ( empty( $published_post_ids ) ) {
+			// Delete all rows that have a post_id set (none are published).
+			$wpdb->query( "DELETE FROM {$table} WHERE post_id IS NOT NULL AND post_id > 0" );
+			return;
+		}
+
+		$ids_placeholder = implode( ',', array_map( 'intval', $published_post_ids ) );
+		$wpdb->query( "DELETE FROM {$table} WHERE post_id IS NOT NULL AND post_id > 0 AND post_id NOT IN ({$ids_placeholder})" );
 	}
 }
