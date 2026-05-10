@@ -76,25 +76,6 @@ class Page extends Model {
 	protected static $primary_key = 'id';
 
 	/**
-	 * Save the page to the database.
-	 *
-	 * Automatically sets `site_id` to the current blog ID when it has not
-	 * been explicitly assigned.  This is required because compose_query()
-	 * appends `AND site_id = <current_blog_id>` to every Page SELECT /
-	 * UPDATE / DELETE, so rows inserted without a site_id (NULL) become
-	 * invisible to all subsequent queries.
-	 *
-	 * @return boolean
-	 */
-	public function save() {
-		if ( $this->site_id === null ) {
-			$this->site_id = get_current_blog_id();
-		}
-
-		return parent::save();
-	}
-
-	/**
 	 * Get the number of pages for each group of status codes, e.g. 1xx, 2xx, 3xx
 	 *
 	 * @return array Assoc. array of status code to number of pages, e.g. '2' => 183
