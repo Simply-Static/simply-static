@@ -160,6 +160,13 @@ class Archive_Creation_Job extends Background_Process {
 			// Set the current site ID for multisite support
 			$this->set_current_site_id( $blog_id );
 
+			// Clear any stale process lock left behind by a previous crashed or
+			// timed-out run. Without this, dispatch() silently returns false when
+			// is_processing() finds an orphaned transient lock, and because the
+			// early return happens before schedule_event(), no cron healthcheck
+			// is registered either — leaving the job permanently stuck.
+			$this->unlock_process();
+
 			$this->push_to_queue( $first_task )
 			     ->save()
 			     ->dispatch();

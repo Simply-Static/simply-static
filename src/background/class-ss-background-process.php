@@ -160,8 +160,14 @@ abstract class Background_Process extends Async_Request {
 	 * @return array|WP_Error|false HTTP Response array, WP_Error on failure, or false if not attempted.
 	 */
 	public function dispatch() {
+		// Always schedule the cron healthcheck first, so that even if the
+		// dispatch is skipped (e.g. process lock still held), the cron can
+		// recover and re-attempt processing later.
+		$this->schedule_event();
+
 		if ( $this->is_processing() ) {
 			// Process already running.
+			Util::debug_log( 'Dispatch skipped: background process is already running (lock held).' );
 			return false;
 		}
 
@@ -177,9 +183,6 @@ abstract class Background_Process extends Async_Request {
 
 			return false;
 		}
-
-		// Schedule the cron healthcheck.
-		$this->schedule_event();
 
 		// If the loopback is known to be broken, skip the remote POST and
 		// process the queue inline via a shutdown function.
