@@ -175,7 +175,7 @@ class Post_Type_Crawler extends Crawler {
 					[ '%s', '%s', '%s', '%d', '%s', '%d', '%s', '%s', '%s', '%s' ]
 				);
 			}
-			
+
 			do_action( 'ss_cleanup_stale_static_page', $url, $file_path, $post_id );
 		}
 	}
