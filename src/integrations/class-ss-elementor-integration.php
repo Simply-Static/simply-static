@@ -73,6 +73,10 @@ class Elementor_Integration extends Integration {
 			add_action( 'ss_after_setup_task', [ $this, 'register_assets' ] );
 		}
 
+		// Always register Google Fonts files regardless of smart_crawl to prevent
+		// CORS issues when the static site serves font CSS with unreplaced origin URLs.
+		add_action( 'ss_after_setup_task', [ $this, 'register_google_fonts' ] );
+
 		add_action( 'ssp_before_form_template_scripts', [ $this, 'dequeue_scripts' ] );
 
 		if ( class_exists( 'simply_static_pro\Single' ) ) {
@@ -400,6 +404,41 @@ class Elementor_Integration extends Integration {
 			/** @var \Simply_Static\Page $static_page */
 			$static_page = Page::query()->find_or_initialize_by( 'url', $url );
 			$static_page->set_status_message( __( 'Elementor Asset', 'simply-static' ) );
+			$static_page->found_on_id = 0;
+			$static_page->save();
+		}
+	}
+
+	/**
+	 * Register Elementor Google Fonts CSS and font files to the export queue.
+	 *
+	 * Elementor's self-hosted Google Fonts feature stores CSS and font files in
+	 * wp-content/uploads/elementor/google-fonts/. These must always be included
+	 * in the static export so the URL extractor can replace origin URLs inside
+	 * the CSS files, preventing CORS errors on the static site.
+	 *
+	 * @return void
+	 */
+	public function register_google_fonts() {
+		$upload_dir = wp_upload_dir();
+		$gf_base    = $upload_dir['basedir'] . '/elementor/google-fonts';
+
+		if ( ! is_dir( $gf_base ) ) {
+			return;
+		}
+
+		$gf_base_url = $upload_dir['baseurl'] . '/elementor/google-fonts';
+		$file_paths  = $this->get_files_in_dir( $gf_base );
+
+		foreach ( $file_paths as $file_path ) {
+			// Build the URL by replacing the filesystem base with the URL base.
+			$relative = str_replace( $gf_base, '', $file_path );
+			$url      = $gf_base_url . $relative;
+
+			Util::debug_log( 'Adding Elementor Google Font asset to queue: ' . $url );
+			/** @var \Simply_Static\Page $static_page */
+			$static_page = Page::query()->find_or_initialize_by( 'url', $url );
+			$static_page->set_status_message( __( 'Elementor Google Font', 'simply-static' ) );
 			$static_page->found_on_id = 0;
 			$static_page->save();
 		}
