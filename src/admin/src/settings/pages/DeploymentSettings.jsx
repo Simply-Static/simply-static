@@ -1010,6 +1010,16 @@ function DeploymentSettings() {
                             }}
                         />
 
+                        <ToggleControl
+                            label={__('Bulk upload via zip archive', 'simply-static')}
+                            help={__('Instead of uploading files one by one, this creates a zip archive locally, uploads it as a single file, and extracts it on the remote server. This can significantly speed up deployments with many files. Requires unzip or python3 on the remote server.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            checked={settings.sftp_bulk_upload}
+                            onChange={(value) => {
+                                updateSetting('sftp_bulk_upload', value);
+                            }}
+                        />
+
                     </CardBody>
                 </Card>
             }

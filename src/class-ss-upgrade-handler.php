@@ -185,6 +185,7 @@ class Upgrade_Handler {
 			'sftp_pass'                     => '',
 			'sftp_folder'                   => '',
 			'sftp_port'                     => 22,
+			'sftp_bulk_upload'              => false,
 			'archive_status_messages'       => array(),
 			'pages_status'                  => array(),
 			'archive_name'                  => null,

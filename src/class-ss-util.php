@@ -1749,6 +1749,7 @@ class Util {
 			'tiiny_deploy',
 			'aws_deploy',
 			'sftp_deploy',
+			'sftp_bulk_deploy',
 		];
 
 		foreach ( $tasks as $task ) {
