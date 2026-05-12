@@ -39,6 +39,7 @@ class Url_Extractor {
 			'srcset',
 			'data-src',
 			'data-srcset',
+			'data-lazy-srcset',
 			'data-bg'
 		),
 		'use'     => array( 'href' ),
@@ -738,6 +739,33 @@ class Url_Extractor {
 					continue;
 				}
 
+				// Handle srcset-like data attributes (e.g. data-lazy-srcset, data-srcset)
+				// by processing each entry individually instead of treating the whole value as one URL.
+				if ( preg_match( '/srcset$/i', $attr_name ) ) {
+					$updated_entries = array();
+					foreach ( preg_split( '/,(?:\s*(?=https?:\/\/|\/\/|\/[^\/])|\s+)/', $value ) as $srcset_entry ) {
+						$srcset_entry = trim( $srcset_entry );
+						if ( $srcset_entry === '' ) {
+							continue;
+						}
+						// Separate the URL from the optional width/density descriptor (e.g. "1500w", "2x").
+						$descriptor = '';
+						$url_part   = $srcset_entry;
+						if ( preg_match( '/^(.*\S)\s+([\d.]+[xw])\s*$/i', $srcset_entry, $entry_match ) ) {
+							$url_part   = $entry_match[1];
+							$descriptor = ' ' . $entry_match[2];
+						}
+						// Skip pure-number artifacts (bare descriptors parsed without a URL).
+						if ( preg_match( '/^\d+$/', trim( $url_part ) ) ) {
+							continue;
+						}
+						$updated_url       = $this->add_to_extracted_urls( $url_part );
+						$updated_entries[] = ( ! is_null( $updated_url ) && $updated_url !== '' ? $updated_url : $url_part ) . $descriptor;
+					}
+					$element->setAttribute( $attr_name, implode( ', ', $updated_entries ) );
+					continue;
+				}
+
 				// Try to process as a URL and replace with the destination.
 				$updated_url = $this->add_to_extracted_urls( $value );
 
@@ -839,7 +867,7 @@ class Url_Extractor {
 					}
  			} else {
  				// srcset is a fair bit different from most html
- 				if ( $attribute_name === 'srcset' || $attribute_name === 'data-srcset' ) {
+ 				if ( preg_match( '/srcset$/i', $attribute_name ) ) {
  					// Process each srcset entry individually and reconstruct the attribute.
  					// This avoids str_replace substring collisions that would corrupt Cloudinary
  					// transformation parameters like f_auto,q_auto or w_300,h_195,c_scale which
