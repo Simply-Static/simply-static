@@ -169,7 +169,9 @@ abstract class Async_Request {
 	 */
 	public function maybe_handle() {
 		// Don't lock up other requests while processing.
-		session_write_close();
+		if ( function_exists( 'session_write_close' ) ) {
+			session_write_close();
+		}
 
 		check_ajax_referer( $this->identifier, 'nonce' );
 

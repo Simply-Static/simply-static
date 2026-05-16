@@ -603,7 +603,9 @@ abstract class Background_Process extends Async_Request {
 	 */
 	public function maybe_handle() {
 		// Don't lock up other requests while processing.
-		session_write_close();
+		if ( function_exists( 'session_write_close' ) ) {
+			session_write_close();
+		}
 
 		Util::debug_log( "Maybe handling: Site ID: " . get_current_blog_id() );
 		$this->set_current_site_id( get_current_blog_id() );
