@@ -18,6 +18,12 @@ class Url_Fetcher {
 	const TIMEOUT = 30;
 
 	/**
+	 * Default desktop User-Agent used for crawling.
+	 * @var string
+	 */
+	const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Simply-Static';
+
+	/**
 	 * Singleton instance
 	 * @var Simply_Static\Url_Fetcher
 	 */
@@ -166,12 +172,13 @@ class Url_Fetcher {
 				}
 				// Attempt 2: Do a non-streamed request and write body manually.
 				if ( ! $recovered ) {
-					$alt_args          = array(
+ 				$alt_args          = array(
 						'timeout'     => self::TIMEOUT,
-						'user-agent'  => 'Simply Static/' . SIMPLY_STATIC_VERSION,
+						'user-agent'  => apply_filters( 'ss_crawler_user_agent', self::DEFAULT_USER_AGENT ),
 						'sslverify'   => false,
 						'redirection' => 0,
 						'blocking'    => true,
+						'decompress'  => true,
 					);
 					$basic_auth_digest = base64_encode( Options::instance()->get( 'http_basic_auth_username' ) . ':' . Options::instance()->get( 'http_basic_auth_password' ) );
 					if ( $basic_auth_digest ) {
@@ -507,12 +514,28 @@ class Url_Fetcher {
 
 		Util::debug_log( "Fetching URL: " . $url );
 
+		/**
+		 * Filter the User-Agent string used by the Simply Static crawler.
+		 *
+		 * By default a desktop Chrome User-Agent is used so that themes/servers
+		 * deliver the full desktop version of the site. Return a different string
+		 * to override (e.g. a custom mobile UA).
+		 *
+		 * @param string $user_agent Default desktop User-Agent.
+		 */
+		$user_agent = apply_filters( 'ss_crawler_user_agent', self::DEFAULT_USER_AGENT );
+
 		$args = array(
 			'timeout'     => self::TIMEOUT,
-			'user-agent'  => 'Simply Static/' . SIMPLY_STATIC_VERSION,
+			'user-agent'  => $user_agent,
 			'sslverify'   => false,
 			'redirection' => 0, // disable redirection.
 			'blocking'    => true,
+			'decompress'  => true, // ensure WordPress decompresses gzip/deflate responses.
+		);
+
+		$headers = array(
+			'Accept-Encoding' => 'identity', // request uncompressed content to avoid gzip issues with streamed downloads.
 		);
 
 		if ( $filename ) {
@@ -521,8 +544,10 @@ class Url_Fetcher {
 		}
 
 		if ( $basic_auth_digest ) {
-			$args['headers'] = array( 'Authorization' => 'Basic ' . $basic_auth_digest );
+			$headers['Authorization'] = 'Basic ' . $basic_auth_digest;
 		}
+
+		$args['headers'] = $headers;
 
 		return wp_remote_get( $url, apply_filters( 'ss_remote_get_args', $args ) );
 	}
