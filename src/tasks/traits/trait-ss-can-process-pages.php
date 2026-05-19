@@ -80,6 +80,21 @@ trait canProcessPages {
 	}
 
 	/**
+	 * Maximum number of seconds process_pages() should run before yielding
+	 * back to the background process dispatcher.
+	 *
+	 * Keeping this well below typical server hard-kill limits (60-120 s)
+	 * prevents the PHP process from being terminated mid-batch, which
+	 * would break the inline-dispatch shutdown-function chain on
+	 * restricted hosting environments (WP Engine, Flywheel, etc.).
+	 *
+	 * Filterable via `simply_static_max_batch_time`.
+	 *
+	 * @var int
+	 */
+	protected $max_batch_time = 50;
+
+	/**
 	 * Process Pages that have to be processed/transferred.
 	 *
 	 * @return bool If true, it's done with all pages. If false, there are still pages to process/transfer.
@@ -90,7 +105,7 @@ trait canProcessPages {
 		$total_pages            = $this->get_total_pages();
 		$pages_to_process_count = count( $pages_to_process );
 
-		Util::debug_log( "TEST. Total pages: " . $total_pages . '; Pages remaining: ' . $pages_to_process_count );
+		Util::debug_log( "Total pages: " . $total_pages . '; Pages remaining: ' . $pages_to_process_count );
 
 		if ( $pages_to_process_count === 0 ) {
 			$processed_pages = $this->get_processed_pages();
@@ -105,7 +120,18 @@ trait canProcessPages {
 			return true; // No Pages to process anymore. It's done.
 		}
 
+		// Time-limit awareness: yield back to handle() before the server
+		// hard-kills the PHP process on restricted hosting.
+		$batch_start    = time();
+		$max_batch_time = (int) apply_filters( 'simply_static_max_batch_time', $this->max_batch_time );
+
  	while ( $static_page = array_shift( $pages_to_process ) ) {
+			// Yield if we are approaching the time limit.
+			if ( ( time() - $batch_start ) >= $max_batch_time ) {
+				Util::debug_log( 'Batch time limit (' . $max_batch_time . 's) reached; yielding to allow re-dispatch.' );
+				break;
+			}
+
 			if ( method_exists( $this, 'check_if_running' ) ) {
 				$this->check_if_running();
 			}
@@ -141,6 +167,11 @@ trait canProcessPages {
 
 				$static_page->{$this->processing_column} = Util::formatted_datetime();
 				$static_page->save();
+
+				// Refresh the background-process lock after each page so it
+				// does not expire during long batches, which would cause the
+				// cron healthcheck to spawn a concurrent worker.
+				$this->maybe_refresh_process_lock();
 			} catch ( Skip_Further_Processing_Exception $e ) {
 				Util::debug_log( 'Encountered Processing Error. We are skipping further until next iteration. Error: ' . $e->getMessage() );
 				// Reset the claim so the page can be retried on next iteration.
@@ -357,6 +388,28 @@ trait canProcessPages {
 		}
 
 		return $query;
+	}
+
+	/**
+	 * Refresh the background-process lock to prevent it from expiring
+	 * during long-running page batches.
+	 *
+	 * When `process_pages()` takes longer than the lock TTL (default 60 s),
+	 * the cron healthcheck sees no lock and dispatches a second worker,
+	 * leading to race conditions and potential stalls. Calling this after
+	 * each page keeps the lock alive.
+	 *
+	 * @return void
+	 */
+	protected function maybe_refresh_process_lock() {
+		try {
+			$job = Plugin::instance()->get_archive_creation_job();
+			if ( $job && method_exists( $job, 'lock_process' ) ) {
+				$job->lock_process( false );
+			}
+		} catch ( \Exception $e ) {
+			// Silently ignore — lock refresh is best-effort.
+		}
 	}
 
 	/**
