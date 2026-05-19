@@ -2,9 +2,9 @@
 Contributors: patrickposner
 Tags: jamstack, performance, security, static site generator
 Requires at least: 6.2
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag:  3.7.0
+Stable tag:  3.7.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -274,6 +274,14 @@ Settings - Configure your static site export options
 Diagnostics - Check your WordPress environment for compatibility
 
 == Changelog ==
+
+= 3.7.1 =
+
+* added time-limit awareness to process_pages()
+* decompress response to avoid gzip/deflate issues
+* function_exists for session handling
+* srcset replacement with lazyloading
+* Elementor font fix (again)
 
 = 3.7.0 =
 
