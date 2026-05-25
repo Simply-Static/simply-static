@@ -128,13 +128,16 @@ function SidebarSite( props = null ) {
         setDisabledButton(true);
         setIsResumed(false);
         setIsPaused(false);
+        const languagePrefix = 'language:';
+        const isLanguageExport = selectedExportType.indexOf(languagePrefix) === 0;
 
         apiFetch({
             path: '/simplystatic/v1/start-export',
             method: 'POST',
             data: {
                 'blog_id': blogId,
-                'type': selectedExportType
+                'type': isLanguageExport ? 'export' : selectedExportType,
+                'language': isLanguageExport ? selectedExportType.replace(languagePrefix, '') : ''
             }
         }).then(resp => {
             var json = JSON.parse(resp);
@@ -216,6 +219,48 @@ function SidebarSite( props = null ) {
         </optgroup>
     }
 
+    const getLanguageOptions = () => {
+        const languages = options.languages || options.multilingual_languages || options.available_languages || [];
+        let normalizedLanguages = [];
+
+        if (Array.isArray(languages)) {
+            normalizedLanguages = languages.map((language) => {
+                if ('string' === typeof language) {
+                    return {label: language, value: language};
+                }
+
+                return {
+                    label: language.label || language.name || language.native_name || language.code || language.slug,
+                    value: language.value || language.code || language.slug || language.locale,
+                };
+            });
+        } else {
+            normalizedLanguages = Object.keys(languages).map((code) => {
+                const language = languages[code];
+
+                return {
+                    label: 'string' === typeof language ? language : (language.label || language.name || language.native_name || code),
+                    value: 'string' === typeof language ? code : (language.value || language.code || language.slug || language.locale || code),
+                };
+            });
+        }
+
+        normalizedLanguages = normalizedLanguages.filter((language) => language.label && language.value);
+
+        return normalizedLanguages;
+    }
+
+    const languageOptions = getLanguageOptions();
+
+    let languageSelectOptions = '';
+    if (languageOptions.length) {
+        languageSelectOptions = <optgroup label={__('Languages', 'simply-static')}>
+            {languageOptions.map((language) => {
+                return <option key={language.value} value={`language:${language.value}`}>{language.label}</option>
+            })}
+        </optgroup>
+    }
+
     // Helper: determine if a route is allowed for current user (UAM). If no list provided, treat as allowed.
     const isAllowed = (route) => {
         try {
@@ -257,6 +302,7 @@ function SidebarSite( props = null ) {
                     </>
                 }
                 {buildOptions}
+                {languageSelectOptions}
             </SelectControl>
             {canRunExport &&
                 <GenerateButtons

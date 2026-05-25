@@ -16,6 +16,7 @@ class Admin_Settings {
         // Clear conflicting flags that could alter the task list.
         delete_option( 'simply-static-use-single' );
         delete_option( 'simply-static-use-build' );
+        delete_option( 'simply-static-use-language' );
 
         try {
             Plugin::instance()->run_static_export();
@@ -369,6 +370,7 @@ class Admin_Settings {
                         'blog_id'          => get_current_blog_id(),
                         'need_upgrade'     => 'no',
                         'builds'           => array(),
+                        'languages'        => $this->get_languages(),
                         'hidden_settings'  => apply_filters( 'ss_hidden_settings', array() ),
                         'last_export_end'  => $options->get( 'archive_end_time' ),
                     // Build integrations as an associative array keyed by integration ID
@@ -479,6 +481,184 @@ class Admin_Settings {
         }
 
         wp_enqueue_style( 'simplystatic-settings-style', SIMPLY_STATIC_URL . '/src/admin/build/index.css', array( 'wp-components' ), $asset_version );
+    }
+
+    /**
+     * Get active multilingual languages for the admin app.
+     *
+     * @return array
+     */
+    private function get_languages() {
+        $languages = array();
+
+        $wpml_languages = apply_filters( 'wpml_active_languages', null, array(
+                'skip_missing' => 0,
+                'orderby'      => 'code',
+        ) );
+
+        if ( empty( $wpml_languages ) && function_exists( 'icl_get_languages' ) ) {
+            $wpml_languages = icl_get_languages( 'skip_missing=0&orderby=code' );
+        }
+
+        if ( is_array( $wpml_languages ) && ! empty( $wpml_languages ) ) {
+            foreach ( $wpml_languages as $code => $language ) {
+                $languages[] = array(
+                        'label' => ! empty( $language['native_name'] ) ? $language['native_name'] : $this->get_language_label( $code ),
+                        'value' => ! empty( $language['language_code'] ) ? $language['language_code'] : $code,
+                );
+            }
+        } else if ( $this->is_wpml_active() ) {
+            $wpml_settings = get_option( 'icl_sitepress_settings' );
+
+            if ( is_array( $wpml_settings ) && ! empty( $wpml_settings['active_languages'] ) && is_array( $wpml_settings['active_languages'] ) ) {
+                foreach ( $wpml_settings['active_languages'] as $code => $language ) {
+                    $language = is_string( $language ) ? $language : $code;
+
+                    if ( is_numeric( $language ) || empty( $language ) ) {
+                        continue;
+                    }
+
+                    $languages[] = array(
+                            'label' => $this->get_language_label( $language ),
+                            'value' => $language,
+                    );
+                }
+            } else if ( defined( 'ICL_LANGUAGE_CODE' ) ) {
+                $languages[] = array(
+                        'label' => $this->get_language_label( ICL_LANGUAGE_CODE ),
+                        'value' => ICL_LANGUAGE_CODE,
+                );
+            }
+        } else if ( function_exists( 'pll_the_languages' ) ) {
+            $polylang_languages = pll_the_languages( array( 'raw' => 1 ) );
+
+            if ( is_array( $polylang_languages ) ) {
+                foreach ( $polylang_languages as $language ) {
+                    $languages[] = array(
+                            'label' => ! empty( $language['name'] ) ? $language['name'] : $language['slug'],
+                            'value' => $language['slug'],
+                    );
+                }
+            }
+        } else {
+            $trp_settings = get_option( 'trp_settings' );
+
+            if ( is_array( $trp_settings ) && ! empty( $trp_settings['publish-languages'] ) && is_array( $trp_settings['publish-languages'] ) ) {
+                foreach ( $trp_settings['publish-languages'] as $language ) {
+                    $languages[] = array(
+                            'label' => $this->get_language_label( $language ),
+                            'value' => $language,
+                    );
+                }
+            }
+        }
+
+        if ( empty( $languages ) ) {
+            $current_language = $this->get_current_language();
+
+            if ( ! empty( $current_language ) ) {
+                $languages[] = array(
+                        'label' => $this->get_language_label( $current_language ),
+                        'value' => $current_language,
+                );
+            }
+        }
+
+        return apply_filters( 'ss_admin_languages', $this->normalize_languages( $languages ) );
+    }
+
+    /**
+     * Check whether WPML appears to be active.
+     *
+     * @return bool
+     */
+    private function is_wpml_active() {
+        return defined( 'ICL_SITEPRESS_VERSION' ) || defined( 'ICL_LANGUAGE_CODE' ) || has_filter( 'wpml_active_languages' );
+    }
+
+    /**
+     * Check whether a multilingual plugin appears to be active.
+     *
+     * @return bool
+     */
+    private function has_multilingual_plugin() {
+        if ( $this->is_wpml_active() || function_exists( 'pll_the_languages' ) ) {
+            return true;
+        }
+
+        $trp_settings = get_option( 'trp_settings' );
+
+        return is_array( $trp_settings );
+    }
+
+    /**
+     * Get the currently active language code.
+     *
+     * @return string
+     */
+    private function get_current_language() {
+        if ( defined( 'ICL_LANGUAGE_CODE' ) ) {
+            return ICL_LANGUAGE_CODE;
+        }
+
+        if ( function_exists( 'pll_current_language' ) ) {
+            $language = pll_current_language( 'slug' );
+
+            if ( $language ) {
+                return $language;
+            }
+        }
+
+        return substr( get_locale(), 0, 2 );
+    }
+
+    /**
+     * Normalize language rows and remove duplicates.
+     *
+     * @param array $languages Languages.
+     *
+     * @return array
+     */
+    private function normalize_languages( $languages ) {
+        $normalized = array();
+
+        foreach ( $languages as $language ) {
+            if ( empty( $language['value'] ) ) {
+                continue;
+            }
+
+            $value = sanitize_key( $language['value'] );
+
+            if ( isset( $normalized[ $value ] ) ) {
+                continue;
+            }
+
+            $normalized[ $value ] = array(
+                    'label' => ! empty( $language['label'] ) ? $language['label'] : $value,
+                    'value' => $value,
+            );
+        }
+
+        return array_values( $normalized );
+    }
+
+    /**
+     * Get a readable label for a language code.
+     *
+     * @param string $language Language code.
+     *
+     * @return string
+     */
+    private function get_language_label( $language ) {
+        if ( function_exists( 'locale_get_display_name' ) ) {
+            $label = locale_get_display_name( $language, get_locale() );
+
+            if ( $label ) {
+                return $label;
+            }
+        }
+
+        return $language;
     }
 
     public function render_settings() {
