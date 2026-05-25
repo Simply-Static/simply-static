@@ -354,6 +354,7 @@ class Admin_Settings {
 
         // Let integrations (e.g., UAM in Pro) refine the allowed pages list. They may also add '/uam'.
         $allowed_pages = apply_filters( 'ss_allowed_pages', $allowed_pages_default, $current_settings );
+        $can_export_languages = $this->can_show_languages();
 
         $args = apply_filters(
                 'ss_settings_args',
@@ -371,6 +372,7 @@ class Admin_Settings {
                         'need_upgrade'     => 'no',
                         'builds'           => array(),
                         'languages'        => $this->get_languages(),
+                        'can_export_languages' => $can_export_languages,
                         'hidden_settings'  => apply_filters( 'ss_hidden_settings', array() ),
                         'last_export_end'  => $options->get( 'archive_end_time' ),
                     // Build integrations as an associative array keyed by integration ID
@@ -489,6 +491,10 @@ class Admin_Settings {
      * @return array
      */
     private function get_languages() {
+        if ( ! $this->can_show_languages() ) {
+            return array();
+        }
+
         $languages = array();
 
         $wpml_languages = apply_filters( 'wpml_active_languages', null, array(
@@ -574,6 +580,34 @@ class Admin_Settings {
      */
     private function is_wpml_active() {
         return defined( 'ICL_SITEPRESS_VERSION' ) || defined( 'ICL_LANGUAGE_CODE' ) || has_filter( 'wpml_active_languages' );
+    }
+
+    /**
+     * Check whether language export options should be exposed to the admin app.
+     *
+     * @return bool
+     */
+    private function can_show_languages() {
+        if ( ! function_exists( 'is_plugin_active' ) ) {
+            include_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        $has_multilingual_plugin = is_plugin_active( 'sitepress-multilingual-cms/sitepress.php' ) ||
+                                   is_plugin_active( 'polylang/polylang.php' ) ||
+                                   is_plugin_active( 'polylang-pro/polylang.php' ) ||
+                                   is_plugin_active( 'translatepress-multilingual/index.php' );
+
+        if ( ! $has_multilingual_plugin ) {
+            return false;
+        }
+
+        $settings = get_option( 'simply-static' );
+
+        if ( is_array( $settings ) && array_key_exists( 'integrations', $settings ) ) {
+            return is_array( $settings['integrations'] ) && in_array( 'multilingual', $settings['integrations'], true );
+        }
+
+        return true;
     }
 
     /**

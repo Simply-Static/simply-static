@@ -15,7 +15,9 @@
     "@wordpress/components": "^32.4.0",
     "@wordpress/data": "^10.42.0",
     "@wordpress/element": "^6.42.0",
-    "@wordpress/scripts": "^31.7.0"
+    "@wordpress/scripts": "^31.7.0",
+    "ajv": "^8.20.0",
+    "styled-components": "^6.4.2"
   },
   "dependencies": {
     "react-data-table-component": "^7.7.0",

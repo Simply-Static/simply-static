@@ -250,7 +250,10 @@ function SidebarSite( props = null ) {
         return normalizedLanguages;
     }
 
-    const languageOptions = getLanguageOptions();
+    const multilingualIntegration = options.integrations && options.integrations.multilingual ? options.integrations.multilingual : {};
+    const canExportLanguages = 'undefined' === typeof options.can_export_languages ? true : options.can_export_languages;
+    const canRunMultilingualExport = canExportLanguages && 'pro' === options.plan && isPro() && canRunIntegration('multilingual') && multilingualIntegration.can_run;
+    const languageOptions = canRunMultilingualExport ? getLanguageOptions() : [];
 
     let languageSelectOptions = '';
     if (languageOptions.length) {
@@ -260,6 +263,12 @@ function SidebarSite( props = null ) {
             })}
         </optgroup>
     }
+
+    useEffect(() => {
+        if (!canRunMultilingualExport && selectedExportType.indexOf('language:') === 0) {
+            setSelectedExportType('export');
+        }
+    }, [canRunMultilingualExport, selectedExportType]);
 
     // Helper: determine if a route is allowed for current user (UAM). If no list provided, treat as allowed.
     const isAllowed = (route) => {
