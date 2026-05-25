@@ -606,13 +606,32 @@ class Util {
 			}
 		}
 
-		// Then test literal contains (case-insensitive)
+ 	// Then test literal patterns (case-insensitive)
 		if ( ! empty( $excluded ) ) {
 			foreach ( $excluded as $excludable ) {
-				if ( stripos( $url, $excludable ) !== false ) {
-					self::debug_log( sprintf( 'Excluding URL "%s" — matched literal exclusion rule: "%s"', $url, $excludable ) );
+				// Path-like literals (starting with /) are matched against the
+				// URL path at path-segment boundaries so that e.g. "/9" only
+				// excludes the path /9 (and sub-paths /9/…) instead of every
+				// URL that happens to contain the characters "/9" anywhere.
+				if ( isset( $excludable[0] ) && $excludable[0] === '/' && strpos( $excludable, '.' ) === false ) {
+					$url_path = parse_url( $url, PHP_URL_PATH ) ?: '/';
+					$pattern  = rtrim( $excludable, '/' );
+					if (
+						strcasecmp( $url_path, $pattern ) === 0
+						|| strcasecmp( $url_path, $pattern . '/' ) === 0
+						|| stripos( $url_path, $pattern . '/' ) === 0
+					) {
+						self::debug_log( sprintf( 'Excluding URL "%s" — matched path exclusion rule: "%s"', $url, $excludable ) );
 
-					return true;
+						return true;
+					}
+				} else {
+					// Non-path literals: keep existing substring behaviour.
+					if ( stripos( $url, $excludable ) !== false ) {
+						self::debug_log( sprintf( 'Excluding URL "%s" — matched literal exclusion rule: "%s"', $url, $excludable ) );
+
+						return true;
+					}
 				}
 			}
 		}
