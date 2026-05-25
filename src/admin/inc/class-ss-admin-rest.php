@@ -1427,7 +1427,8 @@ class Admin_Rest {
         $stats = [
             'status'  => 200,
             'running' => $job->is_running(),
-            'paused'  => $job->is_paused()
+            'paused'  => $job->is_paused(),
+            'progress' => method_exists( $job, 'get_progress' ) ? $job->get_progress() : 0,
         ];
 
         // Kickstart fallback: if the job is "running" but no process lock

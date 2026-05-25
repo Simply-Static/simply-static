@@ -391,6 +391,98 @@ class Archive_Creation_Job extends Background_Process {
 	}
 
 	/**
+	 * Return the current archive creation progress as a percentage.
+	 *
+	 * @return int Progress from 0 to 100.
+	 */
+	public function get_progress() {
+		if ( $this->is_job_done() ) {
+			return 100;
+		}
+
+		$task_list    = array_values( $this->get_task_list() );
+		$current_task = $this->get_current_queued_task();
+
+		if ( empty( $task_list ) || empty( $current_task ) ) {
+			return 0;
+		}
+
+		if ( 'done' === $current_task ) {
+			return 100;
+		}
+
+		$task_index = array_search( $current_task, $task_list, true );
+
+		if ( false === $task_index ) {
+			return 0;
+		}
+
+		$task_progress = $this->get_task_progress( $current_task );
+		$task_fraction = is_numeric( $task_progress ) ? max( 0, min( 100, (int) $task_progress ) ) / 100 : 0;
+		$progress      = ( ( $task_index + $task_fraction ) / count( $task_list ) ) * 100;
+
+		return max( 0, min( 99, (int) floor( $progress ) ) );
+	}
+
+	/**
+	 * Get the task currently stored in the queue.
+	 *
+	 * @return string|null
+	 */
+	protected function get_current_queued_task() {
+		$batches = $this->get_batches( 1 );
+		$batch   = ! empty( $batches ) ? reset( $batches ) : null;
+
+		if ( ! empty( $batch->data ) && is_array( $batch->data ) ) {
+			foreach ( $batch->data as $task_name ) {
+				if ( is_string( $task_name ) ) {
+					return $task_name;
+				}
+			}
+		}
+
+		return $this->get_current_task();
+	}
+
+	/**
+	 * Get percentage progress for tasks that expose countable work.
+	 *
+	 * @param string $task_name Task name.
+	 *
+	 * @return int|null
+	 */
+	protected function get_task_progress( $task_name ) {
+		if ( 'create_zip_archive' === $task_name ) {
+			$total_files = (int) $this->options->get( 'zip_total_files' );
+			$offset      = (int) $this->options->get( 'zip_batch_offset' );
+
+			if ( $total_files > 0 ) {
+				return (int) floor( min( 100, max( 0, ( $offset / $total_files ) * 100 ) ) );
+			}
+		}
+
+		$task = $this->get_task_object( $task_name );
+
+		if ( ! $task || ! method_exists( $task, 'get_processed_pages' ) || ! method_exists( $task, 'get_total_pages' ) ) {
+			return null;
+		}
+
+		try {
+			$total_pages = (int) $task->get_total_pages();
+
+			if ( $total_pages <= 0 ) {
+				return null;
+			}
+
+			$processed_pages = (int) $task->get_processed_pages();
+
+			return (int) floor( min( 100, max( 0, ( $processed_pages / $total_pages ) * 100 ) ) );
+		} catch ( \Throwable $e ) {
+			return null;
+		}
+	}
+
+	/**
 	 * Return the current task
 	 * @return string The current task
 	 */

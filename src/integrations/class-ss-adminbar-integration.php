@@ -150,6 +150,7 @@ class SS_Adminbar_Integration extends Integration {
 
 		try {
 			$job = Plugin::instance()->get_archive_creation_job();
+			$progress = method_exists( $job, 'get_progress' ) ? $job->get_progress() : 0;
 			if ( method_exists( $job, 'is_running' ) && $job->is_running() ) {
 				$status = 'running';
 			} elseif ( method_exists( $job, 'is_paused' ) && $job->is_paused() ) {
@@ -157,7 +158,7 @@ class SS_Adminbar_Integration extends Integration {
 			} else {
 				$status = 'idle';
 			}
-			wp_send_json_success( [ 'status' => $status ] );
+			wp_send_json_success( [ 'status' => $status, 'progress' => $progress ] );
 		} catch ( \Throwable $e ) {
 			wp_send_json_error( [ 'status' => $status ] );
 		}
@@ -234,16 +235,26 @@ class SS_Adminbar_Integration extends Integration {
 		</style>
 		<script id="ss-admin-bar-inline-js">
 		(function(){
-			var loaded=false;
-			function updateStatus(label, cls){
+			function normalizeProgress(progress){
+				progress = parseInt(progress, 10);
+				if(isNaN(progress)) return 0;
+				return Math.max(0, Math.min(100, progress));
+			}
+			function formatLabel(label, progress, status){
+				progress = normalizeProgress(progress);
+				if(status === 'running' || status === 'waiting'){
+					return label + ' (' + progress + '%)';
+				}
+				return label;
+			}
+			function updateStatus(label, cls, progress, status){
 				var item = document.querySelector('#wp-admin-bar-ss-admin-bar-status > .ab-item');
 				if(!item) return;
-				item.textContent = '<?php echo $status_prefix; ?>' + label;
+				item.textContent = '<?php echo $status_prefix; ?>' + formatLabel(label, progress, status);
 				item.classList.remove('ss-status-running','ss-status-waiting','ss-status-idle');
 				item.classList.add('ss-status', cls);
 			}
 			function fetchStatus(){
-				if(loaded) return; loaded=true;
 				var xhr = new XMLHttpRequest();
 				xhr.open('POST','<?php echo esc_url( $ajax_url ); ?>');
 				xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
@@ -251,19 +262,18 @@ class SS_Adminbar_Integration extends Integration {
 					try{
 						var res = JSON.parse(xhr.responseText);
 						var s = res && res.data ? res.data.status : 'idle';
-						if(s==='running') updateStatus('<?php echo $running; ?>','ss-status-running');
-						else if(s==='waiting') updateStatus('<?php echo $waiting; ?>','ss-status-waiting');
-						else updateStatus('<?php echo $idle; ?>','ss-status-idle');
+						var progress = res && res.data ? res.data.progress : 0;
+						if(s==='running') updateStatus('<?php echo $running; ?>','ss-status-running', progress, s);
+						else if(s==='waiting') updateStatus('<?php echo $waiting; ?>','ss-status-waiting', progress, s);
+						else updateStatus('<?php echo $idle; ?>','ss-status-idle', progress, s);
 					}catch(e){ /* noop */ }
 				};
 				xhr.send('action=ss_admin_get_status&security=<?php echo esc_attr( $nonce ); ?>');
 			}
-			function onOpen(){ fetchStatus(); }
 			var root = document.getElementById('wp-admin-bar-ss-admin-bar');
 			if(!root) return;
-			root.addEventListener('mouseenter', onOpen, { once: true });
-			root.addEventListener('focusin', onOpen, { once: true });
-			root.addEventListener('click', onOpen, { once: true });
+			fetchStatus();
+			window.setInterval(fetchStatus, 5000);
 		})();
 		</script>
 		<?php

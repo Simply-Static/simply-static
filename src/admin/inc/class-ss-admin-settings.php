@@ -69,6 +69,11 @@ class Admin_Settings {
         // Ensure the "View Site" link points to the static site even if the admin bar integration is disabled.
         add_action( 'admin_bar_menu', array( $this, 'filter_view_site_link' ), 200 );
 
+        // Keep export progress in the browser tab for logged-in users using toolbar integrations.
+        add_action( 'wp_ajax_ss_export_progress_title_status', array( $this, 'get_export_progress_title_status' ) );
+        add_action( 'admin_footer', array( $this, 'print_export_progress_title_assets' ) );
+        add_action( 'wp_footer', array( $this, 'print_export_progress_title_assets' ) );
+
         // Handle cancel via URL param as a fallback when REST API is unavailable.
         add_action( 'admin_init', array( $this, 'maybe_handle_cancel_export' ) );
 
@@ -1491,6 +1496,125 @@ class Admin_Settings {
         $node->meta['rel']    = 'noopener noreferrer';
 
         $admin_bar->add_node( (array) $node );
+    }
+
+    /**
+     * Return export progress for the browser tab title indicator.
+     *
+     * @return void
+     */
+    public function get_export_progress_title_status() {
+        if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( $_POST['security'], 'ss-export-progress-title-nonce' ) ) {
+            wp_die( 'Security check failed' );
+        }
+
+        $cap_generate = apply_filters( 'ss_user_capability', 'publish_pages', 'generate' );
+        if ( ! current_user_can( $cap_generate ) ) {
+            wp_send_json_error( [ 'status' => 'forbidden' ], 403 );
+        }
+
+        try {
+            $job      = Plugin::instance()->get_archive_creation_job();
+            $progress = method_exists( $job, 'get_progress' ) ? $job->get_progress() : 0;
+            $status   = 'idle';
+
+            if ( method_exists( $job, 'is_running' ) && $job->is_running() ) {
+                $status = 'running';
+            } elseif ( method_exists( $job, 'is_paused' ) && $job->is_paused() ) {
+                $status = 'waiting';
+            }
+
+            wp_send_json_success( [
+                'status'   => $status,
+                'progress' => $progress,
+            ] );
+        } catch ( \Throwable $e ) {
+            wp_send_json_error( [ 'status' => 'error' ] );
+        }
+    }
+
+    /**
+     * Print the browser tab title progress indicator.
+     *
+     * This is intentionally independent from the Admin Bar integration so the
+     * Command Center integration can provide the same background-export signal.
+     *
+     * @return void
+     */
+    public function print_export_progress_title_assets() {
+        if ( ! is_user_logged_in() || ! $this->is_export_progress_title_enabled() ) {
+            return;
+        }
+
+        $cap_generate = apply_filters( 'ss_user_capability', 'publish_pages', 'generate' );
+        if ( ! current_user_can( $cap_generate ) ) {
+            return;
+        }
+
+        $ajax_url     = admin_url( 'admin-ajax.php' );
+        $nonce        = wp_create_nonce( 'ss-export-progress-title-nonce' );
+        $title_prefix = esc_js( __( 'Simply Static', 'simply-static' ) );
+        ?>
+        <script id="ss-export-progress-title-js">
+        (function(){
+            if(window.simplyStaticExportProgressTitleLoaded) return;
+            window.simplyStaticExportProgressTitleLoaded = true;
+
+            var originalTitle = document.title;
+
+            function normalizeProgress(progress){
+                progress = parseInt(progress, 10);
+                if(isNaN(progress)) return 0;
+                return Math.max(0, Math.min(100, progress));
+            }
+
+            function updateTitle(status, progress){
+                progress = normalizeProgress(progress);
+                if(status === 'running' || status === 'waiting'){
+                    document.title = '(' + progress + '%) <?php echo $title_prefix; ?> - ' + originalTitle;
+                    return;
+                }
+                document.title = originalTitle;
+            }
+
+            function fetchStatus(){
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST','<?php echo esc_url( $ajax_url ); ?>');
+                xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
+                xhr.onload = function(){
+                    try{
+                        var res = JSON.parse(xhr.responseText);
+                        var data = res && res.data ? res.data : {};
+                        updateTitle(data.status || 'idle', data.progress || 0);
+                    }catch(e){ /* noop */ }
+                };
+                xhr.send('action=ss_export_progress_title_status&security=<?php echo esc_attr( $nonce ); ?>');
+            }
+
+            fetchStatus();
+            window.setInterval(fetchStatus, 5000);
+        })();
+        </script>
+        <?php
+    }
+
+    /**
+     * Whether a toolbar integration should enable browser tab export progress.
+     *
+     * @return bool
+     */
+    private function is_export_progress_title_enabled() {
+        $integrations = Options::instance()->get( 'integrations' );
+
+        if ( empty( $integrations ) ) {
+            return true;
+        }
+
+        if ( ! is_array( $integrations ) ) {
+            return false;
+        }
+
+        return in_array( 'ss-adminbar', $integrations, true ) || in_array( 'ss-command-center', $integrations, true );
     }
 
     /**
