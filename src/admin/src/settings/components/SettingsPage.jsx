@@ -35,6 +35,68 @@ import PromoSidebar from "./PromoSidebar";
 
 const {__} = wp.i18n;
 
+const settingsRoutes = [
+    '/',
+    '/diagnostics',
+    '/general',
+    '/deployment',
+    '/forms',
+    '/search',
+    '/optimize',
+    '/hide-wp',
+    '/workflow',
+    '/utilities',
+    '/debug',
+    '/uam',
+    '/integrations',
+];
+
+const hashRouteAliases = {
+    'activity-log': '/',
+    'generate': '/',
+    'deploy': '/deployment',
+};
+
+const getRouteFromHash = () => {
+    if ('undefined' === typeof window || !window.location.hash) {
+        return null;
+    }
+
+    let hash = window.location.hash.replace(/^#\/?/, '').split('?')[0];
+
+    try {
+        hash = decodeURIComponent(hash).trim();
+    } catch (e) {
+        return null;
+    }
+
+    if (!hash) {
+        return null;
+    }
+
+    if (hashRouteAliases[hash]) {
+        return hashRouteAliases[hash];
+    }
+
+    const route = `/${hash}`;
+
+    return settingsRoutes.includes(route) ? route : null;
+};
+
+const getHashFromRoute = (route) => {
+    return '/' === route ? '' : route.replace(/^\//, '');
+};
+
+const getRouteFromHistoryState = () => {
+    if ('undefined' === typeof window || !window.history || !window.history.state) {
+        return null;
+    }
+
+    const route = window.history.state.ssRoute;
+
+    return settingsRoutes.includes(route) ? route : null;
+};
+
 function SettingsPage() {
     const {
         isRunning,
@@ -45,30 +107,126 @@ function SettingsPage() {
         setShowMobileNav,
         settings
     } = useContext(SettingsContext);
-    const [activeItem, setActiveItem] = useState({activeItem: "/"});
-    const [initialPage, setInitialPage] = useState(localStorage.getItem('ss-initial-page') ? localStorage.getItem('ss-initial-page') : options.initial);
+    const isRouteAvailable = (route) => {
+        try {
+            if (!settingsRoutes.includes(route)) {
+                return false;
+            }
+
+            if (options.allowed_pages && !options.allowed_pages.includes(route)) {
+                return false;
+            }
+
+            if ('/deployment' === route && options.hidden_settings && options.hidden_settings.includes('deployment')) {
+                return false;
+            }
+
+            return !('/uam' === route && !options.uam_enabled);
+        } catch (e) {
+            return true;
+        }
+    }
+
+    const resolveRoute = (route) => {
+        return isRouteAvailable(route) ? route : options.initial;
+    }
+
+    const getInitialPage = () => {
+        const hashRoute = getRouteFromHash();
+
+        if (hashRoute) {
+            return resolveRoute(hashRoute);
+        }
+
+        return resolveRoute(localStorage.getItem('ss-initial-page') ? localStorage.getItem('ss-initial-page') : options.initial);
+    }
+
+    const [activeItem, setActiveItem] = useState(getInitialPage);
+    const [initialPage, setInitialPage] = useState(getInitialPage);
     const [initialSet, setInitialSet] = useState(false);
 
     // UAM enablement follows server-bootstrapped flag; changes require a page reload
 
+    const replaceCurrentHistoryRoute = (route) => {
+        if ('undefined' === typeof window || !window.history || !window.history.replaceState) {
+            return;
+        }
+
+        window.history.replaceState({
+            ...window.history.state,
+            ssRoute: route,
+        }, '', window.location.href);
+    }
 
     useEffect(() => {
         // Change initial page.
         let initialPageRedirect = localStorage.getItem('ss-initial-page');
+        const hashRoute = getRouteFromHash();
 
         if (!initialSet) {
             setInitialSet(true);
 
-            if (initialPageRedirect) {
-                setActiveItem(initialPageRedirect);
-                setInitialPage(initialPageRedirect);
+            let nextInitialPage = options.initial;
+
+            if (hashRoute) {
+                nextInitialPage = hashRoute;
+            } else if (initialPageRedirect) {
+                nextInitialPage = initialPageRedirect;
                 localStorage.removeItem('ss-initial-page');
-            } else {
-                setActiveItem(options.initial);
-                setInitialPage(options.initial);
             }
+
+            const resolvedInitialPage = resolveRoute(nextInitialPage);
+
+            setActiveItem(resolvedInitialPage);
+            setInitialPage(resolvedInitialPage);
+            replaceCurrentHistoryRoute(resolvedInitialPage);
         }
     }, [options, isRunning, isPaused]);
+
+    useEffect(() => {
+        const updateActiveItemFromLocation = () => {
+            const route = resolveRoute(getRouteFromHash() || getRouteFromHistoryState() || options.initial);
+
+            setActiveItem(route);
+            setInitialPage(route);
+        };
+
+        window.addEventListener('hashchange', updateActiveItemFromLocation);
+        window.addEventListener('popstate', updateActiveItemFromLocation);
+
+        return () => {
+            window.removeEventListener('hashchange', updateActiveItemFromLocation);
+            window.removeEventListener('popstate', updateActiveItemFromLocation);
+        };
+    }, []);
+
+    const selectActiveItem = (route) => {
+        setActiveItem(route);
+
+        if ('undefined' === typeof window || !window.history) {
+            return;
+        }
+
+        const hash = getHashFromRoute(route);
+
+        if (hash) {
+            if (window.location.hash !== `#${hash}`) {
+                window.history.pushState({
+                    ...window.history.state,
+                    ssRoute: route,
+                }, '', `#${hash}`);
+            } else {
+                replaceCurrentHistoryRoute(route);
+            }
+        } else if (window.location.hash) {
+            window.history.pushState({
+                ...window.history.state,
+                ssRoute: route,
+            }, '', `${window.location.pathname}${window.location.search}`);
+        } else {
+            replaceCurrentHistoryRoute(route);
+        }
+    }
 
     // No live redirect; visibility updates after settings page reload
 
@@ -94,7 +252,7 @@ function SettingsPage() {
                             {options.is_network ?
                                 <SidebarMultisite />
                                 :
-                                <SidebarSite setActiveItem={setActiveItem} activeItem={activeItem} />
+                                <SidebarSite setActiveItem={selectActiveItem} activeItem={activeItem} />
                             }
                         </div>
                     </div>
@@ -104,7 +262,7 @@ function SettingsPage() {
                         {options.is_network ?
                              <SidebarMultisite />
                             :
-                            <SidebarSite setActiveItem={setActiveItem} activeItem={activeItem} />
+                            <SidebarSite setActiveItem={selectActiveItem} activeItem={activeItem} />
                         }
                     </FlexItem>
                     <FlexItem isBlock={true}>
@@ -120,7 +278,7 @@ function SettingsPage() {
                                                 {__('Please review them and get them fixed to avoid problems.', 'simply-static')}
                                             </p>
                                             <NavigatorButton isSecondary onClick={() => {
-                                                setActiveItem('/diagnostics')
+                                                selectActiveItem('/diagnostics')
                                                 setShowMobileNav(!showMobileNav);
                                             }}
                                                              className={activeItem === '/diagnostics' ? 'is-active-item' : ''}
