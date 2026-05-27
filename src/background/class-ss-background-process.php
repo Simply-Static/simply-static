@@ -867,6 +867,15 @@ abstract class Background_Process extends Async_Request {
 	protected function handle() {
 		$this->lock_process();
 
+		if ( $this->is_cancelled() ) {
+			Util::debug_log( 'Background process cancelled before handling batch. Clearing queue.' );
+			$this->clear_scheduled_event();
+			$this->unlock_process();
+			$this->delete_all();
+
+			return $this->maybe_wp_die();
+		}
+
 		/**
 		 * Number of seconds to sleep between batches. Defaults to 0 seconds, minimum 0.
 		 *
@@ -942,6 +951,14 @@ abstract class Background_Process extends Async_Request {
 		} while ( ! $this->is_queue_empty() && $this->should_continue() );
 
 		$this->unlock_process();
+
+		if ( $this->is_cancelled() ) {
+			Util::debug_log( 'Background process cancelled after handling batch. Clearing queue.' );
+			$this->clear_scheduled_event();
+			$this->delete_all();
+
+			return $this->maybe_wp_die();
+		}
 
 		// Start next batch or complete process.
 		if ( ! $this->is_queue_empty() ) {
