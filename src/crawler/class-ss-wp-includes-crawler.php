@@ -62,7 +62,7 @@ class Wp_Includes_Crawler extends Crawler {
 			$urls[] = $site_url . $wp_inc . 'js/comment-reply.min.js';
 		}
 
-		$dirs = [ 'css/dist/', 'js/', 'fonts/', 'images/', 'blocks/' ];
+		$dirs = [ 'css/', 'js/', 'fonts/', 'images/', 'blocks/' ];
 		$exts = [ 'css', 'js', 'json', 'woff', 'woff2', 'ttf', 'eot', 'otf', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'ico' ];
 
 		foreach ( $dirs as $dir ) {

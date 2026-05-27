@@ -34,12 +34,37 @@ class Divi_Crawler extends Crawler {
 	 * @return bool
 	 */
 	public function dependency_active() : bool {
-		// Only consider Divi available when the Divi THEME is active (including child themes).
-		// In WordPress, get_template() returns the parent theme directory name. For a Divi child theme,
-		// get_template() will still be 'Divi'. This avoids false positives from the Divi Builder plugin
-		// or just having the Divi theme directory present.
+		if ( function_exists( 'wp_get_theme' ) ) {
+			$theme = wp_get_theme();
+
+			if ( $theme ) {
+				$template = method_exists( $theme, 'get_template' ) ? $theme->get_template() : '';
+				if ( is_string( $template ) && false !== stripos( $template, 'divi' ) ) {
+					return true;
+				}
+
+				$name = method_exists( $theme, 'get' ) ? (string) $theme->get( 'Name' ) : '';
+				if ( false !== stripos( $name, 'divi' ) ) {
+					return true;
+				}
+
+				if ( method_exists( $theme, 'parent' ) ) {
+					$parent = $theme->parent();
+
+					if ( $parent ) {
+						$parent_name       = (string) $parent->get( 'Name' );
+						$parent_stylesheet = (string) $parent->get_stylesheet();
+
+						if ( false !== stripos( $parent_name, 'divi' ) || false !== stripos( $parent_stylesheet, 'divi' ) ) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+
 		$tpl = function_exists( 'get_template' ) ? get_template() : '';
-		return 'Divi' === $tpl;
+		return is_string( $tpl ) && 0 === strcasecmp( $tpl, 'Divi' );
 	}
 
 	/**
