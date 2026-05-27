@@ -83,16 +83,16 @@ trait canProcessPages {
 	 * Maximum number of seconds process_pages() should run before yielding
 	 * back to the background process dispatcher.
 	 *
-	 * Keeping this well below typical server hard-kill limits (60-120 s)
-	 * prevents the PHP process from being terminated mid-batch, which
-	 * would break the inline-dispatch shutdown-function chain on
-	 * restricted hosting environments (WP Engine, Flywheel, etc.).
+	 * Keeping this below the background process' default 20 second
+	 * continuation window prevents the PHP process from spending too long
+	 * inside a single task before the dispatcher can hand off the next
+	 * request.
 	 *
 	 * Filterable via `simply_static_max_batch_time`.
 	 *
 	 * @var int
 	 */
-	protected $max_batch_time = 50;
+	protected $max_batch_time = 15;
 
 	/**
 	 * Process Pages that have to be processed/transferred.
