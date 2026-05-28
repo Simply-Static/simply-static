@@ -317,7 +317,6 @@ class Fetch_Urls_Task extends Task {
 	 * @return void
 	 */
 	public function handle_30x_redirect( $static_page, $save_file, $follow_urls ) {
-		$origin_url      = Util::origin_url();
 		$destination_url = $this->options->get_destination_url();
 		$current_url     = $static_page->url;
 
@@ -357,6 +356,10 @@ class Fetch_Urls_Task extends Task {
 				Util::debug_log( "This looks like a redirect from http to https (or visa versa); adding new URL to the queue" );
 				$this->set_url_found_on( $static_page, $redirect_url );
 
+			} else if ( $this->redirect_resolves_to_same_static_path( $current_url, $redirect_url ) ) {
+				Util::debug_log( "This redirect resolves to the same static file path; adding new URL to the queue" );
+				$this->set_url_found_on( $static_page, $redirect_url );
+
 			} else {
 				// check if this is a local URL
 				if ( Util::is_local_url( $redirect_url ) ) {
@@ -369,10 +372,10 @@ class Fetch_Urls_Task extends Task {
 						$static_page->set_status_message( __( "Do not follow", 'simply-static' ) );
 					}
 					// and update the URL
-					// Replace origin host (any scheme) with the configured destination URL to ensure
-					// redirects point to the static site domain even when schemes differ (http/https).
-					$pattern      = '/^(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i';
-					$redirect_url = preg_replace( $pattern, $destination_url, $redirect_url );
+					// Replace the matching local base with the configured destination URL. In proxy
+					// setups the redirect may point to home_url()/site_url() instead of the configured
+					// Origin URL, so use the local base that actually matched the redirect.
+					$redirect_url = Util::replace_local_url_base( $redirect_url, $destination_url );
 
 				}
 
@@ -413,6 +416,51 @@ class Fetch_Urls_Task extends Task {
 				$static_page->save();
 			}
 		}
+	}
+
+	/**
+	 * Check whether two URLs would be written to the same generated file.
+	 *
+	 * Proxy/subdirectory setups can redirect between the configured public origin
+	 * and the real WordPress install URL. Those are not user-facing redirects for
+	 * the static site; they are alternate local bases for the same static path.
+	 *
+	 * @param string $current_url Current URL.
+	 * @param string $redirect_url Redirect target URL.
+	 *
+	 * @return bool
+	 */
+	protected function redirect_resolves_to_same_static_path( $current_url, $redirect_url ) {
+		if ( ! Util::is_local_url( $current_url ) || ! Util::is_local_url( $redirect_url ) ) {
+			return false;
+		}
+
+		$current_path = $this->normalize_static_redirect_path( $current_url );
+		$redirect_path = $this->normalize_static_redirect_path( $redirect_url );
+
+		return '' !== $current_path && $current_path === $redirect_path;
+	}
+
+	/**
+	 * Normalize a local URL to the path Simply Static will generate for it.
+	 *
+	 * @param string $url URL to normalize.
+	 *
+	 * @return string
+	 */
+	protected function normalize_static_redirect_path( $url ) {
+		$url_without_fragment = preg_replace( '/#.*/', '', $url );
+		$path                 = Util::get_path_from_local_url( $url_without_fragment );
+		if ( ! is_string( $path ) || '' === $path ) {
+			return '';
+		}
+
+		$clean_path = Util::remove_params_and_fragment( $path );
+		$query      = Util::is_local_asset_url( $url ) ? '' : substr( $path, strlen( $clean_path ) );
+		$path       = Util::strip_index_filenames_from_url( $clean_path );
+		$path       = trailingslashit( $path );
+
+		return '/' . ltrim( $path, '/' ) . $query;
 	}
 
 	/**
