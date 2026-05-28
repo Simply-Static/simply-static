@@ -398,14 +398,9 @@ class Url_Fetcher {
 		// a domain with no trailing slash has no path, so we're giving it one
 		$path = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
 
-		$origin_path = wp_parse_url( Util::origin_url(), PHP_URL_PATH );
-
-		if ( null !== $origin_path && '' !== $origin_path ) {
-			$origin_path_length = strlen( $origin_path );
-
-			if ( $origin_path_length > 1 ) { // prevents removal of '/'.
-				$path = substr( $path, $origin_path_length );
-			}
+		$local_path = Util::get_path_from_local_url( Util::remove_params_and_fragment( $static_page->url ) );
+		if ( is_string( $local_path ) && '' !== $local_path ) {
+			$path = $local_path;
 		}
 
 		$path_info = Util::url_path_info( $path );

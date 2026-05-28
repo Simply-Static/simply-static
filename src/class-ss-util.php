@@ -830,6 +830,124 @@ class Util {
 	}
 
 	/**
+	 * Get all URL bases that should be treated as local during export.
+	 *
+	 * Proxy setups can use a public Origin URL that differs from the actual
+	 * WordPress home/site URL. Redirects and generated asset URLs may still point
+	 * at the real WordPress URL, so all known local bases need to be accepted.
+	 *
+	 * @return array
+	 */
+	public static function local_url_bases() {
+		$bases = array( self::origin_url() );
+
+		if ( function_exists( 'home_url' ) ) {
+			$bases[] = untrailingslashit( home_url() );
+		}
+
+		if ( function_exists( 'site_url' ) ) {
+			$bases[] = untrailingslashit( site_url() );
+		}
+
+		$bases = array_filter( array_map( 'untrailingslashit', $bases ) );
+		$bases = array_values( array_unique( $bases ) );
+
+		usort( $bases, function ( $a, $b ) {
+			$a_path = function_exists( 'wp_parse_url' ) ? wp_parse_url( $a, PHP_URL_PATH ) : parse_url( $a, PHP_URL_PATH );
+			$b_path = function_exists( 'wp_parse_url' ) ? wp_parse_url( $b, PHP_URL_PATH ) : parse_url( $b, PHP_URL_PATH );
+
+			return strlen( (string) $b_path ) <=> strlen( (string) $a_path );
+		} );
+
+		return apply_filters( 'ss_local_url_bases', $bases );
+	}
+
+	/**
+	 * Find the local URL base that matches the given URL.
+	 *
+	 * @param string $url URL to match.
+	 *
+	 * @return string|null
+	 */
+	public static function get_local_url_base( $url ) {
+		if ( ! is_string( $url ) || '' === $url ) {
+			return null;
+		}
+
+		$url_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $url ) : parse_url( $url );
+		if ( ! is_array( $url_parts ) || empty( $url_parts['host'] ) ) {
+			return null;
+		}
+
+		$url_host = strtolower( preg_replace( '/:\d+$/', '', (string) $url_parts['host'] ) );
+		$url_path = isset( $url_parts['path'] ) ? untrailingslashit( $url_parts['path'] ) : '';
+
+		foreach ( self::local_url_bases() as $base ) {
+			$base_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $base ) : parse_url( $base );
+			if ( ! is_array( $base_parts ) || empty( $base_parts['host'] ) ) {
+				continue;
+			}
+
+			$base_host = strtolower( preg_replace( '/:\d+$/', '', (string) $base_parts['host'] ) );
+			if ( $url_host !== $base_host ) {
+				continue;
+			}
+
+			$base_path = isset( $base_parts['path'] ) ? untrailingslashit( $base_parts['path'] ) : '';
+			if ( '' === $base_path || '/' === $base_path || $url_path === $base_path || strpos( $url_path . '/', trailingslashit( $base_path ) ) === 0 ) {
+				return $base;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Replace a local URL base with another base URL/path.
+	 *
+	 * @param string $url URL to rewrite.
+	 * @param string $replacement Replacement base.
+	 *
+	 * @return string
+	 */
+	public static function replace_local_url_base( $url, $replacement ) {
+		$base = self::get_local_url_base( $url );
+		if ( null === $base ) {
+			return $url;
+		}
+
+		$url_parts  = function_exists( 'wp_parse_url' ) ? wp_parse_url( $url ) : parse_url( $url );
+		$base_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $base ) : parse_url( $base );
+
+		if ( ! is_array( $url_parts ) || ! is_array( $base_parts ) ) {
+			return $url;
+		}
+
+		$url_path  = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
+		$base_path = isset( $base_parts['path'] ) ? untrailingslashit( $base_parts['path'] ) : '';
+		$path      = $url_path;
+
+		if ( '' !== $base_path && '/' !== $base_path ) {
+			$path = substr( $url_path, strlen( $base_path ) );
+			$path = '' === $path ? '/' : $path;
+		}
+
+		$query    = isset( $url_parts['query'] ) ? '?' . $url_parts['query'] : '';
+		$fragment = isset( $url_parts['fragment'] ) ? '#' . $url_parts['fragment'] : '';
+		$base_url = untrailingslashit( (string) $replacement );
+
+		if ( '' === $base_url ) {
+			return self::add_leading_slash( ltrim( $path, '/' ) ) . $query . $fragment;
+		}
+
+		if ( './' === $replacement ) {
+			return './' . ltrim( $path, '/' ) . $query . $fragment;
+		}
+
+		return $base_url . self::add_leading_slash( ltrim( $path, '/' ) ) . $query . $fragment;
+	}
+
+	/**
 	 * Wrapper around home_url(). Useful for swapping out the URL during debugging.
 	 * @return string home URL
 	 */
@@ -1152,15 +1270,7 @@ class Util {
 	 * @return boolean      true if URL is local, false otherwise
 	 */
 	public static function is_local_url( $url ) {
-		$url_host = self::strip_protocol_from_url( self::remove_params_and_fragment( $url ) );
-		// Strip port if present
-		$url_host = preg_replace( '/:\d+/', '', $url_host );
-
-		$origin_host = self::origin_host();
-		// Strip port if present
-		$origin_host = preg_replace( '/:\d+/', '', $origin_host );
-
-		return apply_filters( 'ss_is_local_url', ( stripos( $url_host, $origin_host ) === 0 ) );
+		return apply_filters( 'ss_is_local_url', null !== self::get_local_url_base( self::remove_params_and_fragment( $url ) ) );
 	}
 
 	/**
@@ -1186,37 +1296,35 @@ class Util {
 	 * @return string       URL sans protocol/host
 	 */
 	public static function get_path_from_local_url( $url ) {
-		// Keep behavior robust: only remove the leading scheme/host (and optional base path),
-		// never replace occurrences inside filenames or deeper path segments.
 		if ( ! is_string( $url ) ) {
 			return $url;
 		}
 
-		// Remove scheme to work with a canonical form like: host[:port]/base/path...
+		$base = self::get_local_url_base( self::remove_params_and_fragment( $url ) );
+		if ( null !== $base ) {
+			$url_parts  = function_exists( 'wp_parse_url' ) ? wp_parse_url( $url ) : parse_url( $url );
+			$base_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $base ) : parse_url( $base );
+
+			if ( is_array( $url_parts ) && is_array( $base_parts ) ) {
+				$url_path  = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
+				$base_path = isset( $base_parts['path'] ) ? untrailingslashit( $base_parts['path'] ) : '';
+
+				if ( '' !== $base_path && '/' !== $base_path ) {
+					$url_path = substr( $url_path, strlen( $base_path ) );
+				}
+
+				$query    = isset( $url_parts['query'] ) ? '?' . $url_parts['query'] : '';
+				$fragment = isset( $url_parts['fragment'] ) ? '#' . $url_parts['fragment'] : '';
+
+				return '/' . ltrim( $url_path, '/' ) . $query . $fragment;
+			}
+		}
+
+		// Fallback: origin_host() may include a subdirectory; strip only once at the start.
 		$no_scheme = self::strip_protocol_from_url( $url );
+		$pattern   = '/^' . preg_quote( self::origin_host(), '/' ) . '/';
+		$no_host   = preg_replace( $pattern, '', $no_scheme, 1 );
 
-		// Determine origin components reliably (host and optional base path for subdirectory installs)
-		$origin_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( self::origin_url() ) : parse_url( self::origin_url() );
-		if ( ! is_array( $origin_parts ) ) {
-			$origin_parts = array();
-		}
-		$origin_host = isset( $origin_parts['host'] ) ? $origin_parts['host'] : '';
-		$origin_path = isset( $origin_parts['path'] ) ? untrailingslashit( $origin_parts['path'] ) : '';
-
-		// Build an anchored pattern that matches only the leading host[:port] and optional base path.
-		if ( $origin_host !== '' ) {
-			$host_pattern = '^' . preg_quote( $origin_host, '/' ) . '(?::\d+)?';
-			$base_pattern = $origin_path !== '' ? preg_quote( $origin_path, '/' ) : '';
-			$pattern      = '/' . $host_pattern . $base_pattern . '/';
-			$no_host      = preg_replace( $pattern, '', $no_scheme, 1 );
-		} else {
-			// Fallback: origin_host() may include subdirectory; strip only once at the start to avoid touching filenames.
-			$fallback = self::origin_host();
-			$pattern  = '/^' . preg_quote( $fallback, '/' ) . '/';
-			$no_host  = preg_replace( $pattern, '', $no_scheme, 1 );
-		}
-
-		// Ensure a single leading slash for a clean local path, preserving any query/fragment later.
 		return '/' . ltrim( $no_host, '/' );
 	}
 
