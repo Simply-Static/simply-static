@@ -306,6 +306,7 @@ class Admin_Dashboard_Widget {
 			'tiiny'        => __( 'Tiiny Host', 'simply-static' ),
 			'simply-cdn'   => __( 'Simply CDN', 'simply-static' ),
 			'aws-s3'       => __( 'Amazon S3', 'simply-static' ),
+			'hetzner'      => __( 'Hetzner Object Storage', 'simply-static' ),
 			'digitalocean' => __( 'DigitalOcean', 'simply-static' ),
 		) );
 
