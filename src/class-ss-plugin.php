@@ -181,6 +181,8 @@ class Plugin {
 		require_once $path . 'src/tasks/class-ss-discover-urls-task.php';
 		require_once $path . 'src/tasks/class-ss-fetch-urls-task.php';
 		require_once $path . 'src/tasks/class-ss-transfer-files-locally-task.php';
+		require_once $path . 'src/class-ss-s3-client.php';
+		require_once $path . 'src/tasks/class-ss-transfer-hetzner-task.php';
 		require_once $path . 'src/tasks/class-ss-create-zip-archive.php';
 		require_once $path . 'src/tasks/class-ss-wrapup-task.php';
 		require_once $path . 'src/tasks/class-ss-cancel-task.php';
@@ -545,6 +547,8 @@ class Plugin {
 				$task_list[] = 'create_zip_archive';
 			} elseif ( 'local' === $delivery_method ) {
 				$task_list[] = 'transfer_files_locally';
+			} elseif ( 'hetzner' === $delivery_method ) {
+				$task_list[] = 'transfer_hetzner';
 			} else {
 				// For other delivery methods in Pro, keep placeholder; Free doesn't handle them.
 			}
@@ -576,6 +580,8 @@ class Plugin {
 			$task_list[] = 'create_zip_archive';
 		} elseif ( 'local' === $delivery_method ) {
 			$task_list[] = 'transfer_files_locally';
+		} elseif ( 'hetzner' === $delivery_method ) {
+			$task_list[] = 'transfer_hetzner';
 		}
 
 		$task_list[] = 'wrapup';

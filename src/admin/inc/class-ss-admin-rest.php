@@ -946,6 +946,9 @@ class Admin_Rest {
             'ss_single_export_add_xml_sitemap',
             'ss_single_auto_export',
             'ss_tools_submenu',
+            'hetzner_path_style',
+            'hetzner_acl_public',
+            'hetzner_empty',
         ];
 
         foreach ( $options as $key => $value ) {
@@ -977,6 +980,12 @@ class Admin_Rest {
                 }
                 $options[ $key ] = $san;
             } elseif ( 'ss_webhook_url' === $key ) {
+                $san = esc_url_raw( $value );
+                if ( empty( $san ) || ! in_array( wp_parse_url( $san, PHP_URL_SCHEME ), [ 'http', 'https' ], true ) ) {
+                    $san = '';
+                }
+                $options[ $key ] = $san;
+            } elseif ( 'hetzner_webhook_url' === $key ) {
                 $san = esc_url_raw( $value );
                 if ( empty( $san ) || ! in_array( wp_parse_url( $san, PHP_URL_SCHEME ), [ 'http', 'https' ], true ) ) {
                     $san = '';
@@ -1123,6 +1132,16 @@ class Admin_Rest {
             's3_access_secret'              => '',
             's3_bucket'                     => '',
             's3_subdirectory'               => '',
+            'hetzner_access_key'            => '',
+            'hetzner_secret_key'            => '',
+            'hetzner_region'                => 'fsn1',
+            'hetzner_endpoint'              => '',
+            'hetzner_bucket'                => '',
+            'hetzner_subdirectory'          => '',
+            'hetzner_path_style'            => false,
+            'hetzner_acl_public'            => false,
+            'hetzner_empty'                 => false,
+            'hetzner_webhook_url'           => '',
             'fix_cors'                      => 'allowed_http_origins',
             // (the full list continues in Admin_Settings; retain same defaults here)
         );

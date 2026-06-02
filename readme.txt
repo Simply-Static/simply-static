@@ -287,6 +287,7 @@ Diagnostics - Check your WordPress environment for compatibility
 
 = 3.6.9.2 =
 
+* added Hetzner Object Storage (S3-compatible) deployment method with built-in AWS Signature V4 support
 * admin UI improvements
 * WP 7.0 testing and bugfixes
 

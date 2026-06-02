@@ -39,6 +39,10 @@ function DeploymentSettings() {
     const [throttleGitHubRequests, setThrottleGitHubRequests] = useState(false);
     const [region, setRegion] = useState('us-east-2');
     const [awsAuthMethod, setAwsAuthMethod] = useState('aws-iam-key');
+    const [hetznerRegion, setHetznerRegion] = useState('fsn1');
+    const [hetznerPathStyle, setHetznerPathStyle] = useState(false);
+    const [hetznerAclPublic, setHetznerAclPublic] = useState(false);
+    const [hetznerEmpty, setHetznerEmpty] = useState(false);
     const [hasCopied, setHasCopied] = useState(false);
     const [pages, setPages] = useState(false);
     const [testDisabled, setTestDisabled] = useState(false);
@@ -50,6 +54,7 @@ function DeploymentSettings() {
         {label: __('SFTP', 'simply-static'), value: 'sftp'},
         {label: __('GitHub', 'simply-static'), value: 'github'},
         {label: __('AWS S3', 'simply-static'), value: 'aws-s3'},
+        {label: __('Hetzner Object Storage', 'simply-static'), value: 'hetzner'},
         {label: __('Bunny CDN', 'simply-static'), value: 'cdn'},
         {label: __('Tiiny.host', 'simply-static'), value: 'tiiny'}
     ]);
@@ -103,6 +108,22 @@ function DeploymentSettings() {
 
         if (settings.aws_region) {
             setRegion(settings.aws_region);
+        }
+
+        if (settings.hetzner_region) {
+            setHetznerRegion(settings.hetzner_region);
+        }
+
+        if (settings.hetzner_path_style) {
+            setHetznerPathStyle(settings.hetzner_path_style);
+        }
+
+        if (settings.hetzner_acl_public) {
+            setHetznerAclPublic(settings.hetzner_acl_public);
+        }
+
+        if (settings.hetzner_empty) {
+            setHetznerEmpty(settings.hetzner_empty);
         }
 
         // Get global page selection
@@ -602,6 +623,157 @@ function DeploymentSettings() {
                 </Card>
             }
             <Spacer margin={5}/>
+            {deliveryMethod === 'hetzner' &&
+                <Card>
+                    <CardHeader>
+                        <b>{__('Hetzner Object Storage', 'simply-static')}</b>
+                    </CardHeader>
+                    <CardBody>
+                        <p>{__('Deploy your static site to Hetzner Object Storage (S3-compatible). This also works with any other S3-compatible provider by entering a custom endpoint below.', 'simply-static')}</p>
+
+                        <TextControl
+                            label={__('Access Key', 'simply-static')}
+                            type={"text"}
+                            help={
+                                <>
+                                    {__('Enter the S3 Access Key generated for your Hetzner project. Learn how to create credentials ', 'simply-static')}
+                                    <ExternalLink href={"https://docs.hetzner.com/storage/object-storage/faq/s3-credentials/"}>{__('here', 'simply-static')}</ExternalLink>
+                                </>
+                            }
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            value={settings.hetzner_access_key}
+                            onChange={(value) => {
+                                updateSetting('hetzner_access_key', value);
+                            }}
+                        />
+
+                        <TextControl
+                            label={__('Secret Key', 'simply-static')}
+                            type={"password"}
+                            help={__('Enter the S3 Secret Key that belongs to your Access Key.', 'simply-static')}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            value={settings.hetzner_secret_key}
+                            onChange={(value) => {
+                                updateSetting('hetzner_secret_key', value);
+                            }}
+                        />
+
+                        <SelectControl
+                            label={__('Location', 'simply-static')}
+                            value={hetznerRegion}
+                            help={__('Select the location your bucket was created in. This is used for both the endpoint and request signing.', 'simply-static')}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            options={[
+                                {label: __('Falkenstein (fsn1)', 'simply-static'), value: 'fsn1'},
+                                {label: __('Nuremberg (nbg1)', 'simply-static'), value: 'nbg1'},
+                                {label: __('Helsinki (hel1)', 'simply-static'), value: 'hel1'},
+                            ]}
+                            onChange={(value) => {
+                                setHetznerRegion(value);
+                                updateSetting('hetzner_region', value);
+                            }}
+                        />
+
+                        <TextControl
+                            label={__('Bucket', 'simply-static')}
+                            type={"text"}
+                            help={__('Enter the name of your bucket. Create it in the Hetzner Cloud Console before running an export.', 'simply-static')}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            value={settings.hetzner_bucket}
+                            onChange={(value) => {
+                                updateSetting('hetzner_bucket', value);
+                            }}
+                        />
+
+                        <TextControl
+                            label={__('Subdirectory', 'simply-static')}
+                            type={"text"}
+                            help={__('Optional. Upload files into a subdirectory inside the bucket (e.g. "static" or "blog/site").', 'simply-static')}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            value={settings.hetzner_subdirectory}
+                            onChange={(value) => {
+                                updateSetting('hetzner_subdirectory', value);
+                            }}
+                        />
+
+                        <TextControl
+                            label={__('Custom Endpoint', 'simply-static')}
+                            type={"text"}
+                            placeholder={'https://' + hetznerRegion + '.your-objectstorage.com'}
+                            help={__('Optional. Leave empty to use the default Hetzner endpoint for the selected location. Set this to use another S3-compatible provider.', 'simply-static')}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            value={settings.hetzner_endpoint}
+                            onChange={(value) => {
+                                updateSetting('hetzner_endpoint', value);
+                            }}
+                        />
+
+                        <TextControl
+                            label={__('Webhook URL', 'simply-static')}
+                            type={"url"}
+                            help={__('Optional. Simply Static sends a POST request to this URL after all files are transferred.', 'simply-static')}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            value={settings.hetzner_webhook_url}
+                            onChange={(value) => {
+                                updateSetting('hetzner_webhook_url', value);
+                            }}
+                        />
+
+                        <ToggleControl
+                            label={__('Empty bucket before new export?', 'simply-static')}
+                            help={
+                                hetznerEmpty
+                                    ? __('Delete existing objects (within the subdirectory, if set) before each export.', 'simply-static')
+                                    : __('Keep existing objects and overwrite changed files only.', 'simply-static')
+                            }
+                            __nextHasNoMarginBottom
+                            checked={hetznerEmpty}
+                            onChange={(value) => {
+                                setHetznerEmpty(value);
+                                updateSetting('hetzner_empty', value);
+                            }}
+                        />
+
+                        <ToggleControl
+                            label={__('Make uploaded files public?', 'simply-static')}
+                            help={
+                                hetznerAclPublic
+                                    ? __('Send a public-read ACL with every upload. Only enable this if your bucket allows ACLs.', 'simply-static')
+                                    : __('Do not send an ACL header. Recommended for buckets that manage access via bucket policies.', 'simply-static')
+                            }
+                            __nextHasNoMarginBottom
+                            checked={hetznerAclPublic}
+                            onChange={(value) => {
+                                setHetznerAclPublic(value);
+                                updateSetting('hetzner_acl_public', value);
+                            }}
+                        />
+
+                        <ToggleControl
+                            label={__('Use path-style addressing?', 'simply-static')}
+                            help={
+                                hetznerPathStyle
+                                    ? __('Use https://endpoint/bucket/key. Enable this for providers that do not support virtual-hosted style.', 'simply-static')
+                                    : __('Use virtual-hosted style (https://bucket.endpoint/key). Recommended for Hetzner.', 'simply-static')
+                            }
+                            __nextHasNoMarginBottom
+                            checked={hetznerPathStyle}
+                            onChange={(value) => {
+                                setHetznerPathStyle(value);
+                                updateSetting('hetzner_path_style', value);
+                            }}
+                        />
+                    </CardBody>
+                </Card>
+            }
+            <Spacer margin={5}/>
             {deliveryMethod === 'cdn' &&
                 <Card>
                     <CardHeader>
@@ -1046,6 +1218,10 @@ function DeploymentSettings() {
                                 variant="primary">{__('Save Settings', 'simply-static')}</Button>
                     }
                     {deliveryMethod === 'aws-s3' &&
+                        <Button onClick={setSavingSettings}
+                                variant="primary">{__('Save Settings', 'simply-static')}</Button>
+                    }
+                    {deliveryMethod === 'hetzner' &&
                         <Button onClick={setSavingSettings}
                                 variant="primary">{__('Save Settings', 'simply-static')}</Button>
                     }
