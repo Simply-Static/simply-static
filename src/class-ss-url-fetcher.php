@@ -113,7 +113,7 @@ class Url_Fetcher {
 		// Check if the URL is a local asset (file) that we can copy directly
 		if ( $is_local_asset ) {
 			// Get the local path for the URL using the original URL without query parameters
-			$local_path = Util::get_path_from_local_url( Util::remove_params_and_fragment( $original_url ) );
+			$local_path = Util::get_source_path_from_local_url( Util::remove_params_and_fragment( $original_url ) );
 			$file_path  = ABSPATH . ltrim( $local_path, '/' );
 
 			Util::debug_log( "Local path: " . $local_path . " - Full file path: " . $file_path );
@@ -136,12 +136,12 @@ class Url_Fetcher {
 				} else {
 					// If copy fails, fall back to remote_get
 					Util::debug_log( "Failed to copy local file, falling back to remote_get" );
-					$response = self::remote_get( $url, $temp_filename );
+					$response = self::remote_get( Util::get_source_url_from_local_url( $url ), $temp_filename );
 				}
 			} else {
 				// If file doesn't exist, fall back to remote_get
 				Util::debug_log( "Local file not found, falling back to remote_get" );
-				$response = self::remote_get( $url, $temp_filename );
+				$response = self::remote_get( Util::get_source_url_from_local_url( $url ), $temp_filename );
 			}
 		} else {
 			// Not a local asset, use remote_get as before
@@ -160,7 +160,7 @@ class Url_Fetcher {
 				$recovered = false;
 				// Attempt 1: If it is a local asset, try copying directly from disk again.
 				if ( isset( $is_local_asset ) && $is_local_asset ) {
-					$local_path = Util::get_path_from_local_url( Util::remove_params_and_fragment( $original_url ) );
+					$local_path = Util::get_source_path_from_local_url( Util::remove_params_and_fragment( $original_url ) );
 					$file_path  = ABSPATH . ltrim( $local_path, '/' );
 					if ( file_exists( $file_path ) && is_readable( $file_path ) ) {
 						$recovered = copy( $file_path, $temp_filename );
@@ -172,7 +172,7 @@ class Url_Fetcher {
 				}
 				// Attempt 2: Do a non-streamed request and write body manually.
 				if ( ! $recovered ) {
- 				$alt_args          = array(
+					$alt_args          = array(
 						'timeout'     => self::TIMEOUT,
 						'user-agent'  => apply_filters( 'ss_crawler_user_agent', self::DEFAULT_USER_AGENT ),
 						'sslverify'   => false,
@@ -184,7 +184,8 @@ class Url_Fetcher {
 					if ( $basic_auth_digest ) {
 						$alt_args['headers'] = array( 'Authorization' => 'Basic ' . $basic_auth_digest );
 					}
-					$alt_resp = wp_remote_get( $url, apply_filters( 'ss_remote_get_args', $alt_args ) );
+					$alt_url  = isset( $is_local_asset ) && $is_local_asset ? Util::get_source_url_from_local_url( $url ) : $url;
+					$alt_resp = wp_remote_get( $alt_url, apply_filters( 'ss_remote_get_args', $alt_args ) );
 					if ( ! is_wp_error( $alt_resp ) ) {
 						$body = wp_remote_retrieve_body( $alt_resp );
 						if ( strlen( $body ) > 0 ) {
@@ -398,7 +399,7 @@ class Url_Fetcher {
 		// a domain with no trailing slash has no path, so we're giving it one
 		$path = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
 
-		$local_path = Util::get_path_from_local_url( Util::remove_params_and_fragment( $static_page->url ) );
+		$local_path = Util::get_public_path_from_local_url( Util::remove_params_and_fragment( $static_page->url ) );
 		if ( is_string( $local_path ) && '' !== $local_path ) {
 			$path = $local_path;
 		}

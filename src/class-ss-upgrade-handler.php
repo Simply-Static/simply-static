@@ -163,11 +163,11 @@ class Upgrade_Handler {
 			'add_feeds'                     => false,
 			'add_rest_api'                  => false,
 			'smart_crawl'                   => true,
-			'wp_content_folder'             => '',
-			'wp_includes_folder'            => '',
-			'wp_uploads_folder'             => '',
-			'wp_plugins_folder'             => '',
-			'wp_themes_folder'              => '',
+			'wp_content_directory'          => 'wp-content',
+			'wp_includes_directory'         => 'wp-includes',
+			'wp_uploads_directory'          => 'uploads',
+			'wp_plugins_directory'          => 'plugins',
+			'wp_themes_directory'           => 'themes',
 			'theme_style_name'              => 'style',
 			'author_url'                    => '',
 			'hide_comments'                 => false,
@@ -205,6 +205,9 @@ class Upgrade_Handler {
 				// Sync database.
 				Page::create_or_update_table();
 
+				// Preserve legacy Hide WP path settings under the current option names.
+				self::migrate_legacy_hide_wp_options();
+
 				// Clean up renamed crawlers in the crawlers option
 				self::cleanup_renamed_crawlers();
 
@@ -222,6 +225,8 @@ class Upgrade_Handler {
 	 * @return void
 	 */
 	protected static function set_default_options() {
+		self::migrate_legacy_hide_wp_options();
+
 		foreach ( self::$default_options as $option_key => $option_value ) {
 			// For new installations, ensure smart_crawl is set to true
 			if ( $option_key === 'smart_crawl' ) {
@@ -233,6 +238,27 @@ class Upgrade_Handler {
 
 		// Save the options
 		self::$options->save();
+	}
+
+	/**
+	 * Migrate legacy Hide WP folder option keys to the current directory keys.
+	 *
+	 * @return void
+	 */
+	protected static function migrate_legacy_hide_wp_options() {
+		$legacy_hide_wp_options = array(
+			'wp_content_folder'  => 'wp_content_directory',
+			'wp_includes_folder' => 'wp_includes_directory',
+			'wp_uploads_folder'  => 'wp_uploads_directory',
+			'wp_plugins_folder'  => 'wp_plugins_directory',
+			'wp_themes_folder'   => 'wp_themes_directory',
+		);
+
+		foreach ( $legacy_hide_wp_options as $legacy_key => $current_key ) {
+			if ( self::$options->get( $current_key ) === null && self::$options->get( $legacy_key ) !== null ) {
+				self::$options->set( $current_key, self::$options->get( $legacy_key ) );
+			}
+		}
 	}
 
 	/**
