@@ -357,8 +357,12 @@ class Fetch_Urls_Task extends Task {
 				$this->set_url_found_on( $static_page, $redirect_url );
 
 			} else if ( $this->redirect_resolves_to_same_static_path( $current_url, $redirect_url ) ) {
-				Util::debug_log( "This redirect resolves to the same static file path; adding new URL to the queue" );
-				$this->set_url_found_on( $static_page, $redirect_url );
+				if ( Util::is_local_url( $redirect_url ) ) {
+					Util::debug_log( "This redirect resolves to the same static file path; adding new URL to the queue" );
+					$this->set_url_found_on( $static_page, $redirect_url );
+				} else {
+					Util::debug_log( "This redirect resolves to the same static file path; not adding non-local URL to the queue" );
+				}
 
 			} else {
 				// check if this is a local URL
@@ -431,7 +435,7 @@ class Fetch_Urls_Task extends Task {
 	 * @return bool
 	 */
 	protected function redirect_resolves_to_same_static_path( $current_url, $redirect_url ) {
-		if ( ! Util::is_local_url( $current_url ) || ! Util::is_local_url( $redirect_url ) ) {
+		if ( ! Util::is_local_url( $current_url ) ) {
 			return false;
 		}
 
@@ -450,7 +454,13 @@ class Fetch_Urls_Task extends Task {
 	 */
 	protected function normalize_static_redirect_path( $url ) {
 		$url_without_fragment = preg_replace( '/#.*/', '', $url );
-		$path                 = Util::get_path_from_local_url( $url_without_fragment );
+		$export_path          = $this->get_path_from_export_url( $url_without_fragment );
+		$path                 = '' !== $export_path ? $export_path : '';
+
+		if ( '' === $path && Util::is_local_url( $url_without_fragment ) ) {
+			$path = Util::get_path_from_local_url( $url_without_fragment );
+		}
+
 		if ( ! is_string( $path ) || '' === $path ) {
 			return '';
 		}
@@ -461,6 +471,87 @@ class Fetch_Urls_Task extends Task {
 		$path       = trailingslashit( $path );
 
 		return '/' . ltrim( $path, '/' ) . $query;
+	}
+
+	/**
+	 * Get the export-relative path from a URL that may use the configured static destination.
+	 *
+	 * @param string $url URL to normalize.
+	 *
+	 * @return string
+	 */
+	protected function get_path_from_export_url( $url ) {
+		if ( ! is_string( $url ) || '' === $url ) {
+			return '';
+		}
+
+		$url_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $url ) : parse_url( $url );
+		if ( ! is_array( $url_parts ) || empty( $url_parts['host'] ) ) {
+			return '';
+		}
+
+		$url_host = strtolower( preg_replace( '/:\d+$/', '', (string) $url_parts['host'] ) );
+		$url_path = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
+
+		foreach ( $this->get_export_url_bases() as $base ) {
+			$base_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $base ) : parse_url( $base );
+			if ( ! is_array( $base_parts ) || empty( $base_parts['host'] ) ) {
+				continue;
+			}
+
+			$base_host = strtolower( preg_replace( '/:\d+$/', '', (string) $base_parts['host'] ) );
+			if ( $url_host !== $base_host ) {
+				continue;
+			}
+
+			$base_path = isset( $base_parts['path'] ) ? untrailingslashit( $base_parts['path'] ) : '';
+			$match     = '' === $base_path || '/' === $base_path || untrailingslashit( $url_path ) === $base_path || strpos( untrailingslashit( $url_path ) . '/', trailingslashit( $base_path ) ) === 0;
+			if ( ! $match ) {
+				continue;
+			}
+
+			if ( '' !== $base_path && '/' !== $base_path ) {
+				$url_path = substr( $url_path, strlen( $base_path ) );
+				$url_path = '' === $url_path ? '/' : $url_path;
+			}
+
+			$query    = isset( $url_parts['query'] ) ? '?' . $url_parts['query'] : '';
+			$fragment = isset( $url_parts['fragment'] ) ? '#' . $url_parts['fragment'] : '';
+
+			return '/' . ltrim( $url_path, '/' ) . $query . $fragment;
+		}
+
+		return '';
+	}
+
+	/**
+	 * Get configured static destination bases used only for redirect equivalence checks.
+	 *
+	 * @return array
+	 */
+	protected function get_export_url_bases() {
+		$bases = array();
+
+		if ( 'absolute' === $this->options->get( 'destination_url_type' ) ) {
+			$bases[] = $this->options->get_destination_url();
+		}
+
+		$static_site_url = Util::get_static_site_url();
+		if ( '' !== $static_site_url ) {
+			$bases[] = $static_site_url;
+		}
+
+		$bases = array_filter( array_map( 'untrailingslashit', $bases ) );
+		$bases = array_values( array_unique( $bases ) );
+
+		usort( $bases, function ( $a, $b ) {
+			$a_path = function_exists( 'wp_parse_url' ) ? wp_parse_url( $a, PHP_URL_PATH ) : parse_url( $a, PHP_URL_PATH );
+			$b_path = function_exists( 'wp_parse_url' ) ? wp_parse_url( $b, PHP_URL_PATH ) : parse_url( $b, PHP_URL_PATH );
+
+			return strlen( (string) $b_path ) <=> strlen( (string) $a_path );
+		} );
+
+		return $bases;
 	}
 
 	/**

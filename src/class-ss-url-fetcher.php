@@ -376,6 +376,10 @@ class Url_Fetcher {
 			return true;
 		}
 
+		if ( in_array( (int) $static_page->http_status_code, array( 301, 302, 303, 307, 308 ), true ) ) {
+			return false;
+		}
+
 		$page_handler = $static_page->get_handler();
 		if ( $static_page->http_status_code === 404 && $page_handler && is_a( $page_handler, Handler_404::class ) ) {
 			return true;
