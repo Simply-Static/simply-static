@@ -1817,7 +1817,7 @@ class Url_Extractor {
 		$destination_url = $this->options->get_destination_url();
 
 		if ( Util::is_local_url( $url ) ) {
-			$path           = Util::get_path_from_local_url( $url );
+			$path           = Util::get_public_path_from_local_url( $url );
 			$sanitized_path = Util::sanitize_local_path( $path );
 
 			return untrailingslashit( $destination_url ) . $sanitized_path;
@@ -1834,7 +1834,7 @@ class Url_Extractor {
 	 * @return string      Relative path for the URL
 	 */
 	private function convert_relative_url( $url ) {
-		$path           = Util::get_path_from_local_url( $url );
+		$path           = Util::get_public_path_from_local_url( $url );
 		$sanitized_path = Util::sanitize_local_path( $path );
 
 		return $this->options->get( 'relative_path' ) . $sanitized_path;
@@ -1859,10 +1859,10 @@ class Url_Extractor {
 	 */
 	private function convert_offline_url( $url ) {
 		// remove the scheme/host from the url
-		$page_path           = Util::get_path_from_local_url( $this->static_page->url );
+		$page_path           = Util::get_public_path_from_local_url( $this->static_page->url );
 		$sanitized_page_path = Util::sanitize_local_path( $page_path );
 
-		$extracted_path           = Util::get_path_from_local_url( $url );
+		$extracted_path           = Util::get_public_path_from_local_url( $url );
 		$sanitized_extracted_path = Util::sanitize_local_path( $extracted_path );
 
 		// create a path from one page to the other

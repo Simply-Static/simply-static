@@ -1329,6 +1329,199 @@ class Util {
 	}
 
 	/**
+	 * Get the static/public path for a local URL after Hide WP path replacements.
+	 *
+	 * @param string $url Local URL or local path.
+	 *
+	 * @return string
+	 */
+	public static function get_public_path_from_local_url( $url ) {
+		$path = self::get_path_from_local_url( $url );
+
+		return self::replace_wordpress_path_with_public_path( $path );
+	}
+
+	/**
+	 * Get the WordPress source path for a local URL that may already use Hide WP replacements.
+	 *
+	 * @param string $url Local URL or local path.
+	 *
+	 * @return string
+	 */
+	public static function get_source_path_from_local_url( $url ) {
+		$path = self::get_path_from_local_url( $url );
+
+		return self::replace_public_path_with_wordpress_path( $path );
+	}
+
+	/**
+	 * Convert a local URL that may use Hide WP replacements back to the WordPress source URL.
+	 *
+	 * @param string $url Local URL.
+	 *
+	 * @return string
+	 */
+	public static function get_source_url_from_local_url( $url ) {
+		if ( ! is_string( $url ) || ! self::is_local_url( $url ) ) {
+			return $url;
+		}
+
+		$base = self::get_local_url_base( self::remove_params_and_fragment( $url ) );
+		if ( null === $base ) {
+			return $url;
+		}
+
+		$path = self::get_source_path_from_local_url( $url );
+
+		return untrailingslashit( $base ) . self::add_leading_slash( ltrim( $path, '/' ) );
+	}
+
+	/**
+	 * Replace default WordPress asset directories with configured Hide WP public directories.
+	 *
+	 * @param string $path Local path.
+	 *
+	 * @return string
+	 */
+	public static function replace_wordpress_path_with_public_path( $path ) {
+		return self::replace_wordpress_asset_path( $path, false );
+	}
+
+	/**
+	 * Replace configured Hide WP public directories with the real WordPress source directories.
+	 *
+	 * @param string $path Local path.
+	 *
+	 * @return string
+	 */
+	public static function replace_public_path_with_wordpress_path( $path ) {
+		return self::replace_wordpress_asset_path( $path, true );
+	}
+
+	/**
+	 * Apply Hide WP path replacements in either direction.
+	 *
+	 * @param string $path Local path.
+	 * @param bool   $reverse Whether to map public paths back to WordPress source paths.
+	 *
+	 * @return string
+	 */
+	private static function replace_wordpress_asset_path( $path, $reverse = false ) {
+		if ( ! is_string( $path ) || '' === $path ) {
+			return $path;
+		}
+
+		$clean_path     = self::remove_params_and_fragment( $path );
+		$query_fragment = substr( $path, strlen( $clean_path ) );
+		$leading_slash  = strpos( $clean_path, '/' ) === 0;
+		$segments       = explode( '/', trim( $clean_path, '/' ) );
+
+		if ( empty( $segments ) || '' === $segments[0] ) {
+			return $path;
+		}
+
+		$options = Options::instance();
+		$map     = array(
+			'wp-content'  => self::get_hide_wp_option( $options, 'wp_content_directory', 'wp_content_folder', 'wp-content' ),
+			'wp-includes' => self::get_hide_wp_option( $options, 'wp_includes_directory', 'wp_includes_folder', 'wp-includes' ),
+			'uploads'     => self::get_hide_wp_option( $options, 'wp_uploads_directory', 'wp_uploads_folder', 'uploads' ),
+			'plugins'     => self::get_hide_wp_option( $options, 'wp_plugins_directory', 'wp_plugins_folder', 'plugins' ),
+			'themes'      => self::get_hide_wp_option( $options, 'wp_themes_directory', 'wp_themes_folder', 'themes' ),
+		);
+
+		if ( $reverse ) {
+			self::replace_path_segment( $segments, 0, $map['wp-content'], 'wp-content' );
+			self::replace_path_segment( $segments, 0, $map['wp-includes'], 'wp-includes' );
+
+			if ( isset( $segments[0] ) && 'wp-content' === $segments[0] && isset( $segments[1] ) ) {
+				self::replace_path_segment( $segments, 1, $map['uploads'], 'uploads' );
+				self::replace_path_segment( $segments, 1, $map['plugins'], 'plugins' );
+				self::replace_path_segment( $segments, 1, $map['themes'], 'themes' );
+			}
+		} else {
+			self::replace_path_segment( $segments, 0, 'wp-content', $map['wp-content'] );
+			self::replace_path_segment( $segments, 0, 'wp-includes', $map['wp-includes'] );
+
+			if ( isset( $segments[0] ) && $map['wp-content'] === $segments[0] && isset( $segments[1] ) ) {
+				self::replace_path_segment( $segments, 1, 'uploads', $map['uploads'] );
+				self::replace_path_segment( $segments, 1, 'plugins', $map['plugins'] );
+				self::replace_path_segment( $segments, 1, 'themes', $map['themes'] );
+			}
+		}
+
+		$theme_style_name = self::get_hide_wp_option( $options, 'theme_style_name', '', 'style' );
+		$theme_style_name = preg_replace( '/\.css$/i', '', $theme_style_name );
+		if ( '' === $theme_style_name ) {
+			$theme_style_name = 'style';
+		}
+
+		$is_theme_asset = isset( $segments[0], $segments[1] )
+			&& ( $reverse ? 'wp-content' === $segments[0] && 'themes' === $segments[1] : $map['wp-content'] === $segments[0] && $map['themes'] === $segments[1] );
+
+		if ( $is_theme_asset && ! empty( $segments ) ) {
+			$last_index = count( $segments ) - 1;
+			$from       = $reverse ? $theme_style_name . '.css' : 'style.css';
+			$to         = $reverse ? 'style.css' : $theme_style_name . '.css';
+
+			if ( $from !== $to && isset( $segments[ $last_index ] ) && $from === $segments[ $last_index ] ) {
+				$segments[ $last_index ] = $to;
+			}
+		}
+
+		$mapped_path = implode( '/', $segments );
+		if ( $leading_slash ) {
+			$mapped_path = '/' . $mapped_path;
+		}
+
+		return $mapped_path . $query_fragment;
+	}
+
+	/**
+	 * Get a Hide WP option with support for the historical *_folder keys.
+	 *
+	 * @param Options $options Options instance.
+	 * @param string  $primary Primary option key.
+	 * @param string  $legacy Legacy option key.
+	 * @param string  $default Default segment.
+	 *
+	 * @return string
+	 */
+	private static function get_hide_wp_option( $options, $primary, $legacy, $default ) {
+		$value = $options->get( $primary );
+		if ( ( null === $value || '' === $value ) && '' !== $legacy ) {
+			$value = $options->get( $legacy );
+		}
+
+		if ( null === $value || '' === $value ) {
+			$value = $default;
+		}
+
+		$value = trim( (string) $value, '/' );
+
+		return '' === $value ? $default : $value;
+	}
+
+	/**
+	 * Replace one path segment when it matches the expected value.
+	 *
+	 * @param array  $segments Path segments.
+	 * @param int    $index Segment index.
+	 * @param string $from Current segment.
+	 * @param string $to Replacement segment.
+	 *
+	 * @return void
+	 */
+	private static function replace_path_segment( &$segments, $index, $from, $to ) {
+		if ( '' === $from || '' === $to || ! isset( $segments[ $index ] ) ) {
+			return;
+		}
+
+		if ( $segments[ $index ] === $from ) {
+			$segments[ $index ] = $to;
+		}
+	}
+
+	/**
 	 * Returns a URL w/o the query string or fragment (i.e. nothing after the path)
 	 *
 	 * @param string $url URL to remove query string/fragment from
