@@ -1050,6 +1050,18 @@ class Admin_Rest {
             $options['ss_webhook_enabled_types'] = array_values( array_intersect( $allowed, $options['ss_webhook_enabled_types'] ) );
         }
 
+        // Empty means all public post types; non-empty selections must be valid public post type slugs.
+        $allowed_post_types = get_post_types( [ 'public' => true ], 'names' );
+        $allowed_post_types = array_values( array_diff( $allowed_post_types, [ 'attachment', 'elementor_library', 'ssp-form' ] ) );
+
+        if ( isset( $options['post_types'] ) && is_array( $options['post_types'] ) ) {
+            $options['post_types'] = array_values( array_intersect( $options['post_types'], $allowed_post_types ) );
+        }
+
+        if ( isset( $options['ss_single_auto_export_types'] ) && is_array( $options['ss_single_auto_export_types'] ) ) {
+            $options['ss_single_auto_export_types'] = array_values( array_intersect( $options['ss_single_auto_export_types'], $allowed_post_types ) );
+        }
+
         // Persist options
         update_option( 'simply-static', $options );
 

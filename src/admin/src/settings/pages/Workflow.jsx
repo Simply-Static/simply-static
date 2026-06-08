@@ -113,20 +113,17 @@ function Workflow() {
             setPostTypeSuggestions(labels);
             setPostTypeMap(map);
 
-            // Initialize tokens from settings; default to all public post types when missing
+            // Empty means all public post types. Keep the field visually empty so
+            // suggestions remain available after a user clears and saves it.
             const saved = Array.isArray(settings.ss_single_auto_export_types) ? settings.ss_single_auto_export_types : [];
-            let initialSlugs = saved;
-            if (!saved.length) {
-                initialSlugs = list.map(i => i.name);
-            }
-            const toLabels = initialSlugs.map(slug => {
+            const validSaved = saved.filter(slug => list.some(i => String(i.name) === String(slug)));
+            const toLabels = validSaved.map(slug => {
                 const entry = list.find(i => String(i.name) === String(slug));
-                return entry ? entry.label : String(slug);
+                return entry.label;
             });
             setSelectedPostTypeLabels(toLabels);
-            if (!saved.length) {
-                // Persist default (all) so UI round-trips
-                updateSetting('ss_single_auto_export_types', initialSlugs);
+            if (saved.length !== validSaved.length) {
+                updateSetting('ss_single_auto_export_types', validSaved);
             }
         });
 
@@ -185,11 +182,21 @@ function Workflow() {
     // Handlers for post type selection token field
     const onChangePostTypeTokens = (tokens) => {
         if (!proEnabled) return;
-        setSelectedPostTypeLabels(tokens);
-        const slugs = tokens.map(label => postTypeMap[label] ? postTypeMap[label] : label).filter(Boolean);
-        // Ensure at least one remains (fallback to all if emptied)
-        const finalSlugs = slugs.length ? slugs : Object.values(postTypeMap);
-        updateSetting('ss_single_auto_export_types', finalSlugs);
+        const validSlugs = Object.values(postTypeMap);
+        const slugs = tokens.map(label => {
+            if (postTypeMap[label]) {
+                return postTypeMap[label];
+            }
+
+            return validSlugs.includes(label) ? label : null;
+        }).filter(Boolean);
+        const labels = slugs.map(slug => {
+            const entry = Object.entries(postTypeMap).find(([, value]) => value === slug);
+            return entry ? entry[0] : slug;
+        });
+
+        setSelectedPostTypeLabels(labels);
+        updateSetting('ss_single_auto_export_types', slugs);
     };
 
     return (
