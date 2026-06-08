@@ -148,22 +148,6 @@ function GeneralSettings() {
 
                 if (response && response.data && response.data.length > 0) {
                     setPostTypes(response.data);
-
-                    // Empty means all public post types. Keep the field visually empty so
-                    // suggestions remain available after a user clears and saves it.
-                    if (!settings.post_types || !Array.isArray(settings.post_types)) {
-                        setSelectedPostTypes([]);
-                    } else if (Array.isArray(settings.post_types)) {
-                        // Ensure all selected post types exist in the post types list
-                        const validPostTypeIds = settings.post_types.filter(name =>
-                            response.data.some(postType => postType.name === name)
-                        );
-
-                        setSelectedPostTypes(validPostTypeIds);
-                        if (settings.post_types.length !== validPostTypeIds.length) {
-                            updateSetting('post_types', validPostTypeIds);
-                        }
-                    }
                 } else {
                     setPostTypesApiError('Invalid API response structure or empty post types array');
                 }
@@ -285,11 +269,25 @@ function GeneralSettings() {
             setSelectedCrawlers(settings.crawlers);
         }
 
-        if (settings.post_types !== undefined) {
-            setSelectedPostTypes(Array.isArray(settings.post_types) ? settings.post_types : []);
+    }, [settings]);
+
+    useEffect(() => {
+        if (!postTypes.length) {
+            return;
         }
 
-    }, [settings]);
+        // Empty means all public post types. Keep the field visually empty so
+        // suggestions remain available after a user clears and saves it.
+        const savedPostTypes = Array.isArray(settings.post_types) ? settings.post_types : [];
+        const validPostTypeIds = savedPostTypes.filter(name =>
+            postTypes.some(postType => postType.name === name)
+        );
+
+        setSelectedPostTypes(validPostTypeIds);
+        if (Array.isArray(settings.post_types) && savedPostTypes.length !== validPostTypeIds.length) {
+            updateSetting('post_types', validPostTypeIds);
+        }
+    }, [postTypes, settings.post_types]);
 
     return (<div className={"inner-settings"}>
         <Card>
