@@ -149,24 +149,19 @@ function GeneralSettings() {
                 if (response && response.data && response.data.length > 0) {
                     setPostTypes(response.data);
 
-                    // If settings.post_types is not an array, initialize it as an empty array
+                    // Empty means all public post types. Keep the field visually empty so
+                    // suggestions remain available after a user clears and saves it.
                     if (!settings.post_types || !Array.isArray(settings.post_types)) {
-                        const allPostTypeIds = response.data.map(postType => postType.name);
-                        setSelectedPostTypes(allPostTypeIds);
-                        updateSetting('post_types', allPostTypeIds);
+                        setSelectedPostTypes([]);
                     } else if (Array.isArray(settings.post_types)) {
                         // Ensure all selected post types exist in the post types list
                         const validPostTypeIds = settings.post_types.filter(name =>
                             response.data.some(postType => postType.name === name)
                         );
 
-                        // If no valid post types are selected, select all by default
-                        if (validPostTypeIds.length === 0) {
-                            const allPostTypeIds = response.data.map(postType => postType.name);
-                            setSelectedPostTypes(allPostTypeIds);
-                            updateSetting('post_types', allPostTypeIds);
-                        } else {
-                            setSelectedPostTypes(validPostTypeIds);
+                        setSelectedPostTypes(validPostTypeIds);
+                        if (settings.post_types.length !== validPostTypeIds.length) {
+                            updateSetting('post_types', validPostTypeIds);
                         }
                     }
                 } else {
@@ -527,8 +522,8 @@ function GeneralSettings() {
                                                                 postType = postTypes.find(pt => pt.name === label);
                                                             }
 
-                                                            return postType ? postType.name : label;
-                                                        });
+                                                            return postType ? postType.name : null;
+                                                        }).filter(Boolean);
                                                         setSelectedPostTypes(selectedNames);
                                                         updateSetting('post_types', selectedNames);
                                                     }}
