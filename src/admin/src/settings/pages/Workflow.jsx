@@ -54,6 +54,7 @@ function Workflow() {
     const [toolsSubmenu, setToolsSubmenu] = useState(false);
 
     // Post Types for Auto Export selection
+    const [postTypes, setPostTypes] = useState([]);
     const [postTypeSuggestions, setPostTypeSuggestions] = useState([]); // array of labels
     const [postTypeMap, setPostTypeMap] = useState({}); // label -> name (slug)
     const [selectedPostTypeLabels, setSelectedPostTypeLabels] = useState([]);
@@ -104,27 +105,19 @@ function Workflow() {
         });
 
         // Post types (for Auto Export selection)
-        apiFetch({path: '/simplystatic/v1/post-types'}).then((resp) => {
+        apiFetch({path: '/simplystatic/v1/post-types', parse: true}).then((resp) => {
+            if (typeof resp === 'string') {
+                try {
+                    resp = JSON.parse(resp);
+                } catch (e) {
+                    setPostTypes([]);
+                    return;
+                }
+            }
+
             // API returns {status, data: [{name, label}]}
             let list = Array.isArray(resp) ? resp : (resp && resp.data ? resp.data : []);
-            const labels = list.map(i => i.label);
-            const map = {};
-            list.forEach(i => map[i.label] = i.name);
-            setPostTypeSuggestions(labels);
-            setPostTypeMap(map);
-
-            // Empty means all public post types. Keep the field visually empty so
-            // suggestions remain available after a user clears and saves it.
-            const saved = Array.isArray(settings.ss_single_auto_export_types) ? settings.ss_single_auto_export_types : [];
-            const validSaved = saved.filter(slug => list.some(i => String(i.name) === String(slug)));
-            const toLabels = validSaved.map(slug => {
-                const entry = list.find(i => String(i.name) === String(slug));
-                return entry.label;
-            });
-            setSelectedPostTypeLabels(toLabels);
-            if (saved.length !== validSaved.length) {
-                updateSetting('ss_single_auto_export_types', validSaved);
-            }
+            setPostTypes(list);
         });
 
         // Initialize toggles from settings; coerce truthiness properly
@@ -152,6 +145,33 @@ function Workflow() {
             setWebhookEnabledTypes((settings.ss_single_export_webhook_url && settings.ss_single_export_webhook_url.length) ? ['single'] : defaultTypes);
         }
     }, [settings.ss_single_pages, settings.ss_single_taxonomy_archives, settings.ss_use_builds]);
+
+    useEffect(() => {
+        if (!postTypes.length) {
+            setPostTypeSuggestions([]);
+            setPostTypeMap({});
+            return;
+        }
+
+        const labels = postTypes.map(i => i.label);
+        const map = {};
+        postTypes.forEach(i => map[i.label] = i.name);
+        setPostTypeSuggestions(labels);
+        setPostTypeMap(map);
+
+        // Empty means all public post types. Keep the field visually empty so
+        // suggestions remain available after a user clears and saves it.
+        const saved = Array.isArray(settings.ss_single_auto_export_types) ? settings.ss_single_auto_export_types : [];
+        const validSaved = saved.filter(slug => postTypes.some(i => String(i.name) === String(slug)));
+        const toLabels = validSaved.map(slug => {
+            const entry = postTypes.find(i => String(i.name) === String(slug));
+            return entry.label;
+        });
+        setSelectedPostTypeLabels(toLabels);
+        if (Array.isArray(settings.ss_single_auto_export_types) && saved.length !== validSaved.length) {
+            updateSetting('ss_single_auto_export_types', validSaved);
+        }
+    }, [postTypes, settings.ss_single_auto_export_types]);
 
     // Handlers
     const onChangeTokens = (tokens) => {
