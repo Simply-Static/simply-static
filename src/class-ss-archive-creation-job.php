@@ -133,6 +133,11 @@ class Archive_Creation_Job extends Background_Process {
 		do_action( 'ss_archive_creation_job_before_start', $blog_id, $this );
 
 		if ( $this->is_job_done() ) {
+			// Persist the requested type before building the task list so filters
+			// can decide between export/update behavior without reading stale options.
+			$this->options
+				->set( 'generate_type', $type )
+				->save();
 
 			$task_list = $this->get_task_list();
 
