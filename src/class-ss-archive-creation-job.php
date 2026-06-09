@@ -158,6 +158,9 @@ class Archive_Creation_Job extends Background_Process {
 				->set( 'archive_start_time', Util::formatted_datetime() )
 				->set( 'archive_end_time', null )
 				->set( 'generate_type', $type )
+				->set( 'zip_batch_offset', null )
+				->set( 'zip_total_files', null )
+				->set( 'zip_files', null )
 				->save();
 
 			Util::debug_log( "Pushing first task to queue: " . $first_task );
