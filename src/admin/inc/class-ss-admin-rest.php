@@ -635,14 +635,15 @@ class Admin_Rest {
 
         // 1. Count posts modified since last export.
         if ( ! empty( $last_export_end ) ) {
-            $post_types = get_post_types( array( 'public' => true ), 'names' );
-            $placeholders = implode( ',', array_fill( 0, count( $post_types ), '%s' ) );
+            $post_types          = get_post_types( array( 'public' => true ), 'names' );
+            $placeholders        = implode( ',', array_fill( 0, count( $post_types ), '%s' ) );
+            $last_export_end_gmt = get_gmt_from_date( $last_export_end );
 
             // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $modified_count = (int) $wpdb->get_var(
                 $wpdb->prepare(
-                    "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ({$placeholders}) AND post_modified > %s",
-                    array_merge( array_values( $post_types ), array( $last_export_end ) )
+                    "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ({$placeholders}) AND ( post_date_gmt > %s OR post_modified_gmt > %s )",
+                    array_merge( array_values( $post_types ), array( $last_export_end_gmt, $last_export_end_gmt ) )
                 )
             );
         }

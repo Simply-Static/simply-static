@@ -17,13 +17,7 @@ function ExportLog() {
 
     // Determine export type based on available information
     useEffect(() => {
-        // If delivery method is 'zip', always use 'export' type
-        if (settings && settings.delivery_method === 'zip') {
-            setExportType('export');
-            return;
-        }
-
-        // Use the new export-type endpoint to get the export type information
+        // Use the export-type endpoint to get the current export type information.
         apiFetch({
             path: '/simplystatic/v1/export-type',
             method: 'GET',
@@ -31,21 +25,14 @@ function ExportLog() {
         .then(response => {
             const json = JSON.parse(response);
             if (json.status === 200 && json.data) {
-                // If delivery method is 'zip', override with 'export' type
-                if (settings && settings.delivery_method === 'zip') {
-                    setExportType('export');
-                } else {
-                    setExportType(json.data.export_type);
-                    setExportTypeId(json.data.export_type_id);
-                }
+                setExportType(json.data.export_type);
+                setExportTypeId(json.data.export_type_id);
             }
         })
         .catch(error => {
             console.error('Error fetching export type:', error);
             // Fallback to using options.last_export_end
-            if (settings && settings.delivery_method === 'zip') {
-                setExportType('export');
-            } else if (options.last_export_end) {
+            if (options.last_export_end) {
                 setExportType('Update');
             } else {
                 setExportType('export');
