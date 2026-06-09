@@ -113,7 +113,7 @@ function SidebarSite( props = null ) {
             setUnpushedChanges(total);
 
             // Auto-select "Export Changes" when there are unpushed changes and Pro is available.
-            if (total > 0 && 'pro' === options.plan && isPro() && 'zip' !== settings.delivery_method && 'tiiny' !== settings.delivery_method) {
+            if (total > 0 && 'pro' === options.plan && isPro()) {
                 setSelectedExportType('update');
             } else {
                 setSelectedExportType('export');
@@ -300,15 +300,11 @@ function SidebarSite( props = null ) {
                 }}
             >
                 <option value="export">{__('Full Site', 'simply-static')}</option>
-                {'zip' !== settings.delivery_method && 'tiiny' !== settings.delivery_method &&
-                    <>
-                        {'pro' === options.plan && isPro() ?
-                            <option value="update">{__('Changes Only', 'simply-static')}</option>
-                            :
-                            <option disabled
-                                    value="update">{__('Changes Only (Requires Simply Static Pro)', 'simply-static')}</option>
-                        }
-                    </>
+                {'pro' === options.plan && isPro() ?
+                    <option value="update">{__('Changes Only', 'simply-static')}</option>
+                    :
+                    <option disabled
+                            value="update">{__('Changes Only (Requires Simply Static Pro)', 'simply-static')}</option>
                 }
                 {buildOptions}
                 {languageSelectOptions}
