@@ -692,18 +692,4 @@ class Fetch_Urls_Task extends Task {
 		return $type;
 	}
 
-	/**
-	 * Get total number of pages to process.
-	 * For this task, we don't use the cached values.
-	 *
-	 * @param boolean $cached Whether to use cached values.
-	 *
-	 * @return int|null
-	 * @throws \Exception
-	 */
-	public function get_total_pages( $cached = true ) {
-
-		return $this->get_total_pages_sql();
-
-	}
 }
