@@ -78,6 +78,16 @@ class Model {
 	}
 
 	/**
+	 * Check whether a field has a non-null value.
+	 *
+	 * @param string $field_name The name of the field to check.
+	 * @return bool Whether the field is set.
+	 */
+	public function __isset( $field_name ) {
+		return array_key_exists( $field_name, $this->data ) && null !== $this->data[ $field_name ];
+	}
+
+	/**
 	 * Set the value of a field for the model
 	 *
 	 * Returns an exception if you try to set a field that isn't one of the

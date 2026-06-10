@@ -261,11 +261,15 @@ class Fetch_Urls_Task extends Task {
 	 * @return void
 	 */
 	public function handle_200_response( $static_page, $save_file, $follow_urls ) {
-		if ( $save_file || $follow_urls ) {
+		$urls = array();
+
+		if ( ( $save_file || $follow_urls ) && $this->can_extract_urls_from_static_page( $static_page ) ) {
 			Util::debug_log( "Extracting URLs and replacing URLs in the static file" );
 			// Fetch all URLs from the page and add them to the queue...
 			$extractor = new Url_Extractor( $static_page );
 			$urls      = $extractor->extract_and_update_urls();
+		} elseif ( $save_file || $follow_urls ) {
+			Util::debug_log( "Skipping URL extraction for non-text file: " . $static_page->content_type );
 		}
 
 		if ( $follow_urls ) {
@@ -305,6 +309,33 @@ class Fetch_Urls_Task extends Task {
 		}
 
 		$static_page->save();
+	}
+
+	/**
+	 * Only text-like files can contain URLs that should be extracted or replaced.
+	 *
+	 * @param \Simply_Static\Page $static_page Record to inspect.
+	 *
+	 * @return bool
+	 */
+	protected function can_extract_urls_from_static_page( $static_page ) {
+		$file_path = isset( $static_page->file_path ) ? (string) $static_page->file_path : '';
+
+		if (
+			$static_page->is_type( 'html' ) ||
+			$static_page->is_type( 'css' ) ||
+			$static_page->is_type( 'xml' ) ||
+			$static_page->is_type( 'xsl' ) ||
+			$static_page->is_type( 'json' )
+		) {
+			return true;
+		}
+
+		if ( '' !== $file_path && substr( $file_path, -4 ) === '.css' ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
