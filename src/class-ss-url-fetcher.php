@@ -267,6 +267,7 @@ class Url_Fetcher {
 				}
 
 				if ( $renamed ) {
+					Util::debug_log( "Saved temp file to: " . $file_path );
 					$static_page->get_handler()->after_file_fetch( $this->archive_dir );
 				}
 			} else {
@@ -350,6 +351,16 @@ class Url_Fetcher {
 			'gz'    => 'application/gzip',
 			'rar'   => 'application/vnd.rar',
 			'7z'    => 'application/x-7z-compressed',
+			'mp3'   => 'audio/mpeg',
+			'm4a'   => 'audio/mp4',
+			'oga'   => 'audio/ogg',
+			'ogg'   => 'audio/ogg',
+			'wav'   => 'audio/wav',
+			'webm'  => 'video/webm',
+			'mp4'   => 'video/mp4',
+			'm4v'   => 'video/mp4',
+			'mov'   => 'video/quicktime',
+			'ogv'   => 'video/ogg',
 			'woff'  => 'font/woff',
 			'woff2' => 'font/woff2',
 			'ttf'   => 'font/ttf',

@@ -232,8 +232,72 @@ class Page extends Model {
 	 * @return bool
 	 */
 	public function is_binary_file() {
-		if ( $this->is_type( 'application/octet-stream' ) ) {
-			return true;
+		if ( ! is_null( $this->content_type ) ) {
+			$binary_types = array(
+				'application/gzip',
+				'application/octet-stream',
+				'application/pdf',
+				'application/vnd.ms-fontobject',
+				'application/vnd.rar',
+				'application/wasm',
+				'application/x-7z-compressed',
+				'application/x-gzip',
+				'application/x-rar-compressed',
+				'application/x-tar',
+				'application/x-zip-compressed',
+				'application/zip',
+				'audio/',
+				'font/',
+				'image/',
+				'video/',
+			);
+
+			foreach ( $binary_types as $binary_type ) {
+				if ( $this->is_type( $binary_type ) ) {
+					return true;
+				}
+			}
+		}
+
+		if ( isset( $this->file_path ) ) {
+			$extension = strtolower( pathinfo( (string) $this->file_path, PATHINFO_EXTENSION ) );
+			if ( in_array( $extension, array(
+				'7z',
+				'aac',
+				'avif',
+				'bmp',
+				'eot',
+				'gif',
+				'gz',
+				'heic',
+				'ico',
+				'jpeg',
+				'jpg',
+				'm4a',
+				'm4v',
+				'mov',
+				'mp3',
+				'mp4',
+				'oga',
+				'ogg',
+				'ogv',
+				'otf',
+				'pdf',
+				'png',
+				'rar',
+				'tar',
+				'tif',
+				'tiff',
+				'ttf',
+				'wav',
+				'webm',
+				'webp',
+				'woff',
+				'woff2',
+				'zip',
+			), true ) ) {
+				return true;
+			}
 		}
 
 		if ( $this->is_type( 'image' ) ) {

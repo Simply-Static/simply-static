@@ -191,6 +191,15 @@ trait canProcessPages {
 				) );
 				$static_page->set_error_message( $e->getMessage() );
 				$static_page->save();
+			} catch ( \Throwable $e ) {
+				Util::debug_log( 'Page URL: ' . $static_page->url . ' not being processed. Error: ' . $e->getMessage() );
+				// Reset the claim so the page can be retried on next iteration.
+				$wpdb->query( $wpdb->prepare(
+					"UPDATE {$table_name} SET {$this->processing_column} = NULL WHERE id = %d",
+					$static_page->id
+				) );
+				$static_page->set_error_message( $e->getMessage() );
+				$static_page->save();
 			}
 		}
 
