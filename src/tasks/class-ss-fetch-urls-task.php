@@ -381,8 +381,7 @@ class Fetch_Urls_Task extends Task {
 			 * @param \Simply_Static\Page   $static_page         Current static page record.
 			 */
 			$skip_local_asset_redirect_page = apply_filters( 'simply_static_skip_local_asset_redirect_page', true, $redirect_url, $current_url, $static_page );
-
-			$has_known_static_reference = isset( $static_page->found_on_id );
+			$has_known_static_reference     = null !== $static_page->found_on_id;
 
 			if ( $skip_local_asset_redirect_page && ! $has_known_static_reference && Util::is_local_asset_url( $redirect_url ) ) {
 				if ( $follow_urls ) {
