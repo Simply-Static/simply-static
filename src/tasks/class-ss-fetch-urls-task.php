@@ -371,6 +371,35 @@ class Fetch_Urls_Task extends Task {
 		$redirect_url = Util::relative_to_absolute_url( $redirect_url, $current_url );
 
 		if ( $redirect_url ) {
+			/**
+			 * Filter whether redirects to local static assets should be queued
+			 * directly instead of creating an HTML redirect page.
+			 *
+			 * @param bool                  $skip_redirect_page Whether to skip creating the redirect page.
+			 * @param string                $redirect_url        Absolute redirect target URL.
+			 * @param string                $current_url         Current URL being fetched.
+			 * @param \Simply_Static\Page   $static_page         Current static page record.
+			 */
+			$skip_local_asset_redirect_page = apply_filters( 'simply_static_skip_local_asset_redirect_page', true, $redirect_url, $current_url, $static_page );
+
+			$has_known_static_reference = isset( $static_page->found_on_id );
+
+			if ( $skip_local_asset_redirect_page && ! $has_known_static_reference && Util::is_local_asset_url( $redirect_url ) ) {
+				if ( $follow_urls ) {
+					Util::debug_log( 'Redirect URL is a local asset; adding the asset URL to the queue without creating a redirect page' );
+					$this->set_url_found_on( $static_page, $redirect_url );
+				} else {
+					Util::debug_log( 'Not following the local asset redirect URL for this page' );
+					$static_page->set_status_message( __( "Do not follow", 'simply-static' ) );
+				}
+
+				$static_page->file_path = null;
+				$static_page->set_status_message( __( "Do not save", 'simply-static' ) );
+				$static_page->save();
+
+				return;
+			}
+
 			// WP likes to 301 redirect `/path` to `/path/` -- we want to
 			// check for this and just add the trailing slashed version
 			if ( $redirect_url === trailingslashit( $current_url ) || untrailingslashit( $redirect_url ) === untrailingslashit( $current_url ) ) {
