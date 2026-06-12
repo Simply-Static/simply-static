@@ -1414,6 +1414,7 @@ class Util {
 		$clean_path     = self::remove_params_and_fragment( $path );
 		$query_fragment = substr( $path, strlen( $clean_path ) );
 		$leading_slash  = strpos( $clean_path, '/' ) === 0;
+		$trailing_slash = strlen( $clean_path ) > 1 && substr( $clean_path, - 1 ) === '/';
 		$segments       = explode( '/', trim( $clean_path, '/' ) );
 
 		if ( empty( $segments ) || '' === $segments[0] ) {
@@ -1471,6 +1472,9 @@ class Util {
 		$mapped_path = implode( '/', $segments );
 		if ( $leading_slash ) {
 			$mapped_path = '/' . $mapped_path;
+		}
+		if ( $trailing_slash && substr( $mapped_path, - 1 ) !== '/' ) {
+			$mapped_path .= '/';
 		}
 
 		return $mapped_path . $query_fragment;
