@@ -14,6 +14,7 @@ import apiFetch from "@wordpress/api-fetch";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
 import HelperVideo from "../components/HelperVideo";
+import StudioNotice from "../components/StudioNotice";
 
 const {__} = wp.i18n;
 
@@ -297,6 +298,14 @@ function GeneralSettings() {
                     videoUrl={'https://youtu.be/cb8jAMJlfGI'}/></b>
             </CardHeader>
             <CardBody>
+                {isStudio() &&
+                    <StudioNotice
+                        heading={__('URL replacement is handled by Studio', 'simply-static')}
+                        cta={null}
+                    >
+                        <p>{__('Studio manages the public URL for this environment automatically, so you do not need to configure replacement URLs manually.', 'simply-static')}</p>
+                    </StudioNotice>
+                }
                 <p>{__('When exporting your static site, any links to your WordPress site will be replaced by one of the following: absolute URLs, relative URLs, or URLs contructed for offline use.', 'simply-static')}</p>
                 <SelectControl
                     label={__('Replacing URLs', 'simply-static')}
@@ -342,6 +351,7 @@ function GeneralSettings() {
                                     placeholder={"example.com"}
                                     __next40pxDefaultSize
                                     __nextHasNoMarginBottom
+                                    disabled={isStudio()}
                                     value={host}
                                     onChange={(host) => {
                                         setHost(host);
@@ -361,6 +371,7 @@ function GeneralSettings() {
                             placeholder={"/"}
                             __next40pxDefaultSize
                             __nextHasNoMarginBottom
+                            disabled={isStudio()}
                             value={path}
                             onChange={(path) => {
                                 setPath(path);
@@ -384,6 +395,7 @@ function GeneralSettings() {
                     <ToggleControl
                         label={__('Force URL replacements', 'simply-static')}
                         __nextHasNoMarginBottom
+                        disabled={isStudio()}
                         help={
                             forceURLReplacement
                                 ? __('Replace all occurrences of the WordPress URL with the static URL (includes inline CSS and JS).', 'simply-static')

@@ -12,6 +12,7 @@ import {useContext, useEffect, useState} from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import {SettingsContext} from "../context/SettingsContext";
 import HelperVideo from "../components/HelperVideo";
+import StudioNotice from "../components/StudioNotice";
 
 const {__} = wp.i18n;
 
@@ -140,46 +141,53 @@ function DebugSettings() {
             </CardBody>
         </Card>
         <Spacer margin={5}/>
-        {!isStudio() &&
-            <Card>
-                <CardHeader>
-                    <b>{__('Temporary Files', 'simply-static')}</b>
-                </CardHeader>
-                <CardBody>
-                    <TextControl
-                        label={__('Temporary Files Directory', 'simply-static')}
-                        type={"text"}
-                        placeholder={options.temp_files_dir}
-                        help={__('Optionally specify the directory to save your temporary files. This directory must exist and be writeable.', 'simply-static')}
-                        __next40pxDefaultSize
-                        __nextHasNoMarginBottom
-                        value={settings.temp_files_dir}
-                        onChange={(temp_dir) => {
-                            updateSetting('temp_files_dir', temp_dir);
-                        }}
-                    />
-
-                    {clearNotice && (
-                        <>
-                            <Notice status={clearNotice.type} isDismissible={true}
-                                    onRemove={() => setClearNotice(null)}>
-                                {clearNotice.message}
-                            </Notice>
-                            <Spacer margin={5}/>
-                        </>
-                    )}
-
-                    <Button
-                        isSecondary
-                        onClick={handleClearTemp}
-                        disabled={clearingTemp}
-                        isBusy={clearingTemp}
+        <Card>
+            <CardHeader>
+                <b>{__('Temporary Files', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
+                {isStudio() &&
+                    <StudioNotice
+                        heading={__('Temporary files are managed by Studio', 'simply-static')}
+                        cta={null}
                     >
-                        {clearingTemp ? __('Clearing…', 'simply-static') : __('Clear Temporary Files', 'simply-static')}
-                    </Button>
-                </CardBody>
-            </Card>
-        }
+                        <p>{__('Studio provisions and cleans up build storage automatically for each environment, so there is no temporary directory to configure.', 'simply-static')}</p>
+                    </StudioNotice>
+                }
+                <TextControl
+                    label={__('Temporary Files Directory', 'simply-static')}
+                    type={"text"}
+                    placeholder={options.temp_files_dir}
+                    help={__('Optionally specify the directory to save your temporary files. This directory must exist and be writeable.', 'simply-static')}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
+                    disabled={isStudio()}
+                    value={settings.temp_files_dir}
+                    onChange={(temp_dir) => {
+                        updateSetting('temp_files_dir', temp_dir);
+                    }}
+                />
+
+                {clearNotice && (
+                    <>
+                        <Notice status={clearNotice.type} isDismissible={true}
+                                onRemove={() => setClearNotice(null)}>
+                            {clearNotice.message}
+                        </Notice>
+                        <Spacer margin={5}/>
+                    </>
+                )}
+
+                <Button
+                    isSecondary
+                    onClick={handleClearTemp}
+                    disabled={isStudio() || clearingTemp}
+                    isBusy={clearingTemp}
+                >
+                    {clearingTemp ? __('Clearing…', 'simply-static') : __('Clear Temporary Files', 'simply-static')}
+                </Button>
+            </CardBody>
+        </Card>
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
@@ -199,28 +207,35 @@ function DebugSettings() {
             </CardBody>
         </Card>
         <Spacer margin={5}/>
-        {!isStudio() &&
-            <Card>
-                <CardHeader>
-                    <b>{__('Proxy Setup', 'simply-static')}</b>
-                </CardHeader>
-                <CardBody>
-                    <TextControl
-                        label={__('Origin URL', 'simply-static')}
-                        type={"url"}
-                        help={__('If the URL of your WordPress installation differs from the public-facing URL (Proxy Setup), add the public URL here.', 'simply-static')}
-                        placeholder={options.home}
-                        autoComplete={"off"}
-                        __next40pxDefaultSize
-                        __nextHasNoMarginBottom
-                        value={settings.origin_url}
-                        onChange={(origin_url) => {
-                            updateSetting('origin_url', origin_url);
-                        }}
-                    />
-                </CardBody>
-            </Card>
-        }
+        <Card>
+            <CardHeader>
+                <b>{__('Proxy Setup', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
+                {isStudio() &&
+                    <StudioNotice
+                        heading={__('Proxy setup is handled by Studio', 'simply-static')}
+                        cta={null}
+                    >
+                        <p>{__('Studio already knows the WordPress origin and public Studio URL for this environment, so you do not need to configure a proxy URL manually.', 'simply-static')}</p>
+                    </StudioNotice>
+                }
+                <TextControl
+                    label={__('Origin URL', 'simply-static')}
+                    type={"url"}
+                    help={__('If the URL of your WordPress installation differs from the public-facing URL (Proxy Setup), add the public URL here.', 'simply-static')}
+                    placeholder={options.home}
+                    autoComplete={"off"}
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
+                    disabled={isStudio()}
+                    value={settings.origin_url}
+                    onChange={(origin_url) => {
+                        updateSetting('origin_url', origin_url);
+                    }}
+                />
+            </CardBody>
+        </Card>
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
@@ -240,25 +255,32 @@ function DebugSettings() {
             </CardBody>
         </Card>
         <Spacer margin={5}/>
-        {!isStudio() &&
-            <Card>
-                <CardHeader>
-                    <b>{__('Cron', 'simply-static')}</b>
-                </CardHeader>
-                <CardBody>
-                    <ToggleControl
-                        label={__('Use server-side cron job', 'simply-static')}
-                        help={__('Enable this if you use a server-side cron job instead of the default WP-Cron.', 'simply-static')}
-                        __nextHasNoMarginBottom
-                        checked={useServerCron}
-                        onChange={(value) => {
-                            setUserServerCron(value);
-                            updateSetting('server_cron', value);
-                        }}
-                    />
-                </CardBody>
-            </Card>
-        }
+        <Card>
+            <CardHeader>
+                <b>{__('Cron', 'simply-static')}</b>
+            </CardHeader>
+            <CardBody>
+                {isStudio() &&
+                    <StudioNotice
+                        heading={__('Cron is automatic on Studio', 'simply-static')}
+                        cta={null}
+                    >
+                        <p>{__('Studio starts builds automatically when your site changes, so you do not need a server-side cron job to trigger exports.', 'simply-static')}</p>
+                    </StudioNotice>
+                }
+                <ToggleControl
+                    label={__('Use server-side cron job', 'simply-static')}
+                    help={__('Enable this if you use a server-side cron job instead of the default WP-Cron.', 'simply-static')}
+                    __nextHasNoMarginBottom
+                    disabled={isStudio()}
+                    checked={useServerCron}
+                    onChange={(value) => {
+                        setUserServerCron(value);
+                        updateSetting('server_cron', value);
+                    }}
+                />
+            </CardBody>
+        </Card>
         <Spacer margin={5}/>
         {settingsSaved &&
             <>

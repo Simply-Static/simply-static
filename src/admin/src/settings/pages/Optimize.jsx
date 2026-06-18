@@ -12,6 +12,7 @@ import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
 import apiFetch from "@wordpress/api-fetch";
 import HelperVideo from "../components/HelperVideo";
+import StudioNotice from "../components/StudioNotice";
 
 const {__} = wp.i18n;
 
@@ -169,7 +170,14 @@ function Optimize() {
 
                 {minifyFiles &&
                     <>
-                        {!isStudio() && <>
+                        {isStudio() &&
+                            <StudioNotice
+                                heading={__('Minification is handled by Studio', 'simply-static')}
+                                cta={null}
+                            >
+                                <p>{__('Studio prepares optimized build assets automatically, so the low-level CSS and JavaScript minification options are not needed for Studio environments.', 'simply-static')}</p>
+                            </StudioNotice>
+                        }
                         <h4 style={{marginTop: '16px', marginBottom: '8px'}}>{__('Minify', 'simply-static')}</h4>
 
                         <ToggleControl
@@ -180,7 +188,7 @@ function Optimize() {
                                     ? __('Minify CSS files.', 'simply-static')
                                     : __('Don\'t minify CSS files.', 'simply-static')
                             }
-                            disabled={('free' === options.plan || !isPro())}
+                            disabled={isStudio() || 'free' === options.plan || !isPro()}
                             checked={minifyCss}
                             onChange={(value) => {
                                 setMinifyCss(value);
@@ -192,7 +200,7 @@ function Optimize() {
                                 label={__('Exclude Stylesheet URLs', 'simply-static')}
                                 __nextHasNoMarginBottom
                                 help={__('Exclude URLs from minification (one per line).', 'simply-static')}
-                                disabled={('free' === options.plan || !isPro())}
+                                disabled={isStudio() || 'free' === options.plan || !isPro()}
                                 value={settings.minify_css_exclude}
                                 onChange={(excludes) => {
                                     updateSetting('minify_css_exclude', excludes);
@@ -208,7 +216,7 @@ function Optimize() {
                                     ? __('Minify JavaScript files.', 'simply-static')
                                     : __('Don\'t minify JavaScript files.', 'simply-static')
                             }
-                            disabled={('free' === options.plan || !isPro())}
+                            disabled={isStudio() || 'free' === options.plan || !isPro()}
                             checked={minifyJavascript}
                             onChange={(value) => {
                                 setMinifyJavascript(value);
@@ -220,7 +228,7 @@ function Optimize() {
                                 label={__('Exclude JavaScript URLs', 'simply-static')}
                                 __nextHasNoMarginBottom
                                 help={__('Exclude URLs from minification (one per line).', 'simply-static')}
-                                disabled={('free' === options.plan || !isPro())}
+                                disabled={isStudio() || 'free' === options.plan || !isPro()}
                                 value={settings.minify_js_exclude}
                                 onChange={(excludes) => {
                                     updateSetting('minify_js_exclude', excludes);
@@ -232,14 +240,13 @@ function Optimize() {
                             label={__('Protect jQuery Globals', 'simply-static')}
                             __nextHasNoMarginBottom
                             help={__('Prevent mangling of jQuery, $, and wp global variables during JS minification.', 'simply-static')}
-                            disabled={('free' === options.plan || !isPro())}
+                            disabled={isStudio() || 'free' === options.plan || !isPro()}
                             checked={cssJsAggregateProtectJquery}
                             onChange={(value) => {
                                 setCssJsAggregateProtectJquery(value);
                                 updateSetting('css_js_aggregate_protect_jquery', value);
                             }}
                         />
-                        </>}
 
                         <h4 style={{marginTop: '16px', marginBottom: '8px'}}>{__('Aggregate', 'simply-static')}</h4>
 
@@ -412,97 +419,103 @@ function Optimize() {
             </CardBody>
         </Card>
         <Spacer margin={5}/>
-        {!isStudio() &&
-            <Card>
-                <CardHeader>
-                    <Flex>
+        <Card>
+            <CardHeader>
+                <Flex>
+                    <FlexItem>
+                        <b>{__('Image Optimization', 'simply-static')}<HelperVideo
+                            title={__('How to optimize images with ShortPixel?', 'simply-static')}
+                            videoUrl={'https://youtu.be/OIfKcXz3cxY'}/></b>
+                    </FlexItem>
+                    {('free' === options.plan || !isPro()) &&
                         <FlexItem>
-                            <b>{__('Image Optimization', 'simply-static')}<HelperVideo
-                                title={__('How to optimize images with ShortPixel?', 'simply-static')}
-                                videoUrl={'https://youtu.be/OIfKcXz3cxY'}/></b>
+                            <ExternalLink
+                                href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
                         </FlexItem>
-                        {('free' === options.plan || !isPro()) &&
-                            <FlexItem>
-                                <ExternalLink
-                                    href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
-                            </FlexItem>
-                        }
-                    </Flex>
-                </CardHeader>
-                <CardBody>
-                    <ToggleControl
-                        label={__('Optimize Images with ShortPixel?', 'simply-static')}
+                    }
+                </Flex>
+            </CardHeader>
+            <CardBody>
+                {isStudio() &&
+                    <StudioNotice
+                        heading={__('Image optimization is handled by Studio', 'simply-static')}
+                        cta={null}
+                    >
+                        <p>{__('Studio optimizes the static build pipeline for its hosting environment, so you do not need to connect ShortPixel for Studio deployments.', 'simply-static')}</p>
+                    </StudioNotice>
+                }
+                <ToggleControl
+                    label={__('Optimize Images with ShortPixel?', 'simply-static')}
+                    __nextHasNoMarginBottom
+                    help={
+                        settings.shortpixel_enabled
+                            ? __('Optimize images with the ShortPixel API.', 'simply-static')
+                            : __('Don\'t optimize images with the ShortPixel API.', 'simply-static')
+                    }
+                    disabled={isStudio() || 'free' === options.plan || !isPro()}
+                    checked={!!settings.shortpixel_enabled}
+                    onChange={(value) => {
+                        updateSetting('shortpixel_enabled', value);
+                    }}
+                />
+
+                {settings.shortpixel_enabled && <>
+                    <TextControl
+                        label={__('ShortPixel API Key', 'simply-static')}
+                        type={"password"}
+                        __next40pxDefaultSize
                         __nextHasNoMarginBottom
-                        help={
-                            settings.shortpixel_enabled
-                                ? __('Optimize images with the ShortPixel API.', 'simply-static')
-                                : __('Don\'t optimize images with the ShortPixel API.', 'simply-static')
-                        }
-                        disabled={('free' === options.plan || !isPro())}
-                        checked={!!settings.shortpixel_enabled}
-                        onChange={(value) => {
-                            updateSetting('shortpixel_enabled', value);
+                        value={settings.shortpixel_api_key}
+                        disabled={isStudio() || 'free' === options.plan || !isPro()}
+                        onChange={(apiKey) => {
+                            updateSetting('shortpixel_api_key', apiKey);
                         }}
                     />
-
-                    {settings.shortpixel_enabled && <>
-                        <TextControl
-                            label={__('ShortPixel API Key', 'simply-static')}
-                            type={"password"}
-                            __next40pxDefaultSize
-                            __nextHasNoMarginBottom
-                            value={settings.shortpixel_api_key}
-                            disabled={('free' === options.plan || !isPro())}
-                            onChange={(apiKey) => {
-                                updateSetting('shortpixel_api_key', apiKey);
-                            }}
-                        />
-                        <ToggleControl
-                            label={__('Convert to webP', 'simply-static')}
-                            __nextHasNoMarginBottom
-                            help={
-                                settings.shortpixel_webp_enabled
-                                    ? __('Convert images to webp format.', 'simply-static')
-                                    : __('Don\'t convert images to webp format', 'simply-static')
-                            }
-                            checked={!!settings.shortpixel_webp_enabled}
-                            disabled={('free' === options.plan || !isPro())}
-                            onChange={(value) => {
-                                updateSetting('shortpixel_webp_enabled', value);
-                            }}
-                        />
-                        <ToggleControl
-                            label={__('Backup the original images?', 'simply-static')}
-                            __nextHasNoMarginBottom
-                            help={
-                                settings.shortpixel_backup_enabled
-                                    ? __('Back original images.', 'simply-static')
-                                    : __('Don\'t backup original images.', 'simply-static')
-                            }
-                            checked={!!settings.shortpixel_backup_enabled}
-                            disabled={('free' === options.plan || !isPro())}
-                            onChange={(value) => {
-                                updateSetting('shortpixel_backup_enabled', value);
-                            }}
-                        />
-                        {settings.shortpixel_backup_enabled && <>
-                            <Notice status={'warning'} isDismissible={false}>
-                                {__('It will preserve every image which might increase your disk space usage.', 'simply-static')}
-                            </Notice>
-                            <Spacer padding={1}></Spacer>
-                            <Button disabled={shortPixelResetting} onClick={restoreBackups}
-                                    variant="secondary">
-                                {!shortPixelResetting && __('Restore Original Images', 'simply-static')}
-                                {shortPixelResetting && [
-                                    <Dashicon icon="update spin"/>,
-                                    __('Restoring...', 'simply-static')
-                                ]}
-                            </Button>
-                        </>}
+                    <ToggleControl
+                        label={__('Convert to webP', 'simply-static')}
+                        __nextHasNoMarginBottom
+                        help={
+                            settings.shortpixel_webp_enabled
+                                ? __('Convert images to webp format.', 'simply-static')
+                                : __('Don\'t convert images to webp format', 'simply-static')
+                        }
+                        checked={!!settings.shortpixel_webp_enabled}
+                        disabled={isStudio() || 'free' === options.plan || !isPro()}
+                        onChange={(value) => {
+                            updateSetting('shortpixel_webp_enabled', value);
+                        }}
+                    />
+                    <ToggleControl
+                        label={__('Backup the original images?', 'simply-static')}
+                        __nextHasNoMarginBottom
+                        help={
+                            settings.shortpixel_backup_enabled
+                                ? __('Back original images.', 'simply-static')
+                                : __('Don\'t backup original images.', 'simply-static')
+                        }
+                        checked={!!settings.shortpixel_backup_enabled}
+                        disabled={isStudio() || 'free' === options.plan || !isPro()}
+                        onChange={(value) => {
+                            updateSetting('shortpixel_backup_enabled', value);
+                        }}
+                    />
+                    {settings.shortpixel_backup_enabled && <>
+                        <Notice status={'warning'} isDismissible={false}>
+                            {__('It will preserve every image which might increase your disk space usage.', 'simply-static')}
+                        </Notice>
+                        <Spacer padding={1}></Spacer>
+                        <Button disabled={isStudio() || shortPixelResetting} onClick={restoreBackups}
+                                variant="secondary">
+                            {!shortPixelResetting && __('Restore Original Images', 'simply-static')}
+                            {shortPixelResetting && [
+                                <Dashicon icon="update spin"/>,
+                                __('Restoring...', 'simply-static')
+                            ]}
+                        </Button>
                     </>}
-                </CardBody>
-            </Card>
-        }
+                </>}
+            </CardBody>
+        </Card>
         <Spacer margin={5}/>
         <Card>
                 <CardHeader>

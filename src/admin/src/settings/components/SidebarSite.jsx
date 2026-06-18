@@ -441,8 +441,7 @@ function SidebarSite( props = null ) {
                 <Dashicon icon="admin-generic"/> {__('General', 'simply-static')}
             </NavigatorButton>
             )}
-            {!options.is_network && !options.hidden_settings.includes('deployment') &&
-                isAllowed('/deployment') && (
+            {!options.is_network && isAllowed('/deployment') && (
                 <NavigatorButton onClick={() => {
                     setActiveItem('/deployment')
                     setShowMobileNav(!showMobileNav);
@@ -451,8 +450,7 @@ function SidebarSite( props = null ) {
                                  path="/deployment">
                     <Dashicon icon="migrate"/> {__('Deploy', 'simply-static')}
                 </NavigatorButton>
-                )
-            }
+            )}
             {!options.is_network &&
                 <>
                     {isAllowed('/forms') && (

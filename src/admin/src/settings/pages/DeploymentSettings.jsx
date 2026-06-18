@@ -13,6 +13,7 @@ import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
 import apiFetch from "@wordpress/api-fetch";
 import HelperVideo from "../components/HelperVideo";
+import StudioNotice from "../components/StudioNotice";
 
 const {__} = wp.i18n;
 
@@ -53,6 +54,7 @@ function DeploymentSettings() {
         {label: __('Bunny CDN', 'simply-static'), value: 'cdn'},
         {label: __('Tiiny.host', 'simply-static'), value: 'tiiny'}
     ]);
+    const canEditDeploymentSettings = !isStudio() || !!options.allow_studio_deployment_settings;
 
     const setSavingSettings = () => {
         saveSettings();
@@ -189,6 +191,7 @@ function DeploymentSettings() {
                     options={deploymentOptions}
                     __next40pxDefaultSize
                     __nextHasNoMarginBottom
+                    disabled={!canEditDeploymentSettings}
                     onChange={(method) => {
                         setDeliveryMethod(method);
                         updateSetting('delivery_method', method);
@@ -198,6 +201,16 @@ function DeploymentSettings() {
             </CardBody>
         </Card>
         <Spacer margin={5}/>
+        {isStudio() &&
+            <StudioNotice
+                heading={__('Deployment is automatic on Studio', 'simply-static')}
+                cta={__('See how Pro deployment works →', 'simply-static')}
+            >
+                <p>{__('Your site is built and published automatically every time you make a change — no destinations to set up, no pipelines to maintain. That\'s the whole idea of Studio.', 'simply-static')}</p>
+                <p>{__('Want to choose exactly where your files go? Deploying to GitHub, Amazon S3, BunnyCDN, SFTP and more is part of Simply Static Pro, where you own and control your deployment pipeline.', 'simply-static')}</p>
+            </StudioNotice>
+        }
+        {canEditDeploymentSettings && <>
         {deliveryMethod === 'simply-static-studio' &&
             <Card>
                 <CardHeader>
@@ -1024,6 +1037,7 @@ function DeploymentSettings() {
                 </Card>
             }
         </>
+        </>}
         <Spacer margin={5}/>
         {settingsSaved &&
             <>
@@ -1040,21 +1054,24 @@ function DeploymentSettings() {
             </>
         }
         <div className={"save-settings"}>
-            {'free' === options.plan ?
-                <>
-                    {deliveryMethod === 'zip' &&
-                        <Button onClick={setSavingSettings}
-                                variant="primary">{__('Save Settings', 'simply-static')}</Button>
-                    }
-                    {deliveryMethod === 'local' &&
-                        <Button onClick={setSavingSettings}
-                                variant="primary">{__('Save Settings', 'simply-static')}</Button>
-                    }
-                </>
-                :
-                <Button onClick={setSavingSettings} variant="primary">{__('Save Settings', 'simply-static')}</Button>
+            {canEditDeploymentSettings && <>
+                {'free' !== options.plan || isStudio() ?
+                    <Button onClick={setSavingSettings} variant="primary">{__('Save Settings', 'simply-static')}</Button>
+                    :
+                    <>
+                        {deliveryMethod === 'zip' &&
+                            <Button onClick={setSavingSettings}
+                                    variant="primary">{__('Save Settings', 'simply-static')}</Button>
+                        }
+                        {deliveryMethod === 'local' &&
+                            <Button onClick={setSavingSettings}
+                                    variant="primary">{__('Save Settings', 'simply-static')}</Button>
+                        }
+                    </>
+                }
+            </>
             }
-            {'pro' === options.plan && isPro() &&
+            {canEditDeploymentSettings && 'pro' === options.plan && isPro() &&
                 <Button
                     disabled={isRunning || testDisabled || testRunning}
                     variant={'secondary'}
