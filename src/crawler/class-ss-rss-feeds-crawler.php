@@ -55,45 +55,64 @@ class Rss_Feeds_Crawler extends Crawler {
 	public function detect(): array {
 		$feed_urls = [];
 
-		// Add the main feed URL
-		$feed_urls[] = get_feed_link();
+		$options                 = get_option( 'simply-static' );
+		$has_post_type_selection = isset( $options['post_types'] ) && is_array( $options['post_types'] ) && ( ! empty( $options['post_types_configured'] ) || ! empty( $options['post_types'] ) );
+		$selected_post_types     = $has_post_type_selection ? $options['post_types'] : [];
 
-		// Add the comments feed URL
-		$feed_urls[] = get_feed_link( 'comments_' );
-
-		// Add category feeds
-		$categories = get_categories( [ 'hide_empty' => true ] );
-		foreach ( $categories as $category ) {
-			$feed_urls[] = get_category_feed_link( $category->term_id );
+		if ( $has_post_type_selection && empty( $selected_post_types ) ) {
+			return $feed_urls;
 		}
 
-		// Add tag feeds
-		$tags = get_tags( [ 'hide_empty' => true ] );
-		foreach ( $tags as $tag ) {
-			$feed_urls[] = get_tag_feed_link( $tag->term_id );
-		}
+		$include_post_feeds = ! $has_post_type_selection || in_array( 'post', $selected_post_types, true );
 
-		// Add author feeds
-		$users = get_users();
-		foreach ( $users as $user ) {
-			$feed_urls[] = get_author_feed_link( $user->ID );
+		if ( $include_post_feeds ) {
+			// Add the main feed URL
+			$feed_urls[] = get_feed_link();
+
+			// Add the comments feed URL
+			$feed_urls[] = get_feed_link( 'comments_' );
+
+			// Add category feeds
+			$categories = get_categories( [ 'hide_empty' => true ] );
+			foreach ( $categories as $category ) {
+				$feed_urls[] = get_category_feed_link( $category->term_id );
+			}
+
+			// Add tag feeds
+			$tags = get_tags( [ 'hide_empty' => true ] );
+			foreach ( $tags as $tag ) {
+				$feed_urls[] = get_tag_feed_link( $tag->term_id );
+			}
+
+			// Add author feeds
+			$users = get_users();
+			foreach ( $users as $user ) {
+				$feed_urls[] = get_author_feed_link( $user->ID );
+			}
 		}
 
 		// Add post type feeds
 		$post_types = get_post_types( [ 'public' => true ], 'names' );
+		$post_types = array_diff( $post_types, [ 'attachment', 'elementor_library', 'ssp-form' ] );
 		foreach ( $post_types as $post_type ) {
 			if ( $post_type === 'post' ) {
 				continue; // Already covered by the main feed
+			}
+
+			if ( $has_post_type_selection && ! in_array( $post_type, $selected_post_types, true ) ) {
+				continue;
 			}
 
 			$feed_url    = add_query_arg( 'post_type', $post_type, get_feed_link() );
 			$feed_urls[] = $feed_url;
 		}
 
-		// Add search feeds (example: /?s=query&feed=rss2)
-		// This is a bit speculative as it depends on actual search terms
-		// We'll add a generic one for demonstration
-		$feed_urls[] = add_query_arg( [ 's' => 'example', 'feed' => 'rss2' ], home_url() );
+		if ( $include_post_feeds ) {
+			// Add search feeds (example: /?s=query&feed=rss2)
+			// This is a bit speculative as it depends on actual search terms
+			// We'll add a generic one for demonstration
+			$feed_urls[] = add_query_arg( [ 's' => 'example', 'feed' => 'rss2' ], home_url() );
+		}
 
 		// Filter out any invalid URLs
 		$feed_urls = array_filter( $feed_urls, function ( $url ) {

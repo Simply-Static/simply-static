@@ -54,7 +54,8 @@ class Post_Type_Crawler extends Crawler {
 
 		// Get selected post types from settings
 		$options = get_option( 'simply-static' );
-		if ( isset( $options['post_types'] ) && is_array( $options['post_types'] ) && ! empty( $options['post_types'] ) ) {
+		$has_post_type_selection = isset( $options['post_types'] ) && is_array( $options['post_types'] ) && ( ! empty( $options['post_types_configured'] ) || ! empty( $options['post_types'] ) );
+		if ( $has_post_type_selection ) {
 			// Filter post types to only include those selected in settings
 			$post_types = array_intersect( $post_types, $options['post_types'] );
 		}
