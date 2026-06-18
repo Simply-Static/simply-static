@@ -58,7 +58,8 @@ class Pagination_Crawler extends Crawler {
 
 		// Get selected post types from settings
 		$options             = get_option( 'simply-static' );
-		$selected_post_types = isset( $options['post_types'] ) && is_array( $options['post_types'] ) && ! empty( $options['post_types'] )
+		$has_post_type_selection = isset( $options['post_types'] ) && is_array( $options['post_types'] ) && ( ! empty( $options['post_types_configured'] ) || ! empty( $options['post_types'] ) );
+		$selected_post_types = $has_post_type_selection
 			? $options['post_types']
 			: [];
 
@@ -67,7 +68,7 @@ class Pagination_Crawler extends Crawler {
 
 		foreach ( $post_types as $post_type ) {
 			// If the post type is not in the selected post types, skip it
-			if ( ! empty( $selected_post_types ) && ! in_array( $post_type, $selected_post_types ) ) {
+			if ( $has_post_type_selection && ! in_array( $post_type, $selected_post_types ) ) {
 				continue;
 			}
 
@@ -186,12 +187,16 @@ class Pagination_Crawler extends Crawler {
 
 		// Get selected post types from settings
 		$options = get_option( 'simply-static' );
-		$selected_post_types = isset( $options['post_types'] ) && is_array( $options['post_types'] ) && ! empty( $options['post_types'] ) 
+		$has_post_type_selection = isset( $options['post_types'] ) && is_array( $options['post_types'] ) && ( ! empty( $options['post_types_configured'] ) || ! empty( $options['post_types'] ) );
+		$selected_post_types = $has_post_type_selection
 			? $options['post_types'] 
 			: [];
 
 		// If no post types are selected, use 'any' to include all post types
-		$post_type_param = empty($selected_post_types) ? 'any' : $selected_post_types;
+		$post_type_param = $has_post_type_selection ? $selected_post_types : 'any';
+		if ( $has_post_type_selection && empty( $selected_post_types ) ) {
+			return $urls;
+		}
 
 		// Get posts that might have pagination
 		$posts = get_posts([
@@ -235,12 +240,13 @@ class Pagination_Crawler extends Crawler {
 
 		// Get selected post types from settings
 		$options             = get_option( 'simply-static' );
-		$selected_post_types = isset( $options['post_types'] ) && is_array( $options['post_types'] ) && ! empty( $options['post_types'] )
+		$has_post_type_selection = isset( $options['post_types'] ) && is_array( $options['post_types'] ) && ( ! empty( $options['post_types_configured'] ) || ! empty( $options['post_types'] ) );
+		$selected_post_types = $has_post_type_selection
 			? $options['post_types']
 			: [];
 
 		// Only process pages if 'page' is in the selected post types (or if no post types are selected)
-		if ( ! empty( $selected_post_types ) && ! in_array( 'page', $selected_post_types ) ) {
+		if ( $has_post_type_selection && ! in_array( 'page', $selected_post_types ) ) {
 			return $urls;
 		}
 

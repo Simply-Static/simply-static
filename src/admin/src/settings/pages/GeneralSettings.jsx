@@ -273,22 +273,26 @@ function GeneralSettings() {
     }, [settings]);
 
     useEffect(() => {
-        if (!postTypes.length) {
+        if (!postTypes.length || !Object.keys(settings).length) {
             return;
         }
 
-        // Empty means all public post types. Keep the field visually empty so
-        // suggestions remain available after a user clears and saves it.
-        const savedPostTypes = Array.isArray(settings.post_types) ? settings.post_types : [];
-        const validPostTypeIds = savedPostTypes.filter(name =>
+        const allPostTypeIds = postTypes.map(postType => postType.name);
+        const savedPostTypes = Array.isArray(settings.post_types) ? settings.post_types : null;
+        const validPostTypeIds = (savedPostTypes || []).filter(name =>
             postTypes.some(postType => postType.name === name)
         );
+        const hasConfiguredPostTypes = !!settings.post_types_configured;
+        const shouldShowDefaultPostTypes = !savedPostTypes || (!hasConfiguredPostTypes && !savedPostTypes.length);
+        const selectedPostTypeIds = shouldShowDefaultPostTypes ? allPostTypeIds : validPostTypeIds;
 
-        setSelectedPostTypes(validPostTypeIds);
-        if (Array.isArray(settings.post_types) && savedPostTypes.length !== validPostTypeIds.length) {
+        setSelectedPostTypes(selectedPostTypeIds);
+
+        if (savedPostTypes && savedPostTypes.length !== validPostTypeIds.length) {
             updateSetting('post_types', validPostTypeIds);
+            updateSetting('post_types_configured', true);
         }
-    }, [postTypes, settings.post_types]);
+    }, [postTypes, settings.post_types, settings.post_types_configured]);
 
     return (<div className={"inner-settings"}>
         <Card>
@@ -536,8 +540,9 @@ function GeneralSettings() {
                                                         }).filter(Boolean);
                                                         setSelectedPostTypes(selectedNames);
                                                         updateSetting('post_types', selectedNames);
+                                                        updateSetting('post_types_configured', true);
                                                     }}
-                                                    help={__('Select which post types to include in the static export. If you remove all selections, all post types will be included by default.', 'simply-static')}
+                                                    help={__('Select which post types to include in the static export. All public post types are selected by default.', 'simply-static')}
                                                     tokenizeOnSpace={false}
                                                     __experimentalExpandOnFocus={true}
                                                     __experimentalShowHowTo={false}

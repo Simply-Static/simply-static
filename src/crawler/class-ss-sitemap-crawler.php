@@ -178,9 +178,13 @@ class Sitemap_Crawler extends Crawler {
 
 		// Get selected post types from settings
 		$options = get_option( 'simply-static' );
-		$selected_post_types = isset( $options['post_types'] ) && is_array( $options['post_types'] ) && ! empty( $options['post_types'] ) 
+		$has_post_type_selection = isset( $options['post_types'] ) && is_array( $options['post_types'] ) && ( ! empty( $options['post_types_configured'] ) || ! empty( $options['post_types'] ) );
+		$selected_post_types = $has_post_type_selection
 			? $options['post_types'] 
 			: [];
+		if ( $has_post_type_selection && empty( $selected_post_types ) ) {
+			return $urls;
+		}
 
 		// Extract URLs from the sitemap
 		if (isset($xml->url)) {
@@ -189,7 +193,7 @@ class Sitemap_Crawler extends Crawler {
 					$page_url = (string) $url->loc;
 
 					// If post types are selected, only include URLs for those post types
-					if (!empty($selected_post_types)) {
+					if ($has_post_type_selection) {
 						// Skip this URL if it doesn't match any selected post type
 						$should_include = false;
 
