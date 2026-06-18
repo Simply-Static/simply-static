@@ -117,10 +117,6 @@ function SettingsPage() {
                 return false;
             }
 
-            if ('/deployment' === route && options.hidden_settings && options.hidden_settings.includes('deployment')) {
-                return false;
-            }
-
             return !('/uam' === route && !options.uam_enabled);
         } catch (e) {
             return true;

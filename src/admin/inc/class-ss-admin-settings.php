@@ -379,6 +379,7 @@ class Admin_Settings {
                         'languages'        => $this->get_languages(),
                         'can_export_languages' => $can_export_languages,
                         'hidden_settings'  => apply_filters( 'ss_hidden_settings', array() ),
+                        'allow_studio_deployment_settings' => apply_filters( 'ss_allow_studio_deployment_settings', false, $current_settings ),
                         'last_export_end'  => $options->get( 'archive_end_time' ),
                     // Build integrations as an associative array keyed by integration ID
                     // to make lookups reliable in the admin app (no numeric reindexing).
