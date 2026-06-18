@@ -739,6 +739,8 @@ class Url_Extractor {
 					continue;
 				}
 
+				$should_extract_url = $this->should_extract_data_attribute_url( $attr_name, $element );
+
 				// Handle srcset-like data attributes (e.g. data-lazy-srcset, data-srcset)
 				// by processing each entry individually instead of treating the whole value as one URL.
 				if ( preg_match( '/srcset$/i', $attr_name ) ) {
@@ -759,7 +761,7 @@ class Url_Extractor {
 						if ( preg_match( '/^\d+$/', trim( $url_part ) ) ) {
 							continue;
 						}
-						$updated_url       = $this->add_to_extracted_urls( $url_part );
+						$updated_url       = $should_extract_url ? $this->add_to_extracted_urls( $url_part ) : $this->convert_url_without_extraction( $url_part );
 						$updated_entries[] = ( ! is_null( $updated_url ) && $updated_url !== '' ? $updated_url : $url_part ) . $descriptor;
 					}
 					$element->setAttribute( $attr_name, implode( ', ', $updated_entries ) );
@@ -767,13 +769,66 @@ class Url_Extractor {
 				}
 
 				// Try to process as a URL and replace with the destination.
-				$updated_url = $this->add_to_extracted_urls( $value );
+				$updated_url = $should_extract_url ? $this->add_to_extracted_urls( $value ) : $this->convert_url_without_extraction( $value );
 
 				if ( ! is_null( $updated_url ) ) {
 					$element->setAttribute( $attr_name, $updated_url );
 				}
 			}
 		}
+	}
+
+	/**
+	 * Determine whether a generic data-* URL should be added to the export queue.
+	 *
+	 * Some data attributes contain metadata URLs rather than resources used by the page.
+	 * WordPress image data-permalink values point to attachment permalinks, which can
+	 * redirect to uploads and should not create static page folders during extraction.
+	 *
+	 * @param string     $attr_name Attribute name.
+	 * @param DOMElement $element   DOM element containing the attribute.
+	 *
+	 * @return bool
+	 */
+	private function should_extract_data_attribute_url( $attr_name, $element ) {
+		$excluded_attributes = apply_filters(
+			'ss_data_attributes_without_url_discovery',
+			array( 'data-permalink' ),
+			$element,
+			$this
+		);
+
+		$excluded_attributes = array_map( 'strtolower', (array) $excluded_attributes );
+		$should_extract      = ! in_array( strtolower( $attr_name ), $excluded_attributes, true );
+
+		return (bool) apply_filters(
+			'ss_extract_data_attribute_url',
+			$should_extract,
+			$attr_name,
+			$element,
+			$this
+		);
+	}
+
+	/**
+	 * Convert a discovered URL for output without adding it to the export queue.
+	 *
+	 * @param string $extracted_url Relative or absolute URL extracted from markup.
+	 *
+	 * @return string|null
+	 */
+	private function convert_url_without_extraction( $extracted_url ) {
+		$url = Util::relative_to_absolute_url( $extracted_url, $this->static_page->url );
+
+		if ( $url ) {
+			$url = Util::normalize_url( $url );
+		}
+
+		if ( $url && Util::is_local_url( $url ) ) {
+			return $this->convert_url( $url );
+		}
+
+		return $url;
 	}
 
 	/**
