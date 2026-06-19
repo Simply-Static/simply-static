@@ -640,58 +640,26 @@ class Elementor_Integration extends Integration {
 		$upload_dir = wp_upload_dir();
 		$thumbs_dir = $upload_dir['basedir'] . '/elementor/thumbs';
 
-		if ( ! is_dir( $thumbs_dir ) ) {
-			return $urls;
-		}
-
-		// 1. Try to find thumbnails by parsing the post content/meta
+		// 1. Find media referenced by Elementor post data.
 		$elementor_data = get_post_meta( $post_id, '_elementor_data', true );
 
 		if ( ! empty( $elementor_data ) ) {
 			$data = json_decode( $elementor_data, true );
 
-			if ( $data ) {
-				$flattened = $this->flatten_data( $data );
-				$found_attachment_ids = [];
+			if ( is_array( $data ) ) {
+				$found_attachment_ids = array();
+				$found_media_urls     = array();
 
-				foreach ( $flattened as $element ) {
-					if ( ! empty( $element['settings'] ) ) {
-						foreach ( $element['settings'] as $key => $value ) {
-							if ( is_array( $value ) && isset( $value['id'] ) && ! empty( $value['url'] ) ) {
-								$found_attachment_ids[] = $value['id'];
-							}
-						}
-					}
+				$this->collect_elementor_media_references( $data, $found_attachment_ids, $found_media_urls );
+
+				foreach ( $found_media_urls as $media_url ) {
+					$urls = $this->add_local_asset_url( $urls, $media_url );
 				}
 
 				$found_attachment_ids = array_unique( array_filter( $found_attachment_ids ) );
 
 				foreach ( $found_attachment_ids as $attachment_id ) {
-					$file = get_attached_file( $attachment_id );
-					if ( ! $file ) {
-						continue;
-					}
-
-					$pathinfo = pathinfo( $file );
-					$basename = $pathinfo['filename'];
-					$ext      = isset( $pathinfo['extension'] ) ? $pathinfo['extension'] : '';
-
-					if ( empty( $ext ) ) {
-						continue;
-					}
-
-					// Search for elementor thumbnails for this attachment
-					$pattern = $thumbs_dir . '/' . $basename . '-*.' . $ext;
-					$files   = glob( $pattern );
-
-					if ( $files ) {
-						foreach ( $files as $thumb_file ) {
-							$thumb_url = $upload_dir['baseurl'] . '/elementor/thumbs/' . basename( $thumb_file );
-							if ( Util::is_local_url( $thumb_url ) ) {
-								$urls[] = $thumb_url;
-							}
-						}
-					}
+					$urls = array_merge( $urls, $this->get_attachment_export_urls( $attachment_id, $upload_dir, $thumbs_dir ) );
 				}
 			}
 		}
@@ -700,15 +668,15 @@ class Elementor_Integration extends Integration {
 		$css_file = $upload_dir['basedir'] . '/elementor/css/post-' . $post_id . '.css';
 		if ( file_exists( $css_file ) ) {
 			$css_url = $upload_dir['baseurl'] . '/elementor/css/post-' . $post_id . '.css';
-			if ( Util::is_local_url( $css_url ) ) {
-				$urls[] = $css_url;
+			if ( Util::is_local_asset_url( $css_url ) ) {
+				$urls = $this->add_local_asset_url( $urls, $css_url );
 
 				$css_content = file_get_contents( $css_file );
 				if ( preg_match_all( '/url\(\s*[\'"]?([^\'"\)]+)[\'"]?\s*\)/i', $css_content, $matches ) ) {
 					foreach ( $matches[1] as $extracted_url ) {
 						$abs_url = Util::relative_to_absolute_url( $extracted_url, $css_url );
-						if ( $abs_url && Util::is_local_url( $abs_url ) ) {
-							$urls[] = $abs_url;
+						if ( $abs_url ) {
+							$urls = $this->add_local_asset_url( $urls, $abs_url );
 						}
 					}
 				}
@@ -716,5 +684,163 @@ class Elementor_Integration extends Integration {
 		}
 
 		return array_values( array_unique( $urls ) );
+	}
+
+	/**
+	 * Recursively collect attachment IDs and asset URLs from Elementor data.
+	 *
+	 * Elementor gallery widgets store image data in nested arrays, so checking
+	 * only direct settings values misses gallery attachments during Single Export.
+	 *
+	 * @param mixed $value          Elementor data value.
+	 * @param array $attachment_ids Found attachment IDs.
+	 * @param array $media_urls     Found media URLs.
+	 * @return void
+	 */
+	private function collect_elementor_media_references( $value, &$attachment_ids, &$media_urls ) {
+		if ( is_array( $value ) ) {
+			if ( isset( $value['id'] ) && is_numeric( $value['id'] ) && (int) $value['id'] > 0 ) {
+				$attachment_ids[] = (int) $value['id'];
+			}
+
+			if ( isset( $value['url'] ) && is_string( $value['url'] ) ) {
+				$media_urls[] = $value['url'];
+			}
+
+			foreach ( $value as $child ) {
+				$this->collect_elementor_media_references( $child, $attachment_ids, $media_urls );
+			}
+
+			return;
+		}
+
+		if ( is_string( $value ) ) {
+			$media_urls[] = $value;
+		}
+	}
+
+	/**
+	 * Get all export-relevant URLs for an attachment.
+	 *
+	 * Includes the original URL, generated intermediate sizes, and Elementor
+	 * thumbnails created in uploads/elementor/thumbs.
+	 *
+	 * @param int    $attachment_id Attachment ID.
+	 * @param array  $upload_dir    wp_upload_dir() data.
+	 * @param string $thumbs_dir    Elementor thumbs directory.
+	 * @return array
+	 */
+	private function get_attachment_export_urls( $attachment_id, $upload_dir, $thumbs_dir ) {
+		$urls = array();
+
+		$attachment_url = wp_get_attachment_url( $attachment_id );
+		$urls           = $this->add_local_asset_url( $urls, $attachment_url );
+
+		$file = get_attached_file( $attachment_id );
+		if ( $file ) {
+			$urls = $this->add_local_asset_url( $urls, $this->upload_file_path_to_url( $file, $upload_dir ) );
+		}
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		if ( is_array( $metadata ) && ! empty( $metadata['file'] ) ) {
+			$urls = $this->add_local_asset_url( $urls, trailingslashit( $upload_dir['baseurl'] ) . ltrim( $metadata['file'], '/' ) );
+
+			$relative_dir = dirname( $metadata['file'] );
+			$relative_dir = '.' === $relative_dir ? '' : trim( $relative_dir, '/' );
+
+			if ( ! empty( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
+				foreach ( $metadata['sizes'] as $size ) {
+					if ( empty( $size['file'] ) ) {
+						continue;
+					}
+
+					$relative_file = ltrim( $relative_dir . '/' . $size['file'], '/' );
+					$urls          = $this->add_local_asset_url( $urls, trailingslashit( $upload_dir['baseurl'] ) . $relative_file );
+				}
+			}
+		}
+
+		if ( is_dir( $thumbs_dir ) ) {
+			$basenames = array();
+
+			if ( $file ) {
+				$pathinfo = pathinfo( $file );
+				if ( ! empty( $pathinfo['filename'] ) ) {
+					$basenames[] = $pathinfo['filename'];
+				}
+			}
+
+			if ( is_array( $metadata ) && ! empty( $metadata['file'] ) ) {
+				$pathinfo = pathinfo( $metadata['file'] );
+				if ( ! empty( $pathinfo['filename'] ) ) {
+					$basenames[] = $pathinfo['filename'];
+				}
+			}
+
+			foreach ( array_unique( $basenames ) as $basename ) {
+				$thumb_basenames = array( $basename );
+				if ( substr( $basename, - 7 ) === '-scaled' ) {
+					$thumb_basenames[] = substr( $basename, 0, - 7 );
+				}
+
+				foreach ( array_unique( $thumb_basenames ) as $thumb_basename ) {
+					$files = glob( trailingslashit( $thumbs_dir ) . $thumb_basename . '-*.*' );
+					if ( empty( $files ) ) {
+						continue;
+					}
+
+					foreach ( $files as $thumb_file ) {
+						$urls = $this->add_local_asset_url( $urls, $this->upload_file_path_to_url( $thumb_file, $upload_dir ) );
+					}
+				}
+			}
+		}
+
+		return array_values( array_unique( $urls ) );
+	}
+
+	/**
+	 * Convert a file in wp_upload_dir()['basedir'] to its public URL.
+	 *
+	 * @param string $file_path  Absolute file path.
+	 * @param array  $upload_dir wp_upload_dir() data.
+	 * @return string
+	 */
+	private function upload_file_path_to_url( $file_path, $upload_dir ) {
+		if ( empty( $file_path ) || empty( $upload_dir['basedir'] ) || empty( $upload_dir['baseurl'] ) ) {
+			return '';
+		}
+
+		$base_dir  = wp_normalize_path( $upload_dir['basedir'] );
+		$file_path = wp_normalize_path( $file_path );
+
+		if ( strpos( $file_path, trailingslashit( $base_dir ) ) !== 0 ) {
+			return '';
+		}
+
+		$relative = ltrim( substr( $file_path, strlen( $base_dir ) ), '/' );
+
+		return trailingslashit( $upload_dir['baseurl'] ) . $relative;
+	}
+
+	/**
+	 * Add a local static asset URL to the URL list.
+	 *
+	 * @param array  $urls URL list.
+	 * @param string $url  URL to add.
+	 * @return array
+	 */
+	private function add_local_asset_url( $urls, $url ) {
+		if ( ! is_string( $url ) || '' === $url ) {
+			return $urls;
+		}
+
+		$url = html_entity_decode( $url, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8' );
+
+		if ( Util::is_local_asset_url( $url ) ) {
+			$urls[] = Util::remove_params_and_fragment( $url );
+		}
+
+		return $urls;
 	}
 }
