@@ -594,14 +594,24 @@ class Plugin {
 		$use_single            = get_option( 'simply-static-use-single' );
 		$use_build             = get_option( 'simply-static-use-build' );
 		$only_404              = get_option( 'simply-static-404-only' );
-		$clear_local_directory = apply_filters(
-			'ss_clear_local_directory',
-			// Only clear on full local exports (not build, not single, not update, not 404-only)
-			empty( $use_build )
+		$export_type           = $this->options->get( 'generate_type' ) ?: 'export';
+		$delivery_method       = $this->options->get( 'delivery_method' );
+		$clear_before_export   = $this->options->get( 'clear_directory_before_export' );
+		$is_full_local_export  = 'export' === $export_type
+			&& empty( $use_build )
 			&& empty( $use_single )
 			&& empty( $only_404 )
-			&& $this->options->get( 'clear_directory_before_export' )
-			&& 'local' === $this->options->get( 'delivery_method' )
+			&& $clear_before_export
+			&& 'local' === $delivery_method;
+
+		$clear_local_directory = apply_filters(
+			'ss_clear_local_directory',
+			$is_full_local_export,
+			$export_type,
+			$use_single,
+			$use_build,
+			$only_404,
+			$this->options
 		);
 
 		// Clear out the local directory before copying files.
@@ -609,15 +619,22 @@ class Plugin {
 			$local_dir = apply_filters( 'ss_local_dir', $this->options->get( 'local_dir' ) );
 
 			// Make sure the directory exists and is not empty.
-			$iterator = new \FilesystemIterator( $local_dir );
-
-			if ( is_dir( $local_dir ) && $iterator->valid() ) {
-				Transfer_Files_Locally_Task::delete_local_directory_static_files( $local_dir, $this->options );
+			if ( is_dir( $local_dir ) ) {
+				$iterator = new \FilesystemIterator( $local_dir, \FilesystemIterator::SKIP_DOTS );
+				if ( $iterator->valid() ) {
+					Transfer_Files_Locally_Task::delete_local_directory_static_files( $local_dir, $this->options );
+				}
 			}
 		} else {
-			// Provide a small hint in debug log when skipping clearing due to special export modes
+			// Provide a small hint in debug log when skipping clearing due to special export modes.
 			if ( ! empty( $only_404 ) ) {
 				Util::debug_log( 'Skipping clearing local directory: 404-only export.' );
+			} elseif ( $clear_before_export && 'local' === $delivery_method && 'export' !== $export_type ) {
+				Util::debug_log( sprintf( 'Skipping clearing local directory: %s export.', $export_type ) );
+			} elseif ( $clear_before_export && 'local' === $delivery_method && ! empty( $use_single ) ) {
+				Util::debug_log( 'Skipping clearing local directory: single export.' );
+			} elseif ( $clear_before_export && 'local' === $delivery_method && ! empty( $use_build ) ) {
+				Util::debug_log( 'Skipping clearing local directory: build export.' );
 			}
 		}
 	}
