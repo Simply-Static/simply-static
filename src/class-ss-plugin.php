@@ -394,23 +394,14 @@ class Plugin {
 
 		$per_page = $per_page ?: 25;
 		$offset   = ( intval( $current_page ) - 1 ) * intval( $per_page );
+		$scope    = $this->get_export_log_scope();
 
 		$query = Page::query()
 		    ->limit( $per_page )
 		    ->offset( $offset )
 		    ->order( 'http_status_code DESC' );
 
-		// Restrict to single-export pages when a single export is active.
-		$use_single = get_option( 'simply-static-use-single' );
-		if ( ! empty( $use_single ) ) {
-			$ids = array_map( 'intval', explode( ',', $use_single ) );
-			if ( count( $ids ) === 1 ) {
-				$query->where( 'post_id = ?', $ids[0] );
-			} else {
-				$in_clause = implode( ',', $ids );
-				$query->where( "post_id IN ({$in_clause})" );
-			}
-		}
+		$this->apply_export_log_scope( $query, $scope );
 
 		if ( ! empty( $search ) ) {
 			$like = '%' . $wpdb->esc_like( $search ) . '%';
@@ -430,14 +421,7 @@ class Plugin {
 			$like               = '%' . $wpdb->esc_like( $search ) . '%';
 			$count_query        = Page::query();
 
-			// Restrict count to single-export pages as well.
-			if ( ! empty( $use_single ) ) {
-				if ( count( $ids ) === 1 ) {
-					$count_query->where( 'post_id = ?', $ids[0] );
-				} else {
-					$count_query->where( "post_id IN ({$in_clause})" );
-				}
-			}
+			$this->apply_export_log_scope( $count_query, $scope );
 
 			$count_query->where(
 				$wpdb->prepare(
@@ -450,14 +434,10 @@ class Plugin {
 			$total_static_pages = apply_filters( 'ss_total_pages', (int) $count_query->count() );
 			$http_status_codes  = Page::get_http_status_codes_summary();
 		} else {
-			if ( ! empty( $use_single ) ) {
-				// For single exports, count only the pages belonging to the exported post(s).
+			if ( ! empty( $scope ) ) {
+				// Count only pages that belong to the current scoped export.
 				$count_query = Page::query();
-				if ( count( $ids ) === 1 ) {
-					$count_query->where( 'post_id = ?', $ids[0] );
-				} else {
-					$count_query->where( "post_id IN ({$in_clause})" );
-				}
+				$this->apply_export_log_scope( $count_query, $scope );
 				$total_static_pages = apply_filters( 'ss_total_pages', (int) $count_query->count() );
 				$http_status_codes  = Page::get_http_status_codes_summary();
 			} else {
@@ -515,6 +495,68 @@ class Plugin {
 			'total_pages'        => $total_pages,
 			'status_codes'       => $http_status_codes,
 		];
+	}
+
+	/**
+	 * Get the current export log scope.
+	 *
+	 * @return array
+	 */
+	private function get_export_log_scope() {
+		$use_single         = get_option( 'simply-static-use-single' );
+		$use_build          = get_option( 'simply-static-use-build' );
+		$generate_type      = $this->options->get( 'generate_type' );
+		$archive_start_time = $this->options->get( 'archive_start_time' );
+
+		if ( ! empty( $use_single ) ) {
+			$ids = array_values( array_filter( array_map( 'intval', explode( ',', $use_single ) ) ) );
+
+			if ( ! empty( $ids ) ) {
+				return [
+					'type' => 'single',
+					'ids'  => $ids,
+				];
+			}
+		}
+
+		if ( 'update' === $generate_type && empty( $use_build ) && ! empty( $archive_start_time ) ) {
+			return [
+				'type'               => 'update',
+				'archive_start_time' => $archive_start_time,
+			];
+		}
+
+		return [];
+	}
+
+	/**
+	 * Apply current export scoping to an export log query.
+	 *
+	 * @param Query $query Export log query.
+	 * @param array $scope Current export log scope.
+	 *
+	 * @return void
+	 */
+	private function apply_export_log_scope( $query, $scope ) {
+		if ( empty( $scope ) || empty( $scope['type'] ) ) {
+			return;
+		}
+
+		if ( 'single' === $scope['type'] && ! empty( $scope['ids'] ) ) {
+			$ids = $scope['ids'];
+
+			if ( count( $ids ) === 1 ) {
+				$query->where( 'post_id = ?', $ids[0] );
+			} else {
+				$in_clause = implode( ',', $ids );
+				$query->where( "post_id IN ({$in_clause})" );
+			}
+		}
+
+		if ( 'update' === $scope['type'] && ! empty( $scope['archive_start_time'] ) ) {
+			$query->where( 'last_checked_at >= ?', $scope['archive_start_time'] );
+			$query->where( 'updated_at >= ?', $scope['archive_start_time'] );
+		}
 	}
 
 	/**

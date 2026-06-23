@@ -631,19 +631,31 @@ class Admin_Rest {
         $options          = Options::reinstance();
         $last_export_end  = $options->get( 'archive_end_time' );
         $modified_count   = 0;
+        $media_count      = 0;
         $deleted_count    = 0;
 
         // 1. Count posts modified since last export.
         if ( ! empty( $last_export_end ) ) {
             $post_types          = get_post_types( array( 'public' => true ), 'names' );
+            unset( $post_types['attachment'] );
             $placeholders        = implode( ',', array_fill( 0, count( $post_types ), '%s' ) );
             $last_export_end_gmt = get_gmt_from_date( $last_export_end );
 
             // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            $modified_count = (int) $wpdb->get_var(
+            if ( ! empty( $post_types ) ) {
+                $modified_count = (int) $wpdb->get_var(
+                    $wpdb->prepare(
+                        "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ({$placeholders}) AND ( post_date_gmt > %s OR post_modified_gmt > %s )",
+                        array_merge( array_values( $post_types ), array( $last_export_end_gmt, $last_export_end_gmt ) )
+                    )
+                );
+            }
+
+            $media_count = (int) $wpdb->get_var(
                 $wpdb->prepare(
-                    "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ({$placeholders}) AND ( post_date_gmt > %s OR post_modified_gmt > %s )",
-                    array_merge( array_values( $post_types ), array( $last_export_end_gmt, $last_export_end_gmt ) )
+                    "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = 'inherit' AND post_type = 'attachment' AND ( post_date_gmt > %s OR post_modified_gmt > %s )",
+                    $last_export_end_gmt,
+                    $last_export_end_gmt
                 )
             );
         }
@@ -676,13 +688,14 @@ class Admin_Rest {
             }
         }
 
-        $total = $modified_count + $deleted_count;
+        $total = $modified_count + $media_count + $deleted_count;
 
         return json_encode( array(
             'status' => 200,
             'data'   => array(
                 'total'          => $total,
                 'modified_count' => $modified_count,
+                'media_count'    => $media_count,
                 'deleted_count'  => $deleted_count,
             ),
         ) );
