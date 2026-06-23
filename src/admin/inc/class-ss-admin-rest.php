@@ -938,6 +938,12 @@ class Admin_Rest {
 
         // Explicit booleans that must be normalized
         $boolean_fields = [
+            'use_search',
+            'use_search_results_page',
+            'search_show_submit',
+            'search_show_excerpt',
+            'fuse_use_extended_search',
+            'fuse_ignore_location',
             'ss_use_single_exports',
             'ss_use_builds',
             'ss_single_include_categories',

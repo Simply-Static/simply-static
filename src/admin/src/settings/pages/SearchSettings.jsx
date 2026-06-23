@@ -34,8 +34,8 @@ function SearchSettings() {
     }
 
     useEffect(() => {
-        if (settings.use_search) {
-            setUseSearch(settings.use_search);
+        if (Object.prototype.hasOwnProperty.call(settings, 'use_search')) {
+            setUseSearch(!!settings.use_search);
         }
 
         if (settings.search_type) {
