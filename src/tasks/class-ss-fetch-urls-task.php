@@ -741,11 +741,11 @@ class Fetch_Urls_Task extends Task {
 	public function get_generate_type() {
 		$type = $this->parent_get_generate_type();
 
-		// By default, update exports fetch all known pages so content hashes can
-		// determine which files changed. Integrations with their own change
-		// detection can opt into the update-scoped query instead.
+		// Changes-only exports should stay scoped to pages marked as changed by
+		// the update/detect-changes flow. Installations that need a full
+		// revalidation pass can opt back into export-scoped fetching.
 		if ( 'update' === $type ) {
-			$type = apply_filters( 'simply_static_fetch_urls_update_generate_type', 'export', $this );
+			$type = apply_filters( 'simply_static_fetch_urls_update_generate_type', 'update', $this );
 		}
 
 		return $type;

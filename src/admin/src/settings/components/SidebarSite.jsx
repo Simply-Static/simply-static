@@ -9,7 +9,7 @@ import {
     SelectControl,
     Tooltip
 } from "@wordpress/components";
-import {useContext, useEffect, useState} from "@wordpress/element";
+import {useContext, useEffect, useRef, useState} from "@wordpress/element";
 import {SettingsContext} from "../context/SettingsContext";
 import VersionInfo from "./VersionInfo";
 import GenerateButtons from "./GenerateButtons";
@@ -46,6 +46,8 @@ function SidebarSite( props = null ) {
     const [canRunExport, setCanRunExport] = useState(true);
     const [isResettingLock, setIsResettingLock] = useState(false);
     const [unpushedChanges, setUnpushedChanges] = useState(0);
+    const hasAutoSelectedExportType = useRef(false);
+    const hasSelectedExportTypeManually = useRef(false);
 
 
     const resetExportLock = () => {
@@ -112,15 +114,23 @@ function SidebarSite( props = null ) {
             const total = json.data ? json.data.total : 0;
             setUnpushedChanges(total);
 
-            // Auto-select "Export Changes" when there are unpushed changes and Pro is available.
-            if (total > 0 && 'pro' === options.plan && isPro()) {
-                setSelectedExportType('update');
-            } else {
-                setSelectedExportType('export');
+            if (!hasAutoSelectedExportType.current && !hasSelectedExportTypeManually.current) {
+                // Auto-select "Export Changes" when there are unpushed changes and Pro is available.
+                if (total > 0 && 'pro' === options.plan && isPro()) {
+                    setSelectedExportType('update');
+                } else {
+                    setSelectedExportType('export');
+                }
+
+                hasAutoSelectedExportType.current = true;
             }
         }).catch(() => {
             setUnpushedChanges(0);
-            setSelectedExportType('export');
+
+            if (!hasAutoSelectedExportType.current && !hasSelectedExportTypeManually.current) {
+                setSelectedExportType('export');
+                hasAutoSelectedExportType.current = true;
+            }
         });
     }, [settings, isRunning]);
 
@@ -296,6 +306,7 @@ function SidebarSite( props = null ) {
                 __next40pxDefaultSize
                 __nextHasNoMarginBottom
                 onChange={(value) => {
+                    hasSelectedExportTypeManually.current = true;
                     setSelectedExportType(value);
                 }}
             >
