@@ -281,6 +281,7 @@ Diagnostics - Check your WordPress environment for compatibility
 * Fix wp-includes exports for subdirectory installs
 * Fix search settings save handling
 * Fix local clearing for partial exports
+* Fix update export logs and media change counts
 
 = 3.7.6 =
 
