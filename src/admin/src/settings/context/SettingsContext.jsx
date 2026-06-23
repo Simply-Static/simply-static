@@ -1,4 +1,4 @@
-import {useState, createContext, useEffect} from "@wordpress/element";
+import {useState, createContext, useEffect, useRef} from "@wordpress/element";
 import apiFetch from '@wordpress/api-fetch';
 import useInterval from "../../hooks/useInterval";
 
@@ -13,6 +13,7 @@ function SettingsContextProvider(props) {
     const [isResumed, setIsResumed] = useState(false);
     const [settingsSaved, setSettingsSaved] = useState(false);
     const [settings, setSettings] = useState({});
+    const settingsRef = useRef(settings);
     const [configs, setConfigs] = useState({});
     const [passedChecks, setPassedChecks] = useState('yes');
     const [blogId, setBlogId] = useState(1);
@@ -21,6 +22,7 @@ function SettingsContextProvider(props) {
 
     const getSettings = () => {
         apiFetch({path: '/simplystatic/v1/settings'}).then((options) => {
+            settingsRef.current = options;
             setSettings(options);
         });
     }
@@ -32,7 +34,7 @@ function SettingsContextProvider(props) {
         return apiFetch({
             path: '/simplystatic/v1/settings',
             method: 'POST',
-            data: settings,
+            data: settingsRef.current,
         }).then(resp => {
             // Clear any queued integration markers and resolve with reload hint.
             setQueuedIntegrations([]);
@@ -49,6 +51,7 @@ function SettingsContextProvider(props) {
             const response = JSON.parse(resp);
             if (response.status === 200 && response.data) {
                 // Update the settings state with the default settings from the server
+                settingsRef.current = response.data;
                 setSettings(response.data);
             }
         });
@@ -93,6 +96,7 @@ function SettingsContextProvider(props) {
     }
 
     const importSettings = (newSettings) => {
+        settingsRef.current = newSettings;
         setSettings(newSettings);
 
         apiFetch({
@@ -112,7 +116,12 @@ function SettingsContextProvider(props) {
 
     const updateSetting = (key, value) => {
         // Use functional update to avoid race conditions when calling updateSetting multiple times in quick succession
-        setSettings(prevSettings => ({...prevSettings, [key]: value}));
+        setSettings(prevSettings => {
+            const nextSettings = {...prevSettings, [key]: value};
+            settingsRef.current = nextSettings;
+
+            return nextSettings;
+        });
     };
 
     const getStatus = () => {
@@ -269,6 +278,7 @@ function SettingsContextProvider(props) {
     useEffect(() => {
         // If current_settings is available in the options object, use it instead of fetching from the API
         if (options.current_settings) {
+            settingsRef.current = options.current_settings;
             setSettings(options.current_settings);
         } else {
             // Fallback to fetching from the API if current_settings is not available
