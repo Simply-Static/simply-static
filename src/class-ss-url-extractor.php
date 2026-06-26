@@ -644,10 +644,10 @@ class Url_Extractor {
 		$response_body = $this->preserve_xmp_tags( $response_body );
 
 		// replace wp_json_encode'd urls, as used by WP's `concatemoji`
-		$response_body = str_replace( addcslashes( Util::origin_url(), '/' ), addcslashes( $destination_url, '/' ), $response_body );
+		$response_body = preg_replace( '/' . Util::json_escaped_origin_url_pattern() . '/i', addcslashes( untrailingslashit( $destination_url ), '/' ), $response_body );
 
 		// replace encoded URLs, as found in query params
-		$response_body = preg_replace( '/(https?%3A)?%2F%2F' . addcslashes( urlencode( Util::origin_host() ), '.' ) . '/i', urlencode( $destination_url ), $response_body );
+		$response_body = preg_replace( '/(https?%3A)?%2F%2F' . Util::origin_host_pattern( true ) . '/i', urlencode( $destination_url ), $response_body );
 
 		// Restore preserved <xmp> tags
 		$response_body = $this->restore_xmp_tags( $response_body );
@@ -676,11 +676,11 @@ class Url_Extractor {
 		$content = $this->preserve_xmp_tags( $content );
 
 		// replace any instance of the origin url, whether it starts with https://, http://, or //.
-		$content = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $destination_url, $content );
+		$content = preg_replace( '/(https?:)?\/\/' . Util::origin_host_pattern() . '/i', $destination_url, $content );
 
 		// replace wp_json_encode'd urls, as used by WP's `concatemoji`.
 		// e.g. {"concatemoji":"http:\/\/www.example.org\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.6.1"}.
-		$content = str_replace( addcslashes( untrailingslashit( Util::origin_url() ), '/' ), addcslashes( untrailingslashit( $destination_url ), '/' ), $content );
+		$content = preg_replace( '/' . Util::json_escaped_origin_url_pattern() . '/i', addcslashes( untrailingslashit( $destination_url ), '/' ), $content );
 
 		// Restore preserved <xmp> tags
 		$content = $this->restore_xmp_tags( $content );
@@ -1664,17 +1664,17 @@ class Url_Extractor {
 
 		// Replace URLs in the script content
 		// First, replace protocol-relative URLs (//example.com)
-		$text = preg_replace( '/(["\'(])\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', '$1' . $convert_to, $decoded_text );
+		$text = preg_replace( '/(["\'(])\/\/' . Util::origin_host_pattern() . '/i', '$1' . $convert_to, $decoded_text );
 
 		// Then replace absolute URLs (http://example.com or https://example.com)
-		$text = preg_replace( '/(["\'(])(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', '$1' . $convert_to, $text );
+		$text = preg_replace( '/(["\'(])(https?:)?\/\/' . Util::origin_host_pattern() . '/i', '$1' . $convert_to, $text );
 
 		// Also replace JSON-encoded URLs
-		$text = str_replace( addcslashes( untrailingslashit( Util::origin_url() ), '/' ), addcslashes( untrailingslashit( $convert_to ), '/' ), $text );
+		$text = preg_replace( '/' . Util::json_escaped_origin_url_pattern() . '/i', addcslashes( untrailingslashit( $convert_to ), '/' ), $text );
 
 		// Replace URLs in sourceURL and sourceMappingURL comments (used for debugging)
 		// Handles both //# and //@ formats (the latter is deprecated but still used)
-		$text = preg_replace( '/(\/\/[#@]\s*(?:sourceURL|sourceMappingURL)\s*=\s*)(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', '$1' . $convert_to, $text );
+		$text = preg_replace( '/(\/\/[#@]\s*(?:sourceURL|sourceMappingURL)\s*=\s*)(https?:)?\/\/' . Util::origin_host_pattern() . '/i', '$1' . $convert_to, $text );
 
 		return $text;
 	}

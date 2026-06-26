@@ -209,7 +209,7 @@ class Yoast_Sitemap_Handler extends Page_Handler {
             return $xml;
         }
         $dest = rtrim( $destination_url, '/' );
-        $pattern = '/(?:(https?:)?\/\/)' . preg_quote( $origin_host, '/' ) . '/i';
+        $pattern = '/(?:(https?:)?\/\/)' . Util::origin_host_pattern() . '/i';
         return preg_replace( $pattern, $dest, $xml );
     }
 }

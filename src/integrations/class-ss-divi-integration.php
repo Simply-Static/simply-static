@@ -111,7 +111,7 @@ class Divi_Integration extends Integration {
 					}
 
 					$updated = preg_replace(
-						'/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i',
+						'/(https?:)?\/\/' . Util::origin_host_pattern() . '/i',
 						$destination_url,
 						$decoded
 					);

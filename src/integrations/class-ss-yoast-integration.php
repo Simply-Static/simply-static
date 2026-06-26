@@ -199,7 +199,7 @@ class Yoast_Integration extends Integration {
 		if ( $scripts ) {
 			foreach ( $scripts as $script ) {
 				$decoded_text = html_entity_decode( $script->nodeValue, ENT_NOQUOTES );
-				$text = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $options->get_destination_url(), $decoded_text );
+				$text = preg_replace( '/(https?:)?\/\/' . Util::origin_host_pattern() . '/i', $options->get_destination_url(), $decoded_text );
 				$script->nodeValue = $text;
 			}
 		}
