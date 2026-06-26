@@ -1704,11 +1704,23 @@ class Url_Extractor {
 	 */
 	private function replace_runtime_local_paths_in_script( $text ) {
 		$_result = preg_replace_callback(
-			'/(["\'])((?:\\\\\/|\/)(?:wp-admin|wp-content|wp-includes|wp-json)(?:\\\\.|(?!\1).)*)\1/s',
+			'/(["\'])((?:(?:\\\\\/){1,2}|\/{1,2})(?:wp-admin|wp-content|wp-includes|wp-json)(?:\\\\.|(?!\1).)*)\1/s',
 			function ( $matches ) {
 				$updated_path = $this->convert_runtime_local_path( $matches[2] );
 
 				return $matches[1] . $updated_path . $matches[1];
+			},
+			$text
+		);
+
+		if ( null !== $_result ) {
+			$text = $_result;
+		}
+
+		$_result = preg_replace_callback(
+			'/(\/\/[#@]\s*(?:sourceURL|sourceMappingURL)\s*=\s*)((?:(?:\\\\\/){1,2}|\/{1,2})(?:wp-admin|wp-content|wp-includes|wp-json)[^\s]+)/i',
+			function ( $matches ) {
+				return $matches[1] . $this->convert_runtime_local_path( $matches[2] );
 			},
 			$text
 		);
@@ -1735,7 +1747,11 @@ class Url_Extractor {
 			return $path;
 		}
 
-		if ( ! preg_match( '#^/(?:wp-admin|wp-content|wp-includes|wp-json)(?:[/?#]|$)#i', $normalized_path ) ) {
+		if ( preg_match( '~^//(?:wp-admin|wp-content|wp-includes|wp-json)(?:[/?#]|$)~i', $normalized_path ) ) {
+			$normalized_path = '/' . ltrim( $normalized_path, '/' );
+		}
+
+		if ( ! preg_match( '~^/(?:wp-admin|wp-content|wp-includes|wp-json)(?:[/?#]|$)~i', $normalized_path ) ) {
 			return $path;
 		}
 
