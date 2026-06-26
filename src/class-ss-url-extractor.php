@@ -917,6 +917,13 @@ class Url_Extractor {
 
 				// we need to verify that the meta tag is a URL.
 				if ( 'meta' === $tag_name ) {
+					$runtime_path = $this->convert_runtime_local_path( $attribute_value );
+
+					if ( $runtime_path !== $attribute_value ) {
+						$tag->setAttribute( $attribute_name, $runtime_path );
+						continue;
+					}
+
 					if ( filter_var( $attribute_value, FILTER_VALIDATE_URL ) ) {
 						$extracted_urls[] = $attribute_value;
 					}
@@ -1676,7 +1683,102 @@ class Url_Extractor {
 		// Handles both //# and //@ formats (the latter is deprecated but still used)
 		$text = preg_replace( '/(\/\/[#@]\s*(?:sourceURL|sourceMappingURL)\s*=\s*)(https?:)?\/\/' . Util::origin_host_pattern() . '/i', '$1' . $convert_to, $text );
 
+		$text = $this->replace_runtime_local_paths_in_script( $text );
+
 		return $text;
+	}
+
+	/**
+	 * Replace root-relative WordPress runtime paths inside JS string literals.
+	 *
+	 * Some plugins expose asset bases in inline config, for example Elementor's
+	 * `elementorFrontendConfig.urls.assets`. Those values may be root-relative
+	 * (`/wp-content/...`) or JSON-escaped (`\/wp-content\/...`). Under file://,
+	 * root-relative paths resolve against the filesystem root, so convert them
+	 * relative to the current exported HTML page. Unlike normal page URLs, these
+	 * runtime paths can be asset directories and must not receive /index.html.
+	 *
+	 * @param string $text Script content.
+	 *
+	 * @return string
+	 */
+	private function replace_runtime_local_paths_in_script( $text ) {
+		$_result = preg_replace_callback(
+			'/(["\'])((?:\\\\\/|\/)(?:wp-admin|wp-content|wp-includes|wp-json)(?:\\\\.|(?!\1).)*)\1/s',
+			function ( $matches ) {
+				$updated_path = $this->convert_runtime_local_path( $matches[2] );
+
+				return $matches[1] . $updated_path . $matches[1];
+			},
+			$text
+		);
+
+		return null !== $_result ? $_result : $text;
+	}
+
+	/**
+	 * Convert a root-relative WordPress runtime path for static output.
+	 *
+	 * @param string $path Root-relative path, optionally JSON-escaped.
+	 *
+	 * @return string
+	 */
+	private function convert_runtime_local_path( $path ) {
+		if ( ! is_string( $path ) || '' === $path ) {
+			return $path;
+		}
+
+		$uses_escaped_slashes = strpos( $path, '\\/' ) !== false;
+		$normalized_path     = str_replace( '\\/', '/', $path );
+
+		if ( strpos( $normalized_path, '*' ) !== false ) {
+			return $path;
+		}
+
+		if ( ! preg_match( '#^/(?:wp-admin|wp-content|wp-includes|wp-json)(?:[/?#]|$)#i', $normalized_path ) ) {
+			return $path;
+		}
+
+		$url = Util::relative_to_absolute_url( $normalized_path, $this->static_page->url );
+
+		if ( $url ) {
+			$url = Util::normalize_url( $url );
+		}
+
+		if ( ! $url || ! Util::is_local_url( $url ) ) {
+			return $path;
+		}
+
+		$converted_path = $this->convert_runtime_local_url( $url );
+
+		if ( $uses_escaped_slashes ) {
+			return addcslashes( $converted_path, '/' );
+		}
+
+		return $converted_path;
+	}
+
+	/**
+	 * Convert a local runtime URL without adding page index filenames.
+	 *
+	 * @param string $url Absolute local URL.
+	 *
+	 * @return string
+	 */
+	private function convert_runtime_local_url( $url ) {
+		if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
+			return $this->convert_absolute_url( $url );
+		} else if ( $this->options->get( 'destination_url_type' ) == 'relative' ) {
+			return $this->convert_relative_url( $url );
+		}
+
+		$page_path           = Util::get_public_path_from_local_url( $this->static_page->url );
+		$sanitized_page_path = Util::sanitize_local_path( $page_path );
+
+		$runtime_path           = Util::get_public_path_from_local_url( $url );
+		$sanitized_runtime_path = Util::sanitize_local_path( $runtime_path );
+
+		return Util::create_offline_path( $sanitized_runtime_path, $sanitized_page_path );
 	}
 
 
