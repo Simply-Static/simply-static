@@ -789,21 +789,8 @@ class Util {
 			return empty( $sitemap_placeholders ) ? $content : strtr( $content, $sitemap_placeholders );
 		}
 
-		$origin_base  = trailingslashit( self::origin_url() );
-		$origin_http  = set_url_scheme( $origin_base, 'http' );
-		$origin_https = set_url_scheme( $origin_base, 'https' );
-		$origin_proto = preg_replace( '#^https?:#i', '', $origin_https );
-		$search       = [
-			untrailingslashit( rtrim( $origin_http, '/' ) ),
-			untrailingslashit( rtrim( $origin_https, '/' ) ),
-			untrailingslashit( rtrim( $origin_proto, '/' ) ),
-		];
-		$content    = str_replace( $search, $destination_base, $content );
-
-		$origin_host  = self::origin_host();
-		$host_no_port = preg_replace( '/:\\d+$/', '', (string) $origin_host );
-		$pattern      = '/(?:https?:)?\\/\\/' . preg_quote( $host_no_port, '/' ) . '(?::\\d+)?/i';
-		$replaced     = preg_replace( $pattern, $destination_base, $content );
+		$pattern  = '/(?:https?:)?\\/\\/' . self::origin_host_pattern( false, true ) . '/i';
+		$replaced = preg_replace( $pattern, $destination_base, $content );
 		if ( is_string( $replaced ) ) {
 			$content = $replaced;
 		}
@@ -827,6 +814,59 @@ class Util {
 	 */
 	public static function origin_host() {
 		return untrailingslashit( self::strip_protocol_from_url( self::origin_url() ) );
+	}
+
+	/**
+	 * Build a regex-safe origin host/path pattern with a URL segment boundary.
+	 *
+	 * origin_host() may include a subdirectory (for example example.com/wp).
+	 * Without a boundary, raw replacements can treat /wp-includes as though it
+	 * started with the /wp base and leave broken suffixes like -includes.
+	 *
+	 * @param bool $encoded Whether the target text is URL-encoded.
+	 * @param bool $allow_port Whether to allow any port when origin_url has none.
+	 *
+	 * @return string Regex fragment.
+	 */
+	public static function origin_host_pattern( $encoded = false, $allow_port = false ) {
+		$origin_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( self::origin_url() ) : parse_url( self::origin_url() );
+
+		if ( ! is_array( $origin_parts ) || empty( $origin_parts['host'] ) ) {
+			$origin_host = self::origin_host();
+			$pattern     = preg_quote( $encoded ? urlencode( $origin_host ) : $origin_host, '/' );
+
+			return $pattern . ( $encoded ? '(?=$|%2F|%3F|%23)' : '(?=$|[\/?#])' );
+		}
+
+		$host = (string) $origin_parts['host'];
+		$path = isset( $origin_parts['path'] ) ? untrailingslashit( (string) $origin_parts['path'] ) : '';
+
+		if ( $encoded ) {
+			$port = isset( $origin_parts['port'] ) ? ':' . $origin_parts['port'] : '';
+
+			return preg_quote( urlencode( $host . $port . $path ), '/' ) . '(?=$|%2F|%3F|%23)';
+		}
+
+		$port_pattern = '';
+		if ( isset( $origin_parts['port'] ) ) {
+			$port_pattern = preg_quote( ':' . $origin_parts['port'], '/' );
+		} elseif ( $allow_port ) {
+			$port_pattern = '(?::\d+)?';
+		}
+
+		return preg_quote( $host, '/' ) . $port_pattern . preg_quote( $path, '/' ) . '(?=$|[\/?#])';
+	}
+
+	/**
+	 * Build a regex-safe JSON-escaped origin URL pattern with a path boundary.
+	 *
+	 * WordPress often writes URLs in JSON as https:\/\/example.com\/wp\/path.
+	 * A boundary prevents /wp from partially matching /wp-includes.
+	 *
+	 * @return string Regex fragment.
+	 */
+	public static function json_escaped_origin_url_pattern() {
+		return preg_quote( addcslashes( untrailingslashit( self::origin_url() ), '/' ), '/' ) . '(?=$|\\\\\/|[?#])';
 	}
 
 	/**
@@ -881,6 +921,7 @@ class Util {
 
 		$url_host = strtolower( preg_replace( '/:\d+$/', '', (string) $url_parts['host'] ) );
 		$url_path = isset( $url_parts['path'] ) ? untrailingslashit( $url_parts['path'] ) : '';
+		$same_host = false;
 
 		foreach ( self::local_url_bases() as $base ) {
 			$base_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $base ) : parse_url( $base );
@@ -893,13 +934,53 @@ class Util {
 				continue;
 			}
 
+			$same_host = true;
+
 			$base_path = isset( $base_parts['path'] ) ? untrailingslashit( $base_parts['path'] ) : '';
 			if ( '' === $base_path || '/' === $base_path || $url_path === $base_path || strpos( $url_path . '/', trailingslashit( $base_path ) ) === 0 ) {
 				return $base;
 			}
 		}
 
+		if ( $same_host && self::is_root_wordpress_asset_path( $url_path ) ) {
+			$scheme = isset( $url_parts['scheme'] ) ? $url_parts['scheme'] : self::origin_scheme();
+			$port   = isset( $url_parts['port'] ) ? ':' . $url_parts['port'] : '';
+
+			return $scheme . '://' . $url_parts['host'] . $port;
+		}
+
 		return null;
+	}
+
+	/**
+	 * Check whether a same-host root path points at WordPress asset directories.
+	 *
+	 * @param string $path URL path.
+	 *
+	 * @return bool
+	 */
+	private static function is_root_wordpress_asset_path( $path ) {
+		if ( ! is_string( $path ) || '' === $path || '/' === $path ) {
+			return false;
+		}
+
+		$segments = explode( '/', trim( $path, '/' ) );
+		if ( empty( $segments[0] ) ) {
+			return false;
+		}
+
+		$options    = Options::instance();
+		$asset_dirs = array(
+			'wp-admin',
+			'wp-content',
+			'wp-includes',
+			self::get_hide_wp_option( $options, 'wp_content_directory', 'wp_content_folder', 'wp-content' ),
+			self::get_hide_wp_option( $options, 'wp_includes_directory', 'wp_includes_folder', 'wp-includes' ),
+		);
+
+		$asset_dirs = array_values( array_unique( array_filter( array_map( 'strval', $asset_dirs ) ) ) );
+
+		return in_array( $segments[0], $asset_dirs, true );
 	}
 
 	/**
@@ -1162,7 +1243,7 @@ class Util {
 		if ( strpos( $extracted_url, '//' ) === 0 ) {
 
 			// if this is a local URL, add the protocol to the URL
-			if ( stripos( $extracted_url, '//' . self::origin_host() ) === 0 ) {
+			if ( preg_match( '/^\/\/' . self::origin_host_pattern() . '/i', $extracted_url ) ) {
 				$extracted_url = self::origin_scheme() . ':' . $extracted_url;
 			}
 
@@ -1322,7 +1403,7 @@ class Util {
 
 		// Fallback: origin_host() may include a subdirectory; strip only once at the start.
 		$no_scheme = self::strip_protocol_from_url( $url );
-		$pattern   = '/^' . preg_quote( self::origin_host(), '/' ) . '/';
+		$pattern   = '/^' . self::origin_host_pattern() . '/';
 		$no_host   = preg_replace( $pattern, '', $no_scheme, 1 );
 
 		return '/' . ltrim( $no_host, '/' );

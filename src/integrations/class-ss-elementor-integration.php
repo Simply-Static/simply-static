@@ -155,11 +155,11 @@ class Elementor_Integration extends Integration {
 		$string = preg_replace_callback( $pattern, array( $this, 'replace_urls' ), $string );
 
 		// replace any instance of the origin url, whether it starts with https://, http://, or //.
-		$string = preg_replace( '/(https?:)?\/\/' . addcslashes( Util::origin_host(), '/' ) . '/i', $destination_url, $string );
+		$string = preg_replace( '/(https?:)?\/\/' . Util::origin_host_pattern() . '/i', $destination_url, $string );
 
 		// replace wp_json_encode'd urls, as used by WP's `concatemoji`.
 		// e.g. {"concatemoji":"http:\/\/www.example.org\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.6.1"}.
-		$string = str_replace( addcslashes( untrailingslashit( Util::origin_url() ), '/' ), addcslashes( untrailingslashit( $destination_url ), '/' ), $string );
+		$string = preg_replace( '/' . Util::json_escaped_origin_url_pattern() . '/i', addcslashes( untrailingslashit( $destination_url ), '/' ), $string );
 
 
 		return $string;
