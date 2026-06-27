@@ -147,6 +147,7 @@ class Upgrade_Handler {
 			'css_optimize_defer_css'        => false,
 			'css_optimize_defer_js'         => false,
 			'css_optimize_google_fonts'     => false,
+			'css_optimize_preconnect_hints' => false,
 			'css_optimize_delay_js'           => false,
 			'css_optimize_delay_js_patterns'  => '',
 			'css_optimize_defer_js_excludes'  => '',
