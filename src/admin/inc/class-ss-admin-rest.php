@@ -1178,6 +1178,7 @@ class Admin_Rest {
             'theme_style_name'              => 'style',
             'archive_start_time'            => null,
             'archive_end_time'              => null,
+            'css_optimize_preconnect_hints' => false,
             'version'                       => SIMPLY_STATIC_VERSION,
         ) );
 

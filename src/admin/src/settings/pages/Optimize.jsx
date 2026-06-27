@@ -34,6 +34,7 @@ function Optimize() {
     const [cssOptimizeDeferCss, setCssOptimizeDeferCss] = useState(false);
     const [cssOptimizeDeferJs, setCssOptimizeDeferJs] = useState(false);
     const [cssOptimizeGoogleFonts, setCssOptimizeGoogleFonts] = useState(false);
+    const [cssOptimizePreconnectHints, setCssOptimizePreconnectHints] = useState(false);
     const [cssOptimizeDelayJs, setCssOptimizeDelayJs] = useState(false);
 
     const [cssJsAggregateCss, setCssJsAggregateCss] = useState(false);
@@ -101,6 +102,8 @@ function Optimize() {
         if (settings.css_optimize_google_fonts) {
             setCssOptimizeGoogleFonts(settings.css_optimize_google_fonts);
         }
+
+        setCssOptimizePreconnectHints(!!settings.css_optimize_preconnect_hints);
 
         if (settings.css_optimize_delay_js) {
             setCssOptimizeDelayJs(settings.css_optimize_delay_js);
@@ -380,12 +383,24 @@ function Optimize() {
                         <ToggleControl
                             label={__('Optimize Google Fonts', 'simply-static')}
                             __nextHasNoMarginBottom
-                            help={__('Preload Google Fonts stylesheets, inject preconnect hints, and add display=swap for faster font loading.', 'simply-static')}
+                            help={__('Preload Google Fonts stylesheets, inject the Google Fonts preconnect hint, and add display=swap for faster font loading.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             checked={cssOptimizeGoogleFonts}
                             onChange={(value) => {
                                 setCssOptimizeGoogleFonts(value);
                                 updateSetting('css_optimize_google_fonts', value);
+                            }}
+                        />
+
+                        <ToggleControl
+                            label={__('Add Preconnect Hints', 'simply-static')}
+                            __nextHasNoMarginBottom
+                            help={__('Add preconnect resource hints for high-value third-party font, icon, script, and image origins found in exported pages.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            checked={cssOptimizePreconnectHints}
+                            onChange={(value) => {
+                                setCssOptimizePreconnectHints(value);
+                                updateSetting('css_optimize_preconnect_hints', value);
                             }}
                         />
 
