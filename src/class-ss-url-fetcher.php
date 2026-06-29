@@ -18,10 +18,10 @@ class Url_Fetcher {
 	const TIMEOUT = 30;
 
 	/**
-	 * Default desktop User-Agent used for crawling.
+	 * Default User-Agent used for crawling.
 	 * @var string
 	 */
-	const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Simply-Static';
+	const DEFAULT_USER_AGENT = 'Simply-Static';
 
 	/**
 	 * Singleton instance
@@ -528,11 +528,10 @@ class Url_Fetcher {
 		/**
 		 * Filter the User-Agent string used by the Simply Static crawler.
 		 *
-		 * By default a desktop Chrome User-Agent is used so that themes/servers
-		 * deliver the full desktop version of the site. Return a different string
-		 * to override (e.g. a custom mobile UA).
+		 * Return a different string to override the default Simply Static
+		 * User-Agent.
 		 *
-		 * @param string $user_agent Default desktop User-Agent.
+		 * @param string $user_agent Default User-Agent.
 		 */
 		$user_agent = apply_filters( 'ss_crawler_user_agent', self::DEFAULT_USER_AGENT );
 
