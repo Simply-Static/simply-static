@@ -118,14 +118,17 @@ export default function EnvironmentSidebar({ getSettings, isRunning }) {
             <p>Current: <strong>{currentVersion()}</strong></p>
         }
         { !showingEnvironmentForm && selectableEnvironments.length > 0 &&
-            <EnvironmentDropdown
-                onChange={updateCurrentVersion}
-                environments={selectableEnvironments}
-                onDelete={deleteCurrentVersion}
-                current={selectedEnvironment}
-                disabled={isRunning || changingEnvironment}
-                isStudio={isStudioEnvironment}
-            />
+            <>
+                <EnvironmentDropdown
+                    onChange={updateCurrentVersion}
+                    environments={selectableEnvironments}
+                    onDelete={deleteCurrentVersion}
+                    current={selectedEnvironment}
+                    disabled={isRunning || changingEnvironment}
+                    isStudio={isStudioEnvironment}
+                />
+                <div className={"environment-extension-slot"} data-ss-environment-sidebar-slot></div>
+            </>
         }
         {
             !showingEnvironmentForm && !isStudioEnvironment &&
