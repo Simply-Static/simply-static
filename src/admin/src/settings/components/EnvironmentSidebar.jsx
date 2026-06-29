@@ -8,7 +8,7 @@ import {SettingsContext} from "../context/SettingsContext";
 const {__} = wp.i18n;
 
 export default function EnvironmentSidebar({ getSettings, isRunning }) {
-    const { getIntegrationById } = useContext(SettingsContext);
+    const { getIntegrationById, isStudio } = useContext(SettingsContext);
     // Helper: determine if Environments feature is available (Pro + enabled)
     const isEnvironmentsAvailable = () => {
         try {
@@ -26,6 +26,7 @@ export default function EnvironmentSidebar({ getSettings, isRunning }) {
     const [selectableEnvironments, setSelectableEnvironments] = useState([]);
     const [showingEnvironmentForm, setShowingEnvironmentForm] = useState(false);
     const [changingEnvironment, setChangingEnvironment] = useState(false);
+    const isStudioEnvironment = isStudio ? isStudio() : false;
 
     useEffect(() => {
         if (!isEnvironmentsAvailable()) {
@@ -48,6 +49,12 @@ export default function EnvironmentSidebar({ getSettings, isRunning }) {
                 // or the endpoint is unavailable.
             });
     }, []);
+
+    useEffect(() => {
+        if (isStudioEnvironment) {
+            setShowingEnvironmentForm(false);
+        }
+    }, [isStudioEnvironment]);
 
     const deleteCurrentVersion = () => {
         setChangingEnvironment(true);
@@ -117,15 +124,16 @@ export default function EnvironmentSidebar({ getSettings, isRunning }) {
                 onDelete={deleteCurrentVersion}
                 current={selectedEnvironment}
                 disabled={isRunning || changingEnvironment}
+                isStudio={isStudioEnvironment}
             />
         }
         {
-            !showingEnvironmentForm &&
+            !showingEnvironmentForm && !isStudioEnvironment &&
             <Button disabled={isRunning || changingEnvironment} variant={"primary"} size={"large"} onClick={() => setShowingEnvironmentForm(true)}>
                 Create an Environment
             </Button>
         }
-        { showingEnvironmentForm && <EnvironmentForm onClose={() => setShowingEnvironmentForm(false)} setSelectedEnvironment={setSelectedEnvironment} setSelectableEnvironments={setSelectableEnvironments} />}
+        { showingEnvironmentForm && !isStudioEnvironment && <EnvironmentForm onClose={() => setShowingEnvironmentForm(false)} setSelectedEnvironment={setSelectedEnvironment} setSelectableEnvironments={setSelectableEnvironments} />}
 
     </div>)
 }
