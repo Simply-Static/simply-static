@@ -1158,6 +1158,7 @@ class Admin_Rest {
             's3_access_secret'              => '',
             's3_bucket'                     => '',
             's3_subdirectory'               => '',
+            'use_search_results_page'       => true,
             'fix_cors'                      => 'allowed_http_origins',
             // (the full list continues in Admin_Settings; retain same defaults here)
         );

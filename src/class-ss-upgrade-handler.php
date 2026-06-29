@@ -122,6 +122,7 @@ class Upgrade_Handler {
 			'use_comments'                  => false,
 			'comment_redirect'              => '',
 			'use_search'                    => false,
+			'use_search_results_page'       => true,
 			'search_type'                   => 'fuse',
 			'search_index_title'            => 'title',
 			'search_index_content'          => 'body',

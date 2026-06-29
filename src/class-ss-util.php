@@ -542,6 +542,21 @@ class Util {
 		$excluded = array( '.php' );
 		$opts     = Options::instance();
 
+		$use_search              = (bool) $opts->get( 'use_search' );
+		$use_search_results_page = $opts->get( 'use_search_results_page' );
+		if ( null === $use_search_results_page ) {
+			$use_search_results_page = true;
+		}
+
+		if ( ! $use_search || ! $use_search_results_page ) {
+			$url_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $url ) : parse_url( $url );
+			if ( ! empty( $url_parts['query'] ) && ! self::is_local_asset_url( $url ) ) {
+				self::debug_log( sprintf( 'Excluding URL "%s" - matched built-in rule: query-string URL (search results page is disabled)', $url ) );
+
+				return true;
+			}
+		}
+
 		// Exclude debug files (.log, .txt) but not robots.txt, llms.txt, _redirects, or _headers
 		if ( preg_match( '/\.(log|txt)$/i', $url ) && strpos( $url, 'debug' ) !== false && strpos( $url, 'robots.txt' ) === false && strpos( $url, 'llms.txt' ) === false && strpos( $url, '_redirects' ) === false && strpos( $url, '_headers' ) === false ) {
 			self::debug_log( sprintf( 'Excluding URL "%s" — matched built-in rule: debug log file pattern', $url ) );
