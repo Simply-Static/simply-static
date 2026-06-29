@@ -1083,11 +1083,15 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: src/admin/src/settings/components/Environments/EnvironmentsDropdown.jsx:12
+#: src/admin/src/settings/components/Environments/EnvironmentsDropdown.jsx:6
+msgid "Choose an environment. If you like to create new ones, please set them up in your Static Studio dashboard."
+msgstr ""
+
+#: src/admin/src/settings/components/Environments/EnvironmentsDropdown.jsx:7
 msgid "Choose an environment or create a new one to configure settings."
 msgstr ""
 
-#: src/admin/src/settings/components/Environments/EnvironmentsDropdown.jsx:22
+#: src/admin/src/settings/components/Environments/EnvironmentsDropdown.jsx:26
 msgid "Delete selected environment"
 msgstr ""
 

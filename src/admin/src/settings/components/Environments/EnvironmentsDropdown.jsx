@@ -1,7 +1,11 @@
 import {Button, Flex, FlexBlock, FlexItem, SelectControl} from "@wordpress/components";
 const {__} = wp.i18n;
 
-export default function EnvironmentDropdown({ onChange, current, environments, disabled, onDelete }) {
+export default function EnvironmentDropdown({ onChange, current, environments, disabled, onDelete, isStudio }) {
+    const helpText = isStudio
+        ? __('Choose an environment. If you like to create new ones, please set them up in your Static Studio dashboard.', 'simply-static')
+        : __('Choose an environment or create a new one to configure settings.', 'simply-static');
+
     return (
         <Flex>
             <FlexItem style={{minWidth: "80%"}}>
@@ -9,7 +13,7 @@ export default function EnvironmentDropdown({ onChange, current, environments, d
                     disabled={disabled}
                     value={current}
                     options={environments}
-                    help={__('Choose an environment or create a new one to configure settings.', 'simply-static')}
+                    help={helpText}
                     __next40pxDefaultSize
                     __nextHasNoMarginBottom
                     onChange={onChange}
