@@ -4,7 +4,7 @@ Tags: jamstack, performance, security, static site generator
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag:  3.7.7
+Stable tag:  3.7.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -274,6 +274,14 @@ Settings - Configure your static site export options
 Diagnostics - Check your WordPress environment for compatibility
 
 == Changelog ==
+
+= 3.7.8 =
+
+* Fix crawler user agent default value
+* Update Studio-related environment UI
+* Handle double-slash offline runtime paths
+* Fix origin URL replacement for WP asset paths
+* Avoid adding __qs directory if not needed
 
 = 3.7.7 =
 
