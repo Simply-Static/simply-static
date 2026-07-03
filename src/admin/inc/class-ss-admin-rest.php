@@ -840,7 +840,7 @@ class Admin_Rest {
             $settings['plugins_to_include'] = Util::ensure_required_plugins( $settings['plugins_to_include'] );
         }
 
-        return $settings;
+        return apply_filters( 'ss_get_settings', $settings );
     }
 
     /**

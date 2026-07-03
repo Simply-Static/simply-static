@@ -30,6 +30,7 @@ class Integrations {
 			'rank-math'         => Rank_Math_Integration::class,
 			'aio-seo'           => AIO_SEO_Integration::class,
 			'seopress'          => SEOPress_Integration::class,
+			'beaver-builder'    => Beaver_Builder_Integration::class,
 			'elementor'         => Elementor_Integration::class,
 			'divi'              => Divi_Integration::class,
 			'cookieyes'         => CookieYes_Integration::class,
@@ -62,6 +63,7 @@ class Integrations {
 		require_once $path . 'class-ss-rank-math-integration.php';
 		require_once $path . 'class-ss-aio-seo-integration.php';
 		require_once $path . 'class-ss-seopress-integration.php';
+		require_once $path . 'class-ss-beaver-builder-integration.php';
 		require_once $path . 'class-ss-elementor-integration.php';
 		require_once $path . 'class-ss-divi-integration.php';
 		require_once $path . 'class-ss-cookie-yes-integration.php';
