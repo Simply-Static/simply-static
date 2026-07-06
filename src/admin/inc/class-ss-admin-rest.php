@@ -281,6 +281,54 @@ class Admin_Rest {
             },
         ) );
 
+        register_rest_route( 'simplystatic/v1', '/exports', array(
+            'methods'             => 'GET',
+            'callback'            => [ $this, 'get_deploy_manifests' ],
+            'permission_callback' => function () {
+                return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'activity-log' ) );
+            },
+        ) );
+
+        register_rest_route( 'simplystatic/v1', '/exports/latest', array(
+            'methods'             => 'GET',
+            'callback'            => [ $this, 'get_latest_deploy_manifest' ],
+            'permission_callback' => function () {
+                return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'activity-log' ) );
+            },
+        ) );
+
+        register_rest_route( 'simplystatic/v1', '/exports/(?P<export_id>[a-zA-Z0-9][a-zA-Z0-9_-]{7,79})', array(
+            'methods'             => 'GET',
+            'callback'            => [ $this, 'get_deploy_manifest' ],
+            'permission_callback' => function () {
+                return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'activity-log' ) );
+            },
+        ) );
+
+        register_rest_route( 'simplystatic/v1', '/exports/(?P<export_id>[a-zA-Z0-9][a-zA-Z0-9_-]{7,79})/urls', array(
+            'methods'             => 'GET',
+            'callback'            => [ $this, 'get_deploy_manifest_urls' ],
+            'permission_callback' => function () {
+                return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'activity-log' ) );
+            },
+        ) );
+
+        register_rest_route( 'simplystatic/v1', '/exports/(?P<export_id>[a-zA-Z0-9][a-zA-Z0-9_-]{7,79})/files', array(
+            'methods'             => 'GET',
+            'callback'            => [ $this, 'get_deploy_manifest_files' ],
+            'permission_callback' => function () {
+                return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'activity-log' ) );
+            },
+        ) );
+
+        register_rest_route( 'simplystatic/v1', '/exports/(?P<export_id>[a-zA-Z0-9][a-zA-Z0-9_-]{7,79})/warnings', array(
+            'methods'             => 'GET',
+            'callback'            => [ $this, 'get_deploy_manifest_warnings' ],
+            'permission_callback' => function () {
+                return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'activity-log' ) );
+            },
+        ) );
+
         register_rest_route( 'simplystatic/v1', '/start-export', array(
             'methods'             => 'POST',
             'callback'            => [ $this, 'start_export' ],
@@ -1333,6 +1381,71 @@ class Admin_Rest {
         }
 
         return json_encode( [ 'status' => 200, 'data' => $export_log ] );
+    }
+
+    /** Deploy manifest summaries */
+    public function get_deploy_manifests( $request ) {
+        $params   = $request->get_params();
+        $page     = ! empty( $params['page'] ) ? absint( $params['page'] ) : 1;
+        $per_page = ! empty( $params['per_page'] ) ? absint( $params['per_page'] ) : 20;
+
+        return rest_ensure_response( Deploy_Manifest_Service::get_instance()->get_exports( $page, $per_page ) );
+    }
+
+    /** Latest deploy manifest */
+    public function get_latest_deploy_manifest() {
+        $manifest = Deploy_Manifest_Service::get_instance()->get_latest_manifest();
+
+        if ( empty( $manifest ) ) {
+            return new \WP_Error( 'ss_manifest_not_found', __( 'No deploy manifest available.', 'simply-static' ), array( 'status' => 404 ) );
+        }
+
+        return rest_ensure_response( $manifest );
+    }
+
+    /** Deploy manifest by ID */
+    public function get_deploy_manifest( $request ) {
+        $deploy_id = sanitize_text_field( $request->get_param( 'export_id' ) );
+        $manifest  = Deploy_Manifest_Service::get_instance()->get_manifest( $deploy_id );
+
+        if ( empty( $manifest ) ) {
+            return new \WP_Error( 'ss_manifest_not_found', __( 'Deploy manifest not found.', 'simply-static' ), array( 'status' => 404 ) );
+        }
+
+        return rest_ensure_response( $manifest );
+    }
+
+    /** Deploy manifest URL records */
+    public function get_deploy_manifest_urls( $request ) {
+        $params    = $request->get_params();
+        $deploy_id = sanitize_text_field( $request->get_param( 'export_id' ) );
+
+        return rest_ensure_response(
+            Deploy_Manifest_Service::get_instance()->get_manifest_urls(
+                $deploy_id,
+                array(
+                    'page'     => ! empty( $params['page'] ) ? absint( $params['page'] ) : 1,
+                    'per_page' => ! empty( $params['per_page'] ) ? absint( $params['per_page'] ) : 100,
+                    'status'   => ! empty( $params['status'] ) ? sanitize_text_field( $params['status'] ) : '',
+                    'type'     => ! empty( $params['type'] ) ? sanitize_text_field( $params['type'] ) : '',
+                    'search'   => ! empty( $params['search'] ) ? sanitize_text_field( $params['search'] ) : '',
+                )
+            )
+        );
+    }
+
+    /** Deploy manifest file records */
+    public function get_deploy_manifest_files( $request ) {
+        $deploy_id = sanitize_text_field( $request->get_param( 'export_id' ) );
+
+        return rest_ensure_response( Deploy_Manifest_Service::get_instance()->get_manifest_files( $deploy_id ) );
+    }
+
+    /** Deploy manifest warnings */
+    public function get_deploy_manifest_warnings( $request ) {
+        $deploy_id = sanitize_text_field( $request->get_param( 'export_id' ) );
+
+        return rest_ensure_response( Deploy_Manifest_Service::get_instance()->get_manifest_warnings( $deploy_id ) );
     }
 
     /**

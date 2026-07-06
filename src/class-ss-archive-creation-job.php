@@ -155,6 +155,7 @@ class Archive_Creation_Job extends Background_Process {
 
 			$this->options
 				->set( 'archive_status_messages', array() )
+				->set( 'archive_deploy_id', function_exists( 'wp_generate_uuid4' ) ? wp_generate_uuid4() : uniqid( 'deploy_', true ) )
 				->set( 'archive_start_time', Util::formatted_datetime() )
 				->set( 'archive_end_time', null )
 				->set( 'generate_type', $type )
@@ -560,6 +561,7 @@ class Archive_Creation_Job extends Background_Process {
 		Util::debug_log( $exception );
 
 		$message = sprintf( __( "An exception occurred: %s", 'simply-static' ), $exception->getMessage() );
+		$this->options->set( 'archive_end_time', Util::formatted_datetime() );
 		$this->save_status_message( $message, 'error' );
 		do_action( 'ss_completed', 'exception', $message );
 
@@ -578,6 +580,7 @@ class Archive_Creation_Job extends Background_Process {
 		Util::debug_log( $wp_error );
 
 		$message = sprintf( __( "An error occurred: %s", 'simply-static' ), $wp_error->get_error_message() );
+		$this->options->set( 'archive_end_time', Util::formatted_datetime() );
 		$this->save_status_message( $message, 'error' );
 		do_action( 'ss_completed', 'error', $message );
 
