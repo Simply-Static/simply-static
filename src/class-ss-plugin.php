@@ -132,6 +132,7 @@ class Plugin {
 				Admin_Settings::get_instance();
 				// Register admin REST routes in a dedicated controller.
 				Admin_Rest::get_instance();
+				Deploy_Manifest_Service::get_instance();
 
 				// Dashboard widget.
 				Admin_Dashboard_Widget::get_instance();
@@ -189,6 +190,9 @@ class Plugin {
 		require_once $path . 'src/class-ss-query.php';
 		require_once $path . 'src/models/class-ss-model.php';
 		require_once $path . 'src/models/class-ss-page.php';
+		require_once $path . 'src/models/class-ss-deploy-manifest.php';
+		require_once $path . 'src/models/class-ss-deploy-manifest-url.php';
+		require_once $path . 'src/class-ss-deploy-manifest-service.php';
 		require_once $path . 'src/class-ss-diagnostic.php';
 		require_once $path . 'src/class-ss-sql-permissions.php';
 		require_once $path . 'src/class-ss-upgrade-handler.php';

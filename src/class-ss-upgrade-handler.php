@@ -189,6 +189,8 @@ class Upgrade_Handler {
 			'sftp_port'                     => 22,
 			'sftp_bulk_upload'              => false,
 			'archive_status_messages'       => array(),
+			'archive_deploy_id'             => null,
+			'deploy_manifest_schema_version'=> null,
 			'pages_status'                  => array(),
 			'archive_name'                  => null,
 			'archive_start_time'            => null,
@@ -197,15 +199,18 @@ class Upgrade_Handler {
 		);
 
 		$version = self::$options->get( 'version' );
+		self::maybe_update_manifest_schema();
 
 		// New installation, set default options.
 		if ( null === $version ) {
 			Page::create_or_update_table();
+			Deploy_Manifest_Service::create_or_update_tables();
 			self::set_default_options();
 		} else {
 			if ( version_compare( $version, SIMPLY_STATIC_VERSION, '!=' ) ) {
 				// Sync database.
 				Page::create_or_update_table();
+				Deploy_Manifest_Service::create_or_update_tables();
 
 				// Preserve legacy Hide WP path settings under the current option names.
 				self::migrate_legacy_hide_wp_options();
@@ -240,6 +245,23 @@ class Upgrade_Handler {
 
 		// Save the options
 		self::$options->save();
+	}
+
+	/**
+	 * Create or update deploy manifest tables when the schema version changes.
+	 *
+	 * @return void
+	 */
+	protected static function maybe_update_manifest_schema() {
+		if ( self::$options->get( 'deploy_manifest_schema_version' ) === Deploy_Manifest_Service::SCHEMA_VERSION ) {
+			return;
+		}
+
+		Deploy_Manifest_Service::create_or_update_tables();
+
+		self::$options
+			->set( 'deploy_manifest_schema_version', Deploy_Manifest_Service::SCHEMA_VERSION )
+			->save();
 	}
 
 	/**
