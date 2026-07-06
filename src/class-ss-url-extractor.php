@@ -885,22 +885,13 @@ class Url_Extractor {
 			}
 		}
 
-		// Handle link tags with rel="preconnect" or rel="dns-prefetch" pointing to origin host.
-		// These tags are browser hints for establishing early connections to external servers.
-		// In a static export, referencing the origin (WordPress) host is both useless and a security
-		// concern as it exposes the staging/source URL. Remove these tags entirely.
+		// Remove local resource hints. They are useless in static output and can
+		// expose a hidden WordPress/staging host in proxy/custom-domain setups.
 		if ( 'link' === $tag_name && $tag->hasAttribute( 'rel' ) && $tag->hasAttribute( 'href' ) ) {
-			$rel_value = strtolower( trim( $tag->getAttribute( 'rel' ) ) );
-			if ( in_array( $rel_value, array( 'preconnect', 'dns-prefetch' ), true ) ) {
-				$href_value = $tag->getAttribute( 'href' );
-				// Check if the href points to the origin host
-				$origin_host = Util::origin_host();
-				if ( stripos( Util::strip_protocol_from_url( $href_value ), $origin_host ) === 0 ) {
-					// Remove the tag from the DOM entirely
-					$tag->parentNode->removeChild( $tag );
+			if ( $this->is_local_resource_hint( $tag->getAttribute( 'rel' ), $tag->getAttribute( 'href' ) ) ) {
+				$tag->parentNode->removeChild( $tag );
 
-					return;
-				}
+				return;
 			}
 		}
 
@@ -984,6 +975,50 @@ class Url_Extractor {
 				$tag->setAttribute( $attribute_name, $attribute_value );
 			}
 		}
+	}
+
+	/**
+	 * Determine if a link element is a local resource hint that should not be
+	 * emitted in the static export.
+	 *
+	 * @param string $rel  Link rel attribute.
+	 * @param string $href Link href attribute.
+	 *
+	 * @return bool
+	 */
+	private function is_local_resource_hint( $rel, $href ) {
+		$rel_tokens = preg_split( '/\s+/', strtolower( trim( (string) $rel ) ) );
+		$rel_tokens = is_array( $rel_tokens ) ? array_filter( $rel_tokens ) : array();
+
+		if ( ! array_intersect( $rel_tokens, array( 'preconnect', 'dns-prefetch' ) ) ) {
+			return false;
+		}
+
+		$href = trim( (string) $href );
+		if ( '' === $href ) {
+			return false;
+		}
+
+		$url = Util::relative_to_absolute_url( $href, $this->static_page->url );
+		if ( ! is_string( $url ) || '' === $url ) {
+			return false;
+		}
+
+		if ( 0 === strpos( $url, '//' ) ) {
+			$url = Util::origin_scheme() . ':' . $url;
+		}
+
+		if ( function_exists( 'wp_parse_url' ) ) {
+			$url_parts = wp_parse_url( $url );
+		} else {
+			$url_parts = parse_url( $url );
+		}
+
+		if ( ! is_array( $url_parts ) || empty( $url_parts['host'] ) ) {
+			return false;
+		}
+
+		return Util::is_local_url( $url );
 	}
 
 	/**
