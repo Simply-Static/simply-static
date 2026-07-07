@@ -96,7 +96,7 @@ class Url_Extractor {
 		'wml'      => array( 'xmlns' ),
 
 		'meta' => array( 'content' ),
-		'link' => array( 'href', 'data-pmdelayedstyle' ),
+		'link' => array( 'href', 'imagesrcset', 'data-pmdelayedstyle' ),
 		'atom' => array( 'href' ),
 	);
 
@@ -888,7 +888,10 @@ class Url_Extractor {
 		// Remove local resource hints. They are useless in static output and can
 		// expose a hidden WordPress/staging host in proxy/custom-domain setups.
 		if ( 'link' === $tag_name && $tag->hasAttribute( 'rel' ) && $tag->hasAttribute( 'href' ) ) {
-			if ( $this->is_local_resource_hint( $tag->getAttribute( 'rel' ), $tag->getAttribute( 'href' ) ) ) {
+			$rel  = $tag->getAttribute( 'rel' );
+			$href = $tag->getAttribute( 'href' );
+
+			if ( $this->is_local_resource_hint( $rel, $href ) || $this->is_current_wordpress_resource_hint( $rel, $href ) ) {
 				$tag->parentNode->removeChild( $tag );
 
 				return;
@@ -1019,6 +1022,54 @@ class Url_Extractor {
 		}
 
 		return Util::is_local_url( $url );
+	}
+
+	/**
+	 * Determine if a resource hint points at a current WordPress host.
+	 *
+	 * The hint may be only scheme + host, so it cannot be detected as a local
+	 * asset URL by the normal path-based checks.
+	 *
+	 * @param string $rel  Link rel attribute.
+	 * @param string $href Link href attribute.
+	 *
+	 * @return bool
+	 */
+	private function is_current_wordpress_resource_hint( $rel, $href ) {
+		$rel_tokens = preg_split( '/\s+/', strtolower( trim( (string) $rel ) ) );
+		$rel_tokens = is_array( $rel_tokens ) ? array_filter( $rel_tokens ) : array();
+
+		if ( ! array_intersect( $rel_tokens, array( 'preconnect', 'dns-prefetch' ) ) ) {
+			return false;
+		}
+
+		$href = trim( (string) $href );
+		if ( '' === $href ) {
+			return false;
+		}
+
+		$url = Util::relative_to_absolute_url( $href, $this->static_page->url );
+		if ( ! is_string( $url ) || '' === $url ) {
+			return false;
+		}
+
+		if ( 0 === strpos( $url, '//' ) ) {
+			$url = Util::origin_scheme() . ':' . $url;
+		}
+
+		$url_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $url ) : parse_url( $url );
+		$host      = is_array( $url_parts ) && ! empty( $url_parts['host'] ) ? strtolower( (string) $url_parts['host'] ) : '';
+
+		$is_current_wordpress_host = Util::is_current_wordpress_host( $host );
+
+		return (bool) apply_filters(
+			'ss_remove_current_wordpress_resource_hint',
+			$is_current_wordpress_host,
+			$url,
+			$rel,
+			$this->static_page,
+			$this
+		);
 	}
 
 	/**
