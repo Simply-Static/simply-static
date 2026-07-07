@@ -964,7 +964,82 @@ class Util {
 			return $scheme . '://' . $url_parts['host'] . $port;
 		}
 
+		if ( self::is_current_wordpress_host( $url_host ) && self::is_root_wordpress_asset_path( $url_path ) ) {
+			$scheme = isset( $url_parts['scheme'] ) ? $url_parts['scheme'] : self::origin_scheme();
+			$port   = isset( $url_parts['port'] ) ? ':' . $url_parts['port'] : '';
+
+			return $scheme . '://' . $url_parts['host'] . $port;
+		}
+
 		return null;
+	}
+
+	/**
+	 * Check whether a host is a WordPress origin for this export.
+	 *
+	 * @param string $host URL host.
+	 *
+	 * @return bool
+	 */
+	public static function is_current_wordpress_host( $host ) {
+		$host = self::normalize_url_host( $host );
+		if ( '' === $host ) {
+			return false;
+		}
+
+		$allowed_hosts             = self::current_wordpress_hosts();
+		$is_current_wordpress_host = in_array( $host, $allowed_hosts, true );
+
+		return (bool) apply_filters(
+			'ss_is_current_wordpress_host',
+			$is_current_wordpress_host,
+			$host,
+			$allowed_hosts
+		);
+	}
+
+	/**
+	 * Get WordPress hosts that should be treated as local.
+	 *
+	 * @return array
+	 */
+	private static function current_wordpress_hosts() {
+		$hosts = array();
+
+		foreach ( self::local_url_bases() as $base ) {
+			$base_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $base ) : parse_url( $base );
+			if ( is_array( $base_parts ) && ! empty( $base_parts['host'] ) ) {
+				$hosts[] = $base_parts['host'];
+			}
+		}
+
+		if ( ! empty( $_SERVER['HTTP_HOST'] ) ) {
+			$hosts[] = function_exists( 'wp_unslash' ) ? wp_unslash( $_SERVER['HTTP_HOST'] ) : $_SERVER['HTTP_HOST'];
+		}
+
+		if ( ! empty( $_SERVER['SERVER_NAME'] ) ) {
+			$hosts[] = function_exists( 'wp_unslash' ) ? wp_unslash( $_SERVER['SERVER_NAME'] ) : $_SERVER['SERVER_NAME'];
+		}
+
+		$hosts = (array) apply_filters( 'ss_current_wordpress_hosts', $hosts );
+		$hosts = array_map( array( __CLASS__, 'normalize_url_host' ), $hosts );
+		$hosts = array_filter( $hosts );
+		$hosts = array_values( array_unique( $hosts ) );
+
+		return $hosts;
+	}
+
+	/**
+	 * Normalize a URL host value for comparison.
+	 *
+	 * @param string $host URL host.
+	 *
+	 * @return string
+	 */
+	private static function normalize_url_host( $host ) {
+		$host = strtolower( trim( (string) $host, ". \t\n\r\0\x0B" ) );
+
+		return preg_replace( '/:\d+$/', '', $host );
 	}
 
 	/**
