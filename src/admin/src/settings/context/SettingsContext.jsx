@@ -7,10 +7,20 @@ const {__} = wp.i18n;
 export const SettingsContext = createContext();
 
 function SettingsContextProvider(props) {
+    const normalizeSnapshotRollback = (rollback = {}) => {
+        return {
+            running: !!rollback.running,
+            status: rollback.status || {},
+            progress: rollback.progress || {},
+            message: rollback.message || __('Rollback in progress. Simply Static export actions are locked until the rollback has finished.', 'simply-static'),
+        };
+    };
+
     const [isRunning, setIsRunning] = useState(false);
     const [isDelayed, setIsDelayed] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
     const [isResumed, setIsResumed] = useState(false);
+    const [snapshotRollback, setSnapshotRollback] = useState(() => normalizeSnapshotRollback(options.snapshot_rollback));
     const [settingsSaved, setSettingsSaved] = useState(false);
     const [settings, setSettings] = useState({});
     const settingsRef = useRef(settings);
@@ -19,6 +29,7 @@ function SettingsContextProvider(props) {
     const [blogId, setBlogId] = useState(1);
     const [queuedIntegrations, setQueuedIntegrations] = useState([]);
     const [showMobileNav, setShowMobileNav] = useState(false);
+    const isRollbackRunning = !!snapshotRollback.running;
 
     const getSettings = () => {
         apiFetch({path: '/simplystatic/v1/settings'}).then((options) => {
@@ -86,9 +97,12 @@ function SettingsContextProvider(props) {
             path: '/simplystatic/v1/is-running',
             method: 'GET'
         }).then(resp => {
-            var json = JSON.parse(resp);
+            var json = 'string' === typeof resp ? JSON.parse(resp) : resp;
             setIsRunning(json.running);
             setIsPaused(json.paused);
+            if ( json.snapshot_rollback ) {
+                setSnapshotRollback(normalizeSnapshotRollback(json.snapshot_rollback));
+            }
             if ( json.delayed ) {
               setIsDelayed(json.delayed_until);
             }
@@ -271,7 +285,7 @@ function SettingsContextProvider(props) {
 
   useInterval(() => {
         checkIfRunning();
-    }, isRunning || isDelayed ? 5000 : null);
+    }, isRunning || isDelayed || isRollbackRunning ? 5000 : null);
 
     // Removed legacy redirect marker handler; router uses 'ss-initial-page' on bootstrap
 
@@ -314,6 +328,9 @@ function SettingsContextProvider(props) {
                 setIsPaused,
                 setIsResumed,
                 isResumed,
+                snapshotRollback,
+                setSnapshotRollback,
+                isRollbackRunning,
                 blogId,
                 setBlogId,
                 isPro,

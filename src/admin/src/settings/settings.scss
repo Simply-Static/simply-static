@@ -207,6 +207,21 @@ toplevel_page_simply-static img {
         }
       }
 
+      &.rollback-locked {
+        button.rollback-locked-button {
+          align-items: center;
+          background: #8a8f98;
+          border-color: #757b85;
+          cursor: not-allowed;
+          display: flex;
+          gap: 6px;
+          justify-content: center;
+          max-width: 200px;
+          opacity: 1;
+          width: 100%;
+        }
+      }
+
       .cancel-button {
         text-align: center;
         display: block;
@@ -227,6 +242,51 @@ toplevel_page_simply-static img {
           line-height: 1.4;
         }
       }
+
+      .rollback-lock-sidebar-notice {
+        background: #fff8e5;
+        border-left-color: #dba617;
+        margin: 10px 0 0;
+        max-width: 200px;
+
+        p {
+          font-size: 12px;
+          line-height: 1.45;
+          margin: 0;
+        }
+      }
+    }
+  }
+
+  .rollback-lock-notice {
+    align-items: flex-start;
+    background: #fff8e5;
+    border-left-color: #dba617;
+    margin: 0 0 16px;
+
+    p {
+      align-items: flex-start;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .dashicon {
+      color: #996800;
+      flex: 0 0 auto;
+      margin-top: 1px;
+    }
+
+    strong {
+      color: #3c434a;
+      flex: 0 0 auto;
+    }
+
+    span {
+      color: #50575e;
+      flex: 1 1 260px;
     }
   }
 
