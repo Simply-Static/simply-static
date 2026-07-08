@@ -34,7 +34,10 @@ function SidebarSite( props = null ) {
         canRunIntegration,
         showMobileNav,
         setShowMobileNav,
-        isDelayed
+        isDelayed,
+        snapshotRollback,
+        setSnapshotRollback,
+        isRollbackRunning
     } = useContext(SettingsContext);
     const { activeItem, setActiveItem} = props;
     // UAM enablement follows server-bootstrapped flag; changes require a page reload.
@@ -48,6 +51,11 @@ function SidebarSite( props = null ) {
     const [unpushedChanges, setUnpushedChanges] = useState(0);
     const hasAutoSelectedExportType = useRef(false);
     const hasSelectedExportTypeManually = useRef(false);
+    const rollbackMessage = snapshotRollback && snapshotRollback.message ? snapshotRollback.message : __('Rollback in progress. Simply Static export actions are locked until the rollback has finished.', 'simply-static');
+    const rollbackProgress = snapshotRollback && snapshotRollback.progress ? snapshotRollback.progress : {};
+    const rollbackProgressText = rollbackProgress.label
+        ? `${rollbackProgress.label}${rollbackProgress.total ? ` (${rollbackProgress.percent || 0}%, ${rollbackProgress.completed || 0}/${rollbackProgress.total})` : ''}`
+        : rollbackMessage;
 
 
     const resetExportLock = () => {
@@ -88,7 +96,7 @@ function SidebarSite( props = null ) {
     }
 
     useEffect(() => {
-        setDisabledButton(isRunning || isPaused);
+        setDisabledButton(isRunning || isPaused || isRollbackRunning);
 
         if (options.selectable_sites && !options.is_network && options.is_multisite) {
             let sites = options.selectable_sites
@@ -102,7 +110,7 @@ function SidebarSite( props = null ) {
             setSelectableSites(sites);
         }
 
-    }, [options, isRunning, isPaused]);
+    }, [options, isRunning, isPaused, isRollbackRunning]);
 
     // Fetch unpushed changes count on mount and after each export finishes.
     useEffect(() => {
@@ -135,6 +143,11 @@ function SidebarSite( props = null ) {
     }, [settings, isRunning]);
 
     const startExport = () => {
+        if (isRollbackRunning) {
+            alert(rollbackMessage);
+            return;
+        }
+
         setDisabledButton(true);
         setIsResumed(false);
         setIsPaused(false);
@@ -156,7 +169,32 @@ function SidebarSite( props = null ) {
                 setDisabledButton(false);
                 return;
             }
+            if (json.status === 409) {
+                const message = json.message || rollbackMessage;
+                setSnapshotRollback({
+                    running: true,
+                    status: {},
+                    message: message,
+                });
+                alert(message);
+                setDisabledButton(true);
+                return;
+            }
             setIsRunning(true);
+        }).catch(error => {
+            const isConflict = error && error.data && 409 === error.data.status;
+            const message = error.message || rollbackMessage;
+
+            if (isConflict) {
+                setSnapshotRollback({
+                    running: true,
+                    status: {},
+                    message: message,
+                });
+            }
+
+            alert(message);
+            setDisabledButton(isConflict || isRunning || isPaused || isRollbackRunning);
         });
     }
 
@@ -298,7 +336,7 @@ function SidebarSite( props = null ) {
             <img alt="Logo"
                  src={options.logo}/>
         </div>
-        <div className={`generate-container ${disabledButton ? 'generating' : ''}`}>
+        <div className={`generate-container ${disabledButton && !isRollbackRunning ? 'generating' : ''} ${isRollbackRunning ? 'rollback-locked' : ''}`}>
             <SelectControl
                 className={'generate-type'}
                 value={selectedExportType}
@@ -320,7 +358,7 @@ function SidebarSite( props = null ) {
                 {buildOptions}
                 {languageSelectOptions}
             </SelectControl>
-            {canRunExport &&
+            {canRunExport && !isRollbackRunning &&
                 <GenerateButtons
                     canGenerate={!disabledButton}
                     startExport={startExport}
@@ -335,12 +373,27 @@ function SidebarSite( props = null ) {
                 />
             }
 
-            {unpushedChanges > 0 && !isRunning && !isPaused && ('pro' === options.plan && isPro()) &&
+            {isRollbackRunning &&
+                <>
+                    <Button
+                        disabled={true}
+                        className={'generate rollback-locked-button'}
+                    >
+                        <Dashicon icon="update"/>
+                        {__('Rollback in progress', 'simply-static')}
+                    </Button>
+                    <Notice status="warning" isDismissible={false} className={"rollback-lock-sidebar-notice"}>
+                        <p>{rollbackProgressText}</p>
+                    </Notice>
+                </>
+            }
+
+            {unpushedChanges > 0 && !isRollbackRunning && !isRunning && !isPaused && ('pro' === options.plan && isPro()) &&
                 <Notice status="info" isDismissible={false} className={"unpushed-changes-notice"}>
                     <p>{sprintf(__('You have %d unpushed changes.', 'simply-static'), unpushedChanges)}</p>
                 </Notice>
             }
-            {unpushedChanges > 0 && !isRunning && !isPaused && !('pro' === options.plan && isPro()) &&
+            {unpushedChanges > 0 && !isRollbackRunning && !isRunning && !isPaused && !('pro' === options.plan && isPro()) &&
                 <Tooltip text={__('Upgrade to Simply Static Pro to push only changes.', 'simply-static')}>
                     <Notice status="info" isDismissible={false} className={"unpushed-changes-notice"}>
                         <p>{sprintf(__('You have %d unpushed changes.', 'simply-static'), unpushedChanges)}</p>
@@ -348,7 +401,7 @@ function SidebarSite( props = null ) {
                 </Tooltip>
             }
 
-            {!canRunExport && options.is_multisite && <>
+            {!isRollbackRunning && !canRunExport && options.is_multisite && <>
                 <Button
                     disabled={true}
                     className={'generate'}
@@ -378,7 +431,7 @@ function SidebarSite( props = null ) {
             {'pro' === options.plan && isPro() &&
                 <>
                     {(!options.is_network && canRunIntegration('environments')) &&
-                        <EnvironmentSidebar isRunning={isRunning} getSettings={getSettings}/>
+                        <EnvironmentSidebar isRunning={isRunning || isRollbackRunning} getSettings={getSettings}/>
                     }
                 </>
             }

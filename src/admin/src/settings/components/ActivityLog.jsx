@@ -1,12 +1,18 @@
 import {useContext, useEffect, useState} from "@wordpress/element";
 import {SettingsContext} from "../context/SettingsContext";
+import {Dashicon, Notice} from "@wordpress/components";
 import Terminal, {ColorMode, TerminalOutput} from "react-terminal-ui";
 import apiFetch from "@wordpress/api-fetch";
 import useInterval from "../../hooks/useInterval";
 
 const {__} = wp.i18n;
 function ActivityLog() {
-    const {isRunning, isResumed, isPaused, blogId} = useContext(SettingsContext);
+    const {isRunning, isResumed, isPaused, blogId, snapshotRollback, isRollbackRunning} = useContext(SettingsContext);
+    const rollbackMessage = snapshotRollback && snapshotRollback.message ? snapshotRollback.message : __('Rollback in progress. Simply Static export actions are locked until the rollback has finished.', 'simply-static');
+    const rollbackProgress = snapshotRollback && snapshotRollback.progress ? snapshotRollback.progress : {};
+    const rollbackProgressText = rollbackProgress.label
+        ? `${rollbackProgress.label}${rollbackProgress.total ? ` (${rollbackProgress.percent || 0}%, ${rollbackProgress.completed || 0}/${rollbackProgress.total})` : ''}`
+        : rollbackMessage;
     const [terminalLineData, setTerminalLineData] = useState([
         <TerminalOutput key="waiting">Waiting for new push..</TerminalOutput>
     ]);
@@ -48,9 +54,22 @@ function ActivityLog() {
         refreshActivityLog();
     }, [isRunning]);
 
-    return (<Terminal name={__('Activity Log', 'simply-static')} height="250px" colorMode={ColorMode.Dark}>
-        {terminalLineData}
-    </Terminal>)
+    return (
+        <>
+            {isRollbackRunning &&
+                <Notice status="warning" isDismissible={false} className={"rollback-lock-notice"}>
+                    <p>
+                        <Dashicon icon="update"/>
+                        <strong>{__('Rollback in progress', 'simply-static')}</strong>
+                        <span>{rollbackProgressText}</span>
+                    </p>
+                </Notice>
+            }
+            <Terminal name={__('Activity Log', 'simply-static')} height="250px" colorMode={ColorMode.Dark}>
+                {terminalLineData}
+            </Terminal>
+        </>
+    )
 }
 
 export default ActivityLog;
