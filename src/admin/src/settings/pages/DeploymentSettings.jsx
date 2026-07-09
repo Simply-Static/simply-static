@@ -150,7 +150,7 @@ function DeploymentSettings() {
                     <CardBody>
                         <Flex direction="column" gap={2}>
                             <p style={{margin: 0}}>
-                                <strong>{__('⚡ Migrate to Static Studio', 'simply-static')}</strong>{' — '}
+                                <strong>{__('⚡ Migrate to Static Studio', 'simply-static')}</strong>{': '}
                                 {__('The all-in-one Static WordPress cloud-hosting platform. Enjoy secure WordPress, the fastest exports, and the best-performing static site hosting in one package.', 'simply-static')}
                             </p>
                             {migrateError && !installingMigrate &&
@@ -206,7 +206,7 @@ function DeploymentSettings() {
                 heading={__('Deployment is automatic on Studio', 'simply-static')}
                 cta={__('See how Pro deployment works →', 'simply-static')}
             >
-                <p>{__('Your site is built and published automatically every time you make a change — no destinations to set up, no pipelines to maintain. That\'s the whole idea of Studio.', 'simply-static')}</p>
+                <p>{__('Your site is built and published automatically every time you make a change, with no destinations to set up and no pipelines to maintain. That\'s the whole idea of Studio.', 'simply-static')}</p>
                 <p>{__('Want to choose exactly where your files go? Deploying to GitHub, Amazon S3, BunnyCDN, SFTP and more is part of Simply Static Pro, where you own and control your deployment pipeline.', 'simply-static')}</p>
             </StudioNotice>
         }

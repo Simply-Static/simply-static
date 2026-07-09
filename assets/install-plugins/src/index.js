@@ -65,11 +65,7 @@ const ssPluginInstall = {
             }
 
             // Skip cards that have already been processed.
-            if (
-                pluginCardElement.classList.contains(
-                    'ss-extension-card-message'
-                )
-            ) {
+            if (pluginCardElement.querySelector('.ss-extension-card-message')) {
                 continue;
             }
 
@@ -77,6 +73,7 @@ const ssPluginInstall = {
             const iconElement = document.createElement('span');
             const tooltipElement = document.createElement('span');
 
+            pluginCardElement.classList.add('ss-compatible-plugin-card');
             messageElement.classList.add('ss-extension-card-message');
             iconElement.classList.add('ss-logo-icon');
             tooltipElement.classList.add('tooltiptext');

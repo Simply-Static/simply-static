@@ -6,6 +6,16 @@
   position: relative;
 }
 
+.plugin-card.ss-compatible-plugin-card {
+  overflow: visible;
+  z-index: 1;
+}
+
+.plugin-card.ss-compatible-plugin-card:hover,
+.plugin-card.ss-compatible-plugin-card:focus-within {
+  z-index: 2;
+}
+
 .plugin-action-buttons .dashicons-external {
   vertical-align: text-bottom;
   margin-left: 5px;
@@ -25,6 +35,7 @@
   border-radius: 50%;
   height: 40px;
   width: 40px;
+  z-index: 2;
 }
 
 .ss-logo-icon {

@@ -40,7 +40,7 @@ export default function PromoSidebar() {
                         {__('Static Studio', 'simply-static')}
                     </h3>
                     <p className={"promo-description"}>
-                        {__('The all-in-one WordPress operations platform for static sites — including Site Health, reports, performance checks, uptime monitoring, and hosting.', 'simply-static')}
+                        {__('The all-in-one WordPress operations platform for static sites, including Site Health, reports, performance checks, uptime monitoring, and hosting.', 'simply-static')}
                     </p>
                     <ul className={"promo-features"}>
                         <li>{__('14-day trial with 3 sites included', 'simply-static')}</li>
