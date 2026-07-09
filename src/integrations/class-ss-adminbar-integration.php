@@ -117,7 +117,7 @@ class SS_Adminbar_Integration extends Integration {
 			$admin_bar->add_node( [
 				'id'     => 'ss-admin-bar-studio-upsell',
 				'parent' => 'ss-admin-bar',
- 			'title'  => '<span class="ss-pro-upsell">' . esc_html__( 'Simply Static Studio', 'simply-static' ) . '</span>',
+ 			'title'  => '<span class="ss-pro-upsell">' . esc_html__( 'Static Studio', 'simply-static' ) . '</span>',
 				'href'   => 'https://simplystatic.com/simply-static-studio/?utm_source=wordpress&utm_medium=adminbar&utm_campaign=upsell',
 				'meta'   => [
 					'target' => '_blank',

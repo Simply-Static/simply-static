@@ -170,7 +170,7 @@ class Admin_Settings {
                     99
             );
 
-            // Add Simply Static Studio submenu that links to external URL
+            // Add Static Studio submenu that links to external URL
             add_submenu_page(
                     'simply-static-generate',
                     __( 'Static Studio', 'simply-static' ),
@@ -213,7 +213,7 @@ class Admin_Settings {
 
             // Register a Tools submenu that links directly to the original page.
             global $submenu;
-            $tools_brand = defined( 'SSS_VERSION' ) ? __( 'Simply Static Studio', 'simply-static' ) : __( 'Simply Static', 'simply-static' );
+            $tools_brand = defined( 'SSS_VERSION' ) ? __( 'Static Studio', 'simply-static' ) : __( 'Simply Static', 'simply-static' );
             $submenu['tools.php'][] = array(
                 $tools_brand,
                 apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ),

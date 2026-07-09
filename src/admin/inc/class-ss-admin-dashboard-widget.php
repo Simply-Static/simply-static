@@ -281,8 +281,8 @@ class Admin_Dashboard_Widget {
 					<p class="ss-upsell-desc"><?php esc_html_e( 'GitHub & CDN deployment, forms, search, and more.', 'simply-static' ); ?></p>
 				</a>
  			<a href="<?php echo esc_url( 'https://simplystatic.com/simply-static-studio/?utm_source=wordpress&utm_medium=dashboard-widget&utm_campaign=upsell&utm_content=studio' ); ?>" target="_blank" rel="noopener noreferrer" class="ss-widget-upsell-card">
- 				<p class="ss-upsell-title"><?php esc_html_e( 'Simply Static Studio', 'simply-static' ); ?> →</p>
-					<p class="ss-upsell-desc"><?php esc_html_e( 'Managed Static WordPress hosting with one-click deploys.', 'simply-static' ); ?></p>
+ 				<p class="ss-upsell-title"><?php esc_html_e( 'Static Studio', 'simply-static' ); ?> →</p>
+					<p class="ss-upsell-desc"><?php esc_html_e( 'WordPress operations with Site Health, reports, uptime, performance checks, and hosting.', 'simply-static' ); ?></p>
 				</a>
 			</div>
 		</div>

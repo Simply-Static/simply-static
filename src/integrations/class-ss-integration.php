@@ -146,7 +146,7 @@ abstract class Integration {
 	/**
 	 * Perform a wp_remote_get request with Basic Auth headers when configured.
 	 *
-	 * On environments that require HTTP Basic Auth (e.g. Simply Static Studio),
+	 * On environments that require HTTP Basic Auth (e.g. Static Studio),
 	 * plain wp_remote_get calls will fail with 401. This helper mirrors the
 	 * authentication logic used by Url_Fetcher::remote_get().
 	 *
