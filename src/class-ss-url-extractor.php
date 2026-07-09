@@ -1614,16 +1614,33 @@ class Url_Extractor {
 		// Pass 1: Handle url(...) constructs with quoted or unquoted values, including relative URLs.
 		// Pattern breakdown:
 		// - url( optional whitespace
-		// - capture optional quote (single or double) in group 1
-		// - capture the URL (anything but closing paren; we'll trim trailing whitespace) in group 2
-		// - match the same optional quote in group 3 via backreference
-		// - optional whitespace and closing paren
+		// - capture the url(...) value, then normalize quote placeholders inside
+		//   the callback. This prevents preserved entities like APOS_PLACEHOLDER
+		//   from being appended to extracted Gutenberg background-image URLs.
 		$text = preg_replace_callback(
-			'/url\(\s*(?:(["\'])\s*)?([^\)\s]+?)\s*(?:\1)?\s*\)/i',
-			function ( $m ) {
-				$quote = isset( $m[1] ) ? $m[1] : '';
-				$raw   = $m[2];
-				$val   = trim( $raw );
+			'/url\(\s*([^\)]*?)\s*\)/i',
+			function ( $m ) use ( $charset ) {
+				$raw   = trim( $m[1] );
+				$quote = '';
+				$val   = $raw;
+
+				if ( $raw !== '' ) {
+					$first_char = $raw[0];
+					$last_char  = substr( $raw, -1 );
+
+					if ( ( $first_char === '"' || $first_char === "'" ) && $last_char === $first_char ) {
+						$quote = $first_char;
+						$val   = substr( $raw, 1, -1 );
+					} else if ( 0 === strpos( $raw, 'APOS_PLACEHOLDER' ) && substr( $raw, -16 ) === 'APOS_PLACEHOLDER' ) {
+						$quote = "'";
+						$val   = substr( $raw, 16, -16 );
+					} else if ( 0 === strpos( $raw, 'QUOTE_PLACEHOLDER' ) && substr( $raw, -17 ) === 'QUOTE_PLACEHOLDER' ) {
+						$quote = '"';
+						$val   = substr( $raw, 17, -17 );
+					}
+				}
+
+				$val = html_entity_decode( $this->restore_attributes( trim( $val ) ), ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, $charset );
 
 				// Skip data URIs or empty
 				if ( $val === '' || stripos( $val, 'data:' ) === 0 ) {
