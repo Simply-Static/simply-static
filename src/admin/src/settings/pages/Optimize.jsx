@@ -541,7 +541,7 @@ function Optimize() {
                         {!isStudio() &&
                             <FlexItem>
                                 <ExternalLink
-                                    href="https://simplystatic.com/simply-static-studio/"> {__('Requires Simply Static Studio', 'simply-static')}</ExternalLink>
+                                    href="https://simplystatic.com/simply-static-studio/"> {__('Requires Static Studio', 'simply-static')}</ExternalLink>
                             </FlexItem>
                         }
                     </Flex>

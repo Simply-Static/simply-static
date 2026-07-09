@@ -37,15 +37,15 @@ export default function PromoSidebar() {
                 <div className={"promo-card-inner"}>
                     <span className={"promo-badge promo-badge-studio"}>{__('Studio', 'simply-static')}</span>
                     <h3 className={"promo-headline"}>
-                        {__('Simply Static Studio', 'simply-static')}
+                        {__('Static Studio', 'simply-static')}
                     </h3>
                     <p className={"promo-description"}>
-                        {__('The all-in-one hosting platform for Static WordPress — including WordPress hosting, static site hosting via CDN, zero configuration, and all Pro features.', 'simply-static')}
+                        {__('The all-in-one WordPress operations platform for static sites — including Site Health, reports, performance checks, uptime monitoring, and hosting.', 'simply-static')}
                     </p>
                     <ul className={"promo-features"}>
-                        <li>{__('WordPress hosting included', 'simply-static')}</li>
-                        <li>{__('Static hosting via global CDN', 'simply-static')}</li>
-                        <li>{__('Zero configuration', 'simply-static')}</li>
+                        <li>{__('14-day trial with 3 sites included', 'simply-static')}</li>
+                        <li>{__('Site Health and reports', 'simply-static')}</li>
+                        <li>{__('Performance checks and uptime monitoring', 'simply-static')}</li>
                         <li>{__('All Pro features included', 'simply-static')}</li>
                     </ul>
                     <Button
@@ -55,7 +55,7 @@ export default function PromoSidebar() {
                         rel="noopener noreferrer"
                         className={"promo-button promo-button-studio"}
                     >
-                        {__('Start 7-Day Free Trial →', 'simply-static')}
+                        {__('Start 14-Day Free Trial →', 'simply-static')}
                     </Button>
                 </div>
             </div>
