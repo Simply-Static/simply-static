@@ -23,52 +23,14 @@ class Handler_404 extends Page_Handler {
      * @return string
      */
     public function get_relative_dir( $dir ) {
-        $file_path = $this->get_configured_file_path();
-
-        if ( $file_path ) {
-            $directory = dirname( $file_path );
-
-            return '.' === $directory ? '' : trailingslashit( $directory );
-        }
-
         return '';
     }
 
     public function get_path_info( $path_info ) {
-        $file_path = $this->get_configured_file_path();
-
-        if ( $file_path ) {
-            $configured_path_info = pathinfo( $file_path );
-
-            $path_info['filename']  = ! empty( $configured_path_info['filename'] ) ? $configured_path_info['filename'] : '404';
-            $path_info['extension'] = ! empty( $configured_path_info['extension'] ) ? $configured_path_info['extension'] : 'html';
-
-            return $path_info;
-        }
-
         $path_info['filename']  = '404';
         $path_info['extension'] = 'html';
 
         return $path_info;
-    }
-
-    /**
-     * Get a preconfigured 404 file path from the page record.
-     *
-     * @return string
-     */
-    private function get_configured_file_path() : string {
-        if ( ! $this->page || empty( $this->page->file_path ) || ! is_string( $this->page->file_path ) ) {
-            return '';
-        }
-
-        $file_path = ltrim( wp_normalize_path( $this->page->file_path ), '/' );
-
-        if ( '404.html' !== basename( $file_path ) ) {
-            return '';
-        }
-
-        return $file_path;
     }
 
     /**

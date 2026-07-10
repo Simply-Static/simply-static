@@ -48,17 +48,20 @@ class Generate_404_Task extends Task {
 		$message = __( 'Generating 404 Page.', 'simply-static' );
 		$this->save_status_message( $message );
 
-		$custom_404_id = intval( $this->options->get( 'custom_404_page' ) );
-		$targets       = $this->get_404_targets( $custom_404_id );
-		$generated_any = false;
+		$custom_404_id  = intval( $this->options->get( 'custom_404_page' ) );
+		$custom_404_url = $custom_404_id ? get_permalink( $custom_404_id ) : '';
+		$custom_404_url = is_string( $custom_404_url ) ? $custom_404_url : '';
+		$generated      = false;
 
-		foreach ( $targets as $target ) {
-			if ( $this->generate_404_target( $target ) ) {
-				$generated_any = true;
-			}
+		if ( $custom_404_url ) {
+			$generated = $this->generate_404_page( $custom_404_url, $custom_404_id );
 		}
 
-		if ( $generated_any ) {
+		if ( ! $generated ) {
+			$generated = $this->generate_404_page( '', 0 );
+		}
+
+		if ( $generated ) {
 			$this->save_status_message( __( '404 Page generated', 'simply-static' ) );
 		}
 
@@ -66,102 +69,21 @@ class Generate_404_Task extends Task {
 	}
 
 	/**
-	 * Get the 404 targets to generate.
+	 * Generate the root 404 page.
 	 *
-	 * @param int $custom_404_id Custom 404 page ID.
-	 *
-	 * @return array
-	 */
-	private function get_404_targets( int $custom_404_id ) : array {
-		$default_target = array(
-			'file_path'   => '404.html',
-			'language'    => '',
-			'post_id'     => $custom_404_id,
-			'require_404' => empty( $custom_404_id ),
-			'url'         => '',
-			'url_base'    => Util::origin_url(),
-		);
-
-		if ( ! empty( $custom_404_id ) ) {
-			$permalink = get_permalink( $custom_404_id );
-
-			if ( $permalink ) {
-				$default_target['url'] = $permalink;
-			}
-		}
-
-		$targets = array( $default_target );
-
-		/**
-		 * Filter the 404 pages generated during the 404 task.
-		 *
-		 * Each target can define file_path, url, url_base, language, post_id,
-		 * and require_404. This supports multilingual plugins generating
-		 * language-specific files such as en/404.html and fr/404.html.
-		 *
-		 * @param array $targets 404 generation targets.
-		 * @param array $context Generation context.
-		 */
-		$targets = apply_filters( 'simply_static_404_targets', $targets, array(
-			'custom_404_page_id' => $custom_404_id,
-			'archive_dir'        => $this->archive_dir,
-		) );
-
-		return $this->normalize_404_targets( is_array( $targets ) ? $targets : array( $default_target ) );
-	}
-
-	/**
-	 * Normalize 404 targets.
-	 *
-	 * @param array $targets 404 targets.
-	 *
-	 * @return array
-	 */
-	private function normalize_404_targets( array $targets ) : array {
-		$normalized = array();
-		$seen_paths = array();
-
-		foreach ( $targets as $target ) {
-			if ( ! is_array( $target ) ) {
-				continue;
-			}
-
-			$file_path = ! empty( $target['file_path'] ) && is_string( $target['file_path'] ) ? ltrim( wp_normalize_path( $target['file_path'] ), '/' ) : '404.html';
-
-			if ( '404.html' !== basename( $file_path ) || isset( $seen_paths[ $file_path ] ) ) {
-				continue;
-			}
-
-			$seen_paths[ $file_path ] = true;
-
-			$normalized[] = array(
-				'file_path'   => $file_path,
-				'language'    => ! empty( $target['language'] ) ? sanitize_text_field( (string) $target['language'] ) : '',
-				'post_id'     => ! empty( $target['post_id'] ) ? absint( $target['post_id'] ) : 0,
-				'require_404' => ! empty( $target['require_404'] ),
-				'url'         => ! empty( $target['url'] ) && is_string( $target['url'] ) ? esc_url_raw( $target['url'] ) : '',
-				'url_base'    => ! empty( $target['url_base'] ) && is_string( $target['url_base'] ) ? esc_url_raw( $target['url_base'] ) : Util::origin_url(),
-			);
-		}
-
-		return $normalized;
-	}
-
-	/**
-	 * Generate a single 404 target.
-	 *
-	 * @param array $target 404 target.
+	 * @param string $custom_404_url Custom 404 page URL, or an empty string for the theme 404.
+	 * @param int    $custom_404_id  Custom 404 page ID.
 	 *
 	 * @return bool
 	 */
-	private function generate_404_target( array $target ) : bool {
+	private function generate_404_page( string $custom_404_url, int $custom_404_id ) : bool {
 		$slug  = time();
 		$count = 1;
 
 		do {
-			$url = ! empty( $target['url'] ) ? $target['url'] : trailingslashit( $target['url_base'] ) . ( $slug + $count );
+			$url = $custom_404_url ?: trailingslashit( Util::origin_url() ) . ( $slug + $count );
 
-			$static_page = $this->create_404_page( $url, $target );
+			$static_page = $this->create_404_page( $url, $custom_404_id );
 			$success     = Url_Fetcher::instance()->fetch( $static_page );
 
 			$count ++;
@@ -171,17 +93,22 @@ class Generate_404_Task extends Task {
 				continue;
 			}
 
-			if ( ! empty( $target['require_404'] ) && 404 !== (int) $static_page->http_status_code ) {
+			if ( ! $custom_404_url && 404 !== (int) $static_page->http_status_code ) {
+				$this->cleanup_failed_404_attempt( $static_page );
+				continue;
+			}
+
+			$file = $this->archive_dir . ltrim( (string) $static_page->file_path, '/\\' );
+
+			if ( empty( $static_page->file_path ) || ! file_exists( $file ) ) {
 				$this->cleanup_failed_404_attempt( $static_page );
 				continue;
 			}
 
 			$this->handle_response( $static_page );
 
-			do_action( 'simply_static_404_generated', $static_page, $target );
-
 			return true;
-		} while ( empty( $target['url'] ) && $count <= 50 );
+		} while ( ! $custom_404_url && $count <= 50 );
 
 		return false;
 	}
@@ -208,16 +135,16 @@ class Generate_404_Task extends Task {
 	}
 
 	/**
-	 * Create a page record for a generated 404 target.
+	 * Create a page record for the generated root 404.
 	 *
-	 * @param string $url    URL to fetch.
-	 * @param array  $target 404 target.
+	 * @param string $url           URL to fetch.
+	 * @param int    $custom_404_id Custom 404 page ID.
 	 *
 	 * @return Page
 	 */
-	private function create_404_page( string $url, array $target ) : Page {
+	private function create_404_page( string $url, int $custom_404_id ) : Page {
 		$static_page = Page::initialize( array(
-			'post_id'             => $this->get_scoped_post_id( $target ),
+			'post_id'             => $this->get_scoped_post_id( $custom_404_id ),
 			'build_id'            => $this->get_scoped_build_id(),
 			'url'                 => $url,
 			'handler'             => Handler_404::class,
@@ -232,14 +159,10 @@ class Generate_404_Task extends Task {
 			'last_modified_at'    => current_time( 'mysql' ),
 			'updated_at'          => current_time( 'mysql' ),
 			'created_at'          => current_time( 'mysql' ),
-			'file_path'           => $target['file_path'],
+			'file_path'           => '404.html',
 		) );
 
 		$static_page->set_json_data_by_key( 'generated_404', true );
-
-		if ( ! empty( $target['language'] ) ) {
-			$static_page->set_json_data_by_key( 'language', $target['language'] );
-		}
 
 		$static_page->save();
 
@@ -249,11 +172,11 @@ class Generate_404_Task extends Task {
 	/**
 	 * Get the post ID that keeps generated 404 pages visible to scoped exports.
 	 *
-	 * @param array $target 404 target.
+	 * @param int $custom_404_id Custom 404 page ID.
 	 *
 	 * @return int
 	 */
-	private function get_scoped_post_id( array $target ) : int {
+	private function get_scoped_post_id( int $custom_404_id ) : int {
 		$use_single = get_option( 'simply-static-use-single' );
 
 		if ( ! empty( $use_single ) ) {
@@ -264,7 +187,7 @@ class Generate_404_Task extends Task {
 			}
 		}
 
-		return ! empty( $target['post_id'] ) ? absint( $target['post_id'] ) : 0;
+		return absint( $custom_404_id );
 	}
 
 	/**
