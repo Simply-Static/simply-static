@@ -2039,11 +2039,15 @@ class Url_Extractor {
 		// Normalize URL to handle posts with URL-encoded post_name values
 		if ( $url ) {
 			$url = Util::normalize_url( $url );
+			$url = $this->normalize_destination_asset_url( $url );
 		}
 
 		if ( $url && Util::is_local_url( $url ) ) {
-			// Only add to extracted urls queue if smart_crawl is not enabled
-			if ( ! $this->options->get( 'smart_crawl' ) ) {
+			// Smart Crawl handles broad URL discovery, but directly referenced
+			// local assets must still be queued so mounted exports cannot miss
+			// critical CSS, JS, fonts, and images when a crawler is disabled or
+			// does not know about a runtime-generated asset URL.
+			if ( ! $this->options->get( 'smart_crawl' ) || Util::is_local_asset_url( $url ) ) {
 				$this->extracted_urls[] = apply_filters(
 					'simply_static_extracted_url',
 					Util::remove_params_and_fragment( $url ),
@@ -2056,6 +2060,69 @@ class Url_Extractor {
 		}
 
 		return $url;
+	}
+
+	/**
+	 * Convert an already-rewritten destination asset URL back to the origin URL
+	 * used by the fetcher. This handles mounted exports where markup contains
+	 * assets like https://example.com/blog/wp-content/... during extraction.
+	 *
+	 * @param string $url Absolute URL.
+	 *
+	 * @return string
+	 */
+	private function normalize_destination_asset_url( $url ) {
+		if ( ! is_string( $url ) || '' === $url || Util::is_local_url( $url ) ) {
+			return $url;
+		}
+
+		if ( 'absolute' !== $this->options->get( 'destination_url_type' ) ) {
+			return $url;
+		}
+
+		$destination_url = untrailingslashit( (string) $this->options->get_destination_url() );
+		if ( '' === $destination_url || './' === $destination_url ) {
+			return $url;
+		}
+
+		$url_parts  = function_exists( 'wp_parse_url' ) ? wp_parse_url( $url ) : parse_url( $url );
+		$dest_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $destination_url ) : parse_url( $destination_url );
+
+		if ( ! is_array( $url_parts ) || ! is_array( $dest_parts ) || empty( $url_parts['host'] ) || empty( $dest_parts['host'] ) ) {
+			return $url;
+		}
+
+		if ( 0 !== strcasecmp( $url_parts['host'], $dest_parts['host'] ) ) {
+			return $url;
+		}
+
+		$url_path  = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
+		$dest_path = isset( $dest_parts['path'] ) ? untrailingslashit( $dest_parts['path'] ) : '';
+
+		if ( '' !== $dest_path && '/' !== $dest_path ) {
+			if ( $url_path !== $dest_path && 0 !== strpos( $url_path . '/', trailingslashit( $dest_path ) ) ) {
+				return $url;
+			}
+
+			$url_path = substr( $url_path, strlen( $dest_path ) );
+			$url_path = '' === $url_path ? '/' : $url_path;
+		}
+
+		if ( ! Util::is_wordpress_asset_path( $url_path ) ) {
+			return $url;
+		}
+
+		$source_url = untrailingslashit( Util::origin_url() ) . '/' . ltrim( $url_path, '/' );
+
+		if ( ! empty( $url_parts['query'] ) ) {
+			$source_url .= '?' . $url_parts['query'];
+		}
+
+		if ( ! empty( $url_parts['fragment'] ) ) {
+			$source_url .= '#' . $url_parts['fragment'];
+		}
+
+		return Util::is_local_asset_url( $source_url ) ? $source_url : $url;
 	}
 
 	/**

@@ -1043,6 +1043,17 @@ class Util {
 	}
 
 	/**
+	 * Check whether a URL path points at WordPress asset directories.
+	 *
+	 * @param string $path URL path.
+	 *
+	 * @return bool
+	 */
+	public static function is_wordpress_asset_path( $path ) {
+		return self::is_root_wordpress_asset_path( $path );
+	}
+
+	/**
 	 * Check whether a same-host root path points at WordPress asset directories.
 	 *
 	 * @param string $path URL path.
