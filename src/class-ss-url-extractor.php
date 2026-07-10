@@ -1772,23 +1772,137 @@ class Url_Extractor {
 				}
 		}
 
+		$destination_path_guard         = $this->get_script_destination_path_guard();
+		$escaped_destination_path_guard = $this->get_script_destination_path_guard( true );
+
 		// Replace URLs in the script content
 		// First, replace protocol-relative URLs (//example.com)
-		$text = preg_replace( '/(["\'(])\/\/' . Util::origin_host_pattern() . '/i', '$1' . $convert_to, $decoded_text );
+		$text = preg_replace( '/(["\'(])\/\/' . Util::origin_host_pattern() . $destination_path_guard . '/i', '$1' . $convert_to, $decoded_text );
 
 		// Then replace absolute URLs (http://example.com or https://example.com)
-		$text = preg_replace( '/(["\'(])(https?:)?\/\/' . Util::origin_host_pattern() . '/i', '$1' . $convert_to, $text );
+		$text = preg_replace( '/(["\'(])(https?:)?\/\/' . Util::origin_host_pattern() . $destination_path_guard . '/i', '$1' . $convert_to, $text );
 
 		// Also replace JSON-encoded URLs
-		$text = preg_replace( '/' . Util::json_escaped_origin_url_pattern() . '/i', addcslashes( untrailingslashit( $convert_to ), '/' ), $text );
+		$text = preg_replace( '/' . Util::json_escaped_origin_url_pattern() . $escaped_destination_path_guard . '/i', addcslashes( untrailingslashit( $convert_to ), '/' ), $text );
 
 		// Replace URLs in sourceURL and sourceMappingURL comments (used for debugging)
 		// Handles both //# and //@ formats (the latter is deprecated but still used)
-		$text = preg_replace( '/(\/\/[#@]\s*(?:sourceURL|sourceMappingURL)\s*=\s*)(https?:)?\/\/' . Util::origin_host_pattern() . '/i', '$1' . $convert_to, $text );
+		$text = preg_replace( '/(\/\/[#@]\s*(?:sourceURL|sourceMappingURL)\s*=\s*)(https?:)?\/\/' . Util::origin_host_pattern() . $destination_path_guard . '/i', '$1' . $convert_to, $text );
 
+		$text = $this->extract_and_replace_script_asset_urls( $text );
 		$text = $this->replace_runtime_local_paths_in_script( $text );
 
 		return $text;
+	}
+
+	/**
+	 * Prevent an already-mounted destination URL from being rewritten twice.
+	 *
+	 * @param bool $escaped Whether the guard is for a JSON-escaped URL.
+	 *
+	 * @return string Regex lookahead fragment.
+	 */
+	private function get_script_destination_path_guard( $escaped = false ) {
+		if ( 'absolute' !== $this->options->get( 'destination_url_type' ) ) {
+			return '';
+		}
+
+		$origin_parts      = function_exists( 'wp_parse_url' ) ? wp_parse_url( Util::origin_url() ) : parse_url( Util::origin_url() );
+		$destination_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $this->options->get_destination_url() ) : parse_url( $this->options->get_destination_url() );
+
+		if ( ! is_array( $origin_parts ) || ! is_array( $destination_parts ) || empty( $origin_parts['host'] ) || empty( $destination_parts['host'] ) ) {
+			return '';
+		}
+
+		if ( 0 !== strcasecmp( $origin_parts['host'], $destination_parts['host'] ) ) {
+			return '';
+		}
+
+		$origin_port      = isset( $origin_parts['port'] ) ? (int) $origin_parts['port'] : null;
+		$destination_port = isset( $destination_parts['port'] ) ? (int) $destination_parts['port'] : null;
+		if ( $origin_port !== $destination_port ) {
+			return '';
+		}
+
+		$origin_path      = isset( $origin_parts['path'] ) ? untrailingslashit( $origin_parts['path'] ) : '';
+		$destination_path = isset( $destination_parts['path'] ) ? untrailingslashit( $destination_parts['path'] ) : '';
+
+		if ( '' === $destination_path || '/' === $destination_path || $destination_path === $origin_path ) {
+			return '';
+		}
+
+		if ( '' !== $origin_path && '/' !== $origin_path && 0 !== strpos( $destination_path . '/', trailingslashit( $origin_path ) ) ) {
+			return '';
+		}
+
+		$destination_suffix = substr( $destination_path, strlen( $origin_path ) );
+		if ( $escaped ) {
+			$destination_suffix = addcslashes( $destination_suffix, '/' );
+		}
+		$path_separator = $escaped ? '\\/' : '/';
+		$boundary       = '(?:' . preg_quote( $path_separator, '/' ) . '|[?#]|$)';
+
+		return '(?!' . preg_quote( $destination_suffix, '/' ) . $boundary . ')';
+	}
+
+	/**
+	 * Extract local asset URLs stored in quoted JavaScript or JSON strings.
+	 *
+	 * Inline configuration such as WordPress's wp-emoji settings is rewritten
+	 * separately from normal HTML attributes. Queue its asset URLs here so the
+	 * referenced files are included in the generated site as well.
+	 *
+	 * @param string $text JavaScript or JSON content.
+	 *
+	 * @return string
+	 */
+	private function extract_and_replace_script_asset_urls( $text ) {
+		// Handle JSON-escaped URLs such as https:\/\/example.com\/asset.js first.
+		$text = preg_replace_callback(
+			'~(["\'])((?:https?:)?(?:\\\\/){2}(?:\\\\/|[^"\'<>\s])+?)\1~i',
+			function ( $matches ) {
+				$url     = str_replace( '\\/', '/', $matches[2] );
+				$updated = $this->extract_script_asset_url( $url );
+
+				return $matches[1] . ( $updated === $url ? $matches[2] : addcslashes( $updated, '/' ) ) . $matches[1];
+			},
+			$text
+		);
+
+		// Handle normal absolute and protocol-relative URLs in quoted strings.
+		$text = preg_replace_callback(
+			'~(["\'])((?:https?:)?//[^"\'<>\\\\\s]+?)\1~i',
+			function ( $matches ) {
+				return $matches[1] . $this->extract_script_asset_url( $matches[2] ) . $matches[1];
+			},
+			$text
+		);
+
+		return $text;
+	}
+
+	/**
+	 * Add one local script asset URL to the extraction queue and rewrite it.
+	 *
+	 * @param string $url URL found inside a script string.
+	 *
+	 * @return string
+	 */
+	private function extract_script_asset_url( $url ) {
+		$absolute_url = Util::relative_to_absolute_url( $url, $this->static_page->url );
+
+		if ( $absolute_url ) {
+			$absolute_url = Util::normalize_url( $absolute_url );
+			$absolute_url = $this->normalize_destination_asset_url( $absolute_url );
+		}
+
+		if ( ! $absolute_url || ! Util::is_local_asset_url( $absolute_url ) ) {
+			return $url;
+		}
+
+		$updated_url = $this->add_to_extracted_urls( $url );
+
+		return $updated_url ?: $url;
 	}
 
 	/**
@@ -2072,7 +2186,7 @@ class Url_Extractor {
 	 * @return string
 	 */
 	private function normalize_destination_asset_url( $url ) {
-		if ( ! is_string( $url ) || '' === $url || Util::is_local_url( $url ) ) {
+		if ( ! is_string( $url ) || '' === $url ) {
 			return $url;
 		}
 
