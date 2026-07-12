@@ -16,8 +16,48 @@ import GenerateButtons from "./GenerateButtons";
 import EnvironmentSidebar from "./EnvironmentSidebar";
 import apiFetch from "@wordpress/api-fetch";
 import useInterval from "../../hooks/useInterval";
+import {getRollbackConflict} from "../utils/export";
 
 const {__, sprintf} = wp.i18n;
+
+const getSafeArchiveActionMessage = ( message, fallbackMessage ) => {
+    return 'string' === typeof message && message.trim() ? message.trim() : fallbackMessage;
+};
+
+export const parseArchiveActionResponse = ( response, fallbackMessage ) => {
+    let parsed = response;
+
+    if ( 'string' === typeof response ) {
+        try {
+            parsed = JSON.parse( response );
+        } catch ( error ) {
+            throw new Error( fallbackMessage );
+        }
+    }
+
+    if ( !parsed || 'object' !== typeof parsed || Array.isArray( parsed ) ) {
+        throw new Error( fallbackMessage );
+    }
+
+    const status = Number( parsed.status );
+    if ( !Number.isInteger( status ) || status < 200 || status >= 300 ) {
+        throw new Error( getSafeArchiveActionMessage( parsed.message, fallbackMessage ) );
+    }
+
+    return parsed;
+};
+
+export const getArchiveActionErrorMessage = ( error, fallbackMessage ) => {
+    if ( error && error.data ) {
+        const dataMessage = getSafeArchiveActionMessage( error.data.message, '' );
+        if ( dataMessage ) {
+            return dataMessage;
+        }
+    }
+
+    return getSafeArchiveActionMessage( error && error.message, fallbackMessage );
+};
+
 function SidebarSite( props = null ) {
     const {
         isRunning,
@@ -64,36 +104,41 @@ function SidebarSite( props = null ) {
             path: '/simplystatic/v1/reset-export-lock',
             method: 'POST'
         }).then(() => {
-            setIsResettingLock(false);
             setCanRunExport(true);
-        });
+		}).catch(() => {
+			setCanRunExport(false);
+		}).finally(() => {
+			setIsResettingLock(false);
+		});
     }
 
-    if ( options.is_multisite ) {
-
-        const checkIfCanRun = () => {
+	const checkIfCanRun = () => {
+		if (!options.is_multisite) {
+			return;
+		}
             apiFetch({
                 path: '/simplystatic/v1/check-can-run',
                 method: 'GET'
-            }).then(resp => {
-                var json = JSON.parse(resp);
+		}).then(resp => {
+			var json = JSON.parse(resp);
 
                 if (json.can_run) {
                     setCanRunExport(true);
                 } else {
                     setCanRunExport(false);
                 }
-            });
-        }
+            }).catch(() => {});
+	}
 
-        useInterval(() => {
+	useInterval(() => {
             checkIfCanRun();
-        }, isRunning ? null : 100000);
+	}, options.is_multisite && !isRunning ? 100000 : null);
 
-        useEffect(() => {
+	useEffect(() => {
+		if (options.is_multisite) {
             checkIfCanRun();
-        }, [])
-    }
+		}
+	}, []);
 
     useEffect(() => {
         setDisabledButton(isRunning || isPaused || isRollbackRunning);
@@ -168,89 +213,105 @@ function SidebarSite( props = null ) {
                 alert(json.message);
                 setDisabledButton(false);
                 return;
-            }
-            if (json.status === 409) {
-                const message = json.message || rollbackMessage;
-                setSnapshotRollback({
-                    running: true,
-                    status: {},
-                    message: message,
-                });
-                alert(message);
-                setDisabledButton(true);
-                return;
+			}
+			if (json.status === 409) {
+				const message = json.message || rollbackMessage;
+				const rollbackState = getRollbackConflict(json);
+				if (rollbackState) {
+					setSnapshotRollback({
+						...rollbackState,
+						status: rollbackState,
+						message: message,
+					});
+				}
+				alert(message);
+				setDisabledButton(!!rollbackState || isRunning || isPaused || isRollbackRunning);
+				return;
             }
             setIsRunning(true);
         }).catch(error => {
-            const isConflict = error && error.data && 409 === error.data.status;
-            const message = error.message || rollbackMessage;
+			const isConflict = error && error.data && 409 === error.data.status;
+			const rollbackState = isConflict ? getRollbackConflict(error.data) : null;
+			const message = error.message || rollbackMessage;
 
-            if (isConflict) {
-                setSnapshotRollback({
-                    running: true,
-                    status: {},
-                    message: message,
-                });
-            }
+			if (rollbackState) {
+				setSnapshotRollback({
+					...rollbackState,
+					status: rollbackState,
+					message: message,
+				});
+			}
 
-            alert(message);
-            setDisabledButton(isConflict || isRunning || isPaused || isRollbackRunning);
-        });
+			alert(message);
+			setDisabledButton(!!rollbackState || isRunning || isPaused || isRollbackRunning);
+		});
     }
 
-    const cancelExport = () => {
-        apiFetch({
-            path: '/simplystatic/v1/cancel-export',
+    const runArchiveAction = ( path, onSuccess, fallbackMessage ) => {
+        return apiFetch({
+            path,
             method: 'POST',
             data: {
                 'blog_id': blogId,
             }
         }).then(resp => {
+            parseArchiveActionResponse( resp, fallbackMessage );
+            onSuccess();
+            return true;
+        }).catch(error => {
+            // Browser alerts display the message as text, so server-provided markup stays inert.
+            alert( getArchiveActionErrorMessage( error, fallbackMessage ) );
+            return false;
+        });
+    };
+
+    const cancelExport = () => {
+        const fallbackMessage = __( 'The export could not be cancelled. Please try again.', 'simply-static' );
+
+        return runArchiveAction( '/simplystatic/v1/cancel-export', () => {
             setIsResumed(false);
-            setIsPaused(false)
+            setIsPaused(false);
             setIsRunning(false);
             setDisabledButton(false);
-        });
+        }, fallbackMessage );
     }
 
     const pauseExport = () => {
-        apiFetch({
-            path: '/simplystatic/v1/pause-export',
-            method: 'POST',
-            data: {
-                'blog_id': blogId,
-            }
-        }).then(resp => {
+        const fallbackMessage = __( 'The export could not be paused. Please try again.', 'simply-static' );
+
+        return runArchiveAction( '/simplystatic/v1/pause-export', () => {
             setIsRunning(false);
             setIsResumed(false);
             setIsPaused(true);
-        });
+        }, fallbackMessage );
     }
 
     const resumeExport = () => {
-        apiFetch({
-            path: '/simplystatic/v1/resume-export',
-            method: 'POST',
-            data: {
-                'blog_id': blogId,
-            }
-        }).then(resp => {
+        const fallbackMessage = __( 'The export could not be resumed. Please try again.', 'simply-static' );
+
+        return runArchiveAction( '/simplystatic/v1/resume-export', () => {
             setIsResumed(true);
             setIsPaused(false);
             setIsRunning(true);
-        });
+        }, fallbackMessage );
     }
 
     const runUpdateFromNetwork = (blogId) => {
-        // Update settings from selected blog_id.
-        updateFromNetwork(blogId);
-
         setIsUpdatingFromNetwork(true);
+        const fallbackMessage = __( 'The settings could not be imported. Please try again.', 'simply-static' );
 
-        setTimeout(function () {
-            setIsUpdatingFromNetwork(false);
+        return Promise.resolve().then(() => {
+            // SettingsContext resolves only after the imported settings have been fetched.
+            return updateFromNetwork(blogId);
+        }).then(() => {
             window.location.reload();
-        }, 3500);
+            return true;
+        }).catch(error => {
+            alert( getArchiveActionErrorMessage( error, fallbackMessage ) );
+            return false;
+        }).finally(() => {
+            setIsUpdatingFromNetwork(false);
+        });
     }
 
     let buildOptions = '';
@@ -449,17 +510,24 @@ function SidebarSite( props = null ) {
                         }}
                     />
                     {selectedCopySite !== 'current' &&
-                        <Button isPrimary onClick={() => {
-                            runUpdateFromNetwork(selectedCopySite);
-                        }}>{__('Import Settings', 'simply-static')}</Button>
+                        <Button
+                            isPrimary
+                            isBusy={isUpdatingFromNetwork}
+                            disabled={isUpdatingFromNetwork}
+                            onClick={() => {
+                                runUpdateFromNetwork(selectedCopySite);
+                            }}
+                        >
+                            {__('Import Settings', 'simply-static')}
+                        </Button>
                     }
                     {isUpdatingFromNetwork ?
                         <Animate type="slide-in" options={{origin: 'top'}}>
                             {() => (
-                                <Notice status="success" isDismissible={false}
+                                <Notice status="info" isDismissible={false}
                                         className={"upgrade-network-notice"}>
                                     <p>
-                                        {__('Settings successfully imported.', 'simply-static')}
+                                        {__('Importing settings…', 'simply-static')}
                                     </p>
                                 </Notice>
                             )}

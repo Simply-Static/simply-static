@@ -3,6 +3,9 @@
   "description": "Convert your WordPress site into a static one with the free WordPress static site generator plugin, Simply Static.",
   "type": "wordpress-plugin",
   "require": {},
+  "require-dev": {
+    "phpunit/phpunit": "^9.6"
+  },
   "license": "GPL-3.0-or-later",
   "authors": [
     {
@@ -18,5 +21,13 @@
     "platform": {
       "php": "7.4"
     }
+  },
+  "scripts": {
+    "test": "phpunit --configuration phpunit.xml.dist",
+    "test:coverage": [
+      "@php -r \"is_dir('build/logs') || mkdir('build/logs', 0777, true);\"",
+      "phpdbg -qrr vendor/bin/phpunit --configuration phpunit.xml.dist --coverage-text --coverage-clover build/logs/clover.xml"
+    ],
+    "coverage:check": "@php tests/check-coverage.php build/logs/clover.xml"
   }
 }

@@ -364,60 +364,148 @@ class Deploy_Manifest_Service {
 		$site_id        = (int) get_current_blog_id();
 		$manifest_copy  = $manifest;
 		$urls           = $manifest_copy['urls'];
+		$now            = Util::formatted_datetime();
 		unset( $manifest_copy['urls'] );
 
-		$wpdb->delete( $manifest_table, array( 'deploy_id' => $deploy_id, 'site_id' => $site_id ) );
-		$wpdb->delete( $url_table, array( 'deploy_id' => $deploy_id, 'site_id' => $site_id ) );
+		if ( false === $wpdb->query( 'START TRANSACTION' ) ) {
+			throw new \RuntimeException( 'Unable to start a deploy manifest transaction.' );
+		}
 
-		$wpdb->insert(
-			$manifest_table,
-			array(
-				'deploy_id'        => $deploy_id,
-				'site_id'          => $site_id,
-				'manifest_version' => $manifest['manifest_version'],
-				'status'           => $manifest['status'],
-				'domain'           => $manifest['domain'],
-				'mount_path'       => $manifest['mount_path'],
-				'started_at'       => $manifest['started_at'],
-				'finished_at'      => $manifest['finished_at'],
-				'duration_seconds' => $manifest['duration_seconds'],
-				'plugin_version'   => $manifest['plugin_version'],
-				'wp_version'       => $manifest['wp_version'],
-				'php_version'      => $manifest['php_version'],
-				'generate_type'    => $manifest['generate_type'],
-				'url_counts'       => wp_json_encode( $manifest['url_counts'] ),
-				'root_files'       => wp_json_encode( $manifest['root_files'] ),
-				'warnings'         => wp_json_encode( $manifest['warnings'] ),
-				'errors'           => wp_json_encode( $manifest['errors'] ),
-				'manifest'         => wp_json_encode( $manifest_copy ),
-				'created_at'       => Util::formatted_datetime(),
-				'updated_at'       => Util::formatted_datetime(),
-			)
-		);
+		try {
+			if ( false === $wpdb->delete( $manifest_table, array( 'deploy_id' => $deploy_id, 'site_id' => $site_id ) ) ) {
+				throw new \RuntimeException( 'Unable to remove the previous deploy manifest.' );
+			}
 
-		foreach ( $urls as $record ) {
-			$wpdb->insert(
-				$url_table,
+			if ( false === $wpdb->delete( $url_table, array( 'deploy_id' => $deploy_id, 'site_id' => $site_id ) ) ) {
+				throw new \RuntimeException( 'Unable to remove the previous deploy manifest URLs.' );
+			}
+
+			$inserted = $wpdb->insert(
+				$manifest_table,
 				array(
-					'deploy_id'          => $deploy_id,
-					'site_id'            => $site_id,
-					'url'                => $record['url'],
-					'source_url'         => $record['source_url'],
-					'static_path'        => $record['static_path'],
-					'type'               => $record['type'],
-					'status_code'        => $record['status_code'],
-					'content_hash'       => $record['content_hash'],
-					'file_size'          => $record['file_size'],
-					'redirect_target'    => $record['redirect_target'],
-					'found_on'           => wp_json_encode( $record['found_on'] ),
-					'in_sitemap'         => $this->nullable_bool_to_db( $record['in_sitemap'] ),
-					'markdown_generated' => $this->nullable_bool_to_db( $record['markdown_generated'] ),
-					'warnings'           => wp_json_encode( $record['warnings'] ),
-					'errors'             => wp_json_encode( $record['errors'] ),
-					'created_at'         => Util::formatted_datetime(),
-					'updated_at'         => Util::formatted_datetime(),
+					'deploy_id'        => $deploy_id,
+					'site_id'          => $site_id,
+					'manifest_version' => $manifest['manifest_version'],
+					'status'           => $manifest['status'],
+					'domain'           => $manifest['domain'],
+					'mount_path'       => $manifest['mount_path'],
+					'started_at'       => $manifest['started_at'],
+					'finished_at'      => $manifest['finished_at'],
+					'duration_seconds' => $manifest['duration_seconds'],
+					'plugin_version'   => $manifest['plugin_version'],
+					'wp_version'       => $manifest['wp_version'],
+					'php_version'      => $manifest['php_version'],
+					'generate_type'    => $manifest['generate_type'],
+					'url_counts'       => wp_json_encode( $manifest['url_counts'] ),
+					'root_files'       => wp_json_encode( $manifest['root_files'] ),
+					'warnings'         => wp_json_encode( $manifest['warnings'] ),
+					'errors'           => wp_json_encode( $manifest['errors'] ),
+					'manifest'         => wp_json_encode( $manifest_copy ),
+					'created_at'       => $now,
+					'updated_at'       => $now,
 				)
 			);
+
+			if ( false === $inserted ) {
+				throw new \RuntimeException( 'Unable to store the deploy manifest.' );
+			}
+
+			$this->persist_manifest_urls( $url_table, $deploy_id, $site_id, $urls, $now );
+
+			if ( false === $wpdb->query( 'COMMIT' ) ) {
+				throw new \RuntimeException( 'Unable to commit the deploy manifest.' );
+			}
+		} catch ( \Throwable $e ) {
+			$wpdb->query( 'ROLLBACK' );
+			throw $e;
+		}
+	}
+
+	/**
+	 * Persist URL records in bounded multi-row inserts.
+	 *
+	 * @param string $table     URL table name.
+	 * @param string $deploy_id Deploy ID.
+	 * @param int    $site_id   Site ID.
+	 * @param array  $records   URL records.
+	 * @param string $now       Shared timestamp.
+	 *
+	 * @return void
+	 */
+	protected function persist_manifest_urls( $table, $deploy_id, $site_id, $records, $now ) {
+		global $wpdb;
+
+		if ( empty( $records ) ) {
+			return;
+		}
+
+		$columns = array(
+			'deploy_id',
+			'site_id',
+			'url',
+			'source_url',
+			'static_path',
+			'type',
+			'status_code',
+			'content_hash',
+			'file_size',
+			'redirect_target',
+			'found_on',
+			'in_sitemap',
+			'markdown_generated',
+			'warnings',
+			'errors',
+			'created_at',
+			'updated_at',
+		);
+		$column_sql = '`' . implode( '`, `', $columns ) . '`';
+		$batch_size = max( 1, min( 500, (int) apply_filters( 'ss_deploy_manifest_insert_batch_size', 200 ) ) );
+
+		foreach ( array_chunk( $records, $batch_size ) as $batch ) {
+			$value_sql = array();
+			$args      = array();
+
+			foreach ( $batch as $record ) {
+				$values = array(
+					array( $deploy_id, '%s' ),
+					array( $site_id, '%d' ),
+					array( $record['url'] ?? '', '%s' ),
+					array( $record['source_url'] ?? null, '%s' ),
+					array( $record['static_path'] ?? null, '%s' ),
+					array( $record['type'] ?? 'other', '%s' ),
+					array( $record['status_code'] ?? null, '%d' ),
+					array( $record['content_hash'] ?? null, '%s' ),
+					array( $record['file_size'] ?? null, '%d' ),
+					array( $record['redirect_target'] ?? null, '%s' ),
+					array( wp_json_encode( $record['found_on'] ?? array() ), '%s' ),
+					array( $this->nullable_bool_to_db( $record['in_sitemap'] ?? null ), '%d' ),
+					array( $this->nullable_bool_to_db( $record['markdown_generated'] ?? null ), '%d' ),
+					array( wp_json_encode( $record['warnings'] ?? array() ), '%s' ),
+					array( wp_json_encode( $record['errors'] ?? array() ), '%s' ),
+					array( $now, '%s' ),
+					array( $now, '%s' ),
+				);
+				$placeholders = array();
+
+				foreach ( $values as $value ) {
+					if ( null === $value[0] ) {
+						$placeholders[] = 'NULL';
+						continue;
+					}
+
+					$placeholders[] = $value[1];
+					$args[]          = $value[0];
+				}
+
+				$value_sql[] = '(' . implode( ', ', $placeholders ) . ')';
+			}
+
+			$sql      = "INSERT INTO `{$table}` ({$column_sql}) VALUES " . implode( ', ', $value_sql );
+			$prepared = $wpdb->prepare( $sql, $args );
+
+			if ( ! is_string( $prepared ) || false === $wpdb->query( $prepared ) ) {
+				throw new \RuntimeException( 'Unable to store deploy manifest URLs.' );
+			}
 		}
 	}
 
@@ -436,10 +524,12 @@ class Deploy_Manifest_Service {
 			return array();
 		}
 
-		$records = array();
+		$records     = array();
+		$parent_urls = $this->get_parent_url_map( $pages );
 
 		foreach ( $pages as $page ) {
-			$records[] = $this->format_page_record( $page );
+			$parent_id = (int) $page->found_on_id;
+			$records[] = $this->format_page_record( $page, $parent_urls[ $parent_id ] ?? null );
 		}
 
 		return $records;
@@ -448,16 +538,16 @@ class Deploy_Manifest_Service {
 	/**
 	 * Format a Page model as a manifest URL record.
 	 *
-	 * @param Page $page Page model.
+	 * @param Page        $page       Page model.
+	 * @param string|null $parent_url Parent URL, when known.
 	 *
 	 * @return array
 	 */
-	protected function format_page_record( $page ) {
+	protected function format_page_record( $page, $parent_url = null ) {
 		$found_on = array();
-		$parent   = $page->parent_static_page();
 
-		if ( $parent ) {
-			$found_on[] = $parent->url;
+		if ( ! empty( $parent_url ) ) {
+			$found_on[] = $parent_url;
 		}
 
 		$warnings = $this->parse_messages( $page->status_message );
@@ -479,6 +569,47 @@ class Deploy_Manifest_Service {
 			'warnings'           => $warnings,
 			'errors'             => $errors,
 		);
+	}
+
+	/**
+	 * Resolve parent URLs in batches instead of issuing one query per page.
+	 *
+	 * @param Page[] $pages Page models.
+	 *
+	 * @return array<int,string>
+	 */
+	protected function get_parent_url_map( $pages ) {
+		$parent_ids = array();
+		$url_map    = array();
+
+		foreach ( $pages as $page ) {
+			$page_id   = (int) $page->id;
+			$parent_id = (int) $page->found_on_id;
+
+			if ( $page_id > 0 && ! empty( $page->url ) ) {
+				$url_map[ $page_id ] = (string) $page->url;
+			}
+
+			if ( $parent_id > 0 ) {
+				$parent_ids[ $parent_id ] = $parent_id;
+			}
+		}
+
+		$missing_ids = array_diff_key( $parent_ids, $url_map );
+
+		foreach ( array_chunk( array_values( $missing_ids ), 1000 ) as $id_batch ) {
+			$parents = Page::query()
+				->where( 'id IN (' . implode( ',', array_map( 'intval', $id_batch ) ) . ')' )
+				->find();
+
+			foreach ( $parents ?: array() as $parent ) {
+				if ( (int) $parent->id > 0 && ! empty( $parent->url ) ) {
+					$url_map[ (int) $parent->id ] = (string) $parent->url;
+				}
+			}
+		}
+
+		return $url_map;
 	}
 
 	/**

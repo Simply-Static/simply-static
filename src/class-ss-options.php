@@ -23,6 +23,15 @@ class Options {
 	 */
 	protected $options = array();
 
+	/** @var array<string,bool> Keys changed by this instance since its last save. */
+	protected $dirty_keys = array();
+
+	/** @var array<string,bool> Keys removed by this instance since its last save. */
+	protected $deleted_keys = array();
+
+	/** @var bool Whether set_options() requested an intentional full replacement. */
+	protected $replace_all = false;
+
 	/**
 	 * Disable usage of "new"
 	 * @return void
@@ -55,7 +64,7 @@ class Options {
 			$db_options = get_option( Plugin::SLUG );
 
 			$options = apply_filters( 'ss_get_options', $db_options );
-			if ( false === $options ) {
+			if ( ! is_array( $options ) ) {
 				$options = array();
 			}
 
@@ -85,6 +94,8 @@ class Options {
 	 */
 	public function set( $name, $value ) {
 		$this->options[ $name ] = $value;
+		$this->dirty_keys[ $name ] = true;
+		unset( $this->deleted_keys[ $name ] );
 
 		return $this;
 	}
@@ -97,7 +108,10 @@ class Options {
 	 * @return \Simply_Static\Options
 	 */
 	public function set_options( $options ) {
-		$this->options = $options;
+		$this->options     = is_array( $options ) ? $options : array();
+		$this->dirty_keys  = array_fill_keys( array_keys( $this->options ), true );
+		$this->deleted_keys = array();
+		$this->replace_all = true;
 
 		return $this;
 	}
@@ -135,6 +149,8 @@ class Options {
 	public function destroy( $name ) {
 		if ( array_key_exists( $name, $this->options ) ) {
 			unset( $this->options[ $name ] );
+			unset( $this->dirty_keys[ $name ] );
+			$this->deleted_keys[ $name ] = true;
 
 			return true;
 		} else {
@@ -155,7 +171,81 @@ class Options {
 	 * @return boolean
 	 */
 	public function save() {
-		return is_network_admin() ? update_site_option( Plugin::SLUG, $this->options ) : update_option( Plugin::SLUG, $this->options );
+		$network = is_network_admin();
+		$current = $this->load_current_options_for_merge( $network );
+		$current = is_array( $current ) ? $current : array();
+
+		if ( $this->replace_all ) {
+			$merged = $this->options;
+		} else {
+			$merged = $current;
+			foreach ( array_keys( $this->dirty_keys ) as $name ) {
+				if ( array_key_exists( $name, $this->options ) ) {
+					$merged[ $name ] = $this->options[ $name ];
+				}
+			}
+			foreach ( array_keys( $this->deleted_keys ) as $name ) {
+				unset( $merged[ $name ] );
+			}
+		}
+
+		$saved = $network ? update_site_option( Plugin::SLUG, $merged ) : update_option( Plugin::SLUG, $merged );
+		if ( ! $saved ) {
+			$stored = $network ? get_site_option( Plugin::SLUG ) : get_option( Plugin::SLUG );
+			$saved  = is_array( $stored ) && $stored === $merged;
+		}
+
+		if ( $saved ) {
+			$this->options      = $merged;
+			$this->dirty_keys   = array();
+			$this->deleted_keys = array();
+			$this->replace_all  = false;
+		}
+
+		return $saved;
+	}
+
+	/**
+	 * Load the latest database value before merging dirty keys.
+	 *
+	 * A long-running worker's request-local alloptions cache can predate an
+	 * administrator save. Reading the row directly avoids merging against that
+	 * stale cache without globally evicting every autoloaded WordPress option.
+	 * Network-admin writes are rare and retain the network-option API fallback.
+	 *
+	 * @param bool $network Whether this is a network-admin option write.
+	 * @return array
+	 */
+	protected function load_current_options_for_merge( $network ) {
+		if ( $network ) {
+			$current = get_site_option( Plugin::SLUG );
+			return is_array( $current ) ? $current : array();
+		}
+
+		global $wpdb;
+		if (
+			isset( $wpdb->options )
+			&& method_exists( $wpdb, 'prepare' )
+			&& method_exists( $wpdb, 'get_var' )
+		) {
+			$raw = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT option_value FROM {$wpdb->options} WHERE option_name = %s LIMIT 1",
+					Plugin::SLUG
+				)
+			);
+			$fresh = is_string( $raw ) ? maybe_unserialize( $raw ) : $raw;
+			if ( is_array( $fresh ) ) {
+				return $fresh;
+			}
+			if ( null === $raw ) {
+				return array();
+			}
+		}
+
+		$current = get_option( Plugin::SLUG );
+
+		return is_array( $current ) ? $current : array();
 	}
 
 	/**

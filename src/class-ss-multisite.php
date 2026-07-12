@@ -50,6 +50,7 @@ class Multisite {
 		add_action( 'ss_after_render_activity_log', [ $this, 'restore_blog' ], 99, 2 );
 		add_action( 'ss_archive_creation_job_after_start_queue', [ $this, 'restore_blog' ], 99, 2 );
 		add_action( 'ss_archive_creation_job_already_running', [ $this, 'restore_blog' ], 99, 2 );
+		add_action( 'ss_archive_creation_job_start_failed', [ $this, 'handle_start_failure' ], 99, 2 );
 		add_filter( 'ss_can_delete_file', [ $this, 'can_delete_file' ], 20, 3 );
 		add_action( 'admin_footer', [ $this, 'hide_top_menu' ] );
 		add_action( 'network_admin_menu', array( Admin_Settings::get_instance(), 'add_menu' ), 2 );
@@ -70,8 +71,18 @@ class Multisite {
         }
 
         $blog_id = get_current_blog_id();
+		$option  = Plugin::SLUG . '_multisite_export_running';
 
-        update_site_option( Plugin::SLUG . '_multisite_export_running', $blog_id );
+		// add_network_option() is an atomic INSERT against the option's unique
+		// key. This closes the check-then-update race where two sites could both
+		// observe an empty marker and begin free multisite exports concurrently.
+		$claimed = add_network_option( null, $option, $blog_id );
+		if ( ! $claimed ) {
+			$owner = $this->current_running_export_site_id();
+			if ( absint( $owner ) !== absint( $blog_id ) ) {
+				throw new \RuntimeException( __( 'Export is already running on another site. Upgrade to Pro to queue site exports.', 'simply-static' ) );
+			}
+		}
     }
 
     /**
@@ -98,6 +109,21 @@ class Multisite {
 
         delete_site_option( Plugin::SLUG . '_multisite_export_running' );
     }
+
+	/**
+	 * Release multisite start state after an archive fails before queueing.
+	 *
+	 * The export marker belongs to the switched target blog, so remove it
+	 * before restoring the original blog and its Options singleton.
+	 *
+	 * @param int $blog_id Target blog ID.
+	 * @param Archive_Creation_Job|null $archive_job Archive job instance.
+	 * @return void
+	 */
+	public function handle_start_failure( $blog_id = 0, $archive_job = null ) {
+		$this->remove_export_check();
+		$this->restore_blog( $blog_id, $archive_job );
+	}
 
     /**
      * Return Blog ID of the current export check.
@@ -237,7 +263,8 @@ class Multisite {
 	 * @return void
 	 */
 	public function switch_to_blog( $blog_id ) {
-		if ( $blog_id === $this->switched ) {
+		$blog_id = absint( $blog_id );
+		if ( ! $blog_id || $blog_id === get_current_blog_id() || $blog_id === $this->switched ) {
 			return;
 		}
 
@@ -263,7 +290,7 @@ class Multisite {
 
 		restore_current_blog();
 		Util::debug_log( "Restored to blog: " . get_current_blog_id() );
-		$this->switched = get_current_blog_id();
+		$this->switched = 0;
 
         if ( $archive_job ) {
             $options = Options::reinstance();

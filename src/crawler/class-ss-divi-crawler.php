@@ -39,12 +39,9 @@ class Divi_Crawler extends Crawler {
 
 			if ( $theme ) {
 				$template = method_exists( $theme, 'get_template' ) ? $theme->get_template() : '';
-				if ( is_string( $template ) && false !== stripos( $template, 'divi' ) ) {
-					return true;
-				}
-
 				$name = method_exists( $theme, 'get' ) ? (string) $theme->get( 'Name' ) : '';
-				if ( false !== stripos( $name, 'divi' ) ) {
+
+				if ( $this->is_divi_identifier( $template ) || $this->is_divi_identifier( $name ) ) {
 					return true;
 				}
 
@@ -52,10 +49,10 @@ class Divi_Crawler extends Crawler {
 					$parent = $theme->parent();
 
 					if ( $parent ) {
-						$parent_name       = (string) $parent->get( 'Name' );
-						$parent_stylesheet = (string) $parent->get_stylesheet();
+						$parent_name       = method_exists( $parent, 'get' ) ? $parent->get( 'Name' ) : '';
+						$parent_stylesheet = method_exists( $parent, 'get_stylesheet' ) ? $parent->get_stylesheet() : '';
 
-						if ( false !== stripos( $parent_name, 'divi' ) || false !== stripos( $parent_stylesheet, 'divi' ) ) {
+						if ( $this->is_divi_identifier( $parent_name ) || $this->is_divi_identifier( $parent_stylesheet ) ) {
 							return true;
 						}
 					}
@@ -64,7 +61,29 @@ class Divi_Crawler extends Crawler {
 		}
 
 		$tpl = function_exists( 'get_template' ) ? get_template() : '';
-		return is_string( $tpl ) && 0 === strcasecmp( $tpl, 'Divi' );
+
+		return $this->is_divi_identifier( $tpl );
+	}
+
+	/**
+	 * Determine whether a theme name or directory is exactly Divi.
+	 *
+	 * @param mixed $identifier Theme name or directory.
+	 *
+	 * @return bool
+	 */
+	private function is_divi_identifier( $identifier ) : bool {
+		if ( ! is_string( $identifier ) ) {
+			return false;
+		}
+
+		$identifier = trim( trim( str_replace( '\\', '/', $identifier ) ), '/' );
+
+		if ( '' === $identifier ) {
+			return false;
+		}
+
+		return 0 === strcasecmp( $identifier, 'divi' );
 	}
 
 	/**

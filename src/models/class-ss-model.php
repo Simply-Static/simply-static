@@ -55,9 +55,16 @@ class Model {
 	private $data = array();
 
 	/**
-	 * Track if this record has had changed made to it
+	 * The last successfully persisted data for this instance.
 	 *
-	 * @var boolean
+	 * @var array
+	 */
+	private $original_data = array();
+
+	/**
+	 * Track the fields that have changed since the last successful save.
+	 *
+	 * @var array
 	 */
 	private $dirty_fields = array();
 
@@ -102,10 +109,15 @@ class Model {
             return;
 			throw new \Exception( 'Column doesn\'t exist for ' . get_called_class() );
 		} else {
-			if ( ! array_key_exists( $field_name, $this->data ) || $this->data[ $field_name ] !== $field_value ) {
-				array_push( $this->dirty_fields, $field_name );
+			$this->data[ $field_name ] = $field_value;
+
+			if ( ! array_key_exists( $field_name, $this->original_data ) || $this->original_data[ $field_name ] !== $field_value ) {
+				$this->dirty_fields[ $field_name ] = true;
+			} else {
+				unset( $this->dirty_fields[ $field_name ] );
 			}
-			return $this->data[ $field_name ] = $field_value;
+
+			return $field_value;
 		}
 	}
 
@@ -145,6 +157,8 @@ class Model {
 			$obj->data[ $column ] = null;
 		}
 		$obj->attributes( $attributes );
+		$obj->original_data = $obj->data;
+		$obj->dirty_fields  = array();
 		return $obj;
 	}
 
@@ -173,34 +187,68 @@ class Model {
 	public function save() {
 		global $wpdb;
 
-		// autoset created_at/updated_at upon save
-		if ( $this->created_at === null ) {
+		$is_existing = $this->exists();
+
+		// Do not update an existing record unless one of its fields changed.
+		if ( $is_existing && empty( $this->dirty_fields ) ) {
+			return true;
+		}
+
+		// Autoset created_at/updated_at when a write is required.
+		if ( ! $is_existing && $this->created_at === null ) {
 			$this->created_at = Util::formatted_datetime();
 		}
 		$this->updated_at = Util::formatted_datetime();
 
-		// If we haven't changed anything, don't bother updating the DB, and
-		// return that saving was successful.
-		if ( empty( $this->dirty_fields ) ) {
-			return true;
+		if ( $is_existing ) {
+			$fields = array_intersect_key( $this->data, $this->dirty_fields );
 		} else {
-			// otherwise, create a new array with just the fields we're updating,
-			// then set the dirty fields back to empty
-			$fields = array_intersect_key( $this->data, array_flip( $this->dirty_fields ) );
-			$this->dirty_fields = array();
+			// New records need all initialized values, even though initialize()
+			// deliberately leaves the object clean for hydrated records.
+			$fields = array();
+			foreach ( $this->data as $field_name => $field_value ) {
+				if ( null !== $field_value ) {
+					$fields[ $field_name ] = $field_value;
+				}
+			}
 		}
 
-		if ( $this->exists() ) {
+		if ( $is_existing ) {
 			$primary_key = static::$primary_key;
 			$rows_updated = $wpdb->update( self::table_name(), $fields, array( $primary_key => $this->$primary_key ) );
-			return $rows_updated !== false;
+
+			if ( false === $rows_updated ) {
+				return false;
+			}
+
+			$this->mark_fields_clean( $fields );
+			return true;
 		} else {
 			$rows_updated = $wpdb->insert( self::table_name(), $fields );
 			if ( $rows_updated === false ) {
 				return false;
 			} else {
-				$this->id = $wpdb->insert_id;
+				$primary_key                = static::$primary_key;
+				$this->data[ $primary_key ] = $wpdb->insert_id;
+				$this->original_data        = $this->data;
+				$this->dirty_fields         = array();
 				return true;
+			}
+		}
+	}
+
+	/**
+	 * Mark successfully persisted fields as clean.
+	 *
+	 * @param array $fields Fields and values sent to the database.
+	 * @return void
+	 */
+	private function mark_fields_clean( $fields ) {
+		foreach ( $fields as $field_name => $field_value ) {
+			$this->original_data[ $field_name ] = $field_value;
+
+			if ( $this->data[ $field_name ] === $field_value ) {
+				unset( $this->dirty_fields[ $field_name ] );
 			}
 		}
 	}

@@ -1,16 +1,21 @@
 {
   "name": "simplystatic-settings",
-  "version": "3.4.5",
+  "version": "3.8.0",
   "description": "",
   "main": "build/index.js",
   "scripts": {
     "build": "wp-scripts build",
+    "lint": "wp-scripts lint-js 'src/**/*.{js,jsx}'",
     "start": "wp-scripts start",
+    "test": "wp-scripts test-unit-js",
+    "test:coverage": "wp-scripts test-unit-js --coverage",
+    "test:watch": "wp-scripts test-unit-js --watch",
     "packages-update": "wp-scripts packages-update"
   },
   "author": "",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
+    "@testing-library/react": "^16.1.0",
     "@wordpress/api-fetch": "^7.50.0",
     "@wordpress/components": "^36.1.0",
     "@wordpress/data": "^10.50.0",

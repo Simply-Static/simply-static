@@ -1,5 +1,5 @@
 import apiFetch from "@wordpress/api-fetch";
-import {useState} from "@wordpress/element";
+import {useRef, useState} from "@wordpress/element";
 import useInterval from "../../hooks/useInterval";
 import {useEffect} from "react";
 import Site from "./Site";
@@ -7,8 +7,9 @@ const {__} = wp.i18n;
 
 function Sites (props) {
     const [sites, setSites] = useState([]);
-    const [anyRunning, setAnyRunning] = useState(false);
-    const [siteToTriggerCron, setSiteToTriggerCron] = useState(0);
+	const [anyRunning, setAnyRunning] = useState(false);
+	const [siteToTriggerCron, setSiteToTriggerCron] = useState(0);
+	const refreshInFlight = useRef(false);
 
     const triggerCron = (blogId) => {
         apiFetch({
@@ -60,8 +61,12 @@ function Sites (props) {
         return siteIds;
     }
 
-    function refreshSites() {
-        apiFetch({
+	function refreshSites() {
+		if (refreshInFlight.current) {
+			return;
+		}
+		refreshInFlight.current = true;
+		apiFetch({
             path: '/simplystatic/v1/sites',
             method: 'GET',
         }).then(resp => {
@@ -78,13 +83,17 @@ function Sites (props) {
 
             setSites(sitesObjects);
 
-            setAnyRunning(haveRunningSite);
-        } );
-    }
+			setAnyRunning(haveRunningSite);
+		}).catch(() => {
+			// Keep the last known site state and allow the next scheduled retry.
+		}).finally(() => {
+			refreshInFlight.current = false;
+		});
+	}
 
-    useInterval(() => {
-        refreshSites();
-    }, anyRunning ? 2500 : 300000); // Any running, check every 2-3secs. Not running, check every 5 mins.
+	useInterval(() => {
+		refreshSites();
+	}, anyRunning ? 10000 : 300000); // Keep active exports responsive without repeatedly scanning a large network every few seconds.
 
     useInterval(() => {
 

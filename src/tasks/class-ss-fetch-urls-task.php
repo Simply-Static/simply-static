@@ -71,7 +71,7 @@ class Fetch_Urls_Task extends Task {
 		}
 
 		if ( ! $success ) {
-			return;
+			throw new \RuntimeException( 'Unable to fetch and save URL: ' . $static_page->url );
 		}
 
 		// Not found? It's maybe a redirection page. Let's try it without our param.
@@ -79,7 +79,7 @@ class Fetch_Urls_Task extends Task {
 			$success = Url_Fetcher::instance()->fetch( $static_page, false );
 
 			if ( ! $success ) {
-				return;
+				throw new \RuntimeException( 'Unable to fetch and save URL without the page-handler parameter: ' . $static_page->url );
 			}
 		}
 
@@ -112,6 +112,9 @@ class Fetch_Urls_Task extends Task {
 	 */
 	public function perform() {
 		$done = $this->process_pages();
+		if ( is_wp_error( $done ) ) {
+			return $done;
+		}
 
 		if ( $done ) {
 			// Last check.
@@ -287,7 +290,7 @@ class Fetch_Urls_Task extends Task {
 			Util::debug_log( "We're saving this URL; keeping the static file" );
 
 			try {
-				$sha1 = sha1_file( $file );
+				$sha1 = sha1_file( $file, true );
 				if ( false === $sha1 ) {
 					$sha1 = '';
 				}
@@ -369,6 +372,22 @@ class Fetch_Urls_Task extends Task {
 
 		// convert our potentially relative URL to an absolute URL
 		$redirect_url = Util::relative_to_absolute_url( $redirect_url, $current_url );
+		$redirect_parts = $redirect_url ? wp_parse_url( $redirect_url ) : false;
+		$redirect_scheme = is_array( $redirect_parts ) && isset( $redirect_parts['scheme'] ) ? strtolower( $redirect_parts['scheme'] ) : '';
+
+		if (
+			! is_array( $redirect_parts )
+			|| empty( $redirect_parts['host'] )
+			|| ! in_array( $redirect_scheme, array( 'http', 'https' ), true )
+			|| array_key_exists( 'user', $redirect_parts )
+			|| array_key_exists( 'pass', $redirect_parts )
+		) {
+			$static_page->file_path = null;
+			$static_page->set_error_message( __( 'Unsafe or invalid redirect target', 'simply-static' ) );
+			$static_page->save();
+
+			return;
+		}
 
 		if ( $redirect_url ) {
 			/**
@@ -457,7 +476,7 @@ class Fetch_Urls_Task extends Task {
 					}
 
 					try {
-						$sha1 = sha1_file( $this->archive_dir . $filename );
+						$sha1 = sha1_file( $this->archive_dir . $filename, true );
 						if ( false === $sha1 ) {
 							$sha1 = '';
 						}

@@ -11,13 +11,19 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Page Handlers.
  */
 class Page_Handlers {
+	/**
+	 * Run after the plugin's priority-10 integration bootstrap. Integrations load
+	 * handler classes used by stored Page records, so running earlier can make a
+	 * valid integration handler fall back to the generic Page_Handler.
+	 */
+	const INIT_PRIORITY = 20;
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		$this->includes();
-		add_action( 'init', [ $this, 'run_page_handlers_from_request' ], 1 );
+		add_action( 'init', [ $this, 'run_page_handlers_from_request' ], self::INIT_PRIORITY );
 	}
 
 	/**

@@ -781,7 +781,7 @@ toplevel_page_simply-static img {
 }
 
 /* Responsive Design */
-a.show-nav {
+.show-nav {
   display: none;
 }
 
@@ -887,7 +887,7 @@ a.show-nav {
   }
 
   /* Toggle nav button — fixed at top, always centered */
-  a.show-nav {
+	.show-nav {
     display: block;
     text-align: center;
     color: #1e1e1e;

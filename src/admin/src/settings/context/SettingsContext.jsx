@@ -6,6 +6,28 @@ const {__} = wp.i18n;
 
 export const SettingsContext = createContext();
 
+export const parseActionResponse = ( response ) => {
+    let parsed = response;
+    if ( typeof response === 'string' ) {
+        try {
+            parsed = JSON.parse( response );
+        } catch ( error ) {
+            throw new Error( __( 'The server returned an invalid response.', 'simply-static' ) );
+        }
+    }
+
+    if ( parsed && typeof parsed === 'object' ) {
+        const status = Number.parseInt( parsed.status, 10 );
+        if ( Number.isFinite( status ) && status >= 400 ) {
+            throw new Error(
+                parsed.message || __( 'The requested action could not be completed.', 'simply-static' )
+            );
+        }
+    }
+
+    return parsed;
+};
+
 function SettingsContextProvider(props) {
     const normalizeSnapshotRollback = (rollback = {}) => {
         return {
@@ -32,9 +54,10 @@ function SettingsContextProvider(props) {
     const isRollbackRunning = !!snapshotRollback.running;
 
     const getSettings = () => {
-        apiFetch({path: '/simplystatic/v1/settings'}).then((options) => {
+        return apiFetch({path: '/simplystatic/v1/settings'}).then((options) => {
             settingsRef.current = options;
             setSettings(options);
+            return options;
         });
     }
 
@@ -54,42 +77,41 @@ function SettingsContextProvider(props) {
     }
 
     const resetSettings = () => {
-        apiFetch({
+        return apiFetch({
             path: '/simplystatic/v1/settings/reset',
             method: 'POST'
         }).then(resp => {
-            // Parse the response to get the default settings
-            const response = JSON.parse(resp);
+            const response = parseActionResponse(resp);
             if (response.status === 200 && response.data) {
-                // Update the settings state with the default settings from the server
                 settingsRef.current = response.data;
                 setSettings(response.data);
             }
+            return response;
         });
     }
 
     const resetDatabase = () => {
-        apiFetch({
+        return apiFetch({
             path: '/simplystatic/v1/settings/reset-database',
             method: 'POST',
-        });
+        }).then(parseActionResponse);
     }
 
     const resetBackgroundQueue = () => {
-        apiFetch({
+        return apiFetch({
             path: '/simplystatic/v1/settings/reset-background-queue',
             method: 'POST',
-        });
+        }).then(parseActionResponse);
     }
 
     const updateFromNetwork = (blogId) => {
-        apiFetch({
+        return apiFetch({
             path: '/simplystatic/v1/update-from-network',
             method: 'POST',
             data: {
                 'blog_id': blogId,
             }
-        });
+        }).then(parseActionResponse).then(getSettings);
     }
 
     const checkIfRunning = () => {
@@ -110,22 +132,22 @@ function SettingsContextProvider(props) {
     }
 
     const importSettings = (newSettings) => {
-        settingsRef.current = newSettings;
-        setSettings(newSettings);
-
-        apiFetch({
+        return apiFetch({
             path: '/simplystatic/v1/settings',
             method: 'POST',
-            data: newSettings,
-        });
+            data: {
+                ...newSettings,
+                __simply_static_import: true,
+            },
+        }).then(parseActionResponse).then(getSettings);
     }
 
     const migrateSettings = () => {
-        apiFetch({
+        return apiFetch({
             path: '/simplystatic/v1/migrate',
             method: 'POST',
-            migrate: true,
-        });
+            data: { migrate: true },
+        }).then(parseActionResponse).then(getSettings);
     }
 
     const updateSetting = (key, value) => {
@@ -298,7 +320,9 @@ function SettingsContextProvider(props) {
             // Fallback to fetching from the API if current_settings is not available
             getSettings();
         }
-        getStatus();
+		if (options.can_view_diagnostics) {
+			getStatus();
+		}
         checkIfRunning();
         setBlogId(options.blog_id)
     }, []);

@@ -1,7 +1,7 @@
 /vendor/
+/build/
+/src/admin/coverage/
 .DS_Store
 /temp-files
 debug.txt
-composer.lock
 node_modules
-package-lock.json

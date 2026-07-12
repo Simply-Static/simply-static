@@ -13,6 +13,158 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Util {
 
 	/**
+	 * Option keys that contain credentials or site-specific deployment secrets.
+	 *
+	 * @return string[]
+	 */
+	public static function get_sensitive_option_keys() {
+		$keys = array(
+			'encryption_key',
+			'http_basic_auth_username',
+			'http_basic_auth_password',
+			'http_basic_auth_digest',
+			'tiiny_email',
+			'tiiny_subdomain',
+			'tiiny_password',
+			'cdn_api_key',
+			'cdn_access_key',
+			'cdn_pull_zone',
+			'cdn_storage_zone',
+			'github_user',
+			'github_email',
+			'github_personal_access_token',
+			'github_repository',
+			'github_webhook_url',
+			'aws_access_key',
+			'aws_access_secret',
+			'aws_bucket',
+			'aws_distribution_id',
+			'aws_webhook_url',
+			's3_access_key',
+			's3_access_secret',
+			's3_bucket',
+			's3_base_url',
+			'algolia_app_id',
+			'algolia_admin_api_key',
+			'algolia_search_api_key',
+			'algolia_index',
+			'sftp_host',
+			'sftp_user',
+			'sftp_pass',
+			'sftp_private_key',
+			'sftp_folder',
+			'shortpixel_api_key',
+			'cloudflare_turnstile_secret_key',
+			'recaptcha_secret_key',
+			'ss_single_export_webhook_url',
+			'ss_webhook_url',
+		);
+
+		$filtered = apply_filters( 'ss_sensitive_option_keys', $keys );
+		if ( is_array( $filtered ) ) {
+			$keys = array_merge( $keys, $filtered );
+		}
+
+		$keys = array_map(
+			static function ( $key ) {
+				return sanitize_key( str_replace( '-', '_', (string) $key ) );
+			},
+			$keys
+		);
+
+		return array_values( array_unique( array_filter( $keys ) ) );
+	}
+
+	/**
+	 * Determine whether an option key is likely to contain a secret.
+	 *
+	 * The pattern is a defense-in-depth fallback for Pro and future integrations;
+	 * the explicit list remains the source of truth for non-obvious identifiers.
+	 *
+	 * @param string $key Option key.
+	 *
+	 * @return bool
+	 */
+	public static function is_sensitive_option_key( $key ) {
+		$key = sanitize_key( str_replace( '-', '_', (string) $key ) );
+
+		if ( in_array( $key, self::get_sensitive_option_keys(), true ) ) {
+			return true;
+		}
+
+		return (bool) preg_match(
+			'/(?:^|_)(?:password|passwd|passphrase|secret|private_key|access_key|api_key|token|auth_token|access_token|personal_access_token|encryption_key|license_key|credentials?|webhook_url)(?:$|_)/i',
+			$key
+		);
+	}
+
+	/**
+	 * Remove credential-bearing values from an options array.
+	 *
+	 * @param array $options Options to redact.
+	 *
+	 * @return array
+	 */
+	public static function remove_sensitive_options( $options ) {
+		if ( ! is_array( $options ) ) {
+			return array();
+		}
+
+		foreach ( array_keys( $options ) as $key ) {
+			if ( self::is_sensitive_option_key( $key ) ) {
+				unset( $options[ $key ] );
+			} elseif ( is_array( $options[ $key ] ) ) {
+				$options[ $key ] = self::remove_sensitive_options( $options[ $key ] );
+			}
+		}
+
+		return $options;
+	}
+
+	/**
+	 * Restore credential-bearing values from the destination installation.
+	 *
+	 * Portable settings exports intentionally omit secrets. Importing one of
+	 * those exports must therefore merge the destination's existing secrets
+	 * back into the payload instead of replacing them with missing values. The
+	 * merge is recursive so credentials stored by Pro or future integrations in
+	 * nested arrays receive the same protection.
+	 *
+	 * @param array $incoming Imported, already-untrusted options.
+	 * @param array $current  Existing destination options.
+	 *
+	 * @return array
+	 */
+	public static function preserve_sensitive_options( $incoming, $current ) {
+		$incoming = is_array( $incoming ) ? $incoming : array();
+		$current  = is_array( $current ) ? $current : array();
+
+		foreach ( $current as $key => $value ) {
+			if ( self::is_sensitive_option_key( $key ) ) {
+				$incoming[ $key ] = $value;
+				continue;
+			}
+
+			if ( ! is_array( $value ) ) {
+				continue;
+			}
+
+			$incoming_value = isset( $incoming[ $key ] ) && is_array( $incoming[ $key ] )
+				? $incoming[ $key ]
+				: array();
+			$merged         = self::preserve_sensitive_options( $incoming_value, $value );
+
+			// Do not recreate unrelated non-sensitive containers that the import
+			// deliberately omitted. A changed result means a nested secret exists.
+			if ( array_key_exists( $key, $incoming ) || $merged !== $incoming_value ) {
+				$incoming[ $key ] = $merged;
+			}
+		}
+
+		return $incoming;
+	}
+
+	/**
 	 * Return a list of plugin directory slugs that must always be present in the
 	 * Enhanced Crawl "Plugins to Include" list. These cannot be removed by users.
 	 *
@@ -451,78 +603,198 @@ class Util {
 
 	/**
 	 * Build a candidate URL list used when resolving regex in Additional URLs.
-	 * This is a best-effort set: home/front page, all public posts, term links, author links,
-	 * and common archive/pagination URLs. Filterable and capped by limits.
+	 * This is a best-effort, bounded set of the home/front page, public posts,
+	 * term links, and author links.
 	 *
 	 * @return string[]
 	 */
 	public static function candidate_urls_for_regex(): array {
-		$limit  = (int) apply_filters( 'ss_regex_candidate_url_limit', 5000 );
-		$urls   = [];
-		$urls[] = home_url( '/' );
+		$limit = max( 0, (int) apply_filters( 'ss_regex_candidate_url_limit', 5000 ) );
+
+		if ( 0 === $limit ) {
+			return array();
+		}
+
+		$batch_size = (int) apply_filters( 'ss_regex_candidate_query_batch_size', 250, $limit );
+		$batch_size = min( 1000, $limit, max( 1, $batch_size ) );
+		$urls       = array();
+		$seen       = array();
+		$add_url    = static function ( $url ) use ( &$urls, &$seen, $limit ) {
+			if ( count( $urls ) >= $limit || ! is_string( $url ) || '' === $url || isset( $seen[ $url ] ) ) {
+				return;
+			}
+
+			$seen[ $url ] = true;
+			$urls[]       = $url;
+		};
+
+		$add_url( home_url( '/' ) );
+
 		if ( 'page' === get_option( 'show_on_front' ) ) {
 			$front_id = (int) get_option( 'page_on_front' );
 			if ( $front_id ) {
-				$u = get_permalink( $front_id );
-				if ( is_string( $u ) ) {
-					$urls[] = $u;
-				}
+				$add_url( get_permalink( $front_id ) );
 			}
 		}
+
+		if ( count( $urls ) >= $limit ) {
+			return $urls;
+		}
+
 		// Posts and pages of public types
 		$post_types = get_post_types( [ 'public' => true ], 'names' );
 		unset( $post_types['attachment'] );
 		$post_types = apply_filters( 'simply_static_post_types_to_crawl', $post_types );
-		$q          = [
-			'post_type'      => $post_types,
-			'post_status'    => 'publish',
-			'posts_per_page' => - 1,
-			'fields'         => 'ids'
-		];
-		$ids        = get_posts( $q );
-		foreach ( (array) $ids as $pid ) {
-			$u = get_permalink( $pid );
-			if ( is_string( $u ) ) {
-				$urls[] = $u;
-			}
-			if ( count( $urls ) >= $limit ) {
-				break;
-			}
-		}
-		if ( count( $urls ) < $limit ) {
-			// Terms
-			$taxes = get_taxonomies( [ 'public' => true ], 'names' );
-			foreach ( $taxes as $tx ) {
-				$terms = get_terms( [ 'taxonomy' => $tx, 'hide_empty' => true ] );
-				if ( is_wp_error( $terms ) ) {
-					continue;
+
+		if ( is_array( $post_types ) && ! empty( $post_types ) ) {
+			// Each provider may examine at most the remaining result capacity. This
+			// retains the posts -> terms -> authors fallback without allowing invalid
+			// or duplicate rows to trigger a full-table scan.
+			$post_offset      = 0;
+			$post_scan_budget = $limit - count( $urls );
+
+			while ( count( $urls ) < $limit && $post_scan_budget > 0 ) {
+				$query_limit = min( $batch_size, $limit - count( $urls ), $post_scan_budget );
+				$ids         = get_posts(
+					array(
+						'post_type'              => $post_types,
+						'post_status'            => 'publish',
+						'posts_per_page'         => $query_limit,
+						'offset'                 => $post_offset,
+						'orderby'                => 'ID',
+						'order'                  => 'ASC',
+						'fields'                 => 'ids',
+						'no_found_rows'          => true,
+						'ignore_sticky_posts'    => true,
+						'update_post_meta_cache' => false,
+						'update_post_term_cache' => false,
+					)
+				);
+
+				if ( is_wp_error( $ids ) || ! is_array( $ids ) || empty( $ids ) ) {
+					break;
 				}
-				foreach ( $terms as $term ) {
-					$u = get_term_link( $term );
-					if ( ! is_wp_error( $u ) ) {
-						$urls[] = $u;
-					}
-					if ( count( $urls ) >= $limit ) {
-						break 2;
-					}
+
+				$ids           = array_slice( array_values( $ids ), 0, $query_limit );
+				$fetched_count = count( $ids );
+				$post_offset      += $fetched_count;
+				$post_scan_budget -= $fetched_count;
+
+				if ( function_exists( '_prime_post_caches' ) ) {
+					_prime_post_caches( $ids, false, false );
 				}
-			}
-		}
-		if ( count( $urls ) < $limit ) {
-			// Authors
-			$users = get_users( [ 'who' => 'authors' ] );
-			foreach ( (array) $users as $user ) {
-				$u = get_author_posts_url( $user->ID );
-				if ( is_string( $u ) ) {
-					$urls[] = $u;
+
+				foreach ( $ids as $post_id ) {
+					$add_url( get_permalink( $post_id ) );
 				}
-				if ( count( $urls ) >= $limit ) {
+
+				if ( $fetched_count < $query_limit ) {
 					break;
 				}
 			}
 		}
 
-		return array_values( array_unique( $urls ) );
+		if ( count( $urls ) < $limit ) {
+			// Terms
+			$taxonomies      = get_taxonomies( [ 'public' => true ], 'names' );
+			$term_scan_budget = $limit - count( $urls );
+
+			foreach ( (array) $taxonomies as $taxonomy ) {
+				$term_offset = 0;
+
+				while ( count( $urls ) < $limit && $term_scan_budget > 0 ) {
+					$query_limit = min( $batch_size, $limit - count( $urls ), $term_scan_budget );
+					$terms       = get_terms(
+						array(
+							'taxonomy'               => $taxonomy,
+							'hide_empty'             => true,
+							'number'                 => $query_limit,
+							'offset'                 => $term_offset,
+							'orderby'                => 'term_id',
+							'order'                  => 'ASC',
+							'update_term_meta_cache' => false,
+						)
+					);
+
+					if ( is_wp_error( $terms ) || ! is_array( $terms ) || empty( $terms ) ) {
+						break;
+					}
+
+					$terms         = array_slice( array_values( $terms ), 0, $query_limit );
+					$fetched_count = count( $terms );
+					$term_offset      += $fetched_count;
+					$term_scan_budget -= $fetched_count;
+
+					foreach ( $terms as $term ) {
+						$term_url = get_term_link( $term );
+
+						if ( ! is_wp_error( $term_url ) ) {
+							$add_url( $term_url );
+						}
+					}
+
+					if ( $fetched_count < $query_limit ) {
+						break;
+					}
+				}
+
+				if ( count( $urls ) >= $limit || $term_scan_budget <= 0 ) {
+					break;
+				}
+			}
+		}
+
+		if ( count( $urls ) < $limit ) {
+			// Authors
+			$user_offset      = 0;
+			$user_scan_budget = $limit - count( $urls );
+
+			while ( count( $urls ) < $limit && $user_scan_budget > 0 ) {
+				$query_limit = min( $batch_size, $limit - count( $urls ), $user_scan_budget );
+				$users       = get_users(
+					array(
+						'who'         => 'authors',
+						'number'      => $query_limit,
+						'offset'      => $user_offset,
+						'orderby'     => 'ID',
+						'order'       => 'ASC',
+						'fields'      => array( 'ID' ),
+						'count_total' => false,
+					)
+				);
+
+				if ( is_wp_error( $users ) || ! is_array( $users ) || empty( $users ) ) {
+					break;
+				}
+
+				$users         = array_slice( array_values( $users ), 0, $query_limit );
+				$fetched_count = count( $users );
+				$user_offset      += $fetched_count;
+				$user_scan_budget -= $fetched_count;
+
+				foreach ( $users as $user ) {
+					$user_id = 0;
+
+					if ( is_object( $user ) && isset( $user->ID ) ) {
+						$user_id = (int) $user->ID;
+					} elseif ( is_array( $user ) && isset( $user['ID'] ) ) {
+						$user_id = (int) $user['ID'];
+					} elseif ( is_numeric( $user ) ) {
+						$user_id = (int) $user;
+					}
+
+					if ( $user_id > 0 ) {
+						$add_url( get_author_posts_url( $user_id ) );
+					}
+				}
+
+				if ( $fetched_count < $query_limit ) {
+					break;
+				}
+			}
+		}
+
+		return $urls;
 	}
 
 	/**
@@ -1456,6 +1728,112 @@ class Util {
 	}
 
 	/**
+	 * Determine whether two HTTP(S) URLs share the same security origin.
+	 *
+	 * Unlike is_local_url(), this comparison intentionally includes the scheme and
+	 * effective port. It is used for credentials, which must never be forwarded to
+	 * another service merely because it happens to use the same hostname.
+	 *
+	 * @param string $url  URL to inspect.
+	 * @param string $base Expected origin URL.
+	 *
+	 * @return bool
+	 */
+	public static function is_same_origin_url( $url, $base ) {
+		$url_parts  = function_exists( 'wp_parse_url' ) ? wp_parse_url( $url ) : parse_url( $url );
+		$base_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $base ) : parse_url( $base );
+
+		if ( ! is_array( $url_parts ) || ! is_array( $base_parts ) ) {
+			return false;
+		}
+
+		if ( array_key_exists( 'user', $url_parts ) || array_key_exists( 'pass', $url_parts ) ) {
+			return false;
+		}
+
+		$url_scheme  = strtolower( isset( $url_parts['scheme'] ) ? (string) $url_parts['scheme'] : '' );
+		$base_scheme = strtolower( isset( $base_parts['scheme'] ) ? (string) $base_parts['scheme'] : '' );
+		$url_host    = isset( $url_parts['host'] ) ? self::normalize_url_host( $url_parts['host'] ) : '';
+		$base_host   = isset( $base_parts['host'] ) ? self::normalize_url_host( $base_parts['host'] ) : '';
+
+		if (
+			! in_array( $url_scheme, array( 'http', 'https' ), true )
+			|| ! in_array( $base_scheme, array( 'http', 'https' ), true )
+			|| '' === $url_host
+			|| '' === $base_host
+		) {
+			return false;
+		}
+
+		$url_port  = isset( $url_parts['port'] ) ? (int) $url_parts['port'] : ( 'https' === $url_scheme ? 443 : 80 );
+		$base_port = isset( $base_parts['port'] ) ? (int) $base_parts['port'] : ( 'https' === $base_scheme ? 443 : 80 );
+
+		return $url_scheme === $base_scheme && $url_host === $base_host && $url_port === $base_port;
+	}
+
+	/**
+	 * Check whether a URL has the exact origin of a configured WordPress URL.
+	 *
+	 * @param string $url URL to inspect.
+	 *
+	 * @return bool
+	 */
+	public static function is_local_origin_url( $url ) {
+		$is_local = false;
+		foreach ( self::local_url_bases() as $base ) {
+			if ( self::is_same_origin_url( $url, $base ) ) {
+				$is_local = true;
+				break;
+			}
+		}
+
+		return (bool) apply_filters( 'ss_is_local_origin_url', $is_local, $url, self::local_url_bases() );
+	}
+
+	/**
+	 * Return an HTTP Basic Authorization header only for an exact WordPress origin.
+	 *
+	 * @param string $url Request URL.
+	 *
+	 * @return string|null
+	 */
+	public static function get_basic_auth_header_for_url( $url ) {
+		$options  = Options::instance();
+		$username = $options->get( 'http_basic_auth_username' );
+		$password = $options->get( 'http_basic_auth_password' );
+
+		if ( ! is_string( $username ) || ! is_string( $password ) || '' === $username || '' === $password ) {
+			return null;
+		}
+
+		// Credential trust is deliberately narrower than crawl-local trust. An
+		// integration may extend local URL filters for discovery without thereby
+		// receiving the destination's Basic Auth secret.
+		$auth_bases = array( self::origin_url() );
+		if ( function_exists( 'home_url' ) ) {
+			$auth_bases[] = untrailingslashit( home_url() );
+		}
+		if ( function_exists( 'site_url' ) ) {
+			$auth_bases[] = untrailingslashit( site_url() );
+		}
+		$auth_bases = array_values( array_unique( array_filter( $auth_bases ) ) );
+		$allowed    = false;
+		foreach ( $auth_bases as $base ) {
+			if ( self::is_same_origin_url( $url, $base ) ) {
+				$allowed = true;
+				break;
+			}
+		}
+
+		$allowed = (bool) apply_filters( 'ss_send_basic_auth_to_url', $allowed, $url, $auth_bases );
+		if ( ! $allowed ) {
+			return null;
+		}
+
+		return 'Basic ' . base64_encode( $username . ':' . $password );
+	}
+
+	/**
 	 * Check if WP-Cron is running.
 	 *
 	 * @return bool
@@ -1534,6 +1912,167 @@ class Util {
 		$path = self::get_path_from_local_url( $url );
 
 		return self::replace_public_path_with_wordpress_path( $path );
+	}
+
+	/**
+	 * Resolve a local asset URL to a readable file within an explicit WordPress root.
+	 *
+	 * URL paths are decoded once and rejected when they contain traversal,
+	 * control characters, backslashes, encoded path separators, or ambiguous
+	 * double-encoding. The canonical file path must remain inside the root that
+	 * corresponds to its URL prefix, preventing symlinks from escaping that root.
+	 *
+	 * @param string $url Local asset URL.
+	 *
+	 * @return string|\WP_Error|null Canonical file path, an error for an unsafe
+	 *                               path, or null when no local file exists.
+	 */
+	public static function resolve_local_asset_path( $url ) {
+		$unsafe_path_error = static function () {
+			return new \WP_Error(
+				'simply_static_unsafe_local_asset_path',
+				__( 'Refusing to read a local asset outside an allowed WordPress directory.', 'simply-static' )
+			);
+		};
+
+		if (
+			! is_string( $url )
+			|| '' === $url
+			|| false !== strpos( $url, "\0" )
+			|| false !== strpos( $url, '\\' )
+			|| preg_match( '/[\x01-\x1F\x7F]/', $url )
+			|| ! self::is_local_url( $url )
+		) {
+			return $unsafe_path_error();
+		}
+
+		$source_path = self::get_source_path_from_local_url( self::remove_params_and_fragment( $url ) );
+		if ( ! is_string( $source_path ) || '' === $source_path ) {
+			return $unsafe_path_error();
+		}
+
+		// Reject malformed escapes and encoded separators before decoding. A
+		// remaining dangerous escape after decoding indicates double-encoding.
+		if (
+			preg_match( '/%(?![0-9a-f]{2})/i', $source_path )
+			|| preg_match( '/%(?:00|2f|5c)/i', $source_path )
+		) {
+			return $unsafe_path_error();
+		}
+
+		$decoded_path = rawurldecode( $source_path );
+		if (
+			false !== strpos( $decoded_path, "\0" )
+			|| false !== strpos( $decoded_path, '\\' )
+			|| preg_match( '/[\x01-\x1F\x7F]/', $decoded_path )
+			|| preg_match( '/%(?:00|2e|2f|5c)/i', $decoded_path )
+		) {
+			return $unsafe_path_error();
+		}
+
+		$segments = explode( '/', $decoded_path );
+		foreach ( $segments as $segment ) {
+			if ( '.' === $segment || '..' === $segment ) {
+				return $unsafe_path_error();
+			}
+		}
+
+		$segments        = array_values( array_filter( $segments, 'strlen' ) );
+		$normalized_path = '/' . implode( '/', $segments );
+		$mappings        = array();
+
+		$add_mapping = static function ( $root, $base_url = null ) use ( &$mappings ) {
+			if ( ! is_string( $root ) || '' === $root || ! is_dir( $root ) ) {
+				return;
+			}
+
+			$root_path = realpath( $root );
+			if ( false === $root_path ) {
+				return;
+			}
+			$root_path = rtrim( str_replace( '\\', '/', $root_path ), '/' );
+			if ( '' === $root_path || preg_match( '/^[a-z]:$/i', $root_path ) ) {
+				return;
+			}
+
+			$url_prefix = '/';
+			if ( is_string( $base_url ) && '' !== $base_url ) {
+				if ( self::is_local_url( $base_url ) ) {
+					$url_prefix = self::get_source_path_from_local_url( self::remove_params_and_fragment( $base_url ) );
+				} else {
+					$parsed_path = function_exists( 'wp_parse_url' ) ? wp_parse_url( $base_url, PHP_URL_PATH ) : parse_url( $base_url, PHP_URL_PATH );
+					$url_prefix  = is_string( $parsed_path ) ? $parsed_path : '';
+				}
+
+				if ( ! is_string( $url_prefix ) || false !== strpos( $url_prefix, '\\' ) ) {
+					return;
+				}
+
+				$url_prefix = '/' . trim( rawurldecode( $url_prefix ), '/' );
+				if ( '/' !== $url_prefix ) {
+					$url_prefix = rtrim( $url_prefix, '/' );
+				}
+			}
+
+			$mappings[] = array(
+				'root'       => $root_path,
+				'url_prefix' => $url_prefix,
+			);
+		};
+
+		// More-specific URL mappings must be attempted before ABSPATH's catch-all.
+		if ( function_exists( 'wp_upload_dir' ) ) {
+			$uploads = wp_upload_dir();
+			if ( is_array( $uploads ) && ! empty( $uploads['basedir'] ) && ! empty( $uploads['baseurl'] ) ) {
+				$add_mapping( $uploads['basedir'], $uploads['baseurl'] );
+			}
+		}
+		if ( defined( 'WP_PLUGIN_DIR' ) && defined( 'WP_PLUGIN_URL' ) ) {
+			$add_mapping( WP_PLUGIN_DIR, WP_PLUGIN_URL );
+		}
+		if ( defined( 'WP_CONTENT_DIR' ) && defined( 'WP_CONTENT_URL' ) ) {
+			$add_mapping( WP_CONTENT_DIR, WP_CONTENT_URL );
+		}
+		if ( defined( 'ABSPATH' ) ) {
+			$add_mapping( ABSPATH );
+		}
+
+		$escaped_roots      = false;
+		$checked_candidates = array();
+		foreach ( $mappings as $mapping ) {
+			$prefix = $mapping['url_prefix'];
+			if (
+				'/' !== $prefix
+				&& $normalized_path !== $prefix
+				&& 0 !== strpos( $normalized_path, $prefix . '/' )
+			) {
+				continue;
+			}
+
+			$relative_path = '/' === $prefix ? ltrim( $normalized_path, '/' ) : ltrim( substr( $normalized_path, strlen( $prefix ) ), '/' );
+			$candidate     = $mapping['root'] . ( '' === $relative_path ? '' : '/' . $relative_path );
+			if ( isset( $checked_candidates[ $candidate ] ) ) {
+				continue;
+			}
+			$checked_candidates[ $candidate ] = true;
+
+			$real_candidate = realpath( $candidate );
+			if ( false === $real_candidate ) {
+				continue;
+			}
+
+			$real_candidate = str_replace( '\\', '/', $real_candidate );
+			if ( 0 !== strpos( $real_candidate, $mapping['root'] . '/' ) ) {
+				$escaped_roots = true;
+				continue;
+			}
+
+			if ( is_file( $real_candidate ) && is_readable( $real_candidate ) ) {
+				return $real_candidate;
+			}
+		}
+
+		return $escaped_roots ? $unsafe_path_error() : null;
 	}
 
 	/**
@@ -2095,7 +2634,7 @@ class Util {
 			$normalized_content_dir = wp_normalize_path( untrailingslashit( WP_CONTENT_DIR ) );
 
 			// If the path starts with the content directory, use WP_CONTENT_URL for replacement
-			if ( strpos( $normalized_path, $normalized_content_dir ) === 0 ) {
+			if ( $normalized_path === $normalized_content_dir || 0 === strpos( $normalized_path, $normalized_content_dir . '/' ) ) {
 				$url = str_replace(
 					$normalized_content_dir,
 					untrailingslashit( WP_CONTENT_URL ),
@@ -2106,12 +2645,13 @@ class Util {
 			}
 		}
 
-		// Default behavior for paths not in WP_CONTENT_DIR
-		$url = str_replace(
-			wp_normalize_path( untrailingslashit( ABSPATH ) ),
-			site_url(),
-			$normalized_path
-		);
+		// Default behavior for paths inside the WordPress installation.
+		$normalized_abspath = wp_normalize_path( untrailingslashit( ABSPATH ) );
+		if ( $normalized_path !== $normalized_abspath && 0 !== strpos( $normalized_path, $normalized_abspath . '/' ) ) {
+			return '';
+		}
+
+		$url = site_url() . substr( $normalized_path, strlen( $normalized_abspath ) );
 
 		return esc_url_raw( $url );
 	}
@@ -2315,6 +2855,75 @@ class Util {
 	}
 
 	/**
+	 * Check whether a directory is safe for recursive content deletion.
+	 *
+	 * This rejects filesystem roots, symlinks, WordPress/application roots, upload
+	 * and system-temp roots, and common user-data roots. Descendant directories
+	 * (such as uploads/simply-static/temp-files) remain valid.
+	 *
+	 * @param string $dir Directory path.
+	 *
+	 * @return bool
+	 */
+	public static function is_safe_directory_to_delete( $dir ) {
+		if ( ! is_string( $dir ) || '' === trim( $dir ) || false !== strpos( $dir, "\0" ) ) {
+			return false;
+		}
+
+		if ( ( function_exists( 'wp_is_stream' ) && wp_is_stream( $dir ) ) || is_link( $dir ) || ! is_dir( $dir ) ) {
+			return false;
+		}
+
+		$real_path = realpath( $dir );
+		if ( false === $real_path ) {
+			return false;
+		}
+
+		$real_path = rtrim( str_replace( '\\', '/', $real_path ), '/' );
+		if ( '' === $real_path || preg_match( '#^(?:[A-Za-z]:)?$#', $real_path ) ) {
+			return false;
+		}
+
+		$protected = array(
+			defined( 'ABSPATH' ) ? ABSPATH : '',
+			defined( 'WP_CONTENT_DIR' ) ? WP_CONTENT_DIR : '',
+			defined( 'WP_PLUGIN_DIR' ) ? WP_PLUGIN_DIR : '',
+			sys_get_temp_dir(),
+		);
+
+		if ( function_exists( 'wp_upload_dir' ) ) {
+			$uploads = wp_upload_dir();
+			if ( is_array( $uploads ) && ! empty( $uploads['basedir'] ) ) {
+				$protected[] = $uploads['basedir'];
+			}
+		}
+
+		$home = getenv( 'HOME' );
+		if ( is_string( $home ) && '' !== $home ) {
+			$protected[] = $home;
+			$protected[] = $home . '/Desktop';
+			$protected[] = $home . '/Documents';
+			$protected[] = $home . '/Downloads';
+		}
+
+		$is_safe = true;
+		foreach ( array_filter( $protected ) as $protected_path ) {
+			$protected_real = realpath( $protected_path );
+			if ( false === $protected_real ) {
+				$protected_real = $protected_path;
+			}
+			$protected_real = rtrim( str_replace( '\\', '/', $protected_real ), '/' );
+
+			if ( $real_path === $protected_real || 0 === strpos( $protected_real . '/', $real_path . '/' ) ) {
+				$is_safe = false;
+				break;
+			}
+		}
+
+		return (bool) apply_filters( 'ss_is_safe_directory_to_delete', $is_safe, $real_path, $protected );
+	}
+
+	/**
 	 * Recursively delete contents of a directory but keep the directory itself.
 	 *
 	 * Rules:
@@ -2327,12 +2936,7 @@ class Util {
 	 */
 	public static function delete_dir_contents( string $dir ): void {
 		$dir = (string) $dir;
-		if ( $dir === '' || ! is_dir( $dir ) ) {
-			return;
-		}
-		$normalized = str_replace( '\\', '/', $dir );
-		// Safety guard: do not operate on very shallow paths (like root-level). Require at least 3 path segments.
-		if ( substr_count( trim( $normalized, '/' ), '/' ) < 2 ) {
+		if ( ! self::is_safe_directory_to_delete( $dir ) ) {
 			return;
 		}
 		$items = scandir( $dir );

@@ -222,7 +222,7 @@ class Generate_404_Task extends Task {
 		Util::debug_log( "We're saving this URL; keeping the static file" );
 
 		try {
-			$sha1 = sha1_file( $file );
+			$sha1 = sha1_file( $file, true );
 			if ( false === $sha1 ) {
 				$sha1 = '';
 			}

@@ -478,55 +478,7 @@ class Elementor_Integration extends Integration {
 	 * @return void
 	 */
 	public function register_lottie_files() {
-		global $wpdb;
-
-		$elementor_data = $wpdb->get_results( "SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key='_elementor_data'", ARRAY_A );
-
-		if ( ! $elementor_data ) {
-			return;
-		}
-
-		$files = [];
-
-		foreach ( $elementor_data as $data ) {
-
-			foreach ( json_decode( $data['meta_value'], true ) as $widget_data ) {
-
-				$flat_widget  = $this->flatten_data( $widget_data );
-				$lottie_files = array_filter( $flat_widget, function ( $item ) {
-					if ( ! isset( $item['widgetType'] ) ) {
-						return false;
-					}
-
-					if ( empty( $item['settings'] ) ) {
-						return false;
-					}
-
-					if ( empty( $item['settings']['source_json'] ) ) {
-						return false;
-					}
-
-					if ( 'library' !== $item['settings']['source_json']['source'] ) {
-						return false;
-					}
-
-					return $item['widgetType'] === 'lottie';
-				} );
-
-				if ( ! $lottie_files ) {
-					continue;
-				}
-
-				foreach ( $lottie_files as $lottie_widget ) {
-					$files[] = $lottie_widget['settings']['source_json']['url'];
-				}
-
-			}
-
-		}
-
-
-		$files = array_unique( $files );
+		$files = $this->get_lottie_file_urls();
 
 		if ( ! $files ) {
 			return;
@@ -540,6 +492,100 @@ class Elementor_Integration extends Integration {
 			$static_page->found_on_id = 0;
 			$static_page->save();
 		}
+	}
+
+	/**
+	 * Get Elementor Pro Lottie URLs without loading every postmeta row at once.
+	 *
+	 * @return array
+	 */
+	protected function get_lottie_file_urls() {
+		global $wpdb;
+
+		$files        = array();
+		$last_meta_id = 0;
+		$batch_size   = (int) apply_filters( 'simply_static_elementor_meta_batch_size', 100 );
+		$batch_size   = max( 1, min( 1000, $batch_size ) );
+
+		do {
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT meta_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_elementor_data' AND meta_id > %d ORDER BY meta_id ASC LIMIT %d",
+					$last_meta_id,
+					$batch_size
+				),
+				ARRAY_A
+			);
+
+			if ( ! is_array( $rows ) || empty( $rows ) ) {
+				break;
+			}
+
+			$next_meta_id = $last_meta_id;
+
+			foreach ( $rows as $row ) {
+				if ( ! is_array( $row ) || ! isset( $row['meta_id'] ) ) {
+					continue;
+				}
+
+				$next_meta_id = max( $next_meta_id, (int) $row['meta_id'] );
+
+				foreach ( $this->extract_lottie_urls_from_json( isset( $row['meta_value'] ) ? $row['meta_value'] : '' ) as $file_url ) {
+					$files[ $file_url ] = $file_url;
+				}
+			}
+
+			if ( method_exists( $wpdb, 'flush' ) ) {
+				$wpdb->flush();
+			}
+
+			if ( count( $rows ) < $batch_size || $next_meta_id <= $last_meta_id ) {
+				break;
+			}
+
+			$last_meta_id = $next_meta_id;
+		} while ( true );
+
+		return array_values( $files );
+	}
+
+	/**
+	 * Extract library-backed Lottie URLs from one Elementor JSON document.
+	 *
+	 * @param mixed $json Elementor postmeta JSON.
+	 *
+	 * @return array
+	 */
+	protected function extract_lottie_urls_from_json( $json ) {
+		if ( ! is_string( $json ) || '' === trim( $json ) ) {
+			return array();
+		}
+
+		$decoded = json_decode( $json, true );
+
+		if ( ! is_array( $decoded ) ) {
+			return array();
+		}
+
+		$urls = array();
+
+		foreach ( $this->flatten_data( $decoded ) as $item ) {
+			if ( ! is_array( $item ) || ! isset( $item['widgetType'] ) || 'lottie' !== $item['widgetType'] ) {
+				continue;
+			}
+
+			$source = isset( $item['settings']['source_json'] ) && is_array( $item['settings']['source_json'] )
+				? $item['settings']['source_json']
+				: array();
+
+			if ( 'library' !== ( isset( $source['source'] ) ? $source['source'] : '' ) || empty( $source['url'] ) || ! is_string( $source['url'] ) ) {
+				continue;
+			}
+
+			$urls[ $source['url'] ] = $source['url'];
+		}
+
+		return array_values( $urls );
 	}
 
 
@@ -591,40 +637,70 @@ class Elementor_Integration extends Integration {
 	}
 
 	/**
-	 * Get all widget
+	 * Flatten an Elementor element tree without embedding the accumulated tree
+	 * into every result item.
 	 *
-	 * @param $type
+	 * @param mixed $data       Elementor element or element list.
+	 * @param array $flat_array Existing flattened values.
 	 *
 	 * @return array
 	 */
 	protected function flatten_data( $data, $flat_array = [] ) {
-
 		if ( ! is_array( $data ) ) {
 			return $flat_array;
 		}
 
-		if ( ! empty( $data['elements'] ) ) {
-			$flat_array = $this->flatten_data( $data['elements'], $flat_array );
-			unset( $data['elements'] );
-		}
+		$stack = array(
+			array(
+				'data' => $data,
+				'emit' => false,
+			),
+		);
 
-		$array_keys = array_keys( $data );
+		while ( ! empty( $stack ) ) {
+			$frame = array_pop( $stack );
+			$node  = $frame['data'];
 
-		foreach ( $array_keys as $number ) {
-			if ( ! is_integer( $number ) ) {
+			if ( $frame['emit'] ) {
+				if ( ! empty( $node ) ) {
+					$flat_array[] = $node;
+				}
+
 				continue;
 			}
 
-			$flat_array = $this->flatten_data( $data[ $number ], $flat_array );
-			unset( $data[ $number ] );
+			$children = array();
+
+			if ( isset( $node['elements'] ) && is_array( $node['elements'] ) ) {
+				$children[] = $node['elements'];
+			}
+
+			unset( $node['elements'] );
+
+			foreach ( array_keys( $node ) as $key ) {
+				if ( ! is_int( $key ) ) {
+					continue;
+				}
+
+				if ( is_array( $node[ $key ] ) ) {
+					$children[] = $node[ $key ];
+				}
+
+				unset( $node[ $key ] );
+			}
+
+			$stack[] = array(
+				'data' => $node,
+				'emit' => true,
+			);
+
+			for ( $index = count( $children ) - 1; $index >= 0; $index -- ) {
+				$stack[] = array(
+					'data' => $children[ $index ],
+					'emit' => false,
+				);
+			}
 		}
-
-
-		if ( isset( $data['elements'] ) ) {
-			unset( $data['elements'] );
-		}
-
-		$flat_array[] = array_merge( $data, $flat_array );
 
 		return $flat_array;
 	}
