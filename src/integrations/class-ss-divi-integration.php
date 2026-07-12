@@ -9,6 +9,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Divi_Integration extends Integration {
 	/**
+	 * Temporary backup used while a static export is running.
+	 *
+	 * @var string
+	 */
+	const PERFORMANCE_OPTIONS_BACKUP = 'simply_static_divi_performance_options_backup';
+
+	/**
+	 * Divi option containers that may be changed during an export.
+	 *
+	 * @var string[]
+	 */
+	private const PERFORMANCE_OPTION_CONTAINERS = array( 'et_divi', 'et_pb_options', 'et_core_options', 'et_core_option' );
+
+	/**
 	 * Given handler ID.
 	 * @var string
 	 */
@@ -27,51 +41,141 @@ class Divi_Integration extends Integration {
   *
   * @return bool
   */
- public function dependency_active() {
-     // Only consider Divi available when the Divi THEME is active (including child themes).
-     // Be lenient with directory/name casing and possible customizations of the folder name.
-     // We detect by checking the active theme's template (parent theme directory) for "divi".
+	public function dependency_active() {
+		// WP_Theme::get_template() returns the parent theme directory for child themes.
+		if ( function_exists( 'wp_get_theme' ) ) {
+			$theme = wp_get_theme();
 
-     // Prefer wp_get_theme(), which correctly returns the parent template directory for child themes.
-     if ( function_exists( 'wp_get_theme' ) ) {
-         $theme = wp_get_theme();
-         if ( $theme ) {
-             // get_template() on WP_Theme is the parent theme directory (string).
-             $parent_template_dir = method_exists( $theme, 'get_template' ) ? $theme->get_template() : '';
-             if ( is_string( $parent_template_dir ) && false !== stripos( $parent_template_dir, 'divi' ) ) {
-                 return true;
-             }
+			if ( $theme ) {
+				$template = method_exists( $theme, 'get_template' ) ? $theme->get_template() : '';
+				$name     = method_exists( $theme, 'get' ) ? $theme->get( 'Name' ) : '';
 
-             // As an additional safeguard, look at the theme names (current and parent) in case
-             // the directory name was customized but still clearly refers to Divi.
-             $current_name = method_exists( $theme, 'get' ) ? (string) $theme->get( 'Name' ) : '';
-             if ( false !== stripos( $current_name, 'divi' ) ) {
-                 return true;
-             }
-             if ( method_exists( $theme, 'parent' ) ) {
-                 $parent = $theme->parent();
-                 if ( $parent ) {
-                     $parent_name = (string) $parent->get( 'Name' );
-                     $parent_stylesheet = (string) $parent->get_stylesheet();
-                     if ( false !== stripos( $parent_name, 'divi' ) || false !== stripos( $parent_stylesheet, 'divi' ) ) {
-                         return true;
-                     }
-                 }
-             }
-         }
-     }
+				if ( $this->is_divi_identifier( $template ) || $this->is_divi_identifier( $name ) ) {
+					return true;
+				}
 
-     // Fallback to classic get_template() check (case-insensitive) if wp_get_theme() is unavailable.
-     $tpl = function_exists( 'get_template' ) ? get_template() : '';
-     return is_string( $tpl ) && 0 === strcasecmp( $tpl, 'Divi' );
- }
+				if ( method_exists( $theme, 'parent' ) ) {
+					$parent = $theme->parent();
+
+					if ( $parent ) {
+						$parent_name       = method_exists( $parent, 'get' ) ? $parent->get( 'Name' ) : '';
+						$parent_stylesheet = method_exists( $parent, 'get_stylesheet' ) ? $parent->get_stylesheet() : '';
+
+						if ( $this->is_divi_identifier( $parent_name ) || $this->is_divi_identifier( $parent_stylesheet ) ) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+
+		$template = function_exists( 'get_template' ) ? get_template() : '';
+
+		return $this->is_divi_identifier( $template );
+	}
 
 	/**
 	 * Run the integration.
 	 */
 	public function run() {
-		$this->disable_divi_performance_options();
+		add_action( 'ss_before_static_export', [ $this, 'prepare_divi_performance_options' ], 10, 0 );
+		add_action( 'ss_after_cleanup', [ $this, 'restore_divi_performance_options' ], 10, 0 );
+		add_action( 'ss_archive_creation_job_start_failed', [ $this, 'restore_divi_performance_options' ], 10, 0 );
+		add_action( 'ss_after_background_queue_reset', [ $this, 'restore_divi_performance_options' ], 10, 0 );
+		add_action( 'simply_static_deactivated', [ $this, 'restore_divi_performance_options' ], 10, 0 );
 		add_filter( 'ss_after_replace_urls_in_html', [ $this, 'replace_data_fac_urls' ], 10, 2 );
+	}
+
+	/**
+	 * Disable problematic Divi performance options for the duration of an export.
+	 *
+	 * Original option containers are persisted before any changes are made so a
+	 * later request can restore them during the wrap-up task.
+	 *
+	 * @return void
+	 */
+	public function prepare_divi_performance_options() {
+		// Recover a backup left by an interrupted export before creating a new one.
+		if ( is_array( get_option( self::PERFORMANCE_OPTIONS_BACKUP, null ) ) ) {
+			$this->restore_divi_performance_options();
+		}
+
+		if ( ! $this->dependency_active() ) {
+			return;
+		}
+
+		$changes = $this->get_divi_performance_option_changes();
+
+		if ( empty( $changes ) ) {
+			return;
+		}
+
+		$backup = array();
+
+		foreach ( $changes as $option_name => $change ) {
+			$backup[ $option_name ] = array(
+				'original'  => $change['original_values'],
+				'temporary' => $change['temporary_values'],
+			);
+		}
+
+		// Store the backup first, so cleanup can recover from a partial update.
+		if ( ! update_option( self::PERFORMANCE_OPTIONS_BACKUP, $backup, false ) ) {
+			Util::debug_log( 'Divi Integration: could not back up performance options; leaving them unchanged.' );
+			return;
+		}
+
+		foreach ( $changes as $option_name => $change ) {
+			update_option( $option_name, $change['updated'] );
+			Util::debug_log( sprintf( 'Divi Integration: temporarily disabled %d performance option(s) in "%s".', $change['count'], $option_name ) );
+		}
+	}
+
+	/**
+	 * Restore Divi performance options after an export or cancellation.
+	 *
+	 * @return void
+	 */
+	public function restore_divi_performance_options() {
+		$backup = get_option( self::PERFORMANCE_OPTIONS_BACKUP, null );
+
+		if ( ! is_array( $backup ) ) {
+			return;
+		}
+
+		foreach ( $backup as $option_name => $values ) {
+			if ( ! is_string( $option_name ) || ! in_array( $option_name, self::PERFORMANCE_OPTION_CONTAINERS, true ) || ! is_array( $values ) ) {
+				continue;
+			}
+
+			$original  = isset( $values['original'] ) && is_array( $values['original'] ) ? $values['original'] : array();
+			$temporary = isset( $values['temporary'] ) && is_array( $values['temporary'] ) ? $values['temporary'] : array();
+			$current    = get_option( $option_name );
+
+			if ( ! is_array( $current ) ) {
+				continue;
+			}
+
+			$restored = $current;
+
+			foreach ( $original as $key => $original_value ) {
+				if ( ! array_key_exists( $key, $temporary ) || ! array_key_exists( $key, $current ) ) {
+					continue;
+				}
+
+				// Preserve an administrator's concurrent change during a long export.
+				if ( $current[ $key ] === $temporary[ $key ] ) {
+					$restored[ $key ] = $original_value;
+				}
+			}
+
+			if ( $restored !== $current ) {
+				update_option( $option_name, $restored );
+			}
+		}
+
+		delete_option( self::PERFORMANCE_OPTIONS_BACKUP );
+		Util::debug_log( 'Divi Integration: restored performance options after export.' );
 	}
 
 	/**
@@ -130,18 +234,11 @@ class Divi_Integration extends Integration {
 	}
 
 	/**
-	 * Disable Divi performance-related options that cause issues on static sites.
-	 * This only updates existing option keys (no new keys are created).
+	 * Build temporary changes for Divi performance-related options.
 	 *
-	 * @return void
+	 * @return array
 	 */
-	protected function disable_divi_performance_options() {
-		if ( ! $this->dependency_active() ) {
-			return;
-		}
-
-		$containers = [ 'et_divi', 'et_pb_options', 'et_core_options', 'et_core_option' ];
-
+	protected function get_divi_performance_option_changes() {
 		// Map of known/likely Divi performance keys to desired "disabled" state.
 		$keys = [
 			// Minify/Combine
@@ -170,33 +267,62 @@ class Divi_Integration extends Integration {
 			'wp_emoji_disable',
 		];
 
-		$changed_total = 0;
+		$changes = array();
 
-		foreach ( $containers as $option_name ) {
+		foreach ( self::PERFORMANCE_OPTION_CONTAINERS as $option_name ) {
 			$opt = get_option( $option_name );
 			if ( ! is_array( $opt ) || empty( $opt ) ) {
 				continue;
 			}
 
-			$changed = 0;
+			$original_values  = array();
+			$temporary_values = array();
+			$changed          = 0;
 
 			foreach ( $keys as $key ) {
 				if ( array_key_exists( $key, $opt ) ) {
 					$desired = $this->coerce_disabled_value( $opt[ $key ] );
 					if ( $opt[ $key ] !== $desired ) {
-						$opt[ $key ] = $desired;
+						$original_values[ $key ]  = $opt[ $key ];
+						$temporary_values[ $key ] = $desired;
+						$opt[ $key ]               = $desired;
 						$changed ++;
 					}
 				}
 			}
 
 			if ( $changed > 0 ) {
-				update_option( $option_name, $opt );
-				$changed_total += $changed;
-				Util::debug_log( sprintf( 'Divi Integration: disabled %d performance option(s) in "%s".', $changed, $option_name ) );
+				$changes[ $option_name ] = array(
+					'original_values'  => $original_values,
+					'temporary_values' => $temporary_values,
+					'updated'          => $opt,
+					'count'            => $changed,
+				);
 			}
 		}
 
+		return $changes;
+	}
+
+	/**
+	 * Determine whether a theme name or directory is exactly Divi.
+	 *
+	 * @param mixed $identifier Theme name or directory.
+	 *
+	 * @return bool
+	 */
+	protected function is_divi_identifier( $identifier ) {
+		if ( ! is_string( $identifier ) ) {
+			return false;
+		}
+
+		$identifier = trim( trim( str_replace( '\\', '/', $identifier ) ), '/' );
+
+		if ( '' === $identifier ) {
+			return false;
+		}
+
+		return 0 === strcasecmp( $identifier, 'divi' );
 	}
 
 	/**

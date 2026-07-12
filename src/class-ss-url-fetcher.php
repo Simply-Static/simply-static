@@ -77,7 +77,8 @@ class Url_Fetcher {
 	 * @return boolean                        Was the fetch successful?
 	 */
 	public function fetch( Page $static_page, $prepare_url = true ) {
-		$url = $static_page->url;
+		$original_url = $static_page->url;
+		$url          = $original_url;
 
 		// Windows support.
 		$url = Util::normalize_slashes( $url );
@@ -101,8 +102,8 @@ class Url_Fetcher {
 
 		// Check if the URL is a local asset (file) that we can copy directly
 		// We do this check before prepare_url to avoid query parameters interfering with extension detection
-		$original_url   = $url;
-		$is_local_asset = Util::is_local_asset_url( $original_url );
+		$is_local_asset = Util::is_local_asset_url( $url );
+		$local_file     = null;
 
 		Util::debug_log( "URL: " . $original_url . " - Is local asset: " . ( $is_local_asset ? 'Yes' : 'No' ) );
 
@@ -112,25 +113,24 @@ class Url_Fetcher {
 
 		// Check if the URL is a local asset (file) that we can copy directly
 		if ( $is_local_asset ) {
-			// Get the local path for the URL using the original URL without query parameters
-			$local_path = Util::get_source_path_from_local_url( Util::remove_params_and_fragment( $original_url ) );
-			$file_path  = ABSPATH . ltrim( $local_path, '/' );
+			$resolved_path = Util::resolve_local_asset_path( $original_url );
 
-			Util::debug_log( "Local path: " . $local_path . " - Full file path: " . $file_path );
-
-			// Check if the file exists
-			if ( file_exists( $file_path ) ) {
-				Util::debug_log( "Copying local file directly: " . $file_path );
+			if ( is_wp_error( $resolved_path ) ) {
+				Util::debug_log( 'Rejected unsafe local asset path: ' . $original_url );
+				$response = $resolved_path;
+			} elseif ( is_string( $resolved_path ) ) {
+				$local_file = $resolved_path;
+				Util::debug_log( "Copying local file directly: " . $local_file );
 
 				// Copy the file to the temporary location
-				if ( copy( $file_path, $temp_filename ) ) {
+				if ( copy( $local_file, $temp_filename ) ) {
 					// Create a response-like array to match what remote_get would return
 					$response = array(
 						'response' => array(
 							'code' => 200
 						),
 						'headers'  => array(
-							'content-type' => $this->detect_mime_type( $file_path, $original_url )
+							'content-type' => $this->detect_mime_type( $local_file, $original_url )
 						)
 					);
 				} else {
@@ -139,7 +139,7 @@ class Url_Fetcher {
 					$response = self::remote_get( Util::get_source_url_from_local_url( $url ), $temp_filename );
 				}
 			} else {
-				// If file doesn't exist, fall back to remote_get
+				// If no safe local file exists, fall back to remote_get.
 				Util::debug_log( "Local file not found, falling back to remote_get" );
 				$response = self::remote_get( Util::get_source_url_from_local_url( $url ), $temp_filename );
 			}
@@ -159,33 +159,31 @@ class Url_Fetcher {
 				Util::debug_log( 'Streamed file is empty after 200 response; attempting fallback to recover content.' );
 				$recovered = false;
 				// Attempt 1: If it is a local asset, try copying directly from disk again.
-				if ( isset( $is_local_asset ) && $is_local_asset ) {
-					$local_path = Util::get_source_path_from_local_url( Util::remove_params_and_fragment( $original_url ) );
-					$file_path  = ABSPATH . ltrim( $local_path, '/' );
-					if ( file_exists( $file_path ) && is_readable( $file_path ) ) {
-						$recovered = copy( $file_path, $temp_filename );
+				if ( isset( $is_local_asset ) && $is_local_asset && is_string( $local_file ) ) {
+					if ( is_readable( $local_file ) ) {
+						$recovered = copy( $local_file, $temp_filename );
 						if ( $recovered ) {
 							Util::debug_log( 'Recovered by copying local asset from disk.' );
 							$filesize = filesize( $temp_filename );
 						}
 					}
 				}
-				// Attempt 2: Do a non-streamed request and write body manually.
-				if ( ! $recovered ) {
-					$alt_args          = array(
-						'timeout'     => self::TIMEOUT,
-						'user-agent'  => apply_filters( 'ss_crawler_user_agent', self::DEFAULT_USER_AGENT ),
-						'sslverify'   => false,
-						'redirection' => 0,
-						'blocking'    => true,
-						'decompress'  => true,
-					);
-					$basic_auth_digest = base64_encode( Options::instance()->get( 'http_basic_auth_username' ) . ':' . Options::instance()->get( 'http_basic_auth_password' ) );
-					if ( $basic_auth_digest ) {
-						$alt_args['headers'] = array( 'Authorization' => 'Basic ' . $basic_auth_digest );
-					}
-					$alt_url  = isset( $is_local_asset ) && $is_local_asset ? Util::get_source_url_from_local_url( $url ) : $url;
-					$alt_resp = wp_remote_get( $alt_url, apply_filters( 'ss_remote_get_args', $alt_args ) );
+					// Attempt 2: Do a non-streamed request and write body manually.
+					if ( ! $recovered ) {
+						$alt_url  = isset( $is_local_asset ) && $is_local_asset ? Util::get_source_url_from_local_url( $url ) : $url;
+						$alt_args          = array(
+							'timeout'     => self::TIMEOUT,
+							'user-agent'  => apply_filters( 'ss_crawler_user_agent', self::DEFAULT_USER_AGENT ),
+							'sslverify'   => (bool) apply_filters( 'ss_remote_get_sslverify', true, $alt_url ),
+							'redirection' => 0,
+							'blocking'    => true,
+							'decompress'  => true,
+						);
+						$authorization = Util::get_basic_auth_header_for_url( $alt_url );
+						if ( null !== $authorization ) {
+							$alt_args['headers'] = array( 'Authorization' => $authorization );
+						}
+						$alt_resp = wp_remote_get( $alt_url, apply_filters( 'ss_remote_get_args', $alt_args ) );
 					if ( ! is_wp_error( $alt_resp ) ) {
 						$body = wp_remote_retrieve_body( $alt_resp );
 						if ( strlen( $body ) > 0 ) {
@@ -207,10 +205,13 @@ class Url_Fetcher {
 			$message                       = sprintf( __( "An error occurred: %s", 'simply-static' ), $response->get_error_message() );
 			$static_page->set_error_message( $message );
 			$static_page->save();
+			if ( file_exists( $temp_filename ) ) {
+				unlink( $temp_filename );
+			}
 
 			return false;
 		} else {
-			$static_page->http_status_code = $response['response']['code'];
+			$static_page->http_status_code = isset( $response['response']['code'] ) ? (int) $response['response']['code'] : 0;
 
 			// Check if this is a JavaScript or CSS file based on the URL extension
 			$path_info = Util::url_path_info( $static_page->url );
@@ -222,7 +223,9 @@ class Url_Fetcher {
 				$static_page->content_type = 'text/css';
 			} else {
 				// Use the content type from the response headers
-				$static_page->content_type = $response['headers']['content-type'];
+				$static_page->content_type = isset( $response['headers']['content-type'] )
+					? $response['headers']['content-type']
+					: $this->detect_mime_type( $temp_filename, $original_url );
 			}
 
 			$static_page->redirect_url = isset( $response['headers']['location'] ) ? $response['headers']['location'] : null;
@@ -231,12 +234,6 @@ class Url_Fetcher {
 
 			$relative_filename = null;
 			if ( $this->can_create_directories_for_page( $static_page ) ) {
-				// pclzip doesn't like 0 byte files (fread error), so we're
-				// going to fix that by putting a single space into the file
-				if ( $filesize === 0 ) {
-					file_put_contents( $temp_filename, ' ' );
-				}
-
 				$relative_filename = $this->create_directories_for_static_page( $static_page );
 			}
 
@@ -263,6 +260,12 @@ class Url_Fetcher {
 					} else {
 						Util::debug_log( "Failed to copy temp file to destination: " . $file_path );
 						$static_page->set_error_message( 'Failed to save fetched file to archive' );
+						if ( file_exists( $temp_filename ) ) {
+							unlink( $temp_filename );
+						}
+						$static_page->save();
+
+						return false;
 					}
 				}
 
@@ -524,7 +527,10 @@ class Url_Fetcher {
 	}
 
 	public static function remote_get( $url, $filename = null ) {
-		$basic_auth_digest = base64_encode( Options::instance()->get( 'http_basic_auth_username' ) . ':' . Options::instance()->get( 'http_basic_auth_password' ) );
+		$allowed = (bool) apply_filters( 'ss_url_fetcher_allow_request', Util::is_local_origin_url( $url ), $url );
+		if ( ! $allowed ) {
+			return new \WP_Error( 'simply_static_unsafe_url', __( 'Refusing to fetch a URL outside the configured WordPress origin.', 'simply-static' ) );
+		}
 
 		Util::debug_log( "Fetching URL: " . $url );
 
@@ -541,7 +547,7 @@ class Url_Fetcher {
 		$args = array(
 			'timeout'     => self::TIMEOUT,
 			'user-agent'  => $user_agent,
-			'sslverify'   => false,
+			'sslverify'   => (bool) apply_filters( 'ss_remote_get_sslverify', true, $url ),
 			'redirection' => 0, // disable redirection.
 			'blocking'    => true,
 			'decompress'  => true, // ensure WordPress decompresses gzip/deflate responses.
@@ -556,8 +562,9 @@ class Url_Fetcher {
 			$args['filename'] = $filename;
 		}
 
-		if ( $basic_auth_digest ) {
-			$headers['Authorization'] = 'Basic ' . $basic_auth_digest;
+		$authorization = Util::get_basic_auth_header_for_url( $url );
+		if ( null !== $authorization ) {
+			$headers['Authorization'] = $authorization;
 		}
 
 		$args['headers'] = $headers;

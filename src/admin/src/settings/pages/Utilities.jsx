@@ -18,13 +18,14 @@ const {__} = wp.i18n;
 function Utilities() {
 
     const {
-        settings,
         importSettings,
-        saveSettings,
         resetSettings,
         migrateSettings,
         resetDatabase,
-        resetBackgroundQueue
+        resetBackgroundQueue,
+        isRunning,
+        isPaused,
+        isRollbackRunning,
     } = useContext(SettingsContext);
     const [isExport, setIsExport] = useState(false);
     const [isImport, setIsImport] = useState(false);
@@ -32,54 +33,80 @@ function Utilities() {
     const [isResetDatabase, setIsResetDatabase] = useState(false);
     const [isMigrate, setIsMigrate] = useState(false);
     const [hasCopied, setHasCopied] = useState(false);
-    const [importData, setImportData] = useState(false);
+    const [importData, setImportData] = useState('');
     const [exportJson, setExportJson] = useState('');
     const [exportLoading, setExportLoading] = useState(false);
     const [exportError, setExportError] = useState('');
     const [isResetBackgroundQueue, setIsResetBackgroundQueue] = useState(false);
+    const [pendingAction, setPendingAction] = useState('');
+    const [actionError, setActionError] = useState('');
+    const maintenanceLocked = isRunning || isPaused || isRollbackRunning;
+    const isBusy = pendingAction !== '';
 
     const setImportDataValue = event => {
-        setImportData(JSON.parse(event.target.value));
+        setImportData(event.target.value);
+        setActionError('');
     };
 
-    const runImportSettings = () => {
-        importSettings(importData);
-        setIsImport(true);
-
-        setTimeout(function () {
-            setIsImport(false);
-        }, 2000);
+    const finishSuccessNotice = (setter) => {
+        setter(true);
+        window.setTimeout(() => setter(false), 2000);
     }
 
-    const runResetSettings = () => {
-        resetSettings();
-        setIsReset(true);
+    const runAction = async (name, action, successSetter) => {
+        setPendingAction(name);
+        setActionError('');
+        try {
+            await action();
+            finishSuccessNotice(successSetter);
+            return true;
+        } catch (error) {
+            setActionError(
+                error && error.message
+                    ? error.message
+                    : __('The requested action could not be completed.', 'simply-static')
+            );
+            return false;
+        } finally {
+            setPendingAction('');
+        }
+    };
 
-        setTimeout(function () {
-            setIsReset(false);
-        }, 2000);
+    const runImportSettings = async () => {
+        let parsed;
+        try {
+            parsed = JSON.parse(importData);
+            if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') {
+                throw new Error(__('Import data must be a JSON object.', 'simply-static'));
+            }
+        } catch (error) {
+            setActionError(
+                error && error.message
+                    ? error.message
+                    : __('Enter valid settings JSON before importing.', 'simply-static')
+            );
+            return;
+        }
+
+        await runAction('import', () => importSettings(parsed), setIsImport);
     }
 
-    const runResetDatabase = () => {
-        resetDatabase();
-        setIsResetDatabase(true);
+    const runResetSettings = () => runAction('reset-settings', resetSettings, setIsReset);
 
-        setTimeout(function () {
-            setIsResetDatabase(false);
-        }, 2000);
+    const runResetDatabase = () => runAction('reset-database', resetDatabase, setIsResetDatabase);
+
+    const runMigrateSettings = async () => {
+        const succeeded = await runAction('migrate', migrateSettings, setIsMigrate);
+        if (succeeded) {
+            window.setTimeout(() => window.location.reload(), 1000);
+        }
     }
 
-
-    const runMigrateSettings = () => {
-        migrateSettings();
-        saveSettings();
-        setIsMigrate(true);
-
-        setTimeout(function () {
-            setIsMigrate(false);
-            location.reload();
-        }, 2000);
-    }
+    const runResetBackgroundQueue = () => runAction(
+        'reset-background',
+        resetBackgroundQueue,
+        setIsResetBackgroundQueue
+    );
 
     const startExport = () => {
         setIsExport(true);
@@ -110,6 +137,16 @@ function Utilities() {
 
     return (
         <div className={"inner-settings"}>
+            {maintenanceLocked && (
+                <Notice status="warning" isDismissible={false}>
+                    <p>{__('Import, reset, and migration actions are unavailable until the active export or rollback finishes.', 'simply-static')}</p>
+                </Notice>
+            )}
+            {actionError && (
+                <Notice status="error" isDismissible onRemove={() => setActionError('')}>
+                    <p>{actionError}</p>
+                </Notice>
+            )}
             <Card>
                 <CardHeader>
                     <b>{__('Export', 'simply-static')}<HelperVideo
@@ -179,9 +216,20 @@ function Utilities() {
                     <p>
                         {__('Paste in the JSON string you got from your export to import all settings for the plugin.', 'simply-static')}
                     </p>
-                    <textarea rows="8" name="import-data" onChange={setImportDataValue}></textarea>
+                    <label className="screen-reader-text" htmlFor="ss-import-data">
+                        {__('Settings JSON to import', 'simply-static')}
+                    </label>
+                    <textarea
+                        id="ss-import-data"
+                        rows="8"
+                        name="import-data"
+                        value={importData}
+                        onChange={setImportDataValue}
+                    />
                     <p>
                         <Button onClick={runImportSettings}
+                                disabled={maintenanceLocked || isBusy || importData.trim() === ''}
+                                isBusy={pendingAction === 'import'}
                                 variant="primary">{__('Import Settings', 'simply-static')}</Button>
                     </p>
                     {isImport ?
@@ -210,10 +258,16 @@ function Utilities() {
                     <p>{__('If the background process is stuck and your debug log shows "There is already an export running", use the "Reset Background Queue" button to clear the queue and locks.', 'simply-static')}</p>
                     <p>
                         <Button onClick={runResetSettings}
+                                disabled={maintenanceLocked || isBusy}
+                                isBusy={pendingAction === 'reset-settings'}
                                 variant="primary">{__('Reset Plugin Settings', 'simply-static')}</Button>
                         <Button onClick={runResetDatabase} className={"reset-db-btn"}
+                                disabled={maintenanceLocked || isBusy}
+                                isBusy={pendingAction === 'reset-database'}
                                 variant="primary">{__('Reset Database Table', 'simply-static')}</Button>
-                        <Button onClick={() => { resetBackgroundQueue(); setIsResetBackgroundQueue(true); setTimeout(() => setIsResetBackgroundQueue(false), 2000); }} className={"reset-bg-btn"}
+                        <Button onClick={runResetBackgroundQueue} className={"reset-bg-btn"}
+                                disabled={isBusy}
+                                isBusy={pendingAction === 'reset-background'}
                                 variant="primary">{__('Reset Background Queue', 'simply-static')}</Button>
                     </p>
                     {isReset ?
@@ -221,7 +275,7 @@ function Utilities() {
                             {() => (
                                 <Notice status="success" isDismissible={false}>
                                     <p>
-                                        {__('Settings resetted successfully.', 'simply-static')}
+                                        {__('Settings reset successfully.', 'simply-static')}
                                     </p>
                                 </Notice>
                             )}
@@ -234,7 +288,7 @@ function Utilities() {
                             {() => (
                                 <Notice status="success" isDismissible={false}>
                                     <p>
-                                        {__('Database table resetted successfully.', 'simply-static')}
+                                        {__('Database table reset successfully.', 'simply-static')}
                                     </p>
                                 </Notice>
                             )}
@@ -266,6 +320,8 @@ function Utilities() {
                     <p>{__('Migrate all of your settings to Simply Static 3.0', 'simply-static')}</p>
                     <p>
                         <Button onClick={runMigrateSettings}
+                                disabled={maintenanceLocked || isBusy}
+                                isBusy={pendingAction === 'migrate'}
                                 variant="primary">{__('Migrate settings', 'simply-static')}</Button>
                     </p>
                     {isMigrate ?
@@ -273,7 +329,7 @@ function Utilities() {
                             {() => (
                                 <Notice status="success" isDismissible={false}>
                                     <p>
-                                        {__('Settings migration successfully.', 'simply-static')}
+                                        {__('Settings migration completed successfully.', 'simply-static')}
                                     </p>
                                 </Notice>
                             )}

@@ -53,18 +53,15 @@ class Upgrade_Handler {
 	}
 
 	/**
-	 * Create settings and setup database
-	 * @return void
+	 * Return the canonical defaults used by both installation and reset.
+	 *
+	 * @return array
 	 */
-	public static function run() {
-		self::$options = Options::instance();
-
-		// Check if directory exists, if not, create it.
-		Util::get_temp_dir();
-
-		self::$default_options = array(
+	public static function get_default_options() {
+		$defaults = array(
 			'destination_scheme'            => 'https://',
 			'destination_host'              => '',
+			'destination_url'               => '',
 			'temp_files_dir'                => '',
 			'additional_urls'               => '',
 			'additional_files'              => '',
@@ -73,9 +70,16 @@ class Upgrade_Handler {
 			'local_dir'                     => '',
 			'relative_path'                 => '',
 			'destination_url_type'          => 'relative',
-			'debugging_mode'                => true,
+			'generate_type'                 => 'export',
+			'debugging_mode'                => false,
 			'server_cron'                   => false,
 			'whitelist_plugins'             => '',
+			'crawlers'                      => null,
+			'post_types'                    => array(),
+			'post_types_configured'         => false,
+			'plugins_to_include'            => array(),
+			'themes_to_include'             => array(),
+			'http_basic_auth_on'            => false,
 			'http_basic_auth_username'      => '',
 			'http_basic_auth_password'      => '',
 			'origin_url'                    => '',
@@ -103,6 +107,7 @@ class Upgrade_Handler {
 			'github_webhook_url'            => '',
 			'github_folder_path'            => '',
 			'github_throttle_requests'      => false,
+			'github_batch_size'             => 100,
 			'aws_auth_method'               => 'aws-iam-key',
 			'aws_region'                    => 'us-east-2',
 			'aws_access_key'                => '',
@@ -112,13 +117,24 @@ class Upgrade_Handler {
 			'aws_distribution_id'           => '',
 			'aws_webhook_url'               => '',
 			'aws_empty'                     => false,
+			'aws_disable_acl'               => false,
 			's3_access_key'                 => '',
 			's3_base_url'                   => '',
 			's3_access_secret'              => '',
 			's3_bucket'                     => '',
 			's3_subdirectory'               => '',
+			'fix_cors'                      => 'allowed_http_origins',
+			'static_url'                    => '',
 			'use_forms'                     => false,
 			'use_form_conditional_loading'  => false,
+			'save_form_entries'             => false,
+			'captcha_service'               => '',
+			'cloudflare_turnstile_site_key' => '',
+			'cloudflare_turnstile_secret_key' => '',
+			'cloudflare_turnstile_theme'    => 'auto',
+			'cloudflare_turnstile_size'     => 'normal',
+			'recaptcha_site_key'            => '',
+			'recaptcha_secret_key'          => '',
 			'use_comments'                  => false,
 			'comment_redirect'              => '',
 			'use_search'                    => false,
@@ -136,14 +152,28 @@ class Upgrade_Handler {
 			'fuse_weight_title'             => 1,
 			'fuse_weight_content'           => 1,
 			'fuse_weight_excerpt'           => 1,
+			'search_show_submit'            => false,
+			'search_show_excerpt'           => false,
+			'search_placeholder'            => '',
+			'search_submit_text'            => '',
+			'search_fuse_show_submit'       => false,
+			'search_fuse_placeholder'       => '',
+			'search_fuse_submit_text'       => '',
 			'algolia_app_id'                => '',
 			'algolia_admin_api_key'         => '',
 			'algolia_search_api_key'        => '',
 			'algolia_index'                 => 'simply_static',
 			'algolia_selector'              => '.search-field',
 			'use_minify'                    => false,
+			'minify_html'                   => false,
 			'minify_css'                    => false,
+			'minify_inline_css'             => false,
 			'minify_js'                     => false,
+			'minify_inline_js'              => false,
+			'minify_css_exclude'            => '',
+			'minify_js_exclude'             => '',
+			'version_css'                   => false,
+			'version_js'                    => false,
 			'use_css_optimize'              => false,
 			'css_optimize_defer_css'        => false,
 			'css_optimize_defer_js'         => false,
@@ -188,6 +218,26 @@ class Upgrade_Handler {
 			'sftp_folder'                   => '',
 			'sftp_port'                     => 22,
 			'sftp_bulk_upload'              => false,
+			'sftp_private_key'              => '',
+			'shortpixel_enabled'            => false,
+			'shortpixel_api_key'            => '',
+			'shortpixel_webp_enabled'       => false,
+			'shortpixel_backup_enabled'     => false,
+			'ss_use_single_exports'         => true,
+			'ss_use_builds'                 => false,
+			'ss_single_pages'               => array(),
+			'ss_single_taxonomy_archives'   => array( 'category', 'post_tag' ),
+			'ss_single_include_archives'    => true,
+			'ss_single_include_pagination'  => true,
+			'ss_single_export_add_xml_sitemap' => false,
+			'ss_single_auto_export'         => false,
+			'ss_single_auto_export_delay'   => 0,
+			'ss_single_auto_export_types'   => array(),
+			'ss_single_export_webhook_url'  => '',
+			'ss_webhook_url'                => '',
+			'ss_webhook_enabled_types'      => array( 'export', 'update', 'build', 'single' ),
+			'ss_tools_submenu'              => false,
+			'ss_uam_access'                 => array(),
 			'archive_status_messages'       => array(),
 			'archive_deploy_id'             => null,
 			'deploy_manifest_schema_version'=> null,
@@ -195,8 +245,27 @@ class Upgrade_Handler {
 			'archive_name'                  => null,
 			'archive_start_time'            => null,
 			'archive_end_time'              => null,
+			'archive_task_list'             => array(),
 			'version'                       => SIMPLY_STATIC_VERSION,
-		);
+			);
+
+		$filtered = apply_filters( 'ss_default_options', $defaults );
+
+		return is_array( $filtered ) ? $filtered : $defaults;
+	}
+
+	/**
+	 * Create settings and setup database.
+	 *
+	 * @return void
+	 */
+	public static function run() {
+		self::$options = Options::instance();
+
+		// Check if directory exists, if not, create it.
+		Util::get_temp_dir();
+
+		self::$default_options = self::get_default_options();
 
 		$version = self::$options->get( 'version' );
 		self::maybe_update_manifest_schema();

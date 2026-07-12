@@ -9,6 +9,7 @@ class Migrate_Settings {
 	 */
 	public static function migrate() {
 		$options = get_option( 'simply-static' );
+		$options = is_array( $options ) ? $options : array();
 
 		if ( isset( $options['debugging_mode'] ) && $options['debugging_mode'] == '1' ) {
 			$options['debugging_mode'] = true;
@@ -29,12 +30,15 @@ class Migrate_Settings {
 		}
 
 		if ( isset( $options['http_basic_auth_digest'] ) && $options['http_basic_auth_digest'] ) {
-			$decoded = base64_decode( $options['http_basic_auth_digest'] );
-			$decoded = explode( ':', $decoded );
-
-			$options['http_basic_auth_username'] = $decoded[0];
-			$options['http_basic_auth_password'] = $decoded[1];
+			$decoded   = base64_decode( (string) $options['http_basic_auth_digest'], true );
+			$separator = is_string( $decoded ) ? strpos( $decoded, ':' ) : false;
+			if ( false !== $separator ) {
+				$options['http_basic_auth_username'] = substr( $decoded, 0, $separator );
+				// Passwords may legitimately contain additional colons.
+				$options['http_basic_auth_password'] = substr( $decoded, $separator + 1 );
+			}
 		}
+		unset( $options['http_basic_auth_digest'] );
 
 		if ( isset( $options['urls_to_exclude'] ) ) {
 			if ( is_array( $options['urls_to_exclude'] ) ) {
@@ -45,6 +49,8 @@ class Migrate_Settings {
 				}
 
 				$options['urls_to_exclude'] = implode( "\n", $urls_to_exclude );
+			} elseif ( is_scalar( $options['urls_to_exclude'] ) ) {
+				$options['urls_to_exclude'] = sanitize_textarea_field( (string) $options['urls_to_exclude'] );
 			} else {
 				$options['urls_to_exclude'] = '';
 			}
@@ -68,11 +74,6 @@ class Migrate_Settings {
 		if ( isset( $options['tiiny-domain-suffix'] ) ) {
 			$options['tiiny_domain_suffix'] = $options['tiiny-domain-suffix'];
 			unset( $options['tiiny-domain-suffix'] );
-		}
-
-		if ( isset( $options['tiiny-password'] ) ) {
-			$options['tiiny_password'] = $options['tiiny-password'];
-			unset( $options['tiiny-password'] );
 		}
 
 		if ( isset( $options['tiiny-password'] ) ) {
@@ -193,7 +194,7 @@ class Migrate_Settings {
 			}
 
 			if ( 0 == $require_name_mail ) {
-				update_option( 'comment_registration', 1 );
+				update_option( 'require_name_email', 1 );
 			}
 
 		} else {
@@ -237,11 +238,16 @@ class Migrate_Settings {
 		if ( isset( $options['search-excludable'] ) ) {
 			$search_urls_to_exclude = [];
 
-			foreach ( $options['search-excludable'] as $url => $data ) {
-				$search_urls_to_exclude[] = $url;
+			if ( is_array( $options['search-excludable'] ) ) {
+				foreach ( $options['search-excludable'] as $url => $data ) {
+					$search_urls_to_exclude[] = $url;
+				}
+				$options['search_excludable'] = implode( "\n", $search_urls_to_exclude );
+			} elseif ( is_scalar( $options['search-excludable'] ) ) {
+				$options['search_excludable'] = sanitize_textarea_field( (string) $options['search-excludable'] );
+			} else {
+				$options['search_excludable'] = '';
 			}
-
-			$options['search_excludable'] = implode( "\n", $search_urls_to_exclude );
 			unset( $options['search-excludable'] );
 		}
 

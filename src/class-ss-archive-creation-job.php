@@ -57,14 +57,17 @@ class Archive_Creation_Job extends Background_Process {
 	public function __construct() {
 		$this->options = Options::instance();
 
-		if ( ! $this->is_job_done() ) {
-			register_shutdown_function( array( $this, 'shutdown_handler' ) );
-		}
+		// The job may be constructed while idle and then start inline in this same
+		// request. Register unconditionally; shutdown_handler() has its own strict
+		// is_task_processing guard, so unrelated requests remain unaffected.
+		register_shutdown_function( array( $this, 'shutdown_handler' ) );
 
 		// Set the cron interval for the job
 		add_filter( 'wp_archive_creation_job_cron_interval', array( $this, 'set_job_interval' ) );
 
-		parent::__construct();
+		// The queue stores task-name scalars only. Disallow object hydration so a
+		// tampered option cannot trigger PHP object-injection gadget methods.
+		parent::__construct( false );
 
 		// Marking on REST API for now.
 		//add_action( $this->identifier . '_paused', [ $this, 'mark_as_paused' ] );
@@ -101,7 +104,42 @@ class Archive_Creation_Job extends Background_Process {
 	}
 
 	public function get_task_list() {
-		return apply_filters( 'simplystatic.archive_creation_job.task_list', array(), $this->options->get( 'delivery_method' ) );
+		$start_time = $this->options->get( 'archive_start_time' );
+		$end_time   = $this->options->get( 'archive_end_time' );
+		$snapshot   = $this->options->get( 'archive_task_list' );
+
+		// Once an export is active, its task sequence must be immutable. Re-running
+		// live filters here would allow settings/integration changes to skip or
+		// replace delivery tasks halfway through an export.
+		if ( null !== $start_time && null === $end_time && is_array( $snapshot ) ) {
+			return array_values(
+				array_filter(
+					$snapshot,
+					static function ( $task_name ) {
+						return is_string( $task_name ) && '' !== $task_name;
+					}
+				)
+			);
+		}
+
+		$task_list = apply_filters(
+			'simplystatic.archive_creation_job.task_list',
+			array(),
+			$this->options->get( 'delivery_method' )
+		);
+
+		if ( ! is_array( $task_list ) ) {
+			return array();
+		}
+
+		return array_values(
+			array_filter(
+				$task_list,
+				static function ( $task_name ) {
+					return is_string( $task_name ) && '' !== $task_name;
+				}
+			)
+		);
 	}
 
 	/**
@@ -129,67 +167,155 @@ class Archive_Creation_Job extends Background_Process {
 	public function start( $blog_id = 0, $type = 'export' ) {
 		// Clear log before running the job.
 		Util::clear_debug_log();
+		$failure_notified   = false;
+		$start_lock_acquired = false;
 
-		do_action( 'ss_archive_creation_job_before_start', $blog_id, $this );
+		try {
+			do_action( 'ss_archive_creation_job_before_start', $blog_id, $this );
+			$this->set_current_site_id( $blog_id ?: get_current_blog_id() );
 
-		if ( $this->is_job_done() ) {
-			// Persist the requested type before building the task list so filters
-			// can decide between export/update behavior without reading stale options.
-			$this->options
-				->set( 'generate_type', $type )
-				->save();
+			// Serialize the check/state/queue transition itself. Worker-level locks
+			// alone are too late: two start requests can otherwise both see an idle
+			// job and enqueue duplicate batches before either worker begins.
+			if ( $this->has_active_process_lock() || false === $this->lock_process() ) {
+				Util::debug_log( "Not starting; another request owns the archive start lock" );
+				do_action( 'ss_archive_creation_job_already_running', $blog_id, $this );
 
-			$task_list = $this->get_task_list();
+				return false;
+			}
+			$start_lock_acquired = true;
 
-			Util::debug_log( "Starting a job; no job is presently running" );
-			Util::debug_log( "Here's our task list: " . implode( ', ', $task_list ) );
+			if ( $this->is_job_done() && ! $this->is_queued() && ! $this->is_paused() && ! $this->is_cancelled() ) {
+				// Persist the requested type before building the task list so filters
+				// can decide between export/update behavior without reading stale options.
+				$this->options
+					->set( 'generate_type', $type )
+					->save();
 
-			do_action( 'ss_archive_creation_job_before_start_queue', $blog_id, $this );
+				$task_list       = $this->get_task_list();
+				$this->task_list = $task_list;
 
-			$first_task = $task_list[0];
+				Util::debug_log( "Starting a job; no job is presently running" );
+				Util::debug_log( "Here's our task list: " . implode( ', ', $task_list ) );
 
-			if ( 'update' !== $type ) {
-				$archive_name = join( '-', array( Plugin::SLUG, $blog_id, time() ) );
-				$this->options->set( 'archive_name', $archive_name );
+				do_action( 'ss_archive_creation_job_before_start_queue', $blog_id, $this );
+
+				if ( empty( $task_list ) ) {
+					$this->options->set( 'archive_task_list', array() );
+					$this->save_status_message(
+						__( 'Unable to start export because no archive tasks were registered.', 'simply-static' ),
+						'error'
+					);
+					$this->unlock_process();
+					$start_lock_acquired = false;
+					$failure_notified = true;
+					do_action( 'ss_archive_creation_job_start_failed', $blog_id, $this );
+
+					return false;
+				}
+
+				$first_task = $task_list[0];
+
+				if ( 'update' !== $type ) {
+					$archive_name = join( '-', array( Plugin::SLUG, $blog_id, time() ) );
+					$this->options->set( 'archive_name', $archive_name );
+				}
+
+				$this->options
+					->set( 'archive_status_messages', array() )
+					->set( 'archive_deploy_id', function_exists( 'wp_generate_uuid4' ) ? wp_generate_uuid4() : uniqid( 'deploy_', true ) )
+					->set( 'archive_start_time', Util::formatted_datetime() )
+					->set( 'archive_end_time', null )
+					->set( 'generate_type', $type )
+					->set( 'archive_task_list', $task_list )
+					->set( 'zip_batch_offset', null )
+					->set( 'zip_total_files', null )
+					->set( 'zip_files', null )
+					->save();
+
+				Util::debug_log( "Pushing first task to queue: " . $first_task );
+
+				$this->push_to_queue( $first_task )
+					->save();
+
+				if ( method_exists( $this, 'was_last_queue_save_successful' ) && ! $this->was_last_queue_save_successful() ) {
+					$this->abort_failed_start(
+						__( 'Unable to start the export because the background queue could not be saved.', 'simply-static' ),
+						$start_lock_acquired
+					);
+					$start_lock_acquired = false;
+					$failure_notified    = true;
+					do_action( 'ss_archive_creation_job_start_failed', $blog_id, $this );
+
+					return false;
+				}
+
+				// Release the short start gate before dispatch; the worker will acquire
+				// the same process lock for queue execution.
+				$this->unlock_process();
+				$start_lock_acquired = false;
+				$dispatch_result = $this->dispatch();
+				if ( false === $dispatch_result && ! $this->is_processing() ) {
+					$this->abort_failed_start(
+						__( 'Unable to start the export because the background worker could not be dispatched.', 'simply-static' ),
+						false
+					);
+					$failure_notified = true;
+					do_action( 'ss_archive_creation_job_start_failed', $blog_id, $this );
+
+					return false;
+				}
+
+				do_action( 'ss_archive_creation_job_after_start_queue', $blog_id, $this );
+
+				return true;
+			} else {
+				$this->unlock_process();
+				$start_lock_acquired = false;
+				Util::debug_log( "Not starting; we're already in the middle of a job" );
+				// looks like we're in the middle of creating an archive...
+				do_action( 'ss_archive_creation_job_already_running', $blog_id, $this );
+
+				return false;
+			}
+		} catch ( \Throwable $exception ) {
+			if ( $start_lock_acquired ) {
+				$this->unlock_process();
 			}
 
-			$this->options
-				->set( 'archive_status_messages', array() )
-				->set( 'archive_deploy_id', function_exists( 'wp_generate_uuid4' ) ? wp_generate_uuid4() : uniqid( 'deploy_', true ) )
-				->set( 'archive_start_time', Util::formatted_datetime() )
-				->set( 'archive_end_time', null )
-				->set( 'generate_type', $type )
-				->set( 'zip_batch_offset', null )
-				->set( 'zip_total_files', null )
-				->set( 'zip_files', null )
-				->save();
+			if ( ! $failure_notified ) {
+				try {
+					do_action( 'ss_archive_creation_job_start_failed', $blog_id, $this, $exception );
+				} catch ( \Throwable $cleanup_exception ) {
+					Util::debug_log( 'Archive start cleanup failed: ' . $cleanup_exception->getMessage() );
+				}
+			}
 
-			Util::debug_log( "Pushing first task to queue: " . $first_task );
-
-			// Set the current site ID for multisite support
-			$this->set_current_site_id( $blog_id );
-
-			// Clear any stale process lock left behind by a previous crashed or
-			// timed-out run. Without this, dispatch() silently returns false when
-			// is_processing() finds an orphaned transient lock, and because the
-			// early return happens before schedule_event(), no cron healthcheck
-			// is registered either — leaving the job permanently stuck.
-			$this->unlock_process();
-
-			$this->push_to_queue( $first_task )
-			     ->save()
-			     ->dispatch();
-
-			do_action( 'ss_archive_creation_job_after_start_queue', $blog_id, $this );
-
-			return true;
-		} else {
-			Util::debug_log( "Not starting; we're already in the middle of a job" );
-			// looks like we're in the middle of creating an archive...
-			do_action( 'ss_archive_creation_job_already_running', $blog_id, $this );
-
-			return false;
+			throw $exception;
 		}
+	}
+
+	/**
+	 * Roll back queue and archive state after a pre-worker start failure.
+	 *
+	 * @param string $message             User-facing failure message.
+	 * @param bool   $start_lock_acquired Whether the short start lock is held.
+	 *
+	 * @return void
+	 */
+	protected function abort_failed_start( $message, $start_lock_acquired ) {
+		if ( $start_lock_acquired ) {
+			$this->unlock_process();
+		}
+
+		$this->clear_scheduled_event();
+		$this->delete_all();
+		$this->task_list = array();
+		$this->options
+			->set( 'archive_end_time', Util::formatted_datetime() )
+			->set( 'archive_task_list', array() )
+			->save();
+		$this->save_status_message( $message, 'error' );
 	}
 
 	/**
@@ -233,62 +359,62 @@ class Archive_Creation_Job extends Background_Process {
 
 		Util::debug_log( "Current task: " . $task_name );
 
-		$task = $this->get_task_object( $task_name );
-
-		if ( false === $task ) {
-			return false;
-		}
-
-		if ( $this->is_paused() ) {
-			return $task_name;
-		}
-
-		// attempt to perform the task
 		try {
+			// Construction is part of task execution: integration constructors can
+			// throw Error/TypeError just as perform() can.
+			$task = $this->get_task_object( $task_name );
+
+			if ( false === $task ) {
+				$message = sprintf(
+					__( 'Unable to run archive task because its class is unavailable: %s', 'simply-static' ),
+					$task_name
+				);
+				$this->options->set( 'archive_end_time', Util::formatted_datetime() );
+				$this->save_status_message( $message, 'error' );
+				do_action( 'ss_completed', 'error', $message );
+
+				// Let the regular cancellation task run its cleanup when available.
+				// If that class is itself missing, remove the queue item to avoid an
+				// endless retry loop.
+				return 'cancel' === $task_name ? false : 'cancel';
+			}
+
+			if ( $this->is_paused() ) {
+				return $task_name;
+			}
+
 			Util::debug_log( 'Performing task: ' . $task_name );
 			$is_done = $task->perform();
 
 			Util::debug_log( 'Task performed: ' . (bool)$is_done );
-		} catch (Pause_Exception $e ) {
-			// If it's a pause execption, just return task since we've paused the execution of tha tasks.
-			return $task_name;
-		} catch ( \Exception $e ) {
-			Util::debug_log( 'Caught an exception' );
 
-			return $this->exception_occurred( $e );
-		}
+			if ( is_wp_error( $is_done ) ) {
+				Util::debug_log( "We encountered a WP_Error" );
+				return $this->error_occurred( $is_done );
+			}
 
-		if ( is_wp_error( $is_done ) ) {
-			// we've hit an error, time to quit
-			Util::debug_log( "We encountered a WP_Error" );
+			if ( true === $is_done ) {
+				$next_task = $this->find_next_task();
+				if ( null === $next_task ) {
+					Util::debug_log( "This task is done and there are no more tasks, time to complete the job" );
+					return false;
+				}
 
-			return $this->error_occurred( $is_done );
-		} else if ( $is_done === true ) {
-			// finished current task, try to find the next one
-			$next_task = $this->find_next_task();
-			if ( $next_task === null ) {
-				Util::debug_log( "This task is done and there are no more tasks, time to complete the job" );
-
-				// we're done; returning false to remove item from queue
-				return false;
-			} else {
 				Util::debug_log( "We've found our next task: " . $next_task );
-
+				// Cleanup/initialization hooks are also untrusted integration code and
+				// must participate in the same terminal failure path.
 				$this->task_cleanup( $next_task );
-
-				// start the next task
 				return $next_task;
 			}
-		} else { // $is_done === false
+
 			Util::debug_log( "We're not done with the " . $task_name . " task yet" );
-
-			// returning current task name to continue processing
 			return $task_name;
+		} catch ( Pause_Exception $exception ) {
+			return $task_name;
+		} catch ( \Throwable $exception ) {
+			Util::debug_log( 'Caught a task throwable' );
+			return $this->exception_occurred( $exception );
 		}
-
-		Util::debug_log( "We shouldn't have gotten here; returning false to remove the " . $task_name . " task from the queue" );
-
-		return false; // remove item from queue
 	}
 
 	/**
@@ -314,6 +440,17 @@ class Archive_Creation_Job extends Background_Process {
 	protected function complete() {
 		Util::debug_log( "Completing the job" );
 
+		// Error and exception handlers persist an end time before queueing the
+		// cancellation cleanup task. Once that task empties the queue, only clear
+		// background-process state; never overwrite the terminal result with a
+		// misleading Done/success event.
+		if ( $this->is_job_done() ) {
+			$this->task_list = array();
+			$this->options->set( 'archive_task_list', array() )->save();
+			parent::complete();
+			return;
+		}
+
 		$this->set_current_task( 'done' );
 
 		$end_time    = Util::formatted_datetime();
@@ -321,7 +458,10 @@ class Archive_Creation_Job extends Background_Process {
 		$duration    = strtotime( $end_time ) - strtotime( $start_time );
 		$time_string = gmdate( "H:i:s", $duration );
 
-		$this->options->set( 'archive_end_time', $end_time );
+		$this->task_list = array();
+		$this->options
+			->set( 'archive_end_time', $end_time )
+			->set( 'archive_task_list', array() );
 
 		$this->save_status_message( sprintf( __( 'Done! Finished in %s', 'simply-static' ), $time_string ) );
 		parent::complete();
@@ -336,42 +476,34 @@ class Archive_Creation_Job extends Background_Process {
 	 */
 	public function cancel() {
 		if ( ! $this->is_job_done() ) {
-			if ( $this->is_paused() ) {
-				$this->resume();
-			}
-			/*Util::debug_log( "Cancelling job; job is not done" );
+			// Publish cancellation before cleanup or dispatch. Resuming a paused job
+			// first creates a race where a worker can execute real tasks before the
+			// cancellation flag becomes visible.
+			update_option( $this->get_status_key(), self::STATUS_CANCELLED );
 
-			if ( $this->is_queue_empty() ) {
-				Util::debug_log( "The queue is empty, pushing the cancel task" );
-				// generally the queue shouldn't be empty when we get a request to
-				// cancel, but if we do, add a cancel task and start processing it.
-				// that should get the job back into a state where it can be
-				// started again.
-				$this->push_to_queue( 'cancel' )
-				     ->save();
-			} else {
-				Util::debug_log( "The queue isn't empty; overwriting current task with a cancel task" );
-				// unlock the process so that we can force our cancel task to process
-				$this->unlock_process();
-
-				// overwrite whatever the current task is with the cancel task
-				$batch       = $this->get_batch();
-				$batch->data = array( 'cancel' );
-				$this->update( $batch->key, $batch->data );
-			}*/
-
-			$end_time    = Util::formatted_datetime();
+			$end_time       = Util::formatted_datetime();
+			$this->task_list = array();
 			$this->options
 				->set( 'archive_end_time', $end_time )
+				->set( 'archive_task_list', array() )
 				->save();
 
-			$cancel_task = new Cancel_Task();
+			$cancel_task = $this->get_cancel_task();
 			$cancel_task->perform();
 
 			parent::cancel();
 		} else {
 			Util::debug_log( "Can't cancel; job is done" );
 		}
+	}
+
+	/**
+	 * Create the cancellation cleanup task.
+	 *
+	 * @return Cancel_Task
+	 */
+	protected function get_cancel_task() {
+		return new Cancel_Task();
 	}
 
 	/**
@@ -500,6 +632,22 @@ class Archive_Creation_Job extends Background_Process {
 	}
 
 	/**
+	 * Clear request-local task state after an administrator resets the queue.
+	 *
+	 * Queue/status persistence is cleared by the reset controller. This method
+	 * prevents the existing in-memory job instance from continuing to report a
+	 * stale task during the remainder of that request.
+	 *
+	 * @return void
+	 */
+	public function reset_runtime_state() {
+		$this->current_task       = null;
+		$this->task_list          = array();
+		$this->is_task_processing = false;
+		$this->options->set( 'archive_task_list', array() )->save();
+	}
+
+	/**
 	 * Set the current task name
 	 *
 	 * @param string $task_name The name of the current task
@@ -552,7 +700,7 @@ class Archive_Creation_Job extends Background_Process {
 	/**
 	 * Add a status message about the exception and cancel the job
 	 *
-	 * @param \Exception $exception The exception that occurred
+	 * @param \Throwable $exception The throwable that occurred.
 	 *
 	 * @return void
 	 */

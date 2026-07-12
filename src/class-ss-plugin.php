@@ -73,6 +73,9 @@ class Plugin {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 			self::$instance->includes();
+			// Page handlers must register their init callback before WordPress
+			// begins running the init hook.
+			self::$instance->page_handlers = new Page_Handlers();
 
 
    add_action( 'activated_plugin', array( '\\Simply_Static\\Util', 'maybe_auto_include_activated_plugin' ), 10, 2 );
@@ -111,7 +114,6 @@ class Plugin {
 				self::$instance->view                 = new View();
 				$archive_job_class = apply_filters( 'ss_archive_creation_job_class', '\\Simply_Static\\Archive_Creation_Job' );
 				self::$instance->archive_creation_job = new $archive_job_class();
-				self::$instance->page_handlers        = new Page_Handlers();
 
 				// Set up pagination.
 				$page                         = isset( $_GET['page'] ) ? $_GET['page'] : '';
@@ -257,6 +259,44 @@ class Plugin {
 			return false;
 		}
 
+		// PHP_AUTH_USER and an explicit Basic Authorization scheme are reliable
+		// Basic Auth signals. REMOTE_USER/AUTH_USER may instead come from SSO,
+		// Kerberos, or a reverse proxy and must not block otherwise valid exports.
+		$basic_auth_on = isset( $_SERVER['PHP_AUTH_USER'] )
+			&& is_string( $_SERVER['PHP_AUTH_USER'] )
+			&& '' !== $_SERVER['PHP_AUTH_USER'];
+		foreach ( array( 'HTTP_AUTHORIZATION', 'REDIRECT_HTTP_AUTHORIZATION' ) as $authorization_key ) {
+			if (
+				isset( $_SERVER[ $authorization_key ] )
+				&& is_string( $_SERVER[ $authorization_key ] )
+				&& preg_match( '/^\s*Basic\s+/i', $_SERVER[ $authorization_key ] )
+			) {
+				$basic_auth_on = true;
+				break;
+			}
+		}
+
+		// Exit if Basic Auth but no credentials were provided.
+		if ( $basic_auth_on ) {
+			$options         = get_option( 'simply-static' );
+			$options         = is_array( $options ) ? $options : array();
+			$basic_auth_user = isset( $options['http_basic_auth_username'] ) ? $options['http_basic_auth_username'] : '';
+			$basic_auth_pass = isset( $options['http_basic_auth_password'] ) ? $options['http_basic_auth_password'] : '';
+
+			$credentials_configured = is_string( $basic_auth_user )
+				&& is_string( $basic_auth_pass )
+				&& '' !== $basic_auth_user
+				&& '' !== $basic_auth_pass;
+
+			if ( ! $credentials_configured ) {
+				// Reject the export before dispatching background work. Starting and
+				// immediately cancelling left stale queue and archive state behind.
+				$message = __( 'Missing Basic Auth credentials - you need to configure the Basic Auth credentials in Simply Static -> Settings -> Misc -> Basic Auth to continue the export.', 'simply-static' );
+				$this->archive_creation_job->save_status_message( $message, 'error' );
+				return false;
+			}
+		}
+
 		if ( ! $blog_id ) {
 			$blog_id = get_current_blog_id();
 		}
@@ -265,54 +305,8 @@ class Plugin {
 		// Clear transients.
 		Util::clear_transients();
 
-		// Start export.
-		$this->archive_creation_job->start( $blog_id, $type );
-
-		// Determine server type for basic auth check.
-		$server_type   = esc_html( $_SERVER['SERVER_SOFTWARE'] );
-		$basic_auth_on = false;
-
-		switch ( $server_type ) {
-			case ( strpos( $server_type, 'Apache' ) !== false ) :
-				if ( isset( $_SERVER['PHP_AUTH_USER'] ) && ! empty( $_SERVER['PHP_AUTH_USER'] ) ) {
-					$basic_auth_on = true;
-				}
-				break;
-			case ( strpos( $server_type, 'nginx' ) !== false ) :
-				if ( isset( $_SERVER['REMOTE_USER'] ) && ! empty( $_SERVER['REMOTE_USER'] ) ) {
-					$basic_auth_on = true;
-				}
-				break;
-			case ( strpos( $server_type, 'IIS' ) !== false ) :
-				if ( isset( $_SERVER['AUTH_USER'] ) && ! empty( $_SERVER['AUTH_USER'] ) ) {
-					$basic_auth_on = true;
-				}
-				break;
-		}
-
-		// Exit if Basic Auth but no credentials were provided.
-		if ( $basic_auth_on ) {
-			$options         = get_option( 'simply-static' );
-			$basic_auth_user = $options['http_basic_auth_username'];
-			$basic_auth_pass = $options['http_basic_auth_password'];
-
-			if ( empty( $basic_auth_user ) && empty( $basic_auth_pass ) ) {
-				// Cancel export.
-				$message = __( 'Missing Basic Auth credentials - you need to configure the Basic Auth credentials in Simply Static -> Settings -> Misc -> Basic Auth to continue the export.', 'simply-static' );
-				$this->archive_creation_job->cancel();
-				$this->archive_creation_job->save_status_message( $message, 'error' );
-
-				// Reset logs.
-				$options['archive_name']       = null;
-				$options['archive_start_time'] = null;
-				$options['archive_end_time']   = null;
-
-				update_option( 'simply-static', $options );
-				return false;
-			}
-		}
-
-		return true;
+		// Start export only after all preflight validation succeeds.
+		return (bool) $this->archive_creation_job->start( $blog_id, $type );
 	}
 
 	/**
@@ -373,6 +367,18 @@ class Plugin {
 		do_action( 'ss_before_render_activity_log', $blog_id );
 
 		$log = $this->options->get( 'archive_status_messages' );
+		if ( ! is_array( $log ) ) {
+			$log = array();
+		}
+
+		foreach ( $log as $key => $entry ) {
+			if ( ! is_array( $entry ) ) {
+				unset( $log[ $key ] );
+				continue;
+			}
+			$log[ $key ]['message']  = wp_kses_post( isset( $entry['message'] ) ? $entry['message'] : '' );
+			$log[ $key ]['datetime'] = sanitize_text_field( isset( $entry['datetime'] ) ? $entry['datetime'] : '' );
+		}
 
 		do_action( 'ss_after_render_activity_log', $blog_id, $this->get_archive_creation_job() );
 
@@ -396,8 +402,9 @@ class Plugin {
 
 		do_action( 'ss_before_render_export_log', $blog_id, $this->get_archive_creation_job() );
 
-		$per_page = $per_page ?: 25;
-		$offset   = ( intval( $current_page ) - 1 ) * intval( $per_page );
+		$per_page    = min( 200, max( 1, absint( $per_page ?: 25 ) ) );
+		$current_page = max( 1, absint( $current_page ) );
+		$offset       = ( $current_page - 1 ) * $per_page;
 		$scope    = $this->get_export_log_scope();
 
 		$query = Page::query()
@@ -461,7 +468,11 @@ class Plugin {
 			$parent_static_page = $static_page->parent_static_page();
 			if ( $parent_static_page ) {
 				$display_url = Util::get_path_from_local_url( $parent_static_page->url );
-				$msg         .= "<a href='" . $parent_static_page->url . "'>" . sprintf( __( 'Found on %s', 'simply-static' ), $display_url ) . "</a>";
+				$parent_url  = esc_url( $parent_static_page->url );
+				$label       = sprintf( __( 'Found on %s', 'simply-static' ), $display_url );
+				$msg         .= $parent_url
+					? '<a href="' . esc_attr( $parent_url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $label ) . '</a>'
+					: esc_html( $label );
 			}
 
 			// Combine status messages.
@@ -473,9 +484,9 @@ class Plugin {
 			if ( ! empty ( $static_page->status_message ) ) {
 				if ( strpos( $static_page->status_message, ';' ) !== false ) {
 					$cleaned = implode( '', array_unique( explode( '; ', $static_page->status_message ) ) );
-					$msg     .= $cleaned;
-				} else {
-					$msg .= $static_page->status_message;
+						$msg     .= wp_kses_post( $cleaned );
+					} else {
+						$msg .= wp_kses_post( $static_page->status_message );
 				}
 			} else {
 				$msg .= $static_page->status_message;
@@ -483,11 +494,11 @@ class Plugin {
 
 			$information = [
 				'id'          => $static_page->id,
-				'url'         => $static_page->url,
+					'url'         => esc_url_raw( $static_page->url ),
 				'processable' => in_array( $static_page->http_status_code, Page::$processable_status_codes ),
 				'code'        => $static_page->http_status_code,
-				'notes'       => $msg,
-				'error'       => $static_page->error_message,
+					'notes'       => wp_kses_post( $msg ),
+					'error'       => sanitize_text_field( $static_page->error_message ),
 			];
 
 			$static_pages_formatted[] = $information;
@@ -712,16 +723,14 @@ class Plugin {
 	 */
 	public function add_http_filters( $parsed_args, $url ) {
 
-		if ( ! Util::is_local_url( $url ) ) {
+		if ( ! Util::is_local_origin_url( $url ) ) {
 			return $parsed_args;
 		}
 
-		// Basic Auth?
-		$basic_auth_user = self::$instance->options->get( 'http_basic_auth_username' );
-		$basic_auth_pass = self::$instance->options->get( 'http_basic_auth_password' );
-
-		if ( ! empty( $basic_auth_user ) && ! empty( $basic_auth_pass ) ) {
-			$parsed_args['headers']['Authorization'] = 'Basic ' . base64_encode( $basic_auth_user . ':' . $basic_auth_pass );
+		$authorization = Util::get_basic_auth_header_for_url( $url );
+		if ( null !== $authorization ) {
+			$parsed_args['headers']                  = isset( $parsed_args['headers'] ) && is_array( $parsed_args['headers'] ) ? $parsed_args['headers'] : array();
+			$parsed_args['headers']['Authorization'] = $authorization;
 		}
 
 		return $parsed_args;

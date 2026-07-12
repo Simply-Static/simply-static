@@ -590,22 +590,24 @@ class Diagnostic {
 		$message = __( 'Basic Auth is not enabled.', 'simply-static' );
 
 		// Determine server type for basic auth check.
-		$server_type   = esc_html( $_SERVER['SERVER_SOFTWARE'] );
+		$server_type   = isset( $_SERVER['SERVER_SOFTWARE'] ) && is_string( $_SERVER['SERVER_SOFTWARE'] )
+			? wp_unslash( $_SERVER['SERVER_SOFTWARE'] )
+			: '';
 		$basic_auth_on = false;
 
-		switch ( $server_type ) {
-			case ( strpos( $server_type, 'Apache' ) !== false ) :
-				if ( isset( $_SERVER['PHP_AUTH_USER'] ) && ! empty( $_SERVER['PHP_AUTH_USER'] ) ) {
+		switch ( true ) {
+			case false !== stripos( $server_type, 'Apache' ):
+				if ( isset( $_SERVER['PHP_AUTH_USER'] ) && is_string( $_SERVER['PHP_AUTH_USER'] ) && '' !== $_SERVER['PHP_AUTH_USER'] ) {
 					$basic_auth_on = true;
 				}
 				break;
-			case ( strpos( $server_type, 'nginx' ) !== false ) :
-				if ( isset( $_SERVER['REMOTE_USER'] ) && ! empty( $_SERVER['REMOTE_USER'] ) ) {
+			case false !== stripos( $server_type, 'nginx' ):
+				if ( isset( $_SERVER['REMOTE_USER'] ) && is_string( $_SERVER['REMOTE_USER'] ) && '' !== $_SERVER['REMOTE_USER'] ) {
 					$basic_auth_on = true;
 				}
 				break;
-			case ( strpos( $server_type, 'IIS' ) !== false ) :
-				if ( isset( $_SERVER['AUTH_USER'] ) && ! empty( $_SERVER['AUTH_USER'] ) ) {
+			case false !== stripos( $server_type, 'IIS' ):
+				if ( isset( $_SERVER['AUTH_USER'] ) && is_string( $_SERVER['AUTH_USER'] ) && '' !== $_SERVER['AUTH_USER'] ) {
 					$basic_auth_on = true;
 				}
 				break;
@@ -616,7 +618,7 @@ class Diagnostic {
 			$basic_auth_user = $this->options->get( 'http_basic_auth_username' );
 			$basic_auth_pass = $this->options->get( 'http_basic_auth_password' );
 
-			if ( empty( $basic_auth_user ) && empty( $basic_auth_pass ) ) {
+			if ( ! is_string( $basic_auth_user ) || ! is_string( $basic_auth_pass ) || '' === $basic_auth_user || '' === $basic_auth_pass ) {
 				$test    = false;
 				$message = __( 'Basic Auth is enabled, but no username or password is set in Simply Static -> Settings -> Debug -> Basic Auth', 'simply-static' );
 			} else {

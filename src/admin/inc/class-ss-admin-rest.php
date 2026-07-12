@@ -18,8 +18,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Admin_Rest {
 
+	/** SHA-256 of the reviewed Static Studio migration package. */
+	const STUDIO_MIGRATE_PACKAGE_SHA256 = '4e9e4e86a429603367e15f181f1631d8459fe0ba2a7c16b5b89add72da0f954f';
+
     /** @var Admin_Rest|null */
     protected static $instance = null;
+
+	/** @var bool */
+	protected $routes_registered = false;
 
     /**
      * Return singleton instance.
@@ -46,15 +52,18 @@ class Admin_Rest {
      * @return void
      */
     public function rest_api_init() {
-        $settings = Admin_Settings::get_instance();
+		if ( $this->routes_registered ) {
+			return;
+		}
+		$this->routes_registered = true;
 
         // Multisite-only endpoints
         if ( is_multisite() ) {
             register_rest_route( 'simplystatic/v1', '/sites', array(
                 'methods'             => 'GET',
-                'callback'            => [ $this, 'get_sites' ],
-                'permission_callback' => function () {
-                    return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+				'callback'            => [ $this, 'get_sites' ],
+				'permission_callback' => function () {
+					return current_user_can( 'manage_network_options' );
                 },
             ) );
 
@@ -76,9 +85,9 @@ class Admin_Rest {
 
             register_rest_route( 'simplystatic/v1', '/reset-export-lock', array(
                 'methods'             => 'POST',
-                'callback'            => [ $this, 'reset_export_lock' ],
-                'permission_callback' => function () {
-                    return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+				'callback'            => [ $this, 'reset_export_lock' ],
+				'permission_callback' => function () {
+					return current_user_can( 'manage_network_options' );
                 },
             ) );
         }
@@ -201,11 +210,11 @@ class Admin_Rest {
             },
         ) );
 
-        register_rest_route( 'simplystatic/v1', '/update-from-network', array(
+		register_rest_route( 'simplystatic/v1', '/update-from-network', array(
             'methods'             => 'POST',
             'callback'            => [ $this, 'update_from_network' ],
-            'permission_callback' => function () {
-                return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+			'permission_callback' => function () {
+				return current_user_can( 'manage_network_options' );
             },
         ) );
 
@@ -237,7 +246,7 @@ class Admin_Rest {
             'methods'             => 'POST',
             'callback'            => [ $this, 'reset_diagnostics' ],
             'permission_callback' => function () {
-                return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'diagnostics' ) );
             },
         ) );
 
@@ -245,7 +254,7 @@ class Admin_Rest {
             'methods'             => 'GET',
             'callback'            => [ $this, 'get_system_status' ],
             'permission_callback' => function () {
-                return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'diagnostics' ) );
             },
         ) );
 
@@ -253,7 +262,7 @@ class Admin_Rest {
             'methods'             => 'GET',
             'callback'            => [ $this, 'check_system_status_passed' ],
             'permission_callback' => function () {
-                return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'diagnostics' ) );
             },
         ) );
 
@@ -265,21 +274,17 @@ class Admin_Rest {
             },
         ) );
 
-        register_rest_route( 'simplystatic/v1', '/activity-log', array(
-            'methods'             => 'GET',
-            'callback'            => [ $this, 'get_activity_log' ],
-            'permission_callback' => function () {
-                return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'activity-log' ) );
-            },
-        ) );
+		register_rest_route( 'simplystatic/v1', '/activity-log', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'get_activity_log' ],
+			'permission_callback' => [ $this, 'can_view_activity_log_for_request' ],
+		) );
 
-        register_rest_route( 'simplystatic/v1', '/export-log', array(
-            'methods'             => 'GET',
-            'callback'            => [ $this, 'get_export_log' ],
-            'permission_callback' => function () {
-                return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'activity-log' ) );
-            },
-        ) );
+		register_rest_route( 'simplystatic/v1', '/export-log', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'get_export_log' ],
+			'permission_callback' => [ $this, 'can_view_activity_log_for_request' ],
+		) );
 
         register_rest_route( 'simplystatic/v1', '/exports', array(
             'methods'             => 'GET',
@@ -329,51 +334,41 @@ class Admin_Rest {
             },
         ) );
 
-        register_rest_route( 'simplystatic/v1', '/start-export', array(
-            'methods'             => 'POST',
-            'callback'            => [ $this, 'start_export' ],
-            'permission_callback' => function () {
-                return current_user_can( apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ) );
-            },
-        ) );
+		register_rest_route( 'simplystatic/v1', '/start-export', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'start_export' ],
+			'permission_callback' => [ $this, 'can_generate_for_request' ],
+		) );
 
-        register_rest_route( 'simplystatic/v1', '/cancel-export', array(
-            'methods'             => 'POST',
-            'callback'            => [ $this, 'cancel_export' ],
-            'permission_callback' => function () {
-                return current_user_can( apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ) );
-            },
-        ) );
+		register_rest_route( 'simplystatic/v1', '/cancel-export', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'cancel_export' ],
+			'permission_callback' => [ $this, 'can_generate_for_request' ],
+		) );
 
-        register_rest_route( 'simplystatic/v1', '/pause-export', array(
-            'methods'             => 'POST',
-            'callback'            => [ $this, 'pause_export' ],
-            'permission_callback' => function () {
-                return current_user_can( apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ) );
-            },
-        ) );
+		register_rest_route( 'simplystatic/v1', '/pause-export', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'pause_export' ],
+			'permission_callback' => [ $this, 'can_generate_for_request' ],
+		) );
 
-        register_rest_route( 'simplystatic/v1', '/resume-export', array(
-            'methods'             => 'POST',
-            'callback'            => [ $this, 'resume_export' ],
-            'permission_callback' => function () {
-                return current_user_can( apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ) );
-            },
-        ) );
+		register_rest_route( 'simplystatic/v1', '/resume-export', array(
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'resume_export' ],
+			'permission_callback' => [ $this, 'can_generate_for_request' ],
+		) );
 
-        register_rest_route( 'simplystatic/v1', '/is-running', array(
-            'methods'             => 'GET',
-            'callback'            => [ $this, 'is_running' ],
-            'permission_callback' => function () {
-                return current_user_can( apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ) );
-            },
-        ) );
+		register_rest_route( 'simplystatic/v1', '/is-running', array(
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'is_running' ],
+			'permission_callback' => [ $this, 'can_generate_for_request' ],
+		) );
 
-        register_rest_route( 'simplystatic/v1', '/clear-temp-files', array(
+		register_rest_route( 'simplystatic/v1', '/clear-temp-files', array(
             'methods'             => 'POST',
             'callback'            => [ $this, 'clear_temp_files' ],
-            'permission_callback' => function () {
-                return current_user_can( apply_filters( 'ss_user_capability', 'publish_pages', 'generate' ) );
+			'permission_callback' => function () {
+				return current_user_can( apply_filters( 'ss_user_capability', 'manage_options', 'settings' ) );
             },
         ) );
 
@@ -384,6 +379,68 @@ class Admin_Rest {
                 return current_user_can( 'install_plugins' ) && current_user_can( 'activate_plugins' );
             },
         ) );
+    }
+
+    /**
+     * Authorize an export action against the requested target site.
+     *
+     * @param \WP_REST_Request|null $request REST request.
+     * @return bool
+     */
+    public function can_generate_for_request( $request = null ) {
+        $capability = apply_filters( 'ss_user_capability', 'publish_pages', 'generate' );
+
+        return $this->current_user_can_for_target_site( $request, $capability );
+    }
+
+    /**
+     * Authorize activity/export-log access against the requested target site.
+     *
+     * @param \WP_REST_Request|null $request REST request.
+     * @return bool
+     */
+    public function can_view_activity_log_for_request( $request = null ) {
+        $capability = apply_filters( 'ss_user_capability', 'manage_options', 'activity-log' );
+
+        return $this->current_user_can_for_target_site( $request, $capability );
+    }
+
+    /**
+     * Check a capability on the current site, or require network authorization
+     * before accessing a different site.
+     *
+     * @param \WP_REST_Request|null $request    REST request.
+     * @param string                $capability Capability to check.
+     * @return bool
+     */
+    private function current_user_can_for_target_site( $request, $capability ) {
+        $blog_id = 0;
+        if ( $request && method_exists( $request, 'get_param' ) ) {
+            $blog_id = absint( $request->get_param( 'blog_id' ) );
+        }
+
+        if ( ! $blog_id || $blog_id === get_current_blog_id() ) {
+            return current_user_can( $capability );
+        }
+
+        if ( ! is_multisite() || ! current_user_can( 'manage_network_options' ) ) {
+            return false;
+        }
+
+        $site = get_blog_details( $blog_id );
+        if ( ! $site || ! empty( $site->deleted ) || ! empty( $site->spam ) || ! empty( $site->archived ) ) {
+            return false;
+        }
+
+        if ( function_exists( 'current_user_can_for_site' ) ) {
+            return current_user_can_for_site( $blog_id, $capability );
+        }
+
+        if ( function_exists( 'current_user_can_for_blog' ) ) {
+            return current_user_can_for_blog( $blog_id, $capability );
+        }
+
+        return false;
     }
 
     // ---- Endpoint implementations (migrated from Admin_Settings) ----
@@ -412,11 +469,21 @@ class Admin_Rest {
         $sites = [];
         foreach ( $site_ids as $site_id ) {
             $site = get_blog_details( $site_id );
+			if ( ! $site ) {
+				continue;
+			}
 
-            $this->switch_to_blog_and_refresh_options( $site_id );
-
-            $running = $job->is_running();
-            $paused  = $job->is_paused();
+			$state = $this->run_in_blog_context(
+				$site_id,
+				function () use ( $job ) {
+					return array(
+						'running' => $job->is_running(),
+						'paused'  => $job->is_paused(),
+					);
+				}
+			);
+			$running = $state['running'];
+			$paused  = $state['paused'];
 
             $sites[] = [
                 'id'               => $site->blog_id,
@@ -429,8 +496,6 @@ class Admin_Rest {
                 'settings_url'     => esc_url( get_admin_url( $site->blog_id ) . 'admin.php?page=simply-static-settings' ),
                 'activity_log_url' => esc_url( get_admin_url( $site->blog_id ) . 'admin.php?page=simply-static-generate' ),
             ];
-
-            $this->restore_current_blog_and_refresh_options();
         }
 
         $sites = apply_filters( 'ss_rest_multisite_get_sites', $sites );
@@ -458,22 +523,18 @@ class Admin_Rest {
         }
 
         try {
-            // Switch to the specified blog
-            $this->switch_to_blog_and_refresh_options( $blog_id );
-
-            do_action( 'wp_archive_creation_job' );
-
-            // Restore the previous blog
-            $this->restore_current_blog_and_refresh_options();
+			$this->run_in_blog_context(
+				$blog_id,
+				function () {
+					do_action( 'wp_archive_creation_job' );
+				}
+			);
 
             return json_encode( [
                 'status'  => 200,
                 'message' => sprintf( __( 'CRON triggered successfully for site %d.', 'simply-static' ), $blog_id ),
             ] );
-        } catch ( \Exception $e ) {
-            // Make sure to restore blog context even on error
-            $this->restore_current_blog_and_refresh_options();
-
+        } catch ( \Throwable $e ) {
             return json_encode( [
                 'status'  => 500,
                 'message' => $e->getMessage(),
@@ -761,8 +822,10 @@ class Admin_Rest {
             $settings = array();
         }
 
-        // Ensure integrations list contains only enabled integrations by default.
-        if ( empty( $settings['integrations'] ) ) {
+        // Populate defaults only for legacy installs where the setting is
+        // absent. Preserve an explicit empty list so users can disable all
+        // optional integrations.
+        if ( ! array_key_exists( 'integrations', $settings ) ) {
             $integrations         = Plugin::instance()->get_integrations();
             $enabled_integrations = [];
             foreach ( $integrations as $integration => $class ) {
@@ -904,15 +967,18 @@ class Admin_Rest {
         }
 
         $excluded = $this->get_export_excluded_options();
-        if ( is_array( $excluded ) ) {
+		if ( is_array( $excluded ) ) {
             foreach ( $excluded as $key ) {
                 if ( array_key_exists( $key, $settings ) ) {
                     unset( $settings[ $key ] );
                 }
-            }
-        }
+			}
+		}
 
-        return json_encode( $settings );
+		// Defense in depth for credentials added by Pro or future integrations.
+		$settings = Util::remove_sensitive_options( $settings );
+
+		return wp_json_encode( $settings );
     }
 
     /**
@@ -921,7 +987,8 @@ class Admin_Rest {
      * @return string[]
      */
     private function get_export_excluded_options() {
-        $defaults = array(
+		$defaults = array(
+			'origin_url',
             'temp_files_dir',
             'local_dir',
             'http_basic_auth_username',
@@ -939,18 +1006,87 @@ class Admin_Rest {
             'archive_name',
             'archive_start_time',
             'archive_end_time',
+			'archive_deploy_id',
+			'archive_task_list',
+			'generate_type',
+			'deploy_manifest_schema_version',
+			'zip_batch_offset',
+			'zip_total_files',
+			'zip_files',
+			'version',
             'http_basic_auth_on',
             'plugins_to_include',
             'themes_to_include',
             'ss_single_pages',
         );
-        $list = apply_filters( 'ss_export_excluded_options', $defaults );
-        if ( ! is_array( $list ) ) {
-            return $defaults;
-        }
-        $list = array_map( 'sanitize_key', array_filter( array_map( 'strval', $list ) ) );
+		// Filters may add exclusions, but cannot remove the built-in security list.
+		$filtered = apply_filters( 'ss_export_excluded_options', $defaults );
+		$list     = is_array( $filtered ) ? array_merge( $defaults, $filtered ) : $defaults;
+		$list     = array_merge( $list, Util::get_sensitive_option_keys() );
+		$list = array_map( 'sanitize_key', array_filter( array_map( 'strval', $list ) ) );
         return array_values( array_unique( $list ) );
     }
+
+	/**
+	 * Merge non-portable destination values back into imported settings.
+	 *
+	 * @param array $incoming Imported settings.
+	 * @param mixed $current  Existing destination settings.
+	 *
+	 * @return array
+	 */
+	private function preserve_destination_options( $incoming, $current ) {
+		$incoming = is_array( $incoming ) ? $incoming : array();
+		$current  = is_array( $current ) ? $current : array();
+		$incoming = Util::preserve_sensitive_options( $incoming, $current );
+
+		foreach ( $this->get_export_excluded_options() as $excluded_key ) {
+			if ( array_key_exists( $excluded_key, $current ) ) {
+				$incoming[ $excluded_key ] = $current[ $excluded_key ];
+			} else {
+				unset( $incoming[ $excluded_key ] );
+			}
+		}
+
+		return $incoming;
+	}
+
+	/**
+	 * Return a fail-closed conflict response for destructive maintenance actions.
+	 *
+	 * @param string $message User-facing conflict message.
+	 *
+	 * @return string|null
+	 */
+	private function get_maintenance_conflict_response( $message ) {
+		try {
+			$job    = Plugin::instance()->get_archive_creation_job();
+			$active = method_exists( $job, 'is_active' )
+				? $job->is_active()
+				: ( $job->is_running() || $job->is_paused() );
+
+			if ( $active ) {
+				return wp_json_encode(
+					array(
+						'status'  => 409,
+						'message' => $message,
+					)
+				);
+			}
+		} catch ( \Throwable $exception ) {
+			Util::debug_log( 'Unable to verify archive state before maintenance: ' . $exception->getMessage() );
+
+			return wp_json_encode(
+				array(
+					'status'  => 500,
+					'message' => __( 'Unable to verify that the export queue is idle.', 'simply-static' ),
+				)
+			);
+		}
+
+		return null;
+	}
+
     /**
      * Save settings via REST API.
      *
@@ -969,11 +1105,25 @@ class Admin_Rest {
             return json_encode( [ 'status' => 400, 'message' => 'No options updated.' ] );
         }
 
+		$portable_import = ! empty( $params['__simply_static_import'] );
+		unset( $params['__simply_static_import'] );
+
+		if ( $portable_import ) {
+			$conflict = $this->get_maintenance_conflict_response(
+				__( 'Settings cannot be imported while an export is active or paused.', 'simply-static' )
+			);
+			if ( null !== $conflict ) {
+				return $conflict;
+			}
+
+			$params = $this->preserve_destination_options( $params, get_option( 'simply-static' ) );
+		}
+
         // Sanitize full options array using WP core sanitize_option for baseline cleaning
         $options = sanitize_option( 'simply-static', $params );
 
         // Field groups by type
-        $multiline_fields = [
+		$multiline_fields = [
             'additional_urls',
             'additional_files',
             'urls_to_exclude',
@@ -982,7 +1132,14 @@ class Admin_Rest {
             'iframe_custom_css',
             'whitelist_plugins',
             'minify_css_exclude',
-            'minify_js_exclude',
+			'minify_js_exclude',
+			'sftp_private_key',
+			'css_js_aggregate_exclude_patterns',
+			'css_optimize_critical_patterns',
+			'css_optimize_defer_js_excludes',
+			'css_optimize_delay_js_patterns',
+			'critical_css_additional_urls',
+			'critical_css_custom',
         ];
 
         $array_fields = [
@@ -1014,7 +1171,8 @@ class Admin_Rest {
             'ss_single_export_add_xml_sitemap',
             'ss_single_auto_export',
             'ss_tools_submenu',
-            'post_types_configured',
+			'post_types_configured',
+			'server_cron',
         ];
 
         foreach ( $options as $key => $value ) {
@@ -1039,15 +1197,15 @@ class Admin_Rest {
                 $options[ $key ] = filter_var( $value, FILTER_VALIDATE_BOOLEAN );
             } elseif ( 'ss_single_auto_export_delay' === $key ) {
                 $options[ $key ] = max( 0, absint( $value ) );
-            } elseif ( 'ss_single_export_webhook_url' === $key ) {
-                $san = esc_url_raw( $value );
-                if ( empty( $san ) || ! in_array( wp_parse_url( $san, PHP_URL_SCHEME ), [ 'http', 'https' ], true ) ) {
-                    $san = '';
+			} elseif ( 'ss_single_export_webhook_url' === $key ) {
+				$san = esc_url_raw( $value );
+				if ( empty( $san ) || ! wp_http_validate_url( $san ) ) {
+					$san = '';
                 }
                 $options[ $key ] = $san;
-            } elseif ( 'ss_webhook_url' === $key ) {
-                $san = esc_url_raw( $value );
-                if ( empty( $san ) || ! in_array( wp_parse_url( $san, PHP_URL_SCHEME ), [ 'http', 'https' ], true ) ) {
+			} elseif ( 'ss_webhook_url' === $key ) {
+				$san = esc_url_raw( $value );
+				if ( empty( $san ) || ! wp_http_validate_url( $san ) ) {
                     $san = '';
                 }
                 $options[ $key ] = $san;
@@ -1062,9 +1220,41 @@ class Admin_Rest {
                     }
                     continue;
                 }
-                $options[ $key ] = sanitize_text_field( $value );
-            }
-        }
+				$options[ $key ] = is_array( $value ) ? map_deep( $value, 'sanitize_text_field' ) : sanitize_text_field( $value );
+			}
+		}
+
+		// Preserve internal/runtime values that are not owned by the settings form.
+		$current_options = get_option( 'simply-static' );
+		$internal_keys   = array(
+			'encryption_key',
+			'archive_status_messages',
+			'archive_deploy_id',
+			'deploy_manifest_schema_version',
+			'pages_status',
+			'archive_name',
+			'archive_start_time',
+			'archive_end_time',
+			'generate_type',
+			'archive_task_list',
+			'zip_batch_offset',
+			'zip_total_files',
+			'zip_files',
+			'version',
+		);
+		if ( is_array( $current_options ) ) {
+			foreach ( $internal_keys as $internal_key ) {
+				if ( array_key_exists( $internal_key, $current_options ) ) {
+					$options[ $internal_key ] = $current_options[ $internal_key ];
+				} else {
+					unset( $options[ $internal_key ] );
+				}
+			}
+		} else {
+			foreach ( $internal_keys as $internal_key ) {
+				unset( $options[ $internal_key ] );
+			}
+		}
 
         // Scrub admin-only plugins from Enhanced Crawl selection before persisting.
         if ( isset( $options['plugins_to_include'] ) && is_array( $options['plugins_to_include'] ) ) {
@@ -1093,11 +1283,15 @@ class Admin_Rest {
         }
 
         // Multisite: also persist per-site copy under site option when not main site
-        if ( is_multisite() ) {
-            $blog_id = get_current_blog_id();
-            if ( $blog_id > 1 ) {
-                update_site_option( 'simply-static-' . $blog_id, $options );
-            }
+		if ( is_multisite() ) {
+			$blog_id = get_current_blog_id();
+			if ( $blog_id > 1 ) {
+				$portable_options = Util::remove_sensitive_options( $options );
+				foreach ( $this->get_export_excluded_options() as $excluded_key ) {
+					unset( $portable_options[ $excluded_key ] );
+				}
+				update_site_option( 'simply-static-' . $blog_id, $portable_options );
+			}
         }
 
         // Mark UAM user-saved flag to avoid runtime default corrections later
@@ -1147,100 +1341,33 @@ class Admin_Rest {
      * Mirrors previous implementation from Admin_Settings for BC.
      */
     public function reset_settings( $request ) {
-        // Check table.
+		$conflict = $this->get_maintenance_conflict_response(
+			__( 'Plugin settings cannot be reset while an export is active or paused.', 'simply-static' )
+		);
+		if ( null !== $conflict ) {
+			return $conflict;
+		}
+
+        // Keep installation and reset on the same complete, typed source of truth.
         Page::create_or_update_table();
-
-        // Define default options (copied from Upgrade_Handler class)
-        $default_options = array(
-            'destination_scheme'            => 'https://',
-            'destination_host'              => '',
-            'temp_files_dir'                => '',
-            'additional_urls'               => '',
-            'additional_files'              => '',
-            'urls_to_exclude'               => "",
-            'delivery_method'               => 'zip',
-            'local_dir'                     => '',
-            'relative_path'                 => '',
-            'destination_url_type'          => 'relative',
-            'debugging_mode'                => true,
-            'server_cron'                   => false,
-            'whitelist_plugins'             => '',
-            'http_basic_auth_username'      => '',
-            'http_basic_auth_password'      => '',
-            'origin_url'                    => '',
-            'force_replace_url'             => true,
-            'clear_directory_before_export' => false,
-            'iframe_urls'                   => '',
-            'iframe_custom_css'             => '',
-            'tiiny_email'                   => get_bloginfo( 'admin_email' ),
-            'tiiny_subdomain'               => '',
-            'tiiny_domain_suffix'           => 'tiiny.site',
-            'tiiny_password'                => '',
-            'cdn_api_key'                   => '',
-            'cdn_storage_host'              => 'storage.bunnycdn.com',
-            'cdn_access_key'                => '',
-            'cdn_pull_zone'                 => '',
-            'cdn_storage_zone'              => '',
-            'cdn_directory'                 => '',
-            'github_account_type'           => 'personal',
-            'github_user'                   => '',
-            'github_email'                  => '',
-            'github_personal_access_token'  => '',
-            'github_repository'             => '',
-            'github_repository_visibility'  => 'public',
-            'github_branch'                 => 'main',
-            'github_webhook_url'            => '',
-            'github_folder_path'            => '',
-            'github_throttle_requests'      => false,
-            'aws_auth_method'               => 'aws-iam-key',
-            'aws_region'                    => 'us-east-2',
-            'aws_access_key'                => '',
-            'aws_access_secret'             => '',
-            'aws_bucket'                    => '',
-            'aws_subdirectory'              => '',
-            'aws_distribution_id'           => '',
-            'aws_webhook_url'               => '',
-            'aws_empty'                     => false,
-            's3_access_key'                 => '',
-            's3_base_url'                   => '',
-            's3_access_secret'              => '',
-            's3_bucket'                     => '',
-            's3_subdirectory'               => '',
-            'use_search_results_page'       => true,
-            'fix_cors'                      => 'allowed_http_origins',
-            // (the full list continues in Admin_Settings; retain same defaults here)
-        );
-
-        // Merge with any defaults that Admin_Settings might add in the future by instantiating Upgrade_Handler if needed
-        // but keep existing reset behavior intact.
-
-        // Add missing required keys used by the UI so that reset produces a working config
-        $default_options = array_merge( $default_options, array(
-            'generate_type'                 => 'export',
-            'destination_url'               => '',
-            'destination_url_type'          => 'relative',
-            'wp_content_directory'          => 'wp-content',
-            'wp_includes_directory'         => 'wp-includes',
-            'wp_uploads_directory'          => 'uploads',
-            'wp_plugins_directory'          => 'plugins',
-            'wp_themes_directory'           => 'themes',
-            'theme_style_name'              => 'style',
-            'archive_start_time'            => null,
-            'archive_end_time'              => null,
-            'css_optimize_preconnect_hints' => false,
-            'version'                       => SIMPLY_STATIC_VERSION,
-        ) );
-
-        // Update settings with default options.
+		$default_options = Upgrade_Handler::get_default_options();
         update_option( 'simply-static', $default_options );
+		Options::reinstance();
 
-        return json_encode( [ 'status' => 200, 'message' => 'Ok', 'data' => $default_options ] );
+		return wp_json_encode( array( 'status' => 200, 'message' => 'Ok', 'data' => $default_options ) );
     }
 
     public function maybe_export_404( $request ) { return Admin_Settings::get_instance()->export_404(); }
 
     /** Reset database (drop and recreate SS pages table) */
     public function reset_database() {
+		$conflict = $this->get_maintenance_conflict_response(
+			__( 'The database table cannot be reset while an export is active or paused.', 'simply-static' )
+		);
+		if ( null !== $conflict ) {
+			return $conflict;
+		}
+
         global $wpdb;
         $table_name = $wpdb->prefix . 'simply_static_pages';
         $wpdb->query( "DROP TABLE IF EXISTS $table_name" );
@@ -1248,47 +1375,128 @@ class Admin_Rest {
         return json_encode( [ 'status' => 200, 'message' => 'Ok' ] );
     }
 
-    /** Reset background queue: delete batches, clear cron, and remove locks */
-    public function reset_background_queue() {
-        try {
-            /** @var Archive_Creation_Job $job */
-            $job = Plugin::instance()->get_archive_creation_job();
-            // Delete all batches and status for this job.
-            $job->delete_all();
-            // Clear any scheduled cron for this job using known hook name.
-            $identifier = 'wp_' . 'archive_creation_job'; // Background_Process identifier is prefix + action
-            $cron_hook  = $identifier . '_cron';
-            while ( $timestamp = wp_next_scheduled( $cron_hook ) ) {
-                wp_unschedule_event( $timestamp, $cron_hook );
-            }
-            wp_clear_scheduled_hook( $cron_hook );
-            // Remove process lock transient so a new run can start immediately.
-            $site_id  = function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : null;
-            $lock_key = $identifier . '_process_lock';
-            if ( is_multisite() && ! is_null( $site_id ) ) {
-                $lock_key .= '_site_' . $site_id;
-            }
-            delete_site_transient( $lock_key );
-            return json_encode( [ 'status' => 200, 'message' => 'Ok' ] );
-        } catch ( \Throwable $e ) {
-            return json_encode( [ 'status' => 500, 'message' => $e->getMessage() ] );
-        }
-    }
+	/** Reset background queue and all request/runtime state owned by that queue. */
+	public function reset_background_queue() {
+		try {
+			/** @var Archive_Creation_Job $job */
+			$job     = Plugin::instance()->get_archive_creation_job();
+			$site_id = function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : null;
+
+			if ( method_exists( $job, 'set_current_site_id' ) && null !== $site_id ) {
+				$job->set_current_site_id( $site_id );
+			}
+			if ( method_exists( $job, 'has_active_process_lock' ) && $job->has_active_process_lock() ) {
+				return wp_json_encode(
+					array(
+						'status'  => 409,
+						'message' => __( 'The background worker is still active. Wait for it to finish before resetting the queue.', 'simply-static' ),
+					)
+				);
+			}
+
+			// Delete queued batches and the background-process status marker.
+			$job->delete_all();
+			$identifier = method_exists( $job, 'get_identifier' ) ? (string) $job->get_identifier() : 'wp_archive_creation_job';
+			if ( '' === $identifier ) {
+				$identifier = 'wp_archive_creation_job';
+			}
+			delete_option( $identifier . '_status' );
+
+			// Clear only this process's healthcheck, never recurring export schedules.
+			wp_clear_scheduled_hook( $identifier . '_cron' );
+
+			// Clear the lock owned by this site without disturbing another site's
+			// process in multisite.
+			$lock_key = $identifier . '_process_lock';
+			if ( is_multisite() && null !== $site_id ) {
+				delete_site_transient( $lock_key . '_site_' . $site_id );
+			} else {
+				delete_site_transient( $lock_key );
+			}
+
+			$options = method_exists( $job, 'get_options' ) ? $job->get_options() : Options::instance();
+			if ( ! is_object( $options ) || ! method_exists( $options, 'set' ) || ! method_exists( $options, 'save' ) ) {
+				$options = Options::instance();
+			}
+			$runtime_defaults = array(
+				'archive_status_messages' => array(),
+				'archive_deploy_id'       => null,
+				'pages_status'             => array(),
+				'archive_name'             => null,
+				'archive_start_time'       => null,
+				'archive_end_time'         => null,
+				'generate_type'            => 'export',
+				'archive_task_list'        => array(),
+				'zip_batch_offset'         => null,
+				'zip_total_files'          => null,
+				'zip_files'                => null,
+			);
+			foreach ( $runtime_defaults as $key => $value ) {
+				$options->set( $key, $value );
+			}
+			$options->save();
+			delete_option( 'simply_static_zip_files' );
+
+			if ( method_exists( $job, 'reset_runtime_state' ) ) {
+				$job->reset_runtime_state();
+			}
+
+			// Special export modes are one-shot state and must never survive a reset.
+			foreach ( array( 'simply-static-404-only', 'simply-static-use-single', 'simply-static-use-build', 'simply-static-use-language' ) as $option_name ) {
+				delete_option( $option_name );
+			}
+
+			// Release this site's multisite-wide export marker without affecting a
+			// different site's active export.
+			if ( is_multisite() && null !== $site_id ) {
+				$network_lock = get_site_option( Plugin::SLUG . '_multisite_export_running', false );
+				if ( absint( $network_lock ) === absint( $site_id ) ) {
+					delete_site_option( Plugin::SLUG . '_multisite_export_running' );
+				}
+			}
+
+			do_action( 'ss_after_background_queue_reset', $job, $site_id );
+
+			return wp_json_encode( array( 'status' => 200, 'message' => 'Ok' ) );
+		} catch ( \Throwable $e ) {
+			return wp_json_encode( array( 'status' => 500, 'message' => $e->getMessage() ) );
+		}
+	}
 
     /** Import settings from another site in network */
-    public function update_from_network( $request ) {
-        $params = $request->get_params();
-        if ( $request->get_params() ) {
-            $blog_id = intval( $params['blog_id'] );
-            // Get Settings from selected subsite.
-            $options = get_site_option( 'simply-static-' . $blog_id );
+	public function update_from_network( $request ) {
+		if ( ! is_multisite() || ! current_user_can( 'manage_network_options' ) ) {
+			return new \WP_Error( 'rest_forbidden', __( 'You are not allowed to import settings across the network.', 'simply-static' ), array( 'status' => 403 ) );
+		}
+
+		$conflict = $this->get_maintenance_conflict_response(
+			__( 'Settings cannot be imported while an export is active or paused.', 'simply-static' )
+		);
+		if ( null !== $conflict ) {
+			return $conflict;
+		}
+
+		$params = $request->get_params();
+		if ( $request->get_params() ) {
+			$blog_id = isset( $params['blog_id'] ) ? absint( $params['blog_id'] ) : 0;
+			$site = $blog_id ? get_blog_details( $blog_id ) : null;
+			if ( ! $site || ! empty( $site->deleted ) || ! empty( $site->spam ) || ! empty( $site->archived ) ) {
+				return new \WP_Error( 'invalid_blog_id', __( 'Invalid source site.', 'simply-static' ), array( 'status' => 400 ) );
+			}
+			// Get Settings from selected subsite.
+			$options = get_site_option( 'simply-static-' . $blog_id );
             if ( ! $options ) {
                 return json_encode( [
                     'status'  => 400,
                     'message' => 'Please save the settings on the selected subsite before importing them into a new site.'
                 ] );
             }
-            update_option( 'simply-static', $options );
+			$options = Util::remove_sensitive_options( is_array( $options ) ? $options : array() );
+			foreach ( $this->get_export_excluded_options() as $excluded_key ) {
+				unset( $options[ $excluded_key ] );
+			}
+			$options = $this->preserve_destination_options( $options, get_option( 'simply-static' ) );
+			update_option( 'simply-static', $options );
             return json_encode( [ 'status' => 200, 'message' => 'Ok' ] );
         }
         return json_encode( [ 'status' => 400, 'message' => 'No options updated.' ] );
@@ -1296,7 +1504,16 @@ class Admin_Rest {
 
     public function get_pages() { return Admin_Settings::get_instance()->get_pages(); }
     public function get_pages_slugs() { return Admin_Settings::get_instance()->get_pages_slugs(); }
-    public function migrate( $request ) { return Admin_Settings::get_instance()->migrate( $request ); }
+	public function migrate( $request ) {
+		$conflict = $this->get_maintenance_conflict_response(
+			__( 'Settings cannot be migrated while an export is active or paused.', 'simply-static' )
+		);
+		if ( null !== $conflict ) {
+			return $conflict;
+		}
+
+		return Admin_Settings::get_instance()->migrate_settings();
+	}
 
     /** Reset diagnostics (clear transient) */
     public function reset_diagnostics() {
@@ -1341,46 +1558,35 @@ class Admin_Rest {
     }
 
     /** Activity log */
-    public function get_activity_log( $request ) {
-        $params  = $request->get_params();
-        $blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
+	public function get_activity_log( $request ) {
+		$params  = $request->get_params();
+		$blog_id = ! empty( $params['blog_id'] ) ? absint( $params['blog_id'] ) : 0;
 
-        if ( $blog_id && is_multisite() ) {
-            $this->switch_to_blog_and_refresh_options( $blog_id );
-        }
+		return $this->run_in_blog_context( $blog_id, function () use ( $blog_id ) {
+			$activity_log = Plugin::instance()->get_activity_log( $blog_id );
+			$running      = Plugin::instance()->get_archive_creation_job()->is_running();
 
-        $activity_log = Plugin::instance()->get_activity_log( $blog_id );
-
-        $running = Plugin::instance()->get_archive_creation_job()->is_running();
-
-        if ( $blog_id && is_multisite() ) {
-            $this->restore_current_blog_and_refresh_options();
-        }
-
-        return json_encode( [
-            'status'  => 200,
-            'data'    => $activity_log,
-            'running' => $running,
-        ] );
+			return json_encode( [
+				'status'  => 200,
+				'data'    => $activity_log,
+				'running' => $running,
+			] );
+		} );
     }
 
     /** Export log */
-    public function get_export_log( $request ) {
-        $params     = $request->get_params();
-        $blog_id    = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
-        $search     = ! empty( $params['search'] ) ? sanitize_text_field( $params['search'] ) : '';
+	public function get_export_log( $request ) {
+		$params     = $request->get_params();
+		$blog_id    = ! empty( $params['blog_id'] ) ? absint( $params['blog_id'] ) : 0;
+		$search     = ! empty( $params['search'] ) ? sanitize_text_field( $params['search'] ) : '';
+		$page       = ! empty( $params['page'] ) ? max( 1, absint( $params['page'] ) ) : 1;
+		$per_page   = ! empty( $params['per_page'] ) ? min( 200, max( 1, absint( $params['per_page'] ) ) ) : 25;
 
-        if ( $blog_id && is_multisite() ) {
-            $this->switch_to_blog_and_refresh_options( $blog_id );
-        }
+		return $this->run_in_blog_context( $blog_id, function () use ( $per_page, $page, $blog_id, $search ) {
+			$export_log = Plugin::instance()->get_export_log( $per_page, $page, $blog_id, $search );
 
-        $export_log = Plugin::instance()->get_export_log( $params['per_page'], $params['page'], $blog_id, $search );
-
-        if ( $blog_id && is_multisite() ) {
-            $this->restore_current_blog_and_refresh_options();
-        }
-
-        return json_encode( [ 'status' => 200, 'data' => $export_log ] );
+			return json_encode( [ 'status' => 200, 'data' => $export_log ] );
+		} );
     }
 
     /** Deploy manifest summaries */
@@ -1451,158 +1657,86 @@ class Admin_Rest {
     /**
      * Start Export
      */
-    public function start_export( $request ) {
-        $params  = $request->get_params();
-        $blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
-        $type    = ! empty( $params['type'] ) ? $params['type'] : 'export';
+	public function start_export( $request ) {
+		$params  = $request->get_params();
+		$blog_id = ! empty( $params['blog_id'] ) ? absint( $params['blog_id'] ) : 0;
+		$type    = ! empty( $params['type'] ) ? sanitize_key( $params['type'] ) : 'export';
         $language = ! empty( $params['language'] ) ? sanitize_text_field( wp_unslash( $params['language'] ) ) : '';
 
-        if ( $blog_id && is_multisite() ) {
-            $this->switch_to_blog_and_refresh_options( $blog_id );
-        }
+		try {
+			return $this->run_in_blog_context( $blog_id, function () use ( $blog_id, $type, $language ) {
+				$archive_creation_job = Plugin::instance()->get_archive_creation_job();
+				do_action( 'ss_before_perform_archive_running_check', $blog_id, $archive_creation_job );
+				if ( $archive_creation_job->is_running() ) {
+					return wp_json_encode( array(
+						'status'  => 409,
+						'message' => __( 'An export is already running. Please wait for it to complete or cancel it before starting a new one.', 'simply-static' ),
+					) );
+				}
 
-        // Check if an export is already running
-        $archive_creation_job = Plugin::instance()->get_archive_creation_job();
-        do_action( 'ss_before_perform_archive_running_check', $blog_id, $archive_creation_job );
-        if ( $archive_creation_job->is_running() ) {
-            Util::debug_log( "Export already running. Blocking new export request." );
-            Util::debug_log( "Current task: " . $archive_creation_job->get_current_task() );
-            Util::debug_log( "Is job done: " . ( $archive_creation_job->is_job_done() ? 'true' : 'false' ) );
+				if ( ! empty( $language ) ) {
+					update_option( 'simply-static-use-language', $language, false );
+				} else {
+					delete_option( 'simply-static-use-language' );
+				}
 
-            if ( $blog_id && is_multisite() ) {
-                $this->restore_current_blog_and_refresh_options();
-            }
+				do_action( 'ss_before_perform_archive_action', $blog_id, 'start', $archive_creation_job );
+				$export_type = apply_filters( 'ss_export_type', $type );
+				$started = Plugin::instance()->run_static_export( $blog_id, $export_type );
+				if ( $started ) {
+					do_action( 'ss_after_perform_archive_action', $blog_id, 'start', $archive_creation_job );
+					return wp_json_encode( array( 'status' => 200 ) );
+				}
 
-            return json_encode( [
-                'status'  => 409,
-                'message' => __( 'An export is already running. Please wait for it to complete or cancel it before starting a new one.', 'simply-static' )
-            ] );
-        }
-
-        try {
-            if ( ! empty( $language ) ) {
-                update_option( 'simply-static-use-language', $language, false );
-            } else {
-                delete_option( 'simply-static-use-language' );
-            }
-
-            do_action( 'ss_before_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
-
-            $type = apply_filters( 'ss_export_type', $type );
-
-            if ( Plugin::instance()->run_static_export( $blog_id, $type ) ) {
-                do_action( 'ss_after_perform_archive_action', $blog_id, 'start', Plugin::instance()->get_archive_creation_job() );
-            }
-
-            if ( $blog_id && is_multisite() ) {
-                $this->restore_current_blog_and_refresh_options();
-            }
-
-            return json_encode( [ 'status' => 200 ] );
-        } catch ( \Exception $e ) {
-            if ( $blog_id && is_multisite() ) {
-                $this->restore_current_blog_and_refresh_options();
-            }
-
-            return json_encode( [ 'status' => 500, 'message' => $e->getMessage() ] );
-        }
+				return wp_json_encode( array(
+					'status'  => 409,
+					'message' => __( 'The export could not be started because another export is active or an export preflight check failed.', 'simply-static' ),
+				) );
+			} );
+		} catch ( \Throwable $e ) {
+			return json_encode( [ 'status' => 500, 'message' => $e->getMessage() ] );
+		}
     }
 
     /** Cancel Export */
-    public function cancel_export( $request ) {
-        Util::debug_log( "Received request to cancel static archive generation" );
-        $params  = $request->get_params();
-        $blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
-
-        if ( $blog_id && is_multisite() ) {
-            $this->switch_to_blog_and_refresh_options( $blog_id );
-        }
-
-        do_action( 'ss_before_perform_archive_action', $blog_id, 'cancel', Plugin::instance()->get_archive_creation_job() );
-        Plugin::instance()->cancel_static_export();
-        do_action( 'ss_after_perform_archive_action', $blog_id, 'cancel', Plugin::instance()->get_archive_creation_job() );
-
-        if ( $blog_id && is_multisite() ) {
-            $this->restore_current_blog_and_refresh_options();
-        }
-
-        return json_encode( [ 'status' => 200 ] );
-    }
+	public function cancel_export( $request ) {
+		return $this->perform_archive_action( $request, 'cancel', 'cancel_static_export' );
+	}
 
     /** Pause Export */
-    public function pause_export( $request ) {
-        Util::debug_log( "Received request to pause static archive generation" );
-        $params  = $request->get_params();
-        $blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
-
-        if ( $blog_id && is_multisite() ) {
-            $this->switch_to_blog_and_refresh_options( $blog_id );
-        }
-
-        do_action( 'ss_before_perform_archive_action', $blog_id, 'pause', Plugin::instance()->get_archive_creation_job() );
-        Plugin::instance()->pause_static_export();
-        do_action( 'ss_after_perform_archive_action', $blog_id, 'pause', Plugin::instance()->get_archive_creation_job() );
-
-        if ( $blog_id && is_multisite() ) {
-            $this->restore_current_blog_and_refresh_options();
-        }
-
-        return json_encode( [ 'status' => 200 ] );
-    }
+	public function pause_export( $request ) {
+		return $this->perform_archive_action( $request, 'pause', 'pause_static_export' );
+	}
 
     /** Resume Export */
-    public function resume_export( $request ) {
-        Util::debug_log( "Received request to resume static archive generation" );
-        $params  = $request->get_params();
-        $blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
-
-        if ( $blog_id && is_multisite() ) {
-            $this->switch_to_blog_and_refresh_options( $blog_id );
-        }
-
-        do_action( 'ss_before_perform_archive_action', $blog_id, 'resume', Plugin::instance()->get_archive_creation_job() );
-        Plugin::instance()->resume_static_export();
-        do_action( 'ss_after_perform_archive_action', $blog_id, 'resume', Plugin::instance()->get_archive_creation_job() );
-
-        if ( $blog_id && is_multisite() ) {
-            $this->restore_current_blog_and_refresh_options();
-        }
-
-        return json_encode( [ 'status' => 200 ] );
-    }
+	public function resume_export( $request ) {
+		return $this->perform_archive_action( $request, 'resume', 'resume_static_export' );
+	}
 
     /** Is running */
-    public function is_running( $request ) {
+	public function is_running( $request ) {
         $params  = $request->get_params();
-        $blog_id = ! empty( $params['blog_id'] ) ? $params['blog_id'] : 0;
+		$blog_id = ! empty( $params['blog_id'] ) ? absint( $params['blog_id'] ) : 0;
 
-        if ( $blog_id && is_multisite() ) {
-            $this->switch_to_blog_and_refresh_options( $blog_id );
-        }
+		try {
+			return $this->run_in_blog_context( $blog_id, function () {
+				$job = Plugin::instance()->get_archive_creation_job();
+				$stats = array(
+					'status'   => 200,
+					'running'  => $job->is_running(),
+					'paused'   => $job->is_paused(),
+					'progress' => method_exists( $job, 'get_progress' ) ? $job->get_progress() : 0,
+				);
 
-        $job   = Plugin::instance()->get_archive_creation_job();
-        $stats = [
-            'status'  => 200,
-            'running' => $job->is_running(),
-            'paused'  => $job->is_paused(),
-            'progress' => method_exists( $job, 'get_progress' ) ? $job->get_progress() : 0,
-        ];
+				if ( ! empty( $stats['running'] ) && empty( $stats['paused'] ) && ! $job->is_processing() ) {
+					$job->dispatch();
+				}
 
-        // Kickstart fallback: if the job is "running" but no process lock
-        // is held (i.e. the loopback dispatch never arrived or was lost),
-        // re-dispatch to resume processing. On hosts where the loopback is
-        // broken this will automatically use inline processing.
-        if ( ! empty( $stats['running'] ) && empty( $stats['paused'] ) && ! $job->is_processing() ) {
-            $job->dispatch();
-        }
-
-        $stats = apply_filters( 'ss_is_running_statuses', $stats );
-
-        if ( $blog_id && is_multisite() ) {
-            $this->restore_current_blog_and_refresh_options();
-        }
-
-        return json_encode( $stats );
+				return wp_json_encode( apply_filters( 'ss_is_running_statuses', $stats ) );
+			} );
+		} catch ( \Throwable $e ) {
+			return wp_json_encode( array( 'status' => 500, 'message' => $e->getMessage() ) );
+		}
     }
 
     /**
@@ -1612,8 +1746,21 @@ class Admin_Rest {
      *
      * @return false|string JSON-encoded response
      */
-    public function clear_temp_files() {
-        try {
+	public function clear_temp_files() {
+		try {
+			$conflict = $this->get_maintenance_conflict_response(
+				__( 'Temporary files cannot be cleared while the export queue is active.', 'simply-static' )
+			);
+			if ( null !== $conflict ) {
+				$response = json_decode( $conflict, true );
+				if ( is_array( $response ) ) {
+					$response['cleared'] = false;
+					return wp_json_encode( $response );
+				}
+
+				return $conflict;
+			}
+
             $setup_task = new Setup_Task();
             $result     = $setup_task->delete_temp_static_files();
 
@@ -1677,9 +1824,39 @@ class Admin_Rest {
         require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
         require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-        $skin      = new \WP_Ajax_Upgrader_Skin();
-        $upgrader  = new \Plugin_Upgrader( $skin );
-        $installed = $upgrader->install( $plugin_zip );
+        $downloaded = download_url( $plugin_zip, 30 );
+
+		if ( is_wp_error( $downloaded ) ) {
+			return new \WP_REST_Response( [
+				'success' => false,
+				'message' => $downloaded->get_error_message(),
+			], 502 );
+		}
+
+		$max_package_bytes = max( 1024 * 1024, min( 200 * 1024 * 1024, (int) apply_filters( 'ss_studio_migrate_max_package_bytes', 50 * 1024 * 1024 ) ) );
+		$package_size      = is_file( $downloaded ) ? filesize( $downloaded ) : false;
+		$expected_hash     = (string) apply_filters( 'ss_studio_migrate_package_sha256', self::STUDIO_MIGRATE_PACKAGE_SHA256 );
+		if (
+			false === $package_size
+			|| $package_size < 1
+			|| $package_size > $max_package_bytes
+			|| ! $this->downloaded_package_matches_checksum( $downloaded, $expected_hash )
+		) {
+			$this->delete_downloaded_package( $downloaded );
+
+			return new \WP_REST_Response( [
+				'success' => false,
+				'message' => __( 'The migration plugin package failed integrity verification.', 'simply-static' ),
+			], 502 );
+		}
+
+		$skin     = new \WP_Ajax_Upgrader_Skin();
+		$upgrader = new \Plugin_Upgrader( $skin );
+		try {
+			$installed = $upgrader->install( $downloaded );
+		} finally {
+			$this->delete_downloaded_package( $downloaded );
+		}
 
         if ( is_wp_error( $installed ) ) {
             return new \WP_REST_Response( [
@@ -1710,6 +1887,82 @@ class Admin_Rest {
         ] );
     }
 
+	/**
+	 * Verify a downloaded package against a pinned SHA-256 digest.
+	 *
+	 * @param string $filename      Local package filename.
+	 * @param string $expected_hash Expected lowercase/uppercase SHA-256 digest.
+	 * @return bool
+	 */
+	private function downloaded_package_matches_checksum( $filename, $expected_hash ) {
+		$expected_hash = strtolower( trim( (string) $expected_hash ) );
+		if ( ! preg_match( '/^[a-f0-9]{64}$/', $expected_hash ) || ! is_file( $filename ) ) {
+			return false;
+		}
+
+		$actual_hash = hash_file( 'sha256', $filename );
+
+		return is_string( $actual_hash ) && hash_equals( $expected_hash, strtolower( $actual_hash ) );
+	}
+
+	/** @param string $filename Temporary package filename. */
+	private function delete_downloaded_package( $filename ) {
+		if ( function_exists( 'wp_delete_file' ) ) {
+			wp_delete_file( $filename );
+		} elseif ( is_file( $filename ) ) {
+			unlink( $filename );
+		}
+	}
+
+	/**
+	 * Perform pause/resume/cancel with guaranteed multisite context cleanup.
+	 *
+	 * @param object $request REST request.
+	 * @param string $action Action label.
+	 * @param string $method Plugin method.
+	 * @return string
+	 */
+	private function perform_archive_action( $request, $action, $method ) {
+		$params  = $request->get_params();
+		$blog_id = ! empty( $params['blog_id'] ) ? absint( $params['blog_id'] ) : 0;
+
+		try {
+			return $this->run_in_blog_context( $blog_id, function () use ( $blog_id, $action, $method ) {
+				$plugin = Plugin::instance();
+				$job    = $plugin->get_archive_creation_job();
+				do_action( 'ss_before_perform_archive_action', $blog_id, $action, $job );
+				$plugin->{$method}();
+				do_action( 'ss_after_perform_archive_action', $blog_id, $action, $job );
+
+				return wp_json_encode( array( 'status' => 200 ) );
+			} );
+		} catch ( \Throwable $e ) {
+			return wp_json_encode( array( 'status' => 500, 'message' => $e->getMessage() ) );
+		}
+	}
+
+	/**
+	 * Run a callback for a target site and always restore the original blog.
+	 *
+	 * @param int      $blog_id Target blog ID, or zero for current.
+	 * @param callable $callback Callback to run.
+	 * @return mixed
+	 */
+	private function run_in_blog_context( $blog_id, $callback ) {
+		$switched = $blog_id && is_multisite() && absint( $blog_id ) !== get_current_blog_id();
+		try {
+			if ( $switched ) {
+				$this->switch_to_blog_and_refresh_options( $blog_id );
+			}
+
+			return call_user_func( $callback );
+		} finally {
+			if ( $switched ) {
+				$this->restore_current_blog_and_refresh_options();
+			}
+		}
+	}
+
     /**
      * Switch to blog and refresh options references.
      *
@@ -1723,7 +1976,11 @@ class Admin_Rest {
         switch_to_blog( $blog_id );
         $options = Options::reinstance();
         Plugin::instance()->set_options( $options );
-        Plugin::instance()->get_archive_creation_job()->set_options( $options );
+		$job = Plugin::instance()->get_archive_creation_job();
+		$job->set_options( $options );
+		if ( method_exists( $job, 'set_current_site_id' ) ) {
+			$job->set_current_site_id( get_current_blog_id() );
+		}
     }
 
     /**
@@ -1738,6 +1995,10 @@ class Admin_Rest {
         restore_current_blog();
         $options = Options::reinstance();
         Plugin::instance()->set_options( $options );
-        Plugin::instance()->get_archive_creation_job()->set_options( $options );
+		$job = Plugin::instance()->get_archive_creation_job();
+		$job->set_options( $options );
+		if ( method_exists( $job, 'set_current_site_id' ) ) {
+			$job->set_current_site_id( get_current_blog_id() );
+		}
     }
 }

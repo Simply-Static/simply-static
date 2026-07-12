@@ -44,14 +44,23 @@ class Transfer_Files_Locally_Task extends Task {
 		$create_dir = $this->maybe_create_local_directory();
 
 		if ( ! $create_dir ) {
-			return true; // Make sure we're out of the loop and finish it.
+			return new \WP_Error(
+				'ss_local_destination_unavailable',
+				__( 'Unable to create the configured local destination directory.', 'simply-static' )
+			);
 		}
 
 		$done = $this->process_pages();
+		if ( is_wp_error( $done ) ) {
+			return $done;
+		}
 
 		if ( $done ) {
 			if ( $this->options->get( 'add_feeds' ) ) {
-				$this->transfer_feed_redirect( $this->destination_dir );
+				$feed_result = $this->transfer_feed_redirect( $this->destination_dir );
+				if ( is_wp_error( $feed_result ) ) {
+					return $feed_result;
+				}
 			}
 
 			/**
@@ -68,7 +77,7 @@ class Transfer_Files_Locally_Task extends Task {
 
 			if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
 				$destination_url = trailingslashit( $this->options->get_destination_url() );
-				$message         = __( 'Destination URL:', 'simply-static' ) . ' <a href="' . $destination_url . '" target="_blank">' . $destination_url . '</a>';
+				$message         = __( 'Destination URL:', 'simply-static' ) . ' <a href="' . esc_url( $destination_url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $destination_url ) . '</a>';
 				$this->save_status_message( $message, 'destination_url' );
 			}
 
@@ -84,6 +93,16 @@ class Transfer_Files_Locally_Task extends Task {
 		}
 
 		return $done;
+	}
+
+	/**
+	 * Start transfer retries independently from fetch retries.
+	 *
+	 * @return true|\WP_Error
+	 */
+	public function cleanup() {
+		Page::query()->update_all( array( 'fetch_attempts' => 0 ) );
+		self::delete_total_pages();
 	}
 
 	public function maybe_create_local_directory() {
@@ -132,30 +151,26 @@ class Transfer_Files_Locally_Task extends Task {
 
 		if ( wp_mkdir_p( $path ) === false ) {
 			Util::debug_log( "Cannot create directory: " . $path );
-			$static_page->set_error_message( 'Unable to create destination directory' );
-		} else {
-			chmod( $path, 0755 );
-			$origin_file_path      = Util::combine_path( $this->archive_dir, $file_path );
-			$destination_file_path = Util::combine_path( $this->destination_dir, $file_path );
-
-			// Check if origin file exists.
-			if ( file_exists( $origin_file_path ) ) {
-				$copy = copy( $origin_file_path, $destination_file_path );
-
-				if ( $copy === false ) {
-					Util::debug_log( "Cannot copy " . $origin_file_path . " to " . $destination_file_path );
-					$static_page->set_error_message( 'Unable to copy file to destination' );
-				} else {
-					$static_page->last_transferred_at = Util::formatted_datetime();
-					$static_page->save();
-
-					Util::debug_log( 'Successfully transferred: ' . $path );
-				}
-			} else {
-				Util::debug_log( "Cannot find file: " . $origin_file_path );
-				$static_page->set_error_message( 'Unable to find file in archive' );
-			}
+			throw new \RuntimeException( 'Unable to create destination directory' );
 		}
+
+		chmod( $path, 0755 );
+		$origin_file_path      = Util::combine_path( $this->archive_dir, $file_path );
+		$destination_file_path = Util::combine_path( $this->destination_dir, $file_path );
+
+		if ( ! file_exists( $origin_file_path ) ) {
+			Util::debug_log( "Cannot find file: " . $origin_file_path );
+			throw new \RuntimeException( 'Unable to find file in archive' );
+		}
+
+		if ( ! copy( $origin_file_path, $destination_file_path ) ) {
+			Util::debug_log( "Cannot copy " . $origin_file_path . " to " . $destination_file_path );
+			throw new \RuntimeException( 'Unable to copy file to destination' );
+		}
+
+		$static_page->last_transferred_at = Util::formatted_datetime();
+		$static_page->save();
+		Util::debug_log( 'Successfully transferred: ' . $path );
 
 		do_action( 'simply_static_page_file_transferred', $static_page, $this->destination_dir );
 	}
@@ -170,21 +185,19 @@ class Transfer_Files_Locally_Task extends Task {
 	 * @return true|\WP_Error True on success, WP_Error otherwise.
 	 */
 	public static function delete_local_directory_static_files( $local_dir, $options ) {
-		$temp_dir = $options->get( 'temp_files_dir' );
-
-		if ( empty( $temp_dir ) ) {
-			$upload_dir = wp_upload_dir();
-			$temp_dir   = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
-		}
-
-		if ( false === file_exists( $temp_dir ) ) {
+		if ( ! Util::is_safe_directory_to_delete( $local_dir ) ) {
+			Util::debug_log( 'Refusing to clear unsafe local destination directory: ' . $local_dir );
 			return false;
 		}
 
 		$files = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $local_dir, \RecursiveDirectoryIterator::SKIP_DOTS ), \RecursiveIteratorIterator::CHILD_FIRST );
 
 		foreach ( $files as $fileinfo ) {
-			if ( $fileinfo->isDir() ) {
+			if ( $fileinfo->isLink() ) {
+				if ( false === unlink( $fileinfo->getPathname() ) ) {
+					return false;
+				}
+			} elseif ( $fileinfo->isDir() ) {
 				if ( false === rmdir( $fileinfo->getRealPath() ) ) {
 					return false;
 				}
@@ -212,9 +225,18 @@ class Transfer_Files_Locally_Task extends Task {
 		$destination_file_path = untrailingslashit( $local_dir ) . DIRECTORY_SEPARATOR . 'feed' . DIRECTORY_SEPARATOR . 'index.html';
 
 		if ( ! file_exists( $file_path ) ) {
-			return;
+			return true;
 		}
 
-		copy( $file_path, $destination_file_path );
+		$destination_feed_dir = dirname( $destination_file_path );
+		if ( ! wp_mkdir_p( $destination_feed_dir ) || ! copy( $file_path, $destination_file_path ) ) {
+			Util::debug_log( 'Unable to transfer feed redirect to local destination: ' . $destination_file_path );
+			return new \WP_Error(
+				'ss_feed_transfer_failed',
+				__( 'Unable to transfer the feed redirect to the local destination.', 'simply-static' )
+			);
+		}
+
+		return true;
 	}
 }

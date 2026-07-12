@@ -24,6 +24,11 @@ class Create_Zip_Archive_Task extends Task {
 	const BATCH_SIZE = 2500;
 
 	/**
+	 * Non-autoloaded option containing the potentially large file snapshot.
+	 */
+	const ZIP_FILES_OPTION = 'simply_static_zip_files';
+
+	/**
 	 * Performing the action.
 	 *
 	 * @return string|bool|WP_Error
@@ -57,7 +62,7 @@ class Create_Zip_Archive_Task extends Task {
 		if ( $this->is_wp_cli_running() ) {
 			$message .= $download_url;
 		} else {
-			$message .= ' <a href="' . $download_url . '">' . __( 'Click here to download', 'simply-static' ) . '</a>';
+			$message .= ' <a href="' . esc_url( $download_url ) . '">' . esc_html__( 'Click here to download', 'simply-static' ) . '</a>';
 		}
 
 		$this->save_status_message( $message );
@@ -75,6 +80,7 @@ class Create_Zip_Archive_Task extends Task {
 		$this->options->set( 'zip_total_files', null );
 		$this->options->set( 'zip_files', null );
 		$this->options->save();
+		delete_option( self::ZIP_FILES_OPTION );
 	}
 
 	/**
@@ -99,6 +105,10 @@ class Create_Zip_Archive_Task extends Task {
 
 		// Only clean temp dir on the first batch.
 		if ( $is_first_batch ) {
+			if ( ! Util::is_safe_directory_to_delete( $temp_dir ) ) {
+				return new \WP_Error( 'unsafe_temp_directory', __( 'Refusing to modify an unsafe temporary directory.', 'simply-static' ) );
+			}
+
 			$temp_dir_empty = ! ( new \FilesystemIterator( $temp_dir ) )->valid();
 
 			if ( ! $temp_dir_empty ) {
@@ -220,8 +230,13 @@ class Create_Zip_Archive_Task extends Task {
 	 */
 	private function get_files_to_include( $archive_dir, $is_first_batch ) {
 		$is_update_export = 'update' === $this->options->get( 'generate_type' );
-		$stored_files = $this->options->get( 'zip_files' );
-		if ( $is_update_export && ! $is_first_batch && is_array( $stored_files ) ) {
+		$stored_files = get_option( self::ZIP_FILES_OPTION, false );
+		if ( false === $stored_files ) {
+			// Resume an archive started before the file snapshot moved out of the
+			// monolithic, commonly autoloaded settings option.
+			$stored_files = $this->options->get( 'zip_files' );
+		}
+		if ( ! $is_first_batch && is_array( $stored_files ) ) {
 			return $stored_files;
 		}
 
@@ -236,8 +251,9 @@ class Create_Zip_Archive_Task extends Task {
 
 		Util::debug_log( 'Prepared ' . count( $files ) . ' file(s) for ZIP archive' );
 
-		if ( $is_update_export && $is_first_batch ) {
-			$this->options->set( 'zip_files', $files );
+		if ( $is_first_batch ) {
+			update_option( self::ZIP_FILES_OPTION, $files, false );
+			$this->options->set( 'zip_files', null );
 			$this->options->save();
 		}
 
@@ -357,7 +373,7 @@ class Create_Zip_Archive_Task extends Task {
 	 * @return string|false|WP_Error Download URL when complete, false if more batches needed, WP_Error on failure.
 	 */
 	private function create_zip_batched( $zip_filename, $archive_dir, $batch_offset, $is_first_batch, $all_files ) {
-		$batch_size = apply_filters( 'ss_zip_batch_size', self::BATCH_SIZE );
+		$batch_size = max( 1, min( 10000, (int) apply_filters( 'ss_zip_batch_size', self::BATCH_SIZE ) ) );
 
 		if ( $is_first_batch ) {
 			Util::debug_log( 'Creating zip archive via ZipArchive (ZIP64 capable if libzip supports it)' );
@@ -386,7 +402,8 @@ class Create_Zip_Archive_Task extends Task {
 		}
 		$base_len  = strlen( $base_path ) + 1; // account for trailing slash in relative names
 
-		$total_files = count( $all_files );
+		$total_files  = count( $all_files );
+		$batch_offset = max( 0, min( (int) $batch_offset, $total_files ) );
 
 		// Store total for status messages.
 		if ( $is_first_batch ) {
@@ -397,6 +414,7 @@ class Create_Zip_Archive_Task extends Task {
 		// Determine the slice of files for this batch.
 		$batch_files = array_slice( $all_files, $batch_offset, $batch_size );
 		$count       = 0;
+		$failed_files = array();
 
 		foreach ( $batch_files as $path ) {
 			$local_name = substr( $path, $base_len );
@@ -405,6 +423,7 @@ class Create_Zip_Archive_Task extends Task {
 			$added = $zip->addFile( $path, $local_name );
 			if ( true !== $added ) {
 				Util::debug_log( 'Failed to add file to zip: ' . $path . ' as ' . $local_name );
+				$failed_files[] = $path;
 				continue;
 			}
 
@@ -426,6 +445,18 @@ class Create_Zip_Archive_Task extends Task {
 					$zip_filename,
 					$status
 				)
+			);
+		}
+
+		if ( ! empty( $failed_files ) ) {
+			return new \WP_Error(
+				'zip_add_file_failed',
+				sprintf(
+					/* translators: %d: number of files that could not be added. */
+					__( 'Unable to add %d file(s) to the ZIP archive.', 'simply-static' ),
+					count( $failed_files )
+				),
+				array( 'files' => $failed_files )
 			);
 		}
 

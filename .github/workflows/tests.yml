@@ -1,0 +1,67 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  php:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.0', '8.2', '8.4']
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer:v2
+      - run: composer install --no-interaction --prefer-dist
+      - run: composer test
+
+  admin:
+    name: Admin application
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/admin/package-lock.json
+      - working-directory: src/admin
+        run: npm ci
+      - working-directory: src/admin
+        run: npm test -- --runInBand
+      - working-directory: src/admin
+        run: npm run lint
+      - working-directory: src/admin
+        run: npm run build
+      - run: git diff --exit-code -- src/admin/build
+
+  coverage:
+    name: PHP coverage report
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+          tools: composer:v2
+      - run: composer install --no-interaction --prefer-dist
+      - run: composer test:coverage
+      - run: composer coverage:check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: php-clover-coverage
+          path: build/logs/clover.xml

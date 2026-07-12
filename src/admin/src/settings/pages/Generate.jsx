@@ -19,7 +19,7 @@ function Generate() {
     const {settings, blogId, setBlogId} = useContext(SettingsContext);
 
     return (<div className={"inner-settings"}>
-        {!options.is_network &&
+		{!options.is_network && options.can_view_activity_log &&
             <>
                 <BFBanner />
                 <ActivityLog/>
@@ -37,7 +37,7 @@ function Generate() {
                     </Card>
                 </FlexItem>
             }
-            {settings.debugging_mode && options.log_file && !options.is_network &&
+		{settings.debugging_mode && options.log_file && options.can_manage_settings && !options.is_network &&
                 <FlexItem isBlock={true}>
                     <Card>
                         <CardHeader>
@@ -50,7 +50,7 @@ function Generate() {
                 </FlexItem>
             }
         </Flex>
-        {!options.is_network && <>
+		{!options.is_network && options.can_view_activity_log && <>
             <Spacer margin={5}/>
             <Card>
                 <CardHeader>

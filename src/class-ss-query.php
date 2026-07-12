@@ -111,6 +111,7 @@ class Query {
 
 		$model = $this->model;
 		$this->where( array( $column_name => $value ) );
+		$this->limit( 1 );
 
 		$query = $this->compose_select_query();
 
@@ -238,7 +239,7 @@ class Query {
 	 * @return self
 	 */
 	public function limit( $limit ) {
-		$this->limit = $limit;
+		$this->limit = max( 1, (int) $limit );
 		return $this;
 	}
 
@@ -252,7 +253,7 @@ class Query {
 			throw new \Exception( "Cannot offset without limit" );
 		}
 
-		$this->offset = $offset;
+		$this->offset = max( 0, (int) $offset );
 		return $this;
 	}
 
@@ -361,11 +362,15 @@ class Query {
 		$values = ' SET ';
 
 		if ( is_array( $arg ) ) {
-			// add array of conditions to the "where" array
+			$assignments = array();
+
+			// Add each field assignment, separated by a comma.
 			foreach ( $arg as $column_name => $value ) {
-				$value = self::escape_and_quote( $value );
-				$values .= "{$column_name} = $value ";
+				$value         = self::escape_and_quote( $value );
+				$assignments[] = "{$column_name} = $value";
 			}
+
+			$values .= implode( ', ', $assignments ) . ' ';
 		} else if ( is_string( $arg ) ) {
 			// pass the string as-is to our "where" array
 			$values .= $arg . ' ';
@@ -393,9 +398,18 @@ class Query {
 			$where .= ' AND ' . $condition;
 		}
 
-        if ( is_a( $model, Page::class ) && false === strpos( $where, 'site_id=' ) ) {
-            $where .= ' AND site_id=' . get_current_blog_id();
-        }
+		// Model queries pass a class-string, so allow class names when checking
+		// whether this is a Page query. Also recognise explicitly supplied site
+		// clauses regardless of whitespace (e.g. `site_id = 2`) so callers can
+		// intentionally target another site without an incompatible second scope.
+		$is_page_query        = is_a( $model, Page::class, true );
+		$scope_check_sql      = self::strip_sql_string_literals( $where );
+		$scope_check_sql      = preg_replace( '~/\*.*?\*/|--[^\r\n]*|#[^\r\n]*~s', '', $scope_check_sql );
+		$has_explicit_site_id = (bool) preg_match( '/\bsite_id\s*(?:=|IS)\s*/i', $scope_check_sql );
+
+		if ( $is_page_query && ! $has_explicit_site_id ) {
+			$where .= ' AND site_id=' . get_current_blog_id();
+		}
 
 		if ( $where !== '' ) {
 			$where = ' WHERE 1=1' . $where;
@@ -414,6 +428,59 @@ class Query {
 		}
 
 		return "{$statement}{$table}{$values}$where{$order}{$limit}$offset";
+	}
+
+	/**
+	 * Remove quoted SQL values before inspecting a condition for scoped columns.
+	 *
+	 * A URL or status value may legitimately contain text such as `site_id=2`.
+	 * Treating that value as an explicit column predicate would accidentally
+	 * disable the mandatory current-site scope on Page queries.
+	 *
+	 * @param string $sql SQL fragment to inspect.
+	 * @return string SQL fragment with quoted values removed.
+	 */
+	private static function strip_sql_string_literals( $sql ) {
+		$result  = '';
+		$quote   = null;
+		$escaped = false;
+		$length  = strlen( $sql );
+
+		for ( $index = 0; $index < $length; ++$index ) {
+			$character = $sql[ $index ];
+
+			if ( null !== $quote ) {
+				if ( $escaped ) {
+					$escaped = false;
+					continue;
+				}
+
+				if ( '\\' === $character ) {
+					$escaped = true;
+					continue;
+				}
+
+				if ( $quote === $character ) {
+					if ( $index + 1 < $length && $sql[ $index + 1 ] === $quote ) {
+						++$index;
+						continue;
+					}
+
+					$quote = null;
+				}
+
+				continue;
+			}
+
+			if ( "'" === $character || '"' === $character ) {
+				$quote = $character;
+				continue;
+			}
+
+			$result .= $character;
+		}
+
+		return $result;
 	}
 
 	/**

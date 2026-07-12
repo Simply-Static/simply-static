@@ -45,7 +45,15 @@ class Pagination_Crawler extends Crawler {
 		// Get pagination for custom page templates (pages with custom WP_Query pagination)
 		$pagination_urls = array_merge( $pagination_urls, $this->get_page_template_pagination() );
 
-		return apply_filters( 'simply_static_pagination_urls', $pagination_urls );
+		$pagination_urls = apply_filters( 'simply_static_pagination_urls', $pagination_urls );
+		$pagination_urls = is_array( $pagination_urls ) ? array_values( array_unique( $pagination_urls ) ) : [];
+		$max_urls        = $this->get_max_generated_urls();
+		if ( count( $pagination_urls ) > $max_urls ) {
+			$this->report_truncation( 'final_urls', $max_urls, count( $pagination_urls ) );
+			$pagination_urls = array_slice( $pagination_urls, 0, $max_urls );
+		}
+
+		return $pagination_urls;
 	}
 
 	/**
@@ -54,7 +62,9 @@ class Pagination_Crawler extends Crawler {
 	 * @return array List of archive pagination URLs
 	 */
 	private function get_archive_pagination() : array {
-		$urls = [];
+		$urls                = [];
+		$max_generated_urls  = $this->get_max_generated_urls();
+		$max_archive_objects = max( 1, min( 100000, (int) apply_filters( 'simply_static_pagination_max_archive_objects', 5000 ) ) );
 
 		// Get selected post types from settings
 		$options             = get_option( 'simply-static' );
@@ -93,7 +103,7 @@ class Pagination_Crawler extends Crawler {
 					}
 
 					// Add URLs for each page (starting from page 2, as page 1 is the main URL)
-					for ( $i = 2; $i <= $total_pages; $i ++ ) {
+					for ( $i = 2; $i <= $total_pages && count( $urls ) < $max_generated_urls; $i ++ ) {
 						// Use /page/N/ format instead of ?paged=N
 						$urls[] = trailingslashit( rtrim( $blog_url, '/' ) ) . 'page/' . $i . '/';
 					}
@@ -102,7 +112,7 @@ class Pagination_Crawler extends Crawler {
 					$archive_link = get_post_type_archive_link( $post_type );
 
 					if ( $archive_link ) {
-						for ( $i = 2; $i <= $total_pages; $i ++ ) {
+						for ( $i = 2; $i <= $total_pages && count( $urls ) < $max_generated_urls; $i ++ ) {
 							$urls[] = trailingslashit( rtrim( $archive_link, '/' ) ) . 'page/' . $i . '/';
 						}
 					}
@@ -110,8 +120,14 @@ class Pagination_Crawler extends Crawler {
 
 				// Get pagination for category archives (only for 'post' type by default)
 				if ( $post_type === 'post' ) {
-					$categories = get_categories( [ 'hide_empty' => true ] );
+					$categories = get_categories( [ 'hide_empty' => true, 'number' => $max_archive_objects ] );
+					if ( count( $categories ) >= $max_archive_objects ) {
+						$this->report_truncation( 'category_candidates', $max_archive_objects, count( $categories ) );
+					}
 					foreach ( $categories as $category ) {
+						if ( count( $urls ) >= $max_generated_urls ) {
+							break;
+						}
 						$category_link = get_category_link( $category->term_id );
 						if ( is_wp_error( $category_link ) || empty( $category_link ) ) {
 							continue;
@@ -122,15 +138,21 @@ class Pagination_Crawler extends Crawler {
 						// Add base term link
 						$urls[] = trailingslashit( rtrim( $category_link, '/' ) ) . '';
 
-						for ( $i = 2; $i <= $category_pages; $i ++ ) {
+						for ( $i = 2; $i <= $category_pages && count( $urls ) < $max_generated_urls; $i ++ ) {
 							// Use /page/N/ format instead of ?paged=N
 							$urls[] = trailingslashit( rtrim( $category_link, '/' ) ) . 'page/' . $i . '/';
 						}
 					}
 
 					// Get pagination for tag archives
-					$tags = get_tags( [ 'hide_empty' => true ] );
+					$tags = get_tags( [ 'hide_empty' => true, 'number' => $max_archive_objects ] );
+					if ( count( $tags ) >= $max_archive_objects ) {
+						$this->report_truncation( 'tag_candidates', $max_archive_objects, count( $tags ) );
+					}
 					foreach ( $tags as $tag ) {
+						if ( count( $urls ) >= $max_generated_urls ) {
+							break;
+						}
 						$tag_link = get_tag_link( $tag->term_id );
 						if ( is_wp_error( $tag_link ) || empty( $tag_link ) ) {
 							continue;
@@ -141,7 +163,7 @@ class Pagination_Crawler extends Crawler {
 						// Add base term link
 						$urls[] = trailingslashit( rtrim( $tag_link, '/' ) ) . '';
 
-						for ( $i = 2; $i <= $tag_pages; $i ++ ) {
+						for ( $i = 2; $i <= $tag_pages && count( $urls ) < $max_generated_urls; $i ++ ) {
 							// Use /page/N/ format instead of ?paged=N
 							$urls[] = trailingslashit( rtrim( $tag_link, '/' ) ) . 'page/' . $i . '/';
 						}
@@ -151,9 +173,16 @@ class Pagination_Crawler extends Crawler {
 					$authors = get_users( [
 						'has_published_posts' => [ 'post' ],
 						'fields'              => [ 'ID' ],
+						'number'              => $max_archive_objects,
 					] );
 					if ( ! empty( $authors ) ) {
+						if ( count( $authors ) >= $max_archive_objects ) {
+							$this->report_truncation( 'author_candidates', $max_archive_objects, count( $authors ) );
+						}
 						foreach ( $authors as $author ) {
+							if ( count( $urls ) >= $max_generated_urls ) {
+								break;
+							}
 							$author_id    = is_object( $author ) ? (int) $author->ID : (int) $author;
 							$post_count   = (int) count_user_posts( $author_id, 'post', true );
 							$author_pages = (int) ceil( $post_count / $posts_per_page );
@@ -164,7 +193,7 @@ class Pagination_Crawler extends Crawler {
 							// Base author link
 							$urls[] = trailingslashit( rtrim( $author_link, '/' ) ) . '';
 							// Pagination pages starting from 2
-							for ( $i = 2; $i <= $author_pages; $i ++ ) {
+							for ( $i = 2; $i <= $author_pages && count( $urls ) < $max_generated_urls; $i ++ ) {
 								$urls[] = trailingslashit( rtrim( $author_link, '/' ) ) . 'page/' . $i . '/';
 							}
 						}
@@ -183,7 +212,10 @@ class Pagination_Crawler extends Crawler {
 	 * @return array List of post pagination URLs
 	 */
 	private function get_post_pagination() : array {
-		$urls = [];
+		$urls               = [];
+		$batch_size         = max( 10, min( 1000, (int) apply_filters( 'simply_static_pagination_post_query_batch_size', 250 ) ) );
+		$max_posts_to_scan  = max( 1, min( 1000000, (int) apply_filters( 'simply_static_pagination_max_posts_to_scan', 10000 ) ) );
+		$max_generated_urls = $this->get_max_generated_urls();
 
 		// Get selected post types from settings
 		$options = get_option( 'simply-static' );
@@ -198,30 +230,44 @@ class Pagination_Crawler extends Crawler {
 			return $urls;
 		}
 
-		// Get posts that might have pagination
-		$posts = get_posts([
-			'post_type'      => $post_type_param,
-			'posts_per_page' => -1,
-			'post_status'    => 'publish',
-		]);
+		$posts_scanned = 0;
+		$posts         = [];
+		$query_size    = 0;
+		for ( $offset = 0; $offset < $max_posts_to_scan && count( $urls ) < $max_generated_urls; $offset += $batch_size ) {
+			$query_size = min( $batch_size, $max_posts_to_scan - $offset );
+			$posts      = get_posts( [
+				'post_type'              => $post_type_param,
+				'posts_per_page'         => $query_size,
+				'offset'                 => $offset,
+				'orderby'                => 'ID',
+				'order'                  => 'ASC',
+				'post_status'            => 'publish',
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			] );
+			$posts_scanned += count( $posts );
 
-		foreach ($posts as $post) {
-			// Check if the post content has the <!--nextpage--> tag
-			$content = $post->post_content;
+			foreach ( $posts as $post ) {
+				// Check if the post content has the <!--nextpage--> tag.
+				$content = $post->post_content;
 
-			if (strpos($content, '<!--nextpage-->') !== false) {
-				// Count the number of pages
-				$pages = substr_count($content, '<!--nextpage-->') + 1;
+				if ( strpos( $content, '<!--nextpage-->' ) !== false ) {
+					$pages    = substr_count( $content, '<!--nextpage-->' ) + 1;
+					$permalink = get_permalink( $post->ID );
 
-				// Get the permalink
-				$permalink = get_permalink($post->ID);
-
-				// Add URLs for each page (starting from page 2, as page 1 is the main URL)
-				for ($i = 2; $i <= $pages; $i++) {
-					// Use /N/ format for post pagination
-					$urls[] = trailingslashit(rtrim($permalink, '/')) . $i . '/';
+					for ( $i = 2; $i <= $pages && count( $urls ) < $max_generated_urls; $i++ ) {
+						$urls[] = trailingslashit( rtrim( $permalink, '/' ) ) . $i . '/';
+					}
 				}
 			}
+
+			if ( count( $posts ) < $query_size ) {
+				break;
+			}
+		}
+		if ( $posts_scanned >= $max_posts_to_scan && $query_size > 0 && count( $posts ) >= $query_size ) {
+			$this->report_truncation( 'post_candidates', $max_posts_to_scan, $posts_scanned );
 		}
 
 		return $urls;
@@ -236,7 +282,8 @@ class Pagination_Crawler extends Crawler {
 	 * @return array List of pagination URLs found in page templates
 	 */
 	private function get_page_template_pagination() : array {
-		$urls = [];
+		$urls               = [];
+		$max_generated_urls = $this->get_max_generated_urls();
 
 		// Get selected post types from settings
 		$options             = get_option( 'simply-static' );
@@ -250,12 +297,32 @@ class Pagination_Crawler extends Crawler {
 			return $urls;
 		}
 
-		// Get all published pages
-		$pages = get_posts( [
-			'post_type'      => 'page',
-			'posts_per_page' => -1,
-			'post_status'    => 'publish',
-		] );
+		$batch_size        = max( 10, min( 1000, (int) apply_filters( 'simply_static_pagination_page_query_batch_size', 100 ) ) );
+		$max_pages_to_scan = max( 1, min( 10000, (int) apply_filters( 'simply_static_pagination_max_page_templates_to_scan', 100 ) ) );
+		$pages             = [];
+		$batch             = [];
+		$query_size        = 0;
+		for ( $offset = 0; $offset < $max_pages_to_scan; $offset += $batch_size ) {
+			$query_size = min( $batch_size, $max_pages_to_scan - $offset );
+			$batch      = get_posts( [
+				'post_type'              => 'page',
+				'posts_per_page'         => $query_size,
+				'offset'                 => $offset,
+				'orderby'                => 'ID',
+				'order'                  => 'ASC',
+				'post_status'            => 'publish',
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			] );
+			$pages      = array_merge( $pages, $batch );
+			if ( count( $batch ) < $query_size ) {
+				break;
+			}
+		}
+		if ( count( $pages ) >= $max_pages_to_scan && $query_size > 0 && count( $batch ) >= $query_size ) {
+			$this->report_truncation( 'page_template_candidates', $max_pages_to_scan, count( $pages ) );
+		}
 
 		/**
 		 * Filter the list of pages to scan for pagination.
@@ -266,13 +333,20 @@ class Pagination_Crawler extends Crawler {
 		 * @param array $pages Array of WP_Post objects to scan for pagination.
 		 */
 		$pages = apply_filters( 'simply_static_pages_to_scan_for_pagination', $pages );
+		$pages = is_array( $pages ) ? array_slice( $pages, 0, $max_pages_to_scan ) : [];
 
 		// Get the site URL for comparison
 		$site_url = trailingslashit( home_url() );
 
 		\Simply_Static\Util::debug_log( sprintf( 'Pagination Crawler: Scanning %d pages for custom pagination links', count( $pages ) ) );
 
+		$global_scan_seconds = max( 1, min( 300, (int) apply_filters( 'simply_static_pagination_total_scan_seconds', 30 ) ) );
+		$scan_deadline       = microtime( true ) + $global_scan_seconds;
 		foreach ( $pages as $page ) {
+			if ( microtime( true ) >= $scan_deadline ) {
+				$this->report_truncation( 'page_template_deadline', count( $urls ), count( $pages ) );
+				break;
+			}
 			$page_url = get_permalink( $page->ID );
 
 			if ( ! $page_url ) {
@@ -280,11 +354,18 @@ class Pagination_Crawler extends Crawler {
 			}
 
 			// Extract pagination URLs from this page and its pagination pages
-			$page_pagination_urls = $this->extract_pagination_urls_from_page( $page_url, $site_url );
+			$page_pagination_urls = $this->extract_pagination_urls_from_page( $page_url, $site_url, $scan_deadline );
 
 			if ( ! empty( $page_pagination_urls ) ) {
 				\Simply_Static\Util::debug_log( sprintf( 'Pagination Crawler: Found %d pagination URLs for page %s', count( $page_pagination_urls ), $page_url ) );
-				$urls = array_merge( $urls, $page_pagination_urls );
+				$remaining = $max_generated_urls - count( $urls );
+				if ( $remaining < count( $page_pagination_urls ) ) {
+					$this->report_truncation( 'page_template_urls', $max_generated_urls, count( $urls ) + count( $page_pagination_urls ) );
+				}
+				$urls = array_merge( $urls, array_slice( $page_pagination_urls, 0, max( 0, $remaining ) ) );
+				if ( count( $urls ) >= $max_generated_urls ) {
+					break;
+				}
 			}
 		}
 
@@ -304,10 +385,16 @@ class Pagination_Crawler extends Crawler {
 	 *
 	 * @return array List of pagination URLs found.
 	 */
-	private function extract_pagination_urls_from_page( string $base_page_url, string $site_url ) : array {
+	private function extract_pagination_urls_from_page( string $base_page_url, string $site_url, $scan_deadline = null ) : array {
 		$all_pagination_urls = [];
+		$discovered_urls     = [];
 		$scanned_urls        = [];
+		$queued_urls         = [ $base_page_url => true ];
 		$urls_to_scan        = [ $base_page_url ];
+
+		if ( ! \Simply_Static\Util::is_local_origin_url( $base_page_url ) || ! \Simply_Static\Util::is_local_origin_url( $site_url ) ) {
+			return $all_pagination_urls;
+		}
 
 		// Get the base page path for pattern matching
 		$base_page_path = wp_parse_url( $base_page_url, PHP_URL_PATH );
@@ -323,34 +410,59 @@ class Pagination_Crawler extends Crawler {
 		];
 
 		// Limit the number of pages to scan to prevent infinite loops
-		$max_pages_to_scan = apply_filters( 'simply_static_max_pagination_pages_to_scan', 100 );
+		$max_pages_to_scan = max( 1, min( 1000, (int) apply_filters( 'simply_static_max_pagination_pages_to_scan', 100 ) ) );
+		$max_body_bytes    = max( 1024, min( 10 * 1024 * 1024, (int) apply_filters( 'simply_static_pagination_max_response_bytes', 2 * 1024 * 1024 ) ) );
+		$max_run_seconds   = max( 1, min( 300, (int) apply_filters( 'simply_static_pagination_max_scan_seconds', 30 ) ) );
+		$request_timeout   = max( 1, min( 30, (int) apply_filters( 'simply_static_pagination_request_timeout', 10 ) ) );
+		$max_generated_urls = $this->get_max_generated_urls();
+		$started_at        = microtime( true );
+		$deadline          = is_numeric( $scan_deadline )
+			? min( (float) $scan_deadline, $started_at + $max_run_seconds )
+			: $started_at + $max_run_seconds;
 		$pages_scanned     = 0;
 
-		while ( ! empty( $urls_to_scan ) && $pages_scanned < $max_pages_to_scan ) {
+		while (
+			! empty( $urls_to_scan )
+			&& $pages_scanned < $max_pages_to_scan
+			&& count( $all_pagination_urls ) < $max_generated_urls
+			&& microtime( true ) < $deadline
+		) {
 			$current_url = array_shift( $urls_to_scan );
+			unset( $queued_urls[ $current_url ] );
 
 			// Skip if already scanned
-			if ( in_array( $current_url, $scanned_urls, true ) ) {
+			if ( isset( $scanned_urls[ $current_url ] ) || ! \Simply_Static\Util::is_local_origin_url( $current_url ) ) {
 				continue;
 			}
 
-			$scanned_urls[] = $current_url;
+			$scanned_urls[ $current_url ] = true;
 			$pages_scanned++;
 
 			// Fetch the page content
-			$response = wp_remote_get( $current_url, [
-				'timeout'   => 30,
-				'sslverify' => false,
-			] );
+			$args = [
+				'timeout'             => min( $request_timeout, max( 1, $deadline - microtime( true ) ) ),
+				'redirection'         => 0,
+				'sslverify'           => (bool) apply_filters( 'ss_remote_get_sslverify', true, $current_url ),
+				'limit_response_size' => $max_body_bytes + 1,
+			];
+			$authorization = \Simply_Static\Util::get_basic_auth_header_for_url( $current_url );
+			if ( null !== $authorization ) {
+				$args['headers'] = [ 'Authorization' => $authorization ];
+			}
 
-			if ( is_wp_error( $response ) ) {
-				\Simply_Static\Util::debug_log( sprintf( 'Pagination Crawler: Failed to fetch page %s: %s', $current_url, $response->get_error_message() ) );
+			$response = wp_remote_get( $current_url, apply_filters( 'ss_remote_get_args', $args ) );
+
+			if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+				$error_message = is_wp_error( $response )
+					? $response->get_error_message()
+					: sprintf( 'HTTP %d', (int) wp_remote_retrieve_response_code( $response ) );
+				\Simply_Static\Util::debug_log( sprintf( 'Pagination Crawler: Failed to fetch page %s: %s', $current_url, $error_message ) );
 				continue;
 			}
 
 			$body = wp_remote_retrieve_body( $response );
 
-			if ( empty( $body ) ) {
+			if ( ! is_string( $body ) || '' === $body || strlen( $body ) > $max_body_bytes ) {
 				continue;
 			}
 
@@ -358,19 +470,28 @@ class Pagination_Crawler extends Crawler {
 			foreach ( $patterns as $pattern ) {
 				if ( preg_match_all( $pattern, $body, $matches ) ) {
 					foreach ( $matches[1] as $match ) {
+						if ( count( $all_pagination_urls ) >= $max_generated_urls ) {
+							$this->report_truncation( 'single_page_urls', $max_generated_urls, count( $matches[1] ) );
+							break 2;
+						}
 						// Convert relative URLs to absolute
-						if ( strpos( $match, 'http' ) !== 0 ) {
+						if ( 0 === strpos( $match, '/' ) ) {
 							$match = $site_url . ltrim( $match, '/' );
 						}
 						// Ensure trailing slash for consistency
 						$pagination_url = trailingslashit( rtrim( $match, '/' ) );
+						if ( ! \Simply_Static\Util::is_local_origin_url( $pagination_url ) ) {
+							continue;
+						}
 
 						// Add to results if not already found
-						if ( ! in_array( $pagination_url, $all_pagination_urls, true ) ) {
+						if ( ! isset( $discovered_urls[ $pagination_url ] ) ) {
+							$discovered_urls[ $pagination_url ] = true;
 							$all_pagination_urls[] = $pagination_url;
 
 							// Add to scan queue if not already scanned
-							if ( ! in_array( $pagination_url, $scanned_urls, true ) && ! in_array( $pagination_url, $urls_to_scan, true ) ) {
+							if ( ! isset( $scanned_urls[ $pagination_url ] ) && ! isset( $queued_urls[ $pagination_url ] ) ) {
+								$queued_urls[ $pagination_url ] = true;
 								$urls_to_scan[] = $pagination_url;
 							}
 						}
@@ -380,5 +501,33 @@ class Pagination_Crawler extends Crawler {
 		}
 
 		return $all_pagination_urls;
+	}
+
+	/** @return int Maximum pagination URLs contributed by this crawler. */
+	private function get_max_generated_urls() : int {
+		return max( 100, min( 1000000, (int) apply_filters( 'simply_static_pagination_max_generated_urls', 50000 ) ) );
+	}
+
+	/**
+	 * Make an intentional safety truncation observable to logs and integrations.
+	 *
+	 * @param string $context Truncation context.
+	 * @param int    $limit   Applied limit.
+	 * @param int    $seen    Number of candidates observed, when known.
+	 */
+	private function report_truncation( $context, $limit, $seen ) : void {
+		$message = sprintf(
+			'Pagination Crawler: safety limit reached (%s, limit %d, observed %d). Adjust the pagination safety filters for this site if complete discovery requires a higher limit.',
+			(string) $context,
+			(int) $limit,
+			(int) $seen
+		);
+		\Simply_Static\Util::debug_log( $message );
+		if ( class_exists( '\\Simply_Static\\Options' ) ) {
+			\Simply_Static\Options::instance()
+				->add_status_message( $message, 'pagination_warning' )
+				->save();
+		}
+		do_action( 'simply_static_pagination_truncated', $context, (int) $limit, (int) $seen, $message );
 	}
 }

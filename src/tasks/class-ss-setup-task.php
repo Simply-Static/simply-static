@@ -366,6 +366,11 @@ class Setup_Task extends Task {
 			return false;
 		}
 
+		if ( ! Util::is_safe_directory_to_delete( $dir ) ) {
+			Util::debug_log( 'Refusing to clear unsafe temporary directory: ' . $dir );
+			return false;
+		}
+
 		$files = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $dir, \RecursiveDirectoryIterator::SKIP_DOTS ), \RecursiveIteratorIterator::CHILD_FIRST );
 
 		foreach ( $files as $fileinfo ) {
@@ -375,7 +380,11 @@ class Setup_Task extends Task {
 				continue;
 			}
 
-			if ( $fileinfo->isDir() ) {
+			if ( $fileinfo->isLink() ) {
+				if ( false === unlink( $fileinfo->getPathname() ) ) {
+					return false;
+				}
+			} elseif ( $fileinfo->isDir() ) {
 				if ( false === rmdir( $fileinfo->getRealPath() ) ) {
 					return false;
 				}

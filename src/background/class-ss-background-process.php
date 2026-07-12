@@ -118,6 +118,27 @@ abstract class Background_Process extends Async_Request {
 	protected $process_lock_released = false;
 
 	/**
+	 * Whether the most recent queue batch was persisted successfully.
+	 *
+	 * @var bool
+	 */
+	protected $queue_save_succeeded = true;
+
+	/**
+	 * Whether this worker owns the database-level advisory lock.
+	 *
+	 * @var bool
+	 */
+	private $database_lock_acquired = false;
+
+	/**
+	 * Database advisory lock name for this site/process.
+	 *
+	 * @var string|null
+	 */
+	private $database_lock_name = null;
+
+	/**
 	 * The status set when process is cancelling.
 	 *
 	 * @var int
@@ -138,6 +159,7 @@ abstract class Background_Process extends Async_Request {
 	 */
 	public function __construct( $allowed_batch_data_classes = true ) {
 		parent::__construct();
+		$this->current_site_id = get_current_blog_id();
 
 		if ( empty( $allowed_batch_data_classes ) && false !== $allowed_batch_data_classes ) {
 			$allowed_batch_data_classes = true;
@@ -217,7 +239,7 @@ abstract class Background_Process extends Async_Request {
 		// If the remote POST fails, mark loopback as unavailable and fall back
 		// to inline processing so the current dispatch is not lost.
 		if ( is_wp_error( $response ) ) {
-			set_site_transient( $this->identifier . '_loopback_available', 'no', HOUR_IN_SECONDS );
+			set_site_transient( $this->get_loopback_cache_key(), 'no', HOUR_IN_SECONDS );
 
 			return $this->dispatch_inline();
 		}
@@ -256,7 +278,7 @@ abstract class Background_Process extends Async_Request {
 			return false;
 		}
 
-		$transient_key = $this->identifier . '_loopback_available';
+		$transient_key = $this->get_loopback_cache_key();
 		$cached        = get_site_transient( $transient_key );
 
 		if ( 'yes' === $cached ) {
@@ -267,15 +289,20 @@ abstract class Background_Process extends Async_Request {
 			return false;
 		}
 
-		// Not cached yet — perform a quick blocking test.
-		$url  = admin_url( 'admin-ajax.php' );
-		$args = array(
-			'timeout'   => 5,
-			'blocking'  => true,
-			'body'      => array( 'action' => 'heartbeat' ),
-			'cookies'   => $_COOKIE,
-			'sslverify' => apply_filters( 'https_local_ssl_verify', false ),
-		);
+		// Not cached yet — probe this exact worker action. A generic Heartbeat
+		// request can pass even when a WAF blocks the background route itself.
+		$url                         = add_query_arg( $this->get_query_args(), $this->get_query_url() );
+		if ( ! $this->is_dispatch_url_allowed( $url ) ) {
+			set_site_transient( $transient_key, 'no', HOUR_IN_SECONDS );
+			return false;
+		}
+		$args                        = $this->get_post_args();
+		$args['blocking']            = true;
+		$args['body']['simply_static_probe'] = '1';
+		$authorization = Util::get_basic_auth_header_for_url( $url );
+		if ( $authorization ) {
+			$args['headers'] = array( 'Authorization' => $authorization );
+		}
 
 		$response = wp_remote_post( esc_url_raw( $url ), $args );
 
@@ -300,6 +327,21 @@ abstract class Background_Process extends Async_Request {
 		set_site_transient( $transient_key, 'yes', HOUR_IN_SECONDS );
 
 		return true;
+	}
+
+	/**
+	 * Get the site-scoped loopback capability cache key.
+	 *
+	 * @return string
+	 */
+	private function get_loopback_cache_key() {
+		$key = $this->identifier . '_loopback_available';
+		if ( is_multisite() ) {
+			$site_id = null !== $this->current_site_id ? $this->current_site_id : get_current_blog_id();
+			$key    .= '_site_' . absint( $site_id );
+		}
+
+		return $key;
 	}
 
 	/**
@@ -351,6 +393,13 @@ abstract class Background_Process extends Async_Request {
 	 * @return bool True to indicate inline dispatch was scheduled.
 	 */
 	protected function dispatch_inline() {
+		// A dispatch requested from inside the current shutdown worker must be
+		// recovered by the scheduled healthcheck. Registering another shutdown
+		// callback here makes PHP run every batch in one FPM request.
+		if ( $this->is_inline ) {
+			return true;
+		}
+
 		$this->is_inline = true;
 
 		// Prevent wp_die() from terminating the shutdown function.
@@ -358,23 +407,44 @@ abstract class Background_Process extends Async_Request {
 		// kill execution before chained batches can run.
 		add_filter( $this->identifier . '_wp_die', '__return_false' );
 
-		$process = $this;
+		$process        = $this;
+		$target_site_id = $this->current_site_id;
 
-		register_shutdown_function( function () use ( $process ) {
-			// Don't run if another process already holds the lock.
-			if ( $process->is_processing() ) {
-				return;
-			}
+		register_shutdown_function( function () use ( $process, $target_site_id ) {
+			$switched = is_multisite()
+				&& ! empty( $target_site_id )
+				&& absint( $target_site_id ) !== get_current_blog_id();
 
-			// Access the protected handle() method via Closure binding.
-			// handle() acquires the lock, processes batches, unlocks, and
-			// either re-dispatches (which will again use inline) or completes.
-			$handler = \Closure::bind( function () {
-				$this->handle();
-			}, $process, get_class( $process ) );
+			try {
+				if ( $switched ) {
+					switch_to_blog( $target_site_id );
+					$process->set_current_site_id( get_current_blog_id() );
+					if ( method_exists( $process, 'set_options' ) ) {
+						$process->set_options( Options::reinstance() );
+					}
+				}
 
-			if ( $handler ) {
-				$handler();
+				// Don't run if another process already holds the target site's lock.
+				if ( $process->is_processing() ) {
+					return;
+				}
+
+				// Access the protected handle() method via Closure binding.
+				$handler = \Closure::bind( function () {
+					$this->handle();
+				}, $process, get_class( $process ) );
+
+				if ( $handler ) {
+					$handler();
+				}
+			} finally {
+				if ( $switched ) {
+					restore_current_blog();
+					$process->set_current_site_id( get_current_blog_id() );
+					if ( method_exists( $process, 'set_options' ) ) {
+						$process->set_options( Options::reinstance() );
+					}
+				}
 			}
 		} );
 
@@ -403,16 +473,29 @@ abstract class Background_Process extends Async_Request {
 	 */
 	public function save() {
 		$key = $this->generate_key();
+		$this->queue_save_succeeded = true;
 
 		if ( ! empty( $this->data ) ) {
 			Util::debug_log( "Saving to key: $key. Data: " . print_r( $this->data, true ));
-			update_option( $key, $this->data );
+			$this->queue_save_succeeded = (bool) update_option( $key, $this->data );
+			if ( ! $this->queue_save_succeeded ) {
+				Util::debug_log( 'Unable to persist background queue batch: ' . $key );
+			}
 		}
 
 		// Clean out data so that new data isn't prepended with closed session's data.
 		$this->data = array();
 
 		return $this;
+	}
+
+	/**
+	 * Whether save() persisted the most recent queue batch.
+	 *
+	 * @return bool
+	 */
+	public function was_last_queue_save_successful() {
+		return $this->queue_save_succeeded;
 	}
 
 	/**
@@ -633,6 +716,10 @@ abstract class Background_Process extends Async_Request {
 
 		check_ajax_referer( $this->identifier, 'nonce' );
 
+		if ( ! empty( $_REQUEST['simply_static_probe'] ) ) {
+			return $this->maybe_wp_die();
+		}
+
 		// Background process already running.
 		if ( $this->is_processing() ) {
 			return $this->maybe_wp_die();
@@ -699,7 +786,33 @@ abstract class Background_Process extends Async_Request {
 			return true;
 		}
 
-		return false;
+		return $this->is_database_lock_in_use();
+	}
+
+	/**
+	 * Determine whether the process lock belongs to a worker that may still run.
+	 *
+	 * Invalid legacy lock values are not treated as active so an administrator
+	 * can recover them through the queue-reset utility. Valid locks remain active
+	 * only for the configured lock duration.
+	 *
+	 * @return bool
+	 */
+	public function has_active_process_lock() {
+		if ( $this->is_database_lock_in_use() ) {
+			return true;
+		}
+
+		$lock_value = get_site_transient( $this->get_lock_key() );
+		if ( ! is_string( $lock_value ) || '' === $lock_value ) {
+			return false;
+		}
+
+		if ( null === $this->get_process_lock_timestamp( $lock_value ) ) {
+			return false;
+		}
+
+		return ! $this->is_process_lock_stale( $lock_value );
 	}
 
 	/**
@@ -714,6 +827,19 @@ abstract class Background_Process extends Async_Request {
 	public function lock_process( $reset_start_time = true ) {
 		if ( $reset_start_time ) {
 			$this->start_time = time(); // Set start time of current process.
+
+			$database_lock = $this->acquire_database_lock();
+			if ( false === $database_lock ) {
+				do_action(
+					$this->identifier . '_process_locked',
+					false,
+					'',
+					0,
+					$this->get_chain_id()
+				);
+
+				return false;
+			}
 		}
 
 		$lock_duration = ( property_exists( $this, 'queue_lock_time' ) ) ? $this->queue_lock_time : 60; // 1 minute
@@ -742,6 +868,12 @@ abstract class Background_Process extends Async_Request {
 			$lock_duration,
 			$this->get_chain_id()
 		);
+
+		if ( ! $locked && $reset_start_time ) {
+			$this->release_database_lock();
+		}
+
+		return (bool) $locked;
 	}
 
 	/**
@@ -757,6 +889,7 @@ abstract class Background_Process extends Async_Request {
 
 		if ( $lock_value && ! $this->owns_process_lock() && ! $this->is_process_lock_stale( $lock_value ) ) {
 			Util::debug_log( 'Skipping process unlock because the lock is owned by another process.' );
+			$this->release_database_lock();
 			return $this;
 		}
 
@@ -773,8 +906,123 @@ abstract class Background_Process extends Async_Request {
 		 * @param string $chain_id Current background process chain ID.
 		 */
 		do_action( $this->identifier . '_process_unlocked', $unlocked, $this->get_chain_id() );
+		$this->release_database_lock();
 
 		return $this;
+	}
+
+	/**
+	 * Acquire an atomic MySQL advisory lock for this worker when supported.
+	 *
+	 * A null result means the database does not expose advisory locks and the
+	 * existing transient guard remains the compatibility fallback.
+	 *
+	 * @return bool|null True when acquired, false when another worker owns it,
+	 *                   null when unavailable/disabled.
+	 */
+	private function acquire_database_lock() {
+		global $wpdb;
+
+		if ( $this->database_lock_acquired ) {
+			return true;
+		}
+
+		if ( ! apply_filters( $this->identifier . '_use_database_lock', true ) ) {
+			return null;
+		}
+
+		if ( ! is_object( $wpdb ) || ! method_exists( $wpdb, 'prepare' ) || ! method_exists( $wpdb, 'get_var' ) ) {
+			return null;
+		}
+
+		$this->database_lock_name = $this->get_database_lock_name();
+		$result = $wpdb->get_var(
+			$wpdb->prepare( 'SELECT GET_LOCK(%s, 0)', $this->database_lock_name )
+		);
+
+		if ( '1' === (string) $result ) {
+			$this->database_lock_acquired = true;
+			return true;
+		}
+
+		if ( '0' === (string) $result ) {
+			return false;
+		}
+
+		Util::debug_log( 'Database advisory locks are unavailable; using the transient process lock fallback.' );
+		return null;
+	}
+
+	/**
+	 * Determine whether any database connection owns this process lock.
+	 *
+	 * @return bool
+	 */
+	private function is_database_lock_in_use() {
+		global $wpdb;
+
+		if ( ! apply_filters( $this->identifier . '_use_database_lock', true ) ) {
+			return false;
+		}
+
+		if ( ! is_object( $wpdb ) || ! method_exists( $wpdb, 'prepare' ) || ! method_exists( $wpdb, 'get_var' ) ) {
+			return false;
+		}
+
+		$result = $wpdb->get_var(
+			$wpdb->prepare( 'SELECT IS_USED_LOCK(%s)', $this->get_database_lock_name() )
+		);
+
+		return null !== $result && false !== $result && '' !== (string) $result;
+	}
+
+	/**
+	 * Build a server-global advisory lock name scoped to this WordPress install.
+	 *
+	 * @return string
+	 */
+	private function get_database_lock_name() {
+		global $wpdb;
+
+		if ( ! empty( $this->database_lock_name ) ) {
+			return $this->database_lock_name;
+		}
+
+		$scope = array(
+			isset( $wpdb->dbname ) ? (string) $wpdb->dbname : '',
+			isset( $wpdb->base_prefix ) ? (string) $wpdb->base_prefix : ( isset( $wpdb->prefix ) ? (string) $wpdb->prefix : '' ),
+			function_exists( 'get_current_network_id' ) ? (string) get_current_network_id() : '1',
+			(string) ( null !== $this->current_site_id ? $this->current_site_id : get_current_blog_id() ),
+			$this->get_lock_key(),
+		);
+		$salt = function_exists( 'wp_salt' )
+			? wp_salt( 'nonce' )
+			: ( defined( 'AUTH_SALT' ) ? AUTH_SALT : ABSPATH );
+		$digest = hash_hmac( 'sha256', implode( '|', $scope ), (string) $salt );
+
+		return 'simply_static_' . substr( $digest, 0, 48 );
+	}
+
+	/**
+	 * Release this worker's database advisory lock.
+	 *
+	 * @return void
+	 */
+	private function release_database_lock() {
+		global $wpdb;
+
+		if ( ! $this->database_lock_acquired || empty( $this->database_lock_name ) ) {
+			return;
+		}
+
+		if ( is_object( $wpdb ) && method_exists( $wpdb, 'prepare' ) && method_exists( $wpdb, 'get_var' ) ) {
+			$wpdb->get_var(
+				$wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $this->database_lock_name )
+			);
+		}
+
+		$this->database_lock_acquired = false;
+		$this->database_lock_name     = null;
 	}
 
 	/**
@@ -950,7 +1198,9 @@ abstract class Background_Process extends Async_Request {
 	 * within server memory and time limit constraints.
 	 */
 	protected function handle() {
-		$this->lock_process();
+		if ( false === $this->lock_process() ) {
+			return $this->maybe_wp_die();
+		}
 
 		if ( $this->is_cancelled() ) {
 			Util::debug_log( 'Background process cancelled before handling batch. Clearing queue.' );
@@ -979,8 +1229,11 @@ abstract class Background_Process extends Async_Request {
 
 		do {
 			$batch = $this->get_batch();
+			if ( ! is_object( $batch ) || empty( $batch->data ) || ! is_array( $batch->data ) ) {
+				break;
+			}
 
-			if( is_multisite() && !is_null( $batch->site_id ) && $batch->site_id !== get_current_blog_id() ) {
+			if( is_multisite() && isset( $batch->site_id ) && !is_null( $batch->site_id ) && $batch->site_id !== get_current_blog_id() ) {
 
 				//Do not try to run a batch for a site that doesn't exist (anymore)
 				if ( ! get_site( $batch->site_id ) ) {
@@ -1192,13 +1445,13 @@ abstract class Background_Process extends Async_Request {
 	public function handle_cron_healthcheck() {
 		if ( $this->is_processing() ) {
 			// Background process already running.
-			exit;
+			return;
 		}
 
 		if ( $this->is_queue_empty() ) {
 			// No data to process.
 			$this->clear_scheduled_event();
-			exit;
+			return;
 		}
 
 		$this->dispatch();

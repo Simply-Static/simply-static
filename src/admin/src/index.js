@@ -1,10 +1,11 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { createRoot } from '@wordpress/element';
 
-import Settings from './settings/Settings'
+import Settings from './settings/Settings';
 
-if (options.screen === 'simplystatic-settings') {
-    let settings = createRoot(document.getElementById('simplystatic-settings'));
-    settings.render(<Settings/>);
+if ( window.options && window.options.screen === 'simplystatic-settings' ) {
+	const container = document.getElementById( 'simplystatic-settings' );
+	if ( container ) {
+		const settings = createRoot( container );
+		settings.render( <Settings /> );
+	}
 }
-

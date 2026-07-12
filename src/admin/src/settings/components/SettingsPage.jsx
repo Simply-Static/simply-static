@@ -233,14 +233,14 @@ function SettingsPage() {
     return (
         <div className={"plugin-settings-container"} >
             <NavigatorProvider initialPath={initialPage} style={{minHeight: minHeight() + "px"}}>
-                <a onClick={() => {
+				<Button type="button" aria-expanded={showMobileNav} aria-controls="simply-static-mobile-nav" onClick={() => {
                     setShowMobileNav(true);
-                }} className={"show-nav"}><Dashicon icon="align-center"/> {__('Toggle menu', 'simply-static')}</a>
+				}} className={"show-nav"}><Dashicon icon="align-center"/> {__('Toggle menu', 'simply-static')}</Button>
                 {showMobileNav &&
-                    <div className="mobile-nav-overlay">
+					<div id="simply-static-mobile-nav" className="mobile-nav-overlay" role="dialog" aria-modal="true" aria-label={__('Simply Static menu', 'simply-static')}>
                         <div className="mobile-nav-header">
                             <span>{__('Menu', 'simply-static')}</span>
-                            <Button isSmall variant="tertiary" onClick={() => setShowMobileNav(false)}>
+							<Button isSmall variant="tertiary" aria-label={__('Close menu', 'simply-static')} onClick={() => setShowMobileNav(false)}>
                                 <Dashicon icon="no-alt" />
                             </Button>
                         </div>

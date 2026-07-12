@@ -125,10 +125,15 @@ class Page extends Model {
 	 */
 	public function is_content_identical( $sha1 ) {
 		$hash = $this->content_hash ?? '';
+		$identical = is_string( $sha1 )
+			&& is_string( $hash )
+			&& 20 === strlen( $sha1 )
+			&& 20 === strlen( $hash )
+			&& hash_equals( $hash, $sha1 );
 
-		Util::debug_log( 'Checking Content Identical:' . $sha1 . '===' . $hash . '. Value: ' . ( $hash && strpos( $sha1, $hash ) === 0 ? 'TRUE' : 'FALSE' ) );
+		Util::debug_log( 'Checking content hash equality. Value: ' . ( $identical ? 'TRUE' : 'FALSE' ) );
 
-		return $hash && strpos( $sha1, $hash ) === 0;
+		return $identical;
 	}
 
 	/**
@@ -380,11 +385,11 @@ class Page extends Model {
 	public function get_json_data_by_key( $key ) {
 		$json = $this->get_json();
 
-		if ( ! $json ) {
+		if ( ! is_array( $json ) ) {
 			return null;
 		}
 
-		if ( empty( $json[ $key ] ) ) {
+		if ( ! array_key_exists( $key, $json ) ) {
 			return null;
 		}
 

@@ -97,7 +97,8 @@ trait canProcessPages {
 	/**
 	 * Process Pages that have to be processed/transferred.
 	 *
-	 * @return bool If true, it's done with all pages. If false, there are still pages to process/transfer.
+	 * @return bool|\WP_Error True when done, false when work remains, or an error
+	 *                        when records exhausted their retry allowance.
 	 * @throws \Exception
 	 */
 	public function process_pages() {
@@ -108,6 +109,23 @@ trait canProcessPages {
 		Util::debug_log( "Total pages: " . $total_pages . '; Pages remaining: ' . $pages_to_process_count );
 
 		if ( $pages_to_process_count === 0 ) {
+			$failed_pages = $this->get_exhausted_pages_count();
+			if ( $failed_pages > 0 ) {
+				$message = sprintf(
+					/* translators: %d: number of pages/files that could not be processed. */
+					_n(
+						'%d page or file could not be processed after repeated attempts.',
+						'%d pages or files could not be processed after repeated attempts.',
+						$failed_pages,
+						'simply-static'
+					),
+					$failed_pages
+				);
+				$this->save_status_message( $message, static::$task_name . '_error' );
+
+				return new \WP_Error( 'ss_page_processing_failed', $message, array( 'failed_pages' => $failed_pages ) );
+			}
+
 			$processed_pages = $this->get_processed_pages();
 			$message         = $this->processed_pages_message( $processed_pages, $total_pages );
 			// In 404-only exports, force the transfer log to reflect a single artifact.
@@ -165,6 +183,10 @@ trait canProcessPages {
 			try {
 				$this->process_page( $static_page );
 
+				// Retry attempts belong to the current processing stage. Once a
+				// stage succeeds, clear the counter so a later Core or Pro stage
+				// receives its own full retry allowance for the same page.
+				$static_page->fetch_attempts = 0;
 				$static_page->{$this->processing_column} = Util::formatted_datetime();
 				$static_page->save();
 
@@ -210,6 +232,43 @@ trait canProcessPages {
 		Util::debug_log( "Total pages: " . $total_pages . '; Pages remaining: ' . ( $total_pages - $processed_pages ) );
 
 		return $processed_pages >= $total_pages;
+	}
+
+	/**
+	 * Count pending rows that have exhausted their retry allowance.
+	 *
+	 * @return int
+	 */
+	protected function get_exhausted_pages_count() {
+		$start_time = $this->get_start_time();
+		$query      = $this->get_main_query();
+
+		if ( 'export' === $this->get_generate_type() ) {
+			$query->where( "( {$this->processing_column} < ? OR {$this->processing_column} IS NULL )", $start_time );
+		}
+
+		if ( 'update' === $this->get_generate_type() ) {
+			$query->where( "( ( {$this->processing_column} < last_modified_at AND {$this->processing_column} < ? ) OR {$this->processing_column} IS NULL )", $start_time );
+		}
+
+		$query->where( 'fetch_attempts >= 3' );
+
+		$use_single = get_option( 'simply-static-use-single' );
+		if ( ! empty( $use_single ) ) {
+			$ids = array_values( array_filter( array_map( 'intval', explode( ',', $use_single ) ) ) );
+			if ( count( $ids ) === 1 ) {
+				$query->where( 'post_id = ?', $ids[0] );
+			} elseif ( ! empty( $ids ) ) {
+				$query->where( 'post_id IN (' . implode( ',', $ids ) . ')' );
+			}
+		}
+
+		$build_id = get_option( 'simply-static-use-build' );
+		if ( ! empty( $build_id ) ) {
+			$query->where( 'build_id = ?', $build_id );
+		}
+
+		return (int) $query->count();
 	}
 
 	/**

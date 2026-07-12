@@ -294,21 +294,8 @@ class Rank_Math_Integration extends Integration {
 		$sitemap_index_url = Router::get_base_url( 'sitemap_index.xml' );
 		$response = $this->auth_remote_get( $sitemap_index_url, array( 'timeout' => 30 ) );
 
-		if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 ) {
-			$xml_content = wp_remote_retrieve_body( $response );
-
-			// Use SimpleXML to parse the XML
-			libxml_use_internal_errors( true );
-			$xml = simplexml_load_string( $xml_content );
-
-			if ( $xml !== false && isset( $xml->sitemap ) ) {
-				foreach ( $xml->sitemap as $sitemap ) {
-					if ( isset( $sitemap->loc ) ) {
-						$sitemap_url = (string) $sitemap->loc;
-						$urls[] = $sitemap_url;
-					}
-				}
-			}
+		foreach ( $this->extract_sitemap_index_urls( $response ) as $sitemap_url ) {
+			$urls[] = $sitemap_url;
 		}
 
 		return $urls;
@@ -391,31 +378,14 @@ class Rank_Math_Integration extends Integration {
 			return;
 		}
 
-		$xml_content = wp_remote_retrieve_body( $response );
-
-		// Use SimpleXML to parse the XML
-		libxml_use_internal_errors( true );
-		$xml = simplexml_load_string( $xml_content );
-		
-		if ( $xml === false ) {
-			return;
-		}
-		
-		// Extract sitemap URLs
-		if ( isset( $xml->sitemap ) ) {
-			foreach ( $xml->sitemap as $sitemap ) {
-				if ( isset( $sitemap->loc ) ) {
-					$sitemap_url = (string) $sitemap->loc;
-					
-					// Add the sitemap URL to the queue
-					/** @var \Simply_Static\Page $static_page */
-					$static_page = Page::query()->find_or_initialize_by( 'url', $sitemap_url );
-					$static_page->set_status_message( __( 'Sitemap URL', 'simply-static' ) );
-					$static_page->found_on_id = 0;
-					$static_page->handler     = Rank_Math_Sitemap_Handler::class;
-					$static_page->save();
-				}
-			}
+		foreach ( $this->extract_sitemap_index_urls( $response ) as $sitemap_url ) {
+			// Add the sitemap URL to the queue.
+			/** @var \Simply_Static\Page $static_page */
+			$static_page = Page::query()->find_or_initialize_by( 'url', $sitemap_url );
+			$static_page->set_status_message( __( 'Sitemap URL', 'simply-static' ) );
+			$static_page->found_on_id = 0;
+			$static_page->handler     = Rank_Math_Sitemap_Handler::class;
+			$static_page->save();
 		}
 	}
 }

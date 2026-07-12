@@ -87,8 +87,9 @@ abstract class Integration {
 		$options      = Options::instance();
 		$integrations = $options->get( 'integrations' );
 
-		// Mainly for backwards compatibility. If there is no such option, it means it's all active.
-		if ( empty( $integrations ) && $this->active_by_default ) {
+		// Backwards compatibility applies only when the option has never been
+		// stored. An explicitly empty array means the user disabled everything.
+		if ( null === $integrations && $this->active_by_default ) {
 			return true;
 		}
 
@@ -156,23 +157,85 @@ abstract class Integration {
 	 * @return array|\WP_Error Response or WP_Error on failure.
 	 */
 	protected function auth_remote_get( $url, $args = [] ) {
-		$options  = Options::instance();
-		$username = $options->get( 'http_basic_auth_username' );
-		$password = $options->get( 'http_basic_auth_password' );
-
-		// Disable SSL verification to match Url_Fetcher::remote_get() behaviour.
-		// Studio and other self-hosted environments may use certificates that
-		// cannot be verified by the server's CA bundle, causing silent failures.
-		if ( ! isset( $args['sslverify'] ) ) {
-			$args['sslverify'] = false;
+		$allowed = Util::is_local_origin_url( $url );
+		$allowed = (bool) apply_filters( 'ss_integration_allow_remote_get', $allowed, $url, $this->id );
+		if ( ! $allowed ) {
+			return new \WP_Error( 'ss_disallowed_remote_url', __( 'Integration requests must target the configured WordPress origin.', 'simply-static' ) );
 		}
 
-		if ( ! empty( $username ) && ! empty( $password ) ) {
+		// Verify TLS by default. Self-signed local environments can opt out for
+		// their exact origin with the narrowly scoped filter.
+		if ( ! isset( $args['sslverify'] ) ) {
+			$args['sslverify'] = (bool) apply_filters( 'ss_remote_get_sslverify', true, $url );
+		}
+		// Redirects can cross origins while retaining request headers in some
+		// transports. Callers can explicitly opt in when no credentials are used.
+		if ( ! isset( $args['redirection'] ) ) {
+			$args['redirection'] = 0;
+		}
+
+		$authorization = Util::get_basic_auth_header_for_url( $url );
+		if ( null !== $authorization ) {
 			$args['headers'] = isset( $args['headers'] ) ? $args['headers'] : [];
-			$args['headers']['Authorization'] = 'Basic ' . base64_encode( $username . ':' . $password );
+			$args['headers']['Authorization'] = $authorization;
 		}
 
 		return wp_remote_get( $url, apply_filters( 'ss_remote_get_args', $args ) );
+	}
+
+	/**
+	 * Extract safe child sitemap URLs from an HTTP response.
+	 *
+	 * SEO plugins expose similar sitemap indexes. Keeping parsing here ensures
+	 * they share body/URL bounds, network-disabled XML parsing, and exact-origin
+	 * checks before a child URL reaches the export queue.
+	 *
+	 * @param array|\WP_Error $response HTTP response.
+	 * @return string[]
+	 */
+	protected function extract_sitemap_index_urls( $response ) {
+		if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+			return array();
+		}
+
+		$body      = wp_remote_retrieve_body( $response );
+		$max_bytes = max( 1024, (int) apply_filters( 'ss_integration_sitemap_max_bytes', 5 * 1024 * 1024 ) );
+		if ( ! is_string( $body ) || '' === $body || strlen( $body ) > $max_bytes ) {
+			return array();
+		}
+
+		if ( preg_match( '/<!\s*(?:DOCTYPE|ENTITY)\b/i', $body ) || ! function_exists( 'simplexml_load_string' ) ) {
+			return array();
+		}
+
+		$previous_errors = libxml_use_internal_errors( true );
+		$xml = simplexml_load_string( $body, 'SimpleXMLElement', defined( 'LIBXML_NONET' ) ? LIBXML_NONET : 0 );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_errors );
+
+		if ( false === $xml ) {
+			return array();
+		}
+
+		$nodes = $xml->xpath( '//*[local-name()="sitemap"]/*[local-name()="loc"]' );
+		if ( ! is_array( $nodes ) ) {
+			return array();
+		}
+
+		$limit = max( 1, (int) apply_filters( 'ss_integration_sitemap_max_urls', 1000 ) );
+		$urls  = array();
+		foreach ( $nodes as $node ) {
+			$url = trim( (string) $node );
+			if ( '' === $url || ! Util::is_local_origin_url( $url ) ) {
+				continue;
+			}
+			$urls[ $url ] = true;
+			if ( count( $urls ) >= $limit ) {
+				break;
+			}
+		}
+
+		return array_keys( $urls );
 	}
 
 	/**
