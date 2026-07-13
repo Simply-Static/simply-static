@@ -400,13 +400,14 @@ class Pagination_Crawler extends Crawler {
 		$base_page_path = wp_parse_url( $base_page_url, PHP_URL_PATH );
 		$base_page_path = $base_page_path ? rtrim( $base_page_path, '/' ) : '';
 
-		// Pattern to match pagination links for this specific page
-		// Matches both absolute URLs and relative paths with /page/N/ format
+		// Pattern to match pagination links for this specific page.
+		// WordPress archives commonly use /page/N/, while page-builder widgets
+		// and custom WP_Query instances may use the shorter /N/ format.
 		$patterns = [
-			// Absolute URL pattern: href="https://example.com/articles/page/2/"
-			'#href=["\'](' . preg_quote( rtrim( $base_page_url, '/' ), '#' ) . '/page/(\d+)/?)["\']#i',
-			// Relative path pattern: href="/articles/page/2/"
-			'#href=["\'](' . preg_quote( $base_page_path, '#' ) . '/page/(\d+)/?)["\']#i',
+			// Absolute URL: https://example.com/articles/page/2/ or /articles/2/.
+			'#href=["\'](' . preg_quote( rtrim( $base_page_url, '/' ), '#' ) . '/(?:page/)?(\d+)/?)["\']#i',
+			// Relative path: /articles/page/2/ or /articles/2/.
+			'#href=["\'](' . preg_quote( $base_page_path, '#' ) . '/(?:page/)?(\d+)/?)["\']#i',
 		];
 
 		// Limit the number of pages to scan to prevent infinite loops
