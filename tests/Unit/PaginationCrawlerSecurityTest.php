@@ -44,6 +44,30 @@ final class PaginationCrawlerSecurityTest extends UnitTestCase {
 		}
 	}
 
+	public function test_detects_numeric_custom_page_pagination_urls(): void {
+		WpEnv::$remote_response = array(
+			'response' => array( 'code' => 200 ),
+			'body'     => implode(
+				'',
+				array(
+					'<a href="https://example.test/articles/2/">Page 2</a>',
+					'<a href="/articles/3/">Page 3</a>',
+				)
+			),
+		);
+
+		$urls = $this->extract( 'https://example.test/articles/' );
+
+		self::assertSame(
+			array(
+				'https://example.test/articles/2/',
+				'https://example.test/articles/3/',
+			),
+			$urls
+		);
+		self::assertCount( 3, WpEnv::$remote_requests );
+	}
+
 	public function test_rejects_external_base_url_before_network_io(): void {
 		self::assertSame( array(), $this->extract( 'https://attacker.test/articles/' ) );
 		self::assertSame( array(), WpEnv::$remote_requests );
