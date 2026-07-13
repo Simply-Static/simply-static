@@ -60,15 +60,7 @@ class Options {
 	public static function instance() {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
-
-			$db_options = get_option( Plugin::SLUG );
-
-			$options = apply_filters( 'ss_get_options', $db_options );
-			if ( ! is_array( $options ) ) {
-				$options = array();
-			}
-
-			self::$instance->options = $options;
+			self::$instance->options = self::load_runtime_options();
 		}
 
 		return self::$instance;
@@ -130,13 +122,20 @@ class Options {
 	 * @return mixed|null
 	 */
 	public function get( $name = '' ) {
-		return array_key_exists( $name, $this->options ) ?
-			(
-			'VERSION' !== strtoupper( $name ) && defined( 'SIMPLY_STATIC_' . strtoupper( $name ) ) ?
-				constant( 'SIMPLY_STATIC_' . strtoupper( $name ) ) :
-				apply_filters( 'ss_get_option_' . strtolower( $name ), $this->options[ $name ], $this )
-			)
-			: null;
+		$normalized_name = strtoupper( $name );
+		$constant_name   = 'SIMPLY_STATIC_' . $normalized_name;
+
+		// Constants are runtime configuration and do not need a placeholder key
+		// in wp_options. This also keeps secret overrides out of database exports.
+		if ( 'VERSION' !== $normalized_name && defined( $constant_name ) ) {
+			return constant( $constant_name );
+		}
+
+		if ( ! array_key_exists( $name, $this->options ) ) {
+			return null;
+		}
+
+		return apply_filters( 'ss_get_option_' . strtolower( $name ), $this->options[ $name ], $this );
 	}
 
 	/**
@@ -191,18 +190,34 @@ class Options {
 
 		$saved = $network ? update_site_option( Plugin::SLUG, $merged ) : update_option( Plugin::SLUG, $merged );
 		if ( ! $saved ) {
-			$stored = $network ? get_site_option( Plugin::SLUG ) : get_option( Plugin::SLUG );
+			$stored = $this->load_current_options_for_merge( $network );
 			$saved  = is_array( $stored ) && $stored === $merged;
 		}
 
 		if ( $saved ) {
-			$this->options      = $merged;
+			// The persisted row deliberately excludes values supplied by runtime
+			// filters. Reload the public option view so those values remain available
+			// to long-running background workers after they save export progress.
+			$this->options      = self::load_runtime_options( $network );
 			$this->dirty_keys   = array();
 			$this->deleted_keys = array();
 			$this->replace_all  = false;
 		}
 
 		return $saved;
+	}
+
+	/**
+	 * Load the filtered runtime option view.
+	 *
+	 * @param bool $network Whether to read the network option.
+	 * @return array
+	 */
+	protected static function load_runtime_options( $network = false ) {
+		$db_options = $network ? get_site_option( Plugin::SLUG ) : get_option( Plugin::SLUG );
+		$options    = apply_filters( 'ss_get_options', $db_options );
+
+		return is_array( $options ) ? $options : array();
 	}
 
 	/**
