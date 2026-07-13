@@ -96,6 +96,32 @@ final class UtilSecurityTest extends UnitTestCase {
 		self::assertSame( '', Util::abs_path_to_url( sys_get_temp_dir() . '/outside/export.zip' ) );
 	}
 
+	public function test_private_backup_artifacts_are_excluded_from_discovery_and_stale_queues(): void {
+		$key = str_repeat( 'a', 32 );
+		$url = 'https://example.test/wp-content/uploads/simply-static/backup-' . $key . '/studio-backup-2026-04-10.zip';
+
+		self::assertTrue( Util::is_private_backup_path( $url ) );
+		self::assertTrue( Util::is_private_backup_path( '/simply-static/backup-' . strtoupper( $key ) . '/config.json' ) );
+		self::assertTrue( Util::is_url_excluded( $url ) );
+	}
+
+	/**
+	 * @dataProvider publicSimplyStaticPathProvider
+	 */
+	public function test_public_simply_static_uploads_are_not_mistaken_for_private_backups( string $path ): void {
+		self::assertFalse( Util::is_private_backup_path( $path ) );
+	}
+
+	/** @return array<string,array{string}> */
+	public function publicSimplyStaticPathProvider(): array {
+		return array(
+			'generated config'       => array( '/wp-content/uploads/simply-static/configs/forms.json' ),
+			'legacy archive name'    => array( '/wp-content/uploads/simply-static/studio-backup-2026-04-10.zip' ),
+			'short backup key'       => array( '/wp-content/uploads/simply-static/backup-abc/archive.zip' ),
+			'backup prefix collision' => array( '/wp-content/uploads/simply-static/backup-' . str_repeat( 'a', 32 ) . '-copy/archive.zip' ),
+		);
+	}
+
 	public function test_sensitive_options_are_removed_with_legacy_and_future_key_fallbacks(): void {
 		$options = array(
 			'delivery_method'                 => 'zip',

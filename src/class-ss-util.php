@@ -811,6 +811,15 @@ class Util {
 			return false;
 		}
 
+		// Backup archives and their metadata are private working files. Keep this
+		// check in the central exclusion path so previously queued records are also
+		// skipped on later exports, not only during uploads-directory discovery.
+		if ( self::is_private_backup_path( $url ) ) {
+			self::debug_log( sprintf( 'Excluding URL "%s" — matched built-in rule: Simply Static private backup directory', $url ) );
+
+			return true;
+		}
+
 		$excluded = array( '.php' );
 		$opts     = Options::instance();
 
@@ -924,6 +933,31 @@ class Util {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Determine whether a URL or relative path points into a private Simply
+	 * Static backup directory.
+	 *
+	 * Backup/Migrate stores working files below
+	 * uploads/simply-static/backup-{32-character random key}/. These files may
+	 * contain archives and installation metadata and must never become static
+	 * site artifacts.
+	 *
+	 * @param string $path URL or filesystem-style relative path.
+	 *
+	 * @return bool
+	 */
+	public static function is_private_backup_path( string $path ): bool {
+		$url_path = function_exists( 'wp_parse_url' ) ? wp_parse_url( $path, PHP_URL_PATH ) : parse_url( $path, PHP_URL_PATH );
+
+		if ( is_string( $url_path ) && '' !== $url_path ) {
+			$path = $url_path;
+		}
+
+		$path = self::normalize_slashes( rawurldecode( $path ) );
+
+		return 1 === preg_match( '#(?:^|/)simply-static/backup-[a-f0-9]{32}(?:/|$)#i', $path );
 	}
 
 	/**
