@@ -29,6 +29,40 @@ final class OptionsTest extends UnitTestCase {
 		self::assertFalse( $options->destroy( 'delivery_method' ) );
 	}
 
+	public function test_constant_overrides_do_not_require_a_persisted_option_key(): void {
+		if ( ! defined( 'SIMPLY_STATIC_RUNTIME_ONLY_SETTING' ) ) {
+			define( 'SIMPLY_STATIC_RUNTIME_ONLY_SETTING', 'from-constant' );
+		}
+
+		WpEnv::$options['simply-static'] = array( 'delivery_method' => 'zip' );
+		$options = Options::reinstance();
+
+		self::assertSame( 'from-constant', $options->get( 'runtime_only_setting' ) );
+		self::assertTrue( $options->set( 'archive_start_time', '2026-07-13 18:00:00' )->save() );
+		self::assertSame( 'from-constant', $options->get( 'runtime_only_setting' ) );
+		self::assertArrayNotHasKey( 'runtime_only_setting', WpEnv::$options['simply-static'] );
+	}
+
+	public function test_runtime_filtered_options_remain_available_after_save(): void {
+		add_filter(
+			'ss_get_options',
+			static function ( $options ) {
+				$options = is_array( $options ) ? $options : array();
+				$options['filtered_runtime_setting'] = 'from-filter';
+
+				return $options;
+			}
+		);
+
+		WpEnv::$options['simply-static'] = array( 'delivery_method' => 'zip' );
+		$options = Options::reinstance();
+
+		self::assertSame( 'from-filter', $options->get( 'filtered_runtime_setting' ) );
+		self::assertTrue( $options->set( 'archive_start_time', '2026-07-13 18:00:00' )->save() );
+		self::assertSame( 'from-filter', $options->get( 'filtered_runtime_setting' ) );
+		self::assertArrayNotHasKey( 'filtered_runtime_setting', WpEnv::$options['simply-static'] );
+	}
+
 	public function test_save_merges_only_dirty_keys_into_fresh_database_state(): void {
 		WpEnv::$options['simply-static'] = array(
 			'delivery_method'    => 'zip',

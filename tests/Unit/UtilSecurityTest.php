@@ -56,6 +56,29 @@ final class UtilSecurityTest extends UnitTestCase {
 		self::assertNull( Util::get_basic_auth_header_for_url( 'https://external.test/page' ) );
 	}
 
+	/**
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_runtime_basic_auth_constants_survive_an_unrelated_option_save(): void {
+		define( 'SIMPLY_STATIC_HTTP_BASIC_AUTH_USERNAME', 'runtime-crawler' );
+		define( 'SIMPLY_STATIC_HTTP_BASIC_AUTH_PASSWORD', 'runtime-password' );
+
+		WpEnv::$options['simply-static'] = array(
+			'delivery_method' => 'zip',
+			'origin_url'      => '',
+		);
+		$options = Options::reinstance();
+
+		self::assertTrue( $options->set( 'archive_start_time', '2026-07-13 18:00:00' )->save() );
+		self::assertSame(
+			'Basic ' . base64_encode( 'runtime-crawler:runtime-password' ),
+			Util::get_basic_auth_header_for_url( 'https://example.test/page' )
+		);
+		self::assertArrayNotHasKey( 'http_basic_auth_username', WpEnv::$options['simply-static'] );
+		self::assertArrayNotHasKey( 'http_basic_auth_password', WpEnv::$options['simply-static'] );
+	}
+
 	public function test_empty_credentials_never_create_an_authorization_header(): void {
 		WpEnv::$options['simply-static']['http_basic_auth_username'] = '';
 		WpEnv::$options['simply-static']['http_basic_auth_password'] = '';
