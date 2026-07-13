@@ -96,7 +96,7 @@ final class RetryStateTask extends Task {
 		$this->should_fail = $should_fail;
 	}
 
-	/** @return bool|\WP_Error */
+	/** @return bool */
 	public function perform() {
 		return $this->process_pages();
 	}
@@ -146,7 +146,7 @@ final class ExhaustedPagesTask extends Task {
 	/** @var int */
 	public $total_pages = 0;
 
-	/** @return bool|\WP_Error */
+	/** @return bool */
 	public function perform() {
 		return $this->process_pages();
 	}
@@ -184,21 +184,22 @@ final class PageProcessingFailureTest extends UnitTestCase {
 		Options::reinstance();
 	}
 
-	public function test_exhausted_rows_fail_instead_of_reporting_success(): void {
+	public function test_exhausted_rows_are_skipped_without_failing_the_export(): void {
 		$task                  = new ExhaustedPagesTask();
 		$task->failed_pages    = 2;
 		$task->processed_pages = 3;
 		$task->total_pages     = 5;
 
 		$result = $task->perform();
+		$messages = Options::instance()->get( 'archive_status_messages' );
 
-		self::assertInstanceOf( \WP_Error::class, $result );
-		self::assertSame( 'ss_page_processing_failed', $result->get_error_code() );
-		self::assertStringContainsString( '2 pages or files', $result->get_error_message() );
+		self::assertTrue( $result );
+		self::assertStringContainsString( '3 of 5', $messages['task']['message'] );
 		self::assertStringContainsString(
-			'2 pages or files',
-			Options::instance()->get( 'archive_status_messages' )['task_error']['message']
+			'Skipped 2 pages or files',
+			$messages['task_warning']['message']
 		);
+		self::assertArrayNotHasKey( 'task_error', $messages );
 	}
 
 	public function test_empty_queue_is_successful_when_no_rows_failed(): void {
@@ -229,10 +230,7 @@ final class PageProcessingFailureTest extends UnitTestCase {
 		self::assertFalse( $task->perform() );
 		self::assertSame( 3, $page->fetch_attempts );
 
-		$result = $task->perform();
-
-		self::assertInstanceOf( \WP_Error::class, $result );
-		self::assertSame( 'ss_page_processing_failed', $result->get_error_code() );
+		self::assertTrue( $task->perform() );
 		self::assertSame( 'Transient fetch failure', $page->error_message );
 	}
 

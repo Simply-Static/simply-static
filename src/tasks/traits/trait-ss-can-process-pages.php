@@ -97,8 +97,7 @@ trait canProcessPages {
 	/**
 	 * Process Pages that have to be processed/transferred.
 	 *
-	 * @return bool|\WP_Error True when done, false when work remains, or an error
-	 *                        when records exhausted their retry allowance.
+	 * @return bool True when done or only skipped records remain, false when work remains.
 	 * @throws \Exception
 	 */
 	public function process_pages() {
@@ -109,23 +108,6 @@ trait canProcessPages {
 		Util::debug_log( "Total pages: " . $total_pages . '; Pages remaining: ' . $pages_to_process_count );
 
 		if ( $pages_to_process_count === 0 ) {
-			$failed_pages = $this->get_exhausted_pages_count();
-			if ( $failed_pages > 0 ) {
-				$message = sprintf(
-					/* translators: %d: number of pages/files that could not be processed. */
-					_n(
-						'%d page or file could not be processed after repeated attempts.',
-						'%d pages or files could not be processed after repeated attempts.',
-						$failed_pages,
-						'simply-static'
-					),
-					$failed_pages
-				);
-				$this->save_status_message( $message, static::$task_name . '_error' );
-
-				return new \WP_Error( 'ss_page_processing_failed', $message, array( 'failed_pages' => $failed_pages ) );
-			}
-
 			$processed_pages = $this->get_processed_pages();
 			$message         = $this->processed_pages_message( $processed_pages, $total_pages );
 			// In 404-only exports, force the transfer log to reflect a single artifact.
@@ -134,6 +116,21 @@ trait canProcessPages {
 				$message = sprintf( __( 'Transferred %d of %d files', 'simply-static' ), 1, 1 );
 			}
 			$this->save_status_message( $message );
+
+			$skipped_pages = $this->get_exhausted_pages_count();
+			if ( $skipped_pages > 0 ) {
+				$skipped_message = sprintf(
+					/* translators: %d: number of skipped pages/files. */
+					_n(
+						'Skipped %d page or file after repeated processing attempts.',
+						'Skipped %d pages or files after repeated processing attempts.',
+						$skipped_pages,
+						'simply-static'
+					),
+					$skipped_pages
+				);
+				$this->save_status_message( $skipped_message, static::$task_name . '_warning' );
+			}
 
 			return true; // No Pages to process anymore. It's done.
 		}
