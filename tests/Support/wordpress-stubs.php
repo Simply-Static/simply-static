@@ -202,6 +202,14 @@ function site_url( $path = '' ) {
 	return rtrim( WpEnv::$site_url, '/' ) . ( '' === $path ? '' : '/' . ltrim( (string) $path, '/' ) );
 }
 
+function includes_url( $path = '' ) {
+	return rtrim( WpEnv::$site_url, '/' ) . '/wp-includes/' . ltrim( (string) $path, '/' );
+}
+
+function plugins_url( $path = '', $plugin = '' ) {
+	return rtrim( WP_PLUGIN_URL, '/' ) . '/' . ltrim( (string) $path, '/' );
+}
+
 function admin_url( $path = '' ) {
 	return site_url( 'wp-admin/' . ltrim( (string) $path, '/' ) );
 }

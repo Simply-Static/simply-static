@@ -191,6 +191,9 @@ class Uploads_Crawler extends Crawler {
 					}
 
 					$relative_path = \Simply_Static\Util::safe_relative_path( $base_dir, $file->getPathname() );
+					if ( \Simply_Static\Util::is_private_backup_path( $relative_path ) ) {
+						continue;
+					}
 
 					// Skip files in ignored directories
 					$skip = false;
@@ -390,7 +393,11 @@ class Uploads_Crawler extends Crawler {
 		foreach ( $files as $file ) {
 			// Build a safe relative path and evaluate skip rules
 			$relative_path = \Simply_Static\Util::safe_relative_path( $dir, $file->getPathname() );
-			$should_skip   = false;
+			if ( \Simply_Static\Util::is_private_backup_path( $relative_path ) ) {
+				continue;
+			}
+
+			$should_skip = false;
 
 			foreach ( $skip_dirs as $skip_dir ) {
 				if ( strpos( $relative_path, '/' . $skip_dir . '/' ) !== false ) {

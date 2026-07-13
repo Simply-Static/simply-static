@@ -62,6 +62,12 @@ class Fetch_Urls_Task extends Task {
 		// page, then we don't need to bother fetching it.
 		if ( $save_file === false && $follow_urls === false ) {
 			Util::debug_log( "Skipping URL because it is no-save and no-follow" );
+			// Incremental exports retain page records. Clear an older generated path
+			// so a backup that was queued before this built-in exclusion cannot be
+			// picked up by a later deployment task.
+			if ( Util::is_private_backup_path( $static_page->url ) ) {
+				$static_page->file_path = null;
+			}
 			$static_page->last_checked_at = Util::formatted_datetime();
 			$static_page->set_status_message( __( "Do not save or follow", 'simply-static' ) );
 			$static_page->save();
