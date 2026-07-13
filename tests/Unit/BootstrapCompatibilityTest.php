@@ -52,6 +52,7 @@ namespace Simply_Static\Tests\Unit {
 			self::assertSame( '2.0.1', Pro_Compatibility::required_pro_version( '3.7.9' ) );
 			self::assertSame( '2.5.0', Pro_Compatibility::required_pro_version( '3.8.0' ) );
 			self::assertSame( '2.5.0', Pro_Compatibility::required_pro_version( '3.8.1' ) );
+			self::assertSame( '2.5.0', Pro_Compatibility::required_pro_version( '3.8.2' ) );
 		}
 
 		public function test_outdated_active_pro_is_left_active_but_all_runtime_hooks_are_blocked(): void {
@@ -99,16 +100,16 @@ namespace Simply_Static\Tests\Unit {
 			$package   = json_decode( (string) file_get_contents( $root . '/src/admin/package.json' ), true );
 			$lock      = json_decode( (string) file_get_contents( $root . '/src/admin/package-lock.json' ), true );
 
-			self::assertMatchesRegularExpression( '/^ \* Version:\s+3\.8\.1$/m', $bootstrap );
-			self::assertStringContainsString( "define( 'SIMPLY_STATIC_VERSION', '3.8.1' );", $bootstrap );
+			self::assertMatchesRegularExpression( '/^ \* Version:\s+3\.8\.2$/m', $bootstrap );
+			self::assertStringContainsString( "define( 'SIMPLY_STATIC_VERSION', '3.8.2' );", $bootstrap );
 			self::assertStringContainsString( "require_once SIMPLY_STATIC_PATH . 'src/class-ss-pro-compatibility.php';", $bootstrap );
 			self::assertStringContainsString( "add_action( 'plugins_loaded', array( 'Simply_Static\\Pro_Compatibility', 'enforce' ), 1 );", $bootstrap );
 			self::assertStringNotContainsString( 'deactivate_plugins( $pro_basename', $bootstrap );
-			self::assertMatchesRegularExpression( '/^Stable tag:\s+3\.8\.1$/m', $readme );
-			self::assertStringContainsString( '= 3.8.1 =', $readme );
-			self::assertSame( '3.8.1', $package['version'] ?? null );
-			self::assertSame( '3.8.1', $lock['version'] ?? null );
-			self::assertSame( '3.8.1', $lock['packages']['']['version'] ?? null );
+			self::assertMatchesRegularExpression( '/^Stable tag:\s+3\.8\.2$/m', $readme );
+			self::assertStringContainsString( '= 3.8.2 =', $readme );
+			self::assertSame( '3.8.2', $package['version'] ?? null );
+			self::assertSame( '3.8.2', $lock['version'] ?? null );
+			self::assertSame( '3.8.2', $lock['packages']['']['version'] ?? null );
 		}
 
 		private function registerProRuntimeHooks(): void {
