@@ -279,6 +279,7 @@ Diagnostics - Check your WordPress environment for compatibility
 
 * Prevented concurrent export requests from overwriting each other's export scope
 * Fixed relative URL path handling
+* Fix inline background process continuation
 
 = 3.8.2 =
 
