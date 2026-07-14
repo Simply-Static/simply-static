@@ -133,6 +133,15 @@ function get_option( $key, $default = false ) {
 	return array_key_exists( $key, WpEnv::$options ) ? WpEnv::$options[ $key ] : $default;
 }
 
+function add_option( $key, $value, $deprecated = '', $autoload = 'yes' ) {
+	if ( array_key_exists( $key, WpEnv::$options ) ) {
+		return false;
+	}
+
+	WpEnv::$options[ $key ] = $value;
+	return true;
+}
+
 function update_option( $key, $value, $autoload = null ) {
 	WpEnv::$options[ $key ] = $value;
 	return true;

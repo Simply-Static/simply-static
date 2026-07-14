@@ -11,6 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The core plugin class
  */
 class Plugin {
+	/** Option used as an atomic gate while an export request is being prepared. */
+	const EXPORT_START_LOCK_OPTION = 'simply-static-export-start-lock';
 
 	/**
 	 * The slug of the plugin; used in actions, filters, i18n, table names, etc.
@@ -63,6 +65,13 @@ class Plugin {
 	 * @var null|\Simply_Static\Integrations
 	 */
 	protected $integrations = null;
+
+	/**
+	 * Token owned by this request while it prepares and starts an export.
+	 *
+	 * @var string
+	 */
+	protected $export_start_lock_token = '';
 
 
 	/**
@@ -243,70 +252,191 @@ class Plugin {
 	/**
 	 * Handle static export.
 	 *
-	 * @param int $blog_id given blog id.
+	 * @param int           $blog_id         Given blog ID.
+	 * @param string        $type            Export type.
+	 * @param callable|null $prepare_callback Optional scope preparation callback. It
+	 *                                        runs only after the atomic start gate is
+	 *                                        held and the archive job is confirmed idle.
+	 * @param callable|null $failure_callback Optional rollback callback invoked under
+	 *                                        the same gate when preparation started but
+	 *                                        the export could not be started.
 	 *
 	 * @return bool Whether the export was started successfully
 	 */
-	public function run_static_export( $blog_id = 0, $type = 'export' ) {
-		// Check if an export is already running
-		if ( $this->archive_creation_job->is_running() ) {
-			Util::debug_log( "Export already running. Blocking new export request." );
-			Util::debug_log( "Current task: " . $this->archive_creation_job->get_current_task() );
-			Util::debug_log( "Is job done: " . ($this->archive_creation_job->is_job_done() ? 'true' : 'false') );
-
-			// For cron jobs or programmatic calls, we just return without starting a new export
-			// The REST API endpoints will handle their own error responses
+	public function run_static_export( $blog_id = 0, $type = 'export', $prepare_callback = null, $failure_callback = null ) {
+		if ( ! $this->acquire_export_start_lock() ) {
+			Util::debug_log( 'Export start blocked because another request is preparing an export.' );
 			return false;
 		}
 
-		// PHP_AUTH_USER and an explicit Basic Authorization scheme are reliable
-		// Basic Auth signals. REMOTE_USER/AUTH_USER may instead come from SSO,
-		// Kerberos, or a reverse proxy and must not block otherwise valid exports.
-		$basic_auth_on = isset( $_SERVER['PHP_AUTH_USER'] )
-			&& is_string( $_SERVER['PHP_AUTH_USER'] )
-			&& '' !== $_SERVER['PHP_AUTH_USER'];
-		foreach ( array( 'HTTP_AUTHORIZATION', 'REDIRECT_HTTP_AUTHORIZATION' ) as $authorization_key ) {
-			if (
-				isset( $_SERVER[ $authorization_key ] )
-				&& is_string( $_SERVER[ $authorization_key ] )
-				&& preg_match( '/^\s*Basic\s+/i', $_SERVER[ $authorization_key ] )
-			) {
-				$basic_auth_on = true;
-				break;
+		$preparation_started = false;
+		try {
+			// This check must happen while the start gate is held. Otherwise two PHP
+			// requests can both observe an idle job before either one persists its scope.
+			if ( $this->is_export_active() ) {
+				Util::debug_log( "Export already running. Blocking new export request." );
+				if ( method_exists( $this->archive_creation_job, 'get_current_task' ) ) {
+					Util::debug_log( "Current task: " . $this->archive_creation_job->get_current_task() );
+				}
+				if ( method_exists( $this->archive_creation_job, 'is_job_done' ) ) {
+					Util::debug_log( "Is job done: " . ($this->archive_creation_job->is_job_done() ? 'true' : 'false') );
+				}
+
+				return false;
 			}
+
+			// PHP_AUTH_USER and an explicit Basic Authorization scheme are reliable
+			// Basic Auth signals. REMOTE_USER/AUTH_USER may instead come from SSO,
+			// Kerberos, or a reverse proxy and must not block otherwise valid exports.
+			$basic_auth_on = isset( $_SERVER['PHP_AUTH_USER'] )
+				&& is_string( $_SERVER['PHP_AUTH_USER'] )
+				&& '' !== $_SERVER['PHP_AUTH_USER'];
+			foreach ( array( 'HTTP_AUTHORIZATION', 'REDIRECT_HTTP_AUTHORIZATION' ) as $authorization_key ) {
+				if (
+					isset( $_SERVER[ $authorization_key ] )
+					&& is_string( $_SERVER[ $authorization_key ] )
+					&& preg_match( '/^\s*Basic\s+/i', $_SERVER[ $authorization_key ] )
+				) {
+					$basic_auth_on = true;
+					break;
+				}
+			}
+
+			// Exit if Basic Auth but no credentials were provided.
+			if ( $basic_auth_on ) {
+				$options         = get_option( 'simply-static' );
+				$options         = is_array( $options ) ? $options : array();
+				$basic_auth_user = isset( $options['http_basic_auth_username'] ) ? $options['http_basic_auth_username'] : '';
+				$basic_auth_pass = isset( $options['http_basic_auth_password'] ) ? $options['http_basic_auth_password'] : '';
+
+				$credentials_configured = is_string( $basic_auth_user )
+					&& is_string( $basic_auth_pass )
+					&& '' !== $basic_auth_user
+					&& '' !== $basic_auth_pass;
+
+				if ( ! $credentials_configured ) {
+					// Reject the export before dispatching background work. Starting and
+					// immediately cancelling left stale queue and archive state behind.
+					$message = __( 'Missing Basic Auth credentials - you need to configure the Basic Auth credentials in Simply Static -> Settings -> Misc -> Basic Auth to continue the export.', 'simply-static' );
+					$this->archive_creation_job->save_status_message( $message, 'error' );
+					return false;
+				}
+			}
+
+			if ( ! $blog_id ) {
+				$blog_id = get_current_blog_id();
+			}
+
+			if ( is_callable( $prepare_callback ) ) {
+				$preparation_started = true;
+				$prepared_type = call_user_func( $prepare_callback, $blog_id, $type, $this->archive_creation_job );
+				if ( false === $prepared_type || is_wp_error( $prepared_type ) ) {
+					$this->rollback_failed_export_start( $failure_callback );
+					$preparation_started = false;
+					return false;
+				}
+				if ( is_string( $prepared_type ) && '' !== $prepared_type ) {
+					$type = $prepared_type;
+				}
+			}
+
+			do_action( 'ss_before_static_export', $blog_id, $type );
+
+			// Clear transients.
+			Util::clear_transients();
+
+			// Start export only after all preflight validation and atomic scope
+			// preparation succeeds.
+			$started = (bool) $this->archive_creation_job->start( $blog_id, $type );
+			if ( ! $started && $preparation_started ) {
+				$this->rollback_failed_export_start( $failure_callback );
+				$preparation_started = false;
+			}
+
+			return $started;
+		} catch ( \Throwable $exception ) {
+			if ( $preparation_started ) {
+				$this->rollback_failed_export_start( $failure_callback );
+			}
+
+			throw $exception;
+		} finally {
+			$this->release_export_start_lock();
+		}
+	}
+
+	/** Run a supplied scope rollback without masking the original start result. */
+	protected function rollback_failed_export_start( $failure_callback ) {
+		if ( ! is_callable( $failure_callback ) ) {
+			return;
 		}
 
-		// Exit if Basic Auth but no credentials were provided.
-		if ( $basic_auth_on ) {
-			$options         = get_option( 'simply-static' );
-			$options         = is_array( $options ) ? $options : array();
-			$basic_auth_user = isset( $options['http_basic_auth_username'] ) ? $options['http_basic_auth_username'] : '';
-			$basic_auth_pass = isset( $options['http_basic_auth_password'] ) ? $options['http_basic_auth_password'] : '';
+		try {
+			call_user_func( $failure_callback );
+		} catch ( \Throwable $exception ) {
+			Util::debug_log( 'Export start rollback failed: ' . $exception->getMessage() );
+		}
+	}
 
-			$credentials_configured = is_string( $basic_auth_user )
-				&& is_string( $basic_auth_pass )
-				&& '' !== $basic_auth_user
-				&& '' !== $basic_auth_pass;
+	/** Return whether any running, paused, or queued export owns the archive state. */
+	public function is_export_active() {
+		$job = $this->archive_creation_job;
+		return ( method_exists( $job, 'is_running' ) && $job->is_running() )
+			|| ( method_exists( $job, 'is_paused' ) && $job->is_paused() )
+			|| ( method_exists( $job, 'is_queued' ) && $job->is_queued() );
+	}
 
-			if ( ! $credentials_configured ) {
-				// Reject the export before dispatching background work. Starting and
-				// immediately cancelling left stale queue and archive state behind.
-				$message = __( 'Missing Basic Auth credentials - you need to configure the Basic Auth credentials in Simply Static -> Settings -> Misc -> Basic Auth to continue the export.', 'simply-static' );
-				$this->archive_creation_job->save_status_message( $message, 'error' );
+	/**
+	 * Atomically reserve the short export preparation/start window.
+	 *
+	 * The database uniqueness constraint behind add_option() makes this safe
+	 * across PHP workers. Locks older than five minutes are treated as abandoned.
+	 *
+	 * @return bool
+	 */
+	public function acquire_export_start_lock() {
+		if ( '' !== $this->export_start_lock_token ) {
+			// A nested start in the same PHP request is still a competing start and
+			// must not prepare a second scope before the first one is persisted.
+			return false;
+		}
+
+		$token = function_exists( 'wp_generate_uuid4' ) ? wp_generate_uuid4() : uniqid( 'ss_export_', true );
+		$lock  = array(
+			'token'      => $token,
+			'created_at' => time(),
+		);
+
+		if ( ! add_option( self::EXPORT_START_LOCK_OPTION, $lock, '', false ) ) {
+			$existing = get_option( self::EXPORT_START_LOCK_OPTION );
+			$created  = is_array( $existing ) && isset( $existing['created_at'] ) ? (int) $existing['created_at'] : 0;
+			if ( $created > 0 && ( time() - $created ) <= 300 ) {
+				return false;
+			}
+
+			// Recover from a PHP process that died while holding the short gate.
+			delete_option( self::EXPORT_START_LOCK_OPTION );
+			if ( ! add_option( self::EXPORT_START_LOCK_OPTION, $lock, '', false ) ) {
 				return false;
 			}
 		}
 
-		if ( ! $blog_id ) {
-			$blog_id = get_current_blog_id();
+		$this->export_start_lock_token = $token;
+		return true;
+	}
+
+	/** Release the export start gate when it is still owned by this request. */
+	public function release_export_start_lock() {
+		if ( '' === $this->export_start_lock_token ) {
+			return;
 		}
-		do_action( 'ss_before_static_export', $blog_id, $type );
 
-		// Clear transients.
-		Util::clear_transients();
+		$existing = get_option( self::EXPORT_START_LOCK_OPTION );
+		if ( is_array( $existing ) && isset( $existing['token'] ) && hash_equals( $this->export_start_lock_token, (string) $existing['token'] ) ) {
+			delete_option( self::EXPORT_START_LOCK_OPTION );
+		}
 
-		// Start export only after all preflight validation succeeds.
-		return (bool) $this->archive_creation_job->start( $blog_id, $type );
+		$this->export_start_lock_token = '';
 	}
 
 	/**

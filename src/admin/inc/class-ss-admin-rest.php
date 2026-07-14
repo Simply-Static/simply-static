@@ -1674,15 +1674,18 @@ class Admin_Rest {
 					) );
 				}
 
-				if ( ! empty( $language ) ) {
-					update_option( 'simply-static-use-language', $language, false );
-				} else {
-					delete_option( 'simply-static-use-language' );
-				}
+				$prepare_export = function () use ( $blog_id, $type, $language, $archive_creation_job ) {
+					if ( ! empty( $language ) ) {
+						update_option( 'simply-static-use-language', $language, false );
+					} else {
+						delete_option( 'simply-static-use-language' );
+					}
 
-				do_action( 'ss_before_perform_archive_action', $blog_id, 'start', $archive_creation_job );
-				$export_type = apply_filters( 'ss_export_type', $type );
-				$started = Plugin::instance()->run_static_export( $blog_id, $export_type );
+					do_action( 'ss_before_perform_archive_action', $blog_id, 'start', $archive_creation_job );
+
+					return apply_filters( 'ss_export_type', $type );
+				};
+				$started = Plugin::instance()->run_static_export( $blog_id, $type, $prepare_export );
 				if ( $started ) {
 					do_action( 'ss_after_perform_archive_action', $blog_id, 'start', $archive_creation_job );
 					return wp_json_encode( array( 'status' => 200 ) );
