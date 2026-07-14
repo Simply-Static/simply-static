@@ -169,6 +169,14 @@ final class OptionsTest extends UnitTestCase {
 				array( 'destination_url_type' => 'relative', 'relative_path' => '/docs' ),
 				'/docs',
 			),
+			'root relative' => array(
+				array( 'destination_url_type' => 'relative', 'relative_path' => '/' ),
+				'',
+			),
+			'trailing slash relative' => array(
+				array( 'destination_url_type' => 'relative', 'relative_path' => '/docs/' ),
+				'/docs',
+			),
 			'offline' => array( array( 'destination_url_type' => 'offline' ), './' ),
 		);
 	}

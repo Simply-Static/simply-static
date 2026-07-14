@@ -284,7 +284,7 @@ class Options {
 				return untrailingslashit( $this->get( 'destination_scheme' ) . $this->get( 'destination_host' ) );
 				break;
 			case 'relative':
-				return $this->get( 'relative_path' );
+				return untrailingslashit( (string) $this->get( 'relative_path' ) );
 		}
 
 		return './';
