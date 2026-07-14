@@ -1757,10 +1757,8 @@ class Url_Extractor {
 		// Get the appropriate replacement URL based on destination URL type
 		switch ( $this->options->get( 'destination_url_type' ) ) {
 			case 'absolute':
-				$convert_to = $this->options->get_destination_url();
-				break;
 			case 'relative':
-				$convert_to = $this->options->get( 'relative_path' );
+				$convert_to = $this->options->get_destination_url();
 				break;
 			default:
 				// Offline mode
@@ -2293,8 +2291,9 @@ class Url_Extractor {
 	private function convert_relative_url( $url ) {
 		$path           = Util::get_public_path_from_local_url( $url );
 		$sanitized_path = Util::sanitize_local_path( $path );
+		$relative_path  = $this->options->get_destination_url();
 
-		return $this->options->get( 'relative_path' ) . $sanitized_path;
+		return Util::safe_join_url( $relative_path, $sanitized_path );
 	}
 
 	/**

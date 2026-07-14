@@ -121,10 +121,22 @@ final class UrlExtractorTest extends UnitTestCase {
 
 	public function test_relative_and_offline_destination_modes_produce_local_paths(): void {
 		WpEnv::$options['simply-static']['destination_url_type'] = 'relative';
+		WpEnv::$options['simply-static']['relative_path'] = '/';
 		Options::reinstance();
-		$relative = $this->extractor( 'html', '<a href="/target/">target</a>' );
+		$relative = $this->extractor( 'html', '<a href="https://example.test/target/">target</a>' );
+		self::assertSame( '/target/', $relative->convert_url( 'https://example.test/target/' ) );
+		self::assertSame(
+			'window.site = "/tc/";',
+			$relative->force_replace( 'window.site = "https://example.test/tc/";' )
+		);
 		$relative->extract_and_update_urls();
 		self::assertStringContainsString( 'href="/target/"', $relative->get_body() );
+		self::assertStringNotContainsString( 'href="//target/"', $relative->get_body() );
+
+		WpEnv::$options['simply-static']['relative_path'] = '/docs/';
+		Options::reinstance();
+		$mounted = $this->extractor( 'html', '<a href="https://example.test/target/">target</a>' );
+		self::assertSame( '/docs/target/', $mounted->convert_url( 'https://example.test/target/' ) );
 
 		WpEnv::$options['simply-static']['destination_url_type'] = 'offline';
 		Options::reinstance();
