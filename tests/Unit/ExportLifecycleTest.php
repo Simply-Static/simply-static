@@ -21,6 +21,12 @@ final class ExportLifecycleArchiveJob {
 	public $running = false;
 
 	/** @var bool */
+	public $paused = false;
+
+	/** @var bool */
+	public $queued = false;
+
+	/** @var bool */
 	public $start_result = true;
 
 	/** @var array<int,array{int,string}> */
@@ -31,6 +37,14 @@ final class ExportLifecycleArchiveJob {
 
 	public function is_running(): bool {
 		return $this->running;
+	}
+
+	public function is_paused(): bool {
+		return $this->paused;
+	}
+
+	public function is_queued(): bool {
+		return $this->queued;
 	}
 
 	public function get_current_task(): string {
@@ -157,6 +171,127 @@ final class ExportLifecycleTest extends UnitTestCase {
 
 		self::assertFalse( $this->plugin->run_static_export( 3, 'export' ) );
 		self::assertSame( array( array( 3, 'export' ) ), $this->job->starts );
+	}
+
+	public function test_contended_start_gate_blocks_preparation_without_mutating_scope(): void {
+		WpEnv::$options[ Plugin::EXPORT_START_LOCK_OPTION ] = array(
+			'token'      => 'another-request',
+			'created_at' => time(),
+		);
+		WpEnv::$options['simply-static-use-build'] = 17;
+		$prepare_calls = 0;
+
+		$started = $this->plugin->run_static_export(
+			1,
+			'export',
+			static function () use ( &$prepare_calls ) {
+				++$prepare_calls;
+				update_option( 'simply-static-use-build', 29, false );
+				return 'export';
+			}
+		);
+
+		self::assertFalse( $started );
+		self::assertSame( 0, $prepare_calls );
+		self::assertSame( 17, WpEnv::$options['simply-static-use-build'] );
+		self::assertSame( array(), $this->job->starts );
+	}
+
+	public function test_active_or_paused_jobs_block_preparation_and_release_the_gate(): void {
+		$prepare_calls = 0;
+		$prepare = static function () use ( &$prepare_calls ) {
+			++$prepare_calls;
+			return 'export';
+		};
+
+		$this->job->running = true;
+		self::assertFalse( $this->plugin->run_static_export( 1, 'export', $prepare ) );
+		$this->job->running = false;
+		$this->job->paused  = true;
+		self::assertFalse( $this->plugin->run_static_export( 1, 'export', $prepare ) );
+
+		self::assertSame( 0, $prepare_calls );
+		self::assertArrayNotHasKey( Plugin::EXPORT_START_LOCK_OPTION, WpEnv::$options );
+	}
+
+	public function test_preparation_can_atomically_select_type_and_success_releases_gate(): void {
+		$gate_seen = false;
+		$started = $this->plugin->run_static_export(
+			8,
+			'42',
+			static function () use ( &$gate_seen ) {
+				$gate_seen = array_key_exists( Plugin::EXPORT_START_LOCK_OPTION, WpEnv::$options );
+				update_option( 'simply-static-use-build', 42, false );
+				return 'export';
+			}
+		);
+
+		self::assertTrue( $started );
+		self::assertTrue( $gate_seen );
+		self::assertSame( array( array( 8, 'export' ) ), $this->job->starts );
+		self::assertSame( 42, WpEnv::$options['simply-static-use-build'] );
+		self::assertArrayNotHasKey( Plugin::EXPORT_START_LOCK_OPTION, WpEnv::$options );
+	}
+
+	public function test_failed_start_rolls_back_prepared_scope_before_releasing_gate(): void {
+		$this->job->start_result = false;
+		WpEnv::$options['simply-static-use-single'] = '11';
+		$rollback_saw_gate = false;
+
+		$started = $this->plugin->run_static_export(
+			3,
+			'export',
+			static function () {
+				update_option( 'simply-static-use-single', '22', false );
+				return 'export';
+			},
+			static function () use ( &$rollback_saw_gate ) {
+				$rollback_saw_gate = array_key_exists( Plugin::EXPORT_START_LOCK_OPTION, WpEnv::$options );
+				update_option( 'simply-static-use-single', '11', false );
+			}
+		);
+
+		self::assertFalse( $started );
+		self::assertTrue( $rollback_saw_gate );
+		self::assertSame( '11', WpEnv::$options['simply-static-use-single'] );
+		self::assertArrayNotHasKey( Plugin::EXPORT_START_LOCK_OPTION, WpEnv::$options );
+	}
+
+	public function test_abandoned_or_malformed_start_gate_is_recovered(): void {
+		foreach (
+			array(
+				array( 'token' => 'stale', 'created_at' => time() - 301 ),
+				'corrupt',
+			) as $stale_lock
+		) {
+			WpEnv::$options[ Plugin::EXPORT_START_LOCK_OPTION ] = $stale_lock;
+			self::assertTrue( $this->plugin->run_static_export( 2, 'export' ) );
+			self::assertArrayNotHasKey( Plugin::EXPORT_START_LOCK_OPTION, WpEnv::$options );
+		}
+	}
+
+	public function test_nested_start_in_same_request_is_rejected_before_its_preparation(): void {
+		$nested_prepare_calls = 0;
+		$outer_started = $this->plugin->run_static_export(
+			5,
+			'export',
+			function () use ( &$nested_prepare_calls ) {
+				$nested_started = $this->plugin->run_static_export(
+					5,
+					'export',
+					static function () use ( &$nested_prepare_calls ) {
+						++$nested_prepare_calls;
+						return 'export';
+					}
+				);
+				self::assertFalse( $nested_started );
+				return 'export';
+			}
+		);
+
+		self::assertTrue( $outer_started );
+		self::assertSame( 0, $nested_prepare_calls );
+		self::assertCount( 1, $this->job->starts );
 	}
 
 	public function test_page_handlers_register_before_init_and_run_after_integration_bootstrap(): void {

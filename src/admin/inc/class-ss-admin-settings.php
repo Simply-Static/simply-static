@@ -39,31 +39,29 @@ class Admin_Settings {
 			}
 		};
 
-        // Ensure generate_404 option is enabled via UI gating; proceed regardless.
-        update_option( 'simply-static-404-only', 1, false );
+		try {
+			$prepare_export = static function () {
+				// Mutate the 404 scope only after Core owns the atomic export start gate.
+				update_option( 'simply-static-404-only', 1, false );
+				delete_option( 'simply-static-use-single' );
+				delete_option( 'simply-static-use-build' );
+				delete_option( 'simply-static-use-language' );
 
-        // Clear conflicting flags that could alter the task list.
-        delete_option( 'simply-static-use-single' );
-        delete_option( 'simply-static-use-build' );
-        delete_option( 'simply-static-use-language' );
-
-        try {
-			$started = Plugin::instance()->run_static_export();
+				return 'export';
+			};
+			$started = Plugin::instance()->run_static_export( 0, 'export', $prepare_export, $restore_flags );
 			if ( ! $started ) {
-				$restore_flags();
-
 				return array(
 					'success' => false,
 					'message' => __( 'The 404 export could not be started because another export is active or an export preflight check failed.', 'simply-static' ),
 				);
 			}
 
-            return [ 'success' => true ];
-        } catch ( \Throwable $e ) {
-			$restore_flags();
-            return [ 'success' => false, 'message' => $e->getMessage() ];
-        }
-    }
+			return [ 'success' => true ];
+		} catch ( \Throwable $e ) {
+			return [ 'success' => false, 'message' => $e->getMessage() ];
+		}
+	}
 
     /**
      * Contains the number of failed tests.
