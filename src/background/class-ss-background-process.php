@@ -104,6 +104,13 @@ abstract class Background_Process extends Async_Request {
 	protected $is_inline = false;
 
 	/**
+	 * Whether an inline shutdown continuation has already been registered.
+	 *
+	 * @var bool
+	 */
+	protected $inline_dispatch_pending = false;
+
+	/**
 	 * Value written to the current process lock by this PHP process.
 	 *
 	 * @var string|null
@@ -393,14 +400,15 @@ abstract class Background_Process extends Async_Request {
 	 * @return bool True to indicate inline dispatch was scheduled.
 	 */
 	protected function dispatch_inline() {
-		// A dispatch requested from inside the current shutdown worker must be
-		// recovered by the scheduled healthcheck. Registering another shutdown
-		// callback here makes PHP run every batch in one FPM request.
-		if ( $this->is_inline ) {
+		// Multiple callers can request a continuation before shutdown begins.
+		// Keep a single pending callback, while allowing the callback itself to
+		// schedule the next bounded worker window when queue work remains.
+		if ( $this->inline_dispatch_pending ) {
 			return true;
 		}
 
-		$this->is_inline = true;
+		$this->is_inline               = true;
+		$this->inline_dispatch_pending = true;
 
 		// Prevent wp_die() from terminating the shutdown function.
 		// handle() calls maybe_wp_die() at the end, which would otherwise
@@ -410,7 +418,19 @@ abstract class Background_Process extends Async_Request {
 		$process        = $this;
 		$target_site_id = $this->current_site_id;
 
-		register_shutdown_function( function () use ( $process, $target_site_id ) {
+		$this->register_inline_shutdown_handler( function () use ( $process, $target_site_id ) {
+			// Release the pending slot before handling. If handle() reaches its
+			// time or memory boundary with work left, dispatch_inline() can now
+			// register exactly one immediate continuation.
+			$process->inline_dispatch_pending = false;
+
+			// A paused queue must remain dormant until resume() explicitly
+			// dispatches it again. Continuing inline here would spin through
+			// shutdown callbacks without doing useful work.
+			if ( $process->is_paused() ) {
+				return;
+			}
+
 			$switched = is_multisite()
 				&& ! empty( $target_site_id )
 				&& absint( $target_site_id ) !== get_current_blog_id();
@@ -449,6 +469,19 @@ abstract class Background_Process extends Async_Request {
 		} );
 
 		return true;
+	}
+
+	/**
+	 * Register an inline worker callback for PHP shutdown.
+	 *
+	 * Kept as a method so continuation scheduling can be covered without
+	 * executing real shutdown callbacks in the unit-test process.
+	 *
+	 * @param callable $handler Inline worker callback.
+	 * @return void
+	 */
+	protected function register_inline_shutdown_handler( $handler ) {
+		register_shutdown_function( $handler );
 	}
 
 	/**

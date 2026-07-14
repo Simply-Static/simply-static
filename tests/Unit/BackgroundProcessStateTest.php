@@ -225,6 +225,38 @@ final class BackgroundDispatchProcess extends BackgroundStateProcess {
 
 }
 
+final class BackgroundInlineContinuationProcess extends BackgroundStateProcess {
+
+	/** @var callable[] */
+	public $shutdown_handlers = array();
+
+	/** @var int */
+	public $handle_calls = 0;
+
+	public function is_processing() {
+		return false;
+	}
+
+	/** @return bool */
+	public function schedule_inline() {
+		return parent::dispatch_inline();
+	}
+
+	/** @param callable $handler */
+	protected function register_inline_shutdown_handler( $handler ) {
+		$this->shutdown_handlers[] = $handler;
+	}
+
+	protected function handle() {
+		++$this->handle_calls;
+		parent::dispatch_inline();
+	}
+
+	public function run_shutdown_handler( int $index ): void {
+		call_user_func( $this->shutdown_handlers[ $index ] );
+	}
+}
+
 final class BackgroundLoopbackProcess extends BackgroundStateProcess {
 
 	/** @var bool|null */
@@ -738,6 +770,30 @@ final class BackgroundProcessStateTest extends UnitTestCase {
 		self::assertTrue( $process->dispatch_via_background() );
 		self::assertSame( 'no', WpEnv::$site_transients['wp_state_process_loopback_available'] );
 		self::assertSame( 1, $process->inline_calls );
+	}
+
+	public function test_inline_fallback_keeps_one_pending_handler_and_immediately_continues(): void {
+		$process = new BackgroundInlineContinuationProcess();
+
+		self::assertTrue( $process->schedule_inline() );
+		self::assertTrue( $process->schedule_inline() );
+		self::assertCount( 1, $process->shutdown_handlers );
+
+		$process->run_shutdown_handler( 0 );
+
+		self::assertSame( 1, $process->handle_calls );
+		self::assertCount( 2, $process->shutdown_handlers );
+	}
+
+	public function test_inline_fallback_does_not_continue_a_paused_queue(): void {
+		$process = new BackgroundInlineContinuationProcess();
+		update_option( $process->status_key(), Background_Process::STATUS_PAUSED );
+
+		self::assertTrue( $process->schedule_inline() );
+		$process->run_shutdown_handler( 0 );
+
+		self::assertSame( 0, $process->handle_calls );
+		self::assertCount( 1, $process->shutdown_handlers );
 	}
 
 	public function test_loopback_detection_uses_override_cache_status_and_failure_cache(): void {
