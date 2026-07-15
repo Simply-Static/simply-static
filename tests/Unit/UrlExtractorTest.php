@@ -104,6 +104,18 @@ final class UrlExtractorTest extends UnitTestCase {
 		self::assertStringContainsString( 'https://static.example.test/base.css', $extractor->get_body() );
 	}
 
+	public function test_css_svg_data_uri_preserves_namespace_url(): void {
+		$css = '.search{background-image:url("data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" '
+			. 'width=\\"24\\" height=\\"24\\" fill=\\"none\\" stroke=\\"rgb(136, 145, 164)\\">'
+			. '<circle cx=\\"11\\" cy=\\"11\\" r=\\"8\\"></circle></svg>")}'
+			. '.select{mask-image:url("data:image/svg+xml,%3Csvg xmlns=\\"http://www.w3.org/2000/svg\\"%3E%3C/svg%3E")}';
+		$extractor = $this->extractor( 'css', $css, 'assets/site.css' );
+
+		$extractor->extract_and_update_urls();
+
+		self::assertSame( $css, $extractor->get_body() );
+	}
+
 	public function test_json_and_xml_urls_are_replaced_without_touching_external_origins(): void {
 		$json = '{"local":"https:\/\/example.test\/api\/items","external":"https:\/\/external.test\/api"}';
 		$json_extractor = $this->extractor( 'json', $json, 'data.json' );
