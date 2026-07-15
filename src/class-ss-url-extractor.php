@@ -1614,17 +1614,22 @@ class Url_Extractor {
 		// Pass 1: Handle url(...) constructs with quoted or unquoted values, including relative URLs.
 		// Pattern breakdown:
 		// - url( optional whitespace
-		// - capture the url(...) value, then normalize quote placeholders inside
+		// - prefer a complete quoted value, allowing escaped quotes and parentheses
+		// - otherwise capture an unquoted value up to its closing parenthesis
+		// - normalize quote placeholders inside
 		//   the callback. This prevents preserved entities like APOS_PLACEHOLDER
-		//   from being appended to extracted Gutenberg background-image URLs.
+		//   from being appended to extracted Gutenberg background-image URLs. Matching
+		//   the complete quoted value also prevents functions inside SVG data URIs
+		//   (for example rgb(...)) from being mistaken for the end of url(...).
 		$text = preg_replace_callback(
-			'/url\(\s*([^\)]*?)\s*\)/i',
+			'/url\(\s*(?:(?<quote>["\'])(?<quoted>(?:\\\\.|(?!\k<quote>).)*)\k<quote>|(?<unquoted>(?:\\\\.|[^)\\\\])*))\s*\)/is',
 			function ( $m ) use ( $charset ) {
-				$raw   = trim( $m[1] );
-				$quote = '';
+				$quote = isset( $m['quote'] ) ? $m['quote'] : '';
+				$raw   = $quote !== '' && isset( $m['quoted'] ) ? $m['quoted'] : ( isset( $m['unquoted'] ) ? $m['unquoted'] : '' );
+				$raw   = trim( $raw );
 				$val   = $raw;
 
-				if ( $raw !== '' ) {
+				if ( $quote === '' && $raw !== '' ) {
 					$first_char = $raw[0];
 					$last_char  = substr( $raw, -1 );
 
