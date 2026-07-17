@@ -681,6 +681,25 @@ function register_rest_route( $namespace, $route, $args, $override = false ) {
 	return true;
 }
 
+function wp_script_is( $handle, $status = 'enqueued' ) {
+	if ( 'registered' !== $status ) {
+		return false;
+	}
+
+	return array_key_exists( (string) $handle, WpEnv::$registered_scripts );
+}
+
+function wp_register_script( $handle, $src, $deps = array(), $ver = false, $in_footer = false ) {
+	WpEnv::$registered_scripts[ (string) $handle ] = array(
+		'src'       => $src,
+		'deps'      => $deps,
+		'ver'       => $ver,
+		'in_footer' => $in_footer,
+	);
+
+	return true;
+}
+
 function wp_remote_get( $url, $args = array() ) {
 	WpEnv::$remote_requests[] = array( 'method' => 'GET', 'url' => $url, 'args' => $args );
 	return WpEnv::$remote_response;

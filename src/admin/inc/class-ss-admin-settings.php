@@ -400,6 +400,26 @@ class Admin_Settings {
 		return $args;
 	}
 
+	/**
+	 * Register the JSX runtime on WordPress versions that do not provide it.
+	 *
+	 * WordPress added this script handle in 6.6. Feature detection also avoids
+	 * replacing a compatible runtime registered by WordPress or Gutenberg.
+	 */
+	public function register_react_jsx_runtime_polyfill() {
+		if ( wp_script_is( 'react-jsx-runtime', 'registered' ) ) {
+			return;
+		}
+
+		wp_register_script(
+			'react-jsx-runtime',
+			SIMPLY_STATIC_URL . '/assets/react-jsx-runtime.js',
+			array( 'react' ),
+			SIMPLY_STATIC_VERSION,
+			true
+		);
+	}
+
     public function add_settings_scripts() {
         $screen  = get_current_screen();
         $options = Options::reinstance();
@@ -434,6 +454,7 @@ class Admin_Settings {
 
         $asset_version = isset( $asset['version'] ) ? $asset['version'] : SIMPLY_STATIC_VERSION;
 
+		$this->register_react_jsx_runtime_polyfill();
         wp_enqueue_script( 'simplystatic-settings', SIMPLY_STATIC_URL . '/src/admin/build/index.js', $dependencies, $asset_version, true );
 
 

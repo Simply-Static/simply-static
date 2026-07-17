@@ -53,8 +53,8 @@ msgid "Simply Static requires PHP 7.4 or higher."
 msgstr "Simply Static benötigt PHP 7.4 oder höher."
 
 #: simply-static.php:34
-msgid "Simply Static requires WordPress 6.6 or higher."
-msgstr "Simply Static benötigt WordPress 6.6 oder höher."
+msgid "Simply Static requires WordPress 6.2 or higher."
+msgstr "Simply Static benötigt WordPress 6.2 oder höher."
 
 #. translators: 1: required Simply Static Pro version
 #: simply-static.php:109
