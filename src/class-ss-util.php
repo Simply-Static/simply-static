@@ -2494,6 +2494,7 @@ class Util {
 	 * @return string Sanitized path.
 	 */
 	public static function sanitize_path( $path ) {
+		$path               = self::normalize_slashes( (string) $path );
 		$segments           = explode( '/', $path );
 		$sanitized_segments = array_map( [ self::class, 'sanitize_filename' ], $segments );
 
@@ -2676,7 +2677,7 @@ class Util {
 	 * @param string $path File path to remove trailing directory separators from
 	 */
 	public static function remove_trailing_directory_separator( $path ) {
-		return rtrim( $path, DIRECTORY_SEPARATOR );
+		return rtrim( (string) $path, "/\\" );
 	}
 
 	/**
@@ -2689,7 +2690,7 @@ class Util {
 			return '';
 		}
 
-		return ltrim( $path, DIRECTORY_SEPARATOR );
+		return ltrim( (string) $path, "/\\" );
 	}
 
 	/**
