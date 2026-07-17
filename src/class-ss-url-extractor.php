@@ -1620,12 +1620,23 @@ class Url_Extractor {
 		//   the callback. This prevents preserved entities like APOS_PLACEHOLDER
 		//   from being appended to extracted Gutenberg background-image URLs. Matching
 		//   the complete quoted value also prevents functions inside SVG data URIs
-		//   (for example rgb(...)) from being mistaken for the end of url(...).
-		$text = preg_replace_callback(
-			'/url\(\s*(?:(?<quote>["\'])(?<quoted>(?:\\\\.|(?!\k<quote>).)*)\k<quote>|(?<unquoted>(?:\\\\.|[^)\\\\])*))\s*\)/is',
+		//   (for example rgb(...)) from being mistaken for the end of url(...). The
+		//   quote-specific branches consume ordinary characters in chunks so large
+		//   inline SVGs do not exhaust PCRE's backtracking or JIT stack limits.
+		$_result = preg_replace_callback(
+			'~url\(\s*(?:(?<double_quote>")(?<double>[^"\\\\]*+(?:\\\\.[^"\\\\]*+)*+)"|(?<single_quote>\')(?<single>[^\'\\\\]*+(?:\\\\.[^\'\\\\]*+)*+)\'|(?<unquoted>[^)\\\\]*+(?:\\\\.[^)\\\\]*+)*+))\s*\)~is',
 			function ( $m ) use ( $charset ) {
-				$quote = isset( $m['quote'] ) ? $m['quote'] : '';
-				$raw   = $quote !== '' && isset( $m['quoted'] ) ? $m['quoted'] : ( isset( $m['unquoted'] ) ? $m['unquoted'] : '' );
+				if ( isset( $m['double_quote'] ) && $m['double_quote'] === '"' ) {
+					$quote = '"';
+					$raw   = isset( $m['double'] ) ? $m['double'] : '';
+				} else if ( isset( $m['single_quote'] ) && $m['single_quote'] === "'" ) {
+					$quote = "'";
+					$raw   = isset( $m['single'] ) ? $m['single'] : '';
+				} else {
+					$quote = '';
+					$raw   = isset( $m['unquoted'] ) ? $m['unquoted'] : '';
+				}
+
 				$raw   = trim( $raw );
 				$val   = $raw;
 
@@ -1666,10 +1677,13 @@ class Url_Extractor {
 			},
 			$text
 		);
+		if ( null !== $_result ) {
+			$text = $_result;
+		}
 
 		// Pass 2: Fallback - replace any remaining bare local absolute or protocol-relative URLs by converting them.
 		$escaped_origin = preg_quote( Util::origin_host(), '/' );
-		$text           = preg_replace_callback(
+		$_result        = preg_replace_callback(
 			'/((?:https?:)?\/\/' . $escaped_origin . ')[^"\')\s;,]+/i',
 			function ( $m ) {
 				$matched_url = $m[0];
@@ -1679,6 +1693,9 @@ class Url_Extractor {
 			},
 			$text
 		);
+		if ( null !== $_result ) {
+			$text = $_result;
+		}
 
 		// Pass 3: Fix HTML numeric entities used inside CSS content strings (e.g., content: "&#61710;" from Elementor/EAEL)
 		// Browsers do not decode HTML entities inside CSS. Convert these to proper CSS escapes like \f10e.
