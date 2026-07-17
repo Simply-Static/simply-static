@@ -981,6 +981,97 @@ class Url_Extractor {
 	}
 
 	/**
+	 * Remove WordPress REST discovery links when REST routes are not exported.
+	 *
+	 * @param DOMXPath $xpath XPath instance for the current document.
+	 *
+	 * @return void
+	 */
+	private function remove_unexported_rest_discovery_links( $xpath ) {
+		if ( $this->options->get( 'add_rest_api' ) ) {
+			return;
+		}
+
+		$links = $xpath->query( '//link[@rel]' );
+		if ( ! $links ) {
+			return;
+		}
+
+		$links_to_remove = array();
+		foreach ( $links as $link ) {
+			if ( $this->is_rest_discovery_link( $link ) ) {
+				$links_to_remove[] = $link;
+			}
+		}
+
+		foreach ( $links_to_remove as $link ) {
+			if ( $link->parentNode ) {
+				$link->parentNode->removeChild( $link );
+			}
+		}
+	}
+
+	/**
+	 * Determine whether a link element advertises a WordPress REST endpoint.
+	 *
+	 * @param \DOMElement $link Link element.
+	 *
+	 * @return bool
+	 */
+	private function is_rest_discovery_link( $link ) {
+		$rel_tokens = preg_split( '/\s+/', strtolower( trim( $link->getAttribute( 'rel' ) ) ) );
+		$rel_tokens = is_array( $rel_tokens ) ? array_filter( $rel_tokens ) : array();
+
+		if ( in_array( 'https://api.w.org/', $rel_tokens, true ) || in_array( 'https://api.w.org', $rel_tokens, true ) ) {
+			return true;
+		}
+
+		if ( ! in_array( 'alternate', $rel_tokens, true ) || ! $link->hasAttribute( 'href' ) ) {
+			return false;
+		}
+
+		$content_type = strtolower( trim( $link->getAttribute( 'type' ) ) );
+		if ( ! in_array( $content_type, array( 'application/json', 'application/json+oembed', 'text/xml+oembed' ), true ) ) {
+			return false;
+		}
+
+		return $this->is_wordpress_rest_url( $link->getAttribute( 'href' ) );
+	}
+
+	/**
+	 * Determine whether a URL resolves to a local WordPress REST route.
+	 *
+	 * @param string $href Link URL.
+	 *
+	 * @return bool
+	 */
+	private function is_wordpress_rest_url( $href ) {
+		$url = Util::relative_to_absolute_url( html_entity_decode( (string) $href, ENT_QUOTES | ENT_HTML5, 'UTF-8' ), $this->static_page->url );
+		if ( ! is_string( $url ) || '' === $url || ! Util::is_local_url( $url ) ) {
+			return false;
+		}
+
+		$parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $url ) : parse_url( $url );
+		if ( ! is_array( $parts ) ) {
+			return false;
+		}
+
+		$path = isset( $parts['path'] ) ? (string) $parts['path'] : '';
+		if ( 1 === preg_match( '#(?:^|/)wp-json(?:/|$)#i', $path ) ) {
+			return true;
+		}
+
+		if ( empty( $parts['query'] ) ) {
+			return false;
+		}
+
+		$query_args = array();
+		parse_str( html_entity_decode( (string) $parts['query'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ), $query_args );
+
+		return array_key_exists( 'rest_route', $query_args );
+	}
+
+	/**
 	 * Determine if a link element is a local resource hint that should not be
 	 * emitted in the static export.
 	 *
@@ -1290,6 +1381,8 @@ class Url_Extractor {
 		if ( ! $dom->documentElement ) {
 			return $html_string;
 		} else {
+			$this->remove_unexported_rest_discovery_links( $xpath );
+
 			// handle tags with attributes
 			foreach ( $match_tags as $tag_name => $attributes ) {
 				$elements = $xpath->query( '//' . $tag_name );

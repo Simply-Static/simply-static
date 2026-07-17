@@ -90,6 +90,16 @@ class Sitemap_Crawler extends Crawler {
 				continue;
 			}
 
+			foreach ( $this->extract_stylesheet_urls( $xml, $url ) as $stylesheet_url ) {
+				if ( count( $urls ) >= $max_urls ) {
+					break;
+				}
+
+				// Stylesheet processing instructions are untrusted sitemap input too.
+				// Only same-origin HTTP(S) resources may reach the fetch queue.
+				$this->add_unique_local_url( $urls, $stylesheet_url );
+			}
+
 			$root_name = strtolower( $xml->getName() );
 
 			if ( 'sitemapindex' === $root_name ) {
@@ -297,6 +307,45 @@ class Sitemap_Crawler extends Crawler {
 		foreach ( $locations as $location ) {
 			$url = trim( (string) $location );
 			if ( '' !== $url ) {
+				$urls[] = $url;
+			}
+		}
+
+		return $urls;
+	}
+
+	/**
+	 * Extract stylesheet URLs from xml-stylesheet processing instructions.
+	 *
+	 * WordPress's native sitemap index and child sitemap documents reference
+	 * different XSL files. These resources are not represented by <loc> nodes,
+	 * so they need to be discovered from the processing instruction itself.
+	 *
+	 * @param \SimpleXMLElement $xml          Parsed sitemap XML.
+	 * @param string            $document_url URL of the sitemap document.
+	 *
+	 * @return array
+	 */
+	private function extract_stylesheet_urls( $xml, $document_url ) : array {
+		$root_node = dom_import_simplexml( $xml );
+		if ( false === $root_node || ! $root_node->ownerDocument ) {
+			return array();
+		}
+
+		$urls = array();
+		foreach ( $root_node->ownerDocument->childNodes as $instruction ) {
+			if ( XML_PI_NODE !== $instruction->nodeType || 'xml-stylesheet' !== strtolower( $instruction->nodeName ) ) {
+				continue;
+			}
+
+			if ( 1 !== preg_match( '/(?:^|\s)href\s*=\s*(["\'])(.*?)\1/i', (string) $instruction->nodeValue, $matches ) ) {
+				continue;
+			}
+
+			$href = html_entity_decode( trim( $matches[2] ), ENT_QUOTES | ENT_XML1, 'UTF-8' );
+			$url  = \Simply_Static\Util::relative_to_absolute_url( $href, $document_url );
+
+			if ( is_string( $url ) && '' !== $url ) {
 				$urls[] = $url;
 			}
 		}

@@ -38,6 +38,7 @@ namespace Simply_Static\Tests\Unit {
 			parent::setUp();
 			$this->requireSource( 'src/class-ss-plugin.php' );
 			$this->requireSource( 'src/class-ss-options.php' );
+			$this->requireSource( 'src/class-ss-phpuri.php' );
 			$this->requireSource( 'src/class-ss-util.php' );
 			$this->requireSource( 'src/crawler/class-ss-crawler.php' );
 			$this->requireSource( 'src/crawler/class-ss-sitemap-crawler.php' );
@@ -97,6 +98,50 @@ namespace Simply_Static\Tests\Unit {
 
 			self::assertSame(
 				array( 'https://example.test/allowed/?q=one' ),
+				( new Sitemap_Crawler() )->detect()
+			);
+		}
+
+		public function test_it_discovers_the_native_sitemap_index_stylesheet(): void {
+			$this->setXmlResponse(
+				'<?xml version="1.0"?>'
+				. '<?xml-stylesheet type="text/xsl" href="/wp-sitemap-index.xsl"?>'
+				. '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></sitemapindex>'
+			);
+
+			self::assertSame(
+				array( 'https://example.test/wp-sitemap-index.xsl' ),
+				( new Sitemap_Crawler() )->detect()
+			);
+		}
+
+		public function test_it_discovers_the_native_child_sitemap_stylesheet(): void {
+			$this->setXmlResponse(
+				'<?xml version="1.0"?>'
+				. '<?xml-stylesheet type="text/xsl" href="https://example.test/wp-sitemap.xsl"?>'
+				. '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+				. '<url><loc>https://example.test/page/</loc></url></urlset>'
+			);
+
+			self::assertSame(
+				array(
+					'https://example.test/wp-sitemap.xsl',
+					'https://example.test/page/',
+				),
+				( new Sitemap_Crawler() )->detect()
+			);
+		}
+
+		public function test_it_rejects_external_sitemap_stylesheets(): void {
+			$this->setXmlResponse(
+				'<?xml version="1.0"?>'
+				. '<?xml-stylesheet type="text/xsl" href="https://attacker.test/private.xsl"?>'
+				. '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+				. '<url><loc>https://example.test/page/</loc></url></urlset>'
+			);
+
+			self::assertSame(
+				array( 'https://example.test/page/' ),
 				( new Sitemap_Crawler() )->detect()
 			);
 		}

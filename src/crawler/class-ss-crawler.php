@@ -129,6 +129,7 @@ abstract class Crawler {
 				$static_page = \Simply_Static\Page::query()->find_or_initialize_by( 'url', $url );
 				$static_page->set_status_message( sprintf( __( 'Added by %s Crawler', 'simply-static' ), $this->name ) );
 				$static_page->found_on_id = 0;
+				$this->configure_static_page( $static_page, $url );
 				$static_page->save();
 				$count++;
 			}
@@ -141,6 +142,17 @@ abstract class Crawler {
 		}
 
 		return $count;
+	}
+
+	/**
+	 * Allow a crawler to configure its Page record before it is queued.
+	 *
+	 * @param \Simply_Static\Page $static_page Page record being queued.
+	 * @param string               $url         Detected URL.
+	 *
+	 * @return void
+	 */
+	protected function configure_static_page( $static_page, $url ) {
 	}
 
 	/**
