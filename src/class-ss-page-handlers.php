@@ -80,5 +80,29 @@ class Page_Handlers {
 		$handler->run_hooks();
 
 		do_action( 'simply_static_page_handler_request_after_hooks', $handler );
+
+		$this->remove_page_id_from_request_uri();
+	}
+
+	/**
+	 * Remove the internal page identifier from the public request URL.
+	 *
+	 * The query argument is needed long enough to resolve and initialize the
+	 * page handler. Leaving it in REQUEST_URI after that point allows plugins
+	 * which serialize the current request URL to expose the internal identifier
+	 * in the generated static page. Keep $_GET intact for integrations which use
+	 * it to detect a Simply Static request.
+	 *
+	 * @return void
+	 */
+	protected function remove_page_id_from_request_uri() {
+		if ( ! isset( $_SERVER['REQUEST_URI'] ) || ! is_string( $_SERVER['REQUEST_URI'] ) ) {
+			return;
+		}
+
+		$_SERVER['REQUEST_URI'] = remove_query_arg(
+			'simply_static_page',
+			wp_unslash( $_SERVER['REQUEST_URI'] )
+		);
 	}
 }
