@@ -94,14 +94,17 @@ final class UrlExtractorTest extends UnitTestCase {
 	}
 
 	public function test_css_imports_and_urls_are_extracted_and_rewritten(): void {
-		$css = '@import url("../base.css"); .a{background:url(./image.png)} .b{src:url(https://external.test/font.woff2)}';
+		$css = '@import url("../base.css"); .a{background:url(./image.png)} .b{src:url(https://external.test/font.woff2)}'
+			. ".c{background:url('../single.png')}";
 		$extractor = $this->extractor( 'css', $css, 'assets/site.css' );
 		$urls = $extractor->extract_and_update_urls();
 
 		self::assertContains( 'https://example.test/base.css', $urls );
 		self::assertContains( 'https://example.test/blog/image.png', $urls );
+		self::assertContains( 'https://example.test/single.png', $urls );
 		self::assertNotContains( 'https://external.test/font.woff2', $urls );
 		self::assertStringContainsString( 'https://static.example.test/base.css', $extractor->get_body() );
+		self::assertStringContainsString( "url('https://static.example.test/single.png')", $extractor->get_body() );
 	}
 
 	public function test_css_svg_data_uri_preserves_namespace_url(): void {
@@ -114,6 +117,20 @@ final class UrlExtractorTest extends UnitTestCase {
 		$extractor->extract_and_update_urls();
 
 		self::assertSame( $css, $extractor->get_body() );
+	}
+
+	public function test_large_css_svg_data_uri_does_not_empty_stylesheet(): void {
+		$path = str_repeat( 'M0 0L1 1', 4000 );
+		$css  = '.icon{background-image:url("data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\">'
+			. '<path d=\\"' . $path . '\\"></path></svg>")}.after{background-image:url("../after.png")}';
+		$expected  = str_replace( '../after.png', 'https://static.example.test/after.png', $css );
+		$extractor = $this->extractor( 'css', $css, 'assets/large-svg.css' );
+
+		$extractor->extract_and_update_urls();
+
+		$body = $extractor->get_body();
+		self::assertSame( strlen( $expected ), strlen( $body ) );
+		self::assertSame( hash( 'sha256', $expected ), hash( 'sha256', $body ) );
 	}
 
 	public function test_json_and_xml_urls_are_replaced_without_touching_external_origins(): void {
