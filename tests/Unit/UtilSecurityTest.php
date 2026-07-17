@@ -17,6 +17,7 @@ final class UtilSecurityTest extends UnitTestCase {
 		$this->requireSource( 'src/class-ss-options.php' );
 		$this->requireSource( 'src/class-ss-phpuri.php' );
 		$this->requireSource( 'src/class-ss-util.php' );
+		$this->requireSource( 'src/tasks/traits/trait-ss-can-transfer.php' );
 
 		WpEnv::$options['simply-static'] = array(
 			'http_basic_auth_username' => 'crawler',
@@ -24,6 +25,31 @@ final class UtilSecurityTest extends UnitTestCase {
 			'origin_url'               => '',
 		);
 		Options::reinstance();
+	}
+
+	public function test_path_helpers_normalize_both_directory_separator_styles(): void {
+		self::assertSame( 'assets/site/index.html', Util::remove_leading_directory_separator( '/\\assets/site/index.html' ) );
+		self::assertSame( 'assets/site', Util::remove_trailing_directory_separator( 'assets/site/\\' ) );
+		self::assertSame( 'assets/site/', Util::sanitize_path( 'assets\\site\\' ) );
+	}
+
+	public function test_transfer_paths_are_portable_and_archive_relative(): void {
+		$transfer = new class() {
+			use \Simply_Static\canTransfer;
+
+			public function page_file_path( $page ): string {
+				return $this->get_page_file_path( $page );
+			}
+		};
+
+		self::assertSame(
+			'assets/site/index.html',
+			$transfer->page_file_path( (object) array( 'file_path' => '\\assets\\site\\index.html' ) )
+		);
+		self::assertSame(
+			'assets/site/index.html',
+			$transfer->page_file_path( (object) array( 'file_path' => '/assets/site/index.html' ) )
+		);
 	}
 
 	/**
