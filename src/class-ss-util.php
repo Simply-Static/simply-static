@@ -1896,21 +1896,9 @@ class Util {
 
 		$base = self::get_local_url_base( self::remove_params_and_fragment( $url ) );
 		if ( null !== $base ) {
-			$url_parts  = function_exists( 'wp_parse_url' ) ? wp_parse_url( $url ) : parse_url( $url );
-			$base_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $base ) : parse_url( $base );
-
-			if ( is_array( $url_parts ) && is_array( $base_parts ) ) {
-				$url_path  = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
-				$base_path = isset( $base_parts['path'] ) ? untrailingslashit( $base_parts['path'] ) : '';
-
-				if ( '' !== $base_path && '/' !== $base_path ) {
-					$url_path = substr( $url_path, strlen( $base_path ) );
-				}
-
-				$query    = isset( $url_parts['query'] ) ? '?' . $url_parts['query'] : '';
-				$fragment = isset( $url_parts['fragment'] ) ? '#' . $url_parts['fragment'] : '';
-
-				return '/' . ltrim( $url_path, '/' ) . $query . $fragment;
+			$path = self::get_path_from_url_base( $url, $base );
+			if ( null !== $path ) {
+				return $path;
 			}
 		}
 
@@ -1930,9 +1918,113 @@ class Util {
 	 * @return string
 	 */
 	public static function get_public_path_from_local_url( $url ) {
-		$path = self::get_path_from_local_url( $url );
+		$source_path = self::get_path_from_local_url( $url );
+		$public_path = self::replace_wordpress_path_with_public_path( $source_path );
 
-		return self::replace_wordpress_path_with_public_path( $path );
+		if (
+			! is_string( $source_path )
+			|| ! self::is_root_wordpress_asset_path( self::remove_params_and_fragment( $source_path ) )
+		) {
+			return $public_path;
+		}
+
+		$asset_prefix = self::get_public_asset_path_prefix( $url, $source_path );
+		if ( '' === $asset_prefix ) {
+			return $public_path;
+		}
+
+		return $asset_prefix . '/' . ltrim( $public_path, '/' );
+	}
+
+	/**
+	 * Get the WordPress install path that must prefix a generated asset path.
+	 *
+	 * Local URL matching intentionally prefers the longest base so redirects
+	 * between an Origin URL, home_url(), and site_url() can resolve to the same
+	 * generated page. For assets, however, a deeper WordPress Address is a real
+	 * public path when the Site Address is its parent. Preserve that suffix in
+	 * the generated path instead of treating it as another export root.
+	 *
+	 * @param string $url Absolute local asset URL.
+	 * @param string $source_path Asset path relative to the matched local base.
+	 *
+	 * @return string Path prefix, or an empty string when none should be added.
+	 */
+	private static function get_public_asset_path_prefix( $url, $source_path ) {
+		if ( ! is_string( $url ) || ! is_string( $source_path ) ) {
+			return '';
+		}
+
+		$public_bases = array( self::origin_url() );
+		if ( function_exists( 'home_url' ) ) {
+			$public_bases[] = untrailingslashit( home_url() );
+		}
+
+		$public_bases = array_values( array_unique( array_filter( array_map( 'untrailingslashit', $public_bases ) ) ) );
+		$source_path = self::remove_params_and_fragment( $source_path );
+
+		foreach ( $public_bases as $public_base ) {
+			$public_root_path = self::get_path_from_url_base( $url, $public_base );
+			if ( null === $public_root_path ) {
+				continue;
+			}
+
+			$public_root_path = self::remove_params_and_fragment( $public_root_path );
+			if ( $public_root_path === $source_path || strlen( $public_root_path ) <= strlen( $source_path ) ) {
+				return '';
+			}
+
+			if ( substr( $public_root_path, -strlen( $source_path ) ) !== $source_path ) {
+				return '';
+			}
+
+			return rtrim( substr( $public_root_path, 0, -strlen( $source_path ) ), '/' );
+		}
+
+		return '';
+	}
+
+	/**
+	 * Get a URL path relative to one explicit local base.
+	 *
+	 * @param string $url URL to normalize.
+	 * @param string $base Local base URL.
+	 *
+	 * @return string|null Relative path, or null when the base does not match.
+	 */
+	private static function get_path_from_url_base( $url, $base ) {
+		$url_parts  = function_exists( 'wp_parse_url' ) ? wp_parse_url( $url ) : parse_url( $url );
+		$base_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $base ) : parse_url( $base );
+
+		if ( ! is_array( $url_parts ) || ! is_array( $base_parts ) || empty( $url_parts['host'] ) || empty( $base_parts['host'] ) ) {
+			return null;
+		}
+
+		if ( self::normalize_url_host( $url_parts['host'] ) !== self::normalize_url_host( $base_parts['host'] ) ) {
+			return null;
+		}
+
+		$url_path  = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
+		$base_path = isset( $base_parts['path'] ) ? untrailingslashit( $base_parts['path'] ) : '';
+
+		if (
+			'' !== $base_path
+			&& '/' !== $base_path
+			&& $url_path !== $base_path
+			&& 0 !== strpos( untrailingslashit( $url_path ) . '/', trailingslashit( $base_path ) )
+		) {
+			return null;
+		}
+
+		if ( '' !== $base_path && '/' !== $base_path ) {
+			$url_path = substr( $url_path, strlen( $base_path ) );
+			$url_path = '' === $url_path ? '/' : $url_path;
+		}
+
+		$query    = isset( $url_parts['query'] ) ? '?' . $url_parts['query'] : '';
+		$fragment = isset( $url_parts['fragment'] ) ? '#' . $url_parts['fragment'] : '';
+
+		return '/' . ltrim( $url_path, '/' ) . $query . $fragment;
 	}
 
 	/**

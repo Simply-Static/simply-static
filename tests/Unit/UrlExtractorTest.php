@@ -9,6 +9,8 @@ use Simply_Static\Page;
 use Simply_Static\Tests\Support\UnitTestCase;
 use Simply_Static\Tests\Support\WpTestEnvironment as WpEnv;
 use Simply_Static\Url_Extractor;
+use Simply_Static\Url_Fetcher;
+use Simply_Static\Util;
 
 final class UrlExtractorTest extends UnitTestCase {
 
@@ -25,6 +27,8 @@ final class UrlExtractorTest extends UnitTestCase {
 		$this->requireSource( 'src/class-ss-query.php' );
 		$this->requireSource( 'src/models/class-ss-model.php' );
 		$this->requireSource( 'src/models/class-ss-page.php' );
+		$this->requireSource( 'src/handlers/class-ss-page-handler.php' );
+		$this->requireSource( 'src/class-ss-url-fetcher.php' );
 		$this->requireSource( 'src/class-ss-url-extractor.php' );
 
 		$base = WpEnv::$upload_dir['basedir'] . '/simply-static/url-extractor';
@@ -172,6 +176,78 @@ final class UrlExtractorTest extends UnitTestCase {
 		$offline = $this->extractor( 'html', '<a href="/target/">target</a>' );
 		$offline->extract_and_update_urls();
 		self::assertStringContainsString( 'target/index.html', $offline->get_body() );
+	}
+
+	public function test_relative_exports_preserve_wordpress_install_subdirectory_for_assets(): void {
+		WpEnv::$home_url = 'https://example.test';
+		WpEnv::$site_url = 'https://example.test/wordpress';
+		WpEnv::$options['simply-static']['destination_url_type'] = 'relative';
+		WpEnv::$options['simply-static']['relative_path'] = '/';
+		WpEnv::$options['simply-static']['wp_content_directory'] = 'wp-content';
+		WpEnv::$options['simply-static']['wp_includes_directory'] = 'wp-includes';
+		Options::reinstance();
+
+		$content_url  = 'https://example.test/wordpress/wp-content/themes/site/style.css';
+		$includes_url = 'https://example.test/wordpress/wp-includes/js/jquery/jquery.min.js';
+
+		// Redirect comparisons still normalize alternate WordPress URL bases.
+		self::assertSame( '/wp-content/themes/site/style.css', Util::get_path_from_local_url( $content_url ) );
+		self::assertSame( '/wp-includes/js/jquery/jquery.min.js', Util::get_path_from_local_url( $includes_url ) );
+
+		// Export paths retain the WordPress Address suffix relative to the public Site Address.
+		self::assertSame( '/wordpress/wp-content/themes/site/style.css', Util::get_public_path_from_local_url( $content_url ) );
+		self::assertSame( '/wordpress/wp-includes/js/jquery/jquery.min.js', Util::get_public_path_from_local_url( $includes_url ) );
+
+		$fetcher_ref = new \ReflectionClass( Url_Fetcher::class );
+		$fetcher     = $fetcher_ref->newInstanceWithoutConstructor();
+		$archive_dir = $fetcher_ref->getProperty( 'archive_dir' );
+		$archive_dir->setAccessible( true );
+		$archive_dir->setValue( $fetcher, $this->archive_dir );
+		$asset_page = Page::initialize( array(
+			'url'              => $content_url,
+			'http_status_code' => 200,
+			'content_type'     => 'text/css',
+		) );
+
+		self::assertSame(
+			'wordpress/wp-content/themes/site/style.css',
+			$fetcher->create_directories_for_static_page( $asset_page )
+		);
+
+		$relative = $this->extractor( 'html', '<link rel="stylesheet" href="' . $content_url . '"><script src="' . $includes_url . '"></script>' );
+		self::assertSame( '/wordpress/wp-content/themes/site/style.css', $relative->convert_url( $content_url ) );
+		self::assertSame( '/wordpress/wp-includes/js/jquery/jquery.min.js', $relative->convert_url( $includes_url ) );
+
+		$relative->extract_and_update_urls();
+		self::assertStringContainsString( 'href="/wordpress/wp-content/themes/site/style.css"', $relative->get_body() );
+		self::assertStringContainsString( 'src="/wordpress/wp-includes/js/jquery/jquery.min.js"', $relative->get_body() );
+	}
+
+	public function test_subdirectory_asset_prefix_composes_with_hide_wordpress_directories(): void {
+		WpEnv::$home_url = 'https://example.test';
+		WpEnv::$site_url = 'https://example.test/wordpress';
+		WpEnv::$options['simply-static']['wp_content_directory'] = 'assets';
+		WpEnv::$options['simply-static']['wp_includes_directory'] = 'core';
+		Options::reinstance();
+
+		self::assertSame(
+			'/wordpress/assets/themes/site/style.css',
+			Util::get_public_path_from_local_url( 'https://example.test/wordpress/wp-content/themes/site/style.css' )
+		);
+		self::assertSame(
+			'/wordpress/core/js/jquery/jquery.min.js',
+			Util::get_public_path_from_local_url( 'https://example.test/wordpress/wp-includes/js/jquery/jquery.min.js' )
+		);
+
+		WpEnv::$home_url = 'https://example.test/wordpress';
+		WpEnv::$options['simply-static']['wp_content_directory'] = 'wp-content';
+		WpEnv::$options['simply-static']['wp_includes_directory'] = 'wp-includes';
+		Options::reinstance();
+
+		self::assertSame(
+			'/wp-content/themes/site/style.css',
+			Util::get_public_path_from_local_url( 'https://example.test/wordpress/wp-content/themes/site/style.css' )
+		);
 	}
 
 	private function extractor( string $type, string $body, string $file_path = 'page.html' ): Url_Extractor {
