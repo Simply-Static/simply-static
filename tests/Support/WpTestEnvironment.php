@@ -34,6 +34,9 @@ final class WpTestEnvironment {
 	/** @var array<int,array<string,mixed>> */
 	public static $routes = array();
 
+	/** @var array<string,array<string,mixed>> */
+	public static $registered_scripts = array();
+
 	/** @var string[] */
 	public static $action_log = array();
 
@@ -95,6 +98,7 @@ final class WpTestEnvironment {
 			'body'     => '',
 		);
 		self::$routes           = array();
+		self::$registered_scripts = array();
 		self::$action_log       = array();
 		self::$capabilities     = array();
 		self::$site_capabilities = array();

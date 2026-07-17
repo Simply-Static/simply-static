@@ -9,6 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Plugin URI:        https://simplystatic.com
  * Description:       A static site generator to create fast and secure static versions of your WordPress website.
  * Version:           3.8.3
+ * Requires at least:  6.2
  * Author:            Patrick Posner
  * Author URI:        https://patrickposner.com
  * License:           GPL-2.0+

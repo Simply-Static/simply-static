@@ -102,11 +102,15 @@ namespace Simply_Static\Tests\Unit {
 			$lock      = json_decode( (string) file_get_contents( $root . '/src/admin/package-lock.json' ), true );
 
 			self::assertMatchesRegularExpression( '/^ \* Version:\s+3\.8\.3$/m', $bootstrap );
+			self::assertMatchesRegularExpression( '/^ \* Requires at least:\s+6\.2$/m', $bootstrap );
 			self::assertStringContainsString( "define( 'SIMPLY_STATIC_VERSION', '3.8.3' );", $bootstrap );
+			self::assertStringContainsString( "version_compare( get_bloginfo( 'version' ), '6.2', '<' )", $bootstrap );
+			self::assertStringContainsString( 'Simply Static requires WordPress 6.2 or higher.', $bootstrap );
 			self::assertStringContainsString( "require_once SIMPLY_STATIC_PATH . 'src/class-ss-pro-compatibility.php';", $bootstrap );
 			self::assertStringContainsString( "add_action( 'plugins_loaded', array( 'Simply_Static\\Pro_Compatibility', 'enforce' ), 1 );", $bootstrap );
 			self::assertStringNotContainsString( 'deactivate_plugins( $pro_basename', $bootstrap );
 			self::assertMatchesRegularExpression( '/^Stable tag:\s+3\.8\.3$/m', $readme );
+			self::assertMatchesRegularExpression( '/^Requires at least:\s+6\.2$/m', $readme );
 			self::assertStringContainsString( '= 3.8.3 =', $readme );
 			self::assertSame( '3.8.3', $package['version'] ?? null );
 			self::assertSame( '3.8.3', $lock['version'] ?? null );

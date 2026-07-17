@@ -48,7 +48,7 @@ msgstr ""
 msgid "Simply Static requires PHP 7.4 or higher."
 msgstr ""
 
-#: simply-static.php:33
+#: simply-static.php:34
 msgid "Simply Static requires WordPress 6.2 or higher."
 msgstr ""
 
