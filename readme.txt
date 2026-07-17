@@ -1,7 +1,7 @@
 === Simply Static - The Static Site Generator ===
 Contributors: patrickposner
 Tags: jamstack, performance, security, static site generator
-Requires at least: 6.2
+Requires at least: 6.6
 Tested up to: 7.0
 Requires PHP: 7.4
 Stable tag:  3.8.3
