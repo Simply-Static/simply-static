@@ -97,6 +97,43 @@ final class UrlExtractorTest extends UnitTestCase {
 		}
 	}
 
+	public function test_removes_wordpress_rest_discovery_links_when_rest_api_is_not_exported(): void {
+		WpEnv::$options['simply-static']['add_rest_api'] = false;
+		Options::reinstance();
+
+		$html = '<html><head>'
+			. '<link href="https://example.test/wp-json/" rel="https://api.w.org/">'
+			. '<link title="REST JSON" href="https://example.test/?rest_route=/wp/v2/pages/7" type="application/json" rel="alternate">'
+			. '<link rel="alternate" type="application/json+oembed" href="https://example.test/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fexample.test%2Fblog%2Fpage">'
+			. '<link rel="alternate" type="text/xml+oembed" href="https://example.test/wp-json/oembed/1.0/embed?format=xml">'
+			. '<link title="Site feed" rel="alternate" type="application/json" href="https://example.test/feed.json">'
+			. '</head><body></body></html>';
+		$extractor = $this->extractor( 'html', $html );
+		$urls      = $extractor->extract_and_update_urls();
+		$body      = $extractor->get_body();
+
+		self::assertStringNotContainsString( 'api.w.org', $body );
+		self::assertStringNotContainsString( 'rest_route', $body );
+		self::assertStringNotContainsString( 'json+oembed', $body );
+		self::assertStringNotContainsString( 'xml+oembed', $body );
+		self::assertStringContainsString( 'title="Site feed"', $body );
+		self::assertNotContains( 'https://example.test/wp-json/', $urls );
+		self::assertContains( 'https://example.test/feed.json', $urls );
+	}
+
+	public function test_preserves_wordpress_rest_discovery_links_when_rest_api_is_exported(): void {
+		WpEnv::$options['simply-static']['add_rest_api'] = true;
+		Options::reinstance();
+
+		$html      = '<link rel="https://api.w.org/" href="https://example.test/wp-json/">';
+		$extractor = $this->extractor( 'html', $html );
+		$urls      = $extractor->extract_and_update_urls();
+
+		self::assertStringContainsString( 'rel="https://api.w.org/"', $extractor->get_body() );
+		self::assertStringContainsString( 'href="https://static.example.test/wp-json/"', $extractor->get_body() );
+		self::assertContains( 'https://example.test/wp-json/', $urls );
+	}
+
 	public function test_css_imports_and_urls_are_extracted_and_rewritten(): void {
 		$css = '@import url("../base.css"); .a{background:url(./image.png)} .b{src:url(https://external.test/font.woff2)}'
 			. ".c{background:url('../single.png')}";
