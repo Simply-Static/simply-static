@@ -327,14 +327,18 @@ class Sitemap_Crawler extends Crawler {
 	 * @return array
 	 */
 	private function extract_stylesheet_urls( $xml, $document_url ) : array {
-		$instructions = $xml->xpath( '/processing-instruction("xml-stylesheet")' );
-		if ( false === $instructions ) {
+		$root_node = dom_import_simplexml( $xml );
+		if ( false === $root_node || ! $root_node->ownerDocument ) {
 			return array();
 		}
 
 		$urls = array();
-		foreach ( $instructions as $instruction ) {
-			if ( 1 !== preg_match( '/(?:^|\s)href\s*=\s*(["\'])(.*?)\1/i', (string) $instruction, $matches ) ) {
+		foreach ( $root_node->ownerDocument->childNodes as $instruction ) {
+			if ( XML_PI_NODE !== $instruction->nodeType || 'xml-stylesheet' !== strtolower( $instruction->nodeName ) ) {
+				continue;
+			}
+
+			if ( 1 !== preg_match( '/(?:^|\s)href\s*=\s*(["\'])(.*?)\1/i', (string) $instruction->nodeValue, $matches ) ) {
 				continue;
 			}
 
