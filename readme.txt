@@ -4,7 +4,7 @@ Tags: jamstack, performance, security, static site generator
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag:  3.8.3
+Stable tag:  3.8.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -274,6 +274,16 @@ Settings - Configure your static site export options
 Diagnostics - Check your WordPress environment for compatibility
 
 == Changelog ==
+
+= 3.8.4 =
+
+* Added export discovery for public llms.txt files and sitemap stylesheets
+* Removed WordPress REST discovery links when REST routes are not included in exports
+* Prevented internal export page IDs from leaking into generated current URLs
+* Fixed asset export paths for WordPress installations in subdirectories
+* Normalized transfer path separators across platforms
+* Fixed CSS URL parsing for SVG data URIs, including large stylesheets
+* Restored admin compatibility with WordPress 6.2
 
 = 3.8.3 =
 
