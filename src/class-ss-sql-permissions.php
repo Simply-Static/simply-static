@@ -65,8 +65,11 @@ class Sql_Permissions {
 			// Loop through all of the grants and set permissions to true where
 			// we're able to find them.
 			foreach ( $rows as $row ) {
-				// Find the database name
-				preg_match( '/GRANT (.+) ON (.+) TO/', $row[0], $matches );
+				// Find the database name. Skip rows without an ON clause, e.g.
+				// MySQL 8 role grants like "GRANT `role`@`%` TO `user`@`%`".
+				if ( ! preg_match( '/GRANT (.+) ON (.+) TO/', $row[0], $matches ) ) {
+					continue;
+				}
 				// Removing backticks and backslashes for easier matching
 				$db_name = preg_replace('/[\\\`]/', '', $matches[2]);
 
