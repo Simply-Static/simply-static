@@ -88,6 +88,8 @@ class Wp_Includes_Crawler extends Crawler {
 			$it = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $full_path, \RecursiveDirectoryIterator::SKIP_DOTS ) );
 			foreach ( $it as $file ) {
 				if ( $file->isDir() ) continue;
+				// WordPress keeps removed core assets as empty placeholders for some releases.
+				if ( 0 === $file->getSize() ) continue;
 				$rel = \Simply_Static\Util::safe_relative_path( $full_path, $file->getPathname() );
 				if ( in_array( strtolower( pathinfo( $rel, PATHINFO_EXTENSION ) ), $exts, true ) ) {
 					$urls[] = \Simply_Static\Util::safe_join_url( $dir_url, $rel );
