@@ -125,9 +125,12 @@ namespace Simply_Static\Tests\Unit {
 			}
 
 			WpEnv::$site_transients = array(
-				'wp_archive_creation_job_process_lock'        => 'legacy-lock',
-				'wp_archive_creation_job_process_lock_site_7' => 'site-lock',
-				'wp_archive_creation_job_process_lock_site_8' => 'other-site-lock',
+				'wp_archive_creation_job_process_lock'                 => 'legacy-lock',
+				'wp_archive_creation_job_process_lock_site_7'          => 'site-lock',
+				'wp_archive_creation_job_process_lock_site_8'          => 'other-site-lock',
+				'wp_archive_creation_job_loopback_available'           => 'no',
+				'wp_archive_creation_job_loopback_available_site_7'    => 'no',
+				'wp_archive_creation_job_loopback_available_site_8'    => 'yes',
 			);
 			WpEnv::$site_options[ Plugin::SLUG . '_multisite_export_running' ] = 7;
 			$GLOBALS['simply_static_test_scheduled_hooks'] = array(
@@ -199,6 +202,9 @@ namespace Simply_Static\Tests\Unit {
 			self::assertSame( 'legacy-lock', WpEnv::$site_transients['wp_archive_creation_job_process_lock'] );
 			self::assertArrayNotHasKey( 'wp_archive_creation_job_process_lock_site_7', WpEnv::$site_transients );
 			self::assertSame( 'other-site-lock', WpEnv::$site_transients['wp_archive_creation_job_process_lock_site_8'] );
+			self::assertSame( 'no', WpEnv::$site_transients['wp_archive_creation_job_loopback_available'] );
+			self::assertArrayNotHasKey( 'wp_archive_creation_job_loopback_available_site_7', WpEnv::$site_transients );
+			self::assertSame( 'yes', WpEnv::$site_transients['wp_archive_creation_job_loopback_available_site_8'] );
 			self::assertArrayNotHasKey( Plugin::SLUG . '_multisite_export_running', WpEnv::$site_options );
 
 			self::assertArrayNotHasKey( 'wp_archive_creation_job_cron', $GLOBALS['simply_static_test_scheduled_hooks'] );
@@ -222,7 +228,9 @@ namespace Simply_Static\Tests\Unit {
 			$this->rest->reset_background_queue();
 
 			self::assertArrayNotHasKey( 'wp_archive_creation_job_process_lock', WpEnv::$site_transients );
+			self::assertArrayNotHasKey( 'wp_archive_creation_job_loopback_available', WpEnv::$site_transients );
 			self::assertSame( 'site-lock', WpEnv::$site_transients['wp_archive_creation_job_process_lock_site_7'] );
+			self::assertSame( 'no', WpEnv::$site_transients['wp_archive_creation_job_loopback_available_site_7'] );
 		}
 
 		public function test_reset_refuses_to_race_an_active_background_worker(): void {

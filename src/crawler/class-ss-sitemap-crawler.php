@@ -181,7 +181,7 @@ class Sitemap_Crawler extends Crawler {
 				array(
 					'timeout'     => min( $request_timeout, max( 0.1, $deadline - $this->now() ) ),
 					'redirection' => 0,
-					'sslverify'   => true,
+					'sslverify'   => (bool) apply_filters( 'ss_remote_get_sslverify', \Simply_Static\Util::should_verify_ssl( $sitemap_url ), $sitemap_url ),
 				)
 			);
 
@@ -234,7 +234,7 @@ class Sitemap_Crawler extends Crawler {
 			array(
 				'timeout'             => $request_timeout,
 				'redirection'         => 0,
-				'sslverify'           => true,
+				'sslverify'           => (bool) apply_filters( 'ss_remote_get_sslverify', \Simply_Static\Util::should_verify_ssl( $sitemap_url ), $sitemap_url ),
 				'limit_response_size' => $response_limit,
 			)
 		);

@@ -37,7 +37,7 @@ final class PaginationCrawlerSecurityTest extends UnitTestCase {
 		self::assertSame( array( 'https://example.test/articles/page/2/' ), $urls );
 		self::assertCount( 2, WpEnv::$remote_requests );
 		foreach ( WpEnv::$remote_requests as $request ) {
-			self::assertTrue( $request['args']['sslverify'] );
+			self::assertFalse( $request['args']['sslverify'] );
 			self::assertSame( 0, $request['args']['redirection'] );
 			self::assertSame( 2 * 1024 * 1024 + 1, $request['args']['limit_response_size'] );
 			self::assertSame( 'Basic ' . base64_encode( 'crawler:secret' ), $request['args']['headers']['Authorization'] );

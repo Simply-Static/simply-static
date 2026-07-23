@@ -443,7 +443,7 @@ class Pagination_Crawler extends Crawler {
 			$args = [
 				'timeout'             => min( $request_timeout, max( 1, $deadline - microtime( true ) ) ),
 				'redirection'         => 0,
-				'sslverify'           => (bool) apply_filters( 'ss_remote_get_sslverify', true, $current_url ),
+				'sslverify'           => (bool) apply_filters( 'ss_remote_get_sslverify', \Simply_Static\Util::should_verify_ssl( $current_url ), $current_url ),
 				'limit_response_size' => $max_body_bytes + 1,
 			];
 			$authorization = \Simply_Static\Util::get_basic_auth_header_for_url( $current_url );

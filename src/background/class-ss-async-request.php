@@ -156,13 +156,16 @@ abstract class Async_Request {
 		if ( property_exists( $this, 'post_args' ) ) {
 			$args = is_array( $this->post_args ) ? $this->post_args : array();
 		} else {
+			$url       = $this->get_query_url();
+			$sslverify = class_exists( __NAMESPACE__ . '\\Util' ) ? Util::should_verify_ssl( $url ) : true;
+			$sslverify = (bool) apply_filters( 'ss_remote_get_sslverify', $sslverify, $url );
 			$args = array(
 				'timeout'     => 5,
 				'blocking'    => false,
 				'redirection' => 0,
 				'body'        => is_array( $this->data ) ? $this->data : array(),
 				'cookies'     => $this->get_auth_cookies(),
-				'sslverify'   => (bool) apply_filters( 'https_local_ssl_verify', true ),
+				'sslverify'   => (bool) apply_filters( 'https_local_ssl_verify', $sslverify, $url ),
 			);
 		}
 

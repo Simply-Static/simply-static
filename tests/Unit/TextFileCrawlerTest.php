@@ -35,7 +35,7 @@ final class TextFileCrawlerTest extends UnitTestCase {
 		self::assertSame( 'https://example.test/llms.txt', $request['url'] );
 		self::assertSame( 5.0, $request['args']['timeout'] );
 		self::assertSame( 0, $request['args']['redirection'] );
-		self::assertTrue( $request['args']['sslverify'] );
+		self::assertFalse( $request['args']['sslverify'] );
 		self::assertSame( 4096, $request['args']['limit_response_size'] );
 	}
 

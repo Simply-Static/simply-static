@@ -563,7 +563,14 @@ final class BackgroundProcessStateTest extends UnitTestCase {
 			$request['args']['cookies']
 		);
 		self::assertSame( 0, $request['args']['redirection'] );
-		self::assertTrue( $request['args']['sslverify'] );
+		self::assertFalse( $request['args']['sslverify'] );
+	}
+
+	public function test_async_dispatch_allows_wordpress_ssl_filter_to_restore_verification(): void {
+		add_filter( 'https_local_ssl_verify', '__return_true' );
+		$args = ( new BackgroundStateProcess() )->post_args_for_test();
+
+		self::assertTrue( $args['sslverify'] );
 	}
 
 	public function test_async_dispatch_rejects_a_filtered_cross_origin_url_before_sending_credentials(): void {
@@ -764,7 +771,7 @@ final class BackgroundProcessStateTest extends UnitTestCase {
 		self::assertCount( 1, WpEnv::$remote_requests );
 		self::assertStringContainsString( 'action=wp_state_process', WpEnv::$remote_requests[0]['url'] );
 		self::assertStringContainsString( 'chain_id=', WpEnv::$remote_requests[0]['url'] );
-		self::assertTrue( WpEnv::$remote_requests[0]['args']['sslverify'] );
+		self::assertFalse( WpEnv::$remote_requests[0]['args']['sslverify'] );
 
 		WpEnv::$remote_response = new \WP_Error( 'loopback', 'Connection refused' );
 		self::assertTrue( $process->dispatch_via_background() );
@@ -814,7 +821,7 @@ final class BackgroundProcessStateTest extends UnitTestCase {
 		WpEnv::$remote_response = array( 'response' => array( 'code' => 403 ) );
 		self::assertFalse( $process->loopback_available_for_test() );
 		self::assertSame( 'no', WpEnv::$site_transients['wp_state_process_loopback_available'] );
-		self::assertTrue( WpEnv::$remote_requests[0]['args']['sslverify'] );
+		self::assertFalse( WpEnv::$remote_requests[0]['args']['sslverify'] );
 		self::assertStringContainsString( 'action=wp_state_process', WpEnv::$remote_requests[0]['url'] );
 		self::assertSame( 'nonce-wp_state_process', WpEnv::$remote_requests[0]['args']['body']['nonce'] );
 		self::assertSame( '1', WpEnv::$remote_requests[0]['args']['body']['simply_static_probe'] );

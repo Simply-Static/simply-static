@@ -255,10 +255,10 @@ namespace Simply_Static\Tests\Unit {
 			$get  = $this->requestsByMethod( 'GET' )[0];
 			self::assertSame( 2.5, $head['args']['timeout'] );
 			self::assertSame( 0, $head['args']['redirection'] );
-			self::assertTrue( $head['args']['sslverify'] );
+			self::assertFalse( $head['args']['sslverify'] );
 			self::assertSame( 2.5, $get['args']['timeout'] );
 			self::assertSame( 0, $get['args']['redirection'] );
-			self::assertTrue( $get['args']['sslverify'] );
+			self::assertFalse( $get['args']['sslverify'] );
 			self::assertSame( 65, $get['args']['limit_response_size'] );
 		}
 

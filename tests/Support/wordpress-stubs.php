@@ -211,6 +211,10 @@ function site_url( $path = '' ) {
 	return rtrim( WpEnv::$site_url, '/' ) . ( '' === $path ? '' : '/' . ltrim( (string) $path, '/' ) );
 }
 
+function wp_get_environment_type() {
+	return WpEnv::$environment_type;
+}
+
 function includes_url( $path = '' ) {
 	return rtrim( WpEnv::$site_url, '/' ) . '/wp-includes/' . ltrim( (string) $path, '/' );
 }

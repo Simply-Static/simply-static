@@ -1825,6 +1825,49 @@ class Util {
 	}
 
 	/**
+	 * Determine whether an internal request should verify its TLS certificate.
+	 *
+	 * Verification remains enabled unless the request targets an exact WordPress
+	 * origin in a local environment. Reserved local hostnames are detected
+	 * automatically so tools such as Herd work without configuration.
+	 *
+	 * @param string $url Request URL.
+	 *
+	 * @return bool
+	 */
+	public static function should_verify_ssl( $url ) {
+		$verify          = true;
+		$is_local_origin = false;
+
+		foreach ( self::local_url_bases() as $base ) {
+			if ( self::is_same_origin_url( $url, $base ) ) {
+				$is_local_origin = true;
+				break;
+			}
+		}
+
+		if ( $is_local_origin ) {
+			$url_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $url ) : parse_url( $url );
+			$host      = is_array( $url_parts ) && isset( $url_parts['host'] )
+				? trim( self::normalize_url_host( $url_parts['host'] ), '[]' )
+				: '';
+			$is_local_environment = function_exists( 'wp_get_environment_type' )
+				&& 'local' === wp_get_environment_type();
+			$is_local_hostname = 'localhost' === $host
+				|| '::1' === $host
+				|| '127.0.0.1' === $host
+				|| '.test' === substr( $host, -5 )
+				|| '.localhost' === substr( $host, -10 );
+
+			if ( $is_local_environment || $is_local_hostname ) {
+				$verify = false;
+			}
+		}
+
+		return $verify;
+	}
+
+	/**
 	 * Return an HTTP Basic Authorization header only for an exact WordPress origin.
 	 *
 	 * @param string $url Request URL.
