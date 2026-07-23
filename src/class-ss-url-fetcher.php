@@ -403,16 +403,17 @@ class Url_Fetcher {
 	}
 
 	/**
-	 * Given a Static_Page, return a relative filename based on the URL
+	 * Build the unfiltered relative filename for a static page.
 	 *
-	 * This will also create directories as needed so that a file could be
-	 * created at the returned file path.
+	 * This calculation intentionally has no filesystem side effects so callers
+	 * can compare a stored path with the path the current export rules would
+	 * generate.
 	 *
-	 * @param \Simply_Static\Page $static_page The Simply_Static\Page
+	 * @param \Simply_Static\Page $static_page The Simply_Static\Page.
 	 *
-	 * @return string|null                The relative file path of the file
+	 * @return string|null The relative file path, or null when no file should be created.
 	 */
-	public function create_directories_for_static_page( $static_page ) {
+	private function build_relative_filename_for_static_page( $static_page ) {
 		$url_parts = parse_url( $static_page->url );
 		// a domain with no trailing slash has no path, so we're giving it one
 		$path = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
@@ -505,12 +506,50 @@ class Url_Fetcher {
 		$sanitized_relative_dir = Util::sanitize_path( (string) urldecode( $relative_file_dir ) );
 		$sanitized_filename     = Util::sanitize_filename( (string) $path_info['filename'] );
 
-		$create_dir = wp_mkdir_p( $this->archive_dir . $sanitized_relative_dir );
+		return $sanitized_relative_dir . $sanitized_filename . ( $path_info['extension'] ? '.' . $path_info['extension'] : '' );
+	}
+
+	/**
+	 * Return the final relative filename produced by the current export rules.
+	 *
+	 * @param \Simply_Static\Page $static_page The Simply_Static\Page.
+	 *
+	 * @return string|null The filtered relative file path.
+	 */
+	public function get_expected_file_path_for_static_page( $static_page ) {
+		$relative_filename = $this->build_relative_filename_for_static_page( $static_page );
+
+		if ( null === $relative_filename ) {
+			return null;
+		}
+
+		return apply_filters( 'simply_static_relative_filename', $relative_filename, $static_page );
+	}
+
+	/**
+	 * Given a Static_Page, return a relative filename based on the URL.
+	 *
+	 * This will also create directories as needed so that a file could be
+	 * created at the returned file path.
+	 *
+	 * @param \Simply_Static\Page $static_page The Simply_Static\Page.
+	 *
+	 * @return string|null The unfiltered relative file path.
+	 */
+	public function create_directories_for_static_page( $static_page ) {
+		$relative_filename = $this->build_relative_filename_for_static_page( $static_page );
+		if ( null === $relative_filename ) {
+			return null;
+		}
+
+		$path_info         = Util::url_path_info( $relative_filename );
+		$relative_file_dir = $path_info['dirname'];
+		$create_dir        = wp_mkdir_p( $this->archive_dir . $relative_file_dir );
+
 		if ( $create_dir === false ) {
-			Util::debug_log( "Unable to create temporary directory: " . $this->archive_dir . $sanitized_relative_dir );
+			Util::debug_log( "Unable to create temporary directory: " . $this->archive_dir . $relative_file_dir );
 			$static_page->set_error_message( 'Unable to create temporary directory' );
 		} else {
-			$relative_filename = $sanitized_relative_dir . $sanitized_filename . ( $path_info['extension'] ? '.' . $path_info['extension'] : '' );
 			Util::debug_log( "New filename for static page: " . $relative_filename );
 
 			// check that file doesn't exist OR exists but is writeable

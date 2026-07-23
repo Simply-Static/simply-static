@@ -387,10 +387,13 @@ function sanitize_title( $title ) {
 }
 
 function sanitize_file_name( $filename ) {
+	$filename_raw = (string) $filename;
 	$filename = basename( str_replace( '\\', '/', (string) $filename ) );
 	$filename = preg_replace( '/[^A-Za-z0-9._-]+/u', '-', $filename );
 	$filename = preg_replace( '/\.{2,}/', '.', (string) $filename );
-	return trim( (string) $filename, '.-' );
+	$filename = trim( (string) $filename, '.-' );
+
+	return apply_filters( 'sanitize_file_name', $filename, $filename_raw );
 }
 
 function remove_accents( $text ) {
@@ -605,6 +608,10 @@ function remove_query_arg( $key, $url ) {
 
 function get_current_blog_id() {
 	return WpEnv::$current_blog_id;
+}
+
+function url_to_postid( $url ) {
+	return 0;
 }
 
 function get_blog_details( $fields = null, $get_all = true ) {

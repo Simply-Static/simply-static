@@ -693,6 +693,7 @@ class Fetch_Urls_Task extends Task {
 		}
 
 		$child_static_page = Page::query()->find_or_create_by( 'url', $child_url );
+		$path_migration    = $this->maybe_requeue_asset_for_path_migration( $child_static_page );
 
 		// During single exports, ensure discovered assets inherit the parent's
 		// post_id so they pass the post_id filter in get_pages_to_process_sql().
@@ -718,7 +719,60 @@ class Fetch_Urls_Task extends Task {
 			do_action( 'simply_static_child_page_found_on_url_before_save', $child_static_page, $static_page );
 
 			$child_static_page->save();
+		} elseif ( $path_migration ) {
+			$child_static_page->save();
 		}
+	}
+
+	/**
+	 * Requeue an existing local asset when its generated output path changed.
+	 *
+	 * Filename sanitization and path filters can change between plugin versions.
+	 * An update export may otherwise rewrite a changed page to the new asset path
+	 * while treating the existing asset record as unchanged and omitting the
+	 * corresponding file from the delta.
+	 *
+	 * @param \Simply_Static\Page $static_page Existing child asset record.
+	 *
+	 * @return bool Whether the asset was marked for refetch and transfer.
+	 */
+	protected function maybe_requeue_asset_for_path_migration( $static_page ) {
+		if ( 'update' !== $this->get_generate_type() ) {
+			return false;
+		}
+
+		if (
+			empty( $static_page->url )
+			|| empty( $static_page->file_path )
+			|| ! Util::is_local_asset_url( $static_page->url )
+		) {
+			return false;
+		}
+
+		$expected_file_path = Url_Fetcher::instance()->get_expected_file_path_for_static_page( $static_page );
+		if ( ! is_string( $expected_file_path ) || '' === $expected_file_path ) {
+			return false;
+		}
+
+		$stored_file_path   = ltrim( Util::normalize_slashes( (string) $static_page->file_path ), '/' );
+		$expected_file_path = ltrim( Util::normalize_slashes( $expected_file_path ), '/' );
+
+		if ( $stored_file_path === $expected_file_path ) {
+			return false;
+		}
+
+		$static_page->last_modified_at = Util::formatted_datetime();
+
+		Util::debug_log(
+			sprintf(
+				'Requeueing asset because its generated path changed from "%s" to "%s": %s',
+				$stored_file_path,
+				$expected_file_path,
+				$static_page->url
+			)
+		);
+
+		return true;
 	}
 
 	/**
