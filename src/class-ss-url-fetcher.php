@@ -171,10 +171,10 @@ class Url_Fetcher {
 					// Attempt 2: Do a non-streamed request and write body manually.
 					if ( ! $recovered ) {
 						$alt_url  = isset( $is_local_asset ) && $is_local_asset ? Util::get_source_url_from_local_url( $url ) : $url;
-						$alt_args          = array(
+						$alt_args = array(
 							'timeout'     => self::TIMEOUT,
 							'user-agent'  => apply_filters( 'ss_crawler_user_agent', self::DEFAULT_USER_AGENT ),
-							'sslverify'   => (bool) apply_filters( 'ss_remote_get_sslverify', true, $alt_url ),
+							'sslverify'   => (bool) apply_filters( 'ss_remote_get_sslverify', Util::should_verify_ssl( $alt_url ), $alt_url ),
 							'redirection' => 0,
 							'blocking'    => true,
 							'decompress'  => true,
@@ -547,7 +547,7 @@ class Url_Fetcher {
 		$args = array(
 			'timeout'     => self::TIMEOUT,
 			'user-agent'  => $user_agent,
-			'sslverify'   => (bool) apply_filters( 'ss_remote_get_sslverify', true, $url ),
+			'sslverify'   => (bool) apply_filters( 'ss_remote_get_sslverify', Util::should_verify_ssl( $url ), $url ),
 			'redirection' => 0, // disable redirection.
 			'blocking'    => true,
 			'decompress'  => true, // ensure WordPress decompresses gzip/deflate responses.

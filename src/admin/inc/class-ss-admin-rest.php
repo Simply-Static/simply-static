@@ -1405,13 +1405,15 @@ class Admin_Rest {
 			// Clear only this process's healthcheck, never recurring export schedules.
 			wp_clear_scheduled_hook( $identifier . '_cron' );
 
-			// Clear the lock owned by this site without disturbing another site's
-			// process in multisite.
-			$lock_key = $identifier . '_process_lock';
-			if ( is_multisite() && null !== $site_id ) {
-				delete_site_transient( $lock_key . '_site_' . $site_id );
-			} else {
-				delete_site_transient( $lock_key );
+			// Clear this site's lock and cached loopback capability without
+			// disturbing another site's process in multisite.
+			foreach ( array( '_process_lock', '_loopback_available' ) as $transient_suffix ) {
+				$transient_key = $identifier . $transient_suffix;
+				if ( is_multisite() && null !== $site_id ) {
+					$transient_key .= '_site_' . $site_id;
+				}
+
+				delete_site_transient( $transient_key );
 			}
 
 			$options = method_exists( $job, 'get_options' ) ? $job->get_options() : Options::instance();

@@ -79,6 +79,9 @@ final class WpTestEnvironment {
 	/** @var string */
 	public static $site_url = 'https://example.test';
 
+	/** @var string */
+	public static $environment_type = 'production';
+
 	/** @var array<string,mixed> */
 	public static $upload_dir = array();
 
@@ -113,6 +116,7 @@ final class WpTestEnvironment {
 		self::$multisite        = false;
 		self::$home_url         = 'https://example.test';
 		self::$site_url         = 'https://example.test';
+		self::$environment_type = 'production';
 		self::$upload_dir       = array(
 			'basedir' => sys_get_temp_dir() . '/simply-static-tests/uploads',
 			'baseurl' => 'https://example.test/wp-content/uploads',

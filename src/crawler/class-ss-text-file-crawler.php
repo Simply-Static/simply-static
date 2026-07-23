@@ -79,7 +79,7 @@ class Text_File_Crawler extends Crawler {
 			array(
 				'timeout'             => $timeout,
 				'redirection'         => 0,
-				'sslverify'           => true,
+				'sslverify'           => (bool) apply_filters( 'ss_remote_get_sslverify', \Simply_Static\Util::should_verify_ssl( $url ), $url ),
 				'limit_response_size' => $max_bytes,
 			)
 		);

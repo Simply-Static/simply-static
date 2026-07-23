@@ -73,6 +73,45 @@ final class UtilSecurityTest extends UnitTestCase {
 		);
 	}
 
+	/**
+	 * @dataProvider localOriginProvider
+	 */
+	public function test_tls_verification_is_disabled_for_exact_local_origins( string $origin ): void {
+		WpEnv::$home_url = $origin;
+		WpEnv::$site_url = $origin;
+		Options::reinstance();
+
+		self::assertFalse( Util::should_verify_ssl( $origin . '/page' ) );
+	}
+
+	/** @return array<string,array{string}> */
+	public function localOriginProvider(): array {
+		return array(
+			'herd test domain'    => array( 'https://site.test' ),
+			'localhost subdomain' => array( 'https://site.localhost' ),
+			'ipv4 loopback'       => array( 'https://127.0.0.1' ),
+			'ipv6 loopback'       => array( 'https://[::1]' ),
+		);
+	}
+
+	public function test_tls_verification_stays_enabled_for_production_and_non_origin_urls(): void {
+		WpEnv::$home_url = 'https://example.com';
+		WpEnv::$site_url = 'https://example.com';
+		Options::reinstance();
+
+		self::assertTrue( Util::should_verify_ssl( 'https://example.com/page' ) );
+		self::assertTrue( Util::should_verify_ssl( 'https://external.test/page' ) );
+	}
+
+	public function test_explicit_local_environment_is_honored(): void {
+		WpEnv::$home_url         = 'https://example.com';
+		WpEnv::$site_url         = 'https://example.com';
+		WpEnv::$environment_type = 'local';
+		Options::reinstance();
+
+		self::assertFalse( Util::should_verify_ssl( 'https://example.com/page' ) );
+	}
+
 	public function test_basic_auth_is_only_returned_for_an_exact_local_origin(): void {
 		$expected = 'Basic ' . base64_encode( 'crawler:correct horse' );
 

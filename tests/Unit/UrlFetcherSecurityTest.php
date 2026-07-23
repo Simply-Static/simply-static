@@ -27,14 +27,40 @@ final class UrlFetcherSecurityTest extends UnitTestCase {
 		Options::reinstance();
 	}
 
-	public function test_local_requests_verify_tls_and_receive_basic_auth(): void {
+	public function test_local_development_requests_skip_tls_verification_and_receive_basic_auth(): void {
 		Url_Fetcher::remote_get( 'https://example.test/page' );
 
 		self::assertCount( 1, WpEnv::$remote_requests );
 		$request = WpEnv::$remote_requests[0];
-		self::assertTrue( $request['args']['sslverify'] );
+		self::assertFalse( $request['args']['sslverify'] );
 		self::assertSame( 0, $request['args']['redirection'] );
 		self::assertSame( 'Basic ' . base64_encode( 'crawler:secret' ), $request['args']['headers']['Authorization'] );
+	}
+
+	public function test_production_requests_keep_tls_verification_enabled(): void {
+		WpEnv::$home_url = 'https://example.com';
+		WpEnv::$site_url = 'https://example.com';
+		Options::reinstance();
+
+		Url_Fetcher::remote_get( 'https://example.com/page' );
+
+		self::assertTrue( WpEnv::$remote_requests[0]['args']['sslverify'] );
+	}
+
+	public function test_ssl_filter_can_override_automatic_detection(): void {
+		add_filter( 'ss_remote_get_sslverify', '__return_true' );
+		Url_Fetcher::remote_get( 'https://example.test/page' );
+		self::assertTrue( WpEnv::$remote_requests[0]['args']['sslverify'] );
+
+		remove_filter( 'ss_remote_get_sslverify', '__return_true' );
+		WpEnv::$remote_requests = array();
+		WpEnv::$home_url        = 'https://example.com';
+		WpEnv::$site_url        = 'https://example.com';
+		Options::reinstance();
+		add_filter( 'ss_remote_get_sslverify', '__return_false' );
+
+		Url_Fetcher::remote_get( 'https://example.com/page' );
+		self::assertFalse( WpEnv::$remote_requests[0]['args']['sslverify'] );
 	}
 
 	public function test_external_and_alternate_port_requests_are_rejected_before_http(): void {

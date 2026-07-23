@@ -163,10 +163,9 @@ abstract class Integration {
 			return new \WP_Error( 'ss_disallowed_remote_url', __( 'Integration requests must target the configured WordPress origin.', 'simply-static' ) );
 		}
 
-		// Verify TLS by default. Self-signed local environments can opt out for
-		// their exact origin with the narrowly scoped filter.
+		// Verify TLS by default, except for exact-origin local environments.
 		if ( ! isset( $args['sslverify'] ) ) {
-			$args['sslverify'] = (bool) apply_filters( 'ss_remote_get_sslverify', true, $url );
+			$args['sslverify'] = (bool) apply_filters( 'ss_remote_get_sslverify', Util::should_verify_ssl( $url ), $url );
 		}
 		// Redirects can cross origins while retaining request headers in some
 		// transports. Callers can explicitly opt in when no credentials are used.

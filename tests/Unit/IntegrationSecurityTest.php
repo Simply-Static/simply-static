@@ -41,12 +41,12 @@ final class IntegrationSecurityTest extends UnitTestCase {
 		};
 	}
 
-	public function test_authenticated_requests_are_local_non_redirecting_and_tls_verified(): void {
+	public function test_authenticated_local_development_requests_are_non_redirecting(): void {
 		$this->integration->fetch( 'https://example.test/sitemap.xml' );
 
 		self::assertCount( 1, WpEnv::$remote_requests );
 		$args = WpEnv::$remote_requests[0]['args'];
-		self::assertTrue( $args['sslverify'] );
+		self::assertFalse( $args['sslverify'] );
 		self::assertSame( 0, $args['redirection'] );
 		self::assertSame( 'Basic ' . base64_encode( 'crawler:secret' ), $args['headers']['Authorization'] );
 	}
