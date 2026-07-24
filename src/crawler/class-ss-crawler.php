@@ -107,15 +107,31 @@ abstract class Crawler {
 		foreach ( $batches as $batch ) {
 			\Simply_Static\Util::debug_log( sprintf( 'Processing batch of %d URLs for %s crawler', count( $batch ), $this->name ) );
 
-   foreach ( $batch as $url ) {
+			foreach ( $batch as $url ) {
+				if ( ! is_string( $url ) ) {
+					continue;
+				}
+
+				$discovered_url = $url;
+				$url            = trim( \Simply_Static\Util::remove_fragment( $url ) );
+
+				// Fragments are browser-side navigation state, not separate
+				// resources. A fragment-only value such as "#/page/2/" has no
+				// server URL to crawl, while an absolute URL with a fragment
+				// is queued once under its fragment-free page URL.
+				if ( '' === $url ) {
+					\Simply_Static\Util::debug_log( sprintf( 'Base crawler skipping fragment-only URL: %s', $discovered_url ) );
+					continue;
+				}
+
 				// Normalize URL to handle posts with URL-encoded post_name values
 				$url = \Simply_Static\Util::normalize_url( $url );
 
-   				// Skip excluded URLs to avoid adding to DB
-   				if ( \Simply_Static\Util::is_url_excluded( $url ) ) {
-   					\Simply_Static\Util::debug_log( sprintf( 'Base crawler skipping excluded URL: %s', $url ) );
-   					continue;
-   				}
+				// Skip excluded URLs to avoid adding to DB
+				if ( \Simply_Static\Util::is_url_excluded( $url ) ) {
+					\Simply_Static\Util::debug_log( sprintf( 'Base crawler skipping excluded URL: %s', $url ) );
+					continue;
+				}
 				// Skip selected custom 404 page from regular crawl/export
 				if ( ! empty( $exclude_url ) ) {
 					$normalized = untrailingslashit( $url );

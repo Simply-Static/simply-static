@@ -2427,6 +2427,22 @@ class Util {
 	}
 
 	/**
+	 * Remove the fragment from a URL while preserving its query string.
+	 *
+	 * URL fragments are handled entirely by the browser and are never part of
+	 * the resource requested from the server.
+	 *
+	 * @param string $url URL from which to remove the fragment.
+	 *
+	 * @return string URL without its fragment.
+	 */
+	public static function remove_fragment( $url ) {
+		$fragment_position = strpos( $url, '#' );
+
+		return false === $fragment_position ? $url : substr( $url, 0, $fragment_position );
+	}
+
+	/**
 	 * Converts a textarea into an array w/ each line being an entry in the array
 	 *
 	 * @param string $textarea Textarea to convert
