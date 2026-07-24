@@ -24,6 +24,11 @@ Use an SVN-specific password rather than the account's main password. The
 workflow grants write access to the GitHub token only in the deployment job;
 the build and dependency-installation job is read-only.
 
+To verify new or rotated credentials without creating a release, open
+**Actions → Release**, select **Run workflow**, and run it from the default
+branch. A manual run only performs the non-mutating credential check; it skips
+the package and deployment jobs.
+
 If WordPress.org's optional
 [Release Confirmation](https://developer.wordpress.org/plugins/wordpress-org/release-confirmation-emails/)
 feature is enabled for the plugin, WordPress.org will still require its separate

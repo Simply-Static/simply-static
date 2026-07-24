@@ -1,14 +1,8 @@
 name: Release
 
 on:
-  # Kept as a reusable, non-deploying credential check after initial setup.
+  # Reusable, non-deploying credential check for initial setup and rotation.
   workflow_dispatch:
-
-  # Temporary trigger for validating the environment before this workflow is
-  # merged. Remove after the first successful credential check.
-  push:
-    branches:
-      - patrickposner/automate-plugin-releases
 
   release:
     # A normal GitHub release triggers "released"; prereleases do not.
@@ -24,7 +18,7 @@ concurrency:
 jobs:
   check-credentials:
     name: Check WordPress.org credentials
-    if: github.event_name != 'release'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     environment: wordpress.org
