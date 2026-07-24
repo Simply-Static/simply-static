@@ -270,6 +270,13 @@ class Fetch_Urls_Task extends Task {
 	 * @return void
 	 */
 	public function handle_200_response( $static_page, $save_file, $follow_urls ) {
+		if ( empty( $static_page->file_path ) ) {
+			Util::debug_log( 'Skipping response processing because no generated file was kept for URL: ' . $static_page->url );
+			$static_page->save();
+
+			return;
+		}
+
 		$urls = array();
 
 		if ( ( $save_file || $follow_urls ) && $this->can_extract_urls_from_static_page( $static_page ) ) {

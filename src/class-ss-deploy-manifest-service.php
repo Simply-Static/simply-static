@@ -515,7 +515,10 @@ class Deploy_Manifest_Service {
 	 * @return array
 	 */
 	protected function build_url_records() {
-		$query = Page::query()->order( 'url ASC' );
+		$query = Page::query()
+			->where( 'file_path IS NOT NULL' )
+			->where( "file_path != ''" )
+			->order( 'url ASC' );
 		$scope = $this->get_export_scope();
 		$this->apply_scope( $query, $scope );
 		$pages = $query->find();
