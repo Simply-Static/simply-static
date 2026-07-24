@@ -1,0 +1,175 @@
+name: Release
+
+on:
+  # Reusable, non-deploying credential check for initial setup and rotation.
+  workflow_dispatch:
+
+  release:
+    # A normal GitHub release triggers "released"; prereleases do not.
+    types: [released]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  check-credentials:
+    name: Check WordPress.org credentials
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: wordpress.org
+
+    steps:
+      - name: Authenticate without changing SVN
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+        run: |
+          if [[ -z "$SVN_USERNAME" || -z "$SVN_PASSWORD" ]]; then
+            echo "SVN_USERNAME and SVN_PASSWORD must both be configured." >&2
+            exit 1
+          fi
+
+          status_code="$(
+            curl --silent --show-error \
+              --output /dev/null \
+              --write-out '%{http_code}' \
+              --request MKCOL \
+              --user "$SVN_USERNAME:$SVN_PASSWORD" \
+              https://plugins.svn.wordpress.org/simply-static/trunk/
+          )"
+
+          case "$status_code" in
+            405)
+              echo "WordPress.org credentials and plugin write access are valid."
+              ;;
+            401)
+              echo "WordPress.org rejected the username or SVN password." >&2
+              exit 1
+              ;;
+            403)
+              echo "The account authenticated but cannot write to the Simply Static SVN repository." >&2
+              exit 1
+              ;;
+            *)
+              echo "Unexpected WordPress.org response: HTTP $status_code" >&2
+              exit 1
+              ;;
+          esac
+
+  build:
+    name: Verify and package
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out the released tag
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f # 2.35.5
+        with:
+          php-version: '8.2'
+          coverage: none
+          tools: composer:v2
+
+      - name: Install PHP test dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run PHP tests
+        run: composer test
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            src/admin/package-lock.json
+            assets/install-plugins/package-lock.json
+
+      - name: Validate release version
+        run: ./scripts/validate-release-version.sh "${{ github.event.release.tag_name }}"
+
+      - name: Test and build the admin application
+        working-directory: src/admin
+        run: |
+          npm ci
+          npm test -- --runInBand
+          npm run lint
+          npm run build
+
+      - name: Build the plugin installer application
+        working-directory: assets/install-plugins
+        run: |
+          npm ci
+          npm run build
+
+      - name: Verify committed React builds
+        run: git diff --exit-code -- src/admin/build assets/install-plugins/build
+
+      - name: Build release package
+        run: ./scripts/build-release.sh
+
+      - name: Upload package for the deployment job
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: simply-static-${{ github.event.release.tag_name }}
+          path: |
+            build/release/simply-static
+            build/release/simply-static.zip
+            build/release/simply-static.zip.sha256
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  deploy:
+    name: Publish
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: wordpress.org
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download verified package
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: simply-static-${{ github.event.release.tag_name }}
+          path: build/release
+
+      - name: Verify downloaded package
+        run: |
+          cd build/release
+          shasum -a 256 --check simply-static.zip.sha256
+          test -s simply-static/simply-static.php
+          test -s simply-static/src/admin/build/index.js
+          test -s simply-static/assets/install-plugins/build/index.js
+
+      - name: Deploy to WordPress.org
+        uses: 10up/action-wordpress-plugin-deploy@54bd289b8525fd23a5c365ec369185f2966529c2 # 2.3.0
+        with:
+          generate-zip: false
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: simply-static
+          BUILD_DIR: build/release/simply-static
+
+      - name: Attach package to the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          gh release upload "$RELEASE_TAG" \
+            build/release/simply-static.zip \
+            build/release/simply-static.zip.sha256 \
+            --clobber
