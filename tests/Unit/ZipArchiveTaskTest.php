@@ -50,10 +50,10 @@ final class ZipArchiveTaskTest extends UnitTestCase {
 		Options::reinstance();
 	}
 
-	public function test_batched_zip_uses_a_stable_file_snapshot_and_preserves_empty_files(): void {
+	public function test_batched_zip_uses_a_stable_file_snapshot_and_preserves_empty_marker_files(): void {
 		file_put_contents( $this->archive_dir . 'a.txt', 'alpha' );
 		file_put_contents( $this->archive_dir . 'nested/b.txt', 'beta' );
-		file_put_contents( $this->archive_dir . 'empty.txt', '' );
+		file_put_contents( $this->archive_dir . '.nojekyll', '' );
 		add_filter( 'ss_zip_batch_size', static function () { return 1; } );
 
 		$task = new Create_Zip_Archive_Task();
@@ -72,9 +72,9 @@ final class ZipArchiveTaskTest extends UnitTestCase {
 		self::assertTrue( $zip->open( untrailingslashit( $this->archive_dir ) . '.zip' ) );
 		self::assertNotFalse( $zip->locateName( 'a.txt' ) );
 		self::assertNotFalse( $zip->locateName( 'nested/b.txt' ) );
-		$empty_index = $zip->locateName( 'empty.txt' );
-		self::assertNotFalse( $empty_index );
-		self::assertSame( 0, $zip->statIndex( $empty_index )['size'] );
+		$marker_index = $zip->locateName( '.nojekyll' );
+		self::assertNotFalse( $marker_index );
+		self::assertSame( 0, $zip->statIndex( $marker_index )['size'] );
 		self::assertFalse( $zip->locateName( 'late.txt' ) );
 		$zip->close();
 	}

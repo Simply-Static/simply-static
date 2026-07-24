@@ -272,6 +272,7 @@ class Url_Fetcher {
 				if ( $renamed ) {
 					Util::debug_log( "Saved temp file to: " . $file_path );
 					$static_page->get_handler()->after_file_fetch( $this->archive_dir );
+					$this->discard_empty_generated_file( $static_page, $file_path );
 				}
 			} else {
 				Util::debug_log( "We weren't able to establish a filename; deleting temp file" );
@@ -282,6 +283,44 @@ class Url_Fetcher {
 
 			return true;
 		}
+	}
+
+	/**
+	 * Remove a generated file when it is still empty after its page handler ran.
+	 *
+	 * Handlers run first because some integrations intentionally populate a
+	 * fetched placeholder in after_file_fetch(). Files that remain at zero
+	 * bytes have no deployable content and should not enter transfer tasks or
+	 * deploy manifests.
+	 *
+	 * @param Page   $static_page Generated page record.
+	 * @param string $file_path   Absolute path to the generated file.
+	 *
+	 * @return bool Whether an empty file was discarded.
+	 */
+	protected function discard_empty_generated_file( Page $static_page, $file_path ) {
+		if ( ! is_file( $file_path ) ) {
+			return false;
+		}
+
+		clearstatcache( true, $file_path );
+		if ( 0 !== filesize( $file_path ) ) {
+			return false;
+		}
+
+		if ( ! @unlink( $file_path ) && file_exists( $file_path ) ) {
+			$static_page->set_error_message( 'Unable to remove empty generated file' );
+			Util::debug_log( 'Unable to remove empty generated file: ' . $file_path );
+
+			return false;
+		}
+
+		Util::debug_log( 'Discarded empty generated file for URL: ' . $static_page->url );
+		$static_page->file_path        = null;
+		$static_page->content_hash     = null;
+		$static_page->last_modified_at = Util::formatted_datetime();
+
+		return true;
 	}
 
 	/**

@@ -50,6 +50,28 @@ final class DeployManifestServiceTest extends UnitTestCase {
 		self::assertSame( 'page', $record['type'] );
 	}
 
+	public function test_manifest_query_excludes_pages_without_a_static_path(): void {
+		global $wpdb;
+
+		$wpdb                = new ManifestWpdb();
+		$wpdb->selectResults = array(
+			array(
+				'id'               => 10,
+				'url'              => 'https://example.test/',
+				'file_path'        => 'index.html',
+				'content_type'     => 'text/html',
+				'http_status_code' => 200,
+			),
+		);
+
+		$records = $this->service()->buildRecords();
+
+		self::assertCount( 1, $records );
+		self::assertSame( 'index.html', $records[0]['static_path'] );
+		self::assertStringContainsString( 'file_path IS NOT NULL', $wpdb->selectQueries[0] );
+		self::assertStringContainsString( "file_path != ''", $wpdb->selectQueries[0] );
+	}
+
 	public function test_manifest_and_urls_are_persisted_in_one_transaction(): void {
 		global $wpdb;
 
@@ -159,9 +181,24 @@ final class DeployManifestServiceTest extends UnitTestCase {
 				return $this->format_page_record( $page, $parent_url );
 			}
 
+			/** @return array<int,array<string,mixed>> */
+			public function buildRecords(): array {
+				return $this->build_url_records();
+			}
+
 			/** @param array<string,mixed> $manifest */
 			public function persist( array $manifest ): void {
 				$this->persist_manifest( $manifest );
+			}
+
+			/** @return array<string,mixed> */
+			protected function get_export_scope() {
+				return array();
+			}
+
+			/** @return int|null */
+			protected function get_file_size( $file_path ) {
+				return null;
 			}
 		};
 	}
@@ -181,11 +218,23 @@ final class ManifestWpdb {
 	/** @var array<int,array{sql:string,args:array<int,mixed>}> */
 	public $prepareCalls = array();
 
+	/** @var array<int,array<string,mixed>> */
+	public $selectResults = array();
+
+	/** @var string[] */
+	public $selectQueries = array();
+
 	/** @var string|null */
 	public $failQueryContaining = null;
 
 	public function get_blog_prefix(): string {
 		return 'wp_';
+	}
+
+	/** @return array<int,array<string,mixed>> */
+	public function get_results( string $sql, $output = null ): array {
+		$this->selectQueries[] = $sql;
+		return $this->selectResults;
 	}
 
 	/** @return int|false */
