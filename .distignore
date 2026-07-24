@@ -1,0 +1,36 @@
+# Repository and CI metadata.
+/.git
+/.github
+/.context
+/.distignore
+/.gitignore
+
+# Development-only PHP files.
+/build
+/composer.json
+/composer.lock
+/phpunit.xml.dist
+/security.md
+/tests
+/vendor
+
+# Release tooling.
+/RELEASING.md
+/scripts
+
+# JavaScript dependencies and source files. The compiled build directories stay.
+node_modules/
+/assets/install-plugins/package.json
+/assets/install-plugins/package-lock.json
+/assets/install-plugins/src
+/src/admin/coverage
+/src/admin/package.json
+/src/admin/package-lock.json
+/src/admin/src
+/src/admin/webpack.config.js
+
+# Generated development files.
+.DS_Store
+*.map
+*.test.js
+*.test.jsx
