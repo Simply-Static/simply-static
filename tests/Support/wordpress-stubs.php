@@ -13,6 +13,7 @@ defined( 'MINUTE_IN_SECONDS' ) || define( 'MINUTE_IN_SECONDS', 60 );
 defined( 'HOUR_IN_SECONDS' ) || define( 'HOUR_IN_SECONDS', 3600 );
 defined( 'DAY_IN_SECONDS' ) || define( 'DAY_IN_SECONDS', 86400 );
 defined( 'ARRAY_A' ) || define( 'ARRAY_A', 'ARRAY_A' );
+defined( 'ARRAY_N' ) || define( 'ARRAY_N', 'ARRAY_N' );
 defined( 'SIMPLY_STATIC_PATH' ) || define( 'SIMPLY_STATIC_PATH', dirname( __DIR__, 2 ) . '/' );
 defined( 'SIMPLY_STATIC_URL' ) || define( 'SIMPLY_STATIC_URL', 'https://example.test/wp-content/plugins/simply-static' );
 defined( 'SIMPLY_STATIC_VERSION' ) || define( 'SIMPLY_STATIC_VERSION', 'test' );

@@ -4,7 +4,7 @@ Tags: jamstack, performance, security, static site generator
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag:  3.8.4
+Stable tag:  3.8.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -274,6 +274,15 @@ Settings - Configure your static site export options
 Diagnostics - Check your WordPress environment for compatibility
 
 == Changelog ==
+
+= 3.8.5 =
+
+* Requeued assets during update exports when their generated paths change
+* Improved support for self-signed certificates in local development environments
+* Skipped empty WordPress core asset placeholders during export discovery
+* Prevented empty generated files from entering transfers and deploy manifests
+* Ignored URL fragments when queueing crawler results
+* Fixed MySQL 8 role-grant warnings in Diagnostics
 
 = 3.8.4 =
 
