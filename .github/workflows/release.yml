@@ -172,4 +172,5 @@ jobs:
           gh release upload "$RELEASE_TAG" \
             build/release/simply-static.zip \
             build/release/simply-static.zip.sha256 \
+            --repo "$GITHUB_REPOSITORY" \
             --clobber
