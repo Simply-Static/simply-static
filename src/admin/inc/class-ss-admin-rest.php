@@ -500,7 +500,12 @@ class Admin_Rest {
 
         $sites = apply_filters( 'ss_rest_multisite_get_sites', $sites );
 
-        return wp_send_json_success( $sites );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $sites,
+			)
+		);
     }
 
     /** Multisite: trigger cron on a specific site */
@@ -1568,11 +1573,13 @@ class Admin_Rest {
 			$activity_log = Plugin::instance()->get_activity_log( $blog_id );
 			$running      = Plugin::instance()->get_archive_creation_job()->is_running();
 
-			return json_encode( [
-				'status'  => 200,
-				'data'    => $activity_log,
-				'running' => $running,
-			] );
+			return rest_ensure_response(
+				array(
+					'status'  => 200,
+					'data'    => $activity_log,
+					'running' => $running,
+				)
+			);
 		} );
     }
 
@@ -1587,7 +1594,7 @@ class Admin_Rest {
 		return $this->run_in_blog_context( $blog_id, function () use ( $per_page, $page, $blog_id, $search ) {
 			$export_log = Plugin::instance()->get_export_log( $per_page, $page, $blog_id, $search );
 
-			return json_encode( [ 'status' => 200, 'data' => $export_log ] );
+			return rest_ensure_response( array( 'status' => 200, 'data' => $export_log ) );
 		} );
     }
 

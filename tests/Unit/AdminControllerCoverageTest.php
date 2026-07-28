@@ -433,28 +433,28 @@ final class AdminControllerCoverageTest extends UnitTestCase {
 		};
 		$this->pluginInstanceProperty()->setValue( null, $plugin );
 
-		$activity = json_decode(
-			(string) $this->rest->get_activity_log( new \WP_REST_Request( array( 'blog_id' => '-9' ) ) ),
-			true
+		$activity_response = $this->rest->get_activity_log(
+			new \WP_REST_Request( array( 'blog_id' => '-9' ) )
 		);
+		self::assertInstanceOf( \WP_REST_Response::class, $activity_response );
+		$activity = $activity_response->get_data();
 		self::assertSame( array( 9 ), $plugin->activity_blog_ids );
 		self::assertSame( 200, $activity['status'] ?? null );
 		self::assertTrue( $activity['running'] ?? false );
 		self::assertSame( 'Ready', $activity['data']['fetch']['message'] ?? null );
 
-		$export = json_decode(
-			(string) $this->rest->get_export_log(
-				new \WP_REST_Request(
-					array(
-						'blog_id'  => '-3',
-						'per_page' => 9999,
-						'page'     => 0,
-						'search'   => "<b> needle </b>\nvalue",
-					)
+		$export_response = $this->rest->get_export_log(
+			new \WP_REST_Request(
+				array(
+					'blog_id'  => '-3',
+					'per_page' => 9999,
+					'page'     => 0,
+					'search'   => "<b> needle </b>\nvalue",
 				)
-			),
-			true
+			)
 		);
+		self::assertInstanceOf( \WP_REST_Response::class, $export_response );
+		$export = $export_response->get_data();
 		self::assertSame( array( 200, 1, 3, 'needle value' ), $plugin->export_calls[0] );
 		self::assertSame( 200, $export['status'] ?? null );
 		self::assertSame( array(), $export['data']['static_pages'] ?? null );

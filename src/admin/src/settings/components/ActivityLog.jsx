@@ -11,7 +11,7 @@ import Terminal, { ColorMode, TerminalOutput } from 'react-terminal-ui';
 import apiFetch from '@wordpress/api-fetch';
 import useInterval from '../../hooks/useInterval';
 import {
-	parseActivityLogMessage,
+	parseActivityLogEntry,
 	parseLogResponse,
 	toInertLogText,
 } from '../utils/log';
@@ -110,9 +110,7 @@ function ActivityLog() {
 						const safeEntry =
 							entry && typeof entry === 'object' ? entry : {};
 						const date = toInertLogText( safeEntry.datetime );
-						const content = parseActivityLogMessage(
-							safeEntry.message
-						);
+						const content = parseActivityLogEntry( safeEntry );
 						const error =
 							message.includes( 'pause' ) ||
 							message.includes( 'cancel' );

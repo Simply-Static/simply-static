@@ -89,6 +89,23 @@ final class ZipArchiveTaskTest extends UnitTestCase {
 		self::assertFileExists( untrailingslashit( $this->archive_dir ) . '.zip' );
 	}
 
+	public function test_perform_publishes_structured_download_link(): void {
+		file_put_contents( $this->archive_dir . 'index.html', '<h1>Archived</h1>' );
+		$zip_file = WP_CONTENT_DIR . '/uploads/simply-static/activity-link-test.zip';
+		wp_mkdir_p( dirname( $zip_file ) );
+		add_filter( 'ss_zip_filename', static function () use ( $zip_file ) {
+			return $zip_file;
+		} );
+
+		self::assertTrue( ( new Create_Zip_Archive_Task() )->perform() );
+
+		$status = WpEnv::$options['simply-static']['archive_status_messages']['create_zip_archive'];
+		self::assertStringStartsWith( 'ZIP archive created: ', $status['message'] );
+		self::assertSame( 'Click here to download', $status['link']['label'] );
+		self::assertStringStartsWith( 'https://example.test/wp-content/', $status['link']['url'] );
+		self::assertStringEndsWith( '/activity-link-test.zip', $status['link']['url'] );
+	}
+
 	public function test_filtered_files_outside_archive_and_symlink_escapes_are_excluded(): void {
 		file_put_contents( $this->archive_dir . 'safe.txt', 'safe' );
 		$outside = WpEnv::$upload_dir['basedir'] . '/outside-secret.txt';
