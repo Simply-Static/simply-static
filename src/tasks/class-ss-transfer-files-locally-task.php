@@ -77,8 +77,14 @@ class Transfer_Files_Locally_Task extends Task {
 
 			if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
 				$destination_url = trailingslashit( $this->options->get_destination_url() );
-				$message         = __( 'Destination URL:', 'simply-static' ) . ' <a href="' . esc_url( $destination_url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $destination_url ) . '</a>';
-				$this->save_status_message( $message, 'destination_url' );
+				$this->save_status_message(
+					__( 'Destination URL:', 'simply-static' ),
+					'destination_url',
+					array(
+						'url'   => $destination_url,
+						'label' => $destination_url,
+					)
+				);
 			}
 
 			// If this is a 404-only export, ensure the activity/export log reflects a single transferred file.

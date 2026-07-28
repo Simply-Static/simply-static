@@ -2781,10 +2781,11 @@ class Util {
 	 * @param string $task_name Name of the task
 	 * @param string $message Message to display about the status of the job
 	 * @param boolean $unique If unique, the task_name/key will get a prefix if the same exists.
+	 * @param array|null $link Optional link data with URL and label.
 	 *
 	 * @return array
 	 */
-	public static function add_archive_status_message( $messages, $task_name, $message, $unique = false ) {
+	public static function add_archive_status_message( $messages, $task_name, $message, $unique = false, $link = null ) {
 		if ( ! is_array( $messages ) ) {
 			$messages = array();
 		}
@@ -2800,6 +2801,15 @@ class Util {
 			);
 		} else { // otherwise just update the message
 			$messages[ $task_name ]['message'] = $message;
+		}
+
+		if ( is_array( $link ) && ! empty( $link['url'] ) ) {
+			$messages[ $task_name ]['link'] = array(
+				'url'   => $link['url'],
+				'label' => isset( $link['label'] ) ? $link['label'] : $link['url'],
+			);
+		} else {
+			unset( $messages[ $task_name ]['link'] );
 		}
 
 		return $messages;

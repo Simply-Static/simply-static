@@ -1,5 +1,6 @@
 import {
 	getSafeLogUrl,
+	parseActivityLogEntry,
 	parseActivityLogMessage,
 	parseLogResponse,
 	toInertLogText,
@@ -81,6 +82,43 @@ describe( 'log utilities', () => {
 			expect( parsed.link ).toBeNull();
 			expect( parsed.before ).not.toContain( '<' );
 			expect( parsed.before ).not.toContain( '>' );
+		} );
+	} );
+
+	describe( 'parseActivityLogEntry', () => {
+		it( 'prefers validated structured link data', () => {
+			expect(
+				parseActivityLogEntry( {
+					message: 'ZIP archive created:',
+					link: {
+						url: '/wp-content/uploads/simply-static/archive.zip',
+						label: 'Click here to download',
+					},
+				} )
+			).toEqual( {
+				before: 'ZIP archive created:',
+				after: '',
+				link: {
+					href: '/wp-content/uploads/simply-static/archive.zip',
+					label: 'Click here to download',
+				},
+			} );
+		} );
+
+		it( 'falls back to a legacy link when structured link data is unsafe', () => {
+			expect(
+				parseActivityLogEntry( {
+					message:
+						'Destination URL: <a href="https://static.example.com/">Static site</a>',
+					link: {
+						url: 'javascript:alert(1)',
+						label: '<img src=x onerror=alert(1)>',
+					},
+				} ).link
+			).toEqual( {
+				href: 'https://static.example.com/',
+				label: 'Static site',
+			} );
 		} );
 	} );
 

@@ -193,6 +193,22 @@ final class PluginTaskLifecycleTest extends UnitTestCase {
 					'datetime' => "2026-07-12\n12:00:00",
 				),
 				'partial' => array(),
+				'linked'  => array(
+					'message'  => 'Destination URL:',
+					'datetime' => '2026-07-12 12:00:00',
+					'link'     => array(
+						'url'   => 'https://static.example.com/',
+						'label' => "Static\nsite",
+					),
+				),
+				'unsafe_link' => array(
+					'message'  => 'Unsafe',
+					'datetime' => '2026-07-12 12:00:00',
+					'link'     => array(
+						'url'   => 'javascript:alert(1)',
+						'label' => 'Unsafe link',
+					),
+				),
 			)
 		);
 
@@ -202,6 +218,14 @@ final class PluginTaskLifecycleTest extends UnitTestCase {
 		self::assertSame( '<strong>Saved</strong>', $log['good']['message'] );
 		self::assertSame( '2026-07-12 12:00:00', $log['good']['datetime'] );
 		self::assertSame( array( 'message' => '', 'datetime' => '' ), $log['partial'] );
+		self::assertSame(
+			array(
+				'url'   => 'https://static.example.com/',
+				'label' => 'Static site',
+			),
+			$log['linked']['link']
+		);
+		self::assertArrayNotHasKey( 'link', $log['unsafe_link'] );
 		self::assertContains( 'ss_before_render_activity_log', WpEnv::$action_log );
 		self::assertContains( 'ss_after_render_activity_log', WpEnv::$action_log );
 	}

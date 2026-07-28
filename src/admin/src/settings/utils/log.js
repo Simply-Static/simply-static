@@ -111,6 +111,38 @@ export function parseActivityLogMessage( value ) {
 }
 
 /**
+ * Convert a complete activity-log entry to safe text and optional link data.
+ *
+ * New entries carry structured link data so their rendering does not depend
+ * on parsing HTML. The message parser remains as a fallback for entries saved
+ * by older plugin versions and third-party deployment methods.
+ *
+ * @param {*} entry Activity-log entry.
+ * @return {{before: string, after: string, link: {href: string, label: string}|null}} Parsed entry.
+ */
+export function parseActivityLogEntry( entry ) {
+	const safeEntry = entry && typeof entry === 'object' ? entry : {};
+	const content = parseActivityLogMessage( safeEntry.message );
+
+	if ( ! safeEntry.link || typeof safeEntry.link !== 'object' ) {
+		return content;
+	}
+
+	const safeUrl = getSafeLogUrl( safeEntry.link.url );
+	if ( ! safeUrl ) {
+		return content;
+	}
+
+	return {
+		...content,
+		link: {
+			href: safeUrl.href,
+			label: toInertLogText( safeEntry.link.label ) || safeUrl.label,
+		},
+	};
+}
+
+/**
  * Parse the tightly allowlisted attributes accepted on a legacy log anchor.
  *
  * @param {string} source Raw attribute source, including leading whitespace.

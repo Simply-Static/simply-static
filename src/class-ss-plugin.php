@@ -508,6 +508,22 @@ class Plugin {
 			}
 			$log[ $key ]['message']  = wp_kses_post( isset( $entry['message'] ) ? $entry['message'] : '' );
 			$log[ $key ]['datetime'] = sanitize_text_field( isset( $entry['datetime'] ) ? $entry['datetime'] : '' );
+
+			if ( isset( $entry['link'] ) && is_array( $entry['link'] ) ) {
+				$link_url   = esc_url_raw( isset( $entry['link']['url'] ) ? $entry['link']['url'] : '' );
+				$link_label = sanitize_text_field( isset( $entry['link']['label'] ) ? $entry['link']['label'] : '' );
+
+				if ( $link_url && preg_match( '#^(?:https?://|/(?!/))#i', $link_url ) ) {
+					$log[ $key ]['link'] = array(
+						'url'   => $link_url,
+						'label' => $link_label ?: $link_url,
+					);
+				} else {
+					unset( $log[ $key ]['link'] );
+				}
+			} elseif ( array_key_exists( 'link', $entry ) ) {
+				unset( $log[ $key ]['link'] );
+			}
 		}
 
 		do_action( 'ss_after_render_activity_log', $blog_id, $this->get_archive_creation_job() );

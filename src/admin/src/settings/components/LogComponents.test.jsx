@@ -212,6 +212,34 @@ describe( 'ActivityLog', () => {
 		expect( container.querySelector( '[onclick]' ) ).toBeNull();
 	} );
 
+	it( 'renders a structured destination link without server HTML', async () => {
+		apiFetch.mockResolvedValue(
+			{
+				status: 200,
+				data: {
+					destination_url: {
+						datetime: '2026-07-12 10:00:00',
+						message: 'Destination URL:',
+						link: {
+							url: 'https://static.example.com/',
+							label: 'https://static.example.com/',
+						},
+					},
+				},
+			}
+		);
+
+		renderWithContext( <ActivityLog />, activityContext );
+		const link = await screen.findByRole( 'link', {
+			name: 'https://static.example.com/',
+		} );
+
+		expect( link.getAttribute( 'href' ) ).toBe(
+			'https://static.example.com/'
+		);
+		expect( screen.getByText( /Destination URL:/ ) ).not.toBeNull();
+	} );
+
 	it( 'keeps an unsafe completion anchor inert', async () => {
 		apiFetch.mockResolvedValue(
 			JSON.stringify( {

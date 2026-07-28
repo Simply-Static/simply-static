@@ -34,16 +34,18 @@ abstract class Task {
 	 * provided, the state_name will be used. Using the same key more than once
 	 * will overwrite previous messages.
 	 *
-	 * @param  string $message Message to display about the status of the job.
-	 * @param  string $key     Unique key for the message.
+	 * @param string     $message Message to display about the status of the job.
+	 * @param string     $key     Unique key for the message.
+	 * @param array|null $link    Optional link data with URL and label.
+	 *
 	 * @return void
 	 */
-	protected function save_status_message( $message, $key = null ) {
+	protected function save_status_message( $message, $key = null, $link = null ) {
 		$task_name = $key ?: static::$task_name;
 		$messages = $this->options->get( 'archive_status_messages' );
 		Util::debug_log( 'Status message: [' . $task_name . '] ' . $message );
 
-		$messages = Util::add_archive_status_message( $messages, $task_name, $message );
+		$messages = Util::add_archive_status_message( $messages, $task_name, $message, false, $link );
 
 		$this->options
 			->set( 'archive_status_messages', $messages )
