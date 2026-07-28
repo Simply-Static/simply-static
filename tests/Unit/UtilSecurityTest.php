@@ -178,6 +178,10 @@ final class UtilSecurityTest extends UnitTestCase {
 			Util::abs_path_to_url( WP_CONTENT_DIR . '/simply-static/export.zip' )
 		);
 		self::assertSame(
+			WpEnv::$upload_dir['baseurl'] . '/simply-static/temp-files/export.zip',
+			Util::abs_path_to_url( WpEnv::$upload_dir['basedir'] . '/simply-static/temp-files/export.zip' )
+		);
+		self::assertSame(
 			'https://example.test/wp-content-backup/export.zip',
 			Util::abs_path_to_url( WP_CONTENT_DIR . '-backup/export.zip' )
 		);

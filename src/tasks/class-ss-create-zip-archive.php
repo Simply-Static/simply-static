@@ -191,9 +191,7 @@ class Create_Zip_Archive_Task extends Task {
 
 		do_action( 'ss_zip_file_created', $zip_archive );
 
-		$download_url = Util::abs_path_to_url( $zip_archive->zipname );
-
-		return $download_url;
+		return $this->get_zip_download_url( $zip_archive->zipname );
 	}
 
 	/**
@@ -215,7 +213,35 @@ class Create_Zip_Archive_Task extends Task {
 
 		do_action( 'ss_zip_file_created', (object) array( 'zipname' => $zip_filename ) );
 
-		return Util::abs_path_to_url( $zip_filename );
+		return $this->get_zip_download_url( $zip_filename );
+	}
+
+	/**
+	 * Validate a completed ZIP and resolve its public download URL.
+	 *
+	 * @param string $zip_filename Full path to the zip file.
+	 *
+	 * @return string|WP_Error Download URL on success, WP_Error otherwise.
+	 */
+	private function get_zip_download_url( $zip_filename ) {
+		clearstatcache( true, $zip_filename );
+
+		if ( ! is_file( $zip_filename ) || ! is_readable( $zip_filename ) || filesize( $zip_filename ) < 22 ) {
+			return new \WP_Error(
+				'zip_file_missing',
+				__( 'The ZIP archive could not be found after it was created.', 'simply-static' )
+			);
+		}
+
+		$download_url = Util::abs_path_to_url( $zip_filename );
+		if ( empty( $download_url ) ) {
+			return new \WP_Error(
+				'zip_url_unavailable',
+				__( 'The ZIP archive was created, but its temporary files directory is not publicly accessible. Choose a directory inside the WordPress uploads directory and try again.', 'simply-static' )
+			);
+		}
+
+		return $download_url;
 	}
 
 	/**
@@ -489,7 +515,6 @@ class Create_Zip_Archive_Task extends Task {
 
 		do_action( 'ss_zip_file_created', (object) array( 'zipname' => $zip_filename ) );
 
-		$download_url = Util::abs_path_to_url( $zip_filename );
-		return $download_url;
+		return $this->get_zip_download_url( $zip_filename );
 	}
 }
