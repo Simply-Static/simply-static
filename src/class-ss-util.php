@@ -2825,6 +2825,22 @@ class Util {
 	public static function abs_path_to_url( $path = '' ) {
 		$normalized_path = wp_normalize_path( $path );
 
+		// Uploads may live outside WP_CONTENT_DIR (or behind a symlink), so use
+		// WordPress's authoritative filesystem-to-URL mapping before checking the
+		// standard WordPress roots.
+		if ( function_exists( 'wp_upload_dir' ) ) {
+			$upload_dir = wp_upload_dir();
+			if ( is_array( $upload_dir ) && ! empty( $upload_dir['basedir'] ) && ! empty( $upload_dir['baseurl'] ) ) {
+				$normalized_upload_dir = wp_normalize_path( untrailingslashit( $upload_dir['basedir'] ) );
+
+				if ( $normalized_path === $normalized_upload_dir || 0 === strpos( $normalized_path, $normalized_upload_dir . '/' ) ) {
+					$url = untrailingslashit( $upload_dir['baseurl'] ) . substr( $normalized_path, strlen( $normalized_upload_dir ) );
+
+					return esc_url_raw( $url );
+				}
+			}
+		}
+
 		// Check if the path is within WP_CONTENT_DIR
 		if ( defined( 'WP_CONTENT_DIR' ) && defined( 'WP_CONTENT_URL' ) ) {
 			$normalized_content_dir = wp_normalize_path( untrailingslashit( WP_CONTENT_DIR ) );

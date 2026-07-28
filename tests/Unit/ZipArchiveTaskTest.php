@@ -106,6 +106,37 @@ final class ZipArchiveTaskTest extends UnitTestCase {
 		self::assertStringEndsWith( '/activity-link-test.zip', $status['link']['url'] );
 	}
 
+	public function test_perform_maps_an_external_uploads_directory_to_its_public_url(): void {
+		file_put_contents( $this->archive_dir . 'index.html', '<h1>Archived</h1>' );
+
+		self::assertTrue( ( new Create_Zip_Archive_Task() )->perform() );
+
+		$zip_file = untrailingslashit( $this->archive_dir ) . '.zip';
+		$status   = WpEnv::$options['simply-static']['archive_status_messages']['create_zip_archive'];
+		$relative = substr( wp_normalize_path( $zip_file ), strlen( wp_normalize_path( WpEnv::$upload_dir['basedir'] ) ) );
+
+		self::assertFileExists( $zip_file );
+		self::assertGreaterThanOrEqual( 22, filesize( $zip_file ) );
+		self::assertSame( WpEnv::$upload_dir['baseurl'] . $relative, $status['link']['url'] );
+	}
+
+	public function test_perform_does_not_report_success_when_the_zip_has_no_public_url(): void {
+		$private_temp_dir = sys_get_temp_dir() . '/simply-static-private-zip-' . uniqid( '', true );
+		$private_archive  = trailingslashit( $private_temp_dir ) . 'site/';
+		wp_mkdir_p( $private_archive );
+		file_put_contents( $private_archive . 'index.html', '<h1>Archived</h1>' );
+
+		WpEnv::$options['simply-static']['temp_files_dir'] = $private_temp_dir;
+		Options::reinstance();
+
+		$result = ( new Create_Zip_Archive_Task() )->perform();
+
+		self::assertInstanceOf( \WP_Error::class, $result );
+		self::assertSame( 'zip_url_unavailable', $result->get_error_code() );
+		self::assertFileExists( untrailingslashit( $private_archive ) . '.zip' );
+		self::assertArrayNotHasKey( 'create_zip_archive', WpEnv::$options['simply-static']['archive_status_messages'] );
+	}
+
 	public function test_filtered_files_outside_archive_and_symlink_escapes_are_excluded(): void {
 		file_put_contents( $this->archive_dir . 'safe.txt', 'safe' );
 		$outside = WpEnv::$upload_dir['basedir'] . '/outside-secret.txt';
