@@ -111,6 +111,13 @@ abstract class Background_Process extends Async_Request {
 	protected $inline_dispatch_pending = false;
 
 	/**
+	 * Whether response finalization was attempted before inline work began.
+	 *
+	 * @var bool
+	 */
+	protected $inline_response_finish_attempted = false;
+
+	/**
 	 * Value written to the current process lock by this PHP process.
 	 *
 	 * @var string|null
@@ -449,6 +456,11 @@ abstract class Background_Process extends Async_Request {
 					return;
 				}
 
+				// PHP shutdown callbacks still run before some web servers finish the
+				// client response. Close it explicitly so a long inline export cannot
+				// turn an otherwise valid REST response into a gateway/JSON error.
+				$process->finish_http_response_for_inline_processing();
+
 				// Access the protected handle() method via Closure binding.
 				$handler = \Closure::bind( function () {
 					$this->handle();
@@ -469,6 +481,38 @@ abstract class Background_Process extends Async_Request {
 		} );
 
 		return true;
+	}
+
+	/**
+	 * Close the client connection before running a long inline worker.
+	 *
+	 * The method is intentionally isolated so hosts without a supported server
+	 * API keep the existing behavior and test processes can override it without
+	 * attempting to finish their own output stream.
+	 *
+	 * @return void
+	 */
+	protected function finish_http_response_for_inline_processing() {
+		if ( $this->inline_response_finish_attempted ) {
+			return;
+		}
+
+		$this->inline_response_finish_attempted = true;
+
+		// Keep processing after the web server closes the client connection.
+		ignore_user_abort( true );
+
+		// Release a PHP session lock before the worker starts making loopback or
+		// polling requests for the same logged-in browser session.
+		if ( function_exists( 'session_status' ) && PHP_SESSION_ACTIVE === session_status() ) {
+			session_write_close();
+		}
+
+		if ( function_exists( 'fastcgi_finish_request' ) ) {
+			fastcgi_finish_request();
+		} elseif ( function_exists( 'litespeed_finish_request' ) ) {
+			litespeed_finish_request();
+		}
 	}
 
 	/**

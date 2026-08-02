@@ -100,6 +100,10 @@ final class PageModelHelpersTest extends UnitTestCase {
 
 		self::assertSame( 'Timed out; Invalid response', $page->error_message );
 		self::assertSame( 'Skipped query string; Saved redirect', $page->status_message );
+
+		$page->clear_error_message();
+
+		self::assertNull( $page->error_message );
 	}
 
 	/**

@@ -233,6 +233,9 @@ final class BackgroundInlineContinuationProcess extends BackgroundStateProcess {
 	/** @var int */
 	public $handle_calls = 0;
 
+	/** @var int */
+	public $finish_response_calls = 0;
+
 	public function is_processing() {
 		return false;
 	}
@@ -250,6 +253,14 @@ final class BackgroundInlineContinuationProcess extends BackgroundStateProcess {
 	protected function handle() {
 		++$this->handle_calls;
 		parent::dispatch_inline();
+	}
+
+	protected function finish_http_response_for_inline_processing() {
+		$was_attempted = $this->inline_response_finish_attempted;
+		parent::finish_http_response_for_inline_processing();
+		if ( ! $was_attempted && $this->inline_response_finish_attempted ) {
+			++$this->finish_response_calls;
+		}
 	}
 
 	public function run_shutdown_handler( int $index ): void {
@@ -789,7 +800,14 @@ final class BackgroundProcessStateTest extends UnitTestCase {
 		$process->run_shutdown_handler( 0 );
 
 		self::assertSame( 1, $process->handle_calls );
+		self::assertSame( 1, $process->finish_response_calls );
 		self::assertCount( 2, $process->shutdown_handlers );
+
+		$process->run_shutdown_handler( 1 );
+
+		self::assertSame( 2, $process->handle_calls );
+		self::assertSame( 1, $process->finish_response_calls );
+		self::assertCount( 3, $process->shutdown_handlers );
 	}
 
 	public function test_inline_fallback_does_not_continue_a_paused_queue(): void {
@@ -800,6 +818,7 @@ final class BackgroundProcessStateTest extends UnitTestCase {
 		$process->run_shutdown_handler( 0 );
 
 		self::assertSame( 0, $process->handle_calls );
+		self::assertSame( 0, $process->finish_response_calls );
 		self::assertCount( 1, $process->shutdown_handlers );
 	}
 
