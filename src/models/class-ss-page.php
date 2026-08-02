@@ -167,6 +167,17 @@ class Page extends Model {
 		}
 	}
 
+	/**
+	 * Clear errors left by an earlier processing attempt.
+	 *
+	 * Page records are retained for single and incremental exports. A later
+	 * successful fetch should therefore replace, rather than continue to show,
+	 * an error from an older attempt.
+	 */
+	public function clear_error_message() {
+		$this->error_message = null;
+	}
+
 	protected function has_error_message( $message ) {
 		if ( ! $this->error_message ) {
 			return false;

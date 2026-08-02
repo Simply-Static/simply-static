@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Simply_Static\Tests\Unit;
 
 use Simply_Static\Options;
+use Simply_Static\Page;
 use Simply_Static\Tests\Support\UnitTestCase;
 use Simply_Static\Tests\Support\WpTestEnvironment as WpEnv;
 use Simply_Static\Url_Fetcher;
@@ -17,6 +18,10 @@ final class UrlFetcherSecurityTest extends UnitTestCase {
 		$this->requireSource( 'src/class-ss-options.php' );
 		$this->requireSource( 'src/class-ss-phpuri.php' );
 		$this->requireSource( 'src/class-ss-util.php' );
+		$this->requireSource( 'src/class-ss-query.php' );
+		$this->requireSource( 'src/models/class-ss-model.php' );
+		$this->requireSource( 'src/models/class-ss-page.php' );
+		$this->requireSource( 'src/handlers/class-ss-page-handler.php' );
 		$this->requireSource( 'src/class-ss-url-fetcher.php' );
 
 		WpEnv::$options['simply-static'] = array(
@@ -81,5 +86,38 @@ final class UrlFetcherSecurityTest extends UnitTestCase {
 		Url_Fetcher::remote_get( 'https://example.test/page' );
 
 		self::assertArrayNotHasKey( 'Authorization', WpEnv::$remote_requests[0]['args']['headers'] );
+	}
+
+	public function test_successful_retry_clears_an_error_from_an_earlier_attempt(): void {
+		$GLOBALS['wpdb'] = new class() {
+			public function get_blog_prefix(): string {
+				return 'wp_';
+			}
+
+			public function update( string $table, array $data, array $where ): int {
+				return 1;
+			}
+		};
+
+		WpEnv::$remote_response = array(
+			'response' => array( 'code' => 301 ),
+			'headers'  => array(
+				'content-type' => 'text/html',
+				'location'     => 'https://example.test/',
+			),
+			'body'     => '',
+		);
+
+		$page = Page::initialize(
+			array(
+				'id'            => 17,
+				'url'           => 'https://example.test/old-redirect/',
+				'error_message' => 'Unable to write temporary file',
+			)
+		);
+
+		self::assertTrue( Url_Fetcher::instance()->fetch( $page ) );
+		self::assertNull( $page->error_message );
+		self::assertSame( 301, $page->http_status_code );
 	}
 }

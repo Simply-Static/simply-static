@@ -80,6 +80,11 @@ class Url_Fetcher {
 		$original_url = $static_page->url;
 		$url          = $original_url;
 
+		// Single and incremental exports reuse Page records. Start each new fetch
+		// with a clean error state so a successful retry does not keep reporting a
+		// failure from an earlier export or attempt.
+		$static_page->clear_error_message();
+
 		// Windows support.
 		$url = Util::normalize_slashes( $url );
 
