@@ -1898,6 +1898,10 @@ class Url_Extractor {
 		// Also replace JSON-encoded URLs
 		$text = preg_replace( '/' . Util::json_escaped_origin_url_pattern() . $escaped_destination_path_guard . '/i', addcslashes( untrailingslashit( $convert_to ), '/' ), $text );
 
+		// Replace a bare origin hostname when it is stored as a complete string value.
+		// Google Site Kit uses this form for its linker domains configuration.
+		$text = $this->replace_bare_origin_host_in_script( $text );
+
 		// Replace URLs in sourceURL and sourceMappingURL comments (used for debugging)
 		// Handles both //# and //@ formats (the latter is deprecated but still used)
 		$text = preg_replace( '/(\/\/[#@]\s*(?:sourceURL|sourceMappingURL)\s*=\s*)(https?:)?\/\/' . Util::origin_host_pattern() . $destination_path_guard . '/i', '$1' . $convert_to, $text );
@@ -1906,6 +1910,49 @@ class Url_Extractor {
 		$text = $this->replace_runtime_local_paths_in_script( $text );
 
 		return $text;
+	}
+
+	/**
+	 * Replace a quoted, hostname-only origin value in inline JavaScript.
+	 *
+	 * Full URLs are handled above, but some scripts store the current host without
+	 * a protocol. Only exact quoted values are replaced so text containing the
+	 * hostname, email addresses, and similarly prefixed domains remain unchanged.
+	 *
+	 * @param string $text JavaScript or JSON content.
+	 *
+	 * @return string
+	 */
+	private function replace_bare_origin_host_in_script( $text ) {
+		if ( 'absolute' !== $this->options->get( 'destination_url_type' ) ) {
+			return $text;
+		}
+
+		$origin_parts      = function_exists( 'wp_parse_url' ) ? wp_parse_url( Util::origin_url() ) : parse_url( Util::origin_url() );
+		$destination_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $this->options->get_destination_url() ) : parse_url( $this->options->get_destination_url() );
+
+		if ( ! is_array( $origin_parts ) || ! is_array( $destination_parts ) || empty( $origin_parts['host'] ) || empty( $destination_parts['host'] ) ) {
+			return $text;
+		}
+
+		$origin_host      = (string) $origin_parts['host'];
+		$destination_host = (string) $destination_parts['host'];
+
+		if ( 0 === strcasecmp( $origin_host, $destination_host ) ) {
+			return $text;
+		}
+
+		$pattern = '/(["\'])' . preg_quote( $origin_host, '/' ) . '\\1/i';
+
+		$replaced = preg_replace_callback(
+			$pattern,
+			function ( $matches ) use ( $destination_host ) {
+				return $matches[1] . $destination_host . $matches[1];
+			},
+			$text
+		);
+
+		return is_string( $replaced ) ? $replaced : $text;
 	}
 
 	/**
