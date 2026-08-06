@@ -189,6 +189,41 @@ final class UrlExtractorTest extends UnitTestCase {
 		self::assertStringContainsString( 'https://external.test/a.jpg', $xml_extractor->get_body() );
 	}
 
+	public function test_replaces_bare_origin_host_in_inline_scripts(): void {
+		$html = '<script id="google_gtagjs-js-after">'
+			. 'gtag("set","linker",{"domains":["example.test"]});'
+			. "const alternate = 'example.test';"
+			. 'const external = "external.test";'
+			. 'const prefixed = "www.example.test";'
+			. 'const suffixed = "example.test.invalid";'
+			. 'const email = "user@example.test";'
+			. '</script>';
+		$extractor = $this->extractor( 'html', $html );
+
+		$extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertStringContainsString( '"domains":["static.example.test"]', $body );
+		self::assertStringContainsString( "const alternate = 'static.example.test';", $body );
+		self::assertStringContainsString( 'const external = "external.test";', $body );
+		self::assertStringContainsString( 'const prefixed = "www.example.test";', $body );
+		self::assertStringContainsString( 'const suffixed = "example.test.invalid";', $body );
+		self::assertStringContainsString( 'const email = "user@example.test";', $body );
+	}
+
+	public function test_preserves_bare_origin_host_for_non_absolute_exports(): void {
+		WpEnv::$options['simply-static']['destination_url_type'] = 'relative';
+		WpEnv::$options['simply-static']['relative_path'] = '/';
+		Options::reinstance();
+
+		$html = '<script>gtag("set","linker",{"domains":["example.test"]});</script>';
+		$extractor = $this->extractor( 'html', $html );
+
+		$extractor->extract_and_update_urls();
+
+		self::assertStringContainsString( '"domains":["example.test"]', $extractor->get_body() );
+	}
+
 	public function test_relative_and_offline_destination_modes_produce_local_paths(): void {
 		WpEnv::$options['simply-static']['destination_url_type'] = 'relative';
 		WpEnv::$options['simply-static']['relative_path'] = '/';
