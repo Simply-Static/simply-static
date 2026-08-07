@@ -1379,7 +1379,7 @@ class Url_Extractor {
 
 		// return the original html string if dom is blank or couldn't be parsed
 		if ( ! $dom->documentElement ) {
-			return $html_string;
+			return $this->restore_html_placeholders( $html_string, $conditional_comments, $html_comments );
 		} else {
 			$this->remove_unexported_rest_discovery_links( $xpath );
 
@@ -1430,10 +1430,10 @@ class Url_Extractor {
 			// Further manipulate Dom?
 			$dom = apply_filters( 'ss_dom_before_save', $dom, $this->static_page->url );
 
-			// Check if $dom is still a DOMDocument object after filters
+			// A filter may serialize the DOM. Restore all temporary placeholders before
+			// returning the string, just as we do after DOMDocument::saveHTML() below.
 			if ( is_string( $dom ) ) {
-				// If $dom has been converted to a string by a filter, return it directly
-				return $dom;
+				return $this->restore_html_placeholders( $dom, $conditional_comments, $html_comments );
 			}
 
 			// Ensure a proper <meta charset> is present as the first child of <head>
@@ -1495,50 +1495,7 @@ class Url_Extractor {
 			$html5_void_elements = array( 'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr' );
 			$html = preg_replace( '#</(' . implode( '|', $html5_void_elements ) . ')>#i', '', $html );
 
-			// Restore script tags
-			$_result = preg_replace_callback( '/<!-- SCRIPT_PLACEHOLDER_(\d+) -->/', function ( $matches ) {
-				$index = (int) $matches[1];
-				if ( isset( $this->script_tags[ $index ] ) ) {
-					return $this->script_tags[ $index ];
-				} else {
-					return '';
-				}
-			}, $html );
-			if ( null !== $_result ) {
-				$html = $_result;
-			}
-
-			// Restore xmp tags
-			$html = $this->restore_xmp_tags( $html );
-
-			// Restore SVG data URIs in style attributes
-			$html = $this->restore_svg_data_uris( $html );
-
-			// Restore conditional comments
-			$_result = preg_replace_callback( '/<!-- CONDITIONAL_COMMENT_PLACEHOLDER_(\d+) -->/', function ( $matches ) use ( $conditional_comments ) {
-				$index = (int) $matches[1];
-				if ( isset( $conditional_comments[ $index ] ) ) {
-					return $conditional_comments[ $index ];
-				} else {
-					return '';
-				}
-			}, $html );
-			if ( null !== $_result ) {
-				$html = $_result;
-			}
-
-			// Restore non-conditional comments exactly as they were
-			$_result = preg_replace_callback( '/<!-- COMMENT_PLACEHOLDER_(\d+) -->/', function ( $matches ) use ( $html_comments ) {
-				$index = (int) $matches[1];
-
-				return isset( $html_comments[ $index ] ) ? $html_comments[ $index ] : '';
-			}, $html );
-			if ( null !== $_result ) {
-				$html = $_result;
-			}
-
-			// Restore JSON attributes
-			$html = $this->restore_attributes( $html );
+			$html = $this->restore_html_placeholders( $html, $conditional_comments, $html_comments );
 
 			// Decode HTML entities across the final HTML using the site's charset so non-Latin text (e.g., Japanese/Arabic)
 			// is preserved as real characters instead of numeric entities. To avoid breaking complex attribute values
@@ -1584,6 +1541,49 @@ class Url_Extractor {
 
 			return $html;
 		}
+	}
+
+	/**
+	 * Restore content protected while an HTML document is processed.
+	 *
+	 * @param string $html                 Processed HTML.
+	 * @param array  $conditional_comments Preserved conditional comments.
+	 * @param array  $html_comments        Preserved non-conditional comments.
+	 *
+	 * @return string
+	 */
+	private function restore_html_placeholders( $html, $conditional_comments, $html_comments ) {
+		$_result = preg_replace_callback( '/<!-- SCRIPT_PLACEHOLDER_(\d+) -->/', function ( $matches ) {
+			$index = (int) $matches[1];
+
+			return isset( $this->script_tags[ $index ] ) ? $this->script_tags[ $index ] : '';
+		}, $html );
+		if ( null !== $_result ) {
+			$html = $_result;
+		}
+
+		$html = $this->restore_xmp_tags( $html );
+		$html = $this->restore_svg_data_uris( $html );
+
+		$_result = preg_replace_callback( '/<!-- CONDITIONAL_COMMENT_PLACEHOLDER_(\d+) -->/', function ( $matches ) use ( $conditional_comments ) {
+			$index = (int) $matches[1];
+
+			return isset( $conditional_comments[ $index ] ) ? $conditional_comments[ $index ] : '';
+		}, $html );
+		if ( null !== $_result ) {
+			$html = $_result;
+		}
+
+		$_result = preg_replace_callback( '/<!-- COMMENT_PLACEHOLDER_(\d+) -->/', function ( $matches ) use ( $html_comments ) {
+			$index = (int) $matches[1];
+
+			return isset( $html_comments[ $index ] ) ? $html_comments[ $index ] : '';
+		}, $html );
+		if ( null !== $_result ) {
+			$html = $_result;
+		}
+
+		return $this->restore_attributes( $html );
 	}
 
 	/**
