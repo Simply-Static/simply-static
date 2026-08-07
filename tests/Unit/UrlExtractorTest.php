@@ -224,6 +224,45 @@ final class UrlExtractorTest extends UnitTestCase {
 		self::assertStringContainsString( '"domains":["example.test"]', $extractor->get_body() );
 	}
 
+	public function test_restores_comments_when_dom_filter_returns_html_string(): void {
+		add_filter( 'ss_dom_before_save', function ( $dom ) {
+			return $dom instanceof \DOMDocument ? $dom->saveHTML() : $dom;
+		} );
+
+		$html = '<meta name="google-site-verification" content="verification-code">'
+			. '<!-- Google tag (gtag.js) snippet added by Site Kit -->'
+			. '<script id="google_gtagjs-js-after">'
+			. 'gtag("set","linker",{"domains":["example.test"]});'
+			. '</script>'
+			. '<!-- End Google tag (gtag.js) snippet added by Site Kit -->';
+		$extractor = $this->extractor( 'html', $html );
+
+		$extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertStringContainsString( '<!-- Google tag (gtag.js) snippet added by Site Kit -->', $body );
+		self::assertStringContainsString( '<!-- End Google tag (gtag.js) snippet added by Site Kit -->', $body );
+		self::assertStringContainsString( '"domains":["static.example.test"]', $body );
+		self::assertStringNotContainsString( 'COMMENT_PLACEHOLDER', $body );
+		self::assertStringNotContainsString( 'SCRIPT_PLACEHOLDER', $body );
+	}
+
+	public function test_restores_comments_in_script_only_html_fragment(): void {
+		$html = '<!-- Google tag (gtag.js) snippet added by Site Kit -->'
+			. '<script>gtag("config","G-TEST");</script>'
+			. '<!-- End Google tag (gtag.js) snippet added by Site Kit -->';
+		$extractor = $this->extractor( 'html', $html );
+
+		$extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertStringContainsString( '<!-- Google tag (gtag.js) snippet added by Site Kit -->', $body );
+		self::assertStringContainsString( '<script>gtag("config","G-TEST");</script>', $body );
+		self::assertStringContainsString( '<!-- End Google tag (gtag.js) snippet added by Site Kit -->', $body );
+		self::assertStringNotContainsString( 'COMMENT_PLACEHOLDER', $body );
+		self::assertStringNotContainsString( 'SCRIPT_PLACEHOLDER', $body );
+	}
+
 	public function test_relative_and_offline_destination_modes_produce_local_paths(): void {
 		WpEnv::$options['simply-static']['destination_url_type'] = 'relative';
 		WpEnv::$options['simply-static']['relative_path'] = '/';
