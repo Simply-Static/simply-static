@@ -14,6 +14,7 @@ import {SettingsContext} from "../context/SettingsContext";
 import apiFetch from "@wordpress/api-fetch";
 import HelperVideo from "../components/HelperVideo";
 import StudioNotice from "../components/StudioNotice";
+import {shouldShowStudioDeploymentNotice} from "../utils/deployment";
 
 const {__} = wp.i18n;
 
@@ -201,7 +202,7 @@ function DeploymentSettings() {
             </CardBody>
         </Card>
         <Spacer margin={5}/>
-        {isStudio() &&
+        {shouldShowStudioDeploymentNotice(isStudio(), canEditDeploymentSettings) &&
             <StudioNotice
                 heading={__('Deployment is automatic on Studio', 'simply-static')}
                 cta={__('See how Pro deployment works →', 'simply-static')}
