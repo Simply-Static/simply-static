@@ -4,7 +4,7 @@ Tags: jamstack, performance, security, static site generator
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag:  3.8.8
+Stable tag:  3.8.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -52,7 +52,7 @@ Your WordPress site stays private and secure. Your static site is what visitors 
 The free version is perfect for simple static exports, but if you need advanced deployment, automation, and powerful features, check out our premium solutions.
 
 = Simply Static Pro - For Developers & Agencies =
-$129/year per site | $399/year unlimited sites
+$99/year per site
 Deploy to any platform. Automate everything. Keep 100% of your profit margins.
 
 * Deploy to GitHub, Netlify, Cloudflare Pages, AWS S3, BunnyCDN, SFTP
@@ -71,7 +71,7 @@ Perfect for developers self-hosting client sites, agencies managing infrastructu
 [Get Simply Static Pro](https://simplystatic.com/simply-static-pro/)
 
 = Simply Static Studio - For Businesses & Content Creators =
-From $19/month
+$19/month per site
 All-in-one managed WordPress hosting. Zero maintenance. Maximum security.
 
 * Fully managed WordPress hosting
@@ -85,7 +85,7 @@ All-in-one managed WordPress hosting. Zero maintenance. Maximum security.
 
 Perfect for businesses running 1-5 websites, content creators who want simplicity, and anyone who values convenience over control.
 
-[Try Studio Free for 7 Days](https://simplystatic.com/simply-static-studio/)
+[Try Studio Free for 14 Days](https://simplystatic.com/simply-static-studio/)
 
 = Trusted by 40,000+ Users Worldwide =
 * 1,400,000+ plugin downloads
@@ -201,8 +201,8 @@ Yes! The core plugin is 100% free and open source. It provides everything you ne
 Simply Static Pro and Studio are optional premium products for advanced features like automated deployment, forms, search, and managed hosting.
 = What's the difference between the free plugin, Pro, and Studio? =
 Free: Generate static sites, export as ZIP or to local directory. Perfect for testing and simple exports.
-Pro ($129-399/year): Advanced deployment, automation, forms, search, WP-CLI. For developers and agencies self-hosting.
-Studio (from $19/month): All-in-one managed hosting. We handle WordPress, static hosting, backups, SSL, everything. For businesses who want zero maintenance.
+Pro ($99/year per site): Advanced deployment, automation, forms, search, WP-CLI. For developers and agencies self-hosting.
+Studio ($19/month per site): All-in-one managed hosting. We handle WordPress, static hosting, backups, SSL, everything. For businesses who want zero maintenance.
 See detailed comparison
 = Can I use the free version for production sites? =
 Yes, but you'll need to manually upload the ZIP file to your hosting provider each time you update your site.
@@ -274,6 +274,13 @@ Settings - Configure your static site export options
 Diagnostics - Check your WordPress environment for compatibility
 
 == Changelog ==
+
+= 3.8.9 =
+
+* Fixed bare origin host replacement in inline scripts, including Google Site Kit linker domains
+* Fixed script and comment restoration for filtered or fragment HTML
+* Improved Static Studio deployment notice visibility and refreshed the Studio promo
+* Updated Simply Static Pro and Static Studio pricing and trial information
 
 = 3.8.8 =
 
