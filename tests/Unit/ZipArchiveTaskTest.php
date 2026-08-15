@@ -92,18 +92,28 @@ final class ZipArchiveTaskTest extends UnitTestCase {
 	public function test_perform_publishes_structured_download_link(): void {
 		file_put_contents( $this->archive_dir . 'index.html', '<h1>Archived</h1>' );
 		$zip_file = WP_CONTENT_DIR . '/uploads/simply-static/activity-link-test.zip';
+		$debug_log = $this->temp_dir . '/zip-debug.log';
 		wp_mkdir_p( dirname( $zip_file ) );
 		add_filter( 'ss_zip_filename', static function () use ( $zip_file ) {
 			return $zip_file;
 		} );
+		add_filter( 'ss_debug_log_file', static function () use ( $debug_log ) {
+			return $debug_log;
+		} );
+		WpEnv::$options['simply-static']['debugging_mode'] = true;
+		Options::reinstance();
 
 		self::assertTrue( ( new Create_Zip_Archive_Task() )->perform() );
 
 		$status = WpEnv::$options['simply-static']['archive_status_messages']['create_zip_archive'];
-		self::assertStringStartsWith( 'ZIP archive created: ', $status['message'] );
+		self::assertSame( 'ZIP archive created: ', $status['message'] );
 		self::assertSame( 'Click here to download', $status['link']['label'] );
 		self::assertStringStartsWith( 'https://example.test/wp-content/', $status['link']['url'] );
 		self::assertStringEndsWith( '/activity-link-test.zip', $status['link']['url'] );
+		self::assertStringContainsString(
+			'Status message: [create_zip_archive] ZIP archive created: ' . $status['link']['url'],
+			file_get_contents( $debug_log )
+		);
 	}
 
 	public function test_perform_maps_an_external_uploads_directory_to_its_public_url(): void {
