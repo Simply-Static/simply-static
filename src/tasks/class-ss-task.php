@@ -43,7 +43,19 @@ abstract class Task {
 	protected function save_status_message( $message, $key = null, $link = null ) {
 		$task_name = $key ?: static::$task_name;
 		$messages = $this->options->get( 'archive_status_messages' );
-		Util::debug_log( 'Status message: [' . $task_name . '] ' . $message );
+		$log_message = $message;
+
+		// Structured links are stored separately from the user-facing message, but
+		// the plain-text debug log must remain useful to deployment scripts.
+		if (
+			is_array( $link ) &&
+			! empty( $link['url'] ) &&
+			false === strpos( $log_message, (string) $link['url'] )
+		) {
+			$log_message = rtrim( $log_message ) . ' ' . $link['url'];
+		}
+
+		Util::debug_log( 'Status message: [' . $task_name . '] ' . $log_message );
 
 		$messages = Util::add_archive_status_message( $messages, $task_name, $message, false, $link );
 
