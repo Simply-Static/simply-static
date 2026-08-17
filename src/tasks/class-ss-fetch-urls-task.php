@@ -73,6 +73,10 @@ class Fetch_Urls_Task extends Task {
 			$static_page->save();
 			return;
 		} else {
+			if ( $this->maybe_handle_registered_redirect( $static_page, $save_file, $follow_urls ) ) {
+				return;
+			}
+
 			$success = Url_Fetcher::instance()->fetch( $static_page );
 		}
 
@@ -108,6 +112,57 @@ class Fetch_Urls_Task extends Task {
 			$this
 		);
 
+	}
+
+	/**
+	 * Generate a redirect page directly from redirect metadata registered by an integration.
+	 *
+	 * Redirect plugins already store the source and target in WordPress. Asking WordPress to
+	 * resolve the source over HTTP adds an unnecessary failure point, especially when the
+	 * configured public URL and the WordPress origin differ. Integrations can return an array
+	 * containing a URL and optional status code to bypass that request.
+	 *
+	 * @param Page $static_page Static page being processed.
+	 * @param bool $save_file Whether to save a static redirect page.
+	 * @param bool $follow_urls Whether to queue a local redirect target.
+	 *
+	 * @return bool Whether a registered redirect was handled.
+	 */
+	protected function maybe_handle_registered_redirect( $static_page, $save_file, $follow_urls ) {
+		/**
+		 * Filter a redirect registered by an integration before its source URL is fetched.
+		 *
+		 * @param null|array{url:string,status_code?:int} $redirect Redirect data or null.
+		 * @param Page                                  $static_page Static page being processed.
+		 */
+		$redirect = apply_filters( 'simply_static_registered_redirect', null, $static_page );
+
+		if ( ! is_array( $redirect ) || empty( $redirect['url'] ) || ! is_string( $redirect['url'] ) ) {
+			return false;
+		}
+
+		$redirect_url = trim( $redirect['url'] );
+		if ( '' === $redirect_url ) {
+			return false;
+		}
+
+		$status_code = isset( $redirect['status_code'] ) ? (int) $redirect['status_code'] : 301;
+		if ( ! in_array( $status_code, array( 301, 302, 303, 307, 308 ), true ) ) {
+			return false;
+		}
+
+		$static_page->clear_error_message();
+		$static_page->last_checked_at  = Util::formatted_datetime();
+		$static_page->http_status_code = $status_code;
+		$static_page->redirect_url     = $redirect_url;
+
+		Util::debug_log( 'Using registered redirect target for URL: ' . $static_page->url );
+		$this->handle_30x_redirect( $static_page, $save_file, $follow_urls );
+		// Some redirect-handler branches only queue the normalized target because
+		// an HTTP fetch normally persists the source page before they run.
+		$static_page->save();
+
+		return true;
 	}
 
 	/**

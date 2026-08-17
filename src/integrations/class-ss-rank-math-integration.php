@@ -5,12 +5,22 @@ namespace Simply_Static;
 use RankMath\Sitemap\Router;
 
 class Rank_Math_Integration extends Integration {
+	const REDIRECT_JSON_KEY = 'rank_math_static_redirect';
+	const LEGACY_REDIRECT_EXPORT_JSON_KEY = 'rank_math_static_redirect_export_started_at';
+
 	/**
 	 * Given plugin handler ID.
 	 *
 	 * @var string Handler ID.
 	 */
 	protected $id = 'rank-math';
+
+	/**
+	 * Exportable redirects keyed by their WordPress source URL.
+	 *
+	 * @var array|null
+	 */
+	protected $static_redirects = null;
 
 	public function __construct() {
 		$this->name        = __( 'Rank Math', 'simply-static' );
@@ -25,6 +35,7 @@ class Rank_Math_Integration extends Integration {
 	public function run() {
 		add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_page' ] );
 		add_action( 'ss_after_setup_task', [ $this, 'register_redirections' ] );
+		add_filter( 'simply_static_registered_redirect', [ $this, 'get_registered_redirect' ], 10, 2 );
 		add_action( 'ss_dom_before_save', [ $this, 'replace_json_schema' ], 10, 2 );
 		add_filter( 'ss_additional_files', [ $this, 'maybe_add_text_files' ] );
 
@@ -186,15 +197,19 @@ class Rank_Math_Integration extends Integration {
 	protected function get_redirects() {
 		global $wpdb;
 
-		$results = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}rank_math_redirections", ARRAY_A );
+		$results = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}rank_math_redirections WHERE status = 'active' ORDER BY updated DESC", ARRAY_A );
 
 
-		if ( empty( $results ) ) {
+		if ( null === $results ) {
 			return null;
 		}
 
+		if ( empty( $results ) ) {
+			return array();
+		}
+
 		$results = array_map( function ( $item ) {
-			$item["sources"] = maybe_unserialize( $item["sources"] );
+			$item['sources'] = maybe_unserialize( $item['sources'] );
 
 			return $item;
 		}, $results );
@@ -216,34 +231,270 @@ class Rank_Math_Integration extends Integration {
 			return;
 		}
 
-		$redirections = $this->get_redirects();
+		$redirections = $this->get_static_redirects();
+
+		// Do not clear stored metadata when the redirect table could not be read.
+		if ( null === $redirections ) {
+			return;
+		}
+
+		$this->clear_stale_static_redirects( $redirections );
 
 		if ( ! $redirections ) {
 			return;
 		}
 
-		foreach ( $redirections as $redirection ) {
+		foreach ( $redirections as $url => $redirection ) {
+			Util::debug_log( 'Adding Rank Math redirection URL to queue: ' . $url );
+			/** @var \Simply_Static\Page $static_page */
+			$static_page = Page::query()->find_or_initialize_by( 'url', $url );
+			$static_page->set_status_message( __( 'RankMath Redirection URL', 'simply-static' ) );
 
-			if ( empty( $redirection['sources'] ) ) {
+			// wpdb hydrates numeric columns as strings. Avoid dirtying an unchanged
+			// redirect page by assigning integer 0 over an existing string "0".
+			if ( null === $static_page->found_on_id || 0 !== (int) $static_page->found_on_id ) {
+				$static_page->found_on_id = 0;
+			}
+
+			$this->set_static_page_redirect( $static_page, $redirection );
+			$static_page->save();
+		}
+	}
+
+	/**
+	 * Return a redirect registered for the current static page.
+	 *
+	 * @param mixed $redirect Existing redirect supplied by another integration.
+	 * @param mixed $static_page Static page being processed.
+	 *
+	 * @return mixed
+	 */
+	public function get_registered_redirect( $redirect, $static_page ) {
+		if (
+			! is_object( $static_page )
+			|| ! method_exists( $static_page, 'get_json_data_by_key' )
+		) {
+			return $redirect;
+		}
+
+		// Single and build exports do not refresh registered redirect metadata.
+		$use_single = get_option( 'simply-static-use-single' );
+		$use_build  = get_option( 'simply-static-use-build' );
+
+		if ( ! empty( $use_build ) || ! empty( $use_single ) ) {
+			return $redirect;
+		}
+
+		$registered_redirect = $static_page->get_json_data_by_key( self::REDIRECT_JSON_KEY );
+
+		return is_array( $registered_redirect ) && ! empty( $registered_redirect['url'] )
+			? $registered_redirect
+			: $redirect;
+	}
+
+	/**
+	 * Get exact, active Rank Math redirects that can be represented by a static file.
+	 *
+	 * @return array<string,array{url:string,status_code:int}>|null
+	 */
+	protected function get_static_redirects() {
+		if ( null !== $this->static_redirects ) {
+			return $this->static_redirects;
+		}
+
+		$redirections = $this->get_redirects();
+
+		if ( ! is_array( $redirections ) ) {
+			return null;
+		}
+
+		$this->static_redirects = array();
+
+		foreach ( $redirections as $redirection ) {
+			$status_code      = isset( $redirection['header_code'] ) ? (int) $redirection['header_code'] : 301;
+			$target_url       = $this->prepare_redirection_url( isset( $redirection['url_to'] ) ? $redirection['url_to'] : '' );
+			$add_query_string = true === apply_filters( 'rank_math/redirection/add_query_string', true, $redirection );
+
+			if (
+				! $target_url
+				|| ! in_array( $status_code, array( 301, 302, 303, 307, 308 ), true )
+				|| empty( $redirection['sources'] )
+				|| ! is_array( $redirection['sources'] )
+			) {
 				continue;
 			}
 
 			foreach ( $redirection['sources'] as $source ) {
-
-				if ( $source['comparison'] !== 'exact' ) {
+				if (
+					! is_array( $source )
+					|| 'exact' !== ( $source['comparison'] ?? '' )
+					|| empty( $source['pattern'] )
+				) {
 					continue;
 				}
 
-				$url = home_url( $source['pattern'] );
-				/** @var \Simply_Static\Page $static_page */
-				$static_page = Page::query()->find_or_initialize_by( 'url', $url );
-				$static_page->set_status_message( __( 'RankMath Redirection URL', 'simply-static' ) );
-				$static_page->found_on_id = 0;
-				$static_page->save();
-			}
+				$source_url = $this->prepare_redirection_url( $source['pattern'] );
+				if ( ! $source_url || isset( $this->static_redirects[ $source_url ] ) ) {
+					continue;
+				}
 
+				$this->static_redirects[ $source_url ] = array(
+					'url'         => $add_query_string ? $this->add_source_query_to_target( $target_url, $source_url ) : $target_url,
+					'status_code' => $status_code,
+				);
+			}
 		}
 
+		return $this->static_redirects;
+	}
+
+	/**
+	 * Normalize a Rank Math source or target against the configured WordPress origin.
+	 *
+	 * @param mixed $url URL or path.
+	 *
+	 * @return string
+	 */
+	protected function prepare_redirection_url( $url ) {
+		$url = is_string( $url ) ? trim( html_entity_decode( $url, ENT_QUOTES ) ) : '';
+
+		if ( '' === $url ) {
+			return '';
+		}
+
+		if ( 0 === strpos( $url, '//' ) ) {
+			$origin_scheme = wp_parse_url( Util::origin_url(), PHP_URL_SCHEME );
+			$url = ( $origin_scheme ? $origin_scheme : 'https' ) . ':' . $url;
+		} elseif ( ! preg_match( '#^https?://#i', $url ) ) {
+			$url = untrailingslashit( Util::origin_url() ) . '/' . ltrim( $url, '/' );
+		}
+
+		return remove_query_arg( 'simply_static_page', $url );
+	}
+
+	/**
+	 * Preserve an exact source rule's query string in its redirect target.
+	 *
+	 * Rank Math appends the incoming query string to the configured target by default.
+	 * Registered redirects bypass Rank Math's HTTP response, so reproduce that behavior
+	 * for query-specific source rules before storing the redirect metadata.
+	 *
+	 * @param string $target_url Redirect target.
+	 * @param string $source_url Exact source URL.
+	 *
+	 * @return string
+	 */
+	protected function add_source_query_to_target( $target_url, $source_url ) {
+		$source_query = wp_parse_url( $source_url, PHP_URL_QUERY );
+
+		if ( ! is_string( $source_query ) || '' === $source_query ) {
+			return $target_url;
+		}
+
+		$fragment = '';
+		$fragment_position = strpos( $target_url, '#' );
+		if ( false !== $fragment_position ) {
+			$fragment   = substr( $target_url, $fragment_position );
+			$target_url = substr( $target_url, 0, $fragment_position );
+		}
+
+		if ( false === strpos( $target_url, '?' ) ) {
+			$separator = '?';
+		} elseif ( in_array( substr( $target_url, -1 ), array( '?', '&' ), true ) ) {
+			$separator = '';
+		} else {
+			$separator = '&';
+		}
+
+		return $target_url . $separator . $source_query . $fragment;
+	}
+
+	/**
+	 * Store redirect metadata and invalidate an existing page when the rule changed.
+	 *
+	 * @param Page  $static_page Static page.
+	 * @param array $redirection Redirect data.
+	 *
+	 * @return void
+	 */
+	protected function set_static_page_redirect( $static_page, $redirection ) {
+		$json = $static_page->get_json();
+		$json = is_array( $json ) ? $json : array();
+		$current = array_key_exists( self::REDIRECT_JSON_KEY, $json ) ? $json[ self::REDIRECT_JSON_KEY ] : null;
+
+		if ( $current !== $redirection ) {
+			$json[ self::REDIRECT_JSON_KEY ] = $redirection;
+			unset( $json[ self::LEGACY_REDIRECT_EXPORT_JSON_KEY ] );
+			$static_page->set_json( $json );
+			$static_page->last_modified_at = Util::formatted_datetime();
+		}
+	}
+
+	/**
+	 * Clear redirect metadata for rules that are no longer exportable.
+	 *
+	 * This is done once during setup in ID-based batches so fetch workers can use
+	 * page-local metadata without loading the complete Rank Math redirect table.
+	 *
+	 * @param array<string,array{url:string,status_code:int}> $redirections Current redirects.
+	 *
+	 * @return void
+	 */
+	protected function clear_stale_static_redirects( $redirections ) {
+		$batch_size = max( 1, (int) apply_filters( 'simply_static_rank_math_redirect_cleanup_batch_size', 500 ) );
+		$last_id    = 0;
+
+		do {
+			$static_pages = Page::query()
+				->where( 'id > ?', $last_id )
+				->where( 'json LIKE ?', '%"' . self::REDIRECT_JSON_KEY . '"%' )
+				->order( 'id ASC' )
+				->limit( $batch_size )
+				->find();
+
+			if ( ! is_array( $static_pages ) || empty( $static_pages ) ) {
+				return;
+			}
+
+			$previous_last_id = $last_id;
+
+			foreach ( $static_pages as $static_page ) {
+				$last_id = max( $last_id, (int) $static_page->id );
+
+				if ( ! empty( $static_page->url ) && array_key_exists( $static_page->url, $redirections ) ) {
+					continue;
+				}
+
+				if ( $this->clear_static_page_redirect( $static_page ) ) {
+					$static_page->save();
+				}
+			}
+
+			if ( $last_id <= $previous_last_id ) {
+				return;
+			}
+		} while ( count( $static_pages ) === $batch_size );
+	}
+
+	/**
+	 * Remove Rank Math redirect metadata from a static page.
+	 *
+	 * @param Page $static_page Static page.
+	 *
+	 * @return bool Whether metadata was removed.
+	 */
+	protected function clear_static_page_redirect( $static_page ) {
+		$json = $static_page->get_json();
+
+		if ( ! is_array( $json ) || ! array_key_exists( self::REDIRECT_JSON_KEY, $json ) ) {
+			return false;
+		}
+
+		unset( $json[ self::REDIRECT_JSON_KEY ], $json[ self::LEGACY_REDIRECT_EXPORT_JSON_KEY ] );
+		$static_page->set_json( $json );
+		$static_page->last_modified_at = Util::formatted_datetime();
+
+		return true;
 	}
 
 	/**
