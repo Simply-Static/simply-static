@@ -22,8 +22,9 @@ class AIO_SEO_Integration extends Integration {
 	 * @return void
 	 */
 	public function run() {
-        add_filter( 'aioseo_unrecognized_allowed_query_args', [ $this, 'allowed_query_args' ] );
+		add_filter( 'aioseo_unrecognized_allowed_query_args', [ $this, 'allowed_query_args' ] );
 		add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_pages' ] );
+		add_action( 'ss_finished_fetching_pages', [ $this, 'finalize_sitemap_files' ] );
 		add_filter( 'ssp_single_export_additional_urls', [ $this, 'add_sitemap_url' ] );
 		add_filter( 'ss_additional_files', [ $this, 'maybe_add_text_files' ] );
 
@@ -41,8 +42,11 @@ class AIO_SEO_Integration extends Integration {
             $args = [];
         }
 
-        $args[] = 'simply_static_page';
-        return $args;
+		if ( ! in_array( 'simply_static_page', $args, true ) ) {
+			$args[] = 'simply_static_page';
+		}
+
+		return $args;
     }
 
 	/**
@@ -72,6 +76,71 @@ class AIO_SEO_Integration extends Integration {
 
 		// Extract and add individual sitemap URLs from sitemap.xml
 		$this->extract_sitemap_urls_from_index();
+
+		// Queue the generated endpoint last. Its handler performs one final pass
+		// over all sitemap XML files after the stylesheet itself is fetched.
+		$this->register_stylesheet_page();
+	}
+
+	/**
+	 * Register the stable stylesheet endpoint as a normal Page record so every
+	 * delivery method transfers it alongside the sitemap XML files.
+	 *
+	 * @return void
+	 */
+	public function register_stylesheet_page() {
+		$url = home_url( 'main-sitemap.xsl' );
+
+		Util::debug_log( 'Adding AIOSEO sitemap stylesheet to queue: ' . $url );
+		/** @var \Simply_Static\Page $static_page */
+		$static_page = Page::query()->find_or_initialize_by( 'url', $url );
+		$static_page->set_status_message( __( 'Sitemap Stylesheet', 'simply-static' ) );
+		$static_page->found_on_id = 0;
+		$static_page->handler     = AIO_SEO_Sitemap_Handler::class;
+		$static_page->save();
+	}
+
+	/**
+	 * Apply one deterministic post-fetch pass after every sitemap and stylesheet
+	 * page has been written. Refresh content hashes for files changed by the pass
+	 * so incremental delivery methods transfer the corrected XML.
+	 *
+	 * @return void
+	 */
+	public function finalize_sitemap_files() {
+		$archive_dir = Options::instance()->get_archive_dir();
+		if ( ! is_dir( $archive_dir ) ) {
+			return;
+		}
+
+		try {
+			$page = Page::initialize( array() );
+			( new AIO_SEO_Sitemap_Handler( $page ) )->after_file_fetch( $archive_dir );
+
+			$sitemap_files = array(
+				Util::combine_path( $archive_dir, '/sitemap.xml' ),
+				Util::combine_path( $archive_dir, '/sitemap_index.xml' ),
+			);
+			$xml_files = glob( Util::combine_path( $archive_dir, '/*-sitemap*.xml' ) );
+			if ( is_array( $xml_files ) ) {
+				$sitemap_files = array_merge( $sitemap_files, $xml_files );
+			}
+
+			foreach ( array_unique( array_filter( $sitemap_files, 'is_file' ) ) as $sitemap_file ) {
+				$relative_path = ltrim( substr( $sitemap_file, strlen( untrailingslashit( $archive_dir ) ) ), '/\\' );
+				$static_page   = Page::query()->find_by( 'file_path', $relative_path );
+				$hash          = sha1_file( $sitemap_file, true );
+
+				if ( ! $static_page || false === $hash || $static_page->is_content_identical( $hash ) ) {
+					continue;
+				}
+
+				$static_page->set_content_hash( $hash );
+				$static_page->save();
+			}
+		} catch ( \Throwable $e ) {
+			Util::debug_log( 'Unable to finalize AIOSEO sitemap files: ' . $e->getMessage() );
+		}
 	}
 
 	/**
