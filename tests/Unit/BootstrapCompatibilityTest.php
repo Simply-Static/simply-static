@@ -105,20 +105,20 @@ namespace Simply_Static\Tests\Unit {
 			$package   = json_decode( (string) file_get_contents( $root . '/src/admin/package.json' ), true );
 			$lock      = json_decode( (string) file_get_contents( $root . '/src/admin/package-lock.json' ), true );
 
-			self::assertMatchesRegularExpression( '/^ \* Version:\s+3\.8\.9$/m', $bootstrap );
+			self::assertMatchesRegularExpression( '/^ \* Version:\s+3\.8\.10$/m', $bootstrap );
 			self::assertMatchesRegularExpression( '/^ \* Requires at least:\s+6\.2$/m', $bootstrap );
-			self::assertStringContainsString( "define( 'SIMPLY_STATIC_VERSION', '3.8.9' );", $bootstrap );
+			self::assertStringContainsString( "define( 'SIMPLY_STATIC_VERSION', '3.8.10' );", $bootstrap );
 			self::assertStringContainsString( "version_compare( get_bloginfo( 'version' ), '6.2', '<' )", $bootstrap );
 			self::assertStringContainsString( 'Simply Static requires WordPress 6.2 or higher.', $bootstrap );
 			self::assertStringContainsString( "require_once SIMPLY_STATIC_PATH . 'src/class-ss-pro-compatibility.php';", $bootstrap );
 			self::assertStringContainsString( "add_action( 'plugins_loaded', array( 'Simply_Static\\Pro_Compatibility', 'enforce' ), 1 );", $bootstrap );
 			self::assertStringNotContainsString( 'deactivate_plugins( $pro_basename', $bootstrap );
-			self::assertMatchesRegularExpression( '/^Stable tag:\s+3\.8\.9$/m', $readme );
+			self::assertMatchesRegularExpression( '/^Stable tag:\s+3\.8\.10$/m', $readme );
 			self::assertMatchesRegularExpression( '/^Requires at least:\s+6\.2$/m', $readme );
-			self::assertStringContainsString( '= 3.8.9 =', $readme );
-			self::assertSame( '3.8.9', $package['version'] ?? null );
-			self::assertSame( '3.8.9', $lock['version'] ?? null );
-			self::assertSame( '3.8.9', $lock['packages']['']['version'] ?? null );
+			self::assertStringContainsString( '= 3.8.10 =', $readme );
+			self::assertSame( '3.8.10', $package['version'] ?? null );
+			self::assertSame( '3.8.10', $lock['version'] ?? null );
+			self::assertSame( '3.8.10', $lock['packages']['']['version'] ?? null );
 		}
 
 		private function registerProRuntimeHooks(): void {
