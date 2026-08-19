@@ -82,6 +82,28 @@ abstract class Crawler {
 	abstract public function detect() : array;
 
 	/**
+	 * Whether this crawler finished its current discovery pass.
+	 *
+	 * Most crawlers complete in one call. Large filesystem crawlers can
+	 * override this and persist a cursor so the background job can yield before
+	 * the request time limit and resume in the next worker request.
+	 *
+	 * @return bool
+	 */
+	public function is_complete() : bool {
+		return true;
+	}
+
+	/**
+	 * Return optional progress for a resumable crawler.
+	 *
+	 * @return array<string,int>
+	 */
+	public function get_progress() : array {
+		return array();
+	}
+
+	/**
 	 * Add detected URLs to the Simply Static page queue.
 	 *
 	 * @return int Number of URLs added

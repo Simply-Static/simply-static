@@ -569,6 +569,10 @@ function wp_upload_dir() {
 	return WpEnv::$upload_dir;
 }
 
+function content_url( $path = '' ) {
+	return rtrim( WpEnv::$home_url, '/' ) . '/wp-content/' . ltrim( (string) $path, '/' );
+}
+
 function wp_is_stream( $path ) {
 	return (bool) preg_match( '#^[a-z][a-z0-9+.-]*://#i', (string) $path );
 }

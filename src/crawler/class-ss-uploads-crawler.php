@@ -14,6 +14,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Uploads_Crawler extends Crawler {
 
+	/** @var bool */
+	protected $complete = true;
+
+	/** @var array<string,int> */
+	protected $progress = array(
+		'added'   => 0,
+		'scanned' => 0,
+	);
+
 	/**
 	 * Crawler ID.
 	 * @var string
@@ -85,156 +94,311 @@ class Uploads_Crawler extends Crawler {
 	}
 
 	/**
-	 * Override add_urls_to_queue to stream URLs directly into the queue in batches.
-	 * This avoids building a massive array in memory for large media libraries.
+	 * Stream one bounded batch of upload URLs into the queue.
+	 *
+	 * The previous implementation traversed the complete uploads tree in one
+	 * request. Large libraries could outlive the background-process request and
+	 * leave the export lock behind. Persist a directory/entry cursor instead so
+	 * Discover_Urls_Task can yield and resume in the next worker request.
 	 *
 	 * @return int Number of URLs added
 	 */
 	public function add_urls_to_queue(): int {
-		$count = 0;
+		$this->complete = true;
+		$scan_dirs      = $this->get_scan_directories();
+		$signature      = $this->get_state_signature( $scan_dirs );
+		$state          = $this->load_state( $signature );
+		$extensions     = (array) apply_filters( 'ss_uploads_media_extensions', $this->get_media_extensions() );
+		$skip_dirs      = (array) apply_filters( 'ss_skip_crawl_uploads_directories', array( '.git', 'node_modules', 'cache', 'tmp', 'temp' ) );
+		$queue_batch    = max( 1, min( 1000, (int) apply_filters( 'simply_static_crawler_batch_size', 100 ) ) );
+		$entry_limit    = max( 1, min( 10000, (int) apply_filters( 'simply_static_uploads_crawler_max_entries_per_batch', 500 ) ) );
+		$seconds        = (float) apply_filters( 'simply_static_uploads_crawler_max_batch_seconds', 10 );
+		$deadline       = microtime( true ) + max( 0.5, min( 15, $seconds ) );
+		$processed        = 0;
+		$invocation_added = 0;
+		$buffer           = array();
 
-		$uploads_dir = wp_upload_dir();
-		$base_dir    = $uploads_dir['basedir'];
-		$base_url    = $uploads_dir['baseurl'];
-
-		$additional_dirs = [
-			[
-				'basedir' => WP_CONTENT_DIR . '/webp-express/webp-images/uploads',
-				'baseurl' => content_url( 'webp-express/webp-images/uploads' ),
-			],
-			[
-				'basedir' => WP_CONTENT_DIR . '/compressx-nextgen/uploads',
-				'baseurl' => content_url( 'compressx-nextgen/uploads' ),
-			],
-		];
-
-		$additional_dirs = apply_filters( 'ss_uploads_additional_directories', $additional_dirs );
-
-		$scan_dirs = [
-			[
-				'basedir' => $base_dir,
-				'baseurl' => $base_url,
-			],
-		];
-
-		foreach ( $additional_dirs as $additional_dir ) {
-			if ( is_dir( $additional_dir['basedir'] ) ) {
-				$scan_dirs[] = $additional_dir;
+		while ( $state['scan_index'] < count( $scan_dirs ) ) {
+			$scan = $scan_dirs[ $state['scan_index'] ];
+			if ( null === $state['current_dir'] ) {
+				if ( empty( $state['pending_dirs'] ) ) {
+					$state['scan_index']++;
+					if ( $state['scan_index'] < count( $scan_dirs ) ) {
+						$state['pending_dirs'] = array( '' );
+					}
+					continue;
+				}
+				$state['current_dir']  = array_pop( $state['pending_dirs'] );
+				$state['entry_offset'] = 0;
 			}
-		}
 
-		if ( ! is_dir( $base_dir ) ) {
-			\Simply_Static\Util::debug_log( "Uploads directory does not exist: " . $base_dir );
-
-			return 0;
-		}
-
-		// Media file extensions to look for
-		$media_extensions = [
-			'jpg',
-			'jpeg',
-			'png',
-			'gif',
-			'webp',
-			'avif',
-			'tiff',
-			'heic',
-			'svg',
-			'ico',
-			'css',
-			'js',
-			'woff',
-			'woff2',
-			'ttf',
-			'otf',
-			'eot',
-			'pdf',
-			'mp3',
-			'mp4',
-			'webm',
-			'ogg',
-			'wav',
-			'mov',
-			'avi',
-			'wmv',
-			'zip',
-			'doc',
-			'docx',
-			'xls',
-			'xlsx',
-			'ppt',
-			'pptx',
-			'json'
-		];
-		$media_extensions = apply_filters( 'ss_uploads_media_extensions', $media_extensions );
-
-		// Directories to skip
-		$skip_dirs = [ '.git', 'node_modules', 'cache', 'tmp', 'temp' ];
-		$skip_dirs = apply_filters( 'ss_skip_crawl_uploads_directories', $skip_dirs );
-
-		$batch_size = (int) apply_filters( 'simply_static_crawler_batch_size', 100 );
-		$buffer     = [];
-
-		foreach ( $scan_dirs as $scan_dir ) {
-			$base_dir = $scan_dir['basedir'];
-			$base_url = $scan_dir['baseurl'];
+			$directory = $this->resolve_scan_directory( $scan['basedir'], $state['current_dir'] );
+			if ( false === $directory ) {
+				\Simply_Static\Util::debug_log( 'Uploads crawler skipped a missing or unsafe directory cursor.' );
+				$state['current_dir']  = null;
+				$state['entry_offset'] = 0;
+				continue;
+			}
 
 			try {
-				$iterator = new \RecursiveIteratorIterator(
-					new \RecursiveDirectoryIterator( $base_dir, \RecursiveDirectoryIterator::SKIP_DOTS ),
-					\RecursiveIteratorIterator::SELF_FIRST
-				);
+				$iterator = $this->get_directory_iterator( $directory );
+				if ( $state['entry_offset'] > 0 ) {
+					$iterator->seek( $state['entry_offset'] );
+				}
+			} catch ( \UnexpectedValueException $exception ) {
+				\Simply_Static\Util::debug_log( 'Uploads crawler could not read directory: ' . $exception->getMessage() );
+				$state['current_dir']  = null;
+				$state['entry_offset'] = 0;
+				continue;
+			} catch ( \OutOfBoundsException $exception ) {
+				// The directory became shorter between worker requests. Everything
+				// before the persisted cursor was already handled, so move on safely.
+				$state['current_dir']  = null;
+				$state['entry_offset'] = 0;
+				continue;
+			}
 
-				foreach ( $iterator as $file ) {
+			while ( $iterator->valid() ) {
+				$file = $iterator->current();
+				$state['entry_offset']++;
+				$state['scanned']++;
+				$processed++;
+
+				if ( $file instanceof \SplFileInfo && ! $file->isLink() ) {
+					$relative_path = ltrim( \Simply_Static\Util::safe_relative_path( $scan['basedir'], $file->getPathname() ), '/' );
 					if ( $file->isDir() ) {
-						continue;
-					}
-
-					$relative_path = \Simply_Static\Util::safe_relative_path( $base_dir, $file->getPathname() );
-					if ( \Simply_Static\Util::is_private_backup_path( $relative_path ) ) {
-						continue;
-					}
-
-					// Skip files in ignored directories
-					$skip = false;
-					foreach ( (array) $skip_dirs as $skip_dir ) {
-						if ( $skip_dir && strpos( $relative_path, '/' . trim( $skip_dir, '/' ) . '/' ) !== false ) {
-							$skip = true;
-							break;
+						if ( ! $this->should_skip_path( $relative_path, $skip_dirs ) ) {
+							if ( count( $state['pending_dirs'] ) >= 50000 ) {
+								throw new \RuntimeException( 'Uploads crawler directory queue exceeded its safety limit.' );
+							}
+							$state['pending_dirs'][] = $relative_path;
+						}
+					} elseif ( $file->isFile() && ! $this->should_skip_path( $relative_path, $skip_dirs ) ) {
+						$extension = strtolower( pathinfo( $relative_path, PATHINFO_EXTENSION ) );
+						if ( in_array( $extension, $extensions, true ) ) {
+							$buffer[] = \Simply_Static\Util::safe_join_url( $scan['baseurl'], $relative_path );
+							if ( count( $buffer ) >= $queue_batch ) {
+								$added             = $this->enqueue_urls_batch( $buffer );
+								$invocation_added += $added;
+								$state['added']    += $added;
+								$buffer             = array();
+							}
 						}
 					}
-					if ( $skip ) {
-						continue;
-					}
-
-					$ext = strtolower( pathinfo( $relative_path, PATHINFO_EXTENSION ) );
-					if ( ! in_array( $ext, (array) $media_extensions, true ) ) {
-						continue;
-					}
-
-					$url      = \Simply_Static\Util::safe_join_url( $base_url, $relative_path );
-					$buffer[] = $url;
-
-					if ( count( $buffer ) >= $batch_size ) {
-						$count  += $this->enqueue_urls_batch( $buffer );
-						$buffer = [];
-						// Yield to allow other processes to run
-						usleep( 100000 );
-					}
 				}
-			} catch ( \Exception $e ) {
-				\Simply_Static\Util::debug_log( 'Error streaming uploads crawl: ' . $e->getMessage() );
+				$iterator->next();
+
+				if ( $processed >= $entry_limit || microtime( true ) >= $deadline ) {
+					break;
+				}
+			}
+
+			if ( ! empty( $buffer ) ) {
+				$added             = $this->enqueue_urls_batch( $buffer );
+				$invocation_added += $added;
+				$state['added']    += $added;
+				$buffer             = array();
+			}
+
+			if ( $iterator->valid() ) {
+				$this->complete = false;
+				$this->progress = array(
+					'added'   => $state['added'],
+					'scanned' => $state['scanned'],
+				);
+				$this->save_state( $state );
+				\Simply_Static\Util::debug_log( sprintf( 'Uploads crawler checkpointed after %d entries with %d URLs queued.', $state['scanned'], $state['added'] ) );
+
+				return $invocation_added;
+			}
+
+			$state['current_dir']  = null;
+			$state['entry_offset'] = 0;
+			if ( $processed >= $entry_limit || microtime( true ) >= $deadline ) {
+				$this->complete = false;
+				$this->progress = array(
+					'added'   => $state['added'],
+					'scanned' => $state['scanned'],
+				);
+				$this->save_state( $state );
+
+				return $invocation_added;
 			}
 		}
 
-		// Process remaining
-		if ( ! empty( $buffer ) ) {
-			$count += $this->enqueue_urls_batch( $buffer );
+		$this->progress = array(
+			'added'   => $state['added'],
+			'scanned' => $state['scanned'],
+		);
+		$this->clear_state();
+		\Simply_Static\Util::debug_log( sprintf( 'Uploads crawler added %d URLs across resumable batches.', $state['added'] ) );
+
+		return $invocation_added;
+	}
+
+	public function is_complete() : bool {
+		return $this->complete;
+	}
+
+	public function get_progress() : array {
+		return $this->progress;
+	}
+
+	/** @return array<int,array{basedir:string,baseurl:string}> */
+	protected function get_scan_directories() : array {
+		$uploads = wp_upload_dir();
+		$dirs    = array();
+		if ( isset( $uploads['basedir'], $uploads['baseurl'] ) && is_string( $uploads['basedir'] ) && is_string( $uploads['baseurl'] ) ) {
+			$canonical = realpath( $uploads['basedir'] );
+			$dirs[]    = array(
+				'basedir' => false === $canonical ? $uploads['basedir'] : $canonical,
+				'baseurl' => $uploads['baseurl'],
+			);
+		}
+		$additional = apply_filters( 'ss_uploads_additional_directories', array(
+			array(
+				'basedir' => WP_CONTENT_DIR . '/webp-express/webp-images/uploads',
+				'baseurl' => content_url( 'webp-express/webp-images/uploads' ),
+			),
+			array(
+				'basedir' => WP_CONTENT_DIR . '/compressx-nextgen/uploads',
+				'baseurl' => content_url( 'compressx-nextgen/uploads' ),
+			),
+		) );
+		foreach ( (array) $additional as $candidate ) {
+			if ( is_array( $candidate ) && isset( $candidate['basedir'], $candidate['baseurl'] ) && is_string( $candidate['basedir'] ) && is_string( $candidate['baseurl'] ) && is_dir( $candidate['basedir'] ) ) {
+				$canonical = realpath( $candidate['basedir'] );
+				$dirs[]    = array(
+					'basedir' => false === $canonical ? $candidate['basedir'] : $canonical,
+					'baseurl' => $candidate['baseurl'],
+				);
+			}
 		}
 
-		\Simply_Static\Util::debug_log( sprintf( 'Uploads crawler added %d URLs (streamed)', $count ) );
+		return $dirs;
+	}
 
-		return $count;
+	/** @return string[] */
+	protected function get_media_extensions() : array {
+		return array( 'jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'tiff', 'heic', 'svg', 'ico', 'css', 'js', 'woff', 'woff2', 'ttf', 'otf', 'eot', 'pdf', 'mp3', 'mp4', 'webm', 'ogg', 'wav', 'mov', 'avi', 'wmv', 'zip', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'json' );
+	}
+
+	protected function get_directory_iterator( string $directory ) : \FilesystemIterator {
+		return new \FilesystemIterator( $directory, \FilesystemIterator::SKIP_DOTS );
+	}
+
+	/** @param string[] $skip_dirs */
+	protected function should_skip_path( string $relative_path, array $skip_dirs ) : bool {
+		$path = trim( str_replace( '\\', '/', $relative_path ), '/' );
+		if ( \Simply_Static\Util::is_private_backup_path( $path ) ) {
+			return true;
+		}
+		foreach ( $skip_dirs as $skip_dir ) {
+			$skip = is_string( $skip_dir ) ? trim( str_replace( '\\', '/', $skip_dir ), '/' ) : '';
+			if ( '' !== $skip && ( $path === $skip || 0 === strpos( $path, $skip . '/' ) || false !== strpos( '/' . $path . '/', '/' . $skip . '/' ) ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/** @return string|false */
+	protected function resolve_scan_directory( string $base_dir, $relative_dir ) {
+		if ( ! is_string( $relative_dir ) || ! $this->is_safe_relative_directory( $relative_dir ) ) {
+			return false;
+		}
+		$root      = realpath( $base_dir );
+		$candidate = realpath( rtrim( $base_dir, '/\\' ) . ( '' === $relative_dir ? '' : '/' . $relative_dir ) );
+		if ( false === $root || false === $candidate || ! is_dir( $candidate ) ) {
+			return false;
+		}
+		$root = rtrim( str_replace( '\\', '/', $root ), '/' );
+		$path = str_replace( '\\', '/', $candidate );
+		if ( $path !== $root && 0 !== strpos( $path, $root . '/' ) ) {
+			return false;
+		}
+
+		return $candidate;
+	}
+
+	protected function is_safe_relative_directory( string $path ) : bool {
+		if ( false !== strpos( $path, "\0" ) || 0 === strpos( str_replace( '\\', '/', $path ), '/' ) ) {
+			return false;
+		}
+		foreach ( explode( '/', str_replace( '\\', '/', $path ) ) as $segment ) {
+			if ( '.' === $segment || '..' === $segment ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/** @param array<int,array{basedir:string,baseurl:string}> $scan_dirs */
+	protected function get_state_signature( array $scan_dirs ) : string {
+		return hash( 'sha256', serialize( array(
+			'archive_start_time' => \Simply_Static\Options::instance()->get( 'archive_start_time' ),
+			'scan_dirs'          => $scan_dirs,
+		) ) );
+	}
+
+	/** @return array<string,mixed> */
+	protected function load_state( string $signature ) : array {
+		$state = \Simply_Static\Options::instance()->get( 'uploads_crawler_state' );
+		if ( ! is_array( $state ) || 1 !== ( $state['version'] ?? null ) || $signature !== ( $state['signature'] ?? null ) ) {
+			return $this->new_state( $signature );
+		}
+		if ( ! isset( $state['scan_index'], $state['entry_offset'], $state['pending_dirs'], $state['added'], $state['scanned'] ) || ! is_array( $state['pending_dirs'] ) ) {
+			return $this->new_state( $signature );
+		}
+		if ( count( $state['pending_dirs'] ) > 50000 || ! is_int( $state['scan_index'] ) || $state['scan_index'] < 0 || ! is_int( $state['entry_offset'] ) || $state['entry_offset'] < 0 ) {
+			return $this->new_state( $signature );
+		}
+		if ( ! is_int( $state['added'] ) || $state['added'] < 0 || ! is_int( $state['scanned'] ) || $state['scanned'] < 0 ) {
+			return $this->new_state( $signature );
+		}
+
+		$current_dir = $state['current_dir'] ?? null;
+		if ( null !== $current_dir && ( ! is_string( $current_dir ) || ! $this->is_safe_relative_directory( $current_dir ) ) ) {
+			return $this->new_state( $signature );
+		}
+		foreach ( $state['pending_dirs'] as $directory ) {
+			if ( ! is_string( $directory ) || ! $this->is_safe_relative_directory( $directory ) ) {
+				return $this->new_state( $signature );
+			}
+		}
+
+		return $state;
+	}
+
+	/** @return array<string,mixed> */
+	protected function new_state( string $signature ) : array {
+		return array(
+			'version'      => 1,
+			'signature'    => $signature,
+			'scan_index'   => 0,
+			'current_dir'  => null,
+			'entry_offset' => 0,
+			'pending_dirs' => array( '' ),
+			'added'        => 0,
+			'scanned'      => 0,
+		);
+	}
+
+	/** @param array<string,mixed> $state */
+	protected function save_state( array $state ) : void {
+		if ( ! \Simply_Static\Options::instance()->set( 'uploads_crawler_state', $state )->save() ) {
+			throw new \RuntimeException( 'Unable to save the uploads crawler checkpoint.' );
+		}
+	}
+
+	protected function clear_state() : void {
+		$options = \Simply_Static\Options::instance();
+		$options->destroy( 'uploads_crawler_state' );
+		if ( ! $options->save() ) {
+			throw new \RuntimeException( 'Unable to clear the uploads crawler checkpoint.' );
+		}
 	}
 
 	/**
@@ -250,7 +414,7 @@ class Uploads_Crawler extends Crawler {
 
 		foreach ( $urls as $url ) {
 			// Skip URLs that are excluded by settings/patterns to avoid adding them to the DB at all
-   if ( \Simply_Static\Util::is_url_excluded( $url ) ) {
+			if ( \Simply_Static\Util::is_url_excluded( $url ) ) {
 				\Simply_Static\Util::debug_log( sprintf( 'Uploads crawler skipping excluded URL: %s', $url ) );
 				continue;
 			}
