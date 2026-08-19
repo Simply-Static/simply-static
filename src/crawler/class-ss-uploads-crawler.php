@@ -438,7 +438,10 @@ class Uploads_Crawler extends Crawler {
 	 * @return array List of media file URLs
 	 */
 	private function scan_directory_for_media_files( $dir, $url_base ): array {
-		$urls = [];
+		$urls            = [];
+		$max_entries     = max( 1, min( 100000, (int) apply_filters( 'simply_static_uploads_detection_max_entries', 5000 ) ) );
+		$deadline        = microtime( true ) + max( 0.5, min( 15, (float) apply_filters( 'simply_static_uploads_detection_max_seconds', 5 ) ) );
+		$entries_scanned = 0;
 
 		// Media file extensions to look for
 		$media_extensions = [
@@ -508,6 +511,10 @@ class Uploads_Crawler extends Crawler {
 			$file_batch  = [];
 
 			foreach ( $iterator as $file ) {
+				$entries_scanned++;
+				if ( $entries_scanned > $max_entries || microtime( true ) >= $deadline ) {
+					break;
+				}
 				// Skip directories
 				if ( $file->isDir() ) {
 					continue;
