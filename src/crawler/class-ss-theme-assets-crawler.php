@@ -65,9 +65,6 @@ class Theme_Assets_Crawler extends Crawler {
 	 * @return int
 	 */
 	public function add_urls_to_queue(): int {
-		$count      = 0;
-		$batch      = [];
-		$batch_sz   = (int) apply_filters( 'simply_static_crawler_batch_size', 100 );
 		$extensions = [
 			'css',
 			'js',
@@ -106,7 +103,7 @@ class Theme_Assets_Crawler extends Crawler {
 			$themes[] = [ get_stylesheet_directory(), get_stylesheet_directory_uri() ];
 		}
 		$parent_slug = get_template();
-		if ( $p = wp_get_theme()->parent() ) {
+		if ( wp_get_theme()->parent() ) {
 			$parent_dir = get_template_directory();
 			$parent_url = get_template_directory_uri();
 			if ( $parent_dir !== ( $themes[0][0] ?? '' ) ) {
@@ -116,91 +113,18 @@ class Theme_Assets_Crawler extends Crawler {
 			}
 		}
 
-		foreach ( $themes as [$dir, $url_base] ) {
-			if ( ! is_dir( $dir ) ) {
-				\Simply_Static\Util::debug_log( "Theme directory does not exist: $dir" );
-				continue;
-			}
+		$directories = array_map( static function ( $theme ) {
+			return array( 'basedir' => $theme[0], 'baseurl' => $theme[1] );
+		}, $themes );
 
-			try {
-				$it = new \RecursiveIteratorIterator(
-					new \RecursiveDirectoryIterator( $dir, \RecursiveDirectoryIterator::SKIP_DOTS ),
-					\RecursiveIteratorIterator::SELF_FIRST
-				);
-				foreach ( $it as $file ) {
-					if ( $file->isDir() ) {
-						continue;
-					}
-					// Build a safe relative path from the theme directory prefix
-					$rel  = \Simply_Static\Util::safe_relative_path( $dir, $file->getPathname() );
-					$skip = false;
-					foreach ( (array) $skip_dirs as $sd ) {
-						$sd = trim( $sd, "/" );
-						if ( $sd === '' ) {
-							continue;
-						}
-						if (
-							strpos( $rel, '/' . $sd . '/' ) !== false ||
-							strpos( $rel, $sd . '/' ) === 0 ||
-							substr( $rel, - ( strlen( $sd ) + 1 ) ) === '/' . $sd
-						) {
-							$skip = true;
-							break;
-						}
-					}
-					if ( $skip ) {
-						continue;
-					}
-					$ext = strtolower( pathinfo( $rel, PATHINFO_EXTENSION ) );
-					if ( ! in_array( $ext, $extensions, true ) ) {
-						continue;
-					}
-					// Join with exactly one slash between base and relative
-					$batch[] = \Simply_Static\Util::safe_join_url( $url_base, $rel );
-					if ( count( $batch ) >= $batch_sz ) {
-						$count += $this->enqueue_urls_batch( $batch );
-						$batch = [];
-						usleep( 100000 );
-					}
-				}
-			} catch ( \Exception $e ) {
-				\Simply_Static\Util::debug_log( 'Error streaming theme crawl: ' . $e->getMessage() );
-			}
-		}
-
-		if ( ! empty( $batch ) ) {
-			$count += $this->enqueue_urls_batch( $batch );
-		}
-
-		\Simply_Static\Util::debug_log( sprintf( 'Theme assets crawler added %d URLs (streamed)', $count ) );
-
-		return $count;
-	}
-
-	/**
-	 * Enqueue a batch of URLs.
-	 *
-	 * @param array $urls
-	 *
-	 * @return int
-	 */
-	private function enqueue_urls_batch( array $urls ): int {
-		$added = 0;
-		\Simply_Static\Util::debug_log( sprintf( 'Processing batch of %d URLs for %s crawler', count( $urls ), $this->name ) );
-		foreach ( $urls as $url ) {
-			// Skip URLs that are excluded by settings/patterns
-			if ( \Simply_Static\Util::is_url_excluded( $url ) ) {
-				\Simply_Static\Util::debug_log( sprintf( 'Theme assets crawler skipping excluded URL: %s', $url ) );
-				continue;
-			}
-			$static_page = \Simply_Static\Page::query()->find_or_initialize_by( 'url', $url );
-			$static_page->set_status_message( sprintf( __( 'Added by %s Crawler', 'simply-static' ), $this->name ) );
-			$static_page->found_on_id = 0;
-			$static_page->save();
-			$added ++;
-		}
-
-		return $added;
+		return $this->enqueue_directory_batch(
+			'theme_assets_crawler_state',
+			$directories,
+			$extensions,
+			(array) $skip_dirs,
+			'simply_static_theme_assets_crawler_max_entries_per_batch',
+			'simply_static_theme_assets_crawler_max_batch_seconds'
+		);
 	}
 
 	/**
@@ -212,7 +136,10 @@ class Theme_Assets_Crawler extends Crawler {
 	 * @return array List of asset URLs
 	 */
 	private function scan_directory_for_assets( $dir, $url_base ): array {
-		$urls = [];
+		$urls        = [];
+		$max_entries = max( 1, min( 100000, (int) apply_filters( 'simply_static_theme_detection_max_entries', 5000 ) ) );
+		$deadline    = microtime( true ) + max( 0.5, min( 15, (float) apply_filters( 'simply_static_theme_detection_max_seconds', 5 ) ) );
+		$scanned     = 0;
 
 		// Asset file extensions to look for
 		$asset_extensions = [
@@ -252,6 +179,10 @@ class Theme_Assets_Crawler extends Crawler {
 		);
 
 		foreach ( $files as $file ) {
+			$scanned++;
+			if ( $scanned > $max_entries || microtime( true ) >= $deadline ) {
+				break;
+			}
 			// Skip directories
 			if ( $file->isDir() ) {
 				continue;

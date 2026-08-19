@@ -87,75 +87,17 @@ class Beaver_Builder_Crawler extends Crawler {
 			return 0;
 		}
 
-		$dir = trailingslashit( $uploads['basedir'] ) . 'bb-plugin/cache';
-		$base_url = trailingslashit( $uploads['baseurl'] ) . 'bb-plugin/cache';
-
-		if ( ! is_dir( $dir ) ) {
-			return 0;
-		}
-
-		$count    = 0;
-		$batch    = [];
-		$batch_sz = (int) apply_filters( 'simply_static_crawler_batch_size', 100 );
-
-		$extensions = [ 'css','js','png','jpg','jpeg','gif','svg','webp','woff','woff2','ttf','eot','otf','ico','mp4','webm','json','map' ];
-		$skip_dirs  = apply_filters( 'ss_skip_crawl_beaver_builder_directories', [ '.git','node_modules','vendor/bin','vendor/composer','tests' ] );
-
-		try {
-			$it = new \RecursiveIteratorIterator(
-				new \RecursiveDirectoryIterator( $dir, \RecursiveDirectoryIterator::SKIP_DOTS ),
-				\RecursiveIteratorIterator::SELF_FIRST
-			);
-			foreach ( $it as $file ) {
-				if ( $file->isDir() ) { continue; }
-				$rel = \Simply_Static\Util::safe_relative_path( $dir, $file->getPathname() );
-				$skip = false;
-				foreach ( (array) $skip_dirs as $sd ) {
-					if ( $sd && strpos( $rel, '/' . $sd . '/' ) !== false ) { $skip = true; break; }
-				}
-				if ( $skip ) { continue; }
-				$ext = strtolower( pathinfo( $rel, PATHINFO_EXTENSION ) );
-				if ( $ext && ! in_array( $ext, $extensions, true ) ) { continue; }
-				$batch[] = \Simply_Static\Util::safe_join_url( $base_url, $rel );
-				if ( count( $batch ) >= $batch_sz ) {
-					$count += $this->enqueue_urls_batch( $batch );
-					$batch = [];
-					usleep( 100000 );
-				}
-			}
-		} catch ( \Exception $e ) {
-			\Simply_Static\Util::debug_log( 'Error streaming Beaver Builder cache crawl: ' . $e->getMessage() );
-		}
-
-		if ( ! empty( $batch ) ) {
-			$count += $this->enqueue_urls_batch( $batch );
-		}
-
-		\Simply_Static\Util::debug_log( sprintf( 'Beaver Builder crawler added %d URLs (streamed)', $count ) );
-		return $count;
-	}
-
-	/**
-	 * Helper: enqueue a batch of URLs.
-	 *
-	 * @param array $urls
-	 * @return int
-	 */
-	protected function enqueue_urls_batch( array $urls ): int {
-		$added = 0;
-  foreach ( $urls as $url ) {
-			// Skip URLs that are excluded by settings/patterns
-			if ( \Simply_Static\Util::is_url_excluded( $url ) ) {
-				\Simply_Static\Util::debug_log( sprintf( 'Beaver Builder crawler skipping excluded URL: %s', $url ) );
-				continue;
-			}
-			$static_page = \Simply_Static\Page::query()->find_or_initialize_by( 'url', $url );
-			$static_page->set_status_message( __( 'Beaver Builder Cache', 'simply-static' ) );
-			$static_page->found_on_id = 0;
-			$static_page->save();
-			$added++;
-		}
-		return $added;
+		return $this->enqueue_directory_batch(
+			'beaver_builder_crawler_state',
+			array( array(
+				'basedir' => trailingslashit( $uploads['basedir'] ) . 'bb-plugin/cache',
+				'baseurl' => trailingslashit( $uploads['baseurl'] ) . 'bb-plugin/cache',
+			) ),
+			array( 'css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'woff', 'woff2', 'ttf', 'eot', 'otf', 'ico', 'mp4', 'webm', 'json', 'map' ),
+			(array) apply_filters( 'ss_skip_crawl_beaver_builder_directories', array( '.git', 'node_modules', 'vendor/bin', 'vendor/composer', 'tests' ) ),
+			'simply_static_beaver_builder_crawler_max_entries_per_batch',
+			'simply_static_beaver_builder_crawler_max_batch_seconds'
+		);
 	}
 
 	/**
@@ -167,6 +109,9 @@ class Beaver_Builder_Crawler extends Crawler {
 	 */
 	protected function scan_directory_for_assets( $dir_root, $url_base ) : array {
 		$urls = [];
+		$max_entries = max( 1, min( 100000, (int) apply_filters( 'simply_static_beaver_builder_detection_max_entries', 5000 ) ) );
+		$deadline    = microtime( true ) + max( 0.5, min( 15, (float) apply_filters( 'simply_static_beaver_builder_detection_max_seconds', 5 ) ) );
+		$scanned     = 0;
 		$extensions = [ 'css','js','png','jpg','jpeg','gif','svg','webp','woff','woff2','ttf','eot','otf','ico','mp4','webm','json','map' ];
 		$skip_dirs  = apply_filters( 'ss_skip_crawl_beaver_builder_directories', [ '.git','node_modules','vendor/bin','vendor/composer','tests' ] );
 
@@ -176,6 +121,10 @@ class Beaver_Builder_Crawler extends Crawler {
 				\RecursiveIteratorIterator::SELF_FIRST
 			);
 			foreach ( $it as $file ) {
+				$scanned++;
+				if ( $scanned > $max_entries || microtime( true ) >= $deadline ) {
+					break;
+				}
 				if ( $file->isDir() ) { continue; }
 				$rel = \Simply_Static\Util::safe_relative_path( $dir_root, $file->getPathname() );
 				$skip = false;

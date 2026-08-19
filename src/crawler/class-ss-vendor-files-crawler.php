@@ -58,6 +58,56 @@ class Vendor_Files_Crawler extends Crawler {
 	}
 
 	/**
+	 * Traverse vendor roots across bounded background requests.
+	 *
+	 * @return int Number of URLs added by this invocation.
+	 */
+	public function add_urls_to_queue() : int {
+		return $this->enqueue_directory_batch(
+			'vendor_files_crawler_state',
+			$this->get_vendor_scan_directories(),
+			array( 'js', 'css', 'woff', 'woff2', 'ttf', 'eot', 'otf', 'svg', 'json' ),
+			(array) apply_filters( 'ss_skip_crawl_vendor_directories', array( '.git', 'node_modules', 'tests', 'docs', 'examples' ) ),
+			'simply_static_vendor_files_crawler_max_entries_per_batch',
+			'simply_static_vendor_files_crawler_max_batch_seconds'
+		);
+	}
+
+	/** @return array<int,array{basedir:string,baseurl:string}> */
+	private function get_vendor_scan_directories() : array {
+		$directories = array();
+		$vendor_dirs = array( 'vendor', 'vendors', 'lib', 'libs', 'library', 'libraries', 'assets/vendor', 'assets/vendors', 'assets/lib', 'assets/libs', 'includes/vendor', 'includes/vendors', 'includes/lib', 'includes/libs' );
+
+		foreach ( \Simply_Static\Util::get_all_active_plugins() as $plugin ) {
+			$plugin_dir = dirname( $plugin );
+			if ( '.' === $plugin_dir ) {
+				continue;
+			}
+			foreach ( $vendor_dirs as $vendor_dir ) {
+				$directories[] = array(
+					'basedir' => WP_PLUGIN_DIR . '/' . $plugin_dir . '/' . $vendor_dir,
+					'baseurl' => trailingslashit( plugins_url() ) . $plugin_dir . '/' . $vendor_dir,
+				);
+			}
+		}
+
+		$themes = array( array( get_stylesheet_directory(), get_stylesheet_directory_uri() ) );
+		if ( get_template_directory() !== get_stylesheet_directory() ) {
+			$themes[] = array( get_template_directory(), get_template_directory_uri() );
+		}
+		foreach ( $themes as $theme ) {
+			foreach ( $vendor_dirs as $vendor_dir ) {
+				$directories[] = array(
+					'basedir' => trailingslashit( $theme[0] ) . $vendor_dir,
+					'baseurl' => trailingslashit( $theme[1] ) . $vendor_dir,
+				);
+			}
+		}
+
+		return $directories;
+	}
+
+	/**
 	 * Scan plugins for vendor files
 	 *
 	 * @return array List of vendor file URLs
@@ -219,7 +269,10 @@ class Vendor_Files_Crawler extends Crawler {
 	 * @return array List of vendor file URLs
 	 */
 	private function scan_directory_for_vendor_files($dir, $url_base, $extensions) : array {
-		$urls = [];
+		$urls            = [];
+		$max_entries     = max( 1, min( 100000, (int) apply_filters( 'simply_static_vendor_detection_max_entries', 5000 ) ) );
+		$deadline        = microtime( true ) + max( 0.5, min( 15, (float) apply_filters( 'simply_static_vendor_detection_max_seconds', 5 ) ) );
+		$entries_scanned = 0;
 
 		// Skip these directories
 		$skip_dirs = ['.git', 'node_modules', 'tests', 'docs', 'examples'];
@@ -244,6 +297,10 @@ class Vendor_Files_Crawler extends Crawler {
 			$file_batch = [];
 
 			foreach ( $iterator as $file ) {
+				$entries_scanned++;
+				if ( $entries_scanned > $max_entries || microtime( true ) >= $deadline ) {
+					break;
+				}
 				// Skip directories
 				if ( $file->isDir() ) {
 					continue;

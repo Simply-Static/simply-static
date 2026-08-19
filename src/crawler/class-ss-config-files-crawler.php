@@ -63,20 +63,21 @@ class Config_Files_Crawler extends Crawler {
 			return $config_urls;
 		}
 
-		// Get all JSON and HTML files in the directory
-		$json_files = glob( $configs_dir . '*.json' );
-		$html_files = glob( $configs_dir . '*.html' );
-		$files = array_merge( $json_files ?: [], $html_files ?: [] );
-
-		foreach ( $files as $file ) {
-			// Get the filename
-			$filename = basename( $file );
-
-			// Create the URL
-			$url = $configs_url . $filename;
-
-			// Add to the list of URLs
-			$config_urls[] = $url;
+		$max_files = max( 1, min( 10000, (int) apply_filters( 'simply_static_config_files_max_files', 1000 ) ) );
+		try {
+			$files = new \FilesystemIterator( $configs_dir, \FilesystemIterator::SKIP_DOTS );
+			foreach ( $files as $file ) {
+				if ( count( $config_urls ) >= $max_files ) {
+					\Simply_Static\Util::debug_log( sprintf( 'Config files crawler stopped at its %d-file safety limit.', $max_files ) );
+					break;
+				}
+				if ( ! $file->isFile() || $file->isLink() || ! in_array( strtolower( $file->getExtension() ), array( 'json', 'html' ), true ) ) {
+					continue;
+				}
+				$config_urls[] = $configs_url . $file->getFilename();
+			}
+		} catch ( \UnexpectedValueException $exception ) {
+			\Simply_Static\Util::debug_log( 'Config files crawler could not read its directory: ' . $exception->getMessage() );
 		}
 
 		return $config_urls;

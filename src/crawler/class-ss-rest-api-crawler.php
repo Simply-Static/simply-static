@@ -64,9 +64,14 @@ class Rest_Api_Crawler extends Crawler {
 		// Get all registered REST routes
 		$rest_server = rest_get_server();
 		$routes = $rest_server->get_routes();
+		$max_routes = max( 1, min( 50000, (int) apply_filters( 'simply_static_rest_api_max_routes', 5000 ) ) );
 
 		// Add URLs for each route
 		foreach ( $routes as $route => $handlers ) {
+			if ( count( $rest_urls ) >= $max_routes ) {
+				\Simply_Static\Util::debug_log( sprintf( 'REST API crawler stopped at its %d-route safety limit.', $max_routes ) );
+				break;
+			}
 			// Skip internal WordPress routes that aren't typically needed
 			if ( $this->should_skip_route( $route ) ) {
 				continue;

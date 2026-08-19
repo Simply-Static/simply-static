@@ -56,6 +56,9 @@ class Plugin_Assets_Crawler extends Crawler {
 			}
 			// Get the plugin directory
 			$plugin_dir  = dirname( $plugin );
+			if ( '.' === $plugin_dir ) {
+				continue;
+			}
 			$plugin_path = $plugins_dir . '/' . $plugin_dir;
 
 			// Skip if the plugin directory doesn't exist
@@ -79,9 +82,6 @@ class Plugin_Assets_Crawler extends Crawler {
 	 * @return int
 	 */
 	public function add_urls_to_queue(): int {
-		$count      = 0;
-		$batch      = [];
-		$batch_sz   = (int) apply_filters( 'simply_static_crawler_batch_size', 100 );
 		$assets_ext = [
 			'css',
 			'js',
@@ -117,12 +117,12 @@ class Plugin_Assets_Crawler extends Crawler {
 		] );
 
 		$plugins_url    = plugins_url();
-		$plugins_dir    = WP_PLUGIN_DIR;
 		$active_plugins = \Simply_Static\Util::get_all_active_plugins();
 		$allowed        = (array) \Simply_Static\Options::instance()->get( 'plugins_to_include' );
 		$allowed        = is_array( $allowed ) ? array_filter( array_map( 'strval', $allowed ) ) : [];
 		$allowed        = apply_filters( 'ss_crawlable_plugins', $allowed );
 
+		$directories = array();
 		foreach ( $active_plugins as $plugin ) {
 			if ( ! empty( $allowed ) ) {
 				$slug = dirname( $plugin );
@@ -131,91 +131,26 @@ class Plugin_Assets_Crawler extends Crawler {
 				}
 			}
 			$plugin_dir  = dirname( $plugin );
-			$plugin_path = $plugins_dir . '/' . $plugin_dir;
+			if ( '.' === $plugin_dir ) {
+				continue;
+			}
+			$plugin_path = WP_PLUGIN_DIR . '/' . $plugin_dir;
 			$base_url    = $plugins_url . '/' . $plugin_dir;
-			if ( ! is_dir( $plugin_path ) ) {
-				continue;
-			}
-
-			try {
-				$it = new \RecursiveIteratorIterator(
-					new \RecursiveDirectoryIterator( $plugin_path, \RecursiveDirectoryIterator::SKIP_DOTS ),
-					\RecursiveIteratorIterator::SELF_FIRST
-				);
-				foreach ( $it as $file ) {
-					if ( $file->isDir() ) {
-						continue;
-					}
-					// Build a safe relative path from the plugin directory prefix
-					$rel = \Simply_Static\Util::safe_relative_path( $plugin_path, $file->getPathname() );
-					// Skip unwanted directories
-					$skip = false;
-					foreach ( (array) $skip_dirs as $sd ) {
-						if ( $sd && strpos( $rel, '/' . $sd . '/' ) !== false ) {
-							$skip = true;
-							break;
-						}
-					}
-					// Extra skips (languages JSON and composer.json)
-					$ext = strtolower( pathinfo( $rel, PATHINFO_EXTENSION ) );
-					if ( ! $skip && $ext === 'json' && strpos( $rel, '/languages/' ) !== false ) {
-						$skip = true;
-					}
-					if ( ! $skip && strtolower( basename( $rel ) ) === 'composer.json' ) {
-						$skip = true;
-					}
-					if ( $skip ) {
-						continue;
-					}
-					if ( ! in_array( $ext, $assets_ext, true ) ) {
-						continue;
-					}
-					// Join with exactly one slash between base and relative
-					$batch[] = \Simply_Static\Util::safe_join_url( $base_url, $rel );
-					if ( count( $batch ) >= $batch_sz ) {
-						$count += $this->enqueue_urls_batch( $batch );
-						$batch = [];
-						usleep( 100000 );
-					}
-				}
-			} catch ( \Exception $e ) {
-				\Simply_Static\Util::debug_log( 'Error streaming plugin assets crawl: ' . $e->getMessage() );
+			if ( is_dir( $plugin_path ) ) {
+				$directories[] = array( 'basedir' => $plugin_path, 'baseurl' => $base_url );
 			}
 		}
 
-		if ( ! empty( $batch ) ) {
-			$count += $this->enqueue_urls_batch( $batch );
-		}
+		$skip_dirs[] = 'composer.json';
 
-		\Simply_Static\Util::debug_log( sprintf( 'Plugin assets crawler added %d URLs (streamed)', $count ) );
-
-		return $count;
-	}
-
-	/**
-	 * Enqueue a batch of URLs.
-	 *
-	 * @param array $urls
-	 *
-	 * @return int
-	 */
-	private function enqueue_urls_batch( array $urls ): int {
-		$added = 0;
-		\Simply_Static\Util::debug_log( sprintf( 'Processing batch of %d URLs for %s crawler', count( $urls ), $this->name ) );
-		foreach ( $urls as $url ) {
-			// Skip URLs that are excluded by settings/patterns
-			if ( \Simply_Static\Util::is_url_excluded( $url ) ) {
-				\Simply_Static\Util::debug_log( sprintf( 'Plugin assets crawler skipping excluded URL: %s', $url ) );
-				continue;
-			}
-			$static_page = \Simply_Static\Page::query()->find_or_initialize_by( 'url', $url );
-			$static_page->set_status_message( sprintf( __( 'Added by %s Crawler', 'simply-static' ), $this->name ) );
-			$static_page->found_on_id = 0;
-			$static_page->save();
-			$added ++;
-		}
-
-		return $added;
+		return $this->enqueue_directory_batch(
+			'plugin_assets_crawler_state',
+			$directories,
+			$assets_ext,
+			(array) $skip_dirs,
+			'simply_static_plugin_assets_crawler_max_entries_per_batch',
+			'simply_static_plugin_assets_crawler_max_batch_seconds'
+		);
 	}
 
 	/**
@@ -227,7 +162,10 @@ class Plugin_Assets_Crawler extends Crawler {
 	 * @return array List of asset URLs
 	 */
 	private function scan_directory_for_assets( $dir, $url_base ): array {
-		$urls = [];
+		$urls            = [];
+		$max_entries     = max( 1, min( 100000, (int) apply_filters( 'simply_static_plugin_assets_detection_max_entries', 5000 ) ) );
+		$deadline        = microtime( true ) + max( 0.5, min( 15, (float) apply_filters( 'simply_static_plugin_assets_detection_max_seconds', 5 ) ) );
+		$entries_scanned = 0;
 
 		// Asset file extensions to look for
 		$asset_extensions = [
@@ -287,6 +225,10 @@ class Plugin_Assets_Crawler extends Crawler {
 			$file_batch  = [];
 
 			foreach ( $iterator as $file ) {
+				$entries_scanned++;
+				if ( $entries_scanned > $max_entries || microtime( true ) >= $deadline ) {
+					break;
+				}
 				// Skip directories
 				if ( $file->isDir() ) {
 					continue;

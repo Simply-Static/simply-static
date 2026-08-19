@@ -139,83 +139,17 @@ class Divi_Crawler extends Crawler {
 	 * @return int Number of URLs added
 	 */
 	public function add_urls_to_queue(): int {
-		$count     = 0;
-		$batch     = [];
-		$batch_sz  = (int) apply_filters( 'simply_static_crawler_batch_size', 100 );
-
-		$site_url = site_url();
-		$wp_path  = ABSPATH;
-
-		$targets = [
-			'/wp-content/et-cache'   => $wp_path . 'wp-content/et-cache',
-			'/wp-content/themes/Divi' => $wp_path . 'wp-content/themes/Divi',
-		];
-
-		$extensions = [ 'css','js','png','jpg','jpeg','gif','svg','webp','woff','woff2','ttf','eot','otf','ico','mp4','webm' ];
-		$skip_dirs  = apply_filters( 'ss_skip_crawl_divi_directories', [ '.git','node_modules','vendor/bin','vendor/composer','tests' ] );
-
-		foreach ( $targets as $url_base => $dir_root ) {
-			if ( ! is_dir( $dir_root ) ) {
-				\Simply_Static\Util::debug_log( "Directory does not exist: $dir_root" );
-				continue;
-			}
-			try {
-				$it = new \RecursiveIteratorIterator(
-					new \RecursiveDirectoryIterator( $dir_root, \RecursiveDirectoryIterator::SKIP_DOTS ),
-					\RecursiveIteratorIterator::SELF_FIRST
-				);
-				foreach ( $it as $file ) {
-					if ( $file->isDir() ) { continue; }
-					$rel = \Simply_Static\Util::safe_relative_path( $dir_root, $file->getPathname() );
-					$skip = false;
-					foreach ( (array) $skip_dirs as $sd ) {
-						if ( $sd && strpos( $rel, '/' . $sd . '/' ) !== false ) { $skip = true; break; }
-					}
-					if ( $skip ) { continue; }
-					$ext = strtolower( pathinfo( $rel, PATHINFO_EXTENSION ) );
-					if ( $ext && ! in_array( $ext, $extensions, true ) ) { continue; }
-					$batch[] = \Simply_Static\Util::safe_join_url( $site_url . $url_base, $rel );
-					if ( count( $batch ) >= $batch_sz ) {
-						$count += $this->enqueue_urls_batch( $batch );
-						$batch = [];
-						usleep( 100000 );
-					}
-				}
-			} catch ( \Exception $e ) {
-				\Simply_Static\Util::debug_log( 'Error streaming Divi directory crawl: ' . $e->getMessage() );
-			}
-		}
-
-		if ( ! empty( $batch ) ) {
-			$count += $this->enqueue_urls_batch( $batch );
-		}
-
-		\Simply_Static\Util::debug_log( sprintf( 'Divi crawler added %d URLs (streamed)', $count ) );
-		return $count;
-	}
-
-	/**
-	 * Enqueue a batch of URLs and return how many were added.
-	 *
-	 * @param array $urls
-	 * @return int
-	 */
-	private function enqueue_urls_batch( array $urls ): int {
-		$added = 0;
-		\Simply_Static\Util::debug_log( sprintf( 'Processing batch of %d URLs for %s crawler', count( $urls ), $this->name ) );
-  foreach ( $urls as $url ) {
-  			// Skip URLs that are excluded by settings/patterns
-  			if ( \Simply_Static\Util::is_url_excluded( $url ) ) {
-  				\Simply_Static\Util::debug_log( sprintf( 'Divi crawler skipping excluded URL: %s', $url ) );
-  				continue;
-  			}
-			$static_page = \Simply_Static\Page::query()->find_or_initialize_by( 'url', $url );
-			$static_page->set_status_message( sprintf( __( 'Added by %s Crawler', 'simply-static' ), $this->name ) );
-			$static_page->found_on_id = 0;
-			$static_page->save();
-			$added++;
-		}
-		return $added;
+		return $this->enqueue_directory_batch(
+			'divi_crawler_state',
+			array(
+				array( 'basedir' => ABSPATH . 'wp-content/et-cache', 'baseurl' => site_url( '/wp-content/et-cache' ) ),
+				array( 'basedir' => ABSPATH . 'wp-content/themes/Divi', 'baseurl' => site_url( '/wp-content/themes/Divi' ) ),
+			),
+			array( 'css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'woff', 'woff2', 'ttf', 'eot', 'otf', 'ico', 'mp4', 'webm' ),
+			(array) apply_filters( 'ss_skip_crawl_divi_directories', array( '.git', 'node_modules', 'vendor/bin', 'vendor/composer', 'tests' ) ),
+			'simply_static_divi_crawler_max_entries_per_batch',
+			'simply_static_divi_crawler_max_batch_seconds'
+		);
 	}
 
 	/**
@@ -228,6 +162,9 @@ class Divi_Crawler extends Crawler {
 	 */
 	private function scan_directory_for_assets( $dir, $url_base ): array {
 		$urls = [];
+		$max_entries = max( 1, min( 100000, (int) apply_filters( 'simply_static_divi_detection_max_entries', 5000 ) ) );
+		$deadline    = microtime( true ) + max( 0.5, min( 15, (float) apply_filters( 'simply_static_divi_detection_max_seconds', 5 ) ) );
+		$scanned     = 0;
 
 		$asset_extensions = [
 			'css','js','png','jpg','jpeg','gif','svg','webp','woff','woff2','ttf','eot','otf','ico','mp4','webm'
@@ -246,6 +183,10 @@ class Divi_Crawler extends Crawler {
 				\RecursiveIteratorIterator::SELF_FIRST
 			);
 			foreach ( $iterator as $file ) {
+				$scanned++;
+				if ( $scanned > $max_entries || microtime( true ) >= $deadline ) {
+					break;
+				}
 				if ( $file->isDir() ) { continue; }
 				$relative_path = \Simply_Static\Util::safe_relative_path( $dir, $file->getPathname() );
 				$skip = false;

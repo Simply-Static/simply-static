@@ -212,6 +212,24 @@ class Discover_Urls_Task extends Task {
 		$this->options->destroy( $this->crawler_index_option );
 		$this->options->destroy( $this->initial_count_option );
 		$this->options->destroy( $this->total_added_option );
+		foreach ( array(
+			'archive_crawler_state',
+			'author_crawler_state',
+			'beaver_builder_crawler_state',
+			'divi_crawler_state',
+			'elementor_crawler_state',
+			'elementor_directory_crawler_state',
+			'plugin_assets_crawler_state',
+			'post_type_crawler_state',
+			'rss_feeds_crawler_state',
+			'taxonomy_crawler_state',
+			'theme_assets_crawler_state',
+			'uploads_crawler_state',
+			'vendor_files_crawler_state',
+			'wp_includes_crawler_state',
+		) as $crawler_state ) {
+			$this->options->destroy( $crawler_state );
+		}
 
 		$this->options->save();
 	}

@@ -54,6 +54,7 @@ class Rss_Feeds_Crawler extends Crawler {
 	 */
 	public function detect(): array {
 		$feed_urls = [];
+		$max_objects = max( 1, min( 100000, (int) apply_filters( 'simply_static_rss_feed_detection_limit', 1000 ) ) );
 
 		$options                 = get_option( 'simply-static' );
 		$has_post_type_selection = isset( $options['post_types'] ) && is_array( $options['post_types'] ) && ( ! empty( $options['post_types_configured'] ) || ! empty( $options['post_types'] ) );
@@ -73,19 +74,19 @@ class Rss_Feeds_Crawler extends Crawler {
 			$feed_urls[] = get_feed_link( 'comments_' );
 
 			// Add category feeds
-			$categories = get_categories( [ 'hide_empty' => true ] );
+			$categories = get_categories( [ 'hide_empty' => true, 'number' => $max_objects ] );
 			foreach ( $categories as $category ) {
 				$feed_urls[] = get_category_feed_link( $category->term_id );
 			}
 
 			// Add tag feeds
-			$tags = get_tags( [ 'hide_empty' => true ] );
+			$tags = get_tags( [ 'hide_empty' => true, 'number' => $max_objects ] );
 			foreach ( $tags as $tag ) {
 				$feed_urls[] = get_tag_feed_link( $tag->term_id );
 			}
 
 			// Add author feeds
-			$users = get_users();
+			$users = get_users( array( 'number' => $max_objects, 'orderby' => 'ID', 'order' => 'ASC' ) );
 			foreach ( $users as $user ) {
 				$feed_urls[] = get_author_feed_link( $user->ID );
 			}
@@ -120,5 +121,118 @@ class Rss_Feeds_Crawler extends Crawler {
 		} );
 
 		return array_unique( $feed_urls );
+	}
+
+	/**
+	 * Traverse term and author feeds across bounded background requests.
+	 *
+	 * @return int Number of URLs added by this invocation.
+	 */
+	public function add_urls_to_queue() : int {
+		$options                 = get_option( 'simply-static' );
+		$has_post_type_selection = isset( $options['post_types'] ) && is_array( $options['post_types'] ) && ( ! empty( $options['post_types_configured'] ) || ! empty( $options['post_types'] ) );
+		$selected_post_types     = $has_post_type_selection ? $options['post_types'] : array();
+		if ( $has_post_type_selection && empty( $selected_post_types ) ) {
+			$this->complete = true;
+			$this->clear_crawler_state( 'rss_feeds_crawler_state' );
+			return 0;
+		}
+
+		$include_post_feeds = ! $has_post_type_selection || in_array( 'post', $selected_post_types, true );
+		$post_types = get_post_types( array( 'public' => true ), 'names' );
+		$post_types = array_values( array_diff( $post_types, array( 'attachment', 'elementor_library', 'ssp-form', 'post' ) ) );
+		if ( $has_post_type_selection ) {
+			$post_types = array_values( array_intersect( $post_types, $selected_post_types ) );
+		}
+		$signature = hash( 'sha256', serialize( array(
+			'archive_start_time' => \Simply_Static\Options::instance()->get( 'archive_start_time' ),
+			'include_posts'      => $include_post_feeds,
+			'post_types'         => $post_types,
+		) ) );
+		$state = \Simply_Static\Options::instance()->get( 'rss_feeds_crawler_state' );
+		if ( ! is_array( $state ) || 1 !== ( $state['version'] ?? null ) || $signature !== ( $state['signature'] ?? null ) || ! in_array( $state['stage'] ?? null, array( 'categories', 'tags', 'authors' ), true ) || ! is_int( $state['offset'] ?? null ) || $state['offset'] < 0 ) {
+			$state = array( 'version' => 1, 'signature' => $signature, 'stage' => 'categories', 'offset' => 0, 'base_added' => false, 'added' => 0, 'scanned' => 0 );
+		}
+
+		$added_now = 0;
+		if ( empty( $state['base_added'] ) ) {
+			$base_urls = array();
+			if ( $include_post_feeds ) {
+				$base_urls[] = get_feed_link();
+				$base_urls[] = get_feed_link( 'comments_' );
+				$base_urls[] = add_query_arg( array( 's' => 'example', 'feed' => 'rss2' ), home_url() );
+			}
+			foreach ( $post_types as $post_type ) {
+				$base_urls[] = add_query_arg( 'post_type', $post_type, get_feed_link() );
+			}
+			$base_urls = array_values( array_unique( array_filter( $base_urls, static function ( $url ) {
+				return is_string( $url ) && false !== filter_var( $url, FILTER_VALIDATE_URL );
+			} ) ) );
+			$added                 = $this->enqueue_urls( $base_urls );
+			$added_now            += $added;
+			$state['added']        += $added;
+			$state['base_added']    = true;
+			$this->save_crawler_state( 'rss_feeds_crawler_state', $state );
+		}
+
+		if ( ! $include_post_feeds ) {
+			$this->complete = true;
+			$this->progress = array( 'added' => $state['added'], 'scanned' => $state['scanned'] );
+			$this->clear_crawler_state( 'rss_feeds_crawler_state' );
+			return $added_now;
+		}
+
+		$batch_size = max( 1, min( 500, (int) apply_filters( 'simply_static_rss_feeds_crawler_batch_size', 100 ) ) );
+		$this->complete = true;
+		while ( true ) {
+			$urls = array();
+			if ( 'authors' === $state['stage'] ) {
+				$ids = get_users( array( 'fields' => 'ID', 'number' => $batch_size, 'offset' => $state['offset'], 'orderby' => 'ID', 'order' => 'ASC' ) );
+				$ids = is_array( $ids ) ? $ids : array();
+				foreach ( $ids as $id ) {
+					$urls[] = get_author_feed_link( (int) $id );
+				}
+			} else {
+				$taxonomy = 'categories' === $state['stage'] ? 'category' : 'post_tag';
+				$ids = get_terms( array( 'taxonomy' => $taxonomy, 'hide_empty' => true, 'fields' => 'ids', 'number' => $batch_size, 'offset' => $state['offset'], 'orderby' => 'term_id', 'order' => 'ASC' ) );
+				$ids = is_wp_error( $ids ) || ! is_array( $ids ) ? array() : $ids;
+				foreach ( $ids as $id ) {
+					$urls[] = 'category' === $taxonomy ? get_category_feed_link( (int) $id ) : get_tag_feed_link( (int) $id );
+				}
+			}
+
+			$urls = array_values( array_filter( $urls, static function ( $url ) {
+				return is_string( $url ) && false !== filter_var( $url, FILTER_VALIDATE_URL );
+			} ) );
+			$added                = $this->enqueue_urls( $urls );
+			$added_now           += $added;
+			$state['added']       += $added;
+			$state['scanned']     += count( $ids );
+			$state['offset']      += count( $ids );
+			if ( count( $ids ) >= $batch_size ) {
+				$this->complete = false;
+				break;
+			}
+			if ( 'categories' === $state['stage'] ) {
+				$state['stage'] = 'tags';
+				$state['offset'] = 0;
+				continue;
+			}
+			if ( 'tags' === $state['stage'] ) {
+				$state['stage'] = 'authors';
+				$state['offset'] = 0;
+				continue;
+			}
+			break;
+		}
+
+		$this->progress = array( 'added' => $state['added'], 'scanned' => $state['scanned'] );
+		if ( $this->complete ) {
+			$this->clear_crawler_state( 'rss_feeds_crawler_state' );
+		} else {
+			$this->save_crawler_state( 'rss_feeds_crawler_state', $state );
+		}
+
+		return $added_now;
 	}
 }
