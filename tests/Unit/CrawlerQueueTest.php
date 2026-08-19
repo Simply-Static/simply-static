@@ -100,4 +100,9 @@ final class CrawlerQueueTest extends UnitTestCase {
 			array_column( array_column( $this->wpdb->inserts, 'data' ), 'url' )
 		);
 	}
+
+	public function test_crawlers_complete_in_one_call_by_default(): void {
+		self::assertTrue( ( new FragmentCrawler( array() ) )->is_complete() );
+		self::assertSame( array(), ( new FragmentCrawler( array() ) )->get_progress() );
+	}
 }

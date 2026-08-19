@@ -100,17 +100,41 @@ class Discover_Urls_Task extends Task {
 		// Run the current crawler.
 		$urls_added       = $crawler->add_urls_to_queue();
 		$total_urls_added = (int) $this->options->get( $this->total_added_option ) + $urls_added;
-		$this->options->set( $this->total_added_option, $total_urls_added );
+		$this->options->set( $this->total_added_option, $total_urls_added )->save();
+		$crawler_complete = ! method_exists( $crawler, 'is_complete' ) || $crawler->is_complete();
+		$crawler_progress = method_exists( $crawler, 'get_progress' ) ? $crawler->get_progress() : array();
+		$crawler_total    = isset( $crawler_progress['added'] )
+			? max( 0, (int) $crawler_progress['added'] )
+			: $urls_added;
 
 		// Log the number of URLs added.
-		Util::debug_log( "Added $urls_added URLs via " . $crawler_name . " Crawler" );
+		Util::debug_log( "Added $urls_added URLs in this " . $crawler_name . " Crawler batch" );
+
+		if ( ! $crawler_complete ) {
+			$scanned = isset( $crawler_progress['scanned'] )
+				? max( 0, (int) $crawler_progress['scanned'] )
+				: 0;
+			$this->save_status_message(
+				sprintf(
+					__( 'Discovering URLs with %1$s Crawler (%2$d of %3$d): %4$d files queued, %5$d entries scanned', 'simply-static' ),
+					$crawler_name,
+					$crawler_number,
+					$crawler_count,
+					$crawler_total,
+					$scanned
+				)
+			);
+			$this->yield_after_current_crawler();
+
+			return false;
+		}
 
 		// Only show individual crawler messages for full exports.
 		$generate_type = $this->options->get( 'generate_type' );
 		if ( $generate_type === 'export' ) {
 			$message = sprintf(
-				_n( 'Added %d URL via %s Crawler', 'Added %d URLs via %s Crawler', $urls_added, 'simply-static' ),
-				$urls_added,
+				_n( 'Added %d URL via %s Crawler', 'Added %d URLs via %s Crawler', $crawler_total, 'simply-static' ),
+				$crawler_total,
 				$crawler_name
 			);
 			$this->save_status_message( $message );
