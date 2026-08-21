@@ -9,6 +9,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Text_File_Handler extends Page_Handler {
 	/**
+	 * Rule files such as _headers and _redirects must remain extensionless.
+	 *
+	 * @return bool
+	 */
+	public function should_preserve_extensionless_filename() {
+		return true;
+	}
+
+	/**
 	 * After the file is fetched into the archive directory, replace any origin URLs
 	 * with the destination URL in plain-text files like robots.txt, llms.txt, _redirects, and _headers.
 	 *

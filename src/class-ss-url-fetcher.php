@@ -467,14 +467,19 @@ class Url_Fetcher {
 			$path = $local_path;
 		}
 
-		$path_info = Util::url_path_info( $path );
+		$path_info    = Util::url_path_info( $path );
+		$page_handler = $static_page->get_handler();
 
 		$relative_file_dir = $path_info['dirname'];
 		$relative_file_dir = Util::remove_leading_directory_separator( $relative_file_dir );
 
-		// If there's no extension, we're going to create a directory with the
-		// filename and place an index.html/xml file in there.
-		if ( $path_info['extension'] === '' && ! $static_page->is_binary_file() ) {
+		// If there's no extension, create a directory with the filename and place
+		// an index.html/xml file in it unless the page handler represents a file.
+		if (
+			$path_info['extension'] === ''
+			&& ! $static_page->is_binary_file()
+			&& ! $page_handler->should_preserve_extensionless_filename()
+		) {
 			if ( $path_info['filename'] !== '' ) {
 				// the filename would be blank for the root url, in that
 				// instance we don't want to add an extra slash
@@ -541,8 +546,6 @@ class Url_Fetcher {
 				Util::debug_log( '[SS][SEARCH_QS] Using non-hashed __qs/ directory for URL: ' . $static_page->url );
 			}
 		}
-
-		$page_handler = $static_page->get_handler();
 
 		$path_info         = apply_filters( 'simply_static_page_path_info', $page_handler->get_path_info( $path_info ), $static_page );
 		$relative_file_dir = apply_filters( 'simple_static_page_relative_file_dir', $page_handler->get_relative_dir( $relative_file_dir ), $static_page );

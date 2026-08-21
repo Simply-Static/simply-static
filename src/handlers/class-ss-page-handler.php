@@ -81,6 +81,19 @@ class Page_Handler {
 
 	public function after_file_fetch( $destination_dir ) {}
 
+	/**
+	 * Whether an extensionless URL represents a file whose name must be kept.
+	 *
+	 * Normal pages without extensions are written to an index file in a
+	 * directory. File handlers can opt out so deployment control files such as
+	 * _headers and _redirects do not become _headers/index.html.
+	 *
+	 * @return bool
+	 */
+	public function should_preserve_extensionless_filename() {
+		return false;
+	}
+
     public function get_path_info( $path_info ) { return $path_info; }
     public function get_relative_dir( $relative_dir ) { return $relative_dir; }
 }
