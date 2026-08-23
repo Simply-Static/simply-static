@@ -161,4 +161,38 @@ final class PostTypeCrawlerResumeTest extends UnitTestCase {
 			$urls
 		);
 	}
+
+	public function test_public_cpt_archive_with_custom_slug_is_queued(): void {
+		WpEnv::$post_types = array(
+			'post'               => 'post',
+			'knowledge_articles' => 'knowledge_articles',
+		);
+		WpEnv::$post_type_archives = array(
+			'knowledge_articles' => 'https://example.test/knowledge-articles/',
+		);
+		WpEnv::$options['simply-static'] = array(
+			'post_types'            => array( 'post', 'knowledge_articles' ),
+			'post_types_configured' => true,
+		);
+
+		$database = new PostTypeCrawlerResumeWpdb( array(
+			'post'               => array( 2 ),
+			'knowledge_articles' => array( 14033 ),
+		) );
+		$GLOBALS['wpdb'] = $database;
+
+		$crawler = new Post_Type_Crawler();
+		$added   = $crawler->add_urls_to_queue();
+
+		self::assertTrue( $crawler->is_complete() );
+		self::assertSame( 3, $added );
+		self::assertSame(
+			array(
+				'https://example.test/post-2/',
+				'https://example.test/post-14033/',
+				'https://example.test/knowledge-articles/',
+			),
+			array_column( array_column( $database->inserts, 'data' ), 'url' )
+		);
+	}
 }

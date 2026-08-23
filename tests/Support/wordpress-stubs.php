@@ -746,6 +746,20 @@ function get_post_types( $args = array(), $output = 'names' ) {
 	return array( 'post' => 'post', 'page' => 'page', 'attachment' => 'attachment' );
 }
 
+function get_post_type_archive_link( $post_type ) {
+	return WpEnv::$post_type_archives[ (string) $post_type ] ?? false;
+}
+
+function get_permalink( $post_id ) {
+	return 'https://example.test/post-' . (int) $post_id . '/';
+}
+
+function wp_count_posts( $post_type = 'post', $perm = '' ) {
+	return (object) array(
+		'publish' => WpEnv::$post_type_counts[ (string) $post_type ] ?? 0,
+	);
+}
+
 function get_taxonomies( $args = array(), $output = 'names' ) {
 	if ( null !== WpEnv::$taxonomies ) {
 		return WpEnv::$taxonomies;

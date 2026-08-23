@@ -52,6 +52,12 @@ final class WpTestEnvironment {
 	/** @var mixed */
 	public static $post_types = null;
 
+	/** @var array<string,string|false> */
+	public static $post_type_archives = array();
+
+	/** @var array<string,int> */
+	public static $post_type_counts = array();
+
 	/** @var mixed */
 	public static $taxonomies = null;
 
@@ -107,6 +113,8 @@ final class WpTestEnvironment {
 		self::$site_capabilities = array();
 		self::$sites            = array();
 		self::$post_types       = null;
+		self::$post_type_archives = array();
+		self::$post_type_counts = array();
 		self::$taxonomies       = null;
 		self::$valid_nonces     = array();
 		self::$nonce_verifications = array();
