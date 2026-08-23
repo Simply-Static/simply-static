@@ -88,7 +88,9 @@ class Post_Type_Crawler extends Crawler {
 			}
 		}
 
-		return $post_urls;
+		$post_urls = array_merge( $post_urls, $this->get_post_type_archive_urls( $post_types ) );
+
+		return array_values( array_unique( $post_urls ) );
 	}
 
 	/**
@@ -147,6 +149,10 @@ class Post_Type_Crawler extends Crawler {
 		}
 
 		if ( 'posts' === $state['stage'] ) {
+			$archive_urls    = $this->get_post_type_archive_urls( $post_types );
+			$archives_added  = $this->enqueue_urls( $archive_urls );
+			$added_now      += $archives_added;
+			$state['added'] += $archives_added;
 			$state['stage'] = 'cleanup';
 		}
 
@@ -198,6 +204,35 @@ class Post_Type_Crawler extends Crawler {
 		}
 
 		return array_values( array_filter( $post_types, 'is_string' ) );
+	}
+
+	/**
+	 * Get archive roots for the selected public custom post types.
+	 *
+	 * The regular Posts archive is already represented by the origin or the
+	 * configured posts page. Custom post type archives are separate URLs and
+	 * must be queued explicitly while Smart Crawl is enabled because linked
+	 * HTML pages are rewritten without being followed.
+	 *
+	 * @param string[] $post_types Public post types selected for crawling.
+	 *
+	 * @return string[]
+	 */
+	private function get_post_type_archive_urls( array $post_types ) : array {
+		$archive_urls = array();
+
+		foreach ( $post_types as $post_type ) {
+			if ( ! is_string( $post_type ) || 'post' === $post_type ) {
+				continue;
+			}
+
+			$archive_url = get_post_type_archive_link( $post_type );
+			if ( is_string( $archive_url ) && '' !== $archive_url ) {
+				$archive_urls[] = $archive_url;
+			}
+		}
+
+		return array_values( array_unique( $archive_urls ) );
 	}
 
 	/** @return array<string,mixed> */

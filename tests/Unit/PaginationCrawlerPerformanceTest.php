@@ -84,5 +84,34 @@ namespace Simply_Static\Tests\Unit {
 			self::assertTrue( $GLOBALS['simply_static_pagination_queries'][0]['no_found_rows'] );
 			self::assertFalse( $GLOBALS['simply_static_pagination_queries'][0]['update_post_meta_cache'] );
 		}
+
+		public function test_public_cpt_archive_pagination_is_discovered_by_default(): void {
+			WpEnv::$post_types = array(
+				'post'               => 'post',
+				'knowledge_articles' => 'knowledge_articles',
+			);
+			WpEnv::$post_type_archives = array(
+				'knowledge_articles' => 'https://example.test/knowledge-articles/',
+			);
+			WpEnv::$post_type_counts = array(
+				'post'               => 0,
+				'knowledge_articles' => 15,
+			);
+			WpEnv::$options['posts_per_page'] = 10;
+			WpEnv::$options['simply-static'] = array(
+				'post_types'            => array( 'knowledge_articles' ),
+				'post_types_configured' => true,
+			);
+
+			$crawler = new Pagination_Crawler();
+			$method  = new ReflectionMethod( Pagination_Crawler::class, 'get_archive_pagination' );
+			$method->setAccessible( true );
+			$urls = $method->invoke( $crawler );
+
+			self::assertSame(
+				array( 'https://example.test/knowledge-articles/page/2/' ),
+				$urls
+			);
+		}
 	}
 }

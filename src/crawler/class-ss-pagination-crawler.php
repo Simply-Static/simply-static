@@ -73,8 +73,27 @@ class Pagination_Crawler extends Crawler {
 			? $options['post_types']
 			: [];
 
-		// Filter to allow adding more post types to archive pagination (like CPTs)
-		$post_types = apply_filters( 'simply_static_archive_pagination_post_types', [ 'post' ] );
+		// Include public CPT archives by default. Smart Crawl does not follow
+		// linked HTML pages, so limiting this list to regular posts leaves CPT
+		// archive pagination out of the export even when its entries are queued.
+		$public_post_types = get_post_types( array( 'public' => true ), 'names' );
+		$public_post_types = apply_filters( 'simply_static_post_types_to_crawl', $public_post_types );
+		$post_types        = array( 'post' );
+
+		foreach ( (array) $public_post_types as $post_type ) {
+			if ( ! is_string( $post_type ) || 'post' === $post_type ) {
+				continue;
+			}
+
+			$archive_link = get_post_type_archive_link( $post_type );
+			if ( is_string( $archive_link ) && '' !== $archive_link ) {
+				$post_types[] = $post_type;
+			}
+		}
+
+		// Allow integrations to add or remove archive pagination post types.
+		$post_types = apply_filters( 'simply_static_archive_pagination_post_types', array_values( array_unique( $post_types ) ) );
+		$post_types = array_values( array_unique( array_filter( (array) $post_types, 'is_string' ) ) );
 
 		foreach ( $post_types as $post_type ) {
 			// If the post type is not in the selected post types, skip it
