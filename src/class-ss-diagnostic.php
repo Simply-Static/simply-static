@@ -179,7 +179,13 @@ class Diagnostic {
 	}
 
 	public function is_additional_file_valid( $file ) {
-		if ( stripos( $file, get_home_path() ) !== 0 && stripos( $file, WP_PLUGIN_DIR ) !== 0 && stripos( $file, WP_CONTENT_DIR ) !== 0 ) {
+		$patterns = Util::parse_patterns( array( $file ) );
+
+		// Keep diagnostics aligned with the setup task, which accepts valid regex patterns.
+		if ( ! empty( $patterns['regex'] ) ) {
+			$test    = true;
+			$message = null;
+		} elseif ( stripos( $file, get_home_path() ) !== 0 && stripos( $file, WP_PLUGIN_DIR ) !== 0 && stripos( $file, WP_CONTENT_DIR ) !== 0 ) {
 			$test    = false;
 			$message = __( 'Not a valid path', 'simply-static' );
 		} elseif ( ! is_readable( $file ) ) {
