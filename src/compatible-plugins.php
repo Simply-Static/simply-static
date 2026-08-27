@@ -32,6 +32,8 @@ return apply_filters( 'ss_compatible_plugins', array(
 	array( 'slug' => 'duplicate-post' ),
 	array( 'slug' => 'duplicate-page' ),
 	array( 'slug' => 'redirection' ),
+	array( 'slug' => 'safe-redirect-manager' ),
+	array( 'slug' => 'page-links-to' ),
 	array( 'slug' => 'really-simple-ssl' ),
 	array( 'slug' => 'limit-login-attempts-reloaded' ),
 	array( 'slug' => 'insert-headers-and-footers' ),
@@ -113,4 +115,3 @@ return apply_filters( 'ss_compatible_plugins', array(
 	array( 'slug' => 'advanced-media-offloader' ),
 	array( 'slug' => 'search-with-typesense' )
 ) );
-
