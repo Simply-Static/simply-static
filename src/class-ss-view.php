@@ -51,6 +51,14 @@ class View {
 	 * Contructor - Performs initialization of the absolute path for views
 	 */
 	public function __construct() {
+		// Resolve views from the canonical plugin root instead of inferring the
+		// location from WordPress's standard plugin directory layout.
+		if ( defined( 'SIMPLY_STATIC_PATH' ) ) {
+			$this->path = trailingslashit( SIMPLY_STATIC_PATH ) . self::DIRECTORY;
+
+			return;
+		}
+
 		// Looking for a basic directory where plugin resides
 		list($plugin_dir) = explode( '/', plugin_basename( __FILE__ ) );
 
