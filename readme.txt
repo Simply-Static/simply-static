@@ -2,9 +2,9 @@
 Contributors: patrickposner
 Tags: jamstack, performance, security, static site generator
 Requires at least: 6.2
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag:  3.8.11
+Stable tag:  3.8.12
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -274,6 +274,14 @@ Settings - Configure your static site export options
 Diagnostics - Check your WordPress environment for compatibility
 
 == Changelog ==
+
+= 3.8.12 =
+
+* Added compatibility with Safe Redirect Manager and Page Links To redirects
+* Fixed redirect view rendering for non-standard plugin directory layouts
+* Fixed diagnostics for additional files configured with regular expressions
+* Removed embedded video tooltips from the settings interface
+* Confirmed compatibility with WordPress 7.1
 
 = 3.8.11 =
 
