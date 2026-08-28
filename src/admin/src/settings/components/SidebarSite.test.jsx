@@ -259,6 +259,20 @@ describe( 'SidebarSite actions', () => {
 		}
 	);
 
+	it( 'only shows maintained learning resources', async () => {
+		await act( async () => {
+			renderSidebar();
+		} );
+
+		expect(
+			screen.getByRole( 'link', { name: 'Documentation' } ).getAttribute( 'href' )
+		).toBe( 'https://docs.simplystatic.com' );
+		expect(
+			screen.getByRole( 'link', { name: 'Tutorials' } ).getAttribute( 'href' )
+		).toBe( 'https://simplystatic.com/tutorials/' );
+		expect( screen.queryByText( 'Video Course' ) ).toBeNull();
+	} );
+
 	it( 'rejects a response without an explicit success status', async () => {
 		actionResponse = JSON.stringify( { message: 'Ambiguous response' } );
 		const { setters } = renderSidebar();

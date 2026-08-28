@@ -11,7 +11,6 @@ import {
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
-import HelperVideo from "../components/HelperVideo";
 
 const {__} = wp.i18n;
 
@@ -123,9 +122,7 @@ function HideWP() {
             <CardHeader>
                 <Flex>
                     <FlexItem>
-                        <b>{__('Replace', 'simply-static')}<HelperVideo
-                            title={__('How to replace WP default paths', 'simply-static')}
-                            videoUrl={'https://youtu.be/GedyNJJMGaY'}/></b>
+                        <b>{__('Replace', 'simply-static')}</b>
                     </FlexItem>
                     {('free' === options.plan || !isPro()) &&
                         <FlexItem>
@@ -296,9 +293,7 @@ function HideWP() {
             <CardHeader>
                 <Flex>
                     <FlexItem>
-                        <b>{__('Hide', 'simply-static')}<HelperVideo
-                            title={__('How to hide and disable WP core features', 'simply-static')}
-                            videoUrl={'https://youtu.be/GijIsrfFB8o'}/></b>
+                        <b>{__('Hide', 'simply-static')}</b>
                     </FlexItem>
                     {('free' === options.plan || !isPro()) &&
                         <FlexItem>
@@ -356,9 +351,7 @@ function HideWP() {
             <CardHeader>
                 <Flex>
                     <FlexItem>
-                        <b>{__('Disable', 'simply-static')}<HelperVideo
-                            title={__('How to hide and disable WP core features', 'simply-static')}
-                            videoUrl={'https://youtu.be/GijIsrfFB8o'}/></b>
+                        <b>{__('Disable', 'simply-static')}</b>
                     </FlexItem>
                     {('free' === options.plan || !isPro()) &&
                         <FlexItem>

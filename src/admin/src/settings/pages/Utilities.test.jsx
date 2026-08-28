@@ -26,8 +26,6 @@ jest.mock( '@wordpress/components', () => {
 	};
 } );
 
-jest.mock( '../components/HelperVideo', () => () => null );
-
 const { fireEvent, render, screen, waitFor } = require( '@testing-library/react' );
 const { SettingsContext } = require( '../context/SettingsContext' );
 const Utilities = require( './Utilities' ).default;

@@ -12,7 +12,6 @@ import {
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
 import apiFetch from "@wordpress/api-fetch";
-import HelperVideo from "../components/HelperVideo";
 import StudioNotice from "../components/StudioNotice";
 import {shouldShowStudioDeploymentNotice} from "../utils/deployment";
 
@@ -254,9 +253,7 @@ function DeploymentSettings() {
         {deliveryMethod === 'zip' &&
             <Card>
                 <CardHeader>
-                    <b>{__('ZIP', 'simply-static')}<HelperVideo
-                        title={__('How to export a ZIP file', 'simply-static')}
-                        videoUrl={'https://youtu.be/WHaFjDte6zI'}/></b>
+                    <b>{__('ZIP', 'simply-static')}</b>
                 </CardHeader>
                 <CardBody>
                     <p>
@@ -269,9 +266,7 @@ function DeploymentSettings() {
         {deliveryMethod === 'local' &&
             <Card>
                 <CardHeader>
-                    <b>{__('Local Directory', 'simply-static')}<HelperVideo
-                        title={__('How to deploy to a local directory', 'simply-static')}
-                        videoUrl={'https://youtu.be/ZRdXQB5slnY'}/></b>
+                    <b>{__('Local Directory', 'simply-static')}</b>
                 </CardHeader>
                 <CardBody>
                     <TextControl
@@ -323,9 +318,7 @@ function DeploymentSettings() {
                     <CardHeader>
                         <Flex>
                             <FlexItem>
-                                <b>{__('GitHub', 'simply-static')} <HelperVideo
-                                    title={__('How to deploy to a GitHub (2/2)', 'simply-static')}
-                                    videoUrl={'https://youtu.be/HqyTKwZuUAM'}/></b>
+                                <b>{__('GitHub', 'simply-static')}</b>
                             </FlexItem>
                             {('free' === options.plan || !isPro()) &&
                                 <FlexItem>
@@ -396,14 +389,7 @@ function DeploymentSettings() {
                         />
 
                         <TextControl
-                            label={
-                                <>
-                                    {__('Personal Access Token', 'simply-static')}
-                                    <HelperVideo
-                                        title={__('How to prepare your GitHub account', 'simply-static')}
-                                        videoUrl={'https://youtu.be/fjsJJmPeKuc'}/>
-                                </>
-                            }
+                            label={__('Personal Access Token', 'simply-static')}
                             type={"password"}
                             help={
                                 <>
@@ -538,9 +524,7 @@ function DeploymentSettings() {
                     <CardHeader>
                         <Flex>
                             <FlexItem>
-                                <b>{__('Tiiny.host', 'simply-static')} <HelperVideo
-                                    title={__('How to deploy to Tiiny.host', 'simply-static')}
-                                    videoUrl={'https://youtu.be/Y9EDaQkGl1Y'}/></b>
+                                <b>{__('Tiiny.host', 'simply-static')}</b>
                             </FlexItem>
                             {('free' === options.plan || !isPro()) &&
                                 <FlexItem>
@@ -616,9 +600,7 @@ function DeploymentSettings() {
                     <CardHeader>
                         <Flex>
                             <FlexItem>
-                                <b>{__('Bunny CDN', 'simply-static')}<HelperVideo
-                                    title={__('How to deploy to Bunny CDN', 'simply-static')}
-                                    videoUrl={'https://youtu.be/FBRg1BI41VY'}/></b>
+                                <b>{__('Bunny CDN', 'simply-static')}</b>
                             </FlexItem>
                             {('free' === options.plan || !isPro()) &&
                                 <FlexItem>
@@ -730,9 +712,7 @@ function DeploymentSettings() {
                     <CardHeader>
                         <Flex>
                             <FlexItem>
-                                <b>{__('Amazon AWS S3', 'simply-static')}<HelperVideo
-                                    title={__('How to deploy to Amazon AWS S3', 'simply-static')}
-                                    videoUrl={'https://youtu.be/rtn21J86Upc'}/></b>
+                                <b>{__('Amazon AWS S3', 'simply-static')}</b>
                             </FlexItem>
                             {('free' === options.plan || !isPro()) &&
                                 <FlexItem>
@@ -932,9 +912,7 @@ function DeploymentSettings() {
                     <CardHeader>
                         <Flex>
                             <FlexItem>
-                                <b>{__('SFTP', 'simply-static')} <HelperVideo
-                                    title={__('How to deploy via SFTP', 'simply-static')}
-                                    videoUrl={'https://youtu.be/6-QR9wZA3VQ'}/></b>
+                                <b>{__('SFTP', 'simply-static')}</b>
                             </FlexItem>
                             {('free' === options.plan || !isPro()) &&
                                 <FlexItem>

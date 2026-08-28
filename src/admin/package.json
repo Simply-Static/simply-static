@@ -26,7 +26,6 @@
   },
   "dependencies": {
     "react-data-table-component": "^8.8.0",
-    "react-player": "^3.4.0",
     "react-terminal-ui": "^1.4.0"
   },
   "overrides": {

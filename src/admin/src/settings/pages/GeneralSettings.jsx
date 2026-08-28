@@ -13,7 +13,6 @@ import {
 import apiFetch from "@wordpress/api-fetch";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
-import HelperVideo from "../components/HelperVideo";
 import StudioNotice from "../components/StudioNotice";
 
 const {__} = wp.i18n;
@@ -297,9 +296,7 @@ function GeneralSettings() {
     return (<div className={"inner-settings"}>
         <Card>
             <CardHeader>
-                <b>{__('Replacing URLs', 'simply-static')}<HelperVideo
-                    title={__('How to replace URLs', 'simply-static')}
-                    videoUrl={'https://youtu.be/cb8jAMJlfGI'}/></b>
+                <b>{__('Replacing URLs', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
                 {isStudio() &&
@@ -417,9 +414,7 @@ function GeneralSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('Enhanced Crawl', 'simply-static')}<HelperVideo
-                    title={__('How Enhanced Crawl improves your static exports', 'simply-static')}
-                    videoUrl={'https://youtu.be/QfKxeQ1w7tU'}/></b>
+                <b>{__('Enhanced Crawl', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
                 <p>{__('Enhanced Crawl uses native WordPress functions to find all pages and files when running a static export.', 'simply-static')}</p>
@@ -689,11 +684,7 @@ function GeneralSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>
-                    {__('404', 'simply-static')}
-                    <HelperVideo title={__('How to manage 404 pages?', 'simply-static')}
-                                 videoUrl={'https://youtu.be/dnRtuQrXG-k'}/>
-                </b>
+                <b>{__('404', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
                 <ToggleControl
@@ -789,9 +780,7 @@ function GeneralSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('Include', 'simply-static')}<HelperVideo
-                    title={__('Include & Exclude files and pages', 'simply-static')}
-                    videoUrl={'https://youtu.be/voAHfwVMLi8'}/></b>
+                <b>{__('Include', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
                 <TextareaControl
@@ -869,9 +858,7 @@ function GeneralSettings() {
         <Spacer margin={5}/>
         <Card>
             <CardHeader>
-                <b>{__('Exclude', 'simply-static')}<HelperVideo
-                    title={__('Include & Exclude files and pages', 'simply-static')}
-                    videoUrl={'https://youtu.be/voAHfwVMLi8'}/></b>
+                <b>{__('Exclude', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
                 <TextareaControl
