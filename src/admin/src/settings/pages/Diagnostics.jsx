@@ -9,7 +9,6 @@ import {
 } from "@wordpress/components";
 import {useContext, useState} from "@wordpress/element";
 import {SettingsContext} from "../context/SettingsContext";
-import HelperVideo from "../components/HelperVideo";
 
 const {__} = wp.i18n;
 
@@ -30,9 +29,7 @@ function Diagnostics() {
         <div>
             <Card>
                 <CardHeader>
-                    <b>{__('Diagnostics', 'simply-static')}<HelperVideo
-                        title={__('How to use diagnostics', 'simply-static')}
-                        videoUrl={'https://youtu.be/X59YMlz6F2s'}/></b>
+                    <b>{__('Diagnostics', 'simply-static')}</b>
                 </CardHeader>
                 <CardBody>
                     <p>

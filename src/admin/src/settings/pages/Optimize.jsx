@@ -11,7 +11,6 @@ import {
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
 import apiFetch from "@wordpress/api-fetch";
-import HelperVideo from "../components/HelperVideo";
 import StudioNotice from "../components/StudioNotice";
 
 const {__} = wp.i18n;
@@ -141,9 +140,7 @@ function Optimize() {
             <CardHeader>
                 <Flex>
                     <FlexItem>
-                        <b>{__('Minify & Aggregation', 'simply-static')}<HelperVideo
-                            title={__('How to minify HTML, CSS and JavaScript?', 'simply-static')}
-                            videoUrl={'https://youtu.be/52IKv5ai-i4'}/></b>
+                        <b>{__('Minify & Aggregation', 'simply-static')}</b>
                     </FlexItem>
                     {('free' === options.plan || !isPro()) &&
                         <FlexItem>
@@ -438,9 +435,7 @@ function Optimize() {
             <CardHeader>
                 <Flex>
                     <FlexItem>
-                        <b>{__('Image Optimization', 'simply-static')}<HelperVideo
-                            title={__('How to optimize images with ShortPixel?', 'simply-static')}
-                            videoUrl={'https://youtu.be/OIfKcXz3cxY'}/></b>
+                        <b>{__('Image Optimization', 'simply-static')}</b>
                     </FlexItem>
                     {('free' === options.plan || !isPro()) &&
                         <FlexItem>

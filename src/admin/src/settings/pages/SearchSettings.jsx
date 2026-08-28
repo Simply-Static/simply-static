@@ -11,8 +11,6 @@ import {
 } from "@wordpress/components";
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
-import HelperVideo from "../components/HelperVideo";
-
 
 const {__} = wp.i18n;
 
@@ -291,9 +289,7 @@ function SearchSettings() {
                     <CardHeader>
                         <Flex>
                             <FlexItem>
-                                <b>{__('Fuse.js', 'simply-static')}<HelperVideo
-                                    title={__('How to add search with FuseJS', 'simply-static')}
-                                    videoUrl={'https://youtu.be/K34l1DXjCHk'}/></b>
+                                <b>{__('Fuse.js', 'simply-static')}</b>
                             </FlexItem>
                             {('free' === options.plan || !isPro()) &&
                                 <FlexItem>
@@ -426,9 +422,7 @@ function SearchSettings() {
                     <CardHeader>
                         <Flex>
                             <FlexItem>
-                                <b>{__('Algolia API', 'simply-static')}<HelperVideo
-                                    title={__('How to add search with the Algolia API', 'simply-static')}
-                                    videoUrl={'https://youtu.be/H9PNZSl0KnU'}/></b>
+                                <b>{__('Algolia API', 'simply-static')}</b>
                             </FlexItem>
                             {('free' === options.plan || !isPro()) &&
                                 <FlexItem>

@@ -11,7 +11,6 @@ import {
 import {useContext, useEffect, useState} from '@wordpress/element';
 import {SettingsContext} from "../context/SettingsContext";
 import apiFetch from "@wordpress/api-fetch";
-import HelperVideo from "../components/HelperVideo";
 
 const {__} = wp.i18n;
 

@@ -11,7 +11,6 @@ import {
 import {useContext, useEffect, useState} from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import {SettingsContext} from "../context/SettingsContext";
-import HelperVideo from "../components/HelperVideo";
 import StudioNotice from "../components/StudioNotice";
 
 const {__} = wp.i18n;
@@ -79,9 +78,7 @@ function DebugSettings() {
     return (<div className={"inner-settings"}>
         <Card>
             <CardHeader>
-                <b>{__('Basic Auth', 'simply-static')}<HelperVideo
-                    title={__('How to set up basic auth', 'simply-static')}
-                    videoUrl={'https://youtu.be/6udSR3_zSOU'}/></b>
+                <b>{__('Basic Auth', 'simply-static')}</b>
             </CardHeader>
             <CardBody>
                 <p>

@@ -686,11 +686,6 @@ function SidebarSite( props = null ) {
             <Button href="https://docs.simplystatic.com" target="_blank">
                 <Dashicon icon="admin-links"/> {__('Documentation', 'simply-static')}
             </Button>
-            <Button
-                href="https://www.youtube.com/playlist?list=PLcpe8_rNg8U5g1gCOa0Ge6T17f50nSvmg"
-                target="_blank">
-                <Dashicon icon="format-video"/> {__('Video Course', 'simply-static')}
-            </Button>
             <Button href="https://simplystatic.com/tutorials/" target="_blank">
                 <Dashicon icon="edit"/> {__('Tutorials', 'simply-static')}
             </Button>

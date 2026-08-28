@@ -11,7 +11,6 @@ import {
 } from "@wordpress/components";
 import {useState, useContext} from "@wordpress/element";
 import {SettingsContext} from "../context/SettingsContext";
-import HelperVideo from "../components/HelperVideo";
 
 const {__} = wp.i18n;
 
@@ -149,9 +148,7 @@ function Utilities() {
             )}
             <Card>
                 <CardHeader>
-                    <b>{__('Export', 'simply-static')}<HelperVideo
-                        title={__('Export & Import settings', 'simply-static')}
-                        videoUrl={'https://youtu.be/fmM123Y-gwg'}/></b>
+                    <b>{__('Export', 'simply-static')}</b>
                 </CardHeader>
                 <CardBody>
                     {!isExport ?
@@ -208,9 +205,7 @@ function Utilities() {
             <Spacer margin={5}/>
             <Card>
                 <CardHeader>
-                    <b>{__('Import', 'simply-static')}<HelperVideo
-                        title={__('Export & Import settings', 'simply-static')}
-                        videoUrl={'https://youtu.be/fmM123Y-gwg'}/></b>
+                    <b>{__('Import', 'simply-static')}</b>
                 </CardHeader>
                 <CardBody>
                     <p>
