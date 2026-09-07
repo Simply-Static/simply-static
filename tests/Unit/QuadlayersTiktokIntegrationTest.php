@@ -67,6 +67,31 @@ final class ExposedTiktokIntegration extends Quadlayers_Tiktok_Integration {
 	}
 }
 
+final class InternalRestTiktokIntegration extends Quadlayers_Tiktok_Integration {
+	/** @var mixed */
+	public $local_response;
+
+	/** @var array<int,mixed> */
+	public $local_requests = array();
+
+	/** @param mixed $local_response */
+	public function __construct( $local_response ) {
+		parent::__construct();
+		$this->local_response = $local_response;
+	}
+
+	/** @return array<int,array<string,mixed>>|\WP_Error */
+	public function request( array $settings ) {
+		return $this->request_feed_items( $settings );
+	}
+
+	protected function request_feed_items_from_local_rest( $route, $body, $max_bytes ) {
+		$this->local_requests[] = array( $route, $body, $max_bytes );
+
+		return $this->local_response;
+	}
+}
+
 final class QuadlayersTiktokIntegrationTest extends UnitTestCase {
 
 	/** @var string */
@@ -220,6 +245,33 @@ final class QuadlayersTiktokIntegrationTest extends UnitTestCase {
 		$payload = json_decode( $request['args']['body'], true );
 		self::assertSame( $settings, $payload['feedSettings'] );
 		self::assertSame( '', $payload['createTime'] );
+	}
+
+	public function test_in_process_rest_response_is_preferred_over_http_loopback(): void {
+		$settings = array(
+			'id'     => 'feed-1',
+			'source' => 'account',
+			'limit'  => 9,
+		);
+		$item = array(
+			'id'              => 'video-1',
+			'share_url'       => 'https://www.tiktok.com/@example/video/1',
+			'title'           => 'Video',
+			'cover_image_url' => 'https://cdn.example.net/video.jpg',
+		);
+		$integration = new InternalRestTiktokIntegration( array( $item ) );
+
+		$result = $integration->request( $settings );
+
+		self::assertCount( 1, $result );
+		self::assertSame( 'video-1', $result[0]['id'] );
+		self::assertCount( 1, $integration->local_requests );
+		self::assertSame( 'quadlayers/tiktok/frontend/user-video-list', $integration->local_requests[0][0] );
+		self::assertSame(
+			array( 'feedSettings' => $settings, 'createTime' => '' ),
+			json_decode( $integration->local_requests[0][1], true )
+		);
+		self::assertSame( array(), WpEnv::$remote_requests, 'A successful internal REST dispatch must not perform an HTTP loopback.' );
 	}
 
 	public function test_only_supported_raster_signatures_are_accepted(): void {
