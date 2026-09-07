@@ -67,6 +67,11 @@ final class ExposedTiktokIntegration extends Quadlayers_Tiktok_Integration {
 	public function imageExtension( string $image ): string {
 		return $this->image_extension( $image );
 	}
+
+	/** @return array<string,mixed>|null */
+	public function decodeSettings( string $value ): ?array {
+		return $this->decode_feed_settings( $value );
+	}
 }
 
 final class InternalRestTiktokIntegration extends Quadlayers_Tiktok_Integration {
@@ -274,6 +279,28 @@ final class QuadlayersTiktokIntegrationTest extends UnitTestCase {
 			json_decode( $integration->local_requests[0][1], true )
 		);
 		self::assertSame( array(), WpEnv::$remote_requests, 'A successful internal REST dispatch must not perform an HTTP loopback.' );
+	}
+
+	public function test_feed_settings_decode_while_json_attribute_entities_are_preserved(): void {
+		$settings = array(
+			'id'      => 'feed-1',
+			'source'  => 'account',
+			'caption' => 'A & B < C > D\'s "double" quotes',
+		);
+		$attribute = htmlspecialchars( (string) wp_json_encode( $settings ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		$preserved = strtr(
+			$attribute,
+			array(
+				'&quot;' => 'QUOTE_PLACEHOLDER',
+				'&apos;' => 'APOS_PLACEHOLDER',
+				'&lt;'   => 'LESSTHAN_PLACEHOLDER',
+				'&gt;'   => 'GREATTHAN_PLACEHOLDER',
+				'&amp;'  => 'AMPERSAND_PLACEHOLDER',
+			)
+		);
+
+		self::assertStringContainsString( 'QUOTE_PLACEHOLDER', $preserved );
+		self::assertSame( $settings, ( new ExposedTiktokIntegration() )->decodeSettings( $preserved ) );
 	}
 
 	public function test_background_export_can_use_the_registered_quadlayers_callback_after_permission_failure(): void {
