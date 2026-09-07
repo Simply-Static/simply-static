@@ -34,6 +34,7 @@ class Integrations {
 			'elementor'         => Elementor_Integration::class,
 			'divi'              => Divi_Integration::class,
 			'cookieyes'         => CookieYes_Integration::class,
+			'quadlayers-tiktok' => Quadlayers_Tiktok_Integration::class,
 			'complianz'         => Complianz_Integration::class,
 			'search-and-filter' => SearchAndFilter_Integration::class,
 			'multilingual'      => Multilingual_Integration::class,
@@ -67,6 +68,7 @@ class Integrations {
 		require_once $path . 'class-ss-elementor-integration.php';
 		require_once $path . 'class-ss-divi-integration.php';
 		require_once $path . 'class-ss-cookie-yes-integration.php';
+		require_once $path . 'class-ss-quadlayers-tiktok-integration.php';
 
 		// Simply Static Pro integrations (visible in Free as samples; runnable in Pro).
 		require_once $path . 'class-ss-pro-integration.php';

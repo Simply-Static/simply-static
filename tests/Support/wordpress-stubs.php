@@ -721,6 +721,11 @@ function wp_remote_get( $url, $args = array() ) {
 	return WpEnv::$remote_response;
 }
 
+function wp_safe_remote_get( $url, $args = array() ) {
+	WpEnv::$remote_requests[] = array( 'method' => 'SAFE_GET', 'url' => $url, 'args' => $args );
+	return WpEnv::$remote_response;
+}
+
 function wp_remote_post( $url, $args = array() ) {
 	WpEnv::$remote_requests[] = array( 'method' => 'POST', 'url' => $url, 'args' => $args );
 	return WpEnv::$remote_response;

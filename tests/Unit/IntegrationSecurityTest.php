@@ -34,6 +34,11 @@ final class IntegrationSecurityTest extends UnitTestCase {
 				return $this->auth_remote_get( $url );
 			}
 
+			/** @return array|\WP_Error */
+			public function post( string $url, array $args = array() ) {
+				return $this->auth_remote_post( $url, $args );
+			}
+
 			/** @param array|\WP_Error $response @return string[] */
 			public function parse( $response ): array {
 				return $this->extract_sitemap_index_urls( $response );
@@ -53,6 +58,29 @@ final class IntegrationSecurityTest extends UnitTestCase {
 
 	public function test_external_integration_request_is_rejected_before_network_io(): void {
 		$response = $this->integration->fetch( 'https://attacker.test/sitemap.xml' );
+
+		self::assertInstanceOf( \WP_Error::class, $response );
+		self::assertSame( 'ss_disallowed_remote_url', $response->get_error_code() );
+		self::assertSame( array(), WpEnv::$remote_requests );
+	}
+
+	public function test_authenticated_local_post_requests_are_non_redirecting(): void {
+		$this->integration->post(
+			'https://example.test/wp-json/plugin/endpoint',
+			array( 'headers' => array( 'Content-Type' => 'application/json' ) )
+		);
+
+		self::assertCount( 1, WpEnv::$remote_requests );
+		self::assertSame( 'POST', WpEnv::$remote_requests[0]['method'] );
+		$args = WpEnv::$remote_requests[0]['args'];
+		self::assertFalse( $args['sslverify'] );
+		self::assertSame( 0, $args['redirection'] );
+		self::assertSame( 'application/json', $args['headers']['Content-Type'] );
+		self::assertSame( 'Basic ' . base64_encode( 'crawler:secret' ), $args['headers']['Authorization'] );
+	}
+
+	public function test_external_integration_post_is_rejected_before_network_io(): void {
+		$response = $this->integration->post( 'https://attacker.test/collect' );
 
 		self::assertInstanceOf( \WP_Error::class, $response );
 		self::assertSame( 'ss_disallowed_remote_url', $response->get_error_code() );
