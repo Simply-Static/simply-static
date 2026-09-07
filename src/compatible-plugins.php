@@ -63,6 +63,7 @@ return apply_filters( 'ss_compatible_plugins', array(
 	array( 'slug' => 'custom-post-type-ui' ),
 	array( 'slug' => 'svg-support' ),
 	array( 'slug' => 'instagram-feed' ),
+	array( 'slug' => 'wp-tiktok-feed' ),
 	array( 'slug' => 'wp-file-manager' ),
 	array( 'slug' => 'redux-framework' ),
 	array( 'slug' => 'breadcrumb-navxt' ),

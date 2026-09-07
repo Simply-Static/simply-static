@@ -183,6 +183,41 @@ abstract class Integration {
 	}
 
 	/**
+	 * Perform a wp_remote_post request with Basic Auth headers when configured.
+	 *
+	 * Integration POST requests are restricted to the configured WordPress
+	 * origin for the same reason as authenticated GET requests: redirects or
+	 * arbitrary hosts must never receive the origin's credentials.
+	 *
+	 * @param string $url  URL to fetch.
+	 * @param array  $args Optional. Additional arguments for wp_remote_post.
+	 *
+	 * @return array|\WP_Error Response or WP_Error on failure.
+	 */
+	protected function auth_remote_post( $url, $args = [] ) {
+		$allowed = Util::is_local_origin_url( $url );
+		$allowed = (bool) apply_filters( 'ss_integration_allow_remote_post', $allowed, $url, $this->id );
+		if ( ! $allowed ) {
+			return new \WP_Error( 'ss_disallowed_remote_url', __( 'Integration requests must target the configured WordPress origin.', 'simply-static' ) );
+		}
+
+		if ( ! isset( $args['sslverify'] ) ) {
+			$args['sslverify'] = (bool) apply_filters( 'ss_remote_post_sslverify', Util::should_verify_ssl( $url ), $url );
+		}
+		if ( ! isset( $args['redirection'] ) ) {
+			$args['redirection'] = 0;
+		}
+
+		$authorization = Util::get_basic_auth_header_for_url( $url );
+		if ( null !== $authorization ) {
+			$args['headers'] = isset( $args['headers'] ) ? $args['headers'] : [];
+			$args['headers']['Authorization'] = $authorization;
+		}
+
+		return wp_remote_post( $url, apply_filters( 'ss_remote_post_args', $args ) );
+	}
+
+	/**
 	 * Extract safe child sitemap URLs from an HTTP response.
 	 *
 	 * SEO plugins expose similar sitemap indexes. Keeping parsing here ensures
