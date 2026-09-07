@@ -10,6 +10,7 @@ use Simply_Static\Options;
 use Simply_Static\Quadlayers_Tiktok_Integration;
 use Simply_Static\Tests\Support\UnitTestCase;
 use Simply_Static\Tests\Support\WpTestEnvironment as WpEnv;
+use QuadLayers\TTF\Api\Rest\Endpoints\Frontend\User_Video_List\Test_Callback as QuadlayersTestCallback;
 
 $simply_static_root = dirname( __DIR__, 2 );
 require_once $simply_static_root . '/src/class-ss-plugin.php';
@@ -19,6 +20,7 @@ require_once $simply_static_root . '/src/class-ss-util.php';
 require_once $simply_static_root . '/src/integrations/class-ss-integration.php';
 require_once $simply_static_root . '/src/integrations/class-ss-quadlayers-tiktok-integration.php';
 require_once $simply_static_root . '/src/class-ss-integrations.php';
+require_once $simply_static_root . '/tests/Support/QuadlayersRestCallback.php';
 
 final class TiktokSnapshotExtractor {
 	/** @var string[] */
@@ -272,6 +274,38 @@ final class QuadlayersTiktokIntegrationTest extends UnitTestCase {
 			json_decode( $integration->local_requests[0][1], true )
 		);
 		self::assertSame( array(), WpEnv::$remote_requests, 'A successful internal REST dispatch must not perform an HTTP loopback.' );
+	}
+
+	public function test_background_export_can_use_the_registered_quadlayers_callback_after_permission_failure(): void {
+		$settings = array(
+			'id'      => 'feed-1',
+			'source'  => 'account',
+			'open_id' => 'connected-account',
+		);
+		$item = array(
+			'id'              => 'video-1',
+			'share_url'       => 'https://www.tiktok.com/@example/video/1',
+			'title'           => 'Video',
+			'cover_image_url' => 'https://cdn.example.net/video.jpg',
+		);
+		$callback = new QuadlayersTestCallback( array( $item ) );
+		WpEnv::$rest_dispatch_response = new \WP_REST_Response(
+			array( 'code' => 'rest_forbidden', 'message' => 'Sorry, you are not allowed to do that.' ),
+			401
+		);
+		WpEnv::$rest_server_routes = array(
+			'/quadlayers/tiktok/frontend/user-video-list' => array(
+				array( 'callback' => array( $callback, 'callback' ) ),
+			),
+		);
+
+		$result = ( new ExposedTiktokIntegration() )->request( $settings );
+
+		self::assertCount( 1, $result );
+		self::assertSame( 'video-1', $result[0]['id'] );
+		self::assertSame( 1, $callback->requests );
+		self::assertCount( 1, WpEnv::$rest_requests );
+		self::assertSame( array(), WpEnv::$remote_requests, 'The registered callback must avoid an HTTP loopback.' );
 	}
 
 	public function test_only_supported_raster_signatures_are_accepted(): void {

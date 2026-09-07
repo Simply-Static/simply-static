@@ -78,10 +78,25 @@ if ( ! class_exists( 'WP_REST_Request' ) ) {
 	class WP_REST_Request {
 		/** @var array<string,mixed> */
 		private $params;
+		/** @var string */
+		private $method = 'GET';
+		/** @var string */
+		private $route = '';
+		/** @var array<string,string> */
+		private $headers = array();
+		/** @var string */
+		private $body = '';
 
-		/** @param array<string,mixed> $params */
-		public function __construct( array $params = array() ) {
-			$this->params = $params;
+		/** @param string|array<string,mixed> $method */
+		public function __construct( $method = 'GET', string $route = '' ) {
+			if ( is_array( $method ) ) {
+				$this->params = $method;
+				return;
+			}
+
+			$this->params = array();
+			$this->method = (string) $method;
+			$this->route  = $route;
 		}
 
 		/** @return array<string,mixed> */
@@ -92,6 +107,35 @@ if ( ! class_exists( 'WP_REST_Request' ) ) {
 		/** @return mixed */
 		public function get_param( string $key ) {
 			return $this->params[ $key ] ?? null;
+		}
+
+		public function set_header( string $key, string $value ): void {
+			$this->headers[ $key ] = $value;
+		}
+
+		public function set_body( string $body ): void {
+			$this->body = $body;
+		}
+
+		public function get_body(): string {
+			return $this->body;
+		}
+
+		public function get_method(): string {
+			return $this->method;
+		}
+
+		public function get_route(): string {
+			return $this->route;
+		}
+	}
+}
+
+if ( ! class_exists( 'WP_REST_Server' ) ) {
+	class WP_REST_Server {
+		/** @return array<string,array<int,array<string,mixed>>> */
+		public function get_routes(): array {
+			return WpEnv::$rest_server_routes;
 		}
 	}
 }
@@ -695,6 +739,18 @@ function register_rest_route( $namespace, $route, $args, $override = false ) {
 		'args'      => $args,
 	);
 	return true;
+}
+
+function rest_do_request( $request ) {
+	WpEnv::$rest_requests[] = $request;
+
+	return null !== WpEnv::$rest_dispatch_response
+		? WpEnv::$rest_dispatch_response
+		: new WP_REST_Response( array( 'code' => 'rest_no_route' ), 404 );
+}
+
+function rest_get_server() {
+	return new WP_REST_Server();
 }
 
 function wp_script_is( $handle, $status = 'enqueued' ) {

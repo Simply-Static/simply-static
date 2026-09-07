@@ -285,15 +285,32 @@ class Quadlayers_Tiktok_Integration extends Integration {
 		$request->set_body( $body );
 		$response = rest_do_request( $request );
 
+		// QuadLayers permits administrators or open IDs saved in its own feed
+		// model. A widget can still contain a valid connected account even when
+		// that feed-model record no longer exists, and background exports do not
+		// run as the administrator used by HTTP Basic Auth. In that one case,
+		// invoke only QuadLayers' registered frontend callback directly. The route
+		// remains allowlisted and the request body still comes from the exported
+		// page; no arbitrary REST permission callback is bypassed.
+		if ( $this->is_rest_permission_failure( $response ) ) {
+			$direct_response = $this->request_feed_items_from_registered_callback( $route, $request );
+			if ( null !== $direct_response ) {
+				$response = $direct_response;
+			}
+		}
+
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
-		if ( ! is_object( $response ) || ! method_exists( $response, 'get_status' ) || ! method_exists( $response, 'get_data' ) ) {
+		if ( is_array( $response ) ) {
+			$data   = $response;
+			$status = 200;
+		} elseif ( is_object( $response ) && method_exists( $response, 'get_status' ) && method_exists( $response, 'get_data' ) ) {
+			$data   = $response->get_data();
+			$status = (int) $response->get_status();
+		} else {
 			return new \WP_Error( 'ss_tiktok_invalid_response', __( 'The TikTok feed endpoint returned an invalid response.', 'simply-static' ) );
 		}
-
-		$data   = $response->get_data();
-		$status = (int) $response->get_status();
 		if ( 404 === $status && is_array( $data ) && 'rest_no_route' === ( $data['code'] ?? '' ) ) {
 			return null;
 		}
@@ -307,6 +324,61 @@ class Quadlayers_Tiktok_Integration extends Integration {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Whether an internal REST dispatch was rejected by its permission callback.
+	 *
+	 * @param mixed $response REST response.
+	 * @return bool
+	 */
+	protected function is_rest_permission_failure( $response ) {
+		if ( ! is_object( $response ) || ! method_exists( $response, 'get_status' ) || ! method_exists( $response, 'get_data' ) ) {
+			return false;
+		}
+
+		$status = (int) $response->get_status();
+		$data   = $response->get_data();
+
+		return in_array( $status, array( 401, 403 ), true )
+			&& is_array( $data )
+			&& 'rest_forbidden' === ( $data['code'] ?? '' );
+	}
+
+	/**
+	 * Invoke the callback registered for one of the fixed QuadLayers routes.
+	 *
+	 * @param string           $route   REST route without a leading slash.
+	 * @param \WP_REST_Request $request Prepared request.
+	 * @return mixed|null
+	 */
+	protected function request_feed_items_from_registered_callback( $route, $request ) {
+		if ( ! in_array( $route, $this->routes, true ) || ! function_exists( 'rest_get_server' ) ) {
+			return null;
+		}
+
+		$server = rest_get_server();
+		if ( ! is_object( $server ) || ! method_exists( $server, 'get_routes' ) ) {
+			return null;
+		}
+
+		$routes   = $server->get_routes();
+		$handlers = $routes[ '/' . ltrim( $route, '/' ) ] ?? array();
+		foreach ( $handlers as $handler ) {
+			$callback = is_array( $handler ) ? ( $handler['callback'] ?? null ) : null;
+			if ( ! is_array( $callback ) || ! isset( $callback[0], $callback[1] ) || ! is_object( $callback[0] ) || 'callback' !== $callback[1] || ! is_callable( $callback ) ) {
+				continue;
+			}
+
+			$class = ltrim( get_class( $callback[0] ), '\\' );
+			if ( 0 !== strpos( $class, 'QuadLayers\\TTF\\Api\\Rest\\Endpoints\\Frontend\\' ) ) {
+				continue;
+			}
+
+			return call_user_func( $callback, $request );
+		}
+
+		return null;
 	}
 
 	/**
