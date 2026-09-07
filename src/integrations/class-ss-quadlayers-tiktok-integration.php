@@ -210,43 +210,51 @@ class Quadlayers_Tiktok_Integration extends Integration {
 			: home_url( '/wp-json/' . $route );
 
 		$max_bytes = max( 1024, (int) apply_filters( 'simply_static_tiktok_response_max_bytes', 2 * 1024 * 1024 ) );
-		$body      = wp_json_encode(
-			array(
-				'feedSettings' => $settings,
-				'createTime'   => '',
-			)
+		$payload = array(
+			'feedSettings' => $settings,
+			'createTime'   => '',
 		);
+		$body    = wp_json_encode( $payload );
 		if ( false === $body ) {
 			return new \WP_Error( 'ss_tiktok_encode_failed', __( 'The TikTok feed settings could not be encoded.', 'simply-static' ) );
 		}
 
-		$response = $this->auth_remote_post(
-			$url,
-			array(
-				'timeout'             => max( 1, (int) apply_filters( 'simply_static_tiktok_request_timeout', 20 ) ),
-				'headers'             => array(
-					'Accept'       => 'application/json',
-					'Content-Type' => 'application/json',
-				),
-				'body'                => $body,
-				'data_format'         => 'body',
-				'limit_response_size' => $max_bytes,
-			)
-		);
-
-		if ( is_wp_error( $response ) ) {
-			return $response;
+		// Prefer an in-process REST dispatch. Managed WordPress environments may
+		// deliberately block container-to-public-host loopback requests even while
+		// the same frontend endpoint is reachable from a visitor's browser.
+		$decoded = $this->request_feed_items_from_local_rest( $route, $body, $max_bytes );
+		if ( is_wp_error( $decoded ) ) {
+			return $decoded;
 		}
-		if ( 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
-			return new \WP_Error( 'ss_tiktok_http_error', __( 'The TikTok feed endpoint returned an error.', 'simply-static' ) );
-		}
+		if ( null === $decoded ) {
+			$response = $this->auth_remote_post(
+				$url,
+				array(
+					'timeout'             => max( 1, (int) apply_filters( 'simply_static_tiktok_request_timeout', 20 ) ),
+					'headers'             => array(
+						'Accept'       => 'application/json',
+						'Content-Type' => 'application/json',
+					),
+					'body'                => $body,
+					'data_format'         => 'body',
+					'limit_response_size' => $max_bytes,
+				)
+			);
 
-		$response_body = wp_remote_retrieve_body( $response );
-		if ( ! is_string( $response_body ) || '' === $response_body || strlen( $response_body ) > $max_bytes ) {
-			return new \WP_Error( 'ss_tiktok_invalid_response', __( 'The TikTok feed endpoint returned an invalid response.', 'simply-static' ) );
-		}
+			if ( is_wp_error( $response ) ) {
+				return $response;
+			}
+			if ( 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+				return new \WP_Error( 'ss_tiktok_http_error', __( 'The TikTok feed endpoint returned an error.', 'simply-static' ) );
+			}
 
-		$decoded = json_decode( $response_body, true );
+			$response_body = wp_remote_retrieve_body( $response );
+			if ( ! is_string( $response_body ) || '' === $response_body || strlen( $response_body ) > $max_bytes ) {
+				return new \WP_Error( 'ss_tiktok_invalid_response', __( 'The TikTok feed endpoint returned an invalid response.', 'simply-static' ) );
+			}
+
+			$decoded = json_decode( $response_body, true );
+		}
 		if ( isset( $decoded['data'] ) && is_array( $decoded['data'] ) ) {
 			$decoded = $decoded['data'];
 		}
@@ -255,6 +263,50 @@ class Quadlayers_Tiktok_Integration extends Integration {
 		}
 
 		return $this->normalize_feed_items( $decoded, $settings );
+	}
+
+	/**
+	 * Dispatch the fixed QuadLayers route inside WordPress when the REST server
+	 * is available. A null result means callers should use the HTTP fallback.
+	 *
+	 * @param string $route     REST route without a leading slash.
+	 * @param string $body      JSON request body.
+	 * @param int    $max_bytes Maximum serialized response size.
+	 * @return mixed|\WP_Error|null
+	 */
+	protected function request_feed_items_from_local_rest( $route, $body, $max_bytes ) {
+		if ( ! function_exists( 'rest_do_request' ) || ! class_exists( '\\WP_REST_Request' ) ) {
+			return null;
+		}
+
+		$request = new \WP_REST_Request( 'POST', '/' . ltrim( $route, '/' ) );
+		$request->set_header( 'Accept', 'application/json' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( $body );
+		$response = rest_do_request( $request );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+		if ( ! is_object( $response ) || ! method_exists( $response, 'get_status' ) || ! method_exists( $response, 'get_data' ) ) {
+			return new \WP_Error( 'ss_tiktok_invalid_response', __( 'The TikTok feed endpoint returned an invalid response.', 'simply-static' ) );
+		}
+
+		$data   = $response->get_data();
+		$status = (int) $response->get_status();
+		if ( 404 === $status && is_array( $data ) && 'rest_no_route' === ( $data['code'] ?? '' ) ) {
+			return null;
+		}
+		if ( 200 !== $status ) {
+			return new \WP_Error( 'ss_tiktok_http_error', __( 'The TikTok feed endpoint returned an error.', 'simply-static' ) );
+		}
+
+		$encoded = wp_json_encode( $data );
+		if ( false === $encoded || strlen( $encoded ) > $max_bytes ) {
+			return new \WP_Error( 'ss_tiktok_invalid_response', __( 'The TikTok feed endpoint returned an invalid response.', 'simply-static' ) );
+		}
+
+		return $data;
 	}
 
 	/**
