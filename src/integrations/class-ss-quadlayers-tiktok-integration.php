@@ -126,6 +126,19 @@ class Quadlayers_Tiktok_Integration extends Integration {
 			return null;
 		}
 
+		// Url_Extractor protects entities inside JSON attributes before building
+		// the DOM and restores them after this integration hook runs. Restore the
+		// same fixed tokens here so the intermediate DOM value is valid JSON.
+		$value = strtr(
+			$value,
+			array(
+				'QUOTE_PLACEHOLDER'     => '&quot;',
+				'APOS_PLACEHOLDER'      => '&apos;',
+				'LESSTHAN_PLACEHOLDER'  => '&lt;',
+				'GREATTHAN_PLACEHOLDER' => '&gt;',
+				'AMPERSAND_PLACEHOLDER' => '&amp;',
+			)
+		);
 		$value   = html_entity_decode( $value, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8' );
 		$decoded = json_decode( $value, true );
 
