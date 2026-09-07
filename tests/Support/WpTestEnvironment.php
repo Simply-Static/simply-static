@@ -21,6 +21,15 @@ final class WpTestEnvironment {
 	/** @var array<string,array<int,array<int,array{callback:callable,accepted_args:int}>>> */
 	public static $filters = array();
 
+	/** @var mixed */
+	public static $rest_dispatch_response;
+
+	/** @var array<int,mixed> */
+	public static $rest_requests = array();
+
+	/** @var array<string,array<int,array<string,mixed>>> */
+	public static $rest_server_routes = array();
+
 	/** @var array<int,array<string,mixed>> */
 	public static $remote_requests = array();
 
@@ -100,6 +109,9 @@ final class WpTestEnvironment {
 		self::$transients       = array();
 		self::$site_transients  = array();
 		self::$filters          = array();
+		self::$rest_dispatch_response = null;
+		self::$rest_requests    = array();
+		self::$rest_server_routes = array();
 		self::$remote_requests  = array();
 		self::$remote_response  = array(
 			'response' => array( 'code' => 200 ),
