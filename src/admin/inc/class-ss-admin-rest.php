@@ -1006,6 +1006,7 @@ class Admin_Rest {
             's3_bucket',
             'algolia_index',
             'sftp_folder',
+			'ftp_folder',
             'archive_status_messages',
             'pages_status',
             'archive_name',
@@ -1178,6 +1179,8 @@ class Admin_Rest {
             'ss_tools_submenu',
 			'post_types_configured',
 			'server_cron',
+			'sftp_bulk_upload',
+			'ftp_passive_mode',
         ];
 
         foreach ( $options as $key => $value ) {
@@ -1202,6 +1205,12 @@ class Admin_Rest {
                 $options[ $key ] = filter_var( $value, FILTER_VALIDATE_BOOLEAN );
             } elseif ( 'ss_single_auto_export_delay' === $key ) {
                 $options[ $key ] = max( 0, absint( $value ) );
+			} elseif ( 'sftp_port' === $key || 'ftp_port' === $key ) {
+				$default_port    = 'sftp_port' === $key ? 22 : 21;
+				$sanitized_port  = absint( $value );
+				$options[ $key ] = $sanitized_port >= 1 && $sanitized_port <= 65535 ? $sanitized_port : $default_port;
+			} elseif ( 'sftp_timeout' === $key || 'ftp_timeout' === $key ) {
+				$options[ $key ] = max( 5, min( 300, absint( $value ) ) );
 			} elseif ( 'ss_single_export_webhook_url' === $key ) {
 				$san = esc_url_raw( $value );
 				if ( empty( $san ) || ! wp_http_validate_url( $san ) ) {

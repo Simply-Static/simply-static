@@ -11,6 +11,7 @@ import {
 } from "@wordpress/components";
 import {useState, useContext} from "@wordpress/element";
 import {SettingsContext} from "../context/SettingsContext";
+import OperationsMode from "../components/OperationsMode";
 
 const {__} = wp.i18n;
 
@@ -41,6 +42,7 @@ function Utilities() {
     const [actionError, setActionError] = useState('');
     const maintenanceLocked = isRunning || isPaused || isRollbackRunning;
     const isBusy = pendingAction !== '';
+	const hasOperationsMode = 'undefined' !== typeof options && 'pro' === options.plan && !!options.operations_mode;
 
     const setImportDataValue = event => {
         setImportData(event.target.value);
@@ -136,6 +138,12 @@ function Utilities() {
 
     return (
         <div className={"inner-settings"}>
+			{hasOperationsMode &&
+				<>
+					<OperationsMode/>
+					<Spacer margin={5}/>
+				</>
+			}
             {maintenanceLocked && (
                 <Notice status="warning" isDismissible={false}>
                     <p>{__('Import, reset, and migration actions are unavailable until the active export or rollback finishes.', 'simply-static')}</p>

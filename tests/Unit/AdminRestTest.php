@@ -101,6 +101,27 @@ final class AdminRestTest extends UnitTestCase {
 		);
 	}
 
+	public function test_save_settings_normalizes_ftp_and_sftp_connection_controls(): void {
+		$this->saveSettings(
+			array(
+				'ftp_port'         => '70000',
+				'sftp_port'        => '2222',
+				'ftp_timeout'      => '1',
+				'sftp_timeout'     => '900',
+				'ftp_passive_mode' => 'false',
+				'sftp_bulk_upload' => 'yes',
+			)
+		);
+
+		$saved = WpEnv::$options['simply-static'];
+		self::assertSame( 21, $saved['ftp_port'] );
+		self::assertSame( 2222, $saved['sftp_port'] );
+		self::assertSame( 5, $saved['ftp_timeout'] );
+		self::assertSame( 300, $saved['sftp_timeout'] );
+		self::assertFalse( $saved['ftp_passive_mode'] );
+		self::assertTrue( $saved['sftp_bulk_upload'] );
+	}
+
 	/**
 	 * @dataProvider unsafeWebhookProvider
 	 */

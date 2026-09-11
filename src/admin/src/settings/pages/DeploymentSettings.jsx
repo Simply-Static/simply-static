@@ -48,6 +48,7 @@ function DeploymentSettings() {
         {label: __('ZIP Archive', 'simply-static'), value: 'zip'},
         {label: __('Local Directory', 'simply-static'), value: 'local'},
         {label: __('Static Studio', 'simply-static'), value: 'simply-static-studio'},
+        {label: __('FTP', 'simply-static'), value: 'ftp'},
         {label: __('SFTP', 'simply-static'), value: 'sftp'},
         {label: __('GitHub', 'simply-static'), value: 'github'},
         {label: __('AWS S3', 'simply-static'), value: 'aws-s3'},
@@ -207,7 +208,7 @@ function DeploymentSettings() {
                 cta={__('See how Pro deployment works →', 'simply-static')}
             >
                 <p>{__('Your site is built and published automatically every time you make a change, with no destinations to set up and no pipelines to maintain. That\'s the whole idea of Studio.', 'simply-static')}</p>
-                <p>{__('Want to choose exactly where your files go? Deploying to GitHub, Amazon S3, BunnyCDN, SFTP and more is part of Simply Static Pro, where you own and control your deployment pipeline.', 'simply-static')}</p>
+                <p>{__('Want to choose exactly where your files go? Deploying to GitHub, Amazon S3, BunnyCDN, FTP, SFTP and more is part of Simply Static Pro, where you own and control your deployment pipeline.', 'simply-static')}</p>
             </StudioNotice>
         }
         {canEditDeploymentSettings && <>
@@ -907,6 +908,129 @@ function DeploymentSettings() {
                 </Card>
             }
             <Spacer margin={5}/>
+            {deliveryMethod === 'ftp' &&
+                <Card>
+                    <CardHeader>
+                        <Flex>
+                            <FlexItem>
+                                <b>{__('FTP', 'simply-static')}</b>
+                            </FlexItem>
+                            {('free' === options.plan || !isPro()) &&
+                                <FlexItem>
+                                    <ExternalLink
+                                        href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
+                                </FlexItem>
+                            }
+                        </Flex>
+                    </CardHeader>
+                    <CardBody>
+                        {false === options.ftp_available &&
+                            <>
+                                <Notice status="error" isDismissible={false}>
+                                    <p>{__('The PHP FTP extension is not installed. Ask the server administrator to enable it before using FTP deployment.', 'simply-static')}</p>
+                                </Notice>
+                                <Spacer margin={4}/>
+                            </>
+                        }
+                        <Notice status="warning" isDismissible={false}>
+                            <p>{__('Plain FTP does not encrypt credentials or uploaded files. Use SFTP whenever your hosting provider supports it.', 'simply-static')}</p>
+                        </Notice>
+                        <Spacer margin={4}/>
+
+                        <TextControl
+                            label={__('Host', 'simply-static')}
+                            type={"text"}
+                            help={__('Enter your FTP host without a path.', 'simply-static')}
+                            value={settings.ftp_host || ''}
+                            disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            onChange={(host) => {
+                                updateSetting('ftp_host', host);
+                            }}
+                        />
+
+                        <TextControl
+                            label={__('Port', 'simply-static')}
+                            type={"number"}
+                            disabled={('free' === options.plan || !isPro())}
+                            help={__('Enter your FTP port. The default is 21.', 'simply-static')}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            value={settings.ftp_port || 21}
+                            onChange={(port) => {
+                                updateSetting('ftp_port', port);
+                            }}
+                        />
+
+                        <TextControl
+                            label={__('FTP username', 'simply-static')}
+                            help={__('Enter your FTP username.', 'simply-static')}
+                            type={"text"}
+                            disabled={('free' === options.plan || !isPro())}
+                            placeholder={"username"}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            value={settings.ftp_user || ''}
+                            onChange={(user) => {
+                                updateSetting('ftp_user', user);
+                            }}
+                        />
+
+                        <TextControl
+                            label={__('FTP password', 'simply-static')}
+                            type={"password"}
+                            disabled={('free' === options.plan || !isPro())}
+                            help={__('Enter your FTP password. You can also define SSP_FTP_PASS in wp-config.php.', 'simply-static')}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            value={settings.ftp_pass || ''}
+                            onChange={(pass) => {
+                                updateSetting('ftp_pass', pass);
+                            }}
+                        />
+
+                        <TextControl
+                            label={__('Connection timeout', 'simply-static')}
+                            type={"number"}
+                            min={5}
+                            max={300}
+                            disabled={('free' === options.plan || !isPro())}
+                            help={__('Stop a stalled FTP connection after this many seconds.', 'simply-static')}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            value={settings.ftp_timeout || 30}
+                            onChange={(timeout) => {
+                                updateSetting('ftp_timeout', timeout);
+                            }}
+                        />
+
+                        <TextControl
+                            label={__('FTP folder', 'simply-static')}
+                            help={__('Leave empty to use the FTP account default, or enter the folder that should contain the static site (for example, "public_html").', 'simply-static')}
+                            type={"text"}
+                            disabled={('free' === options.plan || !isPro())}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            value={settings.ftp_folder || ''}
+                            onChange={(folder) => {
+                                updateSetting('ftp_folder', folder);
+                            }}
+                        />
+
+                        <ToggleControl
+                            label={__('Passive mode', 'simply-static')}
+                            help={__('Recommended for shared hosting and servers behind a firewall.', 'simply-static')}
+                            disabled={('free' === options.plan || !isPro())}
+                            checked={false !== settings.ftp_passive_mode}
+                            onChange={(value) => {
+                                updateSetting('ftp_passive_mode', value);
+                            }}
+                        />
+                    </CardBody>
+                </Card>
+            }
+            <Spacer margin={5}/>
             {deliveryMethod === 'sftp' &&
                 <Card>
                     <CardHeader>
@@ -964,6 +1088,21 @@ function DeploymentSettings() {
                         />
 
                         <TextControl
+                            label={__('Connection timeout', 'simply-static')}
+                            type={"number"}
+                            min={5}
+                            max={300}
+                            disabled={('free' === options.plan || !isPro())}
+                            help={__('Stop a stalled SFTP connection after this many seconds.', 'simply-static')}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            value={settings.sftp_timeout || 30}
+                            onChange={(timeout) => {
+                                updateSetting('sftp_timeout', timeout);
+                            }}
+                        />
+
+                        <TextControl
                             label={__('SFTP password', 'simply-static')}
                             type={"password"}
                             disabled={('free' === options.plan || !isPro())}
@@ -985,6 +1124,20 @@ function DeploymentSettings() {
                             value={settings.sftp_private_key}
                             onChange={(pass) => {
                                 updateSetting('sftp_private_key', pass);
+                            }}
+                        />
+
+                        <TextControl
+                            label={__('SSH host key fingerprint', 'simply-static')}
+                            help={__('Optional: pin the server host key with an OpenSSH SHA256 fingerprint (for example, SHA256:abc…). The deployment stops if the key changes.', 'simply-static')}
+                            type={"text"}
+                            disabled={('free' === options.plan || !isPro())}
+                            placeholder={"SHA256:…"}
+                            __next40pxDefaultSize
+                            __nextHasNoMarginBottom
+                            value={settings.sftp_host_fingerprint || ''}
+                            onChange={(fingerprint) => {
+                                updateSetting('sftp_host_fingerprint', fingerprint);
                             }}
                         />
 

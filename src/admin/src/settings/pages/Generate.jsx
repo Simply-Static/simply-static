@@ -12,6 +12,7 @@ import ExportLog from "../components/ExportLog";
 import LogButtons from "../components/LogButtons";
 import Sites from "../components/Sites";
 import BFBanner from "../components/Marketing/BFBanner";
+import OperationsMode from "../components/OperationsMode";
 
 const {__} = wp.i18n;
 
@@ -19,6 +20,12 @@ function Generate() {
     const {settings, blogId, setBlogId} = useContext(SettingsContext);
 
     return (<div className={"inner-settings"}>
+		{options.operations_mode && options.operations_mode.enabled && !options.operations_mode.unlocked &&
+			<>
+				<OperationsMode locked={true}/>
+				<Spacer margin={5}/>
+			</>
+		}
 		{!options.is_network && options.can_view_activity_log &&
             <>
                 <BFBanner />
