@@ -351,7 +351,12 @@ class Admin_Settings {
 	 */
 	public function apply_admin_bootstrap_capability_boundary( $args, $all_settings, $can_manage_settings, $can_view_activity_log, $can_view_diagnostics ) {
 		$args = is_array( $args ) ? $args : array();
-		$can_manage_settings = (bool) $can_manage_settings;
+		// A settings-args filter may deliberately reduce an administrator's
+		// effective access (for example, Pro's password-gated operations mode).
+		// Never promote that explicit denial back to full access when this
+		// boundary is re-applied after extensions add their bootstrap data.
+		$filter_allows_settings = ! array_key_exists( 'can_manage_settings', $args ) || (bool) $args['can_manage_settings'];
+		$can_manage_settings = (bool) $can_manage_settings && $filter_allows_settings;
 		$can_view_activity_log = (bool) $can_view_activity_log;
 		$can_view_diagnostics = (bool) $can_view_diagnostics;
 
@@ -1093,6 +1098,7 @@ class Admin_Settings {
                 's3_bucket',
                 'algolia_index',
                 'sftp_folder',
+				'ftp_folder',
                 'archive_status_messages',
                 'pages_status',
                 'archive_name',

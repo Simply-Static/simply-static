@@ -143,6 +143,31 @@ final class AdminSettingsSecurityTest extends UnitTestCase {
 		self::assertTrue( $result['can_manage_settings'] );
 	}
 
+	public function test_settings_filter_can_reduce_but_not_promote_administrator_access(): void {
+		$args = array(
+			'can_manage_settings' => false,
+			'current_settings'    => array(
+				'delivery_method' => 'ftp',
+				'ftp_pass'        => 'secret',
+			),
+			'allowed_pages'       => array( '/', '/diagnostics', '/deployment' ),
+			'connect'             => array( 'is_connected' => true, 'auth_token' => 'secret-token' ),
+		);
+
+		$result = $this->settings->apply_admin_bootstrap_capability_boundary(
+			$args,
+			$args['current_settings'],
+			true,
+			true,
+			true
+		);
+
+		self::assertFalse( $result['can_manage_settings'] );
+		self::assertSame( array( '/', '/diagnostics' ), $result['allowed_pages'] );
+		self::assertArrayNotHasKey( 'ftp_pass', $result['current_settings'] );
+		self::assertSame( array( 'is_connected' => true ), $result['connect'] );
+	}
+
 	/**
 	 * @dataProvider invalidCancelNonceProvider
 	 */

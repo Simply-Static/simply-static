@@ -41,6 +41,15 @@ final class UpgradeDefaultsTest extends UnitTestCase {
 			'version_css'                     => 'boolean',
 			'version_js'                      => 'boolean',
 			'sftp_private_key'                => 'string',
+			'sftp_host_fingerprint'           => 'string',
+			'sftp_timeout'                    => 'integer',
+			'ftp_host'                        => 'string',
+			'ftp_user'                        => 'string',
+			'ftp_pass'                        => 'string',
+			'ftp_folder'                      => 'string',
+			'ftp_port'                        => 'integer',
+			'ftp_passive_mode'                => 'boolean',
+			'ftp_timeout'                     => 'integer',
 			'shortpixel_enabled'              => 'boolean',
 			'shortpixel_api_key'              => 'string',
 			'ss_use_single_exports'           => 'boolean',
@@ -69,6 +78,7 @@ final class UpgradeDefaultsTest extends UnitTestCase {
 		self::assertSame( '', $defaults['aws_access_key'] );
 		self::assertSame( '', $defaults['aws_access_secret'] );
 		self::assertSame( '', $defaults['sftp_private_key'] );
+		self::assertSame( '', $defaults['ftp_pass'] );
 		self::assertSame( '', $defaults['ss_webhook_url'] );
 	}
 

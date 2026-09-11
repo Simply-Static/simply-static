@@ -298,6 +298,22 @@ final class UtilSecurityTest extends UnitTestCase {
 		);
 	}
 
+	public function test_ftp_connection_details_are_removed_from_portable_settings(): void {
+		$options = array(
+			'delivery_method' => 'ftp',
+			'ftp_host'        => 'ftp.example.test',
+			'ftp_user'        => 'deploy',
+			'ftp_pass'        => 'secret',
+			'ftp_folder'      => 'public_html',
+			'ftp_port'        => 21,
+		);
+
+		self::assertSame(
+			array( 'delivery_method' => 'ftp', 'ftp_port' => 21 ),
+			Util::remove_sensitive_options( $options )
+		);
+	}
+
 	public function test_recursive_deletion_rejects_a_symlink_root(): void {
 		$target = WpEnv::$upload_dir['basedir'] . '/target';
 		$link   = WpEnv::$upload_dir['basedir'] . '/link';
