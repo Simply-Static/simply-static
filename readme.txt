@@ -4,7 +4,7 @@ Tags: jamstack, performance, security, static site generator
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag:  3.8.12
+Stable tag:  3.8.13
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -274,6 +274,13 @@ Settings - Configure your static site export options
 Diagnostics - Check your WordPress environment for compatibility
 
 == Changelog ==
+
+= 3.8.13 =
+
+* Added static snapshots for QuadLayers TikTok feeds, including reliable background export handling
+* Added FTP deployment settings for Simply Static Pro, including passive mode, connection timeouts, availability guidance, and an unencrypted-transport warning
+* Added SFTP connection timeout and optional SSH host key fingerprint controls
+* Added password-protected operations mode controls for Simply Static Pro while keeping publishing and diagnostics available
 
 = 3.8.12 =
 
