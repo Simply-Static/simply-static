@@ -1,6 +1,6 @@
 {
   "name": "simplystatic-settings",
-  "version": "3.8.12",
+  "version": "3.8.13",
   "description": "",
   "main": "build/index.js",
   "scripts": {
