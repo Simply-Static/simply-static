@@ -73,6 +73,14 @@ function FormSettings() {
                 
                 const credentials = response.credentials;
                 const currentService = settings.captcha_service || '';
+                const recaptchaCredentials = credentials.recaptcha
+                    ? credentials.recaptcha.filter((credential) => {
+                        // Older Pro versions did not expose a service marker and
+                        // only detected reCAPTCHA v3 credentials.
+                        const service = credential.service || 'recaptcha_v3';
+                        return service === currentService;
+                    })
+                    : [];
                 
                 // Check for credentials based on current service
                 let foundCredentials = null;
@@ -90,8 +98,8 @@ function FormSettings() {
                         type: 'success',
                         message: __('Turnstile credentials copied from ', 'simply-static') + sourceName + '!'
                     });
-                } else if (currentService === 'recaptcha_v3' && credentials.recaptcha && credentials.recaptcha.length > 0) {
-                    foundCredentials = credentials.recaptcha[0];
+                } else if ((currentService === 'recaptcha_v2' || currentService === 'recaptcha_v3') && recaptchaCredentials.length > 0) {
+                    foundCredentials = recaptchaCredentials[0];
                     sourceName = foundCredentials.source;
                     
                     // Apply ReCaptcha credentials
@@ -106,9 +114,13 @@ function FormSettings() {
                     // No credentials found for current service, check if other service has credentials
                     let alternativeMsg = '';
                     if (currentService === 'turnstile' && credentials.recaptcha && credentials.recaptcha.length > 0) {
-                        alternativeMsg = __(' ReCaptcha credentials were found - switch to ReCaptcha v3 to use them.', 'simply-static');
-                    } else if (currentService === 'recaptcha_v3' && credentials.turnstile && credentials.turnstile.length > 0) {
+                        alternativeMsg = __(' reCAPTCHA credentials were found - switch to the matching reCAPTCHA version to use them.', 'simply-static');
+                    } else if ((currentService === 'recaptcha_v2' || currentService === 'recaptcha_v3') && credentials.turnstile && credentials.turnstile.length > 0) {
                         alternativeMsg = __(' Turnstile credentials were found - switch to Turnstile to use them.', 'simply-static');
+                    } else if (currentService === 'recaptcha_v2' && credentials.recaptcha && credentials.recaptcha.length > 0) {
+                        alternativeMsg = __(' reCAPTCHA v3 credentials were found - switch to reCAPTCHA v3 to use them.', 'simply-static');
+                    } else if (currentService === 'recaptcha_v3' && credentials.recaptcha && credentials.recaptcha.length > 0) {
+                        alternativeMsg = __(' reCAPTCHA v2 credentials were found - switch to reCAPTCHA v2 to use them.', 'simply-static');
                     }
                     
                     setCredentialsNotice({
@@ -302,6 +314,7 @@ function FormSettings() {
                             options={[
                                 { label: __('Choose Service', 'simply-static'), value: '' },
                                 { label: __('Cloudflare Turnstile', 'simply-static'), value: 'turnstile' },
+                                { label: __('Google reCAPTCHA v2 (Checkbox)', 'simply-static'), value: 'recaptcha_v2' },
                                 { label: __('Google reCAPTCHA v3', 'simply-static'), value: 'recaptcha_v3' },
                             ]}
                             onChange={(value) => updateSetting('captcha_service', value)}
@@ -393,12 +406,12 @@ function FormSettings() {
                                 />
                             </>
                         )}
-                        {settings.captcha_service === 'recaptcha_v3' && (
+                        {(settings.captcha_service === 'recaptcha_v2' || settings.captcha_service === 'recaptcha_v3') && (
                             <>
                                 <TextControl
                                     label={__('Site Key', 'simply-static')}
                                     help={__('Your public key will be used on the static site.', 'simply-static')}
-                                    placeholder={__('Enter your reCAPTCHA v3 site key', 'simply-static')}
+                                    placeholder={__('Enter your reCAPTCHA site key', 'simply-static')}
                                     __next40pxDefaultSize
                                     __nextHasNoMarginBottom
                                     disabled={('free' === options.plan || !isPro())}
@@ -409,7 +422,7 @@ function FormSettings() {
                                 <TextControl
                                     label={__('Secret Key', 'simply-static')}
                                     help={__('Your secret key will be stored in WordPress.', 'simply-static')}
-                                    placeholder={__('Enter your reCAPTCHA v3 secret key', 'simply-static')}
+                                    placeholder={__('Enter your reCAPTCHA secret key', 'simply-static')}
                                     type={'password'}
                                     __next40pxDefaultSize
                                     __nextHasNoMarginBottom
