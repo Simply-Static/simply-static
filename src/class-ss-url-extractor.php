@@ -42,9 +42,10 @@ class Url_Extractor {
 			'data-lazy-srcset',
 			'data-bg'
 		),
-		'use'     => array( 'href' ),
-		'picture' => array( 'src', 'srcset', 'data-src', 'data-srcset', 'data-bg' ),
-		'amp-img' => array( 'src', 'srcset' ),
+		'use'       => array( 'href', 'xlink:href' ),
+		'picture'   => array( 'src', 'srcset', 'data-src', 'data-srcset', 'data-bg' ),
+		'amp-img'   => array( 'src', 'srcset' ),
+		'amp-story' => array( 'publisher-logo-src', 'poster-portrait-src', 'poster-square-src', 'poster-landscape-src' ),
 
 		'applet' => array( 'code', 'codebase', 'archive', 'object' ),
 		'area'   => array( 'href' ),
@@ -135,6 +136,17 @@ class Url_Extractor {
 	 * @var array
 	 */
 	private $svg_data_uris = [];
+
+	/**
+	 * Origin of the page currently being processed.
+	 *
+	 * Managed and reverse-proxy environments can fetch a page from a runtime
+	 * hostname that differs from WordPress home_url(), site_url(), and the
+	 * configured Simply Static origin.
+	 *
+	 * @var string
+	 */
+	private $active_source_origin = '';
 
 	/**
 	 * Constructor
@@ -228,6 +240,34 @@ class Url_Extractor {
 	 * @return array
 	 */
 	public function extract_and_update_urls() {
+		$source_origin                = $this->get_static_page_origin();
+		$source_origin_is_configured = $this->is_configured_local_origin( $source_origin );
+		$this->active_source_origin   = $source_origin;
+
+		if ( '' !== $source_origin ) {
+			add_filter( 'ss_local_url_bases', array( $this, 'add_active_source_origin_to_local_url_bases' ) );
+		}
+
+		try {
+			return $this->extract_and_update_urls_for_source_origin( $source_origin, $source_origin_is_configured );
+		} finally {
+			if ( '' !== $source_origin ) {
+				remove_filter( 'ss_local_url_bases', array( $this, 'add_active_source_origin_to_local_url_bases' ) );
+			}
+
+			$this->active_source_origin = '';
+		}
+	}
+
+	/**
+	 * Run URL extraction while the fetched page origin is registered as local.
+	 *
+	 * @param string $source_origin                Fetched page origin.
+	 * @param bool   $source_origin_is_configured Whether WordPress settings already include the origin.
+	 *
+	 * @return array
+	 */
+	private function extract_and_update_urls_for_source_origin( $source_origin, $source_origin_is_configured ) {
 		// Reset preserved tags for each extraction run
 		$this->xmp_tags = [];
 
@@ -266,9 +306,134 @@ class Url_Extractor {
 			if ( $this->options->get( 'force_replace_url' ) && ( ! $this->options->get( 'use_forms' ) && ! $this->options->get( 'use_comments' ) ) ) {
 				$this->force_replace_urls();
 			}
+
+			if ( '' !== $source_origin && ! $source_origin_is_configured ) {
+				$this->replace_unconfigured_source_origin_urls( $source_origin );
+			}
 		}
 
 		return array_unique( $this->extracted_urls );
+	}
+
+	/**
+	 * Add the current fetched page origin to the local URL bases for one extraction.
+	 *
+	 * @param array $bases Configured local URL bases.
+	 *
+	 * @return array
+	 */
+	public function add_active_source_origin_to_local_url_bases( $bases ) {
+		$bases = (array) $bases;
+
+		if ( '' !== $this->active_source_origin ) {
+			$bases[] = $this->active_source_origin;
+		}
+
+		return array_values( array_unique( array_filter( $bases ) ) );
+	}
+
+	/**
+	 * Get the security origin of the page being processed.
+	 *
+	 * @return string
+	 */
+	private function get_static_page_origin() {
+		$url_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $this->static_page->url ) : parse_url( $this->static_page->url );
+
+		if (
+			! is_array( $url_parts )
+			|| empty( $url_parts['scheme'] )
+			|| empty( $url_parts['host'] )
+			|| isset( $url_parts['user'] )
+			|| isset( $url_parts['pass'] )
+		) {
+			return '';
+		}
+
+		$scheme = strtolower( (string) $url_parts['scheme'] );
+		if ( ! in_array( $scheme, array( 'http', 'https' ), true ) ) {
+			return '';
+		}
+
+		$host = strtolower( (string) $url_parts['host'] );
+		if ( false !== strpos( $host, ':' ) && '[' !== substr( $host, 0, 1 ) ) {
+			$host = '[' . $host . ']';
+		}
+
+		$port = isset( $url_parts['port'] ) ? ':' . (int) $url_parts['port'] : '';
+
+		return $scheme . '://' . $host . $port;
+	}
+
+	/**
+	 * Determine whether an origin is already represented by WordPress settings.
+	 *
+	 * @param string $origin Source origin.
+	 *
+	 * @return bool
+	 */
+	private function is_configured_local_origin( $origin ) {
+		if ( '' === $origin ) {
+			return false;
+		}
+
+		foreach ( Util::local_url_bases() as $base ) {
+			if ( Util::is_same_origin_url( $origin, $base ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Remove residual references to an unconfigured runtime/proxy origin.
+	 *
+	 * Structured URL extraction handles normal attributes. This final pass also
+	 * covers visible URL text, form values, nested query parameters, and encoded
+	 * URLs that otherwise leak a managed WordPress runtime into static output.
+	 *
+	 * @param string $source_origin Unconfigured source origin.
+	 *
+	 * @return void
+	 */
+	private function replace_unconfigured_source_origin_urls( $source_origin ) {
+		$response_body   = $this->get_body();
+		$destination_url = $this->options->get_destination_url();
+
+		if ( ! is_string( $response_body ) || '' === $response_body ) {
+			return;
+		}
+
+		$source_parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $source_origin ) : parse_url( $source_origin );
+		if ( ! is_array( $source_parts ) || empty( $source_parts['host'] ) ) {
+			return;
+		}
+
+		$host = (string) $source_parts['host'];
+		if ( false !== strpos( $host, ':' ) && '[' !== substr( $host, 0, 1 ) ) {
+			$host = '[' . $host . ']';
+		}
+		$authority = $host . ( isset( $source_parts['port'] ) ? ':' . (int) $source_parts['port'] : '' );
+
+		$pattern = '~(?:https?:)?//' . preg_quote( $authority, '~' ) . '(?=$|[/?#\\s<>"\'])~i';
+		$_result = preg_replace_callback(
+			$pattern,
+			static function () use ( $destination_url ) {
+				return $destination_url;
+			},
+			$response_body
+		);
+		if ( null !== $_result ) {
+			$response_body = $_result;
+		}
+
+		$escaped_source      = addcslashes( untrailingslashit( $source_origin ), '/' );
+		$escaped_destination = addcslashes( untrailingslashit( $destination_url ), '/' );
+		$response_body       = str_ireplace( $escaped_source, $escaped_destination, $response_body );
+		$response_body       = str_ireplace( urlencode( $source_origin ), urlencode( $destination_url ), $response_body );
+
+		$this->save_body( $response_body );
 	}
 
 	/**

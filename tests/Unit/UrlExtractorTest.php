@@ -361,12 +361,44 @@ final class UrlExtractorTest extends UnitTestCase {
 		);
 	}
 
-	private function extractor( string $type, string $body, string $file_path = 'page.html' ): Url_Extractor {
+	public function test_rewrites_unconfigured_runtime_origin_without_force_replace(): void {
+		$runtime_origin = 'https://wp-runtime.example.test';
+		$sprite_path    = '/wp-content/plugins/simple-social-icons/symbol-defs.svg';
+		$portrait_path  = '/wp-content/uploads/story-portrait.jpg';
+		$html           = '<html><head>'
+			. '<link rel="preconnect" href="' . $runtime_origin . '">'
+			. '<link rel="dns-prefetch" href="' . $runtime_origin . '">'
+			. '</head><body>'
+			. '<svg><use xlink:href="' . $runtime_origin . $sprite_path . '#social-facebook"></use></svg>'
+			. '<amp-story publisher-logo-src="' . $runtime_origin . '/wp-content/uploads/logo.jpg" '
+			. 'poster-portrait-src="' . $runtime_origin . $portrait_path . '"></amp-story>'
+			. '<input type="hidden" name="page_url" value="' . $runtime_origin . '/blog/page/">'
+			. '<p>Visit ' . $runtime_origin . ' or search '
+			. 'https://external.test/?q=' . $runtime_origin . '/privacy-policy.</p>'
+			. '</body></html>';
+
+		$extractor = $this->extractor( 'html', $html, 'page.html', $runtime_origin . '/blog/page/' );
+		$urls      = $extractor->extract_and_update_urls();
+		$body      = $extractor->get_body();
+
+		self::assertStringNotContainsString( $runtime_origin, $body );
+		self::assertStringNotContainsString( 'rel="preconnect"', $body );
+		self::assertStringNotContainsString( 'rel="dns-prefetch"', $body );
+		self::assertStringContainsString( 'https://static.example.test' . $sprite_path . '#social-facebook', $body );
+		self::assertStringContainsString( 'https://static.example.test' . $portrait_path, $body );
+		self::assertStringContainsString( 'value="https://static.example.test/blog/page/"', $body );
+		self::assertStringContainsString( 'https://external.test/?q=https://static.example.test/privacy-policy', $body );
+		self::assertContains( $runtime_origin . $sprite_path, $urls );
+		self::assertContains( $runtime_origin . $portrait_path, $urls );
+		self::assertFalse( Util::is_local_url( $runtime_origin . '/after-extraction' ) );
+	}
+
+	private function extractor( string $type, string $body, string $file_path = 'page.html', string $page_url = 'https://example.test/blog/page' ): Url_Extractor {
 		$unique_path = str_replace( '/', '-', uniqid( '', true ) ) . '-' . basename( $file_path );
 		file_put_contents( $this->archive_dir . $unique_path, $body );
 
 		$page = Page::initialize( array(
-			'url'               => 'https://example.test/blog/page',
+			'url'               => $page_url,
 			'file_path'         => $unique_path,
 			'http_status_code'  => 200,
 			'content_type'      => 'text/' . $type . '; charset=UTF-8',
