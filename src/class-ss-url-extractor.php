@@ -1595,10 +1595,11 @@ class Url_Extractor {
 			// Further manipulate Dom?
 			$dom = apply_filters( 'ss_dom_before_save', $dom, $this->static_page->url );
 
-			// A filter may serialize the DOM. Restore all temporary placeholders before
-			// returning the string, just as we do after DOMDocument::saveHTML() below.
+			// A filter may serialize the DOM. Run the serialized string through the same
+			// finalization path as DOMDocument::saveHTML() so raw-text content such as CSS
+			// does not retain numeric or named entities introduced during DOM processing.
 			if ( is_string( $dom ) ) {
-				return $this->restore_html_placeholders( $dom, $conditional_comments, $html_comments );
+				return $this->finalize_html_after_dom( $dom, $conditional_comments, $html_comments, $charset );
 			}
 
 			// Ensure a proper <meta charset> is present as the first child of <head>
@@ -1654,58 +1655,73 @@ class Url_Extractor {
 			// Save the HTML document
 			$html = $dom->saveHTML();
 
-			// Remove closing tags for HTML5 void elements that DOMDocument incorrectly adds.
-			// PHP's DOMDocument does not recognize newer HTML5 void elements like <source>,
-			// so saveHTML() may output e.g. </source>, causing W3C validation errors.
-			$html5_void_elements = array( 'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr' );
-			$html = preg_replace( '#</(' . implode( '|', $html5_void_elements ) . ')>#i', '', $html );
-
-			$html = $this->restore_html_placeholders( $html, $conditional_comments, $html_comments );
-
-			// Decode HTML entities across the final HTML using the site's charset so non-Latin text (e.g., Japanese/Arabic)
-			// is preserved as real characters instead of numeric entities. To avoid breaking complex attribute values
-			// (e.g., Elementor's data-settings JSON that may contain encoded SVG like &lt;svg&gt;), we protect attributes
-			// by replacing key entities with placeholders before decoding, then restore them afterwards.
-			$charset = \get_bloginfo( 'charset' );
-
-			if ( empty( $charset ) ) {
-				$charset = 'UTF-8';
-			}
-			$should_decode_final = apply_filters( 'simply_static_decode_final_html', true, $this );
-
-			if ( $should_decode_final ) {
-				// Protect attribute content that must remain entity-encoded during the global decode
-				$html = $this->preserve_attributes( $html );
-				$html = html_entity_decode( $html, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, $charset );
-				// Restore the protected attribute content back to entities to keep markup valid
-				$html = $this->restore_attributes( $html );
-			}
-
-			$html = apply_filters( 'ss_html_after_restored_attributes', $html, $this );
-
-			// Use regex to double-check <style> attributes for things like @font-face URLs.
-			$origin_host = Util::origin_host();
-
-			if ( strpos( $html, $origin_host ) !== false ) {
-				$_result = preg_replace_callback(
-					'/<style\b[^>]*>(.*?)<\/style>/is',
-					function ( $style_match ) use ( $origin_host ) {
-						if ( strpos( $style_match[1], $origin_host ) === false ) {
-							return $style_match[0];
-						}
-						$updated_css = $this->extract_and_replace_urls_in_css( $style_match[1] );
-
-						return str_replace( $style_match[1], $updated_css, $style_match[0] );
-					},
-					$html
-				);
-				if ( null !== $_result ) {
-					$html = $_result;
-				}
-			}
-
-			return $html;
+			return $this->finalize_html_after_dom( $html, $conditional_comments, $html_comments, $charset );
 		}
+	}
+
+	/**
+	 * Finalize HTML after DOM processing, including when a filter serialized the DOM early.
+	 *
+	 * @param string $html                 Serialized HTML.
+	 * @param array  $conditional_comments Preserved conditional comments.
+	 * @param array  $html_comments        Preserved non-conditional comments.
+	 * @param string $charset              Site charset.
+	 *
+	 * @return string
+	 */
+	private function finalize_html_after_dom( $html, $conditional_comments, $html_comments, $charset ) {
+
+		// Remove closing tags for HTML5 void elements that DOMDocument incorrectly adds.
+		// PHP's DOMDocument does not recognize newer HTML5 void elements like <source>,
+		// so saveHTML() may output e.g. </source>, causing W3C validation errors.
+		$html5_void_elements = array( 'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr' );
+		$html = preg_replace( '#</(' . implode( '|', $html5_void_elements ) . ')>#i', '', $html );
+
+		$html = $this->restore_html_placeholders( $html, $conditional_comments, $html_comments );
+
+		// Decode HTML entities across the final HTML using the site's charset so non-Latin text (e.g., Japanese/Arabic)
+		// is preserved as real characters instead of numeric entities. To avoid breaking complex attribute values
+		// (e.g., Elementor's data-settings JSON that may contain encoded SVG like &lt;svg&gt;), we protect attributes
+		// by replacing key entities with placeholders before decoding, then restore them afterwards.
+		$charset = is_string( $charset ) && '' !== $charset ? $charset : \get_bloginfo( 'charset' );
+
+		if ( empty( $charset ) ) {
+			$charset = 'UTF-8';
+		}
+		$should_decode_final = apply_filters( 'simply_static_decode_final_html', true, $this );
+
+		if ( $should_decode_final ) {
+			// Protect attribute content that must remain entity-encoded during the global decode
+			$html = $this->preserve_attributes( $html );
+			$html = html_entity_decode( $html, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, $charset );
+			// Restore the protected attribute content back to entities to keep markup valid
+			$html = $this->restore_attributes( $html );
+		}
+
+		$html = apply_filters( 'ss_html_after_restored_attributes', $html, $this );
+
+		// Use regex to double-check <style> attributes for things like @font-face URLs.
+		$origin_host = Util::origin_host();
+
+		if ( strpos( $html, $origin_host ) !== false ) {
+			$_result = preg_replace_callback(
+				'/<style\b[^>]*>(.*?)<\/style>/is',
+				function ( $style_match ) use ( $origin_host ) {
+					if ( strpos( $style_match[1], $origin_host ) === false ) {
+						return $style_match[0];
+					}
+					$updated_css = $this->extract_and_replace_urls_in_css( $style_match[1] );
+
+					return str_replace( $style_match[1], $updated_css, $style_match[0] );
+				},
+				$html
+			);
+			if ( null !== $_result ) {
+				$html = $_result;
+			}
+		}
+
+		return $html;
 	}
 
 	/**

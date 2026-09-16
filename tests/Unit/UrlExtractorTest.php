@@ -247,6 +247,27 @@ final class UrlExtractorTest extends UnitTestCase {
 		self::assertStringNotContainsString( 'SCRIPT_PLACEHOLDER', $body );
 	}
 
+	public function test_decodes_css_glyphs_when_dom_filter_returns_html_string(): void {
+		add_filter( 'ss_dom_before_save', function ( $dom ) {
+			return $dom instanceof \DOMDocument ? $dom->saveHTML() : $dom;
+		} );
+
+		$html = '<html><head><style id="elementor-frontend-inline-css">'
+			. '.previous::after{content:"←"}.next::after{content:"→"}.check::before{content:"✓"}'
+			. '</style></head><body></body></html>';
+		$extractor = $this->extractor( 'html', $html );
+
+		$extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertStringContainsString( 'content:"←"', $body );
+		self::assertStringContainsString( 'content:"→"', $body );
+		self::assertStringContainsString( 'content:"✓"', $body );
+		self::assertStringNotContainsString( '&larr;', $body );
+		self::assertStringNotContainsString( '&rarr;', $body );
+		self::assertStringNotContainsString( '&#10003;', $body );
+	}
+
 	public function test_restores_comments_in_script_only_html_fragment(): void {
 		$html = '<!-- Google tag (gtag.js) snippet added by Site Kit -->'
 			. '<script>gtag("config","G-TEST");</script>'
