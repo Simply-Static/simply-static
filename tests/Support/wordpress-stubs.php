@@ -838,6 +838,16 @@ function wp_list_pluck( $input_list, $field, $index_key = null ) {
 	return $result;
 }
 
+function wp_parse_args( $args, $defaults = array() ) {
+	if ( is_object( $args ) ) {
+		$args = get_object_vars( $args );
+	} elseif ( ! is_array( $args ) ) {
+		parse_str( (string) $args, $args );
+	}
+
+	return array_merge( $defaults, $args );
+}
+
 function wp_http_validate_url( $url ) {
 	$url = esc_url_raw( $url );
 	$parts = parse_url( $url );
