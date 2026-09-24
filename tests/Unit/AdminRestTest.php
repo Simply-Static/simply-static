@@ -67,12 +67,14 @@ final class AdminRestTest extends UnitTestCase {
 	public function test_save_settings_normalizes_multiline_booleans_and_nested_unknown_arrays(): void {
 		$this->saveSettings(
 			array(
-				'additional_urls'     => "  https://one.test/\r\nhttps://two.test/<b>path</b>  ",
-				'critical_css_custom' => "<b>body</b> {\r\n color: red;\n}",
-				'use_search'          => 'false',
-				'server_cron'         => 'yes',
-				'ss_use_builds'       => '0',
-				'custom_provider'     => array(
+				'additional_urls'               => "  https://one.test/\r\nhttps://two.test/<b>path</b>  ",
+				'critical_css_custom'           => "<b>body</b> {\r\n color: red;\n}",
+				'css_optimize_delay_js_excludes' => " *googletagmanager.com*\r\ngtm-<b>bootstrap</b> ",
+				'css_optimize_delay_js_timeout'  => '75',
+				'use_search'                    => 'false',
+				'server_cron'                   => 'yes',
+				'ss_use_builds'                 => '0',
+				'custom_provider'               => array(
 					'label'   => " <strong>Primary</strong>\n provider ",
 					'details' => array(
 						'region' => '<em>Europe</em>',
@@ -86,6 +88,8 @@ final class AdminRestTest extends UnitTestCase {
 
 		self::assertSame( "https://one.test/\nhttps://two.test/path", $saved['additional_urls'] );
 		self::assertSame( "body {\n color: red;\n}", $saved['critical_css_custom'] );
+		self::assertSame( "*googletagmanager.com*\ngtm-bootstrap", $saved['css_optimize_delay_js_excludes'] );
+		self::assertSame( 60, $saved['css_optimize_delay_js_timeout'] );
 		self::assertFalse( $saved['use_search'] );
 		self::assertTrue( $saved['server_cron'] );
 		self::assertFalse( $saved['ss_use_builds'] );

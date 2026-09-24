@@ -38,6 +38,8 @@ final class UpgradeDefaultsTest extends UnitTestCase {
 			'search_show_excerpt'             => 'boolean',
 			'minify_css_exclude'              => 'string',
 			'minify_js_exclude'               => 'string',
+			'css_optimize_delay_js_excludes'  => 'string',
+			'css_optimize_delay_js_timeout'   => 'integer',
 			'version_css'                     => 'boolean',
 			'version_js'                      => 'boolean',
 			'sftp_private_key'                => 'string',

@@ -1144,6 +1144,7 @@ class Admin_Rest {
 			'css_optimize_critical_patterns',
 			'css_optimize_defer_js_excludes',
 			'css_optimize_delay_js_patterns',
+			'css_optimize_delay_js_excludes',
 			'critical_css_additional_urls',
 			'critical_css_custom',
         ];
@@ -1205,6 +1206,8 @@ class Admin_Rest {
                 $options[ $key ] = filter_var( $value, FILTER_VALIDATE_BOOLEAN );
             } elseif ( 'ss_single_auto_export_delay' === $key ) {
                 $options[ $key ] = max( 0, absint( $value ) );
+			} elseif ( 'css_optimize_delay_js_timeout' === $key ) {
+				$options[ $key ] = max( 0, min( 60, absint( $value ) ) );
 			} elseif ( 'sftp_port' === $key || 'ftp_port' === $key ) {
 				$default_port    = 'sftp_port' === $key ? 22 : 21;
 				$sanitized_port  = absint( $value );
