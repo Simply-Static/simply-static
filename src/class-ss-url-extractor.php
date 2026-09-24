@@ -1050,6 +1050,29 @@ class Url_Extractor {
 			}
 		}
 
+		// Feed readers request the advertised URL directly and generally do not
+		// execute the HTML/JavaScript redirect stored at /feed/index.html. Point
+		// feed discovery links at the XML file that the exporter actually writes.
+		if ( 'link' === $tag_name && $this->is_feed_discovery_link( $tag ) ) {
+			if ( ! $this->options->get( 'add_feeds' ) ) {
+				if ( $tag->parentNode ) {
+					$tag->parentNode->removeChild( $tag );
+				}
+
+				return;
+			}
+
+			$feed_url         = $tag->getAttribute( 'href' );
+			$updated_feed_url = $this->add_to_extracted_urls( $feed_url );
+			if ( is_string( $updated_feed_url ) && '' !== $updated_feed_url ) {
+				$tag->setAttribute( 'href', $this->get_exported_feed_url( $feed_url, $updated_feed_url ) );
+			}
+
+			// The feed URL was handled above; do not process href a second time in
+			// the generic attribute loop.
+			$attributes = array_diff( $attributes, array( 'href' ) );
+		}
+
 		// Remove local resource hints. They are useless in static output and can
 		// expose a hidden WordPress/staging host in proxy/custom-domain setups.
 		if ( 'link' === $tag_name && $tag->hasAttribute( 'rel' ) && $tag->hasAttribute( 'href' ) ) {
@@ -1143,6 +1166,38 @@ class Url_Extractor {
 				$tag->setAttribute( $attribute_name, $attribute_value );
 			}
 		}
+	}
+
+	/**
+	 * Determine whether a link element advertises an RSS or Atom feed.
+	 *
+	 * @param \DOMElement $link Link element.
+	 *
+	 * @return bool
+	 */
+	private function is_feed_discovery_link( $link ) {
+		if ( ! $link->hasAttribute( 'rel' ) || ! $link->hasAttribute( 'href' ) ) {
+			return false;
+		}
+
+		$rel_tokens = preg_split( '/\s+/', strtolower( trim( $link->getAttribute( 'rel' ) ) ) );
+		$rel_tokens = is_array( $rel_tokens ) ? array_filter( $rel_tokens ) : array();
+		if ( ! in_array( 'alternate', $rel_tokens, true ) ) {
+			return false;
+		}
+
+		$content_type = strtolower( trim( $link->getAttribute( 'type' ) ) );
+		if ( ! in_array(
+			$content_type,
+			array( 'application/rss+xml', 'application/atom+xml', 'application/rdf+xml' ),
+			true
+		) ) {
+			return false;
+		}
+
+		$url = Util::relative_to_absolute_url( $link->getAttribute( 'href' ), $this->static_page->url );
+
+		return is_string( $url ) && '' !== $url && Util::is_local_url( $url );
 	}
 
 	/**
@@ -2448,9 +2503,74 @@ class Url_Extractor {
 
 		if ( isset( $extracted_url ) && $extracted_url !== '' ) {
 			$updated_extracted_url = $this->add_to_extracted_urls( $extracted_url );
+
+			// WordPress feed documents use their pretty /feed/ URL as the Atom
+			// self-reference. The static artifact lives at index.xml, so make the
+			// self-reference match the resource consumed by validators and readers.
+			if (
+				$this->is_feed_document()
+				&& $this->is_current_document_url( $extracted_url )
+				&& is_string( $updated_extracted_url )
+			) {
+				$updated_extracted_url = $this->get_exported_feed_url( $extracted_url, $updated_extracted_url );
+			}
 		}
 
 		return $updated_extracted_url;
+	}
+
+	/**
+	 * Check whether the current XML page is an RSS, Atom, or RDF feed.
+	 *
+	 * @return bool
+	 */
+	private function is_feed_document() {
+		if ( $this->static_page->is_type( 'rss' ) || $this->static_page->is_type( 'atom' ) || $this->static_page->is_type( 'rdf' ) ) {
+			return true;
+		}
+
+		$body = ltrim( (string) $this->get_body() );
+
+		return 1 === preg_match( '/^(?:<\?xml\b[^>]*>\s*)?(?:<rss\b|<feed\b|<rdf:RDF\b)/i', $body );
+	}
+
+	/**
+	 * Check whether a URL identifies the XML document currently being exported.
+	 *
+	 * @param string $url Candidate URL.
+	 *
+	 * @return bool
+	 */
+	private function is_current_document_url( $url ) {
+		$current   = Util::remove_fragment( (string) $this->static_page->url );
+		$candidate = Util::relative_to_absolute_url( $url, $this->static_page->url );
+
+		if ( ! is_string( $candidate ) || '' === $candidate ) {
+			return false;
+		}
+
+		$candidate = Util::remove_fragment( $candidate );
+
+		return 0 === strcasecmp( untrailingslashit( $current ), untrailingslashit( $candidate ) );
+	}
+
+	/**
+	 * Return the public URL of the XML file written for a WordPress feed URL.
+	 *
+	 * @param string $source_url    Original WordPress feed URL.
+	 * @param string $converted_url Normally converted URL used as a safe fallback.
+	 *
+	 * @return string
+	 */
+	private function get_exported_feed_url( $source_url, $converted_url ) {
+		$feed_path = Util::get_static_feed_path( $source_url );
+		if ( null === $feed_path ) {
+			return $converted_url;
+		}
+
+		$feed_file_url = trailingslashit( Util::origin_url() ) . ltrim( $feed_path, '/' );
+
+		return $this->convert_url( $feed_file_url );
 	}
 
 	/**
