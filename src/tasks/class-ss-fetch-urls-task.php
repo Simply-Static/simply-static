@@ -744,12 +744,12 @@ class Fetch_Urls_Task extends Task {
 			return;
 		}
 
-		// Skip URLs that resolve to a non-published post (trashed, draft, private, etc.)
+		// Skip URLs that resolve to a non-public post (trashed, draft, private, etc.)
 		$resolved_post_id = url_to_postid( $child_url );
 		if ( $resolved_post_id > 0 ) {
 			$resolved_status = get_post_status( $resolved_post_id );
-			if ( $resolved_status && 'publish' !== $resolved_status ) {
-				Util::debug_log( sprintf( 'Skipping non-published post URL (status: %s): %s', $resolved_status, $child_url ) );
+			if ( $resolved_status && ! Util::is_public_post_status( $resolved_status ) ) {
+				Util::debug_log( sprintf( 'Skipping non-public post URL (status: %s): %s', $resolved_status, $child_url ) );
 				return;
 			}
 		}

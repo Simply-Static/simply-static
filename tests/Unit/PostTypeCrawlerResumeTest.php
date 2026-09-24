@@ -195,4 +195,26 @@ final class PostTypeCrawlerResumeTest extends UnitTestCase {
 			array_column( array_column( $database->inserts, 'data' ), 'url' )
 		);
 	}
+
+	public function test_registered_public_custom_status_is_queried(): void {
+		WpEnv::$registered_post_statuses = array(
+			'publish'    => (object) array( 'name' => 'publish', 'public' => true ),
+			'nepromovat' => (object) array( 'name' => 'nepromovat', 'public' => true ),
+			'draft'      => (object) array( 'name' => 'draft', 'public' => false ),
+		);
+		$database = new PostTypeCrawlerResumeWpdb( array(
+			'post' => array( 2 ),
+			'page' => array(),
+		) );
+		$GLOBALS['wpdb'] = $database;
+
+		$crawler = new Post_Type_Crawler();
+		$crawler->add_urls_to_queue();
+
+		self::assertStringContainsString(
+			"post_status IN ('publish','nepromovat')",
+			$database->queries[0]
+		);
+		self::assertStringNotContainsString( "'draft'", $database->queries[0] );
+	}
 }

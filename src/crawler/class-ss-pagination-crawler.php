@@ -235,6 +235,7 @@ class Pagination_Crawler extends Crawler {
 		$batch_size         = max( 10, min( 1000, (int) apply_filters( 'simply_static_pagination_post_query_batch_size', 250 ) ) );
 		$max_posts_to_scan  = max( 1, min( 1000000, (int) apply_filters( 'simply_static_pagination_max_posts_to_scan', 10000 ) ) );
 		$max_generated_urls = $this->get_max_generated_urls();
+		$public_statuses    = \Simply_Static\Util::get_public_post_statuses();
 
 		// Get selected post types from settings
 		$options = get_option( 'simply-static' );
@@ -260,7 +261,7 @@ class Pagination_Crawler extends Crawler {
 				'offset'                 => $offset,
 				'orderby'                => 'ID',
 				'order'                  => 'ASC',
-				'post_status'            => 'publish',
+				'post_status'            => $public_statuses,
 				'no_found_rows'          => true,
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
@@ -303,6 +304,7 @@ class Pagination_Crawler extends Crawler {
 	private function get_page_template_pagination() : array {
 		$urls               = [];
 		$max_generated_urls = $this->get_max_generated_urls();
+		$public_statuses    = \Simply_Static\Util::get_public_post_statuses();
 
 		// Get selected post types from settings
 		$options             = get_option( 'simply-static' );
@@ -329,7 +331,7 @@ class Pagination_Crawler extends Crawler {
 				'offset'                 => $offset,
 				'orderby'                => 'ID',
 				'order'                  => 'ASC',
-				'post_status'            => 'publish',
+				'post_status'            => $public_statuses,
 				'no_found_rows'          => true,
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,

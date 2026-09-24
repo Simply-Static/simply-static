@@ -34,8 +34,9 @@ class Post_Type_Crawler extends Crawler {
 	 * @return array List of post type URLs
 	 */
 	public function detect(): array {
-		$post_urls = [];
-		$max_posts = max( 1, min( 100000, (int) apply_filters( 'simply_static_post_type_detection_limit', 1000 ) ) );
+		$post_urls       = [];
+		$max_posts       = max( 1, min( 100000, (int) apply_filters( 'simply_static_post_type_detection_limit', 1000 ) ) );
+		$public_statuses = \Simply_Static\Util::get_public_post_statuses();
 
 		// Get all public post types
 		$post_types = get_post_types( [ 'public' => true ], 'names' );
@@ -70,11 +71,11 @@ class Post_Type_Crawler extends Crawler {
 				continue;
 			}
 
-			// Get all published posts of this type
+			// Get all publicly accessible posts of this type.
 			$posts = get_posts( [
 				'post_type'      => $post_type,
 				'posts_per_page' => $max_posts - count( $post_urls ),
-				'post_status'    => 'publish',
+				'post_status'    => $public_statuses,
 			] );
 
 			foreach ( $posts as $post ) {
@@ -101,10 +102,12 @@ class Post_Type_Crawler extends Crawler {
 	public function add_urls_to_queue() : int {
 		global $wpdb;
 
-		$post_types = $this->get_crawl_post_types();
-		$signature  = hash( 'sha256', serialize( array(
+		$post_types      = $this->get_crawl_post_types();
+		$public_statuses = \Simply_Static\Util::get_public_post_statuses();
+		$signature       = hash( 'sha256', serialize( array(
 			'archive_start_time' => \Simply_Static\Options::instance()->get( 'archive_start_time' ),
 			'post_types'         => $post_types,
+			'post_statuses'       => $public_statuses,
 		) ) );
 		$state       = $this->load_post_type_state( $signature );
 		$batch_size  = max( 1, min( 500, (int) apply_filters( 'simply_static_post_type_crawler_batch_size', 100 ) ) );
@@ -118,11 +121,15 @@ class Post_Type_Crawler extends Crawler {
 		while ( 'posts' === $state['stage'] && $state['post_type_index'] < count( $post_types ) ) {
 			$post_type   = $post_types[ $state['post_type_index'] ];
 			$query_limit = min( $batch_size, $entry_limit - $processed );
+			$status_placeholders = implode( ',', array_fill( 0, count( $public_statuses ), '%s' ) );
+			$query_params        = array_merge(
+				array( $post_type ),
+				$public_statuses,
+				array( $state['last_post_id'], $query_limit )
+			);
 			$ids = $wpdb->get_col( $wpdb->prepare(
-				"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'publish' AND ID > %d ORDER BY ID ASC LIMIT %d",
-				$post_type,
-				$state['last_post_id'],
-				$query_limit
+				"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status IN ({$status_placeholders}) AND ID > %d ORDER BY ID ASC LIMIT %d",
+				...$query_params
 			) );
 			$ids = is_array( $ids ) ? array_map( 'intval', $ids ) : array();
 			$urls = array();
