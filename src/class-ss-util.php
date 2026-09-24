@@ -13,6 +13,48 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Util {
 
 	/**
+	 * Get the post statuses that WordPress exposes publicly.
+	 *
+	 * Custom post statuses are not necessarily private. Treat statuses registered
+	 * with `public => true` the same as `publish` so their URLs can be discovered
+	 * and fetched during an export.
+	 *
+	 * @return string[]
+	 */
+	public static function get_public_post_statuses(): array {
+		$statuses = get_post_stati( array( 'public' => true ), 'names' );
+		$statuses = is_array( $statuses ) ? $statuses : array();
+
+		/**
+		 * Filter the post statuses that Simply Static treats as publicly exportable.
+		 *
+		 * @param string[] $statuses Public post status slugs.
+		 */
+		$statuses = apply_filters( 'simply_static_public_post_statuses', $statuses );
+		$statuses = is_array( $statuses ) ? $statuses : array();
+		$statuses = array_map(
+			static function ( $status ): string {
+				return is_string( $status ) ? sanitize_key( $status ) : '';
+			},
+			$statuses
+		);
+		$statuses = array_values( array_unique( array_filter( $statuses ) ) );
+
+		return empty( $statuses ) ? array( 'publish' ) : $statuses;
+	}
+
+	/**
+	 * Determine whether a post status is publicly exportable.
+	 *
+	 * @param string $status Post status slug.
+	 *
+	 * @return bool
+	 */
+	public static function is_public_post_status( $status ): bool {
+		return is_string( $status ) && in_array( sanitize_key( $status ), self::get_public_post_statuses(), true );
+	}
+
+	/**
 	 * Option keys that contain credentials or site-specific deployment secrets.
 	 *
 	 * @return string[]
@@ -662,7 +704,7 @@ class Util {
 				$ids         = get_posts(
 					array(
 						'post_type'              => $post_types,
-						'post_status'            => 'publish',
+						'post_status'            => self::get_public_post_statuses(),
 						'posts_per_page'         => $query_limit,
 						'offset'                 => $post_offset,
 						'orderby'                => 'ID',

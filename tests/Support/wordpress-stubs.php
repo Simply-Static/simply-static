@@ -664,7 +664,7 @@ function get_current_blog_id() {
 }
 
 function url_to_postid( $url ) {
-	return 0;
+	return WpEnv::$url_post_ids[ (string) $url ] ?? 0;
 }
 
 function get_blog_details( $fields = null, $get_all = true ) {
@@ -805,6 +805,43 @@ function get_post_types( $args = array(), $output = 'names' ) {
 	}
 
 	return array( 'post' => 'post', 'page' => 'page', 'attachment' => 'attachment' );
+}
+
+function get_post_stati( $args = array(), $output = 'names', $operator = 'and' ) {
+	$statuses = WpEnv::$registered_post_statuses;
+	if ( empty( $statuses ) ) {
+		$statuses = array(
+			'publish' => (object) array( 'name' => 'publish', 'public' => true ),
+		);
+	}
+
+	if ( ! empty( $args ) ) {
+		$statuses = array_filter(
+			$statuses,
+			static function ( $status ) use ( $args, $operator ): bool {
+				$matches = 0;
+				foreach ( $args as $property => $expected ) {
+					if ( isset( $status->{$property} ) && $status->{$property} == $expected ) {
+						++$matches;
+					}
+				}
+
+				return 'or' === $operator ? $matches > 0 : $matches === count( $args );
+			}
+		);
+	}
+
+	return 'objects' === $output ? $statuses : array_keys( $statuses );
+}
+
+function get_post_status( $post = null ) {
+	$post_id = is_object( $post ) && isset( $post->ID ) ? (int) $post->ID : (int) $post;
+
+	return WpEnv::$post_statuses[ $post_id ] ?? false;
+}
+
+function get_post_status_object( $post_status ) {
+	return WpEnv::$registered_post_statuses[ (string) $post_status ] ?? null;
 }
 
 function get_post_type_archive_link( $post_type ) {

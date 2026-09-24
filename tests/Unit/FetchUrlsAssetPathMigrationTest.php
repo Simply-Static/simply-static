@@ -121,6 +121,35 @@ final class FetchUrlsAssetPathMigrationTest extends UnitTestCase {
 		self::assertSame( array(), $this->wpdb->updates );
 	}
 
+	public function test_link_to_public_custom_status_is_not_skipped(): void {
+		$this->wpdb->row = $this->childRow( self::LEGACY_PATH );
+		WpEnv::$url_post_ids[ self::ASSET_URL ] = 88;
+		WpEnv::$post_statuses[ 88 ] = 'nepromovat';
+		WpEnv::$registered_post_statuses = array(
+			'publish'    => (object) array( 'name' => 'publish', 'public' => true ),
+			'nepromovat' => (object) array( 'name' => 'nepromovat', 'public' => true ),
+			'draft'      => (object) array( 'name' => 'draft', 'public' => false ),
+		);
+
+		( new Fetch_Urls_Task() )->set_url_found_on( $this->parentPage(), self::ASSET_URL );
+
+		self::assertCount( 1, $this->wpdb->updates );
+	}
+
+	public function test_link_to_non_public_status_is_skipped(): void {
+		$this->wpdb->row = $this->childRow( self::LEGACY_PATH );
+		WpEnv::$url_post_ids[ self::ASSET_URL ] = 88;
+		WpEnv::$post_statuses[ 88 ] = 'draft';
+		WpEnv::$registered_post_statuses = array(
+			'publish' => (object) array( 'name' => 'publish', 'public' => true ),
+			'draft'   => (object) array( 'name' => 'draft', 'public' => false ),
+		);
+
+		( new Fetch_Urls_Task() )->set_url_found_on( $this->parentPage(), self::ASSET_URL );
+
+		self::assertSame( array(), $this->wpdb->updates );
+	}
+
 	/** @return array<string,mixed> */
 	private function childRow( string $file_path ): array {
 		return array(
