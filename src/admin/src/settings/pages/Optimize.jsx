@@ -425,6 +425,31 @@ function Optimize() {
                                     updateSetting('css_optimize_delay_js_patterns', patterns);
                                 }}
                             />
+                            <TextareaControl
+                                label={__('Delay Exclude Patterns', 'simply-static')}
+                                __nextHasNoMarginBottom
+                                help={__('Glob patterns for scripts that must run without Simply Static\'s interaction delay (one per line). Patterns match script URLs, element IDs, and inline script content. You can also add data-ssp-no-delay to a script tag. Exclusions do not override your consent manager.', 'simply-static')}
+                                disabled={('free' === options.plan || !isPro())}
+                                value={settings.css_optimize_delay_js_excludes || ''}
+                                placeholder={'*googletagmanager.com*\ngtm-bootstrap'}
+                                onChange={(patterns) => {
+                                    updateSetting('css_optimize_delay_js_excludes', patterns);
+                                }}
+                            />
+                            <TextControl
+                                label={__('Delay Fallback Timeout (seconds)', 'simply-static')}
+                                type="number"
+                                min="0"
+                                max="60"
+                                __next40pxDefaultSize
+                                __nextHasNoMarginBottom
+                                help={__('Release delayed scripts after this many seconds if there is no user interaction. Use 0 to release them immediately.', 'simply-static')}
+                                disabled={('free' === options.plan || !isPro())}
+                                value={settings.css_optimize_delay_js_timeout ?? 10}
+                                onChange={(timeout) => {
+                                    updateSetting('css_optimize_delay_js_timeout', timeout);
+                                }}
+                            />
                         </>}
                     </>
                 }

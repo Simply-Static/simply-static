@@ -181,6 +181,8 @@ class Upgrade_Handler {
 			'css_optimize_preconnect_hints' => false,
 			'css_optimize_delay_js'           => false,
 			'css_optimize_delay_js_patterns'  => '',
+			'css_optimize_delay_js_excludes'  => '',
+			'css_optimize_delay_js_timeout'   => 10,
 			'css_optimize_defer_js_excludes'  => '',
 			'css_optimize_critical_patterns'  => '',
 			'css_js_aggregate_css'              => false,
