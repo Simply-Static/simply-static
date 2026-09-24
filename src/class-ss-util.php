@@ -2473,6 +2473,74 @@ class Util {
 	}
 
 	/**
+	 * Resolve a WordPress feed URL to the public XML path used by a static export.
+	 *
+	 * Pretty feed URLs retain their path and receive index.xml. Plain-permalink
+	 * feeds receive a stable path so they do not depend on query handling at the
+	 * static destination.
+	 *
+	 * @param string $url WordPress feed URL.
+	 *
+	 * @return string|null Destination-relative XML path, or null for a non-feed URL.
+	 */
+	public static function get_static_feed_path( $url ) {
+		$parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $url ) : parse_url( $url );
+		if ( ! is_array( $parts ) ) {
+			return null;
+		}
+
+		$query_args = array();
+		if ( ! empty( $parts['query'] ) ) {
+			parse_str( html_entity_decode( (string) $parts['query'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ), $query_args );
+			unset( $query_args['simply_static_page'] );
+		}
+
+		if ( isset( $query_args['feed'] ) ) {
+			$format = strtolower( preg_replace( '/[^a-z0-9_-]/i', '', (string) $query_args['feed'] ) );
+			$format = '' === $format ? 'rss2' : $format;
+
+			if ( 1 === count( $query_args ) ) {
+				if ( 'rss2' === $format ) {
+					return 'feed/index.xml';
+				}
+				if ( 'comments-rss2' === $format ) {
+					return 'comments/feed/index.xml';
+				}
+
+				return 'feed/' . $format . '/index.xml';
+			}
+
+			// Multiple query feeds (for example a custom-post-type feed) need
+			// isolated files so one feed cannot overwrite another.
+			ksort( $query_args );
+			$signature = substr( md5( http_build_query( $query_args ) ), 0, 12 );
+
+			return 'feed/' . $format . '/__qs/' . $signature . '/index.xml';
+		}
+
+		$path = self::get_public_path_from_local_url( self::remove_params_and_fragment( $url ) );
+		if ( ! is_string( $path ) || '' === $path ) {
+			$path = isset( $parts['path'] ) ? (string) $parts['path'] : '';
+		}
+		$path = trim( self::sanitize_local_path( $path ), '/' );
+		if ( '' === $path || ! preg_match( '#(?:^|/)feed(?:/(?:atom|rdf|rss|rss2))?/?$#i', $path ) ) {
+			return null;
+		}
+
+		if ( ! empty( $query_args ) ) {
+			// WordPress represents custom-post-type and other filtered feeds as a
+			// pretty feed path plus query arguments. Keep each one separate from the
+			// unfiltered feed so it cannot overwrite feed/index.xml.
+			ksort( $query_args );
+			$signature = substr( md5( http_build_query( $query_args ) ), 0, 12 );
+
+			return trailingslashit( $path ) . '__qs/' . $signature . '/index.xml';
+		}
+
+		return trailingslashit( $path ) . 'index.xml';
+	}
+
+	/**
 	 * Remove the fragment from a URL while preserving its query string.
 	 *
 	 * URL fragments are handled entirely by the browser and are never part of

@@ -459,6 +459,11 @@ class Url_Fetcher {
 	 */
 	private function build_relative_filename_for_static_page( $static_page ) {
 		$url_parts = parse_url( $static_page->url );
+		$feed_path = Util::get_static_feed_path( $static_page->url );
+		if ( null !== $feed_path && $static_page->is_type( 'xml' ) ) {
+			return $feed_path;
+		}
+
 		// a domain with no trailing slash has no path, so we're giving it one
 		$path = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
 

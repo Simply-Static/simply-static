@@ -189,6 +189,106 @@ final class UrlExtractorTest extends UnitTestCase {
 		self::assertStringContainsString( 'https://external.test/a.jpg', $xml_extractor->get_body() );
 	}
 
+	public function test_feed_discovery_links_target_the_exported_xml_file(): void {
+		WpEnv::$options['simply-static']['add_feeds'] = true;
+		Options::reinstance();
+
+		$html = '<html><head>'
+			. '<link rel="alternate" type="application/rss+xml" href="https://example.test/feed/">'
+			. '</head><body><a href="https://example.test/feed/">ordinary page link</a></body></html>';
+		$extractor = $this->extractor( 'html', $html );
+
+		$urls = $extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertStringContainsString( 'href="https://static.example.test/feed/index.xml"', $body );
+		self::assertStringContainsString( 'href="https://static.example.test/feed/"', $body );
+		self::assertContains( 'https://example.test/feed/', $urls );
+	}
+
+	public function test_disabled_feeds_are_not_advertised(): void {
+		WpEnv::$options['simply-static']['add_feeds'] = false;
+		Options::reinstance();
+
+		$html = '<html><head>'
+			. '<link rel="alternate" type="application/rss+xml" href="https://example.test/feed/">'
+			. '</head><body></body></html>';
+		$extractor = $this->extractor( 'html', $html );
+
+		$extractor->extract_and_update_urls();
+
+		self::assertStringNotContainsString( 'application/rss+xml', $extractor->get_body() );
+	}
+
+	public function test_external_feed_discovery_links_are_preserved(): void {
+		WpEnv::$options['simply-static']['add_feeds'] = false;
+		Options::reinstance();
+
+		$html = '<html><head>'
+			. '<link rel="alternate" type="application/rss+xml" href="https://feeds.example.net/feed/">'
+			. '</head><body></body></html>';
+		$extractor = $this->extractor( 'html', $html );
+
+		$extractor->extract_and_update_urls();
+
+		self::assertStringContainsString( 'href="https://feeds.example.net/feed/"', $extractor->get_body() );
+	}
+
+	public function test_plain_permalink_feed_discovery_targets_the_stable_xml_file(): void {
+		WpEnv::$options['simply-static']['add_feeds'] = true;
+		Options::reinstance();
+
+		$html = '<html><head>'
+			. '<link rel="alternate" type="application/rss+xml" href="https://example.test/?feed=rss2">'
+			. '</head><body></body></html>';
+		$extractor = $this->extractor( 'html', $html );
+
+		$extractor->extract_and_update_urls();
+
+		self::assertStringContainsString(
+			'href="https://static.example.test/feed/index.xml"',
+			$extractor->get_body()
+		);
+	}
+
+	public function test_feed_self_reference_targets_xml_and_preserves_all_items(): void {
+		$xml = '<?xml version="1.0" encoding="UTF-8"?>'
+			. '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>'
+			. '<atom:link href="https://example.test/feed/" rel="self" type="application/rss+xml" />'
+			. '<link>https://example.test/</link>'
+			. '<item><guid>https://example.test/?p=1</guid><link>https://example.test/one/</link></item>'
+			. '<item><guid>https://example.test/?p=2</guid><link>https://example.test/two/</link></item>'
+			. '</channel></rss>';
+		$extractor = $this->extractor( 'xml', $xml, 'feed/index.xml', 'https://example.test/feed/' );
+
+		$extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertStringContainsString( 'href="https://static.example.test/feed/index.xml"', $body );
+		self::assertStringContainsString( '<link>https://static.example.test/</link>', $body );
+		self::assertStringContainsString( '<link>https://static.example.test/one/</link>', $body );
+		self::assertStringContainsString( '<link>https://static.example.test/two/</link>', $body );
+
+		$document = new \DOMDocument();
+		self::assertTrue( $document->loadXML( $body ) );
+		self::assertSame( 2, $document->getElementsByTagName( 'item' )->length );
+	}
+
+	public function test_plain_permalink_feed_only_rewrites_its_self_reference(): void {
+		$xml = '<?xml version="1.0" encoding="UTF-8"?>'
+			. '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>'
+			. '<atom:link href="https://example.test/?feed=rss2" rel="self" type="application/rss+xml" />'
+			. '<link>https://example.test/</link>'
+			. '</channel></rss>';
+		$extractor = $this->extractor( 'xml', $xml, 'feed/index.xml', 'https://example.test/?feed=rss2' );
+
+		$extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertStringContainsString( 'href="https://static.example.test/feed/index.xml"', $body );
+		self::assertStringContainsString( '<link>https://static.example.test/</link>', $body );
+	}
+
 	public function test_replaces_bare_origin_host_in_inline_scripts(): void {
 		$html = '<script id="google_gtagjs-js-after">'
 			. 'gtag("set","linker",{"domains":["example.test"]});'

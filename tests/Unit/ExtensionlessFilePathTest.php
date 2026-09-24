@@ -83,6 +83,46 @@ final class ExtensionlessFilePathTest extends UnitTestCase {
 		self::assertSame( 'about/index.html', $this->fetcher()->get_expected_file_path_for_static_page( $page ) );
 	}
 
+	/**
+	 * @dataProvider feedPathProvider
+	 */
+	public function test_feeds_use_stable_non_colliding_xml_paths( string $url, string $expected ): void {
+		$page = Page::initialize(
+			array(
+				'url'          => $url,
+				'content_type' => 'application/rss+xml; charset=UTF-8',
+			)
+		);
+
+		self::assertSame( $expected, $this->fetcher()->get_expected_file_path_for_static_page( $page ) );
+	}
+
+	/** @return array<string,array{string,string}> */
+	public function feedPathProvider(): array {
+		return array(
+			'main rss2 feed' => array(
+				'https://example.test/?feed=rss2',
+				'feed/index.xml',
+			),
+			'atom feed' => array(
+				'https://example.test/?feed=atom',
+				'feed/atom/index.xml',
+			),
+			'comments feed' => array(
+				'https://example.test/?feed=comments-rss2',
+				'comments/feed/index.xml',
+			),
+			'custom post type feed' => array(
+				'https://example.test/?post_type=book&feed=rss2',
+				'feed/rss2/__qs/' . substr( md5( 'feed=rss2&post_type=book' ), 0, 12 ) . '/index.xml',
+			),
+			'pretty custom post type feed' => array(
+				'https://example.test/feed/?post_type=book',
+				'feed/__qs/' . substr( md5( 'post_type=book' ), 0, 12 ) . '/index.xml',
+			),
+		);
+	}
+
 	private function fetcher(): Url_Fetcher {
 		$reflection = new ReflectionClass( Url_Fetcher::class );
 
