@@ -37,6 +37,7 @@ class Rank_Math_Integration extends Integration {
 		add_action( 'ss_after_setup_task', [ $this, 'register_redirections' ] );
 		add_filter( 'simply_static_registered_redirect', [ $this, 'get_registered_redirect' ], 10, 2 );
 		add_action( 'ss_dom_before_save', [ $this, 'replace_json_schema' ], 10, 2 );
+		add_filter( 'ss_additional_urls', [ $this, 'add_dynamic_robots_url' ] );
 		add_filter( 'ss_additional_files', [ $this, 'maybe_add_text_files' ] );
 
 		// Maybe update sitemap on single export.

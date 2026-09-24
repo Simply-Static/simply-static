@@ -145,6 +145,32 @@ abstract class Integration {
 	}
 
 	/**
+	 * Queue WordPress' virtual robots.txt endpoint for fetching.
+	 *
+	 * SEO integrations can generate robots.txt dynamically rather than storing a
+	 * physical file in ABSPATH. Merely writing that response into the archive is
+	 * not enough for page-driven deployment targets such as Static Studio: the
+	 * URL also needs a Page record so the generated file is transferred.
+	 *
+	 * @param array $urls Additional URLs queued by the setup task.
+	 * @return array
+	 */
+	public function add_dynamic_robots_url( $urls ) {
+		$urls = is_array( $urls ) ? $urls : array();
+
+		if (
+			! (bool) apply_filters( 'ss_include_robots_txt_in_export', true )
+			|| file_exists( ABSPATH . 'robots.txt' )
+		) {
+			return $urls;
+		}
+
+		$urls[] = home_url( '/robots.txt' );
+
+		return array_values( array_unique( $urls ) );
+	}
+
+	/**
 	 * Perform a wp_remote_get request with Basic Auth headers when configured.
 	 *
 	 * On environments that require HTTP Basic Auth (e.g. Static Studio),
