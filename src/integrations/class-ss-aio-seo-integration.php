@@ -26,6 +26,7 @@ class AIO_SEO_Integration extends Integration {
 		add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_pages' ] );
 		add_action( 'ss_finished_fetching_pages', [ $this, 'finalize_sitemap_files' ] );
 		add_filter( 'ssp_single_export_additional_urls', [ $this, 'add_sitemap_url' ] );
+		add_filter( 'ss_additional_urls', [ $this, 'add_dynamic_robots_url' ] );
 		add_filter( 'ss_additional_files', [ $this, 'maybe_add_text_files' ] );
 
 		$this->include_file( 'handlers/class-ss-aio-seo-sitemap-handler.php' );

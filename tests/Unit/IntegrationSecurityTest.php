@@ -130,4 +130,18 @@ final class IntegrationSecurityTest extends UnitTestCase {
 
 		self::assertSame( array( 'https://example.test/a.xml' ), $this->integration->parse( $response ) );
 	}
+
+	public function test_dynamic_robots_url_is_queued_for_page_driven_deployments(): void {
+		self::assertSame(
+			array( 'https://example.test/existing', 'https://example.test/robots.txt' ),
+			$this->integration->add_dynamic_robots_url( array( 'https://example.test/existing' ) )
+		);
+
+		add_filter( 'ss_include_robots_txt_in_export', static function () { return false; } );
+
+		self::assertSame(
+			array( 'https://example.test/existing' ),
+			$this->integration->add_dynamic_robots_url( array( 'https://example.test/existing' ) )
+		);
+	}
 }

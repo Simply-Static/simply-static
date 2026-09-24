@@ -109,7 +109,7 @@ class Uploads_Crawler extends Crawler {
 		$signature      = $this->get_state_signature( $scan_dirs );
 		$state          = $this->load_state( $signature );
 		$extensions     = (array) apply_filters( 'ss_uploads_media_extensions', $this->get_media_extensions() );
-		$skip_dirs      = (array) apply_filters( 'ss_skip_crawl_uploads_directories', array( '.git', 'node_modules', 'cache', 'tmp', 'temp' ) );
+		$skip_dirs      = (array) apply_filters( 'ss_skip_crawl_uploads_directories', array( '.git', 'node_modules', 'cache', 'tmp', 'temp', 'compatibility-check', 'simply-static/temp-files' ) );
 		$queue_batch    = max( 1, min( 1000, (int) apply_filters( 'simply_static_crawler_batch_size', 100 ) ) );
 		$entry_limit    = max( 1, min( 10000, (int) apply_filters( 'simply_static_uploads_crawler_max_entries_per_batch', 500 ) ) );
 		$seconds        = (float) apply_filters( 'simply_static_uploads_crawler_max_batch_seconds', 10 );
@@ -487,7 +487,9 @@ class Uploads_Crawler extends Crawler {
 			'node_modules',
 			'cache',
 			'tmp',
-			'temp'
+			'temp',
+			'compatibility-check',
+			'simply-static/temp-files'
 		] );
 
 		// Check if directory exists

@@ -25,6 +25,7 @@ class Yoast_Integration extends Integration {
 		add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_page' ] );
 		add_action( 'ss_after_setup_task', [ $this, 'register_redirections' ] );
 		add_action( 'ss_dom_before_save', [ $this, 'replace_json_schema' ], 10, 2 );
+		add_filter( 'ss_additional_urls', [ $this, 'add_dynamic_robots_url' ] );
 		add_filter( 'ss_additional_files', [ $this, 'maybe_add_text_files' ] );
 
   // Allow Simply Static setting to control sitemap inclusion on Single Export.

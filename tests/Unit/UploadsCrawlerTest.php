@@ -57,11 +57,15 @@ final class UploadsCrawlerTest extends UnitTestCase {
 		$root = sys_get_temp_dir() . '/ss-uploads-resume-' . bin2hex( random_bytes( 8 ) );
 		wp_mkdir_p( $root . '/2026/deep' );
 		wp_mkdir_p( $root . '/cache' );
+		wp_mkdir_p( $root . '/compatibility-check/plugin' );
+		wp_mkdir_p( $root . '/simply-static/temp-files/current-export' );
 		file_put_contents( $root . '/photo.jpg', 'image' );
 		file_put_contents( $root . '/notes.txt', 'ignore' );
 		file_put_contents( $root . '/2026/one.png', 'image' );
 		file_put_contents( $root . '/2026/deep/two.pdf', 'document' );
 		file_put_contents( $root . '/cache/hidden.jpg', 'cache' );
+		file_put_contents( $root . '/compatibility-check/plugin/package.js', 'private working file' );
+		file_put_contents( $root . '/simply-static/temp-files/current-export/index.js', 'recursive export artifact' );
 
 		WpTestEnvironment::$upload_dir = array(
 			'basedir' => $root,
