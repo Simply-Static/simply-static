@@ -1,5 +1,5 @@
 {
-    "translation-revision-date": "2026-09-25 10:00+0200",
+    "translation-revision-date": "2026-09-25 10:56+0200",
     "generator": "WP-CLI\/2.12.0",
     "source": "src\/admin\/build\/index.js",
     "domain": "messages",
@@ -375,7 +375,7 @@
                 "Optimierung"
             ],
             "Hide WP": [
-                "WordPress verbergen"
+                "WP verbergen"
             ],
             "Advanced": [
                 "Erweitert"
@@ -1899,7 +1899,7 @@
                 "Abonnent"
             ],
             "Form Connections": [
-                "Formular-Verbindungen"
+                "Formulare"
             ],
             "UAM (User Access Management)": [
                 "UAM (Benutzerzugriffsverwaltung)"

@@ -22,6 +22,31 @@ define( 'SIMPLY_STATIC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SIMPLY_STATIC_URL', untrailingslashit( plugin_dir_url( __FILE__ ) ) );
 define( 'SIMPLY_STATIC_VERSION', '3.8.13' );
 
+/**
+ * Load bundled translations after WordPress has initialized the current locale.
+ *
+ * The JavaScript catalog is loaded separately by wp_set_script_translations(),
+ * while PHP-generated responses (including Diagnostics) need the MO catalog.
+ * Loading the bundled file directly also supports installations where Core is
+ * embedded outside the standard plugins directory.
+ */
+function simply_static_load_textdomain() {
+	$locale = apply_filters( 'plugin_locale', determine_locale(), 'simply-static' );
+	$mofile = SIMPLY_STATIC_PATH . 'languages/simply-static-' . $locale . '.mo';
+
+	if ( is_readable( $mofile ) ) {
+		load_textdomain( 'simply-static', $mofile );
+		return;
+	}
+
+	load_plugin_textdomain(
+		'simply-static',
+		false,
+		dirname( plugin_basename( __FILE__ ) ) . '/languages'
+	);
+}
+add_action( 'init', 'simply_static_load_textdomain', 0 );
+
 // Check PHP version.
 if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
 	deactivate_plugins( plugin_basename( __FILE__ ) );
