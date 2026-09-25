@@ -537,7 +537,11 @@ class Admin_Rest {
 
             return json_encode( [
                 'status'  => 200,
-                'message' => sprintf( __( 'CRON triggered successfully for site %d.', 'simply-static' ), $blog_id ),
+                'message' => sprintf(
+                    /* translators: %d: WordPress site ID. */
+                    __( 'CRON triggered successfully for site %d.', 'simply-static' ),
+                    $blog_id
+                ),
             ] );
         } catch ( \Throwable $e ) {
             return json_encode( [
@@ -1103,12 +1107,12 @@ class Admin_Rest {
      */
     public function save_settings( $request ) {
         if ( ! $request || ! method_exists( $request, 'get_params' ) ) {
-            return json_encode( [ 'status' => 400, 'message' => 'No options updated.' ] );
+            return wp_json_encode( [ 'status' => 400, 'message' => __( 'No options updated.', 'simply-static' ) ] );
         }
 
         $params = $request->get_params();
         if ( ! $params ) {
-            return json_encode( [ 'status' => 400, 'message' => 'No options updated.' ] );
+            return wp_json_encode( [ 'status' => 400, 'message' => __( 'No options updated.', 'simply-static' ) ] );
         }
 
 		$portable_import = ! empty( $params['__simply_static_import'] );
@@ -1505,9 +1509,9 @@ class Admin_Rest {
 			// Get Settings from selected subsite.
 			$options = get_site_option( 'simply-static-' . $blog_id );
             if ( ! $options ) {
-                return json_encode( [
+                return wp_json_encode( [
                     'status'  => 400,
-                    'message' => 'Please save the settings on the selected subsite before importing them into a new site.'
+                    'message' => __( 'Please save the settings on the selected subsite before importing them into a new site.', 'simply-static' )
                 ] );
             }
 			$options = Util::remove_sensitive_options( is_array( $options ) ? $options : array() );
@@ -1518,7 +1522,7 @@ class Admin_Rest {
 			update_option( 'simply-static', $options );
             return json_encode( [ 'status' => 200, 'message' => 'Ok' ] );
         }
-        return json_encode( [ 'status' => 400, 'message' => 'No options updated.' ] );
+        return wp_json_encode( [ 'status' => 400, 'message' => __( 'No options updated.', 'simply-static' ) ] );
     }
 
     public function get_pages() { return Admin_Settings::get_instance()->get_pages(); }

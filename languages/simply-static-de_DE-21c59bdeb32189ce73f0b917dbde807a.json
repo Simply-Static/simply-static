@@ -1,1 +1,2122 @@
-{"translation-revision-date":"2025-12-01 15:14-0600","generator":"WP-CLI\/2.12.0","source":"src\/admin\/build\/index.js","domain":"messages","locale_data":{"messages":{"":{"domain":"messages","lang":"de_DE","plural-forms":"nplurals=2; plural=n != 1;"},"Activity Log":["Aktivit\u00e4tsprotokoll"],"Changing ...":["Wechseln.."],"Environment":["Umgebung"],"A new environment will be created with the current configuration.":["Eine neue Umgebung wird erstellt mit der aktuellen Konfiguration."],"Creating...":["Erstelle.."],"Create":["Erstellen"],"Cancel":["Abbrechen"],"Choose an environment or create a new one to configure settings.":["W\u00e4hle eine Umgebung oder erstelle eine neue mit den aktuellen Einstellungen."],"Delete selected environment":["L\u00f6sche die ausgew\u00e4hlte Umgebung"],"Generate":["Generieren"],"Pause":["Anhalten"],"Resume":["Fortsetzen"],"Automated Redirects with Redirection":["Automatische Weiterleitungen mit Redirection"],"Cookie Consent with Complianz":["Cookie Banner mit Complianz"],"Requires Simply Static Pro":["Erfordert Simply Static Pro"],"Get the Pro version":["Hole dir die Pro-Version"],"Download Log":["Log herunterladen"],"Clear Log":["Log l\u00f6schen"],"Log file cleared.":["Log-Datei erfolgreich geleert."],"Buy now":["Jetzt kaufen"],"Toggle menu":["Men\u00fc umschalten"],"There are errors in diagnostics that may negatively affect your static export.":["Es gibt Fehler in der Diagnose welche m\u00f6glicherweise deinen Export beeintr\u00e4chtigen."],"Please review them and get them fixed to avoid problems.":["Bitte \u00fcberpr\u00fcfe und behebe die Meldungen um Fehlern vorzubeugen."],"Visit Diagnostics":["Diagnose ansehen"],"You are using the pro version without a valid license.":["Du nutzt die Pro-Version ohne g\u00fcltige Lizenz."],"We have temporarily disabled all the pro features now. Please contact our support to have the problem solved.":["Wir haben alle Pro-Funktionen vor\u00fcbergehend deaktiviert. Bitte kontaktiere den Support um das Problem zu beheben."],"Changelog":["Changelog"],"Documentation":["Dokumentation"],"Use current settings":["Nutze aktuelle Einstellungen"],"Export":["Export"],"Export Changes":["\u00c4nderungen exportieren"],"Export Changes (Requires Simply Static Pro)":["\u00c4nderungen exportieren (erfordert Simply Static Pro)"],"An export from another site is running. Upgrade to queue them.":["Ein Export von einer anderen Site wird ausgef\u00fchrt. Upgrade auf Simply Static Pro, um sie in die Warteschlange zu stellen."],"Import":["Import"],"Choose a subsite to import settings from.":["W\u00e4hle eine Subsite um Einstellungen zu importieren."],"Import Settings":["Import-Einstellungen"],"Settings successfully imported.":["Einstellungen erfolgreich importiert."],"Tools":["Tools"],"Diagnostics":["Diagnose"],"Settings":["Einstellungen"],"General":["Allgemein"],"Deploy":["Deployment"],"Forms":["Formulare"],"Search":["Suche"],"Optimize":["Optimierung"],"Workflow":["Workflow"],"Advanced":["Erweitert"],"Integrations":["Integrationen"],"Utilities":["Werkzeuge"],"Debug":["Debugging"],"UAM":["UAM"],"Video Course":["Video Kurs"],"Tutorials":["Tutorials"],"Upgrade to manage from network.":["Upgrade auf Simply Static Pro und manage Exporte vom Netzwerk."],"Name":["Name"],"Status":["Status"],"Actions":["Aktionen"],"Temporary files cleared.":["Tempor\u00e4re Dateien wurden gel\u00f6scht."],"Could not clear temporary files.":["Tempor\u00e4re Dateien konnten nicht gel\u00f6scht werden."],"Request failed. Please try again.":["Bearbeitung fehlgeschlagen. Bitte versuche es nochmal. "],"Basic Auth":["Basic Auth"],"How to set up basic auth":["Wie man Basic Auth konfiguriert"],"If you've secured WordPress with HTTP Basic Auth you need to specify the username and password to use below.":["Wenn du deine WordPress-Seite mit HTTP BASIC Auth gesch\u00fctzt hast, trage Nutzername und Password hier ein."],"Basic Auth Username":["Basic Auth Nutzername"],"Basic Auth Password":["Basic Auth Passwort"],"Enable Basic Auth":["Basic Auth aktivieren"],"Automatically setting up Basic Auth requires Simply Static Pro.":["Automatische Einrichtung von Basic Auth ben\u00f6tigt Simply Static Pro."],"Once enabled we will put your entire website behind password protection.":["Sobald aktiviert, wird deine gesamte WordPress-Seite mit einem Passwort-Schutz versehen."],"Requires Username & Password to work":["Ben\u00f6tigt Nutzername und Passwort"],"Temporary Files":["Tempor\u00e4re Dateien"],"Temporary Files Directory":["Tempor\u00e4res Dateiverzeichnis"],"Optionally specify the directory to save your temporary files. This directory must exist and be writeable.":["Lege das tempor\u00e4re Dateiverzeichnis fest. Diese Verzeichnis muss existieren und beschreibbar sein."],"Clearing\u2026":["L\u00f6schen.."],"Clear Temporary Files":["Tempor\u00e4re Dateien l\u00f6schen"],"Whitelist Plugins":["Plugins whitelisten"],"Whitelist plugins in diagnostics":["Plugins whitelisten und aus Diagnose-Report ausschlie\u00dfen"],"If you want to exclude certain plugins from the diagnostics check add the plugin slugs here (one per line).":["Wenn du bestimmte Plugins vom Diagnose-Report ausschlie\u00dfen m\u00f6chtest, trage sie hier ein (ein Plugin pro Zeile)."],"Proxy Setup":["Proxy-Konfiguration"],"Origin URL":["Quell-URL"],"If the URL of your WordPress installation differs from the public-facing URL (Proxy Setup), add the public URL here.":["Wenn die URL deiner WordPress-Installation von der \u00f6ffentlichen URL abweicht (Proxy), f\u00fcr die \u00f6ffentliche URL hier ein."],"Debug Log":["Debug-Log"],"Activate Debug Log":["Debug-Log aktivieren"],"Enable it to download the debug log from Simply Static -> Generate.":["Aktiviere den Debug Log um die Datei in Simply Static -> Aktivit\u00e4tsprotokoll herunterzuladen."],"Cron":["Cron"],"Use server-side cron job":["Nutzer einen server-seitigen Cron-Job"],"Enable this if you use a server-side cron job instead of the default WP-Cron.":["Aktiviere diese Option wenn du einen server-seitigen Cron-Job statt dem standard WP-Cron verwendest."],"Settings saved successfully.":["Einstellungen erfolgreich gespeichert."],"Save Settings":["Einstellungen speichern"],"ZIP Archive":["ZIP Archiv"],"Local Directory":["Lokales Verzeichnis"],"Static Studio":["Static Studio"],"SFTP":["SFTP"],"GitHub":["GitHub"],"AWS S3":["AWS S3"],"Bunny CDN":["Bunny CDN"],"Tiiny.host":["Tiiny.host"],"No page selected":["Keine Seite ausgew\u00e4hlt"],"Deployment Settings":["Deployment Einstellungen"],"Choose from a variety of deployment methods. Depending on your selection we either provide a ZIP file, export to a local directory or send your files to a remote destination.":["W\u00e4hle eine der unterschiedlichen Deployment-Optionen. Basierend auf deiner Einstellung erh\u00e4lst du eine Liste von zus\u00e4tzlichen Optionen."],"Deployment method":["Deployment-Methode"],"The all-in-one Static WordPress cloud-hosting platform.":["Die All-in-One-Cloud-Hosting-Plattform f\u00fcr Static WordPress."],"Enjoy secure WordPress, the fastest exports, and the best-performing static site hosting in one package.":["Genie\u00dfen Sie sicheres WordPress, die schnellsten Exporte und das leistungsst\u00e4rkste Hosting statischer WordPress Websites in einem Paket."],"ZIP":["ZIP"],"How to export a ZIP file":["Wie man eine ZIP-Datei exportiert"],"Get a download link in the activity log once the static export has finished.":["Du bekommst einen Download-Link im Aktivit\u00e4tsprotokoll angezeigt sobald der Export abgeschlossen ist."],"How to deploy to a local directory":["Wie man in ein lokales Verzeichnis exportiert"],"Path":["Pfad"],"This is the directory where your static files will be saved. We will create it automatically on the first export if it doesn't exist.":["Dies ist das Verzeichnis in dem deine statischen Dateien gespeichert werden. Dieses Verzeichnis muss existieren und beschreibbar sein."],"Copied home path":["Homeverzeichnis kopiert"],"Copy home path":["Homeverzeichnis kopieren"],"Clear Local Directory":["Lokales Verzeichnis leeren"],"Clear local directory before running an export.":["Leere lokales Verzeichnis vor n\u00e4chstem Export."],"Don't clear local directory before running an export.":["Leere lokales Verzeichnis nicht vor n\u00e4chstem Export."],"How to deploy to a GitHub (2\/2)":["Wie man zu GitHub exportiert (2\/2)"],"GitHub enables you to export your static website to one of the common static hosting providers like Netlify, Cloudflare Pages or GitHub Pages.":["GitHub erm\u00f6glicht es dir deine statische Seite auf einem der popul\u00e4ren statischen Hostinganbieter zu hosten. Beispiele sind Netlify, Cloudflare Pages oder GitHub Pages."],"Account Type":["Account-Typ"],"Depending on the account type the settings fields will change.":["Basierend auf deinem Account-Typ werden sich die Einstellungen \u00e4ndern."],"Personal":["Personal"],"Organization":["Organization"],"Enter the name of your organization.":["Trage den Namen deiner Organisation ein."],"Username":["Nutzername"],"Enter your GitHub username.":["Trage deinen GitHub Nutzernamen ein."],"E-Mail":["E-Mail"],"Enter your GitHub email address. This will be used to commit files to your repository.":["Trage deine GitHub E-Mail-Adresse ein."],"Personal Access Token":["Personal Access Token"],"How to prepare your GitHub account":["Wie du deinen GitHub Account vorbereitest"],"You need a personal access token from GitHub. Learn how to get one ":["Du ben\u00f6tigst deinen Personal Access Token um eine Verbindung zu GitHub aufzubauen "],"here":["hier"],"Repository":["Repository"],"Enter a name for your repository (lowercase without spaces or special characters).":["Trage den Namen deines Repositories ein. Dieser Name sollte aus Kleinbuchstaben bestehen und keine Leer-und Sonderzeichen enthalten."],"Ensure to create the repository and add a readme file to it before running an export as shown in the docs ":["Stelle sicher das dein Repository ein README file enth\u00e4lt bevor du den Export ausf\u00fchrst "],"Folder":["Verzeichnis"],"Enter a relative path to a folder if you want to push files under it. Example: for github.com\/USER\/REPOSITORY\/folder1, enter folder1":["F\u00fcge einen relativen Pfad ein. Beispiel: f\u00fcr github.com\/USER\/REPOSITORY\/folder1 setze folder1 ein"],"You need to create the repository manually within your organization before connecting it.":["Du musst das Repository manuell in deinem Konto einrichten bevor du die Verbindung aufbauen kannst."],"Visiblity":["Sichtbarkeit"],"Decide if you want to make your repository public or private.":["Entscheide ob dein Repository public oder private sein soll."],"Public":["Public"],"Private":["Private"],"Branch":["Branch"],"Simply Static automatically uses \"main\" as branch. You may want to modify that for example to gh-pages. for GitHub Pages.":["Simply Static nutzt automatisch den \"main\" branch. Du kannst den Branch mit dieser Einstellung anpassen."],"Webhook URL":["Webhook URL"],"Enter your Webhook URL here and Simply Static will send a POST request after all files are commited to GitHub.":["Trage deine Webhook URL hier ein. Simply Static wird einen POST request an diese URL senden sobald alle Dateien auf GitHub hochgeladen wurden."],"Throttle Requests":["Anfragen pro Sekunde limitieren"],"Enable this option if you are experiencing issues with the GitHub API rate limit.":["Aktiviere die Option wenn du Probleme mit deinem GitHub Rate Limit bekommst."],"Batch size":["Batch-Gr\u00f6\u00dfe"],"Enter the number of files you want to be processed in a single batch. If current export fails to deploy, lower the number.":["Trage die Anzahl der Seiten\/Dateien ein die pro Durchlauf exportiert werden sollen. Falls es Probleme bei der \u00dcbertragung gibt, reduziere die Anzahl."],"How to deploy to Tiiny.host":["Wie man zu Tiiny.host exportiert"],"Deploying to Tiiny.host is the easiest and fastest deployment option available in Simply Static Pro.":["Die \u00dcbertragung zur Tiiny.host ist die schnellste Deployment-Option in Simply Static Pro."],"This field is auto-filled with the e-mail address used for activating Simply Static Pro.":["Dieses Feld wird automatisch mit deiner Admin-E-Mail-Adresse ausgef\u00fcllt. Ein Konto wird automatisch bei der ersten \u00dcbertragung erstellt."],"An account will be created automatically on your first deployment.":["Ein Konto wird automatisch bei der ersten \u00dcbertragung erstellt."],"Subdomain":["Subdomain"],"That's the part before your TLD. Your full URL is the combination of the subdomain plus the domain suffix.":["Das ist der Part vor deiner Domain. Deine URL ist die Kombination aus Subdomain und Domain-Suffix."],"Domain Suffix":["Domain-Suffix"],"This defaults to tiiny.site. If you have a custom domain configured in Tiiny.host, you can also use  that one.":["Wenn du noch keine eigene Domain hast, nutzen wir .tiiny.site."],"Password Protection":["Passwort-Schutz"],"Adding a password will activate password protection on your static site. The website is only visible with the password.":["Deine statische Website wird mit dem eingetragenen Passwort gesch\u00fctzt und ist erst nach Eingabe erreichbar."],"How to deploy to Bunny CDN":["Wie man zu BunnyCDN exportiert"],"Bunny CDN is a fast and reliable CDN provider that you can run your static website on.":["Bunny CDN ist eine schnelle und zuverl\u00e4ssige Option um deine statische Seite zu hosten."],"Bunny CDN API Key":["Bunny CDN API Key"],"Enter your API Key from Bunny CDN. You can find your API-Key as described ":["Trage deinen Bunny CDN API Key hier ein "],"Storage Host":["Storage Host"],"Depending on your location, you have a different storage host. You find out which URL to use ":["Basierend auf deinem Standort ben\u00f6tigst du wom\u00f6glich einen anderen Host.  Du findest mehr dazu in der Dokumentation von BunnyCDN "],"Bunny CDN Access Key":["Bunny CDN Access Key"],"Enter your Acess Key from Bunny CDN. You will find it within your storage zone setttings within FTP & API Access -> Password.":["Trage deinen Access Key hier ein. Du findest ihn in deinem BunnyCDN Konto unter Storage Zone -> Settings -> FTP & API Access."],"Pull Zone":["Pull Zone"],"A pull zone is the connection of your CDN to the internet. Simply Static will try to find an existing pull zone with the provided name, if there is none it creates a new pull zone.":["Pullzones sind vergleichbar mit Domains. Wenn du noch keine Pullzone in BunnyCDN erstellst hast, \u00fcbernimmt Simply Static das f\u00fcr dich."],"Storage Zone":["Storage Zone"],"A storage zone contains your static files. Simply Static will try to find an existing storage zone with the provided name, if there is none it creates a new storage zone.":["Storage Zones sind der physische Speicher f\u00fcr deine statischen Dateien. Simply Static erstellt dies automatisch falls du es noch nicht gemacht hast."],"Subdirectory":["Unterverzeichnis"],"If you want to transfer the files to a specific subdirectory on your storage zone add the name of that directory here.":["Wenn du deine statischen Dateien in einem Unterverzeichnis ablegen m\u00f6chtest, gib den Pfad hier ein."],"Amazon AWS S3":["Amazon AWS S3"],"How to deploy to Amazon AWS S3":["Wie man zu Amazon AWS S3 exportiert"],"Authentication Method":["Authentifizierungsmethode"],"AWS IAM Access Key":["AWS IAM-Zugriffsschl\u00fcssel"],"AWS EC2":["AWS EC2"],"Access Key ID":["Access Key ID"],"Enter your Access Key from AWS. Learn how to get one ":["Trage deinen AWS Access Key hier ein "],"Secret Access Key":["Secret Access Key"],"Enter your Secret Key from AWS. Learn how to get one ":["Tragen deinen AWS Secret Key hier ein "],"Region":["Region"],"US East (Ohio)":["US East (Ohio)"],"US East (N. Virginia)":["US East (N. Virginia)"],"US West (N. California)":["US West (N. California)"],"US West (Oregon)":["US West (Oregon)"],"Africa (Cape Town)":["Africa (Cape Town)"],"Asia Pacific (Hong Kong)":["Asia Pacific (Hong Kong)"],"Asia Pacific (Hyderabad)":["Asia Pacific (Hyderabad)"],"Asia Pacific (Jakarta)":["Asia Pacific (Jakarta)"],"Asia Pacific (Melbourne)":["Asia Pacific (Melbourne)"],"Asia Pacific (Mumbai)":["Asia Pacific (Mumbai)"],"Asia Pacific (Osaka)":["Asia Pacific (Osaka)"],"Asia Pacific (Seoul)":["Asia Pacific (Seoul)"],"Asia Pacific (Singapore)":["Asia Pacific (Singapore)"],"Asia Pacific (Sydney)":["Asia Pacific (Sydney)"],"Asia Pacific (Tokyo)":["Asia Pacific (Tokyo)"],"Canada (Central)":["Canada (Central)"],"Europe (Frankfurt)":["Europe (Frankfurt)"],"Europe (Ireland)":["Europe (Ireland)"],"Europe (London)":["Europe (London)"],"Europe (Milan)":["Europe (Milan)"],"Europe (Paris)":["Europe (Paris)"],"Europe (Spain)":["Europe (Spain)"],"Europe (Stockholm)":["Europe (Stockholm)"],"Europe (Zurich)":["Europe (Zurich)"],"Middle East (Bahrain)":["Middle East (Bahrain)"],"Middle East (UAE)":["Middle East (UAE)"],"South America (S\u00e3o Paulo)":["South America (S\u00e3o Paulo)"],"AWS GovCloud (US-East)":["AWS GovCloud (US-East)"],"AWS GovCloud (US-West)":["AWS GovCloud (US-West)"],"Bucket":["Bucket"],"Add the name of your bucket here.":["Trage den Namen deines Buckets hier ein."],"Add an optional subdirectory for your bucket":["F\u00fcge ein optionales Unterverzeichnis ein"],"Cloudfront Distribution ID":["Cloudfront Distribution ID"],"We automatically invalidate the cache after each export.":["Wir leeren den Cache automatisch nach jedem statischen Export."],"Enter your Webhook URL here and Simply Static will send a POST request after all files are transferred to AWS S3.":["Gebe deine Webhook URL hier ein. Simply Static sendet einen POST-Request nachdem alle Dateien zu GitHub \u00fcbertragen wurden."],"Empty bucket before new export?":["Sollen wir den Inhalt des Buckets l\u00f6schen bevor wir die neuen Dateien hochladen?"],"Clear bucket before new export.":["Bucket vor neuem Export l\u00f6schen."],"Don't clear bucket before new export.":["Bucket nicht vor neuem Export l\u00f6schen."],"How to deploy via SFTP":["Wie man zu einem SFTP Server exportiert"],"Host":["Host"],"Enter your SFTP host.":["Trage deinen SFTP Host ein."],"Port":["Port"],"Enter your SFTP port.":["Trage deinen SFTP Port ein."],"SFTP username":["SFTP Nutzername"],"Enter your SFTP username.":["Trage deinen SFTP Nutzernamen ein."],"SFTP password":["SFTP Passwort"],"Enter your SFTP password.":["Trage dein SFTP Passwort ein."],"SFTP private key":["SFTP Private Key"],"OPTIONAL: This is only required if you need to authenticate via a private key to access your SFTP server.":["Optional: Dies ist nur erforderlich wenn du dich mit einem privaten Schl\u00fcssel statt einem Passwort mit deinem SFTP Server verbinden m\u00f6chtest."],"Enter your SFTP private key if you want passwordless upload and the server is configured to allow it. You can set it as a constant in wp-config.php by using define('SSP_SFTP_KEY', 'YOUR_KEY')":["F\u00fcge deinen SFTP Private Key ein falls du dich ohne Passwort bei deinem SFTP server anmelden m\u00f6chtest. Du kannst den Schl\u00fcssel auch in deiner wp-config.php definieren mit der Konstante define('SSP_SFTP_KEY', 'YOUR_KEY')"],"SFTP folder":["SFTP Verzeichnis"],"Leave empty to upload to the default SFTP folder. Enter a folder path where you want the static files to be uploaded to (example: \"uploads\" will upload to uploads folder. \"uploads\/new-folder\" will upload files to \"new-folder\"). ":["Trage den Pfad auf deinem SFTP-Server ein in dem du die Dateien ablegen m\u00f6chtest. Lasse das Feld leer falls es das Stammverzeichnis sein soll. "],"Save settings to test":["Einstellungen speichern zum testen"],"Test Deployment":["Test-Export"],"How to use diagnostics":["Wie man die Diagnose benutzt"],"Our diagnostics tool provides detailed insights into your WordPress installation and server configuration and tells you exactly what needs to be optimized to get the most out of Simply Static. Click the button below to get the latest results.":["Unser Diagnose-Tool zeigt dir alle WordPress-und Serverkonfiguration die n\u00f6tig sind um Simply Static bestm\u00f6glich auszuf\u00fchren."],"Reset Diagnostics":["Diagnose-Daten zur\u00fccksetzen"],"Diagnostics resetted successfully.":["Diagnose erfolgreich zur\u00fcckgesetzt."],"Use forms?":["Formulare benutzen?"],"Use Forms on your static website.":["Nutze Formulare auf deiner statischen Website."],"Don't use forms on your static website.":["Nutze keine Formulare auf deiner statischen Website."],"Store form entries":["Formular-Eintr\u00e4ge speichern"],"Store form entries inside WordPress (requires Simply Static Webhook).":["Speichere Formulareintr\u00e4ge innerhalb von WordPress (erfordert Simply Static Webhook)."],"Do not store form entries in WordPress.":["Speichere keine Formulareintr\u00e4ge in WordPress."],"Create a form connection":["Erstelle eine Formular-Verbindung"],"Comments":["Kommentare"],"Use comments?":["Kommentare benutzen?"],"Use comments on your static website.":["Nutze Kommentare auf deiner statischen Website."],"Don't use comments on your static website.":["Nutze keine Kommentare auf deiner statischen Website."],"Select a redirect page":["W\u00e4hle eine Weiterleitungs-Seite"],"The post will be regenerated after comment submission, but it might take a while so its good practice to redirect the visitor.":["Der Beitrag wird automatisch neu generiert sobald ein Kommentar hinzugef\u00fcgt wurde. Damit deine Besucher ein direktes Feedback bekommen, solltest du eine Weiterleitungsseite hinterlegen."],"Captcha":["Captcha"],"We will automatically protect your forms and comments with a captcha on your static site.":["Wir sch\u00fctzen Ihre Formulare und Kommentare automatisch mit einem Captcha auf Ihrer statischen Seite."],"Captcha Service":["Captcha-Dienst"],"Choose which captcha service to use. More options coming soon.":["W\u00e4hle den Captcha-Dienst aus, den du nutzen m\u00f6chtest. Weitere Optionen folgen bald."],"Cloudflare Turnstile":["Cloudflare Turnstile"],"Site Key":["Site Key"],"Your public key will be used on the static site.":["Dein \u00f6ffentlicher Schl\u00fcssel wird auf der statischen Seite verwendet."],"Enter your Turnstile site key":["Gib deinen Turnstile-Sitekey ein"],"Secret Key":["Secret Key"],"Your secret key will be stored in WordPress.":["Dein geheimer Schl\u00fcssel wird in WordPress gespeichert."],"Enter your Turnstile secret key":["Gib deinen Turnstile-Secretkey ein"],"Theme":["Theme"],"Choose how the widget should look on your site.":["W\u00e4hle, wie das Widget auf deiner Seite aussehen soll."],"Auto":["Auto"],"Light":["Hell"],"Dark":["Dunkel"],"Size":["Gr\u00f6\u00dfe"],"Choose the widget size.":["W\u00e4hle die Gr\u00f6\u00dfe des Widgets."],"Normal":["Normal"],"Flexible":["Flexibel"],"Compact":["Kompakt"],"CORS":["CORS"],"How to deal with CORS":["Wie man mit CORS umgeht"],"Enable CORS":["CORS aktivieren"],"CORS settings enabled. Configure options below.":["CORS-Einstellungen aktiviert. Konfigurieren Sie unten die Optionen."],"Turn on to configure CORS for Forms and Comments requests.":["Aktivieren Sie die Konfiguration von CORS f\u00fcr Formular- und Kommentaranfragen."],"When using Forms and Comments in Simply Static Pro you may encounter CORS issues as you make requests from your static website to your original one.":["Wenn du Formulare oder Kommentare in Simply Static Pro benutzt, wirst du wom\u00f6glich CORS Probleme haben, da du Anfragen von deiner statischen Seite zu deiner WordPress Website machst."],"Due to the variety of server setups out there, you may need to make changes on your server.":["Durch die Menge an unterschiedlichen Server-Setups musst du wom\u00f6glich Anpassungen an deinem Server vornehmen."],"Static URL":["Statische URL"],"Add the URL of your static website to allow CORS from it.":["Trage die URL zu deiner statischen Seite hier ein um CORS Anfragen zu erlauben."],"Select CORS method":["W\u00e4hle eine CORS-Methode"],"Choose one of the methods to allow CORS for your website.":["W\u00e4hle einer der Methoden um CORS Anfragen zu erlauben."],"Replacing URLs":["URLs ersetzen"],"How to replace URLs":["Wie man URLs ersetzt"],"When exporting your static site, any links to your WordPress site will be replaced by one of the following: absolute URLs, relative URLs, or URLs contructed for offline use.":["Wenn du eine statische Seite exportierst, werden alle Links deiner WordPress-Seite durch eine der folgenden Optionen ersetzt: absolute URLs, relative URLs oder konstruierte URLs f\u00fcr die Offline-Speicherung."],"Absolute URLs":["Absolute URLs"],"Relative Path":["Relativer Pfad"],"Offline Usage":["Offline"],"Scheme":["Schema"],"Convert all URLs for your WordPress site to absolute URLs at the domain specified above.":["Konvertiere alle URLs deiner WordPress-Seite zu absoluten URLs."],"Convert all URLs for your WordPress site to relative URLs that will work at any domain.":["Konvertiere alle URLs deiner WordPress-Seite zu relativen URLs."],"Optionally specify a path above if you intend to place the files in a subdirectory.":["F\u00fcge ein Unterverzeichnis ein (optional)"],"Example":["Beispiel"],"enter \/path above if you wanted to serve your files at www.example.com\/path\/":["f\u00fcge \/pfad\/ ein, falls deine Seite unter www.example.com\/path\/ erreichbar sein soll"],"Convert all URLs for your WordPress site so that you can browse the site locally on your own computer without hosting it on a web server.":["Konvertiert alle deine WordPress-URLs so, dass sie auf deinem lokalen Computer ge\u00f6ffnet werden k\u00f6nnen. Dies ist nicht f\u00fcr die Verwendung auf einem Webserver geeignet."],"Force URL replacements":["Erweitertes URL-Ersetzen"],"Replace all occurrences of the WordPress URL with the static URL (includes inline CSS and JS).":["Ersetze alle Vorkommnisse deiner WordPress URL mit deiner statischen URL."],"Replace only occurrences of the WordPress URL that match our tag list.":["Ersetze alle Vorkommnisse deiner WordPress URL die mit dem Tag matchen."],"Enhanced Crawl":["Erweitertes Crawling"],"How Enhanced Crawl improves your static exports":["Wie erweitertes Crawling Ihre statischen Exporte verbessert"],"Enhanced Crawl uses native WordPress functions to find all pages and files when running a static export.":["Erweitertes Crawling verwendet native WordPress-Funktionen, um alle Seiten und Dateien zu finden, wenn ein statischer Export ausgef\u00fchrt wird."],"Enable Enhanced Crawl":["Aktiviere Erweitertes Crawling"],"Find pages and files via Enhanced Crawl.":["Suchen Sie Seiten und Dateien \u00fcber den erweiterten Crawl."],"Don't find pages and files via Enhanced Crawl.":["Seiten und Dateien werden \u00fcber erweitertes Crawling nicht gefunden."],"Error loading crawlers: ":["Fehler beim Laden von Crawlern: "],"Active Crawlers":["Aktive Crawler"],"Select which crawlers to activate. If none selected, all crawlers will be active by default.":["W\u00e4hlen Sie aus, welche Crawler aktiviert werden sollen. Wenn keine Option ausgew\u00e4hlt ist, sind standardm\u00e4\u00dfig alle Crawler aktiv."],"Error loading post types: ":["Fehler beim Laden von Beitragstypen: "],"Post Types to Include":["Einzuschlie\u00dfende Beitragstypen"],"Select which post types to include in the static export. If you remove all selections, all post types will be included by default.":["W\u00e4hlen Sie aus, welche Beitragstypen in den statischen Export aufgenommen werden sollen. Wenn Sie alle Auswahlen entfernen, werden standardm\u00e4\u00dfig alle Beitragstypen eingeschlossen."],"Loading post types...":["Lade Beitragstypen.."],"Error loading plugins: ":["Fehler beim Laden von Plugins: "],"Plugins to Include":["Einzuschlie\u00dfende Plugins"],"Select which active plugins to include. All active plugins are included by default; remove tokens to exclude them.":["W\u00e4hlen Sie aus, welche aktiven Plug-ins eingeschlossen werden sollen. Alle aktiven Plugins sind standardm\u00e4\u00dfig enthalten; Entfernen Sie Plugins, um sie auszuschlie\u00dfen."],"Loading plugins...":["Plugins werden geladen..."],"Error loading themes: ":["Fehler beim Laden von Themes: "],"Themes to Include":["Einzuschlie\u00dfende Themes"],"Select which theme(s) to include. The active theme and parent (if any) are included by default; remove tokens to exclude them.":["W\u00e4hlen Sie aus, welche(s) Theme(s) einbezogen werden sollen. Das aktive Design und das Child-Theme (falls vorhanden) sind standardm\u00e4\u00dfig enthalten. Entfernen Sie Themes, um sie auszuschlie\u00dfen."],"Loading themes...":["Themes werden geladen..."],"Loading crawlers...":["Crawler werden verladen..."],"404":["404"],"How to manage 404 pages?":["Wie verwalte ich 404-Seiten?"],"Generate 404 Page?":["Generiere eine 404-Fehlerseite?"],"Generate a 404 page based on your theme template.":["Generieren Sie eine 404-Seite basierend auf Ihrer Theme-Vorlage."],"Don't generate a 404 page.":["Keine 404-Fehlerseite generieren."],"Custom 404 page (optional)":["Benutzerdefinierte 404-Seite (optional)"],"If selected, Simply Static will use the content of this page for the 404 page instead of the theme default.":["Wenn diese Option ausgew\u00e4hlt ist, verwendet Simply Static den Inhalt dieser Seite f\u00fcr die 404-Seite anstelle des Standarddesigns f\u00fcr das Design."],"Failed to start 404 export.":["Fehler beim Starten des 404-Exports."],"Export 404 Page":["404-Seite exportieren"],"Include":["Einschlie\u00dfen"],"Include & Exclude files and pages":["Einschlie\u00dfen und Ausschlie\u00dfen von Dateien und Seiten"],"Additional URLs":["Zus\u00e4tzliche URLs"],"You can enter full URLs or regex (wrap with \/ \/). Examples: https:\/\/example.com\/private\/ or \/\\\/blog\\\/.*$\/i (one per line).":["Sie k\u00f6nnen vollst\u00e4ndige URLs oder Regex eingeben (Umbruch mit \/ \/). Beispiele: https:\/\/example.com\/private\/ oder \/\\\/blog\\\/.*$\/i (eine pro Zeile)."],"Additional Files and Directories":["Zus\u00e4tzliche Dateien und Verzeichnisse"],"Enter absolute paths or regex (wrap with \/ \/). Examples: \/\\.pdf$\/i or \/wp-content\\\/uploads\\\/reports\\\/.*\/ (one per line).":["Geben Sie absolute Pfade oder Regex ein (Umbruch mit \/ \/). Beispiele: \/\\.pdf$\/i oder \/wp-content\\\/uploads\\\/reports\\\/.*\/ (einer pro Zeile)."],"Include RSS Feeds?":["RSS-Feeds einschlie\u00dfen?"],"Include feed URLs of all your posts.":["F\u00fcgen Sie Feed-URLs aller Ihrer Beitr\u00e4ge hinzu."],"Don't include feed URLs for all your posts.":["F\u00fcgen Sie keine Feed-URLs f\u00fcr alle Ihre Beitr\u00e4ge ein."],"Include Rest API?":["Rest-API einschlie\u00dfen?"],"Include all Rest API endpoints as JSON files.":["Schlie\u00dfen Sie alle REST-API-Endpunkte als JSON-Dateien ein."],"Don't include Rest API endpoints as JSON files.":["Schlie\u00dfen Sie REST-API-Endpunkte nicht als JSON-Dateien ein."],"Exclude":["Ausschlie\u00dfen"],"Urls to exclude":["URLs zum Ausschlie\u00dfen"],"You can enter substrings or regex (wrap with \/ \/). Examples: .jpg or \/\\.(pdf|zip)$\/i or \/\/private\/.*\/ (one per line).":["Sie k\u00f6nnen Teilzeichenfolgen oder Regex eingeben (Umbruch mit \/ \/). Beispiele: .jpg oder \/\\. (pdf|zip)$\/i oder \/\/private\/.*\/ (eine pro Zeile)."],"Debugging":["Debug-Modus"],"Export Log":["Export Log"],"Control Integrations that will be active during the export of the static site.":["Kontrolliere die Integrationen, die w\u00e4hrend des Exports der statischen Site aktiv sein werden."],"Minify":["Minifizieren"],"How to minify HTML, CSS and JavaScript?":["Wie minimiert man HTML, CSS und JavaScript?"],"Minify Files?":["Dateien minifizieren?"],"Enable minify files on your static website.":["Aktiviere Datei-Minifizierung auf deiner statischen Website."],"Don't enable minify files on your static website.":["Deaktiviere Datei-Minifizierung auf deiner statischen Website."],"Minify HTML":["HTML minifizieren"],"Minify HTML files.":["HTML minifizieren."],"Don't minify HTML files.":["HTML nicht minifizieren."],"Leave quotes inside HTML attributes":["Anf\u00fchrungszeichen in HTML-Attributen belassen"],"If there are issues with comments or JavaScript when minifying HTML, toggle this ON.":["Wenn beim Minimieren von HTML Probleme mit Kommentaren oder JavaScript auftreten, schalten Sie diese Option ein."],"Minify CSS":["CSS minifizieren"],"Minify CSS files.":["CSS minifizieren."],"Don't minify CSS files.":["CSS nicht minifizieren."],"Exclude Stylesheet URLs":["Stylesheet-URLs ausschlie\u00dfen"],"Exclude URLs from minification (one per line).":["URLs von der Minimierung ausschlie\u00dfen (eine pro Zeile)."],"Minify Inline CSS":["Inline-CSS minifizieren"],"Minify Inline CSS.":["Inline-CSS minifizieren."],"Don't minify Inline CSS.":["Inline-CSS nicht minifizieren."],"Minify JavaScript":["JavaScript minifizieren"],"Minify JavaScript files.":["JavaScript minifizieren."],"Don't minify JavaScript files.":["JavaScript nicht minifizieren."],"Exclude JavaScript URLs":["JavaScript-URLs ausschlie\u00dfen"],"Minify Inline JavaScript":["Inline-JavaScript minifizieren"],"Minify Inline JavaScript.":["Inline-JavaScript minifizieren."],"Don't minify Inline JavaScript.":["Inline-JavaScript nicht minifizieren."],"Image Optimization":["Bild-Optimierung"],"How to optimize images with ShortPixel?":["Wie optimiere ich Bilder mit ShortPixel?"],"Optimize Images with ShortPixel?":["Bilder mit ShortPixel optimieren?"],"Optimize images with the ShortPixel API.":["Optimieren Sie Bilder mit der ShortPixel-API."],"Don't optimize images with the ShortPixel API.":["Optimieren Sie Bilder nicht mit der ShortPixel-API."],"ShortPixel API Key":["ShortPixel API Key"],"Convert to webP":["Konvertieren in webP"],"Convert images to webp format.":["Konvertieren Sie Bilder in das Webp-Format."],"Don't convert images to webp format":["Konvertieren Sie keine Bilder in das Webp-Format"],"Backup the original images?":["Original-Bilder als Backup speichern?"],"Back original images.":["Original-Bilder als Backup speichern."],"Don't backup original images.":["Sichern Sie keine Originalbilder."],"It will preserve every image which might increase your disk space usage.":["Es beh\u00e4lt jedes Bild bei, was Ihren Speicherplatzverbrauch erh\u00f6hen k\u00f6nnte."],"Restore Original Images":["Original-Bilder wiederherstellen"],"Restoring...":["Wiederherstellen.."],"Replace":["Ersetzen"],"How to replace WP default paths":["So ersetzen Sie WP-Standardpfade"],"wp-content directory":["wp-content Verzeichnis"],"Replace the \"wp-content\" directory.":["Ersetze das \"wp-content\" Verzeichnis."],"wp-includes directory":["wp-includes Verzeichnis"],"Replace the \"wp-includes\" directory.":["Ersetze das \"wp-includes\" Verzeichnis."],"uploads directory":["uploads Verzeichnis"],"Replace the \"wp-content\/uploads\" directory.":["Ersetze das \"wp-content\/uploads\" Verzeichnis."],"plugins directory":["plugins Verzeichnis"],"Replace the \"wp-content\/plugins\" directory.":["Ersetze das \"wp-content\/plugins\" Verzeichnis."],"themes directory":["themes Verzeichnis"],"Replace the \"wp-content\/themes\" directory.":["Ersetze das \"wp-content\/themes\" Verzeichnis."],"Theme style name":["Theme Stylesheet Name"],"Replace the style.css filename.":["Ersetze den style.css Dateinamen."],"Author URL":["Autoren-URLs"],"Replace the author url.":["Ersetze die Autoren-URLs."],"Hide":["Verstecken"],"How to hide and disable WP core features":["So verbergen und deaktivieren Sie WP-Kernfunktionen"],"Hide HTML Comments":["Verstecke HTML Kommentare"],"Hide WordPress Version":["Verstecke WordPress Version"],"Hide WordPress Generator Meta":["Verstecke WordPress Generator Meta"],"Hide DNS Prefetch WordPress link":["Verstecke DNS Prefetch WordPress Link"],"Hide RSD Header":["Verstecke RSD Header"],"Hide Emojis if you don't use them":["Verstecke Emojis"],"Disable":["Deaktivieren"],"Disable XML-RPC":["Deaktiviere XML-RPC"],"Disable Embed Scripts":["Deaktiviere Embed Scripts"],"Disable DB Debug in Frontend":["Deaktiviere DB Debug"],"Disable WLW Manifest Scripts":["Deaktiviere WLW Manifest Scripts"],"Use search?":["Suche benutzen?"],"Use search on your static website.":["Nutze Suche auf deiner statischen Website."],"Don't use search on your static website.":["Nutze keine Suche auf deiner statischen Website."],"Search Type":["Suche-Typ"],"Decide which search type you want to use. Fuse runs locally based on a file, and Algolia is an external API service.":["Entscheiden Sie, welchen Suchtyp Sie verwenden m\u00f6chten. Fuse wird lokal auf der Grundlage einer Datei ausgef\u00fchrt, und Algolia ist ein externer API-Dienst."],"Use Search Results Page":["Nutze die Suchergebnisseite"],"Simply Static will create a static search results page and the export will include a special __qs directory.":["Simply Static erstellt eine statische Suchergebnisseite und der Export enth\u00e4lt ein spezielles __qs-Verzeichnis."],"Use Submit Button":["Verwenden Sie die Schaltfl\u00e4che \"Senden\""],"Show or hide the submit button in the search UI.":["Ein- oder Ausblenden der Schaltfl\u00e4che \"Senden\" in der Benutzeroberfl\u00e4che der Suche."],"Submit button text":["\u201eSenden\u201c-Schaltfl\u00e4che Text"],"Customize the submit button text or HTML (e.g., add an icon).":["Passen Sie den Text oder den HTML-Code der Schaltfl\u00e4che \"Senden\" an (z. B. durch Hinzuf\u00fcgen eines Symbols)."],"Show excerpt in suggestions\/results":["Auszug in Vorschl\u00e4gen\/Ergebnissen anzeigen"],"Enable to display the excerpt below each search suggestion and result item.":["Aktivieren Sie diese Option, um den Auszug unter jedem Suchvorschlag und Ergebniselement anzuzeigen."],"Input placeholder":["Platzhalter"],"Search..":["Suche.."],"Customize the placeholder text for the search input.":["Passen Sie den Platzhaltertext f\u00fcr die Sucheingabe an."],"How to select data with meta tags":["Wie man Daten aus Metatags selektiert"],"Targeting for excerpt in the meta description tag.":["Ziel f\u00fcr das Excerpt im Meta-Description-Tag."],"Adding such meta in the excerpt field would be:":["Ein Beispiel daf\u00fcr w\u00fcrde wie folgt aussehen:"],"Targeting for title in the property meta tag.":["Ziel f\u00fcr den Title im Meta-Description-Tag."],"If the second item (after | ) is not <code>content<\/code>, we'll use it as value of that attribute (<code>property=\"og:title\"<\/code> in this example) and use <code>content<\/code> for value.":["Wenn das zweite Element (nach | ) nicht <code>content<\/code> ist, nutzen wir den Wert dieses Attributs (<code>property=\"og:title\"<\/code>in diesem Beispiel <code>content<\/code> als Wert."],"Caution: Use meta tags that exist everywhere for title.":["Warnung: Nutze Meta-Tags die \u00fcberall f\u00fcr den Titel existieren."],"Indexing":["Indexierung"],"CSS-Selector for Title":["CSS-Selector f\u00fcr den Titel"],"Add the CSS selector which contains the title of the page\/post":["Trage den CSS-Selector ein der den Titel der Seite enth\u00e4lt."],"Or meta tags. Click for more information.":["Oder Meta-Tags. Klicke f\u00fcr mehr Informationen."],"CSS-Selector for Content":["CSS-Selector f\u00fcr den Inhalt"],"Add the CSS selector which contains the content of the page\/post.":["Trage den CSS-Selector ein der den Inhalt der Seite enth\u00e4lt."],"CSS-Selector for Excerpt":["CSS-Selector f\u00fcr Excerpt"],"Add the CSS selector which contains the excerpt of the page\/post.":["Trage den CSS-Selector ein der die Kurzbeschreibung der Seite enth\u00e4lt."],"Exclude URLs":["URLs ausschlie\u00dfen"],"Exclude URLs from indexing (one per line). You can use full URLs, parts of an URL or plain words (like stop words).":["Schlie\u00dfe Seiten von der Indexierung aus (ein Eintrag pro Zeile). Du kannst vollst\u00e4ndige URLs oder nur Stichw\u00f6rter verwenden."],"Fuse.js":["Fuse.js"],"How to add search with FuseJS":["So f\u00fcgen Sie mit FuseJS eine Suche hinzu"],"CSS-Selector":["CSS-Selector"],"Add the CSS selector for the <form> element that contains your search input field.":["F\u00fcgen Sie den CSS-Selektor f\u00fcr die <form> -Element, das Ihr Sucheingabefeld enth\u00e4lt.<\/form>"],"Threshold":["Schwellwert"]," A threshold of 0.0 requires a perfect match, a threshold of 1.0 would match anything.":[" Ein Schwellenwert von 0,0 erfordert eine perfekte \u00dcbereinstimmung, ein Schwellenwert von 1,0 w\u00fcrde auf alles passen."],"Algolia API":["Algolia API"],"How to add search with the Algolia API":["So f\u00fcgen Sie eine Suche mit der Algolia-API hinzu"],"Application ID":["Application ID"],"Add your Algolia App ID.":["Trage deine Algolia App ID hier ein."],"Admin API Key":["Admin API Key"],"Add your Algolia Admin API Key.":["Trage deinen Algolia Admin API Key hier ein."],"Search-Only API Key":["Search-Only API Key"],"Add your Algolia Search-Only API Key here. This is the only key that will be visible on your static site.":["Trage deinen Algolia Search-only API Key hier ein."],"Name for your index":["Der Name des Indexes"],"Add your Algolia index name here.":["Trage den Namen des Suchindexes hier ein."],"If you have multiple search elements with different CSS selectors, separate them by a comma (,) such as: .search-form, .custom-search-form":["Wenn Sie mehrere Suchelemente mit unterschiedlichen CSS-Selektoren haben, trennen Sie sie durch ein Komma (,), z. B.: .search-form, .custom-search-form"],"Administrator":["Administrator"],"Editor":["Editor"],"Author":["Autor"],"Contributor":["Mitarbeiter"],"Subscriber":["Abonnent"],"Form Connections":["Formular-Verbindungen"],"Builds":["Builds"],"UAM (User Access Management)":["UAM (Benutzerzugriffsverwaltung)"],"Control who can access Simply Static pages, menu entries, and selected features by assigning a minimum WordPress role.":["Kontrollieren Sie, wer auf Simply Static-Seiten, Men\u00fceintr\u00e4ge und ausgew\u00e4hlte Funktionen zugreifen kann, indem Sie eine WordPress-Mindestrolle zuweisen."],"Menu":["Men\u00fc"],"Features":["Funktionen"],"Admin Bar":["Admin-Leiste"],"Single Export (Button)":["Einzelner Export (Schaltfl\u00e4che)"],"Failed to prepare export JSON.":["Export-JSON wurde nicht vorbereitet."],"Failed to fetch export data.":["Ich konnte die Exportdaten nicht abrufen."],"Export & Import settings":["Export & Import von Einstellungen"],"Export Settings":["Export-Einstellungen"],"Preparing export...":["Vorbereitung des Exports..."],"Copied!":["Kopiert!"],"Copy export data":["Kopiere Export-Daten"],"Paste in the JSON string you got from your export to import all settings for the plugin.":["F\u00fcge den JSON-String aus dem Export hier ein und importiere deine Einstellungen."],"Settings imported successfully.":["Einstellungen erfolgreich importiert."],"Reset":["Zur\u00fccksetzen"],"By clicking the \"Reset Plugin Settings\", you will reset all plugin settings. This can be useful if you want to import a new set of settings or you want a fresh start.":["Mit einem Klick auf \"Plugin-Einstellungen zur\u00fccksetzen\" werden alle Plugin-Einstellungen zur\u00fcckgesetzt. Dies kann n\u00fctzlich sein, wenn Sie einen neuen Satz Einstellungen importieren oder einen Neustart durchf\u00fchren m\u00f6chten."],"If you click the \"Reset Database Table\" button instead, you will keep all your settings, and we will only recreate our DB table.":["Wenn Sie stattdessen auf die Schaltfl\u00e4che \u201eDatenbanktabelle zur\u00fccksetzen\u201c klicken, bleiben alle Ihre Einstellungen erhalten und wir erstellen nur unsere DB-Tabelle neu."],"If the background process is stuck and your debug log shows \"There is already an export running\", use the \"Reset Background Queue\" button to clear the queue and locks.":["Wenn der Hintergrundprozess h\u00e4ngen bleibt und im Debug-Protokoll die Meldung \"Es wird bereits ein Export ausgef\u00fchrt\" angezeigt wird, verwenden Sie die Schaltfl\u00e4che \"Hintergrundwarteschlange zur\u00fccksetzen\", um die Warteschlange und die Sperren zu l\u00f6schen."],"Reset Plugin Settings":["Plugin-Einstellungen zur\u00fccksetzen"],"Reset Database Table":["Datenbanktabelle zur\u00fccksetzen"],"Reset Background Queue":["Hintergrundwarteschlange zur\u00fccksetzen"],"Settings resetted successfully.":["Einstellungen erfolgreich zur\u00fcckgesetzt."],"Database table resetted successfully.":["Datenbank-Tabelle erfolgreich zur\u00fcckgesetzt."],"Background queue reset successfully.":["Zur\u00fccksetzen der Hintergrundwarteschlange erfolgreich."],"Migrate Settings":["Migrationseinstellungen"],"Migrate all of your settings to Simply Static 3.0":["Migriere alle Einstellungen zu Simply Static 3.0"],"Migrate settings":["Einstellungen migrieren"],"Settings migration successfully.":["Migration erfolgreich abgeschlossen."],"Single Exports":["Einzelne Exporte"],"Use Single Exports?":["Einzelne Exporte verwenden?"],"Quickly push updates to your static site while editing pages\/posts.":["Pushen Sie Updates schnell auf Ihre statische Website, w\u00e4hrend Sie Seiten\/Beitr\u00e4ge bearbeiten."],"Do not allow quick updates while editing posts\/pages.":["Lassen Sie keine Schnellaktualisierungen zu, w\u00e4hrend Sie Beitr\u00e4ge\/Seiten bearbeiten."],"Use Auto Export?":["Automatischen Export verwenden?"],"Automatically schedule a Single Export when a post\/page is updated\/published.":["Planen Sie automatisch einen einzelnen Export, wenn ein Beitrag\/eine Seite aktualisiert\/ver\u00f6ffentlicht wird."],"Do not automatically run Single Export when a post\/page is updated\/published.":["Einzelner Export wird nicht automatisch ausgef\u00fchrt, wenn ein Beitrag\/eine Seite aktualisiert\/ver\u00f6ffentlicht wird."],"Auto Export Post Types":["Auto-Export-Posttypen"],"Choose which public post types should trigger automatic Single Exports when updated. If none is selected, all public post types are used.":["W\u00e4hlen Sie aus, welche \u00f6ffentlichen Beitragstypen bei Aktualisierung automatische Einzelexporte ausl\u00f6sen sollen. Wenn keiner ausgew\u00e4hlt wird, werden alle \u00f6ffentlichen Beitragstypen verwendet."],"Auto export delay (seconds)":["Verz\u00f6gerung beim automatischen Export (Sekunden)"],"Delay before the automatic Single Export starts after a change is detected.":["Verz\u00f6gerung, bevor der automatische Einzelexport gestartet wird, nachdem eine \u00c4nderung erkannt wurde."],"Pages to update":["Zu aktualisierende Seiten"],"Select which pages should start a Single Export. If none selected, we use your homepage.":["W\u00e4hlen Sie aus, welche Seiten einen Einzelexport starten sollen. Wenn keine Auswahl getroffen ist, verwenden wir Ihre Startseite."],"Choose which pages\/files should be updated when running a Single Export.":["W\u00e4hlen Sie aus, welche Seiten\/Dateien beim Ausf\u00fchren eines einzelnen Exports aktualisiert werden sollen."],"Taxonomy Archives":["Taxonomie Archive"],"Choose which taxonomy archives to include for selected pages\/posts (e.g., Categories, Tags, or custom taxonomies).":["W\u00e4hlen Sie aus, welche Taxonomiearchive f\u00fcr ausgew\u00e4hlte Seiten\/Beitr\u00e4ge einbezogen werden sollen (z. B. Kategorien, Tags oder benutzerdefinierte Taxonomien)."],"Choose which taxonomies should be updated when running a Single Export.":["W\u00e4hlen Sie aus, welche Taxonomien beim Ausf\u00fchren eines einzelnen Exports aktualisiert werden sollen."],"Update archives (author\/date\/post_type)":["Aktualisieren von Archiven (Autor\/Datum\/post_type)"],"Update archive URLs when running a Single Export.":["Aktualisieren Sie die Archiv-URLs beim Ausf\u00fchren eines einzelnen Exports."],"Do not update archive URLs.":["Aktualisieren Sie keine Archiv-URLs."],"Update pagination":["Paginierung aktualisieren"],"Update pagination URLs when running a Single Export.":["Aktualisieren Sie Paginierungs-URLs, wenn Sie einen einzelnen Export ausf\u00fchren."],"Do not update pagination URLs.":["Aktualisieren Sie keine Paginierungs-URLs."],"Update XML sitemap":["Aktualisieren der XML-Sitemap"],"Update XML sitemaps when running a Single Export.":["Aktualisieren Sie XML-Sitemaps, wenn Sie einen einzelnen Export ausf\u00fchren."],"Do not update XML sitemaps.":["XML-Sitemaps nicht aktualisieren."],"Build Exports":["Build Exporte"],"Use Build Exports?":["Build Exporte verwenden?"],"Use build exports to quickly update a list of pages and files on your static site.":["Verwenden Sie Build-Exporte, um eine Liste von Seiten und Dateien auf Ihrer statischen Website schnell zu aktualisieren."],"Build Exports are disabled.":["Build-Exporte sind deaktiviert."],"Webhook":["Webhook"],"Simply Static will POST a JSON payload to this URL after exports finish.":["Simply Static sendet nach Abschluss der Exporte einen JSON-Payload an diese URL."],"Fire for these export types:":["F\u00fcr diese Export-Typen aktivieren:"],"Export (full)":["Exportieren (vollst\u00e4ndig)"],"Update":["\u00c4nderungen Exportieren"],"Build":["Build"],"Single":["Single"],"Payload includes event, site_url, export_type, identifiers (when available), timestamp, and success.":["Der Payload umfasst Ereignis, site_url, export_type, IDs (sofern verf\u00fcgbar), Zeitstempel und Erfolg."]}}}
+{
+    "translation-revision-date": "2026-09-25 10:00+0200",
+    "generator": "WP-CLI\/2.12.0",
+    "source": "src\/admin\/build\/index.js",
+    "domain": "messages",
+    "locale_data": {
+        "messages": {
+            "": {
+                "domain": "messages",
+                "lang": "de_DE",
+                "plural-forms": "nplurals=2; plural=n != 1;"
+            },
+            "Simply Static Pro": [
+                "Simply Static Pro"
+            ],
+            "Static Studio": [
+                "Static Studio"
+            ],
+            "ZIP Archive": [
+                "ZIP-Archiv"
+            ],
+            "Local Directory": [
+                "Lokales Verzeichnis"
+            ],
+            "GitHub": [
+                "GitHub"
+            ],
+            "Generate": [
+                "Generieren"
+            ],
+            "Settings": [
+                "Einstellungen"
+            ],
+            "Diagnostics": [
+                "Diagnose"
+            ],
+            "Basic Auth": [
+                "Basic Auth"
+            ],
+            "Origin URL": [
+                "Quell-URL"
+            ],
+            "The server returned an invalid response.": [
+                "Der Server hat eine ung\u00fcltige Antwort zur\u00fcckgegeben."
+            ],
+            "The requested action could not be completed.": [
+                "Die angeforderte Aktion konnte nicht abgeschlossen werden."
+            ],
+            "Rollback in progress. Simply Static export actions are locked until the rollback has finished.": [
+                "Rollback l\u00e4uft. Die Exportaktionen von Simply Static bleiben gesperrt, bis der Rollback abgeschlossen ist."
+            ],
+            "You have %d unpushed change.": [
+                "Du hast %d noch nicht gepushte \u00c4nderung.",
+                "Du hast %d noch nicht gepushte \u00c4nderungen."
+            ],
+            "Waiting for new push\u2026": [
+                "Warte auf einen neuen Push \u2026"
+            ],
+            "Resuming the push\u2026": [
+                "Push wird fortgesetzt \u2026"
+            ],
+            "Rollback in progress": [
+                "Rollback l\u00e4uft"
+            ],
+            "Activity Log": [
+                "Aktivit\u00e4tsprotokoll"
+            ],
+            "A new environment will be created with the current configuration.": [
+                "Eine neue Umgebung wird erstellt mit der aktuellen Konfiguration."
+            ],
+            "Creating...": [
+                "Wird erstellt \u2026"
+            ],
+            "Create": [
+                "Erstellen"
+            ],
+            "Cancel": [
+                "Abbrechen"
+            ],
+            "Choose an environment. If you like to create new ones, please set them up in your Static Studio dashboard.": [
+                "W\u00e4hle eine Umgebung aus. Neue Umgebungen kannst du in deinem Static-Studio-Dashboard einrichten."
+            ],
+            "Choose an environment or create a new one to configure settings.": [
+                "W\u00e4hle eine Umgebung oder erstelle eine neue mit den aktuellen Einstellungen."
+            ],
+            "Delete selected environment": [
+                "L\u00f6sche die ausgew\u00e4hlte Umgebung"
+            ],
+            "Changing ...": [
+                "Wird gewechselt \u2026"
+            ],
+            "Environment": [
+                "Umgebung"
+            ],
+            "Current": [
+                "Aktuell"
+            ],
+            "Create an Environment": [
+                "Umgebung erstellen"
+            ],
+            "Invalid export log response.": [
+                "Ung\u00fcltige Antwort des Exportprotokolls."
+            ],
+            "Could not load the export log.": [
+                "Das Exportprotokoll konnte nicht geladen werden."
+            ],
+            "Code": [
+                "Code"
+            ],
+            "URL": [
+                "URL"
+            ],
+            "Export Type": [
+                "Exporttyp"
+            ],
+            "Notes": [
+                "Hinweise"
+            ],
+            "Search export log": [
+                "Exportprotokoll durchsuchen"
+            ],
+            "Search\u2026": [
+                "Suchen \u2026"
+            ],
+            "Loading\u2026": [
+                "Wird geladen \u2026"
+            ],
+            "Push": [
+                "Push"
+            ],
+            "Pause": [
+                "Anhalten"
+            ],
+            "Resume": [
+                "Fortsetzen"
+            ],
+            "Missing plugin": [
+                "Fehlendes Plugin"
+            ],
+            "Requires Simply Static Pro": [
+                "Erfordert Simply Static Pro"
+            ],
+            "Disabled by Command Center": [
+                "Vom Command Center deaktiviert"
+            ],
+            "Always active": [
+                "Immer aktiv"
+            ],
+            "Get the Pro version": [
+                "Pro-Version holen"
+            ],
+            "Download Log": [
+                "Log herunterladen"
+            ],
+            "Clear Log": [
+                "Log l\u00f6schen"
+            ],
+            "Log file cleared.": [
+                "Log-Datei erfolgreich geleert."
+            ],
+            "BLACK FRIDAY: Upgrade to Simply Static Pro and save 25%% with code %s.": [
+                "BLACK FRIDAY: Wechsle zu Simply Static Pro und spare mit dem Code %s 25 %%."
+            ],
+            "Buy now": [
+                "Jetzt kaufen"
+            ],
+            "The operations mode request could not be completed.": [
+                "Die Anfrage f\u00fcr den Betriebsmodus konnte nicht abgeschlossen werden."
+            ],
+            "The operations mode password must contain at least 8 characters.": [
+                "Das Passwort f\u00fcr den Betriebsmodus muss mindestens 8 Zeichen enthalten."
+            ],
+            "The password confirmation does not match.": [
+                "Die Passwortbest\u00e4tigung stimmt nicht \u00fcberein."
+            ],
+            "Operations mode": [
+                "Betriebsmodus"
+            ],
+            "Publishing remains available. Enter the operations password to access deployment, account, and plugin settings.": [
+                "Das Ver\u00f6ffentlichen bleibt verf\u00fcgbar. Gib das Passwort f\u00fcr den Betriebsmodus ein, um auf Deployment-, Konto- und Plugin-Einstellungen zuzugreifen."
+            ],
+            "Operations password": [
+                "Passwort f\u00fcr den Betriebsmodus"
+            ],
+            "Unlock settings": [
+                "Einstellungen entsperren"
+            ],
+            "Operations mode is enabled and settings are currently unlocked for support.": [
+                "Der Betriebsmodus ist aktiviert und die Einstellungen sind derzeit f\u00fcr den Support entsperrt."
+            ],
+            "Protect deployment credentials and configuration from client changes while keeping publishing and diagnostics available.": [
+                "Sch\u00fctze Deployment-Zugangsdaten und die Konfiguration vor \u00c4nderungen durch Kunden, w\u00e4hrend Ver\u00f6ffentlichen und Diagnose verf\u00fcgbar bleiben."
+            ],
+            "New password (optional)": [
+                "Neues Passwort (optional)"
+            ],
+            "Leave blank to keep the existing password.": [
+                "Leer lassen, um das vorhandene Passwort beizubehalten."
+            ],
+            "Use at least 8 characters. The password is stored as a one-way hash.": [
+                "Verwende mindestens 8 Zeichen. Das Passwort wird als nicht umkehrbarer Hash gespeichert."
+            ],
+            "Confirm password": [
+                "Passwort best\u00e4tigen"
+            ],
+            "Update operations mode": [
+                "Betriebsmodus aktualisieren"
+            ],
+            "Enable operations mode": [
+                "Betriebsmodus aktivieren"
+            ],
+            "Lock settings now": [
+                "Einstellungen jetzt sperren"
+            ],
+            "Disable operations mode": [
+                "Betriebsmodus deaktivieren"
+            ],
+            "Unlocked sessions expire automatically after one hour.": [
+                "Entsperrte Sitzungen laufen nach einer Stunde automatisch ab."
+            ],
+            "Pro": [
+                "Pro"
+            ],
+            "Unlock single push, change detection, environments, search, forms, and much more.": [
+                "Schalte Einzel-Pushes, \u00c4nderungserkennung, Umgebungen, Suche, Formulare und vieles mehr frei."
+            ],
+            "Push only changes": [
+                "Nur \u00c4nderungen pushen"
+            ],
+            "Search integration": [
+                "Suchintegration"
+            ],
+            "Form handling": [
+                "Formularverarbeitung"
+            ],
+            "Multilingual support": [
+                "Mehrsprachige Unterst\u00fctzung"
+            ],
+            "Minification and image optimization": [
+                "Minifizierung und Bildoptimierung"
+            ],
+            "Get Simply Static Pro \u2192": [
+                "Simply Static Pro holen \u2192"
+            ],
+            "Studio": [
+                "Studio"
+            ],
+            "The complete Static WordPress operations platform. Keep WordPress for editing, publish fast static websites, and manage everything from one place.": [
+                "Die Komplettl\u00f6sung f\u00fcr den Betrieb statischer WordPress-Websites. Nutze WordPress zum Bearbeiten, ver\u00f6ffentliche schnelle statische Websites und verwalte alles zentral."
+            ],
+            "Start & Stop WordPress": [
+                "WordPress starten und stoppen"
+            ],
+            "Static publishing to CDN": [
+                "Statische Ver\u00f6ffentlichung im CDN"
+            ],
+            "Central dashboard for all sites": [
+                "Zentrales Dashboard f\u00fcr alle Websites"
+            ],
+            "Automated WordPress migration": [
+                "Automatisierte WordPress-Migration"
+            ],
+            "Site health, security, and performance checks": [
+                "Pr\u00fcfungen von Website-Zustand, Sicherheit und Leistung"
+            ],
+            "Start 14-Day Free Trial \u2192": [
+                "14-t\u00e4gige kostenlose Testphase starten \u2192"
+            ],
+            "Toggle menu": [
+                "Men\u00fc umschalten"
+            ],
+            "Simply Static menu": [
+                "Simply-Static-Men\u00fc"
+            ],
+            "Menu": [
+                "Men\u00fc"
+            ],
+            "Close menu": [
+                "Men\u00fc schlie\u00dfen"
+            ],
+            "There are errors in diagnostics that may negatively affect your static push.": [
+                "Die Diagnose enth\u00e4lt Fehler, die deinen statischen Push beeintr\u00e4chtigen k\u00f6nnen."
+            ],
+            "Please review them and get them fixed to avoid problems.": [
+                "Bitte \u00fcberpr\u00fcfe und behebe die Meldungen um Fehlern vorzubeugen."
+            ],
+            "Visit Diagnostics": [
+                "Diagnose ansehen"
+            ],
+            "You are using the pro version without a valid license.": [
+                "Du nutzt die Pro-Version ohne g\u00fcltige Lizenz."
+            ],
+            "We have temporarily disabled all the pro features now. Please contact our support to have the problem solved.": [
+                "Wir haben alle Pro-Funktionen vor\u00fcbergehend deaktiviert. Bitte kontaktiere den Support um das Problem zu beheben."
+            ],
+            "Contact Support": [
+                "Support kontaktieren"
+            ],
+            "Simply Static logo": [
+                "Simply-Static-Logo"
+            ],
+            "Changelog": [
+                "Changelog"
+            ],
+            "Documentation": [
+                "Dokumentation"
+            ],
+            "Use current settings": [
+                "Nutze aktuelle Einstellungen"
+            ],
+            "The export could not be cancelled. Please try again.": [
+                "Der Export konnte nicht abgebrochen werden. Versuche es erneut."
+            ],
+            "The export could not be paused. Please try again.": [
+                "Der Export konnte nicht pausiert werden. Versuche es erneut."
+            ],
+            "The export could not be resumed. Please try again.": [
+                "Der Export konnte nicht fortgesetzt werden. Versuche es erneut."
+            ],
+            "The settings could not be imported. Please try again.": [
+                "Die Einstellungen konnten nicht importiert werden. Versuche es erneut."
+            ],
+            "Builds": [
+                "Builds"
+            ],
+            "Languages": [
+                "Sprachen"
+            ],
+            "Full Site": [
+                "Gesamte Website"
+            ],
+            "Changes Only": [
+                "Nur \u00c4nderungen"
+            ],
+            "Changes Only (Requires Simply Static Pro)": [
+                "Nur \u00c4nderungen (erfordert Simply Static Pro)"
+            ],
+            "Upgrade to Simply Static Pro to push only changes.": [
+                "Wechsle zu Simply Static Pro, um nur \u00c4nderungen zu pushen."
+            ],
+            "A push from another site is running. Upgrade to queue them.": [
+                "Ein Push von einer anderen Website l\u00e4uft. Wechsle zur Pro-Version, um weitere Pushes in die Warteschlange einzureihen."
+            ],
+            "Reset push lock": [
+                "Push-Sperre zur\u00fccksetzen"
+            ],
+            "Import": [
+                "Import"
+            ],
+            "Choose a subsite to import settings from.": [
+                "W\u00e4hle eine Unterwebsite aus, von der du Einstellungen importieren m\u00f6chtest."
+            ],
+            "Import Settings": [
+                "Einstellungen importieren"
+            ],
+            "Importing settings\u2026": [
+                "Einstellungen werden importiert \u2026"
+            ],
+            "Tools": [
+                "Werkzeuge"
+            ],
+            "General": [
+                "Allgemein"
+            ],
+            "Deploy": [
+                "Deployment"
+            ],
+            "Forms": [
+                "Formulare"
+            ],
+            "Search": [
+                "Suche"
+            ],
+            "Optimize": [
+                "Optimierung"
+            ],
+            "Hide WP": [
+                "WordPress verbergen"
+            ],
+            "Advanced": [
+                "Erweitert"
+            ],
+            "Integrations": [
+                "Integrationen"
+            ],
+            "Workflow": [
+                "Arbeitsablauf"
+            ],
+            "Utilities": [
+                "Werkzeuge"
+            ],
+            "Debug": [
+                "Debugging"
+            ],
+            "UAM": [
+                "UAM"
+            ],
+            "Learn": [
+                "Mehr erfahren"
+            ],
+            "Tutorials": [
+                "Tutorials"
+            ],
+            "Upgrade to manage from network.": [
+                "Upgrade auf Simply Static Pro und manage Exporte vom Netzwerk."
+            ],
+            "Name": [
+                "Name"
+            ],
+            "Status": [
+                "Status"
+            ],
+            "Actions": [
+                "Aktionen"
+            ],
+            "Explore Pro \u2192": [
+                "Pro entdecken \u2192"
+            ],
+            "Version": [
+                "Version"
+            ],
+            "Free": [
+                "Kostenlos"
+            ],
+            "Temporary files cleared.": [
+                "Tempor\u00e4re Dateien wurden gel\u00f6scht."
+            ],
+            "Could not clear temporary files.": [
+                "Tempor\u00e4re Dateien konnten nicht gel\u00f6scht werden."
+            ],
+            "Request failed. Please try again.": [
+                "Die Anfrage ist fehlgeschlagen. Versuche es erneut."
+            ],
+            "If you've secured WordPress with HTTP Basic Auth you need to specify the username and password to use below.": [
+                "Wenn du deine WordPress-Website mit HTTP Basic Auth gesch\u00fctzt hast, gib unten den Benutzernamen und das Passwort ein."
+            ],
+            "Basic Auth Username": [
+                "Basic-Auth-Benutzername"
+            ],
+            "Basic Auth Password": [
+                "Basic-Auth-Passwort"
+            ],
+            "Enable Basic Auth": [
+                "Basic Auth aktivieren"
+            ],
+            "Automatically setting up Basic Auth requires Simply Static Pro.": [
+                "Automatische Einrichtung von Basic Auth ben\u00f6tigt Simply Static Pro."
+            ],
+            "Once enabled we will put your entire website behind password protection.": [
+                "Nach der Aktivierung sch\u00fctzen wir deine gesamte Website mit einem Passwort."
+            ],
+            "Requires Username & Password to work": [
+                "Erfordert Benutzername und Passwort"
+            ],
+            "Temporary Files": [
+                "Tempor\u00e4re Dateien"
+            ],
+            "Temporary files are managed by Studio": [
+                "Tempor\u00e4re Dateien werden von Studio verwaltet"
+            ],
+            "Studio provisions and cleans up build storage automatically for each environment, so there is no temporary directory to configure.": [
+                "Studio stellt den Build-Speicher f\u00fcr jede Umgebung automatisch bereit und bereinigt ihn. Daher musst du kein tempor\u00e4res Verzeichnis konfigurieren."
+            ],
+            "Temporary Files Directory": [
+                "Verzeichnis f\u00fcr tempor\u00e4re Dateien"
+            ],
+            "Optionally specify the directory to save your temporary files. This directory must exist and be writable.": [
+                "Gib optional ein Verzeichnis f\u00fcr tempor\u00e4re Dateien an. Dieses Verzeichnis muss vorhanden und beschreibbar sein."
+            ],
+            "Clearing\u2026": [
+                "L\u00f6schen\u2026"
+            ],
+            "Clear Temporary Files": [
+                "Tempor\u00e4re Dateien l\u00f6schen"
+            ],
+            "Whitelist Plugins": [
+                "Plugins whitelisten"
+            ],
+            "Whitelist plugins in diagnostics": [
+                "Plugins whitelisten und aus Diagnose-Report ausschlie\u00dfen"
+            ],
+            "If you want to exclude certain plugins from the diagnostics check add the plugin slugs here (one per line).": [
+                "Wenn du bestimmte Plugins vom Diagnose-Report ausschlie\u00dfen m\u00f6chtest, trage sie hier ein (ein Plugin pro Zeile)."
+            ],
+            "Proxy Setup": [
+                "Proxy-Konfiguration"
+            ],
+            "Proxy setup is handled by Studio": [
+                "Die Proxy-Konfiguration \u00fcbernimmt Studio"
+            ],
+            "Studio already knows the WordPress origin and public Studio URL for this environment, so you do not need to configure a proxy URL manually.": [
+                "Studio kennt bereits den WordPress-Ursprung und die \u00f6ffentliche Studio-URL dieser Umgebung. Du musst daher keine Proxy-URL manuell konfigurieren."
+            ],
+            "If the URL of your WordPress installation differs from the public-facing URL (Proxy Setup), add the public URL here.": [
+                "Wenn die URL deiner WordPress-Installation von der \u00f6ffentlichen URL abweicht (Proxy), f\u00fcr die \u00f6ffentliche URL hier ein."
+            ],
+            "Debug Log": [
+                "Debug-Log"
+            ],
+            "Activate Debug Log": [
+                "Debug-Log aktivieren"
+            ],
+            "Enable it to download the debug log from Simply Static -> Generate.": [
+                "Aktiviere diese Option, um das Debug-Protokoll unter Simply Static -> Aktivit\u00e4tsprotokoll herunterzuladen."
+            ],
+            "Cron": [
+                "Cron"
+            ],
+            "Cron is automatic on Studio": [
+                "Cron l\u00e4uft in Studio automatisch"
+            ],
+            "Studio starts builds automatically when your site changes, so you do not need a server-side cron job to trigger exports.": [
+                "Studio startet Builds automatisch, wenn sich deine Website \u00e4ndert. Du ben\u00f6tigst daher keinen serverseitigen Cronjob, um Exporte auszul\u00f6sen."
+            ],
+            "Use server-side cron job": [
+                "Serverseitigen Cronjob verwenden"
+            ],
+            "Enable this if you use a server-side cron job instead of the default WP-Cron.": [
+                "Aktiviere diese Option, wenn du statt des standardm\u00e4\u00dfigen WP-Cron einen serverseitigen Cronjob verwendest."
+            ],
+            "Settings saved successfully.": [
+                "Einstellungen erfolgreich gespeichert."
+            ],
+            "Save Settings": [
+                "Einstellungen speichern"
+            ],
+            "FTP": [
+                "FTP"
+            ],
+            "SFTP": [
+                "SFTP"
+            ],
+            "AWS S3": [
+                "AWS S3"
+            ],
+            "Bunny CDN": [
+                "Bunny CDN"
+            ],
+            "Tiiny.host": [
+                "Tiiny.host"
+            ],
+            "No page selected": [
+                "Keine Seite ausgew\u00e4hlt"
+            ],
+            "Something went wrong.": [
+                "Etwas ist schiefgelaufen."
+            ],
+            "\u26a1 Migrate to Static Studio": [
+                "\u26a1 Zu Static Studio migrieren"
+            ],
+            "The all-in-one Static WordPress cloud-hosting platform. Enjoy secure WordPress, the fastest exports, and the best-performing static site hosting in one package.": [
+                "Die Komplettl\u00f6sung f\u00fcr Cloud-Hosting von statischen WordPress-Websites. Sicheres WordPress, schnellste Exporte und leistungsstarkes Hosting f\u00fcr statische Websites in einem Paket."
+            ],
+            "Installing\u2026": [
+                "Wird installiert \u2026"
+            ],
+            "Open Migration Settings": [
+                "Migrationseinstellungen \u00f6ffnen"
+            ],
+            "Install & Activate Migration Plugin": [
+                "Migrations-Plugin installieren und aktivieren"
+            ],
+            "Deployment Settings": [
+                "Deployment Einstellungen"
+            ],
+            "Choose from a variety of deployment methods. Depending on your selection we either provide a ZIP file, export to a local directory or send your files to a remote destination.": [
+                "W\u00e4hle eine der unterschiedlichen Deployment-Optionen. Basierend auf deiner Einstellung erh\u00e4lst du eine Liste von zus\u00e4tzlichen Optionen."
+            ],
+            "Deployment method": [
+                "Deployment-Methode"
+            ],
+            "Deployment is automatic on Studio": [
+                "Das Deployment l\u00e4uft in Studio automatisch"
+            ],
+            "See how Pro deployment works \u2192": [
+                "So funktioniert das Pro-Deployment \u2192"
+            ],
+            "Your site is built and published automatically every time you make a change, with no destinations to set up and no pipelines to maintain. That's the whole idea of Studio.": [
+                "Deine Website wird bei jeder \u00c4nderung automatisch erstellt und ver\u00f6ffentlicht. Du musst weder Ziele einrichten noch Pipelines pflegen. Genau daf\u00fcr ist Studio da."
+            ],
+            "Want to choose exactly where your files go? Deploying to GitHub, Amazon S3, BunnyCDN, FTP, SFTP and more is part of Simply Static Pro, where you own and control your deployment pipeline.": [
+                "Du m\u00f6chtest genau bestimmen, wohin deine Dateien \u00fcbertragen werden? Deployments zu GitHub, Amazon S3, BunnyCDN, FTP, SFTP und weiteren Zielen sind Teil von Simply Static Pro. Damit verwaltest und kontrollierst du deine Deployment-Pipeline selbst."
+            ],
+            "The all-in-one Static WordPress cloud-hosting platform.": [
+                "Die All-in-One-Cloud-Hosting-Plattform f\u00fcr Static WordPress."
+            ],
+            "Enjoy secure WordPress, the fastest exports, and the best-performing static site hosting in one package.": [
+                "Sicheres WordPress, schnellste Exporte und leistungsstarkes Hosting f\u00fcr statische Websites in einem Paket."
+            ],
+            "Migrate your existing WordPress site to Static Studio with one click.": [
+                "Migriere deine bestehende WordPress-Website mit einem Klick zu Static Studio."
+            ],
+            "Learn more about Static Studio": [
+                "Mehr \u00fcber Static Studio erfahren"
+            ],
+            "ZIP": [
+                "ZIP"
+            ],
+            "Get a download link in the activity log once the static export has finished.": [
+                "Du bekommst einen Download-Link im Aktivit\u00e4tsprotokoll angezeigt sobald der Export abgeschlossen ist."
+            ],
+            "Path": [
+                "Pfad"
+            ],
+            "This is the directory where your static files will be saved. We will create it automatically on the first export if it doesn't exist.": [
+                "Dies ist das Verzeichnis in dem deine statischen Dateien gespeichert werden. Dieses Verzeichnis muss existieren und beschreibbar sein."
+            ],
+            "Copied home path": [
+                "Homeverzeichnis kopiert"
+            ],
+            "Copy home path": [
+                "Homeverzeichnis kopieren"
+            ],
+            "Clear Local Directory": [
+                "Lokales Verzeichnis leeren"
+            ],
+            "Clear local directory before running an export.": [
+                "Leere lokales Verzeichnis vor n\u00e4chstem Export."
+            ],
+            "Don't clear local directory before running an export.": [
+                "Leere lokales Verzeichnis nicht vor n\u00e4chstem Export."
+            ],
+            "GitHub enables you to export your static website to one of the common static hosting providers like Netlify, Cloudflare Pages or GitHub Pages.": [
+                "Mit GitHub kannst du deine statische Website zu g\u00e4ngigen Hosting-Anbietern wie Netlify, Cloudflare Pages oder GitHub Pages exportieren."
+            ],
+            "Account Type": [
+                "Kontotyp"
+            ],
+            "Depending on the account type the settings fields will change.": [
+                "Die Einstellungsfelder \u00e4ndern sich abh\u00e4ngig vom Kontotyp."
+            ],
+            "Personal": [
+                "Pers\u00f6nlich"
+            ],
+            "Organization": [
+                "Organisation"
+            ],
+            "Enter the name of your organization.": [
+                "Trage den Namen deiner Organisation ein."
+            ],
+            "Username": [
+                "Benutzername"
+            ],
+            "Enter your GitHub username.": [
+                "Gib deinen GitHub-Benutzernamen ein."
+            ],
+            "E-Mail": [
+                "E-Mail"
+            ],
+            "Enter your GitHub email address. This will be used to commit files to your repository.": [
+                "Gib deine GitHub-E-Mail-Adresse ein. Sie wird f\u00fcr Commits in deinem Repository verwendet."
+            ],
+            "Personal Access Token": [
+                "Pers\u00f6nliches Zugriffstoken"
+            ],
+            "You need a personal access token from GitHub. Learn how to get one ": [
+                "Du ben\u00f6tigst ein pers\u00f6nliches Zugriffstoken von GitHub. So erh\u00e4ltst du eines: "
+            ],
+            "here": [
+                "hier"
+            ],
+            "Repository": [
+                "Repository"
+            ],
+            "Enter a name for your repository (lowercase without spaces or special characters).": [
+                "Gib einen Namen f\u00fcr dein Repository ein (Kleinbuchstaben ohne Leer- oder Sonderzeichen)."
+            ],
+            "Ensure to create the repository and add a readme file to it before running an export as shown in the docs ": [
+                "Erstelle das Repository und f\u00fcge wie in der Dokumentation beschrieben eine README-Datei hinzu, bevor du einen Export startest: "
+            ],
+            "Folder": [
+                "Verzeichnis"
+            ],
+            "Enter a relative path to a folder if you want to push files under it. Example: for github.com\/USER\/REPOSITORY\/folder1, enter folder1": [
+                "Gib einen relativen Verzeichnispfad ein, wenn du Dateien dorthin pushen m\u00f6chtest. Beispiel: Gib f\u00fcr github.com\/USER\/REPOSITORY\/folder1 den Wert folder1 ein."
+            ],
+            "You need to create the repository manually within your organization before connecting it.": [
+                "Du musst das Repository vor dem Verbinden manuell in deiner Organisation erstellen."
+            ],
+            "Visibility": [
+                "Sichtbarkeit"
+            ],
+            "Decide if you want to make your repository public or private.": [
+                "Lege fest, ob dein Repository \u00f6ffentlich oder privat sein soll."
+            ],
+            "Public": [
+                "\u00d6ffentlich"
+            ],
+            "Private": [
+                "Privat"
+            ],
+            "Branch": [
+                "Branch"
+            ],
+            "Simply Static automatically uses \"main\" as the branch. For GitHub Pages, you may want to change it to gh-pages.": [
+                "Simply Static verwendet automatisch \"main\" als Branch. F\u00fcr GitHub Pages kannst du ihn in gh-pages \u00e4ndern."
+            ],
+            "Webhook URL": [
+                "Webhook-URL"
+            ],
+            "Enter your Webhook URL here and Simply Static will send a POST request after all files are committed to GitHub.": [
+                "Gib hier deine Webhook-URL ein. Simply Static sendet eine POST-Anfrage, nachdem alle Dateien an GitHub \u00fcbertragen wurden."
+            ],
+            "Throttle Requests": [
+                "Anfragen pro Sekunde limitieren"
+            ],
+            "Enable this option if you are experiencing issues with the GitHub API rate limit.": [
+                "Aktiviere diese Option, wenn Probleme mit dem API-Ratenlimit von GitHub auftreten."
+            ],
+            "Batch size": [
+                "Batch-Gr\u00f6\u00dfe"
+            ],
+            "Enter the number of files you want to be processed in a single batch. If current export fails to deploy, lower the number.": [
+                "Trage die Anzahl der Seiten\/Dateien ein die pro Durchlauf exportiert werden sollen. Falls es Probleme bei der \u00dcbertragung gibt, reduziere die Anzahl."
+            ],
+            "Deploying to Tiiny.host is the easiest and fastest deployment option available in Simply Static Pro.": [
+                "Die \u00dcbertragung zur Tiiny.host ist die schnellste Deployment-Option in Simply Static Pro."
+            ],
+            "This field is auto-filled with the email address used for activating Simply Static Pro.": [
+                "Dieses Feld wird automatisch mit der E-Mail-Adresse ausgef\u00fcllt, die zur Aktivierung von Simply Static Pro verwendet wurde."
+            ],
+            "An account will be created automatically on your first deployment.": [
+                "Ein Konto wird automatisch bei der ersten \u00dcbertragung erstellt."
+            ],
+            "Subdomain": [
+                "Subdomain"
+            ],
+            "That's the part before your TLD. Your full URL is the combination of the subdomain plus the domain suffix.": [
+                "Das ist der Part vor deiner Domain. Deine URL ist die Kombination aus Subdomain und Domain-Suffix."
+            ],
+            "Domain Suffix": [
+                "Domain-Suffix"
+            ],
+            "This defaults to tiiny.site. If you have a custom domain configured in Tiiny.host, you can also use that one.": [
+                "Standardm\u00e4\u00dfig wird tiiny.site verwendet. Wenn du in Tiiny.host eine eigene Domain konfiguriert hast, kannst du auch diese verwenden."
+            ],
+            "Password Protection": [
+                "Passwortschutz"
+            ],
+            "Adding a password will activate password protection on your static site. The website is only visible with the password.": [
+                "Deine statische Website wird mit dem eingetragenen Passwort gesch\u00fctzt und ist erst nach Eingabe erreichbar."
+            ],
+            "Bunny CDN is a fast and reliable CDN provider that you can run your static website on.": [
+                "Bunny CDN ist ein schneller und zuverl\u00e4ssiger CDN-Anbieter f\u00fcr deine statische Website."
+            ],
+            "Bunny CDN API Key": [
+                "Bunny-CDN-API-Schl\u00fcssel"
+            ],
+            "Enter your API Key from Bunny CDN. You can find your API-Key as described ": [
+                "Gib deinen API-Schl\u00fcssel von Bunny CDN ein. So findest du ihn: "
+            ],
+            "Storage Host": [
+                "Speicher-Host"
+            ],
+            "Depending on your location, you have a different storage host. You find out which URL to use ": [
+                "Der Speicher-Host h\u00e4ngt von deinem Standort ab. Die passende URL findest du hier: "
+            ],
+            "Bunny CDN Access Key": [
+                "Bunny-CDN-Zugriffsschl\u00fcssel"
+            ],
+            "Enter your Access Key from Bunny CDN. You will find it in your storage zone settings under FTP & API Access -> Password.": [
+                "Gib deinen Zugriffsschl\u00fcssel von Bunny CDN ein. Du findest ihn in den Einstellungen deiner Speicherzone unter FTP & API Access -> Password."
+            ],
+            "Pull Zone": [
+                "Pull-Zone"
+            ],
+            "A pull zone is the connection of your CDN to the internet. Simply Static will try to find an existing pull zone with the provided name, if there is none it creates a new pull zone.": [
+                "Eine Pull-Zone verbindet dein CDN mit dem Internet. Simply Static sucht nach einer bestehenden Pull-Zone mit dem angegebenen Namen und erstellt eine neue, falls keine vorhanden ist."
+            ],
+            "Storage Zone": [
+                "Speicherzone"
+            ],
+            "A storage zone contains your static files. Simply Static will try to find an existing storage zone with the provided name, if there is none it creates a new storage zone.": [
+                "Eine Speicherzone enth\u00e4lt deine statischen Dateien. Simply Static sucht nach einer bestehenden Speicherzone mit dem angegebenen Namen und erstellt eine neue, falls keine vorhanden ist."
+            ],
+            "Subdirectory": [
+                "Unterverzeichnis"
+            ],
+            "If you want to transfer the files to a specific subdirectory on your storage zone add the name of that directory here.": [
+                "Wenn du deine statischen Dateien in einem Unterverzeichnis ablegen m\u00f6chtest, gib den Pfad hier ein."
+            ],
+            "Amazon AWS S3": [
+                "Amazon AWS S3"
+            ],
+            "Authentication Method": [
+                "Authentifizierungsmethode"
+            ],
+            "AWS IAM Access Key": [
+                "AWS IAM-Zugriffsschl\u00fcssel"
+            ],
+            "AWS EC2": [
+                "AWS EC2"
+            ],
+            "Access Key ID": [
+                "Zugriffsschl\u00fcssel-ID"
+            ],
+            "Enter your Access Key from AWS. Learn how to get one ": [
+                "Gib deinen AWS-Zugriffsschl\u00fcssel ein. So erh\u00e4ltst du einen: "
+            ],
+            "Secret Access Key": [
+                "Geheimer Zugriffsschl\u00fcssel"
+            ],
+            "Enter your Secret Key from AWS. Learn how to get one ": [
+                "Gib deinen geheimen AWS-Schl\u00fcssel ein. So erh\u00e4ltst du einen: "
+            ],
+            "Region": [
+                "Region"
+            ],
+            "US East (Ohio)": [
+                "US East (Ohio)"
+            ],
+            "US East (N. Virginia)": [
+                "US East (N. Virginia)"
+            ],
+            "US West (N. California)": [
+                "US West (N. California)"
+            ],
+            "US West (Oregon)": [
+                "US West (Oregon)"
+            ],
+            "Africa (Cape Town)": [
+                "Africa (Cape Town)"
+            ],
+            "Asia Pacific (Hong Kong)": [
+                "Asia Pacific (Hong Kong)"
+            ],
+            "Asia Pacific (Hyderabad)": [
+                "Asia Pacific (Hyderabad)"
+            ],
+            "Asia Pacific (Jakarta)": [
+                "Asia Pacific (Jakarta)"
+            ],
+            "Asia Pacific (Melbourne)": [
+                "Asia Pacific (Melbourne)"
+            ],
+            "Asia Pacific (Mumbai)": [
+                "Asia Pacific (Mumbai)"
+            ],
+            "Asia Pacific (Osaka)": [
+                "Asia Pacific (Osaka)"
+            ],
+            "Asia Pacific (Seoul)": [
+                "Asia Pacific (Seoul)"
+            ],
+            "Asia Pacific (Singapore)": [
+                "Asia Pacific (Singapore)"
+            ],
+            "Asia Pacific (Sydney)": [
+                "Asia Pacific (Sydney)"
+            ],
+            "Asia Pacific (Tokyo)": [
+                "Asia Pacific (Tokyo)"
+            ],
+            "Canada (Central)": [
+                "Canada (Central)"
+            ],
+            "Europe (Frankfurt)": [
+                "Europe (Frankfurt)"
+            ],
+            "Europe (Ireland)": [
+                "Europe (Ireland)"
+            ],
+            "Europe (London)": [
+                "Europe (London)"
+            ],
+            "Europe (Milan)": [
+                "Europe (Milan)"
+            ],
+            "Europe (Paris)": [
+                "Europe (Paris)"
+            ],
+            "Europe (Spain)": [
+                "Europe (Spain)"
+            ],
+            "Europe (Stockholm)": [
+                "Europe (Stockholm)"
+            ],
+            "Europe (Zurich)": [
+                "Europe (Zurich)"
+            ],
+            "Middle East (Bahrain)": [
+                "Middle East (Bahrain)"
+            ],
+            "Middle East (UAE)": [
+                "Middle East (UAE)"
+            ],
+            "South America (S\u00e3o Paulo)": [
+                "South America (S\u00e3o Paulo)"
+            ],
+            "AWS GovCloud (US-East)": [
+                "AWS GovCloud (US-East)"
+            ],
+            "AWS GovCloud (US-West)": [
+                "AWS GovCloud (US-West)"
+            ],
+            "Bucket": [
+                "Bucket"
+            ],
+            "Add the name of your bucket here.": [
+                "Trage den Namen deines Buckets hier ein."
+            ],
+            "Add an optional subdirectory for your bucket": [
+                "F\u00fcge ein optionales Unterverzeichnis ein"
+            ],
+            "Cloudfront Distribution ID": [
+                "CloudFront-Distributions-ID"
+            ],
+            "We automatically invalidate the cache after each export.": [
+                "Wir leeren den Cache automatisch nach jedem statischen Export."
+            ],
+            "Enter your Webhook URL here and Simply Static will send a POST request after all files are transferred to AWS S3.": [
+                "Gib hier deine Webhook-URL ein. Simply Static sendet eine POST-Anfrage, nachdem alle Dateien an AWS S3 \u00fcbertragen wurden."
+            ],
+            "Disable ACL on uploads?": [
+                "ACL bei Uploads deaktivieren?"
+            ],
+            "ACL header will not be sent. Required for buckets with \"Bucket owner enforced\" (ACLs disabled).": [
+                "Der ACL-Header wird nicht gesendet. Dies ist f\u00fcr Buckets mit \"Bucket owner enforced\" (deaktivierte ACLs) erforderlich."
+            ],
+            "ACL header will be sent with uploads. Disable this if your bucket has ACLs disabled.": [
+                "Der ACL-Header wird bei Uploads gesendet. Deaktiviere dies, wenn ACLs f\u00fcr deinen Bucket deaktiviert sind."
+            ],
+            "Empty bucket before new export?": [
+                "Sollen wir den Inhalt des Buckets l\u00f6schen bevor wir die neuen Dateien hochladen?"
+            ],
+            "Clear bucket before new export.": [
+                "Bucket vor neuem Export l\u00f6schen."
+            ],
+            "Don't clear bucket before new export.": [
+                "Bucket nicht vor neuem Export l\u00f6schen."
+            ],
+            "The PHP FTP extension is not installed. Ask the server administrator to enable it before using FTP deployment.": [
+                "Die PHP-Erweiterung f\u00fcr FTP ist nicht installiert. Bitte den Serveradministrator, sie zu aktivieren, bevor du FTP-Deployment verwendest."
+            ],
+            "Plain FTP does not encrypt credentials or uploaded files. Use SFTP whenever your hosting provider supports it.": [
+                "Einfaches FTP verschl\u00fcsselt weder Zugangsdaten noch hochgeladene Dateien. Verwende SFTP, wenn dein Hosting-Anbieter es unterst\u00fctzt."
+            ],
+            "Host": [
+                "Host"
+            ],
+            "Enter your FTP host without a path.": [
+                "Gib deinen FTP-Host ohne Pfad ein."
+            ],
+            "Port": [
+                "Port"
+            ],
+            "Enter your FTP port. The default is 21.": [
+                "Gib deinen FTP-Port ein. Der Standardwert ist 21."
+            ],
+            "FTP username": [
+                "FTP-Benutzername"
+            ],
+            "Enter your FTP username.": [
+                "Gib deinen FTP-Benutzernamen ein."
+            ],
+            "FTP password": [
+                "FTP-Passwort"
+            ],
+            "Enter your FTP password. You can also define SSP_FTP_PASS in wp-config.php.": [
+                "Gib dein FTP-Passwort ein. Alternativ kannst du SSP_FTP_PASS in der wp-config.php definieren."
+            ],
+            "Connection timeout": [
+                "Zeit\u00fcberschreitung der Verbindung"
+            ],
+            "Stop a stalled FTP connection after this many seconds.": [
+                "Beendet eine nicht reagierende FTP-Verbindung nach dieser Anzahl von Sekunden."
+            ],
+            "FTP folder": [
+                "FTP-Verzeichnis"
+            ],
+            "Leave empty to use the FTP account default, or enter the folder that should contain the static site (for example, \"public_html\").": [
+                "Leer lassen, um den Standard des FTP-Kontos zu verwenden, oder das Verzeichnis eingeben, das die statische Website enthalten soll (zum Beispiel \"public_html\")."
+            ],
+            "Passive mode": [
+                "Passiver Modus"
+            ],
+            "Recommended for shared hosting and servers behind a firewall.": [
+                "Empfohlen f\u00fcr Shared Hosting und Server hinter einer Firewall."
+            ],
+            "Enter your SFTP host.": [
+                "Gib deinen SFTP-Host ein."
+            ],
+            "Enter your SFTP port.": [
+                "Gib deinen SFTP-Port ein."
+            ],
+            "SFTP username": [
+                "SFTP-Benutzername"
+            ],
+            "Enter your SFTP username.": [
+                "Gib deinen SFTP-Benutzernamen ein."
+            ],
+            "Stop a stalled SFTP connection after this many seconds.": [
+                "Beendet eine nicht reagierende SFTP-Verbindung nach dieser Anzahl von Sekunden."
+            ],
+            "SFTP password": [
+                "SFTP-Passwort"
+            ],
+            "Enter your SFTP password.": [
+                "Gib dein SFTP-Passwort ein."
+            ],
+            "SFTP private key": [
+                "Privater SFTP-Schl\u00fcssel"
+            ],
+            "OPTIONAL: This is only required if you need to authenticate via a private key to access your SFTP server.": [
+                "Optional: Nur erforderlich, wenn du dich mit einem privaten Schl\u00fcssel bei deinem SFTP-Server authentifizieren musst."
+            ],
+            "Enter your SFTP private key if you want passwordless upload and the server is configured to allow it. You can set it as a constant in wp-config.php by using define('SSP_SFTP_KEY', 'YOUR_KEY')": [
+                "Gib deinen privaten SFTP-Schl\u00fcssel ein, wenn du ohne Passwort hochladen m\u00f6chtest und der Server dies erlaubt. Du kannst ihn in der wp-config.php mit define('SSP_SFTP_KEY', 'YOUR_KEY') als Konstante festlegen."
+            ],
+            "SSH host key fingerprint": [
+                "SSH-Hostschl\u00fcssel-Fingerabdruck"
+            ],
+            "Optional: pin the server host key with an OpenSSH SHA256 fingerprint (for example, SHA256:abc\u2026). The deployment stops if the key changes.": [
+                "Optional: Fixiere den Hostschl\u00fcssel des Servers mit einem OpenSSH-SHA256-Fingerabdruck (zum Beispiel SHA256:abc\u2026). Das Deployment wird abgebrochen, wenn sich der Schl\u00fcssel \u00e4ndert."
+            ],
+            "SFTP folder": [
+                "SFTP Verzeichnis"
+            ],
+            "Leave empty to upload to the default SFTP folder. Enter a folder path where you want the static files to be uploaded to (example: \"uploads\" will upload to uploads folder. \"uploads\/new-folder\" will upload files to \"new-folder\"). ": [
+                "Trage den Pfad auf deinem SFTP-Server ein in dem du die Dateien ablegen m\u00f6chtest. Lasse das Feld leer falls es das Stammverzeichnis sein soll. "
+            ],
+            "Bulk upload via zip archive": [
+                "Massen-Upload \u00fcber ein ZIP-Archiv"
+            ],
+            "Instead of uploading files one by one, this creates a zip archive locally, uploads it as a single file, and extracts it on the remote server. This can significantly speed up deployments with many files. Requires unzip or python3 on the remote server.": [
+                "Statt Dateien einzeln hochzuladen, wird lokal ein ZIP-Archiv erstellt, als einzelne Datei hochgeladen und auf dem entfernten Server entpackt. Dies kann Deployments mit vielen Dateien erheblich beschleunigen. Auf dem entfernten Server wird unzip oder python3 ben\u00f6tigt."
+            ],
+            "Save settings to test": [
+                "Einstellungen speichern zum testen"
+            ],
+            "Test Deployment": [
+                "Test-Export"
+            ],
+            "Our diagnostics tool provides detailed insights into your WordPress installation and server configuration and tells you exactly what needs to be optimized to get the most out of Simply Static. Click the button below to get the latest results.": [
+                "Unser Diagnose-Tool zeigt dir alle WordPress-und Serverkonfiguration die n\u00f6tig sind um Simply Static bestm\u00f6glich auszuf\u00fchren."
+            ],
+            "Reset Diagnostics": [
+                "Diagnose-Daten zur\u00fccksetzen"
+            ],
+            "Diagnostics resetted successfully.": [
+                "Diagnose erfolgreich zur\u00fcckgesetzt."
+            ],
+            "Failed to detect credentials.": [
+                "Zugangsdaten konnten nicht erkannt werden."
+            ],
+            "Turnstile credentials copied from ": [
+                "Turnstile-Zugangsdaten kopiert aus "
+            ],
+            "reCAPTCHA credentials copied from ": [
+                "reCAPTCHA-Zugangsdaten kopiert aus "
+            ],
+            " reCAPTCHA credentials were found - switch to the matching reCAPTCHA version to use them.": [
+                " reCAPTCHA-Zugangsdaten wurden gefunden. Wechsle zur passenden reCAPTCHA-Version, um sie zu verwenden."
+            ],
+            " Turnstile credentials were found - switch to Turnstile to use them.": [
+                " Turnstile-Zugangsdaten wurden gefunden. Wechsle zu Turnstile, um sie zu verwenden."
+            ],
+            " reCAPTCHA v3 credentials were found - switch to reCAPTCHA v3 to use them.": [
+                " Zugangsdaten f\u00fcr reCAPTCHA v3 wurden gefunden. Wechsle zu reCAPTCHA v3, um sie zu verwenden."
+            ],
+            " reCAPTCHA v2 credentials were found - switch to reCAPTCHA v2 to use them.": [
+                " Zugangsdaten f\u00fcr reCAPTCHA v2 wurden gefunden. Wechsle zu reCAPTCHA v2, um sie zu verwenden."
+            ],
+            "No credentials found for the selected captcha service.": [
+                "F\u00fcr den ausgew\u00e4hlten Captcha-Dienst wurden keine Zugangsdaten gefunden."
+            ],
+            "Error detecting credentials: ": [
+                "Fehler beim Erkennen der Zugangsdaten: "
+            ],
+            "Unknown error": [
+                "Unbekannter Fehler"
+            ],
+            "Use forms?": [
+                "Formulare benutzen?"
+            ],
+            "Use Forms on your static website.": [
+                "Nutze Formulare auf deiner statischen Website."
+            ],
+            "Don't use forms on your static website.": [
+                "Nutze keine Formulare auf deiner statischen Website."
+            ],
+            "Store form entries": [
+                "Formular-Eintr\u00e4ge speichern"
+            ],
+            "Store form entries inside WordPress (requires Simply Static Webhook).": [
+                "Speichere Formulareintr\u00e4ge innerhalb von WordPress (erfordert Simply Static Webhook)."
+            ],
+            "Do not store form entries in WordPress.": [
+                "Speichere keine Formulareintr\u00e4ge in WordPress."
+            ],
+            "Enable conditional loading": [
+                "Bedingtes Laden aktivieren"
+            ],
+            "Form scripts are only loaded on pages that contain a connected form.": [
+                "Formularskripte werden nur auf Seiten mit einem verbundenen Formular geladen."
+            ],
+            "Form scripts are loaded on all pages for maximum compatibility.": [
+                "Formularskripte werden f\u00fcr maximale Kompatibilit\u00e4t auf allen Seiten geladen."
+            ],
+            "Create a form connection": [
+                "Erstelle eine Formular-Verbindung"
+            ],
+            "Comments": [
+                "Kommentare"
+            ],
+            "Use comments?": [
+                "Kommentare benutzen?"
+            ],
+            "Use comments on your static website.": [
+                "Nutze Kommentare auf deiner statischen Website."
+            ],
+            "Don't use comments on your static website.": [
+                "Nutze keine Kommentare auf deiner statischen Website."
+            ],
+            "The post will be regenerated after comment submission, but it might take a while, so it is good practice to redirect the visitor.": [
+                "Der Beitrag wird nach dem Absenden des Kommentars neu erzeugt. Da dies etwas dauern kann, solltest du den Besucher weiterleiten."
+            ],
+            "Captcha": [
+                "Captcha"
+            ],
+            "We will automatically protect your forms and comments with a captcha on your static site.": [
+                "Wir sch\u00fctzen deine Formulare und Kommentare auf der statischen Website automatisch mit einem Captcha."
+            ],
+            "Captcha Service": [
+                "Captcha-Dienst"
+            ],
+            "Choose which captcha service to use.": [
+                "W\u00e4hle den Captcha-Dienst aus, den du verwenden m\u00f6chtest."
+            ],
+            "Choose Service": [
+                "Dienst ausw\u00e4hlen"
+            ],
+            "Cloudflare Turnstile": [
+                "Cloudflare Turnstile"
+            ],
+            "Google reCAPTCHA v2 (Checkbox)": [
+                "Google reCAPTCHA v2 (Kontrollk\u00e4stchen)"
+            ],
+            "Google reCAPTCHA v3": [
+                "Google reCAPTCHA v3"
+            ],
+            "Detecting...": [
+                "Wird erkannt \u2026"
+            ],
+            "Copy existing Credentials": [
+                "Vorhandene Zugangsdaten kopieren"
+            ],
+            "Automatically detect and copy captcha credentials from form plugins like Contact Form 7, WPForms, or Fluent Forms.": [
+                "Captcha-Zugangsdaten aus Formular-Plugins wie Contact Form 7, WPForms oder Fluent Forms automatisch erkennen und kopieren."
+            ],
+            "Site Key": [
+                "Websiteschl\u00fcssel"
+            ],
+            "Your public key will be used on the static site.": [
+                "Dein \u00f6ffentlicher Schl\u00fcssel wird auf der statischen Seite verwendet."
+            ],
+            "Enter your Turnstile site key": [
+                "Gib deinen Turnstile-Sitekey ein"
+            ],
+            "Secret Key": [
+                "Geheimer Schl\u00fcssel"
+            ],
+            "Your secret key will be stored in WordPress.": [
+                "Dein geheimer Schl\u00fcssel wird in WordPress gespeichert."
+            ],
+            "Enter your Turnstile secret key": [
+                "Gib deinen Turnstile-Secretkey ein"
+            ],
+            "Theme": [
+                "Theme"
+            ],
+            "Choose how the widget should look on your site.": [
+                "W\u00e4hle, wie das Widget auf deiner Seite aussehen soll."
+            ],
+            "Auto": [
+                "Auto"
+            ],
+            "Light": [
+                "Hell"
+            ],
+            "Dark": [
+                "Dunkel"
+            ],
+            "Size": [
+                "Gr\u00f6\u00dfe"
+            ],
+            "Choose the widget size.": [
+                "W\u00e4hle die Gr\u00f6\u00dfe des Widgets."
+            ],
+            "Normal": [
+                "Normal"
+            ],
+            "Flexible": [
+                "Flexibel"
+            ],
+            "Compact": [
+                "Kompakt"
+            ],
+            "Enter your reCAPTCHA site key": [
+                "Gib deinen reCAPTCHA-Websiteschl\u00fcssel ein"
+            ],
+            "Enter your reCAPTCHA secret key": [
+                "Gib deinen geheimen reCAPTCHA-Schl\u00fcssel ein"
+            ],
+            "Replacing URLs": [
+                "URLs ersetzen"
+            ],
+            "URL replacement is handled by Studio": [
+                "Studio \u00fcbernimmt die URL-Ersetzung"
+            ],
+            "Studio manages the public URL for this environment automatically, so you do not need to configure replacement URLs manually.": [
+                "Studio verwaltet die \u00f6ffentliche URL dieser Umgebung automatisch. Du musst daher keine Ersatz-URLs manuell konfigurieren."
+            ],
+            "When exporting your static site, any links to your WordPress site will be replaced by one of the following: absolute URLs, relative URLs, or URLs constructed for offline use.": [
+                "Beim Export deiner statischen Website werden Links zu deiner WordPress-Website durch absolute URLs, relative URLs oder f\u00fcr die Offline-Nutzung erstellte URLs ersetzt."
+            ],
+            "Absolute URLs": [
+                "Absolute URLs"
+            ],
+            "Relative Path": [
+                "Relativer Pfad"
+            ],
+            "Offline Usage": [
+                "Offline"
+            ],
+            "Scheme": [
+                "Schema"
+            ],
+            "Convert all URLs for your WordPress site to absolute URLs at the domain specified above.": [
+                "Konvertiere alle URLs deiner WordPress-Seite zu absoluten URLs."
+            ],
+            "Convert all URLs for your WordPress site to relative URLs that will work at any domain.": [
+                "Konvertiere alle URLs deiner WordPress-Seite zu relativen URLs."
+            ],
+            "Optionally specify a path above if you intend to place the files in a subdirectory.": [
+                "F\u00fcge ein Unterverzeichnis ein (optional)"
+            ],
+            "Example": [
+                "Beispiel"
+            ],
+            "enter \/path above if you wanted to serve your files at www.example.com\/path\/": [
+                "f\u00fcge \/pfad\/ ein, falls deine Seite unter www.example.com\/path\/ erreichbar sein soll"
+            ],
+            "Convert all URLs for your WordPress site so that you can browse the site locally on your own computer without hosting it on a web server.": [
+                "Konvertiert alle deine WordPress-URLs so, dass sie auf deinem lokalen Computer ge\u00f6ffnet werden k\u00f6nnen. Dies ist nicht f\u00fcr die Verwendung auf einem Webserver geeignet."
+            ],
+            "Force URL replacements": [
+                "Erweitertes URL-Ersetzen"
+            ],
+            "Replace all occurrences of the WordPress URL with the static URL (includes inline CSS and JS).": [
+                "Ersetze alle Vorkommnisse deiner WordPress URL mit deiner statischen URL."
+            ],
+            "Replace only occurrences of the WordPress URL that match our tag list.": [
+                "Ersetze alle Vorkommnisse deiner WordPress URL die mit dem Tag matchen."
+            ],
+            "Enhanced Crawl": [
+                "Erweitertes Crawling"
+            ],
+            "Enhanced Crawl uses native WordPress functions to find all pages and files when running a static export.": [
+                "Erweitertes Crawling verwendet native WordPress-Funktionen, um alle Seiten und Dateien zu finden, wenn ein statischer Export ausgef\u00fchrt wird."
+            ],
+            "Enable Enhanced Crawl": [
+                "Aktiviere Erweitertes Crawling"
+            ],
+            "Find pages and files via Enhanced Crawl.": [
+                "Seiten und Dateien \u00fcber den erweiterten Crawl finden."
+            ],
+            "Don't find pages and files via Enhanced Crawl.": [
+                "Seiten und Dateien werden \u00fcber erweitertes Crawling nicht gefunden."
+            ],
+            "Error loading crawlers: ": [
+                "Fehler beim Laden von Crawlern: "
+            ],
+            "Active Crawlers": [
+                "Aktive Crawler"
+            ],
+            "Select which crawlers to activate. If none selected, all crawlers will be active by default.": [
+                "W\u00e4hle die zu aktivierenden Crawler aus. Wenn keiner ausgew\u00e4hlt ist, sind standardm\u00e4\u00dfig alle Crawler aktiv."
+            ],
+            "Error loading post types: ": [
+                "Fehler beim Laden von Beitragstypen: "
+            ],
+            "Post Types to Include": [
+                "Einzuschlie\u00dfende Beitragstypen"
+            ],
+            "Select which post types to include in the static export. All public post types are selected by default.": [
+                "W\u00e4hle die Inhaltstypen aus, die in den statischen Export aufgenommen werden sollen. Standardm\u00e4\u00dfig sind alle \u00f6ffentlichen Inhaltstypen ausgew\u00e4hlt."
+            ],
+            "Loading post types...": [
+                "Lade Beitragstypen.."
+            ],
+            "Error loading plugins: ": [
+                "Fehler beim Laden von Plugins: "
+            ],
+            "Plugins to Include": [
+                "Einzuschlie\u00dfende Plugins"
+            ],
+            "Select which active plugins to include. All active plugins are included by default; remove tokens to exclude them.": [
+                "W\u00e4hle die einzuschlie\u00dfenden aktiven Plugins aus. Standardm\u00e4\u00dfig sind alle aktiven Plugins enthalten. Entferne Eintr\u00e4ge, um sie auszuschlie\u00dfen."
+            ],
+            "Loading plugins...": [
+                "Plugins werden geladen..."
+            ],
+            "Error loading themes: ": [
+                "Fehler beim Laden von Themes: "
+            ],
+            "Themes to Include": [
+                "Einzuschlie\u00dfende Themes"
+            ],
+            "Select which theme(s) to include. The active theme and parent (if any) are included by default; remove tokens to exclude them.": [
+                "W\u00e4hle die einzuschlie\u00dfenden Themes aus. Das aktive Theme und gegebenenfalls sein Parent-Theme sind standardm\u00e4\u00dfig enthalten. Entferne Eintr\u00e4ge, um sie auszuschlie\u00dfen."
+            ],
+            "Loading themes...": [
+                "Themes werden geladen..."
+            ],
+            "Loading crawlers...": [
+                "Crawler werden verladen..."
+            ],
+            "404": [
+                "404"
+            ],
+            "Generate 404 Page?": [
+                "Generiere eine 404-Fehlerseite?"
+            ],
+            "Generate a 404 page based on your theme template.": [
+                "Eine 404-Seite anhand der Vorlage deines Themes erzeugen."
+            ],
+            "Don't generate a 404 page.": [
+                "Keine 404-Fehlerseite generieren."
+            ],
+            "Custom 404 page (optional)": [
+                "Benutzerdefinierte 404-Seite (optional)"
+            ],
+            "If selected, Simply Static will use the content of this page for the 404 page instead of the theme default.": [
+                "Wenn diese Option ausgew\u00e4hlt ist, verwendet Simply Static den Inhalt dieser Seite f\u00fcr die 404-Seite anstelle des Standarddesigns f\u00fcr das Design."
+            ],
+            "Failed to start 404 push.": [
+                "Der 404-Push konnte nicht gestartet werden."
+            ],
+            "Push 404 Page": [
+                "404-Seite pushen"
+            ],
+            "Include": [
+                "Einschlie\u00dfen"
+            ],
+            "Additional URLs": [
+                "Zus\u00e4tzliche URLs"
+            ],
+            "You can enter full URLs or regex (wrap with \/ \/). Examples: https:\/\/example.com\/private\/ or \/\\\/blog\\\/.*$\/i (one per line).": [
+                "Du kannst vollst\u00e4ndige URLs oder regul\u00e4re Ausdr\u00fccke eingeben (zwischen \/ \/). Beispiele: https:\/\/example.com\/private\/ oder \/\\\/blog\\\/.*$\/i (ein Eintrag pro Zeile)."
+            ],
+            "Additional Files and Directories": [
+                "Zus\u00e4tzliche Dateien und Verzeichnisse"
+            ],
+            "Enter absolute paths or regex (wrap with \/ \/). Examples: \/\\.pdf$\/i or \/wp-content\\\/uploads\\\/reports\\\/.*\/ (one per line).": [
+                "Gib absolute Pfade oder regul\u00e4re Ausdr\u00fccke ein (zwischen \/ \/). Beispiele: \/\\.pdf$\/i oder \/wp-content\\\/uploads\\\/reports\\\/.*\/ (ein Eintrag pro Zeile)."
+            ],
+            "Include RSS Feeds?": [
+                "RSS-Feeds einschlie\u00dfen?"
+            ],
+            "Include feed URLs of all your posts.": [
+                "Feed-URLs aller deiner Beitr\u00e4ge einschlie\u00dfen."
+            ],
+            "Don't include feed URLs for all your posts.": [
+                "Feed-URLs deiner Beitr\u00e4ge nicht einschlie\u00dfen."
+            ],
+            "Include Rest API?": [
+                "Rest-API einschlie\u00dfen?"
+            ],
+            "Include all Rest API endpoints as JSON files.": [
+                "Alle REST-API-Endpunkte als JSON-Dateien einschlie\u00dfen."
+            ],
+            "Don't include Rest API endpoints as JSON files.": [
+                "REST-API-Endpunkte nicht als JSON-Dateien einschlie\u00dfen."
+            ],
+            "Exclude": [
+                "Ausschlie\u00dfen"
+            ],
+            "URLs to exclude": [
+                "Auszuschlie\u00dfende URLs"
+            ],
+            "You can enter substrings or regex (wrap with \/ \/). Examples: .jpg or \/\\.(pdf|zip)$\/i or \/\/private\/.*\/ (one per line).": [
+                "Du kannst Teilzeichenfolgen oder regul\u00e4re Ausdr\u00fccke eingeben (zwischen \/ \/). Beispiele: .jpg, \/\\.(pdf|zip)$\/i oder \/\/private\/.*\/ (ein Eintrag pro Zeile)."
+            ],
+            "Debugging": [
+                "Debug-Modus"
+            ],
+            "Export Log": [
+                "Exportprotokoll"
+            ],
+            "Replace": [
+                "Ersetzen"
+            ],
+            "wp-content directory": [
+                "wp-content Verzeichnis"
+            ],
+            "Replace the \"wp-content\" directory.": [
+                "Ersetze das \"wp-content\" Verzeichnis."
+            ],
+            "wp-includes directory": [
+                "wp-includes Verzeichnis"
+            ],
+            "Replace the \"wp-includes\" directory.": [
+                "Ersetze das \"wp-includes\" Verzeichnis."
+            ],
+            "Uploads directory": [
+                "Upload-Verzeichnis"
+            ],
+            "Replace the \"wp-content\/uploads\" directory.": [
+                "Ersetze das \"wp-content\/uploads\" Verzeichnis."
+            ],
+            "Plugins directory": [
+                "Plugin-Verzeichnis"
+            ],
+            "Replace the \"wp-content\/plugins\" directory.": [
+                "Ersetze das \"wp-content\/plugins\" Verzeichnis."
+            ],
+            "Themes directory": [
+                "Theme-Verzeichnis"
+            ],
+            "Replace the \"wp-content\/themes\" directory.": [
+                "Ersetze das \"wp-content\/themes\" Verzeichnis."
+            ],
+            "Theme style name": [
+                "Theme Stylesheet Name"
+            ],
+            "Replace the style.css filename.": [
+                "Ersetze den style.css Dateinamen."
+            ],
+            "Author URL": [
+                "Autoren-URLs"
+            ],
+            "Replace the author url.": [
+                "Ersetze die Autoren-URLs."
+            ],
+            "Hide": [
+                "Verstecken"
+            ],
+            "Hide WordPress Version": [
+                "Verstecke WordPress Version"
+            ],
+            "Hide WordPress Generator Meta": [
+                "Verstecke WordPress Generator Meta"
+            ],
+            "Hide DNS Prefetch WordPress link": [
+                "Verstecke DNS Prefetch WordPress Link"
+            ],
+            "Hide RSD Header": [
+                "Verstecke RSD Header"
+            ],
+            "Disable": [
+                "Deaktivieren"
+            ],
+            "Disable XML-RPC": [
+                "Deaktiviere XML-RPC"
+            ],
+            "Disable Embed Scripts": [
+                "Deaktiviere Embed Scripts"
+            ],
+            "Disable DB Debug in Frontend": [
+                "Deaktiviere DB Debug"
+            ],
+            "Disable WLW Manifest Scripts": [
+                "Deaktiviere WLW Manifest Scripts"
+            ],
+            "Disable Emojis": [
+                "Emojis deaktivieren"
+            ],
+            "Minify & Aggregation": [
+                "Minifizierung und B\u00fcndelung"
+            ],
+            "Minify and aggregate CSS, JavaScript, and HTML files to reduce file sizes and HTTP requests for faster page loads.": [
+                "Minifiziert und b\u00fcndelt CSS-, JavaScript- und HTML-Dateien, um Dateigr\u00f6\u00dfen und HTTP-Anfragen zu reduzieren und Seiten schneller zu laden."
+            ],
+            "Enable Minify & Aggregation?": [
+                "Minifizierung und B\u00fcndelung aktivieren?"
+            ],
+            "Minify and aggregate files on your static website.": [
+                "Dateien auf deiner statischen Website minifizieren und b\u00fcndeln."
+            ],
+            "Don't minify or aggregate files on your static website.": [
+                "Dateien auf deiner statischen Website nicht minifizieren oder b\u00fcndeln."
+            ],
+            "Minification is handled by Studio": [
+                "Studio \u00fcbernimmt die Minifizierung"
+            ],
+            "Studio prepares optimized build assets automatically, so the low-level CSS and JavaScript minification options are not needed for Studio environments.": [
+                "Studio bereitet optimierte Build-Dateien automatisch vor. Die detaillierten Optionen zur CSS- und JavaScript-Minifizierung werden f\u00fcr Studio-Umgebungen daher nicht ben\u00f6tigt."
+            ],
+            "Minify": [
+                "Minifizieren"
+            ],
+            "Minify CSS": [
+                "CSS minifizieren"
+            ],
+            "Minify CSS files.": [
+                "CSS minifizieren."
+            ],
+            "Don't minify CSS files.": [
+                "CSS nicht minifizieren."
+            ],
+            "Exclude Stylesheet URLs": [
+                "Stylesheet-URLs ausschlie\u00dfen"
+            ],
+            "Exclude URLs from minification (one per line).": [
+                "URLs von der Minimierung ausschlie\u00dfen (eine pro Zeile)."
+            ],
+            "Minify JavaScript": [
+                "JavaScript minifizieren"
+            ],
+            "Minify JavaScript files.": [
+                "JavaScript minifizieren."
+            ],
+            "Don't minify JavaScript files.": [
+                "JavaScript nicht minifizieren."
+            ],
+            "Exclude JavaScript URLs": [
+                "JavaScript-URLs ausschlie\u00dfen"
+            ],
+            "Protect jQuery Globals": [
+                "Globale jQuery-Variablen sch\u00fctzen"
+            ],
+            "Prevent mangling of jQuery, $, and wp global variables during JS minification.": [
+                "Verhindert, dass die globalen Variablen jQuery, $ und wp bei der JavaScript-Minifizierung umbenannt werden."
+            ],
+            "Aggregate": [
+                "B\u00fcndeln"
+            ],
+            "Aggregate CSS": [
+                "CSS b\u00fcndeln"
+            ],
+            "Combine multiple CSS files into fewer bundles grouped by media attribute and deferral status.": [
+                "Mehrere CSS-Dateien anhand von Medienattribut und Zur\u00fcckstellungsstatus zu weniger Paketen b\u00fcndeln."
+            ],
+            "Aggregate JavaScript": [
+                "JavaScript b\u00fcndeln"
+            ],
+            "Combine multiple JS files into fewer bundles grouped by loading attributes (defer, async, delayed) and position (head\/body).": [
+                "Mehrere JavaScript-Dateien anhand ihrer Ladeattribute (defer, async, verz\u00f6gert) und Position (head\/body) zu weniger Paketen b\u00fcndeln."
+            ],
+            "Exclude Patterns": [
+                "Ausschlussmuster"
+            ],
+            "Glob patterns for files to exclude from aggregation (one per line). Use this for scripts that break when concatenated, such as Google Maps init scripts, payment gateway SDKs, or scripts using document.write().": [
+                "Glob-Muster f\u00fcr Dateien, die von der B\u00fcndelung ausgeschlossen werden sollen (eines pro Zeile). Verwende dies f\u00fcr Skripte, die beim Zusammenf\u00fcgen nicht mehr funktionieren, etwa Initialisierungsskripte von Google Maps, SDKs von Zahlungsanbietern oder Skripte mit document.write()."
+            ],
+            "Defer & Delay": [
+                "Zur\u00fcckstellen und verz\u00f6gern"
+            ],
+            "Eliminate render-blocking CSS and JavaScript resources to improve Lighthouse scores and page load speed.": [
+                "Beseitigt render-blockierende CSS- und JavaScript-Ressourcen, um Lighthouse-Werte und Ladezeiten zu verbessern."
+            ],
+            "Enable Defer & Delay?": [
+                "Zur\u00fcckstellen und Verz\u00f6gern aktivieren?"
+            ],
+            "Optimize render-blocking resources during static export.": [
+                "Render-blockierende Ressourcen w\u00e4hrend des statischen Exports optimieren."
+            ],
+            "Don't optimize render-blocking resources.": [
+                "Render-blockierende Ressourcen nicht optimieren."
+            ],
+            "Defer Non-Critical CSS": [
+                "Nicht kritisches CSS zur\u00fcckstellen"
+            ],
+            "Convert non-critical stylesheets to load asynchronously using the media=\"print\" pattern.": [
+                "Nicht kritische Stylesheets mit dem Muster media=\"print\" in asynchron geladene Stylesheets umwandeln."
+            ],
+            "Critical CSS Patterns": [
+                "Muster f\u00fcr kritisches CSS"
+            ],
+            "Glob patterns for stylesheets that must remain render-blocking (one per line). Default: *\/style.css, *\/styles.css, *\/global.css, *\/theme*.css, *\/wp-block-*.css": [
+                "Glob-Muster f\u00fcr Stylesheets, die render-blockierend bleiben m\u00fcssen (eines pro Zeile). Standard: *\/style.css, *\/styles.css, *\/global.css, *\/theme*.css, *\/wp-block-*.css"
+            ],
+            "Defer Synchronous Scripts": [
+                "Synchrone Skripte zur\u00fcckstellen"
+            ],
+            "Add the defer attribute to render-blocking scripts. Preserves execution order (safe for jQuery dependencies).": [
+                "F\u00fcgt render-blockierenden Skripten das Attribut defer hinzu. Die Ausf\u00fchrungsreihenfolge bleibt erhalten (sicher f\u00fcr jQuery-Abh\u00e4ngigkeiten)."
+            ],
+            "Defer Exclude Patterns": [
+                "Ausschlussmuster f\u00fcr das Zur\u00fcckstellen"
+            ],
+            "Additional glob patterns for scripts to exclude from deferral (one per line). Built-in patterns already exclude WordPress core scripts: jQuery, wp-i18n, wp-hooks, wp-url, wp-api-fetch, and wp-api.": [
+                "Zus\u00e4tzliche Glob-Muster f\u00fcr Skripte, die nicht zur\u00fcckgestellt werden sollen (eines pro Zeile). Integrierte Muster schlie\u00dfen WordPress-Core-Skripte bereits aus: jQuery, wp-i18n, wp-hooks, wp-url, wp-api-fetch und wp-api."
+            ],
+            "Optimize Google Fonts": [
+                "Google Fonts optimieren"
+            ],
+            "Preload Google Fonts stylesheets, inject the Google Fonts preconnect hint, and add display=swap for faster font loading.": [
+                "Stylesheets von Google Fonts vorladen, den Preconnect-Hinweis f\u00fcr Google Fonts einf\u00fcgen und display=swap hinzuf\u00fcgen, damit Schriften schneller geladen werden."
+            ],
+            "Add Preconnect Hints": [
+                "Preconnect-Hinweise hinzuf\u00fcgen"
+            ],
+            "Add preconnect resource hints for high-value third-party font, icon, script, and image origins found in exported pages.": [
+                "Preconnect-Ressourcenhinweise f\u00fcr wichtige externe Quellen von Schriften, Icons, Skripten und Bildern hinzuf\u00fcgen, die auf exportierten Seiten gefunden wurden."
+            ],
+            "Delay Non-Critical JavaScript": [
+                "Nicht kritisches JavaScript verz\u00f6gern"
+            ],
+            "Delay third-party scripts (analytics, tag managers, tracking pixels) until user interaction to reduce Total Blocking Time. Scripts load on first click, scroll, or keypress.": [
+                "Skripte von Drittanbietern (Analysen, Tag-Manager, Tracking-Pixel) bis zur ersten Benutzerinteraktion verz\u00f6gern, um die Total Blocking Time zu reduzieren. Die Skripte werden beim ersten Klick, Scrollen oder Tastendruck geladen."
+            ],
+            "Additional Delay Patterns": [
+                "Zus\u00e4tzliche Verz\u00f6gerungsmuster"
+            ],
+            "Additional glob patterns for scripts to delay (one per line). Built-in patterns already cover Google (Tag Manager, Analytics, Ads, reCAPTCHA), HubSpot, Facebook\/Meta Pixel, Hotjar, Clarity, Bing UET, Cloudflare (Insights, Turnstile), CleanTalk, Matomo\/Piwik, Plausible, Twitter\/X, LinkedIn, Pinterest, Tawk.to, Crisp, LiveChat, Intercom, Drift, Tidio, Segment, Amplitude, Mixpanel, Optimizely, Mouseflow, Lucky Orange, Crazy Egg, FullStory, LogRocket, and Sentry.": [
+                "Zus\u00e4tzliche Glob-Muster f\u00fcr zu verz\u00f6gernde Skripte (eines pro Zeile). Integrierte Muster decken bereits Google (Tag Manager, Analytics, Ads, reCAPTCHA), HubSpot, Facebook\/Meta Pixel, Hotjar, Clarity, Bing UET, Cloudflare (Insights, Turnstile), CleanTalk, Matomo\/Piwik, Plausible, Twitter\/X, LinkedIn, Pinterest, Tawk.to, Crisp, LiveChat, Intercom, Drift, Tidio, Segment, Amplitude, Mixpanel, Optimizely, Mouseflow, Lucky Orange, Crazy Egg, FullStory, LogRocket und Sentry ab."
+            ],
+            "Delay Exclude Patterns": [
+                "Ausschlussmuster f\u00fcr Verz\u00f6gerungen"
+            ],
+            "Glob patterns for scripts that must run without Simply Static's interaction delay (one per line). Patterns match script URLs, element IDs, and inline script content. You can also add data-ssp-no-delay to a script tag. Exclusions do not override your consent manager.": [
+                "Glob-Muster f\u00fcr Skripte, die ohne die Interaktionsverz\u00f6gerung von Simply Static ausgef\u00fchrt werden m\u00fcssen (eines pro Zeile). Die Muster werden mit Skript-URLs, Element-IDs und Inline-Skriptinhalten abgeglichen. Du kannst einem script-Tag auch data-ssp-no-delay hinzuf\u00fcgen. Ausschl\u00fcsse setzen deinen Consent-Manager nicht au\u00dfer Kraft."
+            ],
+            "Delay Fallback Timeout (seconds)": [
+                "Fallback-Zeit\u00fcberschreitung f\u00fcr Verz\u00f6gerungen (Sekunden)"
+            ],
+            "Release delayed scripts after this many seconds if there is no user interaction. Use 0 to release them immediately.": [
+                "Verz\u00f6gerte Skripte nach dieser Anzahl von Sekunden freigeben, wenn keine Benutzerinteraktion erfolgt. Verwende 0, um sie sofort freizugeben."
+            ],
+            "Image Optimization": [
+                "Bild-Optimierung"
+            ],
+            "Image optimization is handled by Studio": [
+                "Studio \u00fcbernimmt die Bildoptimierung"
+            ],
+            "Studio optimizes the static build pipeline for its hosting environment, so you do not need to connect ShortPixel for Studio deployments.": [
+                "Studio optimiert die statische Build-Pipeline f\u00fcr seine Hosting-Umgebung. Du musst ShortPixel daher nicht f\u00fcr Studio-Deployments verbinden."
+            ],
+            "Optimize Images with ShortPixel?": [
+                "Bilder mit ShortPixel optimieren?"
+            ],
+            "Optimize images with the ShortPixel API.": [
+                "Bilder mit der ShortPixel-API optimieren."
+            ],
+            "Don't optimize images with the ShortPixel API.": [
+                "Bilder nicht mit der ShortPixel-API optimieren."
+            ],
+            "ShortPixel API Key": [
+                "ShortPixel API Key"
+            ],
+            "Convert to WebP": [
+                "In WebP konvertieren"
+            ],
+            "Convert images to WebP format.": [
+                "Bilder in das WebP-Format konvertieren."
+            ],
+            "Don't convert images to WebP format.": [
+                "Bilder nicht in das WebP-Format konvertieren."
+            ],
+            "Backup the original images?": [
+                "Original-Bilder als Backup speichern?"
+            ],
+            "Back original images.": [
+                "Original-Bilder als Backup speichern."
+            ],
+            "Don't backup original images.": [
+                "Originalbilder nicht sichern."
+            ],
+            "It will preserve every image which might increase your disk space usage.": [
+                "Alle Originalbilder bleiben erhalten, wodurch der Speicherplatzbedarf steigen kann."
+            ],
+            "Restore Original Images": [
+                "Original-Bilder wiederherstellen"
+            ],
+            "Restoring...": [
+                "Wiederherstellen.."
+            ],
+            "Critical CSS": [
+                "Kritisches CSS"
+            ],
+            "Requires Static Studio": [
+                "Erfordert Static Studio"
+            ],
+            "Generate critical above-the-fold CSS to eliminate render-blocking stylesheets and improve page load speed. Critical CSS is generated for the homepage and injected into every page.": [
+                "Erzeugt kritisches CSS f\u00fcr den sichtbaren Seitenbereich, um render-blockierende Stylesheets zu vermeiden und die Ladezeit zu verbessern. Das kritische CSS wird f\u00fcr die Startseite erstellt und in jede Seite eingef\u00fcgt."
+            ],
+            "Enable Critical CSS Generation?": [
+                "Erzeugung von kritischem CSS aktivieren?"
+            ],
+            "Critical CSS will be generated during static export.": [
+                "Kritisches CSS wird w\u00e4hrend des statischen Exports erzeugt."
+            ],
+            "Don't generate critical CSS.": [
+                "Kein kritisches CSS erzeugen."
+            ],
+            "By default, critical CSS is generated from the homepage only. Add additional page URLs here (one per line) if those pages have significantly different styles.": [
+                "Standardm\u00e4\u00dfig wird kritisches CSS nur anhand der Startseite erzeugt. F\u00fcge hier weitere Seiten-URLs hinzu (eine pro Zeile), wenn diese Seiten deutlich andere Stile verwenden."
+            ],
+            "Custom CSS": [
+                "Benutzerdefiniertes CSS"
+            ],
+            "Add custom CSS that will be appended to the generated critical CSS. Use this to fix minor visual glitches.": [
+                "F\u00fcge eigenes CSS hinzu, das an das erzeugte kritische CSS angeh\u00e4ngt wird. Damit kannst du kleinere Darstellungsfehler beheben."
+            ],
+            "Versioning": [
+                "Versionierung"
+            ],
+            "Version CSS?": [
+                "CSS versionieren?"
+            ],
+            "Appends a version query string to CSS files.": [
+                "H\u00e4ngt eine Versions-Abfragezeichenfolge an CSS-Dateien an."
+            ],
+            "Don't append a version query string to CSS files.": [
+                "Keine Versions-Abfragezeichenfolge an CSS-Dateien anh\u00e4ngen."
+            ],
+            "Version JavaScript?": [
+                "JavaScript versionieren?"
+            ],
+            "Appends a version query string to JavaScript files.": [
+                "H\u00e4ngt eine Versions-Abfragezeichenfolge an JavaScript-Dateien an."
+            ],
+            "Don't append a version query string to JavaScript files.": [
+                "Keine Versions-Abfragezeichenfolge an JavaScript-Dateien anh\u00e4ngen."
+            ],
+            "Use search?": [
+                "Suche benutzen?"
+            ],
+            "Use search on your static website.": [
+                "Nutze Suche auf deiner statischen Website."
+            ],
+            "Don't use search on your static website.": [
+                "Nutze keine Suche auf deiner statischen Website."
+            ],
+            "Search Type": [
+                "Suche-Typ"
+            ],
+            "Decide which search type you want to use. Fuse runs locally based on a file, and Algolia is an external API service.": [
+                "W\u00e4hle den gew\u00fcnschten Suchtyp. Fuse arbeitet lokal mit einer Datei, Algolia ist ein externer API-Dienst."
+            ],
+            "Use Search Results Page": [
+                "Nutze die Suchergebnisseite"
+            ],
+            "Simply Static will create a static search results page and the export will include a special __qs directory.": [
+                "Simply Static erstellt eine statische Suchergebnisseite und der Export enth\u00e4lt ein spezielles __qs-Verzeichnis."
+            ],
+            "Use Submit Button": [
+                "Absende-Schaltfl\u00e4che verwenden"
+            ],
+            "Show or hide the submit button in the search UI.": [
+                "Ein- oder Ausblenden der Schaltfl\u00e4che \"Senden\" in der Benutzeroberfl\u00e4che der Suche."
+            ],
+            "Submit button text": [
+                "\u201eSenden\u201c-Schaltfl\u00e4che Text"
+            ],
+            "Customize the submit button text or HTML (e.g., add an icon).": [
+                "Passe Text oder HTML der Absende-Schaltfl\u00e4che an, um zum Beispiel ein Icon hinzuzuf\u00fcgen."
+            ],
+            "Show excerpt in suggestions\/results": [
+                "Auszug in Vorschl\u00e4gen\/Ergebnissen anzeigen"
+            ],
+            "Enable to display the excerpt below each search suggestion and result item.": [
+                "Aktivieren, um den Textauszug unter jedem Suchvorschlag und Suchergebnis anzuzeigen."
+            ],
+            "Input placeholder": [
+                "Platzhalter"
+            ],
+            "Search..": [
+                "Suche.."
+            ],
+            "Customize the placeholder text for the search input.": [
+                "Passe den Platzhaltertext des Suchfelds an."
+            ],
+            "How to select data with meta tags": [
+                "Wie man Daten aus Metatags selektiert"
+            ],
+            "Targeting for excerpt in the meta description tag.": [
+                "Ziel f\u00fcr das Excerpt im Meta-Description-Tag."
+            ],
+            "Adding such meta in the excerpt field would be:": [
+                "Ein Beispiel daf\u00fcr w\u00fcrde wie folgt aussehen:"
+            ],
+            "Targeting for title in the property meta tag.": [
+                "Ziel f\u00fcr den Title im Meta-Description-Tag."
+            ],
+            "If the second item (after | ) is not <code>content<\/code>, we'll use it as value of that attribute (<code>property=\"og:title\"<\/code> in this example) and use <code>content<\/code> for value.": [
+                "Wenn das zweite Element (nach | ) nicht <code>content<\/code> ist, nutzen wir den Wert dieses Attributs (<code>property=\"og:title\"<\/code>in diesem Beispiel <code>content<\/code> als Wert."
+            ],
+            "Caution: Use meta tags that exist everywhere for title.": [
+                "Warnung: Nutze Meta-Tags die \u00fcberall f\u00fcr den Titel existieren."
+            ],
+            "Indexing": [
+                "Indexierung"
+            ],
+            "CSS selector for title": [
+                "CSS-Selektor f\u00fcr den Titel"
+            ],
+            "Add the CSS selector which contains the title of the page\/post": [
+                "Trage den CSS-Selector ein der den Titel der Seite enth\u00e4lt."
+            ],
+            "Or meta tags. Click for more information.": [
+                "Oder Meta-Tags. Klicke f\u00fcr mehr Informationen."
+            ],
+            "CSS selector for content": [
+                "CSS-Selektor f\u00fcr den Inhalt"
+            ],
+            "Add the CSS selector which contains the content of the page\/post.": [
+                "Trage den CSS-Selector ein der den Inhalt der Seite enth\u00e4lt."
+            ],
+            "CSS selector for excerpt": [
+                "CSS-Selektor f\u00fcr den Textauszug"
+            ],
+            "Add the CSS selector which contains the excerpt of the page\/post.": [
+                "Trage den CSS-Selector ein der die Kurzbeschreibung der Seite enth\u00e4lt."
+            ],
+            "Exclude URLs": [
+                "URLs ausschlie\u00dfen"
+            ],
+            "Exclude URLs from indexing (one per line). You can use full URLs, parts of a URL, or plain words (such as stop words).": [
+                "URLs von der Indexierung ausschlie\u00dfen (eine pro Zeile). Du kannst vollst\u00e4ndige URLs, Teile einer URL oder einzelne W\u00f6rter wie Stoppw\u00f6rter verwenden."
+            ],
+            "Fuse.js": [
+                "Fuse.js"
+            ],
+            "CSS selector": [
+                "CSS-Selektor"
+            ],
+            "Add the CSS selector for the <form> element that contains your search input field.": [
+                "Gib den CSS-Selektor des <form>-Elements ein, das dein Suchfeld enth\u00e4lt."
+            ],
+            "If you have multiple search elements with different CSS selectors, separate them by a comma (,) such as: .search-form, .custom-search-form": [
+                "Wenn du mehrere Suchelemente mit unterschiedlichen CSS-Selektoren hast, trenne sie durch ein Komma (,), zum Beispiel: .search-form, .custom-search-form"
+            ],
+            "Threshold": [
+                "Schwellwert"
+            ],
+            " A threshold of 0.0 requires a perfect match, a threshold of 1.0 would match anything.": [
+                " Ein Schwellenwert von 0,0 erfordert eine perfekte \u00dcbereinstimmung, ein Schwellenwert von 1,0 w\u00fcrde auf alles passen."
+            ],
+            "Use Extended Search": [
+                "Erweiterte Suche verwenden"
+            ],
+            "Enable Fuse.js extended search operators such as exact match, prefix, suffix, and inverse match.": [
+                "Erweiterte Suchoperatoren von Fuse.js wie exakte \u00dcbereinstimmung, Pr\u00e4fix, Suffix und umgekehrte \u00dcbereinstimmung aktivieren."
+            ],
+            "Ignore Location": [
+                "Position ignorieren"
+            ],
+            "When enabled, the search will look for a match anywhere in the string, regardless of position. By default, Fuse.js favors matches near the beginning of a string.": [
+                "Wenn aktiviert, sucht die Suche unabh\u00e4ngig von der Position \u00fcberall in der Zeichenfolge nach \u00dcbereinstimmungen. Standardm\u00e4\u00dfig bevorzugt Fuse.js \u00dcbereinstimmungen am Anfang einer Zeichenfolge."
+            ],
+            "Weight": [
+                "Gewichtung"
+            ],
+            "Weighted search allows you to prioritize certain fields in your search results. A higher weight means results matching that field will appear higher in the results list. Default weight is 1.": [
+                "Mit der gewichteten Suche kannst du bestimmte Felder in den Suchergebnissen priorisieren. Bei einer h\u00f6heren Gewichtung erscheinen Ergebnisse, die mit diesem Feld \u00fcbereinstimmen, weiter oben. Die Standardgewichtung ist 1."
+            ],
+            "Title Weight": [
+                "Gewichtung des Titels"
+            ],
+            "Content Weight": [
+                "Gewichtung des Inhalts"
+            ],
+            "Excerpt Weight": [
+                "Gewichtung des Textauszugs"
+            ],
+            "Algolia API": [
+                "Algolia API"
+            ],
+            "Application ID": [
+                "Anwendungs-ID"
+            ],
+            "Add your Algolia App ID.": [
+                "Trage deine Algolia App ID hier ein."
+            ],
+            "Admin API Key": [
+                "Admin-API-Schl\u00fcssel"
+            ],
+            "Add your Algolia Admin API Key.": [
+                "Trage deinen Algolia Admin API Key hier ein."
+            ],
+            "Search-Only API Key": [
+                "API-Schl\u00fcssel nur f\u00fcr die Suche"
+            ],
+            "Add your Algolia Search-Only API Key here. This is the only key that will be visible on your static site.": [
+                "Trage deinen Algolia Search-only API Key hier ein."
+            ],
+            "Name for your index": [
+                "Der Name des Indexes"
+            ],
+            "Add your Algolia index name here.": [
+                "Trage den Namen des Suchindexes hier ein."
+            ],
+            "Administrator": [
+                "Administrator"
+            ],
+            "Editor": [
+                "Redakteur"
+            ],
+            "Author": [
+                "Autor"
+            ],
+            "Contributor": [
+                "Mitarbeiter"
+            ],
+            "Subscriber": [
+                "Abonnent"
+            ],
+            "Form Connections": [
+                "Formular-Verbindungen"
+            ],
+            "UAM (User Access Management)": [
+                "UAM (Benutzerzugriffsverwaltung)"
+            ],
+            "Control who can access Simply Static pages, menu entries, and selected features by assigning a minimum WordPress role.": [
+                "Lege mit einer WordPress-Mindestrolle fest, wer auf Seiten, Men\u00fceintr\u00e4ge und ausgew\u00e4hlte Funktionen von Simply Static zugreifen darf."
+            ],
+            "Features": [
+                "Funktionen"
+            ],
+            "Admin Bar": [
+                "Admin-Leiste"
+            ],
+            "Single Export (Button)": [
+                "Einzelner Export (Schaltfl\u00e4che)"
+            ],
+            "Import data must be a JSON object.": [
+                "Die Importdaten m\u00fcssen ein JSON-Objekt sein."
+            ],
+            "Enter valid settings JSON before importing.": [
+                "Gib vor dem Import g\u00fcltiges Einstellungs-JSON ein."
+            ],
+            "Failed to prepare export JSON.": [
+                "Export-JSON wurde nicht vorbereitet."
+            ],
+            "Failed to fetch export data.": [
+                "Ich konnte die Exportdaten nicht abrufen."
+            ],
+            "Import, reset, and migration actions are unavailable until the active export or rollback finishes.": [
+                "Import-, Zur\u00fccksetzungs- und Migrationsaktionen sind nicht verf\u00fcgbar, bis der aktive Export oder Rollback abgeschlossen ist."
+            ],
+            "Export": [
+                "Export"
+            ],
+            "Export Settings": [
+                "Export-Einstellungen"
+            ],
+            "Preparing export...": [
+                "Vorbereitung des Exports..."
+            ],
+            "Copied!": [
+                "Kopiert!"
+            ],
+            "Copy export data": [
+                "Kopiere Export-Daten"
+            ],
+            "Paste in the JSON string you got from your export to import all settings for the plugin.": [
+                "F\u00fcge den JSON-String aus dem Export hier ein und importiere deine Einstellungen."
+            ],
+            "Settings JSON to import": [
+                "Zu importierendes Einstellungs-JSON"
+            ],
+            "Settings imported successfully.": [
+                "Einstellungen erfolgreich importiert."
+            ],
+            "Reset": [
+                "Zur\u00fccksetzen"
+            ],
+            "By clicking the \"Reset Plugin Settings\", you will reset all plugin settings. This can be useful if you want to import a new set of settings or you want a fresh start.": [
+                "Mit einem Klick auf \"Plugin-Einstellungen zur\u00fccksetzen\" setzt du alle Plugin-Einstellungen zur\u00fcck. Das ist hilfreich, wenn du neue Einstellungen importieren oder neu beginnen m\u00f6chtest."
+            ],
+            "If you click the \"Reset Database Table\" button instead, you will keep all your settings, and we will only recreate our DB table.": [
+                "Wenn du stattdessen auf \"Datenbanktabelle zur\u00fccksetzen\" klickst, bleiben deine Einstellungen erhalten und nur die Datenbanktabelle wird neu erstellt."
+            ],
+            "If the background process is stuck and your debug log shows \"There is already an export running\", use the \"Reset Background Queue\" button to clear the queue and locks.": [
+                "Wenn der Hintergrundprozess h\u00e4ngt und dein Debug-Protokoll \"Es l\u00e4uft bereits ein Export\" meldet, l\u00f6sche die Warteschlange und Sperren mit \"Hintergrundwarteschlange zur\u00fccksetzen\"."
+            ],
+            "Reset Plugin Settings": [
+                "Plugin-Einstellungen zur\u00fccksetzen"
+            ],
+            "Reset Database Table": [
+                "Datenbanktabelle zur\u00fccksetzen"
+            ],
+            "Reset Background Queue": [
+                "Hintergrundwarteschlange zur\u00fccksetzen"
+            ],
+            "Settings reset successfully.": [
+                "Einstellungen erfolgreich zur\u00fcckgesetzt."
+            ],
+            "Database table reset successfully.": [
+                "Datenbanktabelle erfolgreich zur\u00fcckgesetzt."
+            ],
+            "Background queue reset successfully.": [
+                "Zur\u00fccksetzen der Hintergrundwarteschlange erfolgreich."
+            ],
+            "Migrate Settings": [
+                "Migrationseinstellungen"
+            ],
+            "Migrate all of your settings to Simply Static 3.0": [
+                "Migriere alle Einstellungen zu Simply Static 3.0"
+            ],
+            "Migrate settings": [
+                "Einstellungen migrieren"
+            ],
+            "Settings migration completed successfully.": [
+                "Einstellungsmigration erfolgreich abgeschlossen."
+            ],
+            "Single Push": [
+                "Einzel-Push"
+            ],
+            "Use Single Push?": [
+                "Einzel-Push verwenden?"
+            ],
+            "Quickly push updates to your static site while editing pages\/posts.": [
+                "\u00c4nderungen beim Bearbeiten von Seiten oder Beitr\u00e4gen schnell auf deine statische Website pushen."
+            ],
+            "Do not allow quick updates while editing posts\/pages.": [
+                "Keine schnellen Aktualisierungen beim Bearbeiten von Beitr\u00e4gen oder Seiten zulassen."
+            ],
+            "Use Auto Push?": [
+                "Automatischen Push verwenden?"
+            ],
+            "Automatically schedule a Single Push when a post\/page is updated\/published.": [
+                "Automatisch einen Einzel-Push planen, wenn ein Beitrag oder eine Seite aktualisiert oder ver\u00f6ffentlicht wird."
+            ],
+            "Do not automatically run Single Push when a post\/page is updated\/published.": [
+                "Keinen Einzel-Push automatisch ausf\u00fchren, wenn ein Beitrag oder eine Seite aktualisiert oder ver\u00f6ffentlicht wird."
+            ],
+            "Auto Push Post Types": [
+                "Inhaltstypen f\u00fcr automatische Pushes"
+            ],
+            "Choose which public post types should trigger automatic single pushes when updated. If none is selected, all public post types are used.": [
+                "W\u00e4hle aus, welche \u00f6ffentlichen Inhaltstypen bei einer Aktualisierung automatische Einzel-Pushes ausl\u00f6sen sollen. Wenn keiner ausgew\u00e4hlt ist, werden alle \u00f6ffentlichen Inhaltstypen verwendet."
+            ],
+            "Auto push delay (seconds)": [
+                "Verz\u00f6gerung des automatischen Pushs (Sekunden)"
+            ],
+            "Delay before the automatic Single Push starts after a change is detected.": [
+                "Verz\u00f6gerung, bevor der automatische Einzel-Push nach einer erkannten \u00c4nderung startet."
+            ],
+            "Pages to update": [
+                "Zu aktualisierende Seiten"
+            ],
+            "Select which pages should start a Single Push. If none selected, we use your homepage.": [
+                "W\u00e4hle aus, welche Seiten einen Einzel-Push starten sollen. Wenn keine ausgew\u00e4hlt ist, wird deine Startseite verwendet."
+            ],
+            "Choose which pages\/files should be updated when running a Single Push.": [
+                "W\u00e4hle aus, welche Seiten und Dateien bei einem Einzel-Push aktualisiert werden sollen."
+            ],
+            "Taxonomy Archives": [
+                "Taxonomie Archive"
+            ],
+            "Choose which taxonomy archives to include for selected pages\/posts (e.g., Categories, Tags, or custom taxonomies).": [
+                "W\u00e4hle die Taxonomiearchive aus, die f\u00fcr ausgew\u00e4hlte Seiten oder Beitr\u00e4ge eingeschlossen werden sollen, zum Beispiel Kategorien, Schlagw\u00f6rter oder individuelle Taxonomien."
+            ],
+            "Choose which taxonomies should be updated when running a Single Push.": [
+                "W\u00e4hle aus, welche Taxonomien bei einem Einzel-Push aktualisiert werden sollen."
+            ],
+            "Update archives (author\/date\/post_type)": [
+                "Aktualisieren von Archiven (Autor\/Datum\/post_type)"
+            ],
+            "Update archive URLs when running a Single Push.": [
+                "Archiv-URLs bei einem Einzel-Push aktualisieren."
+            ],
+            "Do not update archive URLs.": [
+                "Archiv-URLs nicht aktualisieren."
+            ],
+            "Update pagination": [
+                "Paginierung aktualisieren"
+            ],
+            "Update pagination URLs when running a Single Push.": [
+                "Paginierungs-URLs bei einem Einzel-Push aktualisieren."
+            ],
+            "Do not update pagination URLs.": [
+                "Paginierungs-URLs nicht aktualisieren."
+            ],
+            "Update XML sitemap": [
+                "Aktualisieren der XML-Sitemap"
+            ],
+            "Update XML sitemaps when running a Single Push.": [
+                "XML-Sitemaps bei einem Einzel-Push aktualisieren."
+            ],
+            "Do not update XML sitemaps.": [
+                "XML-Sitemaps nicht aktualisieren."
+            ],
+            "Enable Builds": [
+                "Builds aktivieren"
+            ],
+            "Use builds to quickly update a list of pages and files on your static site.": [
+                "Verwende Builds, um eine Liste von Seiten und Dateien auf deiner statischen Website schnell zu aktualisieren."
+            ],
+            "Builds are disabled.": [
+                "Builds sind deaktiviert."
+            ],
+            "Tools Submenu": [
+                "Untermen\u00fc Werkzeuge"
+            ],
+            "Move menu to Tools submenu": [
+                "Men\u00fc in das Untermen\u00fc Werkzeuge verschieben"
+            ],
+            "The Simply Static menu is placed under the Tools menu in the admin sidebar.": [
+                "Das Simply-Static-Men\u00fc wird in der Admin-Seitenleiste unter Werkzeuge angezeigt."
+            ],
+            "The Simply Static menu is shown as a top-level item in the admin sidebar.": [
+                "Das Simply-Static-Men\u00fc wird als Eintrag der obersten Ebene in der Admin-Seitenleiste angezeigt."
+            ],
+            "Webhook": [
+                "Webhook"
+            ],
+            "Simply Static will POST a JSON payload to this URL after pushes finish.": [
+                "Simply Static sendet nach abgeschlossenen Pushes eine JSON-Nutzlast per POST an diese URL."
+            ],
+            "Fire for these push types:": [
+                "F\u00fcr diese Push-Typen ausl\u00f6sen:"
+            ],
+            "Update": [
+                "\u00c4nderungen Exportieren"
+            ],
+            "Build": [
+                "Build"
+            ],
+            "Single": [
+                "Einzeln"
+            ],
+            "Payload includes event, site_url, export_type, identifiers (when available), timestamp, and success.": [
+                "Der Payload umfasst Ereignis, site_url, export_type, IDs (sofern verf\u00fcgbar), Zeitstempel und Erfolg."
+            ]
+        }
+    }
+}

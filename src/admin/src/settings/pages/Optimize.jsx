@@ -417,7 +417,7 @@ function Optimize() {
                             <TextareaControl
                                 label={__('Additional Delay Patterns', 'simply-static')}
                                 __nextHasNoMarginBottom
-                                help={__('Additional glob patterns for scripts to delay (one per line). Built-in patterns already cover Google (Tag Manager, Analytics, Ads, ReCaptcha), HubSpot, Facebook/Meta Pixel, Hotjar, Clarity, Bing UET, Cloudflare (Insights, Turnstile), CleanTalk, Matomo/Piwik, Plausible, Twitter/X, LinkedIn, Pinterest, Tawk.to, Crisp, LiveChat, Intercom, Drift, Tidio, Segment, Amplitude, Mixpanel, Optimizely, Mouseflow, Lucky Orange, Crazy Egg, FullStory, LogRocket, and Sentry.', 'simply-static')}
+                                help={__('Additional glob patterns for scripts to delay (one per line). Built-in patterns already cover Google (Tag Manager, Analytics, Ads, reCAPTCHA), HubSpot, Facebook/Meta Pixel, Hotjar, Clarity, Bing UET, Cloudflare (Insights, Turnstile), CleanTalk, Matomo/Piwik, Plausible, Twitter/X, LinkedIn, Pinterest, Tawk.to, Crisp, LiveChat, Intercom, Drift, Tidio, Segment, Amplitude, Mixpanel, Optimizely, Mouseflow, Lucky Orange, Crazy Egg, FullStory, LogRocket, and Sentry.', 'simply-static')}
                                 disabled={('free' === options.plan || !isPro())}
                                 value={settings.css_optimize_delay_js_patterns}
                                 placeholder={'*example-tracking.com*\n*custom-analytics*'}
@@ -507,12 +507,12 @@ function Optimize() {
                         }}
                     />
                     <ToggleControl
-                        label={__('Convert to webP', 'simply-static')}
+                        label={__('Convert to WebP', 'simply-static')}
                         __nextHasNoMarginBottom
                         help={
                             settings.shortpixel_webp_enabled
-                                ? __('Convert images to webp format.', 'simply-static')
-                                : __('Don\'t convert images to webp format', 'simply-static')
+                                ? __('Convert images to WebP format.', 'simply-static')
+                                : __('Don\'t convert images to WebP format.', 'simply-static')
                         }
                         checked={!!settings.shortpixel_webp_enabled}
                         disabled={isStudio() || 'free' === options.plan || !isPro()}

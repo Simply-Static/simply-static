@@ -109,9 +109,13 @@ final class Pro_Compatibility {
 			defined( 'SIMPLY_STATIC_VERSION' ) ? (string) SIMPLY_STATIC_VERSION : self::CURRENT_CORE_VERSION
 		);
 
-		$message = $network_admin
-			? __( 'Simply Static Pro did not load network-wide because this version of Simply Static requires Simply Static Pro %1$s or newer. Please update Simply Static Pro to continue using Pro features.', 'simply-static' )
-			: __( 'Simply Static Pro did not load because this version of Simply Static requires Simply Static Pro %1$s or newer. Please update Simply Static Pro to continue using Pro features.', 'simply-static' );
+		if ( $network_admin ) {
+			/* translators: %1$s: required Simply Static Pro version. */
+			$message = __( 'Simply Static Pro did not load network-wide because this version of Simply Static requires Simply Static Pro %1$s or newer. Please update Simply Static Pro to continue using Pro features.', 'simply-static' );
+		} else {
+			/* translators: %1$s: required Simply Static Pro version. */
+			$message = __( 'Simply Static Pro did not load because this version of Simply Static requires Simply Static Pro %1$s or newer. Please update Simply Static Pro to continue using Pro features.', 'simply-static' );
+		}
 
 		echo '<div class="notice notice-error"><p>'
 			. esc_html( sprintf( $message, $required_version ) )

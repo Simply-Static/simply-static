@@ -176,7 +176,7 @@ class Admin_Settings {
 
             add_action( "admin_print_scripts-{$settings_suffix}", array( $this, 'add_settings_scripts' ) );
 
-            $notifications = sprintf( '<span class="update-plugins diagnostics-error"><span class="plugin-count" aria-hidden="true">%s</span><span class="screen-reader-text">errors in diagnostics</span></span>', $this->failed_tests );
+            $notifications = sprintf( '<span class="update-plugins diagnostics-error"><span class="plugin-count" aria-hidden="true">%s</span><span class="screen-reader-text">%s</span></span>', $this->failed_tests, esc_html__( 'errors in diagnostics', 'simply-static' ) );
 
             // Add diagnostics page.
             $diagnostics_suffix = add_submenu_page(
@@ -1445,7 +1445,7 @@ class Admin_Settings {
      */
     public function get_export_progress_title_status() {
         if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( $_POST['security'], 'ss-export-progress-title-nonce' ) ) {
-            wp_die( 'Security check failed' );
+            wp_die( esc_html__( 'Security check failed', 'simply-static' ) );
         }
 
         $cap_generate = apply_filters( 'ss_user_capability', 'publish_pages', 'generate' );

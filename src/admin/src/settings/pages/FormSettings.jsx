@@ -102,13 +102,13 @@ function FormSettings() {
                     foundCredentials = recaptchaCredentials[0];
                     sourceName = foundCredentials.source;
                     
-                    // Apply ReCaptcha credentials
+                    // Apply reCAPTCHA credentials
                     updateSetting('recaptcha_site_key', foundCredentials.site_key);
                     updateSetting('recaptcha_secret_key', foundCredentials.secret_key);
                     
                     setCredentialsNotice({
                         type: 'success',
-                        message: __('ReCaptcha credentials copied from ', 'simply-static') + sourceName + '!'
+                        message: __('reCAPTCHA credentials copied from ', 'simply-static') + sourceName + '!'
                     });
                 } else {
                     // No credentials found for current service, check if other service has credentials
@@ -272,7 +272,7 @@ function FormSettings() {
                         <SelectControl
                             label={__('Select a redirect page', 'content-protector')}
                             options={pagesSlugs}
-                            help={__('The post will be regenerated after comment submission, but it might take a while so its good practice to redirect the visitor.', 'simply-static')}
+                            help={__('The post will be regenerated after comment submission, but it might take a while, so it is good practice to redirect the visitor.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             value={settings.comment_redirect}
                             __next40pxDefaultSize

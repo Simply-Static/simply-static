@@ -113,7 +113,12 @@ trait canProcessPages {
 			// In 404-only exports, force the transfer log to reflect a single artifact.
 			$only_404 = get_option( 'simply-static-404-only' );
 			if ( ! empty( $only_404 ) ) {
-				$message = sprintf( __( 'Transferred %d of %d files', 'simply-static' ), 1, 1 );
+				$message = sprintf(
+					/* translators: 1: number of files transferred, 2: total number of files. */
+					__( 'Transferred %1$d of %2$d files', 'simply-static' ),
+					1,
+					1
+				);
 			}
 			$this->save_status_message( $message );
 
@@ -285,7 +290,12 @@ trait canProcessPages {
 	 * @return string
 	 */
 	protected function processed_pages_message( $processed, $total ) {
-		return sprintf( __( "Uploaded %d of %d files", 'simply-static' ), $processed, $total );
+		return sprintf(
+			/* translators: 1: number of files uploaded, 2: total number of files. */
+			__( 'Uploaded %1$d of %2$d files', 'simply-static' ),
+			$processed,
+			$total
+		);
 	}
 
 	/**

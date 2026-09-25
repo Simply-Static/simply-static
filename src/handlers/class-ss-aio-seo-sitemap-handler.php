@@ -63,7 +63,7 @@ class AIO_SEO_Sitemap_Handler extends Page_Handler {
 	 * @return string
 	 */
 	public static function stylesheet_content() {
-		return <<<'XSL'
+		$stylesheet = <<<'XSL'
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -76,7 +76,7 @@ class AIO_SEO_Sitemap_Handler extends Page_Handler {
 		<html>
 			<head>
 				<meta name="viewport" content="width=device-width, initial-scale=1"/>
-				<title>XML Sitemap</title>
+				<title>{{xml-sitemap}}</title>
 				<style>
 					body{margin:0;background:#f7f8fa;color:#24292f;font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 					main{max-width:1100px;margin:48px auto;padding:0 24px}
@@ -94,13 +94,13 @@ class AIO_SEO_Sitemap_Handler extends Page_Handler {
 			</head>
 			<body>
 				<main>
-					<h1>XML Sitemap</h1>
+					<h1>{{xml-sitemap}}</h1>
 					<xsl:choose>
 						<xsl:when test="sitemap:sitemapindex">
-							<p>This sitemap index contains <xsl:value-of select="count(sitemap:sitemapindex/sitemap:sitemap)"/> sitemaps.</p>
+							<p>{{sitemap-index-count}}</p>
 							<div class="table-wrap">
 								<table>
-									<thead><tr><th>URL</th><th>Last modified</th></tr></thead>
+									<thead><tr><th>URL</th><th>{{last-modified}}</th></tr></thead>
 									<tbody>
 										<xsl:for-each select="sitemap:sitemapindex/sitemap:sitemap">
 											<tr>
@@ -113,10 +113,10 @@ class AIO_SEO_Sitemap_Handler extends Page_Handler {
 							</div>
 						</xsl:when>
 						<xsl:otherwise>
-							<p>This sitemap contains <xsl:value-of select="count(sitemap:urlset/sitemap:url)"/> URLs.</p>
+							<p>{{sitemap-count}}</p>
 							<div class="table-wrap">
 								<table>
-									<thead><tr><th>URL</th><th class="number">Images</th><th>Last modified</th></tr></thead>
+									<thead><tr><th>URL</th><th class="number">{{images}}</th><th>{{last-modified}}</th></tr></thead>
 									<tbody>
 										<xsl:for-each select="sitemap:urlset/sitemap:url">
 											<tr>
@@ -136,6 +136,25 @@ class AIO_SEO_Sitemap_Handler extends Page_Handler {
 	</xsl:template>
 </xsl:stylesheet>
 XSL;
+
+		return strtr(
+			$stylesheet,
+			array(
+				'{{xml-sitemap}}'         => esc_html__( 'XML Sitemap', 'simply-static' ),
+				'{{sitemap-index-count}}' => sprintf(
+					/* translators: %s: number of sitemaps in the sitemap index. */
+					esc_html__( 'This sitemap index contains %s sitemaps.', 'simply-static' ),
+					'<xsl:value-of select="count(sitemap:sitemapindex/sitemap:sitemap)"/>'
+				),
+				'{{sitemap-count}}'       => sprintf(
+					/* translators: %s: number of URLs in the sitemap. */
+					esc_html__( 'This sitemap contains %s URLs.', 'simply-static' ),
+					'<xsl:value-of select="count(sitemap:urlset/sitemap:url)"/>'
+				),
+				'{{images}}'              => esc_html__( 'Images', 'simply-static' ),
+				'{{last-modified}}'       => esc_html__( 'Last modified', 'simply-static' ),
+			)
+		);
 	}
 
 	/**

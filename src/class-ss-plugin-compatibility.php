@@ -158,14 +158,22 @@ class Plugin_Compatibility {
 			'plugin-install',
 			'plugin-install-network'
 		], true ) ) {
+			$asset_file = SIMPLY_STATIC_PATH . '/assets/install-plugins/build/index.asset.php';
+			$asset      = file_exists( $asset_file )
+				? require $asset_file
+				: array( 'dependencies' => array( 'wp-dom-ready', 'wp-i18n' ), 'version' => SIMPLY_STATIC_VERSION );
 
 			wp_enqueue_script(
 				self::ASSET_HANDLE,
 				SIMPLY_STATIC_URL . '/assets/install-plugins/build/index.js',
-				[],
-				SIMPLY_STATIC_VERSION,
+				isset( $asset['dependencies'] ) ? $asset['dependencies'] : array( 'wp-dom-ready', 'wp-i18n' ),
+				isset( $asset['version'] ) ? $asset['version'] : SIMPLY_STATIC_VERSION,
 				true
 			);
+
+			if ( function_exists( 'wp_set_script_translations' ) ) {
+				wp_set_script_translations( self::ASSET_HANDLE, 'simply-static', SIMPLY_STATIC_PATH . '/languages' );
+			}
 
 			wp_enqueue_style(
 				'ss-admin',

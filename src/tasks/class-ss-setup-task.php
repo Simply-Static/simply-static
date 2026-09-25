@@ -194,20 +194,32 @@ class Setup_Task extends Task {
 			}
 
 			// Create index.html file for feed directory.
-			file_put_contents( $feed_directory . '/index.html',
-				'<!DOCTYPE html>
+			$redirect_title = esc_html__( 'Redirecting...', 'simply-static' );
+			$redirect_text  = sprintf(
+				/* translators: %s: destination link. */
+				__( 'You are being redirected to %s', 'simply-static' ),
+				'<a href="index.xml">index.xml</a>'
+			);
+
+			file_put_contents(
+				$feed_directory . '/index.html',
+				sprintf(
+					'<!DOCTYPE html>
 			<html>
 				<head>
-					<title>Redirecting...</title>
+					<title>%1$s</title>
 					<meta http-equiv="refresh" content="0;url=index.xml">
 				</head>
 				<body>
 					<script type="text/javascript">
 						window.location = "index.xml";
 					</script>
-					<p>You are being redirected to <a href="index.xml">index.xml</a></p>
+					<p>%2$s</p>
 				</body>
-			</html>'
+			</html>',
+					$redirect_title,
+					wp_kses_post( $redirect_text )
+				)
 			);
 
 			// Add feed redirect file to additional files.

@@ -366,6 +366,7 @@ class Archive_Creation_Job extends Background_Process {
 
 			if ( false === $task ) {
 				$message = sprintf(
+					/* translators: %s: archive task class name. */
 					__( 'Unable to run archive task because its class is unavailable: %s', 'simply-static' ),
 					$task_name
 				);
@@ -463,7 +464,13 @@ class Archive_Creation_Job extends Background_Process {
 			->set( 'archive_end_time', $end_time )
 			->set( 'archive_task_list', array() );
 
-		$this->save_status_message( sprintf( __( 'Done! Finished in %s', 'simply-static' ), $time_string ) );
+		$this->save_status_message(
+			sprintf(
+				/* translators: %s: export duration in hours, minutes, and seconds. */
+				__( 'Done! Finished in %s', 'simply-static' ),
+				$time_string
+			)
+		);
 		parent::complete();
 
 		do_action( 'ss_completed', 'success' );
@@ -708,7 +715,11 @@ class Archive_Creation_Job extends Background_Process {
 		Util::debug_log( "An exception occurred: " . $exception->getMessage() );
 		Util::debug_log( $exception );
 
-		$message = sprintf( __( "An exception occurred: %s", 'simply-static' ), $exception->getMessage() );
+		$message = sprintf(
+			/* translators: %s: exception message. */
+			__( 'An exception occurred: %s', 'simply-static' ),
+			$exception->getMessage()
+		);
 		$this->options->set( 'archive_end_time', Util::formatted_datetime() );
 		$this->save_status_message( $message, 'error' );
 		do_action( 'ss_completed', 'exception', $message );
@@ -727,7 +738,11 @@ class Archive_Creation_Job extends Background_Process {
 		Util::debug_log( "An error occurred: " . $wp_error->get_error_message() );
 		Util::debug_log( $wp_error );
 
-		$message = sprintf( __( "An error occurred: %s", 'simply-static' ), $wp_error->get_error_message() );
+		$message = sprintf(
+			/* translators: %s: error message. */
+			__( 'An error occurred: %s', 'simply-static' ),
+			$wp_error->get_error_message()
+		);
 		$this->options->set( 'archive_end_time', Util::formatted_datetime() );
 		$this->save_status_message( $message, 'error' );
 		do_action( 'ss_completed', 'error', $message );
@@ -763,11 +778,20 @@ class Archive_Creation_Job extends Background_Process {
 				->set( 'archive_end_time', $end_time )
 				->save();
 
-			$error_message = '(' . $error['type'] . ') ' . $error['message'];
-			$error_message .= ' in <b>' . $error['file'] . '</b>';
-			$error_message .= ' on line <b>' . $error['line'] . '</b>';
+			$error_message = sprintf(
+				/* translators: 1: PHP error type, 2: error message, 3: file path, 4: line number. */
+				__( '(%1$s) %2$s in <b>%3$s</b> on line <b>%4$d</b>', 'simply-static' ),
+				$error['type'],
+				$error['message'],
+				$error['file'],
+				$error['line']
+			);
 
-			$message = sprintf( __( "Error: %s", 'simply-static' ), $error_message );
+			$message = sprintf(
+				/* translators: %s: formatted PHP error details. */
+				__( 'Error: %s', 'simply-static' ),
+				$error_message
+			);
 			Util::debug_log( $message );
 			$this->save_status_message( $message, 'error' );
 		}

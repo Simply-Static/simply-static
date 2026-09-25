@@ -1,7 +1,7 @@
 import {Notice, Animate, __experimentalSpacer as Spacer, Button} from '@wordpress/components';
 import {useEffect, useState} from '@wordpress/element';
 
-const {__} = wp.i18n;
+const {__, sprintf} = wp.i18n;
 
 /**
  * Black Friday Banner
@@ -62,8 +62,11 @@ export default function BFBanner() {
                 {() => (
                     <Notice status="notice" isDismissible onRemove={dismiss} className={"bf-banner"}>
                         <p>
-                            <strong>BLACK FRIDAY</strong>: Upgrade to <b>Simply Static Pro</b> and save <b>25%</b> by
-                            using the code <b>SSBF25</b>
+                            {sprintf(
+                                /* translators: %s: Black Friday coupon code. */
+                                __('BLACK FRIDAY: Upgrade to Simply Static Pro and save 25%% with code %s.', 'simply-static'),
+                                'SSBF25'
+                            )}
                             {' '}
                             <Button
                                 isPrimary
