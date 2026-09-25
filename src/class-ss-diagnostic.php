@@ -141,6 +141,8 @@ class Diagnostic {
 			);
 		}
 
+		$this->checks = $this->filter_checks( $this->checks );
+
 		// Set transient for checks.
 		if ( ! get_transient( 'simply_static_checks' ) ) {
 			set_transient( 'simply_static_checks', $this->checks, 5 * MINUTE_IN_SECONDS );
@@ -163,6 +165,25 @@ class Diagnostic {
 
 	public function get_checks() {
 		return $this->checks;
+	}
+
+	/**
+	 * Allow extensions to add their own diagnostic checks.
+	 *
+	 * @param array $checks Diagnostic sections and checks.
+	 *
+	 * @return array
+	 */
+	protected function filter_checks( array $checks ): array {
+		/**
+		 * Filters the diagnostic sections and checks before they are cached.
+		 *
+		 * @param array      $checks      Diagnostic sections and checks.
+		 * @param Diagnostic $diagnostic Current diagnostic instance.
+		 */
+		$filtered_checks = apply_filters( 'ss_diagnostic_checks', $checks, $this );
+
+		return is_array( $filtered_checks ) ? $filtered_checks : $checks;
 	}
 
 	public function is_destination_host_a_valid_url() {
