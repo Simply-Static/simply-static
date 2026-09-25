@@ -47,28 +47,36 @@ class Diagnostic {
 
 	public function __construct() {
 		$this->options = Options::instance();
+		$sections      = array(
+			'urls'       => __( 'URLs', 'simply-static' ),
+			'server'     => __( 'Server', 'simply-static' ),
+			'wordpress'  => __( 'WordPress', 'simply-static' ),
+			'plugins'    => __( 'Plugins', 'simply-static' ),
+			'filesystem' => __( 'Filesystem', 'simply-static' ),
+			'mysql'      => __( 'MySQL', 'simply-static' ),
+		);
 
 		$this->checks = array(
-			'URLs'       => array(),
-			'Server'     => array(
+			$sections['urls']       => array(),
+			$sections['server']     => array(
 				__( 'PHP Version', 'simply-static' ) => $this->php_version(),
 				__( 'Basic Auth', 'simply-static' )  => $this->check_basic_auth_status(),
 				__( 'php-xml', 'simply-static' )     => $this->is_xml_active(),
 				__( 'cURL', 'simply-static' )        => $this->has_curl(),
-				__( 'Docker', 'simply-static' ) => $this->docker_environment_check(),
+				__( 'Docker', 'simply-static' )      => $this->docker_environment_check(),
 			),
-			'WordPress'  => array(
+			$sections['wordpress']  => array(
 				__( 'Permalinks', 'simply-static' ) => $this->is_permalink_structure_set(),
 				__( 'Indexable', 'simply-static' )  => $this->is_set_to_index(),
 				__( 'Caching', 'simply-static' )    => $this->is_cache_set(),
 				__( 'WP-CRON', 'simply-static' )    => $this->is_wp_cron_running(),
 			),
-			'Plugins'    => array(),
-			'Filesystem' => array(
+			$sections['plugins']    => array(),
+			$sections['filesystem'] => array(
 				__( 'Temp dir readable', 'simply-static' )  => $this->is_temp_files_dir_readable(),
 				__( 'Temp dir writable', 'simply-static' ) => $this->is_temp_files_dir_writeable(),
 			),
-			'MySQL'      => array(
+			$sections['mysql']      => array(
 				__( 'DELETE', 'simply-static' ) => $this->user_can_delete(),
 				__( 'INSERT', 'simply-static' ) => $this->user_can_insert(),
 				__( 'SELECT', 'simply-static' ) => $this->user_can_select(),
@@ -79,27 +87,27 @@ class Diagnostic {
 		);
 
 		if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
-			$this->checks['URLs'][ __( 'Destination URL', 'simply-static' ) ] = $this->is_destination_host_a_valid_url();
+			$this->checks[ $sections['urls'] ][ __( 'Destination URL', 'simply-static' ) ] = $this->is_destination_host_a_valid_url();
 		}
 
 		if ( $this->options->get( 'delivery_method' ) == 'local' ) {
-			$this->checks['Filesystem'][ __( 'Local Dir', 'simply-static' ) ] = $this->is_local_dir_writeable();
+			$this->checks[ $sections['filesystem'] ][ __( 'Local Dir', 'simply-static' ) ] = $this->is_local_dir_writeable();
 		}
 
 		$additional_urls = Util::string_to_array( $this->options->get( 'additional_urls' ) );
 
 		foreach ( $additional_urls as $url ) {
-			$this->checks['URLs'][ $url ] = $this->is_additional_url_valid( $url );
+			$this->checks[ $sections['urls'] ][ $url ] = $this->is_additional_url_valid( $url );
 		}
 
 		$additional_files = Util::string_to_array( $this->options->get( 'additional_files' ) );
 		foreach ( $additional_files as $file ) {
-			$this->checks['Filesystem'][ $file ] = $this->is_additional_file_valid( $file );
+			$this->checks[ $sections['filesystem'] ][ $file ] = $this->is_additional_file_valid( $file );
 		}
 
 		// Check if URLs checks are empty.
-		if ( empty( $this->checks['URLs'] ) ) {
-			unset( $this->checks['URLs'] );
+		if ( empty( $this->checks[ $sections['urls'] ] ) ) {
+			unset( $this->checks[ $sections['urls'] ] );
 		}
 
 		// Check for incompatible plugins.
@@ -118,7 +126,7 @@ class Diagnostic {
 
 		foreach ( $activated_plugins as $plugin ) {
 			if ( in_array( $plugin['TextDomain'], $this->incompatible_plugins ) ) {
-				$this->checks['Plugins'][ $plugin['Name'] ] = $this->is_incompatible_plugin( $plugin );
+				$this->checks[ $sections['plugins'] ][ $plugin['Name'] ] = $this->is_incompatible_plugin( $plugin );
 				$plugin_count ++;
 			}
 		}
@@ -126,7 +134,7 @@ class Diagnostic {
 		if ( $plugin_count === 0 ) {
 			/* translators: %d: number of incompatible plugins. */
 			$incompatible_plugins_error = sprintf( __( '%d incompatible plugins are active', 'simply-static' ), $plugin_count );
-			$this->checks['Plugins']['Incompatible Plugins'] = array(
+			$this->checks[ $sections['plugins'] ][ __( 'Incompatible Plugins', 'simply-static' ) ] = array(
 				'test'        => true,
 				'description' => __( 'No incompatible plugins are active on your website!', 'simply-static' ),
 				'error'       => $incompatible_plugins_error,

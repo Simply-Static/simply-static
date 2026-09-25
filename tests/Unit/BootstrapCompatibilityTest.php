@@ -110,6 +110,8 @@ namespace Simply_Static\Tests\Unit {
 			self::assertStringContainsString( "define( 'SIMPLY_STATIC_VERSION', '3.8.13' );", $bootstrap );
 			self::assertStringContainsString( "version_compare( get_bloginfo( 'version' ), '6.2', '<' )", $bootstrap );
 			self::assertStringContainsString( 'Simply Static requires WordPress 6.2 or higher.', $bootstrap );
+			self::assertStringContainsString( "add_action( 'init', 'simply_static_load_textdomain', 0 );", $bootstrap );
+			self::assertStringContainsString( "load_textdomain( 'simply-static', \$mofile );", $bootstrap );
 			self::assertStringContainsString( "require_once SIMPLY_STATIC_PATH . 'src/class-ss-pro-compatibility.php';", $bootstrap );
 			self::assertStringContainsString( "add_action( 'plugins_loaded', array( 'Simply_Static\\Pro_Compatibility', 'enforce' ), 1 );", $bootstrap );
 			self::assertStringNotContainsString( 'deactivate_plugins( $pro_basename', $bootstrap );

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-25T07:54:54+00:00\n"
+"POT-Creation-Date: 2026-09-25T08:56:56+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: simply-static\n"
@@ -45,16 +45,16 @@ msgstr ""
 msgid "https://patrickposner.com"
 msgstr ""
 
-#: simply-static.php:28
+#: simply-static.php:53
 msgid "Simply Static requires PHP 7.4 or higher."
 msgstr ""
 
-#: simply-static.php:28
-#: simply-static.php:34
+#: simply-static.php:53
+#: simply-static.php:59
 msgid "Plugin dependency check"
 msgstr ""
 
-#: simply-static.php:34
+#: simply-static.php:59
 msgid "Simply Static requires WordPress 6.2 or higher."
 msgstr ""
 
@@ -413,354 +413,382 @@ msgstr ""
 msgid "Unsupported compatibility API schema %d."
 msgstr ""
 
+#: src/class-ss-diagnostic.php:51
+msgid "URLs"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:52
+msgid "Server"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:53
+msgid "WordPress"
+msgstr ""
+
 #: src/class-ss-diagnostic.php:54
-msgid "PHP Version"
+msgid "Plugins"
 msgstr ""
 
 #: src/class-ss-diagnostic.php:55
+msgid "Filesystem"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:56
+msgid "MySQL"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:62
+msgid "PHP Version"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:63
 #: src/admin/src/settings/pages/DebugSettings.jsx:81
 msgid "Basic Auth"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:56
+#: src/class-ss-diagnostic.php:64
 msgid "php-xml"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:57
+#: src/class-ss-diagnostic.php:65
 msgid "cURL"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:58
+#: src/class-ss-diagnostic.php:66
 msgid "Docker"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:61
+#: src/class-ss-diagnostic.php:69
 msgid "Permalinks"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:62
+#: src/class-ss-diagnostic.php:70
 msgid "Indexable"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:63
+#: src/class-ss-diagnostic.php:71
 msgid "Caching"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:64
+#: src/class-ss-diagnostic.php:72
 msgid "WP-CRON"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:68
+#: src/class-ss-diagnostic.php:76
 msgid "Temp dir readable"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:69
+#: src/class-ss-diagnostic.php:77
 msgid "Temp dir writable"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:72
+#: src/class-ss-diagnostic.php:80
 msgid "DELETE"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:73
+#: src/class-ss-diagnostic.php:81
 msgid "INSERT"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:74
+#: src/class-ss-diagnostic.php:82
 msgid "SELECT"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:75
+#: src/class-ss-diagnostic.php:83
 msgid "CREATE"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:76
+#: src/class-ss-diagnostic.php:84
 msgid "ALTER"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:77
+#: src/class-ss-diagnostic.php:85
 msgid "DROP"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:82
+#: src/class-ss-diagnostic.php:90
 msgid "Destination URL"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:86
+#: src/class-ss-diagnostic.php:94
 msgid "Local Dir"
 msgstr ""
 
 #. translators: %d: number of incompatible plugins.
-#: src/class-ss-diagnostic.php:128
+#: src/class-ss-diagnostic.php:136
 #, php-format
 msgid "%d incompatible plugins are active"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:131
+#: src/class-ss-diagnostic.php:137
+msgid "Incompatible Plugins"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:139
 msgid "No incompatible plugins are active on your website!"
 msgstr ""
 
 #. translators: %s: destination URL.
-#: src/class-ss-diagnostic.php:165
+#: src/class-ss-diagnostic.php:173
 #, php-format
 msgid "Destination URL %s is valid"
 msgstr ""
 
 #. translators: %s: destination URL.
-#: src/class-ss-diagnostic.php:167
+#: src/class-ss-diagnostic.php:175
 #, php-format
 msgid "Destination URL %s is not valid"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:182
+#: src/class-ss-diagnostic.php:190
 msgid "Is a valid URL."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:183
+#: src/class-ss-diagnostic.php:191
 msgid "Is not a valid URL."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:196
+#: src/class-ss-diagnostic.php:204
 msgid "Not a valid path"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:199
+#: src/class-ss-diagnostic.php:207
 msgid "Not readable"
 msgstr ""
 
 #. translators: %s: additional file or directory path.
-#: src/class-ss-diagnostic.php:206
+#: src/class-ss-diagnostic.php:214
 #, php-format
 msgid "Additional File/Dir %s is valid"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:218
+#: src/class-ss-diagnostic.php:226
 msgid "WordPress permalink structure is set"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:219
+#: src/class-ss-diagnostic.php:227
 msgid "WordPress permalink structure is not set"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:226
+#: src/class-ss-diagnostic.php:234
 msgid "Discourage search engines from indexing this site is disabled"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:227
+#: src/class-ss-diagnostic.php:235
 msgid "Discourage search engines from indexing this site is enabled"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:242
+#: src/class-ss-diagnostic.php:250
 msgid "WordPress cron is available and running"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:243
+#: src/class-ss-diagnostic.php:251
 msgid "WordPress cron is not available and not running"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:252
+#: src/class-ss-diagnostic.php:260
 msgid "Caching is disabled, great!"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:253
+#: src/class-ss-diagnostic.php:261
 msgid "Please disable caching before running a static export"
 msgstr ""
 
 #. translators: %s: caching plugin name.
-#: src/class-ss-diagnostic.php:264
-#: src/class-ss-diagnostic.php:270
-#: src/class-ss-diagnostic.php:276
-#: src/class-ss-diagnostic.php:282
-#: src/class-ss-diagnostic.php:288
-#: src/class-ss-diagnostic.php:294
-#: src/class-ss-diagnostic.php:300
-#: src/class-ss-diagnostic.php:306
-#: src/class-ss-diagnostic.php:312
-#: src/class-ss-diagnostic.php:318
-#: src/class-ss-diagnostic.php:324
-#: src/class-ss-diagnostic.php:330
+#: src/class-ss-diagnostic.php:272
+#: src/class-ss-diagnostic.php:278
+#: src/class-ss-diagnostic.php:284
+#: src/class-ss-diagnostic.php:290
+#: src/class-ss-diagnostic.php:296
+#: src/class-ss-diagnostic.php:302
+#: src/class-ss-diagnostic.php:308
+#: src/class-ss-diagnostic.php:314
+#: src/class-ss-diagnostic.php:320
+#: src/class-ss-diagnostic.php:326
+#: src/class-ss-diagnostic.php:332
+#: src/class-ss-diagnostic.php:338
 #, php-format
 msgid "Please disable caching (%s) before running a static export."
 msgstr ""
 
 #. translators: %s: plugin name.
-#: src/class-ss-diagnostic.php:415
+#: src/class-ss-diagnostic.php:423
 #, php-format
 msgid "%s is not compatible with Simply Static."
 msgstr ""
 
 #. translators: %s: temporary files directory path.
-#: src/class-ss-diagnostic.php:426
+#: src/class-ss-diagnostic.php:434
 #, php-format
 msgid "Web server can read from Temp Files Directory: %s"
 msgstr ""
 
 #. translators: %s: temporary files directory path.
-#: src/class-ss-diagnostic.php:428
+#: src/class-ss-diagnostic.php:436
 #, php-format
 msgid "Web server can't read from Temp Files Directory: %s"
 msgstr ""
 
 #. translators: %s: temporary files directory path.
-#: src/class-ss-diagnostic.php:440
+#: src/class-ss-diagnostic.php:448
 #, php-format
 msgid "Web server can write to Temp Files Directory: %s"
 msgstr ""
 
 #. translators: %s: temporary files directory path.
-#: src/class-ss-diagnostic.php:442
+#: src/class-ss-diagnostic.php:450
 #, php-format
 msgid "Web server can't write to Temp Files Directory: %s"
 msgstr ""
 
 #. translators: %s: local destination directory path.
-#: src/class-ss-diagnostic.php:454
+#: src/class-ss-diagnostic.php:462
 #, php-format
 msgid "Web server can write to Local Directory: %s"
 msgstr ""
 
 #. translators: %s: local destination directory path.
-#: src/class-ss-diagnostic.php:456
+#: src/class-ss-diagnostic.php:464
 #, php-format
 msgid "Web server can not write to Local Directory: %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:468
+#: src/class-ss-diagnostic.php:476
 msgid "MySQL user has DELETE privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:469
+#: src/class-ss-diagnostic.php:477
 msgid "MySQL user has no DELETE privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:476
+#: src/class-ss-diagnostic.php:484
 msgid "MySQL user has INSERT privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:477
+#: src/class-ss-diagnostic.php:485
 msgid "MySQL user has no INSERT privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:484
+#: src/class-ss-diagnostic.php:492
 msgid "MySQL user has SELECT privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:485
+#: src/class-ss-diagnostic.php:493
 msgid "MySQL user has no SELECT privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:492
+#: src/class-ss-diagnostic.php:500
 msgid "MySQL user has CREATE privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:493
+#: src/class-ss-diagnostic.php:501
 msgid "MySQL user has no CREATE privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:500
+#: src/class-ss-diagnostic.php:508
 msgid "MySQL user has ALTER privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:501
+#: src/class-ss-diagnostic.php:509
 msgid "MySQL user has no ALTER privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:508
+#: src/class-ss-diagnostic.php:516
 msgid "MySQL user has DROP privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:509
+#: src/class-ss-diagnostic.php:517
 msgid "MySQL user has no DROP privilege"
 msgstr ""
 
 #. translators: %s: minimum supported PHP version.
-#: src/class-ss-diagnostic.php:515
+#: src/class-ss-diagnostic.php:523
 #, php-format
 msgid "PHP version is >= %s"
 msgstr ""
 
 #. translators: %s: minimum supported PHP version.
-#: src/class-ss-diagnostic.php:517
+#: src/class-ss-diagnostic.php:525
 #, php-format
 msgid "PHP version < %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:529
+#: src/class-ss-diagnostic.php:537
 msgid "php-xml is available"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:530
+#: src/class-ss-diagnostic.php:538
 msgid "php-xml is not available"
 msgstr ""
 
 #. translators: %s: minimum supported cURL version.
-#: src/class-ss-diagnostic.php:543
+#: src/class-ss-diagnostic.php:551
 #, php-format
 msgid "cURL version < %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:547
+#: src/class-ss-diagnostic.php:555
 msgid "cURL is available"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:569
+#: src/class-ss-diagnostic.php:577
 msgid "Docker not detected"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:570
+#: src/class-ss-diagnostic.php:578
 msgid "Docker misconfiguration detected"
 msgstr ""
 
 #. translators: 1: current site url, 2: example of host.docker.internal with port, 3: docs url
-#: src/class-ss-diagnostic.php:593
+#: src/class-ss-diagnostic.php:601
 #, php-format
 msgid "Your WordPress Address appears to be %1$s which is usually not reachable from inside the container. Consider using %2$s (and map host.docker.internal), or the container service name, or adjust your Site URL. See instructions: %3$s"
 msgstr ""
 
 #. translators: 1: current site url, 2: server port, 3: docs url
-#: src/class-ss-diagnostic.php:605
+#: src/class-ss-diagnostic.php:613
 #, php-format
 msgid "Site URL %1$s uses a different port than the web server (%2$d). This is often unreachable from within the container. See Docker guide: %3$s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:615
+#: src/class-ss-diagnostic.php:623
 msgid "Site URL looks reachable."
 msgstr ""
 
 #. translators: %s: URL of the Docker setup guide.
-#: src/class-ss-diagnostic.php:621
+#: src/class-ss-diagnostic.php:629
 #, php-format
 msgid "If exports fail, please review: %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:625
+#: src/class-ss-diagnostic.php:633
 msgid "Site URL looks fine for container access."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:632
+#: src/class-ss-diagnostic.php:640
 msgid "Basic Auth is not enabled."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:665
+#: src/class-ss-diagnostic.php:673
 msgid "Basic Auth is enabled, but no username or password is set in Simply Static -> Settings -> Debug -> Basic Auth"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:667
+#: src/class-ss-diagnostic.php:675
 msgid "Basic Auth is enabled, and username and password are set in Simply Static -> Settings -> Debug -> Basic Auth"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:688
+#: src/class-ss-diagnostic.php:696
 msgid "Not a valid URL."
 msgstr ""
 
 #. translators: %s: HTTP status code.
-#: src/class-ss-diagnostic.php:699
+#: src/class-ss-diagnostic.php:707
 #, php-format
 msgid "Received a %s response. This might indicate a problem."
 msgstr ""
 
 #. translators: %s: HTTP status code.
-#: src/class-ss-diagnostic.php:706
+#: src/class-ss-diagnostic.php:714
 #, php-format
 msgid "Received a %s response."
 msgstr ""
