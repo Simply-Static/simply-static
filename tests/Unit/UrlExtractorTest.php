@@ -514,6 +514,67 @@ final class UrlExtractorTest extends UnitTestCase {
 		self::assertFalse( Util::is_local_url( $runtime_origin . '/after-extraction' ) );
 	}
 
+	public function test_preserves_excluded_php_form_actions_during_force_replace(): void {
+		WpEnv::$options['simply-static']['force_replace_url'] = true;
+		Options::reinstance();
+
+		$endpoint  = 'https://example.test/wp-content/themes/site/download-ics.php';
+		add_filter(
+			'simply_static_content_before_save',
+			static function ( $content ) use ( $endpoint ) {
+				return str_replace( $endpoint, 'https://static.example.test/wp-content/themes/site/download-ics.php', $content );
+			},
+			PHP_INT_MAX
+		);
+		$html      = '<form action="' . $endpoint . '" method="post"></form>'
+			. '<form action="https://example.test/contact/"></form>'
+			. '<a href="' . $endpoint . '">download</a>';
+		$extractor = $this->extractor( 'html', $html );
+
+		$extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertStringContainsString( 'action="' . $endpoint . '"', $body );
+		self::assertStringContainsString( 'action="https://static.example.test/contact/"', $body );
+		self::assertStringContainsString( 'href="https://static.example.test/wp-content/themes/site/download-ics.php"', $body );
+		self::assertStringNotContainsString( 'SS_PRESERVED_FORM_ACTION_', $body );
+	}
+
+	public function test_preserves_excluded_php_form_actions_on_unconfigured_runtime_origin(): void {
+		$runtime_origin = 'https://wp-runtime.example.test';
+		$endpoint       = $runtime_origin . '/wp-content/themes/site/download-ics.php';
+		$html           = '<form class="calendar" action=\'' . $endpoint . '\' method="post"></form>'
+			. '<input type="hidden" value="' . $runtime_origin . '/event/">';
+		$extractor      = $this->extractor( 'html', $html, 'page.html', $runtime_origin . '/store/' );
+
+		$extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertStringContainsString( 'action="' . $endpoint . '"', $body );
+		self::assertStringContainsString( 'value="https://static.example.test/event/"', $body );
+		self::assertStringNotContainsString( 'SS_PRESERVED_FORM_ACTION_', $body );
+	}
+
+	public function test_form_action_preservation_can_be_enabled_by_filter(): void {
+		WpEnv::$options['simply-static']['force_replace_url'] = true;
+		Options::reinstance();
+
+		$endpoint = 'https://example.test/calendar/download';
+		add_filter(
+			'simply_static_preserve_form_action',
+			static function ( $preserve, $action ) use ( $endpoint ) {
+				return $preserve || $endpoint === $action;
+			},
+			10,
+			2
+		);
+
+		$extractor = $this->extractor( 'html', '<form action="' . $endpoint . '"></form>' );
+		$extractor->extract_and_update_urls();
+
+		self::assertStringContainsString( 'action="' . $endpoint . '"', $extractor->get_body() );
+	}
+
 	private function extractor( string $type, string $body, string $file_path = 'page.html', string $page_url = 'https://example.test/blog/page' ): Url_Extractor {
 		$unique_path = str_replace( '/', '-', uniqid( '', true ) ) . '-' . basename( $file_path );
 		file_put_contents( $this->archive_dir . $unique_path, $body );
