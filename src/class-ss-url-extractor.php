@@ -138,6 +138,20 @@ class Url_Extractor {
 	private $svg_data_uris = [];
 
 	/**
+	 * Form action values protected from broad URL replacement passes.
+	 *
+	 * @var array
+	 */
+	private $preserved_form_actions = array();
+
+	/**
+	 * Restore protected form actions after content filters have run.
+	 *
+	 * @var bool
+	 */
+	private $restore_form_actions_on_save = false;
+
+	/**
 	 * Origin of the page currently being processed.
 	 *
 	 * Managed and reverse-proxy environments can fetch a page from a runtime
@@ -198,6 +212,14 @@ class Url_Extractor {
 		// Guard against filters returning null (e.g. due to PCRE backtrack/recursion limit errors).
 		if ( null === $content ) {
 			$content = '';
+		}
+
+		if ( $this->restore_form_actions_on_save && ! empty( $this->preserved_form_actions ) ) {
+			$content = str_replace(
+				array_keys( $this->preserved_form_actions ),
+				array_values( $this->preserved_form_actions ),
+				$content
+			);
 		}
 
 		// Restore script tags if they exist and there are placeholders in the content
@@ -270,49 +292,153 @@ class Url_Extractor {
 	private function extract_and_update_urls_for_source_origin( $source_origin, $source_origin_is_configured ) {
 		// Reset preserved tags for each extraction run
 		$this->xmp_tags = [];
+		$preserve_form_actions = $this->static_page->is_type( 'html' );
 
-		if ( $this->static_page->is_type( 'html' ) ) {
-			$this->save_body( $this->extract_and_replace_urls_in_html() );
-			$body = apply_filters( 'ss_after_replace_urls_in_html', $this->get_body(), $this->static_page );
-			$this->save_body( $body );
+		if ( $preserve_form_actions ) {
+			$this->preserve_excluded_form_actions();
 		}
 
-		// Treat as CSS either by content-type or by file extension fallback (handles servers sending wrong or missing headers)
-		$looks_like_css = $this->static_page->is_type( 'css' ) || ( isset( $this->static_page->file_path ) && substr( $this->static_page->file_path, - 4 ) === '.css' );
-		if ( $looks_like_css ) {
-			$this->save_body( $this->extract_and_replace_urls_in_css( $this->get_body() ) );
-		}
-
-		if ( $this->static_page->is_type( 'xml' ) || $this->static_page->is_type( 'xsl' ) ) {
-			$this->save_body( $this->extract_and_replace_urls_in_xml() );
-		}
-
-		if ( $this->static_page->is_type( 'json' ) ) {
-			// Check if the URL includes 'simply-static/configs'
-			if ( strpos( $this->static_page->file_path, 'simply-static/configs' ) === false ) {
-				// Proceed to replace the URL.
-				$this->save_body( $this->extract_and_replace_urls_in_json() );
-			}
-		}
-
-		if ( $this->static_page->is_type( 'html' ) || $this->static_page->is_type( 'css' ) || $this->static_page->is_type( 'xml' ) || $this->static_page->is_type( 'json' ) ) {
-			// Check if the URL includes 'simply-static/configs'
-			if ( strpos( $this->static_page->file_path, 'simply-static/configs' ) === false ) {
-				// Replace encoded URLs.
-				$this->replace_encoded_urls();
+		try {
+			if ( $this->static_page->is_type( 'html' ) ) {
+				$this->save_body( $this->extract_and_replace_urls_in_html() );
+				$body = apply_filters( 'ss_after_replace_urls_in_html', $this->get_body(), $this->static_page );
+				$this->save_body( $body );
 			}
 
-			// If activated forced string/replace for URLs.
-			if ( $this->options->get( 'force_replace_url' ) && ( ! $this->options->get( 'use_forms' ) && ! $this->options->get( 'use_comments' ) ) ) {
-				$this->force_replace_urls();
+			// Treat as CSS either by content-type or by file extension fallback (handles servers sending wrong or missing headers)
+			$looks_like_css = $this->static_page->is_type( 'css' ) || ( isset( $this->static_page->file_path ) && substr( $this->static_page->file_path, - 4 ) === '.css' );
+			if ( $looks_like_css ) {
+				$this->save_body( $this->extract_and_replace_urls_in_css( $this->get_body() ) );
 			}
 
-			if ( '' !== $source_origin && ! $source_origin_is_configured ) {
-				$this->replace_unconfigured_source_origin_urls( $source_origin );
+			if ( $this->static_page->is_type( 'xml' ) || $this->static_page->is_type( 'xsl' ) ) {
+				$this->save_body( $this->extract_and_replace_urls_in_xml() );
+			}
+
+			if ( $this->static_page->is_type( 'json' ) ) {
+				// Check if the URL includes 'simply-static/configs'
+				if ( strpos( $this->static_page->file_path, 'simply-static/configs' ) === false ) {
+					// Proceed to replace the URL.
+					$this->save_body( $this->extract_and_replace_urls_in_json() );
+				}
+			}
+
+			if ( $this->static_page->is_type( 'html' ) || $this->static_page->is_type( 'css' ) || $this->static_page->is_type( 'xml' ) || $this->static_page->is_type( 'json' ) ) {
+				// Check if the URL includes 'simply-static/configs'
+				if ( strpos( $this->static_page->file_path, 'simply-static/configs' ) === false ) {
+					// Replace encoded URLs.
+					$this->replace_encoded_urls();
+				}
+
+				// If activated forced string/replace for URLs.
+				if ( $this->options->get( 'force_replace_url' ) && ( ! $this->options->get( 'use_forms' ) && ! $this->options->get( 'use_comments' ) ) ) {
+					$this->force_replace_urls();
+				}
+
+				if ( '' !== $source_origin && ! $source_origin_is_configured ) {
+					$this->replace_unconfigured_source_origin_urls( $source_origin );
+				}
+			}
+		} finally {
+			if ( $preserve_form_actions ) {
+				$this->restore_preserved_form_actions();
 			}
 		}
 
 		return array_unique( $this->extracted_urls );
+	}
+
+	/**
+	 * Protect form actions that point to URLs excluded from the static export.
+	 *
+	 * Dynamic handlers such as PHP endpoints cannot be served by the static
+	 * destination. Keep those actions on the WordPress origin while broad URL
+	 * replacement continues to handle the rest of the document.
+	 *
+	 * @return void
+	 */
+	private function preserve_excluded_form_actions() {
+		$content = $this->get_body();
+
+		$this->preserved_form_actions = array();
+
+		if ( ! is_string( $content ) || '' === $content || false === stripos( $content, '<form' ) ) {
+			return;
+		}
+
+		$_result = preg_replace_callback(
+			'/<form\b(?:[^>"\']+|"[^"]*"|\'[^\']*\')*>/is',
+			function ( $form_match ) {
+				$_form = preg_replace_callback(
+					'/(\saction\s*=\s*)(?:"([^"]*)"|\'([^\']*)\'|([^\s>]+))/i',
+					function ( $action_match ) {
+						if ( isset( $action_match[2] ) && '' !== $action_match[2] ) {
+							$action = $action_match[2];
+							$quote  = '"';
+						} elseif ( isset( $action_match[3] ) && '' !== $action_match[3] ) {
+							$action = $action_match[3];
+							$quote  = "'";
+						} else {
+							$action = isset( $action_match[4] ) ? $action_match[4] : '';
+							$quote  = '';
+						}
+
+						$decoded_action = html_entity_decode( $action, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8' );
+						$absolute_url   = Util::relative_to_absolute_url( $decoded_action, $this->static_page->url );
+						$preserve       = is_string( $absolute_url ) && '' !== $absolute_url && Util::is_local_url( $absolute_url ) && Util::is_url_excluded( $absolute_url );
+						$preserve       = (bool) apply_filters(
+							'simply_static_preserve_form_action',
+							$preserve,
+							$decoded_action,
+							$absolute_url,
+							$this->static_page,
+							$this
+						);
+
+						if ( ! $preserve ) {
+							return $action_match[0];
+						}
+
+						$placeholder = 'SS_PRESERVED_FORM_ACTION_' . count( $this->preserved_form_actions );
+						$this->preserved_form_actions[ $placeholder ] = $action;
+
+						return $action_match[1] . $quote . $placeholder . $quote;
+					},
+					$form_match[0]
+				);
+
+				return null === $_form ? $form_match[0] : $_form;
+			},
+			$content
+		);
+
+		if ( null !== $_result && $_result !== $content ) {
+			$this->save_body( $_result );
+		}
+	}
+
+	/**
+	 * Restore form action values after all broad URL replacement passes.
+	 *
+	 * @return void
+	 */
+	private function restore_preserved_form_actions() {
+		if ( empty( $this->preserved_form_actions ) ) {
+			return;
+		}
+
+		$content = $this->get_body();
+
+		$this->restore_form_actions_on_save = true;
+
+		try {
+			if ( is_string( $content ) && '' !== $content ) {
+				$this->save_body( $content );
+			}
+		} finally {
+			$this->restore_form_actions_on_save = false;
+			$this->preserved_form_actions       = array();
+		}
 	}
 
 	/**
