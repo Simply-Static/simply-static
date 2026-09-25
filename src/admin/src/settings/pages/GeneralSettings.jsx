@@ -307,7 +307,7 @@ function GeneralSettings() {
                         <p>{__('Studio manages the public URL for this environment automatically, so you do not need to configure replacement URLs manually.', 'simply-static')}</p>
                     </StudioNotice>
                 }
-                <p>{__('When exporting your static site, any links to your WordPress site will be replaced by one of the following: absolute URLs, relative URLs, or URLs contructed for offline use.', 'simply-static')}</p>
+                <p>{__('When exporting your static site, any links to your WordPress site will be replaced by one of the following: absolute URLs, relative URLs, or URLs constructed for offline use.', 'simply-static')}</p>
                 <SelectControl
                     label={__('Replacing URLs', 'simply-static')}
                     value={replaceType}
@@ -862,7 +862,7 @@ function GeneralSettings() {
             </CardHeader>
             <CardBody>
                 <TextareaControl
-                    label={__('Urls to exclude', 'simply-static')}
+                    label={__('URLs to exclude', 'simply-static')}
                     placeholder={"/some-directory/\n.jpg\n/\\.(pdf|zip)$/i\n/\\/private\\/.*/"}
                     __nextHasNoMarginBottom
                     help={__('You can enter substrings or regex (wrap with / /). Examples: .jpg or /\\.(pdf|zip)$/i or /\/private\/.*/ (one per line).', 'simply-static')}

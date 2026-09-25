@@ -90,6 +90,7 @@ class Discover_Urls_Task extends Task {
 
 		$this->save_status_message(
 			sprintf(
+				/* translators: 1: crawler name, 2: current crawler number, 3: total number of crawlers. */
 				__( 'Discovering URLs with %1$s Crawler (%2$d of %3$d)', 'simply-static' ),
 				$crawler_name,
 				$crawler_number,
@@ -116,6 +117,7 @@ class Discover_Urls_Task extends Task {
 				: 0;
 			$this->save_status_message(
 				sprintf(
+					/* translators: 1: crawler name, 2: current crawler number, 3: total crawlers, 4: files queued, 5: entries scanned. */
 					__( 'Discovering URLs with %1$s Crawler (%2$d of %3$d): %4$d files queued, %5$d entries scanned', 'simply-static' ),
 					$crawler_name,
 					$crawler_number,
@@ -133,7 +135,8 @@ class Discover_Urls_Task extends Task {
 		$generate_type = $this->options->get( 'generate_type' );
 		if ( $generate_type === 'export' ) {
 			$message = sprintf(
-				_n( 'Added %d URL via %s Crawler', 'Added %d URLs via %s Crawler', $crawler_total, 'simply-static' ),
+				/* translators: 1: number of URLs, 2: crawler name. */
+				_n( 'Added %1$d URL via %2$s Crawler', 'Added %1$d URLs via %2$s Crawler', $crawler_total, 'simply-static' ),
 				$crawler_total,
 				$crawler_name
 			);
@@ -174,6 +177,7 @@ class Discover_Urls_Task extends Task {
 		if ( $generate_type === 'export' ) {
 			// Save the final status message
 			$message = sprintf(
+				/* translators: %d: number of URLs added by crawlers. */
 				_n( 'Added %d URL via Crawler', 'Added %d URLs via Crawler', $new_urls_for_export, 'simply-static' ),
 				$new_urls_for_export
 			);

@@ -136,7 +136,7 @@ class SS_Adminbar_Integration extends Integration {
  public function get_export_status() {
         // Validate nonce.
         if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( $_POST['security'], 'ss-admin-bar-nonce' ) ) {
-            wp_die( 'Security check failed' );
+            wp_die( esc_html__( 'Security check failed', 'simply-static' ) );
         }
 
 		// Permission check aligned with admin bar visibility (generate capability)

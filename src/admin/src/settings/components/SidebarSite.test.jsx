@@ -1,6 +1,8 @@
 global.wp = {
 	i18n: {
 		__: ( value ) => value,
+		_n: ( singular, plural, number ) =>
+			1 === number ? singular : plural,
 		sprintf: ( value, number ) => value.replace( '%d', number ),
 	},
 };

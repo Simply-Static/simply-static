@@ -18,7 +18,7 @@ import apiFetch from "@wordpress/api-fetch";
 import useInterval from "../../hooks/useInterval";
 import {getRollbackConflict} from "../utils/export";
 
-const {__, sprintf} = wp.i18n;
+const {__, _n, sprintf} = wp.i18n;
 
 const getSafeArchiveActionMessage = ( message, fallbackMessage ) => {
     return 'string' === typeof message && message.trim() ? message.trim() : fallbackMessage;
@@ -323,7 +323,7 @@ function SidebarSite( props = null ) {
             return a.props.children.localeCompare(b.props.children);
         });
 
-        buildOptions = <optgroup label="Builds">
+        buildOptions = <optgroup label={__('Builds', 'simply-static')}>
             {builds}
         </optgroup>
     }
@@ -391,10 +391,15 @@ function SidebarSite( props = null ) {
     const hasAnySettings = ['/general', '/deployment', '/forms', '/search', '/optimize', '/hide-wp', '/workflow'].some(isAllowed);
     // Include UAM route in Advanced only as a possible member; if UAM is disabled server-side it won't be in allowed_pages anyway
     const hasAnyAdvanced = ['/integrations', '/utilities', '/debug', '/uam'].some(isAllowed);
+    const unpushedChangesMessage = sprintf(
+        /* translators: %d: number of changes that have not been pushed. */
+        _n('You have %d unpushed change.', 'You have %d unpushed changes.', unpushedChanges, 'simply-static'),
+        unpushedChanges
+    );
 
     return <Card className={"plugin-nav"}>
         <div className={"plugin-logo"}>
-            <img alt="Logo"
+            <img alt={__('Simply Static logo', 'simply-static')}
                  src={options.logo}/>
         </div>
         <div className={`generate-container ${disabledButton && !isRollbackRunning ? 'generating' : ''} ${isRollbackRunning ? 'rollback-locked' : ''}`}>
@@ -451,13 +456,13 @@ function SidebarSite( props = null ) {
 
             {unpushedChanges > 0 && !isRollbackRunning && !isRunning && !isPaused && ('pro' === options.plan && isPro()) &&
                 <Notice status="info" isDismissible={false} className={"unpushed-changes-notice"}>
-                    <p>{sprintf(__('You have %d unpushed changes.', 'simply-static'), unpushedChanges)}</p>
+                    <p>{unpushedChangesMessage}</p>
                 </Notice>
             }
             {unpushedChanges > 0 && !isRollbackRunning && !isRunning && !isPaused && !('pro' === options.plan && isPro()) &&
                 <Tooltip text={__('Upgrade to Simply Static Pro to push only changes.', 'simply-static')}>
                     <Notice status="info" isDismissible={false} className={"unpushed-changes-notice"}>
-                        <p>{sprintf(__('You have %d unpushed changes.', 'simply-static'), unpushedChanges)}</p>
+                        <p>{unpushedChangesMessage}</p>
                     </Notice>
                 </Tooltip>
             }
@@ -682,7 +687,7 @@ function SidebarSite( props = null ) {
             )}
         </CardBody>}
         <CardBody>
-            <h4 className={"settings-headline"}>Learn</h4>
+            <h4 className={"settings-headline"}>{__('Learn', 'simply-static')}</h4>
             <Button href="https://docs.simplystatic.com" target="_blank">
                 <Dashicon icon="admin-links"/> {__('Documentation', 'simply-static')}
             </Button>

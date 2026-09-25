@@ -61,7 +61,18 @@ class Delay_Integration extends Integration {
 		$delay_time = $this->get_delayed_time();
 		$left       = $delay_time - time();
 
-		throw new \Exception( sprintf( __( 'You can export again in about %s second(s)', 'simply-static'), $left ) );
+		throw new \Exception(
+			sprintf(
+				/* translators: %s: approximate number of seconds until another export can start. */
+				_n(
+					'You can export again in about %s second',
+					'You can export again in about %s seconds',
+					$left,
+					'simply-static'
+				),
+				$left
+			)
+		);
 	}
 
 

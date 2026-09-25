@@ -181,7 +181,13 @@ abstract class Crawler {
 
 				// Create a new Simply_Static\Page for each URL
 				$static_page = \Simply_Static\Page::query()->find_or_initialize_by( 'url', $url );
-				$static_page->set_status_message( sprintf( __( 'Added by %s Crawler', 'simply-static' ), $this->name ) );
+				$static_page->set_status_message(
+					sprintf(
+						/* translators: %s: crawler name. */
+						__( 'Added by %s Crawler', 'simply-static' ),
+						$this->name
+					)
+				);
 				$static_page->found_on_id = 0;
 				$this->configure_static_page( $static_page, $url );
 				$static_page->save();

@@ -146,12 +146,12 @@ class SEOPress_Sitemap_Handler extends Page_Handler {
             echo '<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:sitemap="http://www.sitemaps.org/schemas/sitemap/0.9">';
             echo '<xsl:output method="html" encoding="UTF-8" indent="yes"/>';
             echo '<xsl:template match="/">';
-            echo '<html><head><title>XML Sitemap</title>';
+            echo '<html><head><title>' . esc_html__( 'XML Sitemap', 'simply-static' ) . '</title>';
             echo '<style>body{font-family:Arial,sans-serif;font-size:14px;color:#333}h1{font-size:24px;font-weight:normal;margin:10px 0}table{border-collapse:collapse;width:100%;margin:20px 0}th,td{padding:10px;text-align:left}th{background-color:#f2f2f2}tr:nth-child(even){background-color:#f9f9f9}a{color:#337ab7;text-decoration:none}a:hover{text-decoration:underline}</style>';
             echo '</head><body>';
-            echo '<h1>XML Sitemap</h1>';
+            echo '<h1>' . esc_html__( 'XML Sitemap', 'simply-static' ) . '</h1>';
             echo '<table>';
-            echo '<tr><th>URL</th><th>Last Modified</th></tr>';
+            echo '<tr><th>URL</th><th>' . esc_html__( 'Last modified', 'simply-static' ) . '</th></tr>';
             echo '<xsl:for-each select="sitemap:urlset/sitemap:url">';
             echo '<tr>';
             echo '<td><a href="{sitemap:loc}"><xsl:value-of select="sitemap:loc"/></a></td>';

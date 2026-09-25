@@ -115,7 +115,7 @@ export default function EnvironmentSidebar({ getSettings, isRunning }) {
     return (<div className={"environment-container"}>
         <h4 className={"settings-headline"}> {__('Environment', 'simply-static')}</h4>
         { !showingEnvironmentForm && selectedEnvironment &&
-            <p>Current: <strong>{currentVersion()}</strong></p>
+            <p>{__('Current', 'simply-static')}: <strong>{currentVersion()}</strong></p>
         }
         { !showingEnvironmentForm && selectableEnvironments.length > 0 &&
             <>
@@ -133,7 +133,7 @@ export default function EnvironmentSidebar({ getSettings, isRunning }) {
         {
             !showingEnvironmentForm && !isStudioEnvironment &&
             <Button disabled={isRunning || changingEnvironment} variant={"primary"} size={"large"} onClick={() => setShowingEnvironmentForm(true)}>
-                Create an Environment
+                {__('Create an Environment', 'simply-static')}
             </Button>
         }
         { showingEnvironmentForm && !isStudioEnvironment && <EnvironmentForm onClose={() => setShowingEnvironmentForm(false)} setSelectedEnvironment={setSelectedEnvironment} setSelectableEnvironments={setSelectableEnvironments} />}

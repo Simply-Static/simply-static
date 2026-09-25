@@ -450,7 +450,7 @@ function DeploymentSettings() {
                             </>
                         }
                         <SelectControl
-                            label={__('Visiblity', 'simply-static')}
+                            label={__('Visibility', 'simply-static')}
                             value={githubVisibility}
                             help={__('Decide if you want to make your repository public or private.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
@@ -470,7 +470,7 @@ function DeploymentSettings() {
                             label={__('Branch', 'simply-static')}
                             type={settings.github_branch}
                             placeholder={"main"}
-                            help={__('Simply Static automatically uses "main" as branch. You may want to modify that for example to gh-pages. for GitHub Pages.', 'simply-static')}
+                            help={__('Simply Static automatically uses "main" as the branch. For GitHub Pages, you may want to change it to gh-pages.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             __next40pxDefaultSize
                             __nextHasNoMarginBottom
@@ -483,7 +483,7 @@ function DeploymentSettings() {
                         <TextControl
                             label={__('Webhook URL', 'simply-static')}
                             type={"url"}
-                            help={__('Enter your Webhook URL here and Simply Static will send a POST request after all files are commited to GitHub.', 'simply-static')}
+                            help={__('Enter your Webhook URL here and Simply Static will send a POST request after all files are committed to GitHub.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             __next40pxDefaultSize
                             __nextHasNoMarginBottom
@@ -545,7 +545,7 @@ function DeploymentSettings() {
                             type={"text"}
                             help={
                                 <>
-                                    {__('This field is auto-filled with the e-mail address used for activating Simply Static Pro.', 'simply-static')}<br></br>
+                                    {__('This field is auto-filled with the email address used for activating Simply Static Pro.', 'simply-static')}<br></br>
                                     <b>{__('An account will be created automatically on your first deployment.', 'simply-static')}</b>
                                 </>
                             }
@@ -570,7 +570,7 @@ function DeploymentSettings() {
                         <TextControl
                             label={__('Domain Suffix', 'simply-static')}
                             type={"text"}
-                            help={__('This defaults to tiiny.site. If you have a custom domain configured in Tiiny.host, you can also use  that one.', 'simply-static')}
+                            help={__('This defaults to tiiny.site. If you have a custom domain configured in Tiiny.host, you can also use that one.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             __next40pxDefaultSize
                             __nextHasNoMarginBottom
@@ -655,7 +655,7 @@ function DeploymentSettings() {
                         <TextControl
                             label={__('Bunny CDN Access Key', 'simply-static')}
                             type={"password"}
-                            help={__('Enter your Acess Key from Bunny CDN. You will find it within your storage zone setttings within FTP & API Access -> Password.', 'simply-static')}
+                            help={__('Enter your Access Key from Bunny CDN. You will find it in your storage zone settings under FTP & API Access -> Password.', 'simply-static')}
                             disabled={('free' === options.plan || !isPro())}
                             __next40pxDefaultSize
                             __nextHasNoMarginBottom

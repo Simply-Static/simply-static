@@ -207,7 +207,7 @@ function SearchSettings() {
                 </CardHeader>
                 <CardBody>
                     <TextControl
-                        label={__('CSS-Selector for Title', 'simply-static')}
+                        label={__('CSS selector for title', 'simply-static')}
                         type={"text"}
                         placeholder={'title'}
                         __next40pxDefaultSize
@@ -227,7 +227,7 @@ function SearchSettings() {
                         }}
                     />
                     <TextControl
-                        label={__('CSS-Selector for Content', 'simply-static')}
+                        label={__('CSS selector for content', 'simply-static')}
                         type={"text"}
                         placeholder={'body'}
                         __next40pxDefaultSize
@@ -248,7 +248,7 @@ function SearchSettings() {
                     />
 
                     <TextControl
-                        label={__('CSS-Selector for Excerpt', 'simply-static')}
+                        label={__('CSS selector for excerpt', 'simply-static')}
                         type={"text"}
                         placeholder={'.entry-content'}
                         __next40pxDefaultSize
@@ -272,7 +272,7 @@ function SearchSettings() {
                         label={__('Exclude URLs', 'simply-static')}
                         placeholder={"author\narchive\ncategory"}
                         __nextHasNoMarginBottom
-                        help={__('Exclude URLs from indexing (one per line). You can use full URLs, parts of an URL or plain words (like stop words).', 'simply-static')}
+                        help={__('Exclude URLs from indexing (one per line). You can use full URLs, parts of a URL, or plain words (such as stop words).', 'simply-static')}
                         disabled={('free' === options.plan || !isPro())}
                         value={settings.search_excludable}
                         onChange={(excludes) => {
@@ -301,7 +301,7 @@ function SearchSettings() {
                     </CardHeader>
                     <CardBody>
                         <TextControl
-                            label={__('CSS-Selector', 'simply-static')}
+                            label={__('CSS selector', 'simply-static')}
                             type={"text"}
                             __next40pxDefaultSize
                             __nextHasNoMarginBottom
@@ -485,7 +485,7 @@ function SearchSettings() {
                             }}
                         />
                         <TextControl
-                            label={__('CSS-Selector', 'simply-static')}
+                            label={__('CSS selector', 'simply-static')}
                             type={"text"}
                             __next40pxDefaultSize
                             __nextHasNoMarginBottom

@@ -74,7 +74,7 @@ class Compatibility_API_Client {
 	private static function fetch() {
 		$endpoint = self::get_endpoint();
 		if ( ! $endpoint ) {
-			return new \WP_Error( 'invalid_compatibility_api_url', 'The compatibility API URL is invalid.' );
+			return new \WP_Error( 'invalid_compatibility_api_url', __( 'The compatibility API URL is invalid.', 'simply-static' ) );
 		}
 
 		$args = array(
@@ -95,17 +95,31 @@ class Compatibility_API_Client {
 
 		$code = wp_remote_retrieve_response_code( $response );
 		if ( 200 !== $code ) {
-			return new \WP_Error( 'compatibility_api_http_error', 'Compatibility API returned HTTP ' . $code . '.' );
+			return new \WP_Error(
+				'compatibility_api_http_error',
+				sprintf(
+					/* translators: %d: HTTP status code. */
+					__( 'Compatibility API returned HTTP %d.', 'simply-static' ),
+					$code
+				)
+			);
 		}
 
 		$payload = json_decode( wp_remote_retrieve_body( $response ), true );
 		if ( ! is_array( $payload ) || ! isset( $payload['plugins'] ) || ! is_array( $payload['plugins'] ) ) {
-			return new \WP_Error( 'invalid_compatibility_api_payload', 'Compatibility API returned invalid JSON.' );
+			return new \WP_Error( 'invalid_compatibility_api_payload', __( 'Compatibility API returned invalid JSON.', 'simply-static' ) );
 		}
 
 		$schema_version = isset( $payload['schema_version'] ) ? (string) $payload['schema_version'] : '1.0';
 		if ( '1' !== strtok( $schema_version, '.' ) ) {
-			return new \WP_Error( 'unsupported_compatibility_api_schema', 'Unsupported compatibility API schema ' . $schema_version . '.' );
+			return new \WP_Error(
+				'unsupported_compatibility_api_schema',
+				sprintf(
+					/* translators: %d: compatibility API schema version. */
+					__( 'Unsupported compatibility API schema %d.', 'simply-static' ),
+					$schema_version
+				)
+			);
 		}
 
 		$plugins = array();

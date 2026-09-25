@@ -299,7 +299,7 @@ function SettingsPage() {
                                                     {__('We have temporarily disabled all the pro features now. Please contact our support to have the problem solved.', 'simply-static')}
                                                 </p>
                                                 <Button isPrimary href={"https://simplystatic.com/support/"}
-                                                        target="_blank">Contact Support</Button>
+                                                        target="_blank">{__('Contact Support', 'simply-static')}</Button>
                                             </Notice>
                                             <Spacer margin={"5px"}/>
                                         </>

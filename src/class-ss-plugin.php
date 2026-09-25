@@ -616,7 +616,11 @@ class Plugin {
 			if ( $parent_static_page ) {
 				$display_url = Util::get_path_from_local_url( $parent_static_page->url );
 				$parent_url  = esc_url( $parent_static_page->url );
-				$label       = sprintf( __( 'Found on %s', 'simply-static' ), $display_url );
+				$label       = sprintf(
+					/* translators: %s: URL on which the exported resource was discovered. */
+					__( 'Found on %s', 'simply-static' ),
+					$display_url
+				);
 				$msg         .= $parent_url
 					? '<a href="' . esc_attr( $parent_url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $label ) . '</a>'
 					: esc_html( $label );

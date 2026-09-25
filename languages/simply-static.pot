@@ -1,26 +1,27 @@
-# Copyright (C) 2025 Patrick Posner
+# Copyright (C) 2026 Patrick Posner
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simply Static 3.5.3\n"
+"Project-Id-Version: Simply Static 3.8.13\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simply-static\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-12-07T18:14:05+00:00\n"
+"POT-Creation-Date: 2026-09-25T07:54:54+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: simply-static\n"
 
 #. Plugin Name of the plugin
 #: simply-static.php
-#: src/admin/inc/class-ss-admin-settings.php:102
-#: src/admin/inc/class-ss-admin-settings.php:103
+#: src/admin/inc/class-ss-admin-settings.php:140
+#: src/admin/inc/class-ss-admin-settings.php:252
+#: src/admin/inc/class-ss-admin-settings.php:1496
 #: src/integrations/class-ss-adminbar-integration.php:47
 #: src/integrations/class-ss-adminbar-integration.php:51
-#: src/integrations/class-ss-elementor-integration.php:399
+#: src/integrations/class-ss-elementor-integration.php:456
 msgid "Simply Static"
 msgstr ""
 
@@ -44,139 +45,372 @@ msgstr ""
 msgid "https://patrickposner.com"
 msgstr ""
 
-#: simply-static.php:27
+#: simply-static.php:28
 msgid "Simply Static requires PHP 7.4 or higher."
+msgstr ""
+
+#: simply-static.php:28
+#: simply-static.php:34
+msgid "Plugin dependency check"
 msgstr ""
 
 #: simply-static.php:34
 msgid "Simply Static requires WordPress 6.2 or higher."
 msgstr ""
 
-#. translators: 1: required Simply Static Pro version
-#: simply-static.php:109
-#, php-format
-msgid "Simply Static Pro has been deactivated because it is not compatible with this version of Simply Static. Please update Simply Static Pro to at least version %1$s and then reactivate it."
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:59
+msgid "Simply Static — Latest Export"
 msgstr ""
 
-#. translators: 1: required Simply Static Pro version
-#: simply-static.php:122
-#, php-format
-msgid "Simply Static Pro has been deactivated network-wide because it is not compatible with this version of Simply Static. Please update Simply Static Pro to at least version %1$s and then reactivate it."
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:198
+msgid "No export has been run yet."
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-meta.php:72
-msgid "Export static page"
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:200
+msgid "Run Your First Export"
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-meta.php:74
-msgid "Export posts and pages directly with "
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:238
+msgid "Completed"
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-rest.php:357
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:240
+msgid "In Progress"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:245
+msgid "Pages"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:249
+msgid "Duration"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:253
+msgid "Date"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:257
+msgid "Delivery"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:264
+msgid "View Export"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:280
+#: src/admin/inc/class-ss-admin-settings.php:199
+#: src/integrations/class-ss-adminbar-integration.php:109
+#: src/admin/src/settings/components/PromoSidebar.jsx:12
+msgid "Simply Static Pro"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:281
+msgid "GitHub & CDN deployment, forms, search, and more."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:284
+#: src/admin/inc/class-ss-admin-settings.php:212
+#: src/admin/inc/class-ss-admin-settings.php:252
+#: src/integrations/class-ss-adminbar-integration.php:120
+#: src/admin/src/settings/components/PromoSidebar.jsx:40
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:50
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:218
+msgid "Static Studio"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:285
+msgid "WordPress operations with Site Health, reports, uptime, performance checks, and hosting."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:301
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:48
+msgid "ZIP Archive"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:302
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:49
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:270
+msgid "Local Directory"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:303
+#: src/integrations/pro/class-ss-github-integration.php:10
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:53
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:322
+msgid "GitHub"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:304
+msgid "CDN"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:305
+msgid "BunnyCDN"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:306
+msgid "Tiiny Host"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:307
+msgid "Simply CDN"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:308
+msgid "Amazon S3"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:309
+msgid "DigitalOcean"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-dashboard-widget.php:312
+msgid "Unknown"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-rest.php:495
 #: src/integrations/class-ss-adminbar-integration.php:62
-#: src/integrations/class-ss-adminbar-integration.php:170
+#: src/integrations/class-ss-adminbar-integration.php:196
 msgid "Running"
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-rest.php:357
+#: src/admin/inc/class-ss-admin-rest.php:495
 msgid "Paused"
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-rest.php:357
+#: src/admin/inc/class-ss-admin-rest.php:495
 #: src/integrations/class-ss-adminbar-integration.php:59
-#: src/integrations/class-ss-adminbar-integration.php:171
+#: src/integrations/class-ss-adminbar-integration.php:197
 msgid "Idle"
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-rest.php:378
+#: src/admin/inc/class-ss-admin-rest.php:519
 msgid "This endpoint is only available for multisite installations."
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-rest.php:385
+#: src/admin/inc/class-ss-admin-rest.php:526
 msgid "Invalid blog ID provided."
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-rest.php:400
+#. translators: %d: WordPress site ID.
+#: src/admin/inc/class-ss-admin-rest.php:542
 #, php-format
 msgid "CRON triggered successfully for site %d."
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-rest.php:1166
+#: src/admin/inc/class-ss-admin-rest.php:579
+msgid "Export lock cleared."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-rest.php:1092
+msgid "Unable to verify that the export queue is idle."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-rest.php:1110
+#: src/admin/inc/class-ss-admin-rest.php:1115
+#: src/admin/inc/class-ss-admin-rest.php:1525
+msgid "No options updated."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-rest.php:1123
+#: src/admin/inc/class-ss-admin-rest.php:1496
+msgid "Settings cannot be imported while an export is active or paused."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-rest.php:1366
+msgid "Plugin settings cannot be reset while an export is active or paused."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-rest.php:1386
+msgid "The database table cannot be reset while an export is active or paused."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-rest.php:1413
+msgid "The background worker is still active. Wait for it to finish before resetting the queue."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-rest.php:1492
+msgid "You are not allowed to import settings across the network."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-rest.php:1507
+msgid "Invalid source site."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-rest.php:1514
+msgid "Please save the settings on the selected subsite before importing them into a new site."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-rest.php:1532
+msgid "Settings cannot be migrated while an export is active or paused."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-rest.php:1631
+msgid "No deploy manifest available."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-rest.php:1643
+msgid "Deploy manifest not found."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-rest.php:1698
 msgid "An export is already running. Please wait for it to complete or cancel it before starting a new one."
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-settings.php:113
-#: src/admin/inc/class-ss-admin-settings.php:114
-#: src/admin/src/settings/components/GenerateButtons.jsx:20
-#: src/admin/src/settings/components/SidebarSite.jsx:254
-#: src/admin/src/settings/components/Site.jsx:120
-#: src/admin/src/settings/components/Site.jsx:125
-#: src/admin/src/settings/pages/UAMSettings.jsx:47
-msgid "Generate"
+#: src/admin/inc/class-ss-admin-rest.php:1721
+msgid "The export could not be started because another export is active or an export preflight check failed."
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-settings.php:126
-#: src/admin/inc/class-ss-admin-settings.php:127
-#: src/class-ss-plugin.php:549
-#: src/integrations/class-ss-adminbar-integration.php:98
-#: src/admin/src/settings/components/SidebarSite.jsx:333
-#: src/admin/src/settings/pages/UAMSettings.jsx:48
-#: src/admin/src/settings/pages/UAMSettings.jsx:149
-msgid "Settings"
+#: src/admin/inc/class-ss-admin-rest.php:1780
+msgid "Temporary files cannot be cleared while the export queue is active."
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-settings.php:141
-#: src/admin/inc/class-ss-admin-settings.php:142
-#: src/integrations/class-ss-adminbar-integration.php:86
-#: src/admin/src/settings/components/SidebarSite.jsx:327
-#: src/admin/src/settings/pages/Diagnostics.jsx:33
-#: src/admin/src/settings/pages/UAMSettings.jsx:26
-#: src/admin/src/settings/pages/UAMSettings.jsx:49
-msgid "Diagnostics"
+#: src/admin/inc/class-ss-admin-rest.php:1877
+msgid "The migration plugin package failed integrity verification."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-rest.php:1899
+msgid "Plugin installation failed."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-settings.php:17
+msgid "The 404 export cannot start while another export is active or paused."
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-settings.php:56
+msgid "The 404 export could not be started because another export is active or an export preflight check failed."
 msgstr ""
 
 #: src/admin/inc/class-ss-admin-settings.php:156
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:46
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:136
-msgid "Static Studio"
+#: src/admin/inc/class-ss-admin-settings.php:157
+#: src/admin/src/settings/components/Site.jsx:120
+#: src/admin/src/settings/components/Site.jsx:125
+#: src/admin/src/settings/pages/UAMSettings.jsx:48
+msgid "Generate"
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-settings.php:157
+#: src/admin/inc/class-ss-admin-settings.php:169
+#: src/admin/inc/class-ss-admin-settings.php:170
+#: src/class-ss-plugin.php:861
+#: src/integrations/class-ss-adminbar-integration.php:98
+#: src/admin/src/settings/components/SidebarSite.jsx:570
+#: src/admin/src/settings/pages/UAMSettings.jsx:49
+#: src/admin/src/settings/pages/UAMSettings.jsx:150
+msgid "Settings"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-settings.php:179
+msgid "errors in diagnostics"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-settings.php:184
+#: src/admin/inc/class-ss-admin-settings.php:185
+#: src/integrations/class-ss-adminbar-integration.php:86
+#: src/admin/src/settings/components/SidebarSite.jsx:564
+#: src/admin/src/settings/pages/Diagnostics.jsx:32
+#: src/admin/src/settings/pages/UAMSettings.jsx:26
+#: src/admin/src/settings/pages/UAMSettings.jsx:50
+msgid "Diagnostics"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-settings.php:200
+msgid "Simply Static Pro<i class=\"dashicons dashicons-external\" style=\"font-size:12px;vertical-align:-2px;height:10px;\"></i>"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-settings.php:213
 msgid "Static Studio<i class=\"dashicons dashicons-external\" style=\"font-size:12px;vertical-align:-2px;height:10px;\"></i>"
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-settings.php:1170
+#: src/admin/inc/class-ss-admin-settings.php:1429
 msgid "View Static Site"
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-settings.php:1204
+#: src/admin/inc/class-ss-admin-settings.php:1448
+#: src/integrations/class-ss-adminbar-integration.php:139
+msgid "Security check failed"
+msgstr ""
+
+#: src/admin/inc/class-ss-admin-settings.php:1597
 msgid "A multisite export lock is currently set. Resetting the lock and using queued exports are available in Simply Static Pro."
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-settings.php:1206
+#: src/admin/inc/class-ss-admin-settings.php:1599
 msgid "Learn more about Pro"
 msgstr ""
 
-#: src/class-ss-archive-creation-job.php:298
+#: src/background/class-ss-async-request.php:94
+msgid "The background request URL must use the WordPress admin origin."
+msgstr ""
+
+#: src/class-ss-archive-creation-job.php:206
+msgid "Unable to start export because no archive tasks were registered."
+msgstr ""
+
+#: src/class-ss-archive-creation-job.php:243
+msgid "Unable to start the export because the background queue could not be saved."
+msgstr ""
+
+#: src/class-ss-archive-creation-job.php:260
+msgid "Unable to start the export because the background worker could not be dispatched."
+msgstr ""
+
+#. translators: %s: archive task class name.
+#: src/class-ss-archive-creation-job.php:370
+#, php-format
+msgid "Unable to run archive task because its class is unavailable: %s"
+msgstr ""
+
+#. translators: %s: export duration in hours, minutes, and seconds.
+#: src/class-ss-archive-creation-job.php:470
 #, php-format
 msgid "Done! Finished in %s"
 msgstr ""
 
-#: src/class-ss-archive-creation-job.php:441
+#. translators: %s: exception message.
+#: src/class-ss-archive-creation-job.php:720
 #, php-format
 msgid "An exception occurred: %s"
 msgstr ""
 
-#: src/class-ss-archive-creation-job.php:459
-#: src/class-ss-url-fetcher.php:85
-#: src/class-ss-url-fetcher.php:199
+#. translators: %s: error message.
+#: src/class-ss-archive-creation-job.php:743
+#: src/class-ss-url-fetcher.php:97
+#: src/class-ss-url-fetcher.php:210
 #, php-format
 msgid "An error occurred: %s"
 msgstr ""
 
-#: src/class-ss-archive-creation-job.php:488
+#. translators: 1: PHP error type, 2: error message, 3: file path, 4: line number.
+#: src/class-ss-archive-creation-job.php:783
+#, php-format
+msgid "(%1$s) %2$s in <b>%3$s</b> on line <b>%4$d</b>"
+msgstr ""
+
+#. translators: %s: formatted PHP error details.
+#: src/class-ss-archive-creation-job.php:792
 #, php-format
 msgid "Error: %s"
+msgstr ""
+
+#: src/class-ss-compatibility-api-client.php:77
+msgid "The compatibility API URL is invalid."
+msgstr ""
+
+#. translators: %d: HTTP status code.
+#: src/class-ss-compatibility-api-client.php:102
+#, php-format
+msgid "Compatibility API returned HTTP %d."
+msgstr ""
+
+#: src/class-ss-compatibility-api-client.php:110
+msgid "Compatibility API returned invalid JSON."
+msgstr ""
+
+#. translators: %d: compatibility API schema version.
+#: src/class-ss-compatibility-api-client.php:119
+#, php-format
+msgid "Unsupported compatibility API schema %d."
 msgstr ""
 
 #: src/class-ss-diagnostic.php:54
@@ -196,331 +430,414 @@ msgstr ""
 msgid "cURL"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:60
-msgid "Permalinks"
+#: src/class-ss-diagnostic.php:58
+msgid "Docker"
 msgstr ""
 
 #: src/class-ss-diagnostic.php:61
-msgid "Indexable"
+msgid "Permalinks"
 msgstr ""
 
 #: src/class-ss-diagnostic.php:62
-msgid "Caching"
+msgid "Indexable"
 msgstr ""
 
 #: src/class-ss-diagnostic.php:63
+msgid "Caching"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:64
 msgid "WP-CRON"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:67
+#: src/class-ss-diagnostic.php:68
 msgid "Temp dir readable"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:68
-msgid "Temp dir writeable"
-msgstr ""
-
-#: src/class-ss-diagnostic.php:71
-msgid "DELETE"
+#: src/class-ss-diagnostic.php:69
+msgid "Temp dir writable"
 msgstr ""
 
 #: src/class-ss-diagnostic.php:72
-msgid "INSERT"
+msgid "DELETE"
 msgstr ""
 
 #: src/class-ss-diagnostic.php:73
-msgid "SELECT"
+msgid "INSERT"
 msgstr ""
 
 #: src/class-ss-diagnostic.php:74
-msgid "CREATE"
+msgid "SELECT"
 msgstr ""
 
 #: src/class-ss-diagnostic.php:75
-msgid "ALTER"
+msgid "CREATE"
 msgstr ""
 
 #: src/class-ss-diagnostic.php:76
+msgid "ALTER"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:77
 msgid "DROP"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:81
+#: src/class-ss-diagnostic.php:82
 msgid "Destination URL"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:85
+#: src/class-ss-diagnostic.php:86
 msgid "Local Dir"
 msgstr ""
 
+#. translators: %d: number of incompatible plugins.
 #: src/class-ss-diagnostic.php:128
-msgid "No incompatible plugins are active on your website!"
-msgstr ""
-
-#: src/class-ss-diagnostic.php:129
 #, php-format
 msgid "%d incompatible plugins are active"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:164
+#: src/class-ss-diagnostic.php:131
+msgid "No incompatible plugins are active on your website!"
+msgstr ""
+
+#. translators: %s: destination URL.
+#: src/class-ss-diagnostic.php:165
 #, php-format
 msgid "Destination URL %s is valid"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:165
+#. translators: %s: destination URL.
+#: src/class-ss-diagnostic.php:167
 #, php-format
 msgid "Destination URL %s is not valid"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:175
+#: src/class-ss-diagnostic.php:182
 msgid "Is a valid URL."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:176
+#: src/class-ss-diagnostic.php:183
 msgid "Is not a valid URL."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:183
+#: src/class-ss-diagnostic.php:196
 msgid "Not a valid path"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:186
+#: src/class-ss-diagnostic.php:199
 msgid "Not readable"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:194
+#. translators: %s: additional file or directory path.
+#: src/class-ss-diagnostic.php:206
 #, php-format
 msgid "Additional File/Dir %s is valid"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:202
+#: src/class-ss-diagnostic.php:218
 msgid "WordPress permalink structure is set"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:203
+#: src/class-ss-diagnostic.php:219
 msgid "WordPress permalink structure is not set"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:210
+#: src/class-ss-diagnostic.php:226
 msgid "Discourage search engines from indexing this site is disabled"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:211
+#: src/class-ss-diagnostic.php:227
 msgid "Discourage search engines from indexing this site is enabled"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:226
+#: src/class-ss-diagnostic.php:242
 msgid "WordPress cron is available and running"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:227
+#: src/class-ss-diagnostic.php:243
 msgid "WordPress cron is not available and not running"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:236
+#: src/class-ss-diagnostic.php:252
 msgid "Caching is disabled, great!"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:237
+#: src/class-ss-diagnostic.php:253
 msgid "Please disable caching before running a static export"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:243
-#: src/class-ss-diagnostic.php:249
-#: src/class-ss-diagnostic.php:255
-#: src/class-ss-diagnostic.php:261
-#: src/class-ss-diagnostic.php:267
-#: src/class-ss-diagnostic.php:273
-#: src/class-ss-diagnostic.php:279
-#: src/class-ss-diagnostic.php:285
-#: src/class-ss-diagnostic.php:291
-#: src/class-ss-diagnostic.php:297
-#: src/class-ss-diagnostic.php:303
-#: src/class-ss-diagnostic.php:309
+#. translators: %s: caching plugin name.
+#: src/class-ss-diagnostic.php:264
+#: src/class-ss-diagnostic.php:270
+#: src/class-ss-diagnostic.php:276
+#: src/class-ss-diagnostic.php:282
+#: src/class-ss-diagnostic.php:288
+#: src/class-ss-diagnostic.php:294
+#: src/class-ss-diagnostic.php:300
+#: src/class-ss-diagnostic.php:306
+#: src/class-ss-diagnostic.php:312
+#: src/class-ss-diagnostic.php:318
+#: src/class-ss-diagnostic.php:324
+#: src/class-ss-diagnostic.php:330
 #, php-format
 msgid "Please disable caching (%s) before running a static export."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:395
+#. translators: %s: plugin name.
+#: src/class-ss-diagnostic.php:415
 #, php-format
 msgid "%s is not compatible with Simply Static."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:404
+#. translators: %s: temporary files directory path.
+#: src/class-ss-diagnostic.php:426
 #, php-format
 msgid "Web server can read from Temp Files Directory: %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:405
+#. translators: %s: temporary files directory path.
+#: src/class-ss-diagnostic.php:428
 #, php-format
 msgid "Web server can't read from Temp Files Directory: %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:414
+#. translators: %s: temporary files directory path.
+#: src/class-ss-diagnostic.php:440
 #, php-format
 msgid "Web server can write to Temp Files Directory: %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:415
+#. translators: %s: temporary files directory path.
+#: src/class-ss-diagnostic.php:442
 #, php-format
 msgid "Web server can't write to Temp Files Directory: %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:424
+#. translators: %s: local destination directory path.
+#: src/class-ss-diagnostic.php:454
 #, php-format
 msgid "Web server can write to Local Directory: %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:425
+#. translators: %s: local destination directory path.
+#: src/class-ss-diagnostic.php:456
 #, php-format
 msgid "Web server can not write to Local Directory: %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:432
+#: src/class-ss-diagnostic.php:468
 msgid "MySQL user has DELETE privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:433
+#: src/class-ss-diagnostic.php:469
 msgid "MySQL user has no DELETE privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:440
+#: src/class-ss-diagnostic.php:476
 msgid "MySQL user has INSERT privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:441
+#: src/class-ss-diagnostic.php:477
 msgid "MySQL user has no INSERT privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:448
+#: src/class-ss-diagnostic.php:484
 msgid "MySQL user has SELECT privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:449
+#: src/class-ss-diagnostic.php:485
 msgid "MySQL user has no SELECT privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:456
+#: src/class-ss-diagnostic.php:492
 msgid "MySQL user has CREATE privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:457
+#: src/class-ss-diagnostic.php:493
 msgid "MySQL user has no CREATE privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:464
+#: src/class-ss-diagnostic.php:500
 msgid "MySQL user has ALTER privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:465
+#: src/class-ss-diagnostic.php:501
 msgid "MySQL user has no ALTER privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:472
+#: src/class-ss-diagnostic.php:508
 msgid "MySQL user has DROP privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:473
+#: src/class-ss-diagnostic.php:509
 msgid "MySQL user has no DROP privilege"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:480
+#. translators: %s: minimum supported PHP version.
+#: src/class-ss-diagnostic.php:515
 #, php-format
 msgid "PHP version is >= %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:481
+#. translators: %s: minimum supported PHP version.
+#: src/class-ss-diagnostic.php:517
 #, php-format
 msgid "PHP version < %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:488
+#: src/class-ss-diagnostic.php:529
 msgid "php-xml is available"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:489
+#: src/class-ss-diagnostic.php:530
 msgid "php-xml is not available"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:503
-msgid "cURL is available"
-msgstr ""
-
-#: src/class-ss-diagnostic.php:504
+#. translators: %s: minimum supported cURL version.
+#: src/class-ss-diagnostic.php:543
 #, php-format
 msgid "cURL version < %s"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:510
+#: src/class-ss-diagnostic.php:547
+msgid "cURL is available"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:569
+msgid "Docker not detected"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:570
+msgid "Docker misconfiguration detected"
+msgstr ""
+
+#. translators: 1: current site url, 2: example of host.docker.internal with port, 3: docs url
+#: src/class-ss-diagnostic.php:593
+#, php-format
+msgid "Your WordPress Address appears to be %1$s which is usually not reachable from inside the container. Consider using %2$s (and map host.docker.internal), or the container service name, or adjust your Site URL. See instructions: %3$s"
+msgstr ""
+
+#. translators: 1: current site url, 2: server port, 3: docs url
+#: src/class-ss-diagnostic.php:605
+#, php-format
+msgid "Site URL %1$s uses a different port than the web server (%2$d). This is often unreachable from within the container. See Docker guide: %3$s"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:615
+msgid "Site URL looks reachable."
+msgstr ""
+
+#. translators: %s: URL of the Docker setup guide.
+#: src/class-ss-diagnostic.php:621
+#, php-format
+msgid "If exports fail, please review: %s"
+msgstr ""
+
+#: src/class-ss-diagnostic.php:625
+msgid "Site URL looks fine for container access."
+msgstr ""
+
+#: src/class-ss-diagnostic.php:632
 msgid "Basic Auth is not enabled."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:541
+#: src/class-ss-diagnostic.php:665
 msgid "Basic Auth is enabled, but no username or password is set in Simply Static -> Settings -> Debug -> Basic Auth"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:543
+#: src/class-ss-diagnostic.php:667
 msgid "Basic Auth is enabled, and username and password are set in Simply Static -> Settings -> Debug -> Basic Auth"
 msgstr ""
 
-#: src/class-ss-diagnostic.php:564
-msgid "Not a valid url."
+#: src/class-ss-diagnostic.php:688
+msgid "Not a valid URL."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:573
+#. translators: %s: HTTP status code.
+#: src/class-ss-diagnostic.php:699
 #, php-format
 msgid "Received a %s response. This might indicate a problem."
 msgstr ""
 
-#: src/class-ss-diagnostic.php:576
+#. translators: %s: HTTP status code.
+#: src/class-ss-diagnostic.php:706
 #, php-format
 msgid "Received a %s response."
 msgstr ""
 
-#: src/class-ss-multisite.php:134
+#: src/class-ss-multisite.php:83
+#: src/class-ss-multisite.php:160
 msgid "Export is already running on another site. Upgrade to Pro to queue site exports."
 msgstr ""
 
 #. translators: %s: Plugin name
-#: src/class-ss-plugin-compatibility.php:230
+#: src/class-ss-plugin-compatibility.php:241
 #, php-format
 msgid "Site link of %s"
 msgstr ""
 
-#: src/class-ss-plugin-compatibility.php:232
+#: src/class-ss-plugin-compatibility.php:243
 msgid "Visit site"
 msgstr ""
 
-#: src/class-ss-plugin-compatibility.php:233
+#: src/class-ss-plugin-compatibility.php:244
 msgid "(opens in a new tab)"
 msgstr ""
 
-#: src/class-ss-plugin-compatibility.php:257
+#: src/class-ss-plugin-compatibility.php:273
+msgid "Simply Static Compatible with configuration"
+msgstr ""
+
+#: src/class-ss-plugin-compatibility.php:274
 msgid "Simply Static Compatible"
 msgstr ""
 
-#: src/class-ss-plugin.php:272
+#: src/class-ss-plugin.php:321
 msgid "Missing Basic Auth credentials - you need to configure the Basic Auth credentials in Simply Static -> Settings -> Misc -> Basic Auth to continue the export."
 msgstr ""
 
-#: src/class-ss-plugin.php:393
+#. translators: %s: URL on which the exported resource was discovered.
+#: src/class-ss-plugin.php:621
 #, php-format
 msgid "Found on %s"
 msgstr ""
 
-#: src/class-ss-plugin.php:550
+#: src/class-ss-plugin.php:862
 msgid "Docs"
 msgstr ""
 
-#: src/class-ss-url-fetcher.php:85
+#. translators: %1$s: required Simply Static Pro version.
+#: src/class-ss-pro-compatibility.php:114
+#, php-format
+msgid "Simply Static Pro did not load network-wide because this version of Simply Static requires Simply Static Pro %1$s or newer. Please update Simply Static Pro to continue using Pro features."
+msgstr ""
+
+#. translators: %1$s: required Simply Static Pro version.
+#: src/class-ss-pro-compatibility.php:117
+#, php-format
+msgid "Simply Static Pro did not load because this version of Simply Static requires Simply Static Pro %1$s or newer. Please update Simply Static Pro to continue using Pro features."
+msgstr ""
+
+#: src/class-ss-url-fetcher.php:97
 msgid "Attempted to fetch a remote URL"
 msgstr ""
 
-#: src/class-ss-view.php:140
+#: src/class-ss-url-fetcher.php:623
+msgid "Refusing to fetch a URL outside the configured WordPress origin."
+msgstr ""
+
+#: src/class-ss-util.php:2149
+msgid "Refusing to read a local asset outside an allowed WordPress directory."
+msgstr ""
+
+#. translators: %s: view template path.
+#: src/class-ss-view.php:152
 #, php-format
 msgid "Can't find view template: %s"
 msgstr ""
 
-#: src/class-ss-view.php:146
+#. translators: %s: view layout path.
+#: src/class-ss-view.php:165
 #, php-format
 msgid "Can't find view layout: %s"
 msgstr ""
@@ -542,7 +859,6 @@ msgid "Detects author archive URLs."
 msgstr ""
 
 #: src/crawler/class-ss-beaver-builder-crawler.php:28
-#: src/crawler/class-ss-beaver-builder-crawler.php:153
 msgid "Beaver Builder Cache"
 msgstr ""
 
@@ -558,13 +874,9 @@ msgstr ""
 msgid "Detects JSON configuration files in the Simply Static Pro configs directory."
 msgstr ""
 
-#: src/crawler/class-ss-crawler.php:127
-#: src/crawler/class-ss-divi-crawler.php:169
-#: src/crawler/class-ss-elementor-crawler.php:146
-#: src/crawler/class-ss-plugin-assets-crawler.php:209
-#: src/crawler/class-ss-theme-assets-crawler.php:192
-#: src/crawler/class-ss-uploads-crawler.php:194
-#: src/crawler/class-ss-wp-includes-crawler.php:168
+#. translators: %s: crawler name.
+#: src/crawler/class-ss-crawler.php:187
+#: src/crawler/class-ss-uploads-crawler.php:423
 #, php-format
 msgid "Added by %s Crawler"
 msgstr ""
@@ -633,11 +945,11 @@ msgstr ""
 msgid "Detects WordPress RSS feed URLs."
 msgstr ""
 
-#: src/crawler/class-ss-sitemap-crawler.php:27
+#: src/crawler/class-ss-sitemap-crawler.php:28
 msgid "Sitemap URLs"
 msgstr ""
 
-#: src/crawler/class-ss-sitemap-crawler.php:28
+#: src/crawler/class-ss-sitemap-crawler.php:29
 msgid "Detects URLs from XML sitemaps."
 msgstr ""
 
@@ -649,6 +961,14 @@ msgstr ""
 msgid "Detects URLs for all public taxonomies (categories, tags, etc.)."
 msgstr ""
 
+#: src/crawler/class-ss-text-file-crawler.php:29
+msgid "Public Text Files"
+msgstr ""
+
+#: src/crawler/class-ss-text-file-crawler.php:30
+msgid "Detects conventional public text files such as llms.txt."
+msgstr ""
+
 #: src/crawler/class-ss-theme-assets-crawler.php:27
 msgid "Theme Assets"
 msgstr ""
@@ -657,11 +977,11 @@ msgstr ""
 msgid "Detects URLs for assets (CSS, JS, images) used by the active theme."
 msgstr ""
 
-#: src/crawler/class-ss-uploads-crawler.php:27
+#: src/crawler/class-ss-uploads-crawler.php:36
 msgid "Uploads Directory"
 msgstr ""
 
-#: src/crawler/class-ss-uploads-crawler.php:28
+#: src/crawler/class-ss-uploads-crawler.php:37
 msgid "Detects URLs for media files in the uploads directory."
 msgstr ""
 
@@ -681,6 +1001,33 @@ msgstr ""
 msgid "Detects essential files in wp-includes directory."
 msgstr ""
 
+#: src/handlers/class-ss-aio-seo-sitemap-handler.php:143
+#: src/handlers/class-ss-seopress-sitemap-handler.php:149
+#: src/handlers/class-ss-seopress-sitemap-handler.php:152
+msgid "XML Sitemap"
+msgstr ""
+
+#. translators: %s: number of sitemaps in the sitemap index.
+#: src/handlers/class-ss-aio-seo-sitemap-handler.php:146
+#, php-format
+msgid "This sitemap index contains %s sitemaps."
+msgstr ""
+
+#. translators: %s: number of URLs in the sitemap.
+#: src/handlers/class-ss-aio-seo-sitemap-handler.php:151
+#, php-format
+msgid "This sitemap contains %s URLs."
+msgstr ""
+
+#: src/handlers/class-ss-aio-seo-sitemap-handler.php:154
+msgid "Images"
+msgstr ""
+
+#: src/handlers/class-ss-aio-seo-sitemap-handler.php:155
+#: src/handlers/class-ss-seopress-sitemap-handler.php:154
+msgid "Last modified"
+msgstr ""
+
 #: src/integrations/class-ss-adminbar-integration.php:17
 msgid "Admin Bar (Core)"
 msgstr ""
@@ -690,12 +1037,12 @@ msgid "Adds an admin bar integration for Simply Static to see the current status
 msgstr ""
 
 #: src/integrations/class-ss-adminbar-integration.php:58
-#: src/integrations/class-ss-adminbar-integration.php:173
+#: src/integrations/class-ss-adminbar-integration.php:199
 msgid "Status: "
 msgstr ""
 
 #: src/integrations/class-ss-adminbar-integration.php:65
-#: src/integrations/class-ss-adminbar-integration.php:172
+#: src/integrations/class-ss-adminbar-integration.php:198
 msgid "Waiting"
 msgstr ""
 
@@ -708,18 +1055,30 @@ msgstr ""
 msgid "Adds XML sitemaps to generated static files."
 msgstr ""
 
-#: src/integrations/class-ss-aio-seo-integration.php:88
-#: src/integrations/class-ss-rank-math-integration.php:298
-#: src/integrations/class-ss-rank-math-integration.php:443
+#: src/integrations/class-ss-aio-seo-integration.php:98
+msgid "Sitemap Stylesheet"
+msgstr ""
+
+#: src/integrations/class-ss-aio-seo-integration.php:158
+#: src/integrations/class-ss-rank-math-integration.php:520
+#: src/integrations/class-ss-rank-math-integration.php:637
 #: src/integrations/class-ss-seopress-integration.php:62
-#: src/integrations/class-ss-yoast-integration.php:117
-#: src/integrations/class-ss-yoast-integration.php:263
+#: src/integrations/class-ss-yoast-integration.php:118
+#: src/integrations/class-ss-yoast-integration.php:235
 msgid "Sitemap URL"
 msgstr ""
 
-#: src/integrations/class-ss-aio-seo-integration.php:180
-#: src/integrations/class-ss-seopress-integration.php:139
+#: src/integrations/class-ss-aio-seo-integration.php:221
+#: src/integrations/class-ss-seopress-integration.php:110
 msgid "Individual Sitemap URL"
+msgstr ""
+
+#: src/integrations/class-ss-beaver-builder-integration.php:30
+msgid "Beaver Builder"
+msgstr ""
+
+#: src/integrations/class-ss-beaver-builder-integration.php:31
+msgid "Includes Beaver Builder cache files when exporting static sites."
 msgstr ""
 
 #: src/integrations/class-ss-cookie-yes-integration.php:18
@@ -738,16 +1097,19 @@ msgstr ""
 msgid "Adds a delay to the static site generation."
 msgstr ""
 
-#: src/integrations/class-ss-delay-integration.php:64
+#. translators: %s: approximate number of seconds until another export can start.
+#: src/integrations/class-ss-delay-integration.php:67
 #, php-format
-msgid "You can export again in about %s second(s)"
-msgstr ""
+msgid "You can export again in about %s second"
+msgid_plural "You can export again in about %s seconds"
+msgstr[0] ""
+msgstr[1] ""
 
-#: src/integrations/class-ss-divi-integration.php:21
+#: src/integrations/class-ss-divi-integration.php:35
 msgid "Divi"
 msgstr ""
 
-#: src/integrations/class-ss-divi-integration.php:22
+#: src/integrations/class-ss-divi-integration.php:36
 msgid "Optimizes DIVI for using it on static sites including a custom crawler to include cache files"
 msgstr ""
 
@@ -759,24 +1121,76 @@ msgstr ""
 msgid "Exports assets required for Elementor and Elementor Pro widgets and prepares data used by them."
 msgstr ""
 
-#: src/integrations/class-ss-elementor-integration.php:384
+#: src/integrations/class-ss-elementor-integration.php:406
 msgid "Elementor Asset"
 msgstr ""
 
-#: src/integrations/class-ss-elementor-integration.php:482
+#: src/integrations/class-ss-elementor-integration.php:441
+msgid "Elementor Google Font"
+msgstr ""
+
+#: src/integrations/class-ss-elementor-integration.php:491
 msgid "Elementor Pro Lottie"
 msgstr ""
 
-#: src/integrations/class-ss-rank-math-integration.php:16
+#: src/integrations/class-ss-integration.php:189
+#: src/integrations/class-ss-integration.php:227
+msgid "Integration requests must target the configured WordPress origin."
+msgstr ""
+
+#: src/integrations/class-ss-quadlayers-tiktok-integration.php:62
+msgid "QuadLayers TikTok Feed"
+msgstr ""
+
+#: src/integrations/class-ss-quadlayers-tiktok-integration.php:63
+msgid "Replaces dynamic TikTok feeds with static, locally cached snapshots."
+msgstr ""
+
+#: src/integrations/class-ss-quadlayers-tiktok-integration.php:217
+msgid "The TikTok feed source is not supported."
+msgstr ""
+
+#: src/integrations/class-ss-quadlayers-tiktok-integration.php:232
+msgid "The TikTok feed settings could not be encoded."
+msgstr ""
+
+#: src/integrations/class-ss-quadlayers-tiktok-integration.php:261
+#: src/integrations/class-ss-quadlayers-tiktok-integration.php:331
+msgid "The TikTok feed endpoint returned an error."
+msgstr ""
+
+#: src/integrations/class-ss-quadlayers-tiktok-integration.php:266
+#: src/integrations/class-ss-quadlayers-tiktok-integration.php:325
+#: src/integrations/class-ss-quadlayers-tiktok-integration.php:336
+msgid "The TikTok feed endpoint returned an invalid response."
+msgstr ""
+
+#: src/integrations/class-ss-quadlayers-tiktok-integration.php:275
+msgid "The TikTok feed endpoint did not return valid JSON."
+msgstr ""
+
+#: src/integrations/class-ss-quadlayers-tiktok-integration.php:567
+msgid "TikTok posts are temporarily unavailable."
+msgstr ""
+
+#: src/integrations/class-ss-quadlayers-tiktok-integration.php:579
+msgid "View TikTok video"
+msgstr ""
+
+#: src/integrations/class-ss-quadlayers-tiktok-integration.php:591
+msgid "TikTok video"
+msgstr ""
+
+#: src/integrations/class-ss-rank-math-integration.php:26
 msgid "Rank Math"
 msgstr ""
 
-#: src/integrations/class-ss-rank-math-integration.php:17
+#: src/integrations/class-ss-rank-math-integration.php:27
 #: src/integrations/class-ss-yoast-integration.php:16
 msgid "Automatically includes your XML sitemaps, handles URL replacements in schema.org markup, and creates redirects on your static site for you."
 msgstr ""
 
-#: src/integrations/class-ss-rank-math-integration.php:270
+#: src/integrations/class-ss-rank-math-integration.php:252
 msgid "RankMath Redirection URL"
 msgstr ""
 
@@ -788,7 +1202,7 @@ msgstr ""
 msgid "Yoast"
 msgstr ""
 
-#: src/integrations/class-ss-yoast-integration.php:90
+#: src/integrations/class-ss-yoast-integration.php:91
 msgid "Yoast Redirection URL"
 msgstr ""
 
@@ -822,6 +1236,14 @@ msgstr ""
 msgid "Input Width"
 msgstr ""
 
+#: src/integrations/pro/class-ss-command-center-integration.php:9
+msgid "Command Center (Core)"
+msgstr ""
+
+#: src/integrations/pro/class-ss-command-center-integration.php:10
+msgid "Adds a compact admin-bar widget for quick access. Access Generate, Settings, Diagnostics and Form Submissions directly from the toolbar."
+msgstr ""
+
 #: src/integrations/pro/class-ss-complianz-integration.php:13
 msgid "Complianz | GDPR/CCPA Cookie Consent"
 msgstr ""
@@ -838,12 +1260,16 @@ msgstr ""
 msgid "Define multiple environments of Simply Static so you can easily change between saved configurations."
 msgstr ""
 
-#: src/integrations/pro/class-ss-github-integration.php:10
-msgid "Github"
+#: src/integrations/pro/class-ss-github-integration.php:11
+msgid "Used when deploying exported sites to GitHub."
 msgstr ""
 
-#: src/integrations/pro/class-ss-github-integration.php:11
-msgid "Used when deploying the exported sites to Github"
+#: src/integrations/pro/class-ss-markdown-integration.php:9
+msgid "Markdown (Core)"
+msgstr ""
+
+#: src/integrations/pro/class-ss-markdown-integration.php:10
+msgid "Generates Markdown versions of your pages for optimal AI agent accessibility, adds proper meta tags, and ensures your static site follows AI-readability best practices."
 msgstr ""
 
 #: src/integrations/pro/class-ss-multilingual-integration.php:13
@@ -871,11 +1297,11 @@ msgid "Efficiently crawl, queue and export pSEO websites with this integration."
 msgstr ""
 
 #: src/integrations/pro/class-ss-redirection-integration.php:13
-msgid "Redirection"
+msgid "Redirects"
 msgstr ""
 
 #: src/integrations/pro/class-ss-redirection-integration.php:14
-msgid "Integrates redirections from the \"Redirection\" Plugin automatically on each export."
+msgid "Automatically includes exact redirects from Redirection, Safe Redirect Manager, and Page Links To in each export."
 msgstr ""
 
 #: src/integrations/pro/class-ss-search-and-filter-integration.php:13
@@ -887,7 +1313,7 @@ msgid "Integrates the popular Search and Filter plugin to be used on static site
 msgstr ""
 
 #: src/integrations/pro/class-ss-shortpixel-integration.php:11
-msgid "Shortpixel"
+msgid "ShortPixel"
 msgstr ""
 
 #: src/integrations/pro/class-ss-shortpixel-integration.php:12
@@ -914,81 +1340,132 @@ msgstr ""
 msgid "Cancelling job"
 msgstr ""
 
-#: src/tasks/class-ss-create-zip-archive.php:37
+#: src/tasks/class-ss-create-zip-archive.php:61
 msgid "ZIP archive created: "
 msgstr ""
 
-#: src/tasks/class-ss-create-zip-archive.php:41
+#: src/tasks/class-ss-create-zip-archive.php:64
 msgid "Click here to download"
 msgstr ""
 
+#: src/tasks/class-ss-create-zip-archive.php:111
+msgid "Refusing to modify an unsafe temporary directory."
+msgstr ""
+
 #. translators: 1: directory path
-#: src/tasks/class-ss-create-zip-archive.php:96
+#: src/tasks/class-ss-create-zip-archive.php:148
 #, php-format
 msgid "The ZIP destination directory is not writable: %s"
 msgstr ""
 
 #. translators: 1: zip file path
-#: src/tasks/class-ss-create-zip-archive.php:108
+#: src/tasks/class-ss-create-zip-archive.php:160
 #, php-format
 msgid "Cannot overwrite ZIP file: %s (permission denied)"
 msgstr ""
 
+#: src/tasks/class-ss-create-zip-archive.php:189
+#: src/tasks/class-ss-create-zip-archive.php:211
+msgid "Unable to create ZIP archive"
+msgstr ""
+
+#: src/tasks/class-ss-create-zip-archive.php:232
+msgid "The ZIP archive could not be found after it was created."
+msgstr ""
+
+#: src/tasks/class-ss-create-zip-archive.php:240
+msgid "The ZIP archive was created, but its temporary files directory is not publicly accessible. Choose a directory inside the WordPress uploads directory and try again."
+msgstr ""
+
 #. translators: 1: zip file path
-#: src/tasks/class-ss-create-zip-archive.php:123
+#: src/tasks/class-ss-create-zip-archive.php:421
 #, php-format
 msgid "Unable to open ZIP archive for writing: %s"
 msgstr ""
 
 #. translators: 1: zip file path, 2: status message
-#: src/tasks/class-ss-create-zip-archive.php:160
+#: src/tasks/class-ss-create-zip-archive.php:472
 #, php-format
 msgid "Failed to finalize ZIP archive: %1$s (%2$s)"
 msgstr ""
 
-#: src/tasks/class-ss-create-zip-archive.php:188
-msgid "Unable to create ZIP archive"
+#. translators: %d: number of files that could not be added.
+#: src/tasks/class-ss-create-zip-archive.php:484
+#, php-format
+msgid "Unable to add %d file(s) to the ZIP archive."
 msgstr ""
 
-#: src/tasks/class-ss-discover-urls-task.php:33
+#. translators: 1: files processed so far, 2: total files
+#: src/tasks/class-ss-create-zip-archive.php:503
+#, php-format
+msgid "Creating ZIP archive (%1$d of %2$d files)..."
+msgstr ""
+
+#: src/tasks/class-ss-discover-urls-task.php:54
 msgid "Discovering URLs"
 msgstr ""
 
-#: src/tasks/class-ss-discover-urls-task.php:62
+#. translators: 1: crawler name, 2: current crawler number, 3: total number of crawlers.
+#: src/tasks/class-ss-discover-urls-task.php:94
 #, php-format
-msgid "Added %d URLs via %s Crawler"
+msgid "Discovering URLs with %1$s Crawler (%2$d of %3$d)"
 msgstr ""
 
-#: src/tasks/class-ss-discover-urls-task.php:81
+#. translators: 1: crawler name, 2: current crawler number, 3: total crawlers, 4: files queued, 5: entries scanned.
+#: src/tasks/class-ss-discover-urls-task.php:121
 #, php-format
-msgid "Added %d URLs via Crawler"
+msgid "Discovering URLs with %1$s Crawler (%2$d of %3$d): %4$d files queued, %5$d entries scanned"
 msgstr ""
 
-#: src/tasks/class-ss-fetch-urls-task.php:100
+#. translators: 1: number of URLs, 2: crawler name.
+#: src/tasks/class-ss-discover-urls-task.php:139
+#, php-format
+msgid "Added %1$d URL via %2$s Crawler"
+msgid_plural "Added %1$d URLs via %2$s Crawler"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of URLs added by crawlers.
+#: src/tasks/class-ss-discover-urls-task.php:181
+#, php-format
+msgid "Added %d URL via Crawler"
+msgid_plural "Added %d URLs via Crawler"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/tasks/class-ss-fetch-urls-task.php:72
+#: src/tasks/class-ss-fetch-urls-task.php:258
 msgid "Do not save or follow"
 msgstr ""
 
-#: src/tasks/class-ss-fetch-urls-task.php:148
+#. translators: 1: number of pages/files fetched, 2: total number of pages/files.
+#: src/tasks/class-ss-fetch-urls-task.php:308
+#: src/tasks/class-ss-fetch-urls-task.php:881
 #, php-format
-msgid "Fetched %d of %d pages/files"
+msgid "Fetched %1$d of %2$d pages/files"
 msgstr ""
 
-#: src/tasks/class-ss-fetch-urls-task.php:184
-#: src/tasks/class-ss-fetch-urls-task.php:267
+#: src/tasks/class-ss-fetch-urls-task.php:358
+#: src/tasks/class-ss-fetch-urls-task.php:484
+#: src/tasks/class-ss-fetch-urls-task.php:527
 msgid "Do not follow"
 msgstr ""
 
-#: src/tasks/class-ss-fetch-urls-task.php:202
-#: src/tasks/class-ss-fetch-urls-task.php:301
+#: src/tasks/class-ss-fetch-urls-task.php:384
+#: src/tasks/class-ss-fetch-urls-task.php:488
+#: src/tasks/class-ss-fetch-urls-task.php:568
 msgid "Do not save"
+msgstr ""
+
+#: src/tasks/class-ss-fetch-urls-task.php:459
+msgid "Unsafe or invalid redirect target"
 msgstr ""
 
 #: src/tasks/class-ss-generate-404-task.php:48
 msgid "Generating 404 Page."
 msgstr ""
 
-#: src/tasks/class-ss-generate-404-task.php:79
-#: src/tasks/class-ss-generate-404-task.php:128
+#: src/tasks/class-ss-generate-404-task.php:65
 msgid "404 Page generated"
 msgstr ""
 
@@ -996,71 +1473,137 @@ msgstr ""
 msgid "Setting up"
 msgstr ""
 
-#: src/tasks/class-ss-setup-task.php:74
-#: src/admin/src/settings/pages/DebugSettings.jsx:209
+#: src/tasks/class-ss-setup-task.php:76
+#: src/admin/src/settings/pages/DebugSettings.jsx:221
 msgid "Origin URL"
 msgstr ""
 
-#: src/tasks/class-ss-setup-task.php:95
+#: src/tasks/class-ss-setup-task.php:97
 msgid "Additional URL"
 msgstr ""
 
-#: src/tasks/class-ss-setup-task.php:119
+#: src/tasks/class-ss-setup-task.php:121
 msgid "Additional URL (regex)"
 msgstr ""
 
-#: src/tasks/class-ss-setup-task.php:212
+#: src/tasks/class-ss-setup-task.php:197
+#: views/redirect.php:36
+msgid "Redirecting..."
+msgstr ""
+
+#. translators: %s: destination link.
+#: src/tasks/class-ss-setup-task.php:200
+#: views/redirect.php:49
+#, php-format
+msgid "You are being redirected to %s"
+msgstr ""
+
+#: src/tasks/class-ss-setup-task.php:246
 msgid "Additional File"
 msgstr ""
 
-#: src/tasks/class-ss-setup-task.php:231
+#: src/tasks/class-ss-setup-task.php:265
 msgid "Additional Dir"
 msgstr ""
 
-#: src/tasks/class-ss-setup-task.php:278
+#: src/tasks/class-ss-setup-task.php:312
 msgid "Additional File (regex)"
 msgstr ""
 
-#: src/tasks/class-ss-transfer-files-locally-task.php:71
+#: src/tasks/class-ss-transfer-files-locally-task.php:49
+msgid "Unable to create the configured local destination directory."
+msgstr ""
+
+#: src/tasks/class-ss-transfer-files-locally-task.php:81
 msgid "Destination URL:"
 msgstr ""
 
-#: src/tasks/class-ss-transfer-files-locally-task.php:80
-#: src/tasks/class-ss-transfer-files-locally-task.php:120
-#: src/tasks/traits/trait-ss-can-process-pages.php:91
+#. translators: 1: number of files transferred, 2: total number of files.
+#: src/tasks/class-ss-transfer-files-locally-task.php:96
+#: src/tasks/class-ss-transfer-files-locally-task.php:152
+#: src/tasks/traits/trait-ss-can-process-pages.php:118
 #, php-format
-msgid "Transferred %d of %d files"
+msgid "Transferred %1$d of %2$d files"
 msgstr ""
 
-#: src/tasks/class-ss-transfer-files-locally-task.php:117
+#: src/tasks/class-ss-transfer-files-locally-task.php:147
 msgid "No new/updated pages to transfer"
+msgstr ""
+
+#: src/tasks/class-ss-transfer-files-locally-task.php:254
+msgid "Unable to transfer the feed redirect to the local destination."
 msgstr ""
 
 #: src/tasks/class-ss-wrapup-task.php:40
 msgid "Wrapping up"
 msgstr ""
 
-#: src/tasks/traits/trait-ss-can-process-pages.php:149
+#. translators: %d: number of skipped pages/files.
+#: src/tasks/traits/trait-ss-can-process-pages.php:129
 #, php-format
-msgid "Uploaded %d of %d files"
+msgid "Skipped %d page or file after repeated processing attempts."
+msgid_plural "Skipped %d pages or files after repeated processing attempts."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: number of files uploaded, 2: total number of files.
+#: src/tasks/traits/trait-ss-can-process-pages.php:295
+#, php-format
+msgid "Uploaded %1$d of %2$d files"
 msgstr ""
 
-#: views/redirect.php:4
-msgid "Redirecting..."
-msgstr ""
-
-#: views/redirect.php:12
-#, php-format
-msgid "You are being redirected to %s"
+#: views/redirect.php:51
+msgid "The redirect target is invalid."
 msgstr ""
 
 #: assets/install-plugins/build/index.js:1
-#: assets/install-plugins/src/index.js:85
+#: assets/install-plugins/src/index.js:82
 msgid "This is known to work well with the Simply Static plugin."
 msgstr ""
 
-#: src/admin/src/settings/components/ActivityLog.jsx:51
-#: src/admin/src/settings/components/SidebarSite.jsx:317
+#: src/admin/build/index.js:1
+#: src/admin/src/settings/context/SettingsContext.jsx:15
+msgid "The server returned an invalid response."
+msgstr ""
+
+#: src/admin/build/index.js:1
+#: src/admin/src/settings/context/SettingsContext.jsx:23
+#: src/admin/src/settings/pages/Utilities.jsx:68
+msgid "The requested action could not be completed."
+msgstr ""
+
+#: src/admin/build/index.js:1
+#: src/admin/src/settings/components/ActivityLog.jsx:31
+#: src/admin/src/settings/components/SidebarSite.jsx:94
+#: src/admin/src/settings/context/SettingsContext.jsx:37
+msgid "Rollback in progress. Simply Static export actions are locked until the rollback has finished."
+msgstr ""
+
+#. translators: %d: number of changes that have not been pushed.
+#: src/admin/build/index.js:3
+#: src/admin/src/settings/components/SidebarSite.jsx:396
+#, js-format
+msgid "You have %d unpushed change."
+msgid_plural "You have %d unpushed changes."
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/admin/src/settings/components/ActivityLog.jsx:50
+#: src/admin/src/settings/components/ActivityLog.jsx:206
+msgid "Waiting for new push…"
+msgstr ""
+
+#: src/admin/src/settings/components/ActivityLog.jsx:213
+msgid "Resuming the push…"
+msgstr ""
+
+#: src/admin/src/settings/components/ActivityLog.jsx:232
+#: src/admin/src/settings/components/SidebarSite.jsx:449
+msgid "Rollback in progress"
+msgstr ""
+
+#: src/admin/src/settings/components/ActivityLog.jsx:239
+#: src/admin/src/settings/components/SidebarSite.jsx:554
 #: src/admin/src/settings/pages/UAMSettings.jsx:25
 msgid "Activity Log"
 msgstr ""
@@ -1095,12 +1638,62 @@ msgstr ""
 msgid "Delete selected environment"
 msgstr ""
 
-#: src/admin/src/settings/components/EnvironmentSidebar.jsx:100
+#: src/admin/src/settings/components/EnvironmentSidebar.jsx:107
 msgid "Changing ..."
 msgstr ""
 
-#: src/admin/src/settings/components/EnvironmentSidebar.jsx:109
+#: src/admin/src/settings/components/EnvironmentSidebar.jsx:116
 msgid "Environment"
+msgstr ""
+
+#: src/admin/src/settings/components/EnvironmentSidebar.jsx:118
+msgid "Current"
+msgstr ""
+
+#: src/admin/src/settings/components/EnvironmentSidebar.jsx:136
+msgid "Create an Environment"
+msgstr ""
+
+#: src/admin/src/settings/components/ExportLog.jsx:109
+msgid "Invalid export log response."
+msgstr ""
+
+#: src/admin/src/settings/components/ExportLog.jsx:147
+msgid "Could not load the export log."
+msgstr ""
+
+#: src/admin/src/settings/components/ExportLog.jsx:254
+msgid "Code"
+msgstr ""
+
+#: src/admin/src/settings/components/ExportLog.jsx:260
+msgid "URL"
+msgstr ""
+
+#: src/admin/src/settings/components/ExportLog.jsx:293
+msgid "Export Type"
+msgstr ""
+
+#: src/admin/src/settings/components/ExportLog.jsx:305
+msgid "Notes"
+msgstr ""
+
+#: src/admin/src/settings/components/ExportLog.jsx:330
+msgid "Search export log"
+msgstr ""
+
+#: src/admin/src/settings/components/ExportLog.jsx:336
+msgid "Search…"
+msgstr ""
+
+#: src/admin/src/settings/components/ExportLog.jsx:362
+msgid "Loading…"
+msgstr ""
+
+#: src/admin/src/settings/components/GenerateButtons.jsx:20
+#: src/admin/src/settings/components/SidebarSite.jsx:438
+#: src/admin/src/settings/components/SidebarSite.jsx:476
+msgid "Push"
 msgstr ""
 
 #: src/admin/src/settings/components/GenerateButtons.jsx:29
@@ -1113,43 +1706,50 @@ msgstr ""
 msgid "Resume"
 msgstr ""
 
-#: src/admin/src/settings/components/Integration.jsx:26
-msgid "Automated Redirects with Redirection"
+#: src/admin/src/settings/components/Integration.jsx:41
+msgid "Missing plugin"
 msgstr ""
 
-#: src/admin/src/settings/components/Integration.jsx:31
-msgid "Cookie Consent with Complianz"
-msgstr ""
-
-#: src/admin/src/settings/components/Integration.jsx:44
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:230
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:445
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:523
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:637
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:823
-#: src/admin/src/settings/pages/FormSettings.jsx:97
-#: src/admin/src/settings/pages/FormSettings.jsx:151
-#: src/admin/src/settings/pages/FormSettings.jsx:203
-#: src/admin/src/settings/pages/FormSettings.jsx:296
-#: src/admin/src/settings/pages/GeneralSettings.jsx:579
-#: src/admin/src/settings/pages/GeneralSettings.jsx:631
-#: src/admin/src/settings/pages/GeneralSettings.jsx:702
-#: src/admin/src/settings/pages/Optimize.jsx:187
-#: src/admin/src/settings/pages/Optimize.jsx:346
-#: src/admin/src/settings/pages/Optimize.jsx:436
-#: src/admin/src/settings/pages/Optimize.jsx:561
-#: src/admin/src/settings/pages/Optimize.jsx:641
-#: src/admin/src/settings/pages/SearchSettings.jsx:61
-#: src/admin/src/settings/pages/SearchSettings.jsx:205
-#: src/admin/src/settings/pages/SearchSettings.jsx:301
-#: src/admin/src/settings/pages/SearchSettings.jsx:354
-#: src/admin/src/settings/pages/Workflow.jsx:201
-#: src/admin/src/settings/pages/Workflow.jsx:365
+#: src/admin/src/settings/components/Integration.jsx:43
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:327
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:533
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:609
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:721
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:921
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1044
+#: src/admin/src/settings/pages/FormSettings.jsx:177
+#: src/admin/src/settings/pages/FormSettings.jsx:248
+#: src/admin/src/settings/pages/FormSettings.jsx:300
+#: src/admin/src/settings/pages/GeneralSettings.jsx:601
+#: src/admin/src/settings/pages/GeneralSettings.jsx:653
+#: src/admin/src/settings/pages/GeneralSettings.jsx:720
+#: src/admin/src/settings/pages/HideWP.jsx:130
+#: src/admin/src/settings/pages/HideWP.jsx:301
+#: src/admin/src/settings/pages/HideWP.jsx:359
+#: src/admin/src/settings/pages/Optimize.jsx:148
+#: src/admin/src/settings/pages/Optimize.jsx:303
+#: src/admin/src/settings/pages/Optimize.jsx:468
+#: src/admin/src/settings/pages/Optimize.jsx:623
+#: src/admin/src/settings/pages/SearchSettings.jsx:59
+#: src/admin/src/settings/pages/SearchSettings.jsx:203
+#: src/admin/src/settings/pages/SearchSettings.jsx:297
+#: src/admin/src/settings/pages/SearchSettings.jsx:430
+#: src/admin/src/settings/pages/Workflow.jsx:233
 #: src/admin/src/settings/pages/Workflow.jsx:397
+#: src/admin/src/settings/pages/Workflow.jsx:429
+#: src/admin/src/settings/pages/Workflow.jsx:461
 msgid "Requires Simply Static Pro"
 msgstr ""
 
+#: src/admin/src/settings/components/Integration.jsx:56
+msgid "Disabled by Command Center"
+msgstr ""
+
 #: src/admin/src/settings/components/Integration.jsx:59
+msgid "Always active"
+msgstr ""
+
+#: src/admin/src/settings/components/Integration.jsx:62
 msgid "Get the Pro version"
 msgstr ""
 
@@ -1165,151 +1765,358 @@ msgstr ""
 msgid "Log file cleared."
 msgstr ""
 
-#: src/admin/src/settings/components/Marketing/BFBanner.jsx:75
+#. translators: %s: Black Friday coupon code.
+#: src/admin/src/settings/components/Marketing/BFBanner.jsx:67
+#, js-format
+msgid "BLACK FRIDAY: Upgrade to Simply Static Pro and save 25%% with code %s."
+msgstr ""
+
+#: src/admin/src/settings/components/Marketing/BFBanner.jsx:78
 msgid "Buy now"
 msgstr ""
 
-#: src/admin/src/settings/components/SettingsPage.jsx:83
+#: src/admin/src/settings/components/OperationsMode.jsx:19
+msgid "The operations mode request could not be completed."
+msgstr ""
+
+#: src/admin/src/settings/components/OperationsMode.jsx:50
+msgid "The operations mode password must contain at least 8 characters."
+msgstr ""
+
+#: src/admin/src/settings/components/OperationsMode.jsx:56
+msgid "The password confirmation does not match."
+msgstr ""
+
+#: src/admin/src/settings/components/OperationsMode.jsx:67
+#: src/admin/src/settings/components/OperationsMode.jsx:105
+msgid "Operations mode"
+msgstr ""
+
+#: src/admin/src/settings/components/OperationsMode.jsx:70
+msgid "Publishing remains available. Enter the operations password to access deployment, account, and plugin settings."
+msgstr ""
+
+#: src/admin/src/settings/components/OperationsMode.jsx:73
+#: src/admin/src/settings/components/OperationsMode.jsx:117
+msgid "Operations password"
+msgstr ""
+
+#: src/admin/src/settings/components/OperationsMode.jsx:94
+msgid "Unlock settings"
+msgstr ""
+
+#: src/admin/src/settings/components/OperationsMode.jsx:110
+msgid "Operations mode is enabled and settings are currently unlocked for support."
+msgstr ""
+
+#: src/admin/src/settings/components/OperationsMode.jsx:113
+msgid "Protect deployment credentials and configuration from client changes while keeping publishing and diagnostics available."
+msgstr ""
+
+#: src/admin/src/settings/components/OperationsMode.jsx:117
+msgid "New password (optional)"
+msgstr ""
+
+#: src/admin/src/settings/components/OperationsMode.jsx:119
+msgid "Leave blank to keep the existing password."
+msgstr ""
+
+#: src/admin/src/settings/components/OperationsMode.jsx:120
+msgid "Use at least 8 characters. The password is stored as a one-way hash."
+msgstr ""
+
+#: src/admin/src/settings/components/OperationsMode.jsx:130
+msgid "Confirm password"
+msgstr ""
+
+#: src/admin/src/settings/components/OperationsMode.jsx:149
+msgid "Update operations mode"
+msgstr ""
+
+#: src/admin/src/settings/components/OperationsMode.jsx:149
+msgid "Enable operations mode"
+msgstr ""
+
+#: src/admin/src/settings/components/OperationsMode.jsx:160
+msgid "Lock settings now"
+msgstr ""
+
+#: src/admin/src/settings/components/OperationsMode.jsx:169
+msgid "Disable operations mode"
+msgstr ""
+
+#: src/admin/src/settings/components/OperationsMode.jsx:175
+msgid "Unlocked sessions expire automatically after one hour."
+msgstr ""
+
+#: src/admin/src/settings/components/PromoSidebar.jsx:10
+#: src/admin/src/settings/components/VersionInfo.jsx:20
+#: src/admin/src/settings/components/VersionInfo.jsx:26
+msgid "Pro"
+msgstr ""
+
+#: src/admin/src/settings/components/PromoSidebar.jsx:15
+msgid "Unlock single push, change detection, environments, search, forms, and much more."
+msgstr ""
+
+#: src/admin/src/settings/components/PromoSidebar.jsx:18
+msgid "Push only changes"
+msgstr ""
+
+#: src/admin/src/settings/components/PromoSidebar.jsx:19
+msgid "Search integration"
+msgstr ""
+
+#: src/admin/src/settings/components/PromoSidebar.jsx:20
+msgid "Form handling"
+msgstr ""
+
+#: src/admin/src/settings/components/PromoSidebar.jsx:21
+msgid "Multilingual support"
+msgstr ""
+
+#: src/admin/src/settings/components/PromoSidebar.jsx:22
+msgid "Minification and image optimization"
+msgstr ""
+
+#: src/admin/src/settings/components/PromoSidebar.jsx:31
+msgid "Get Simply Static Pro →"
+msgstr ""
+
+#: src/admin/src/settings/components/PromoSidebar.jsx:38
+#: src/admin/src/settings/components/VersionInfo.jsx:21
+msgid "Studio"
+msgstr ""
+
+#: src/admin/src/settings/components/PromoSidebar.jsx:43
+msgid "The complete Static WordPress operations platform. Keep WordPress for editing, publish fast static websites, and manage everything from one place."
+msgstr ""
+
+#: src/admin/src/settings/components/PromoSidebar.jsx:46
+msgid "Start & Stop WordPress"
+msgstr ""
+
+#: src/admin/src/settings/components/PromoSidebar.jsx:47
+msgid "Static publishing to CDN"
+msgstr ""
+
+#: src/admin/src/settings/components/PromoSidebar.jsx:48
+msgid "Central dashboard for all sites"
+msgstr ""
+
+#: src/admin/src/settings/components/PromoSidebar.jsx:49
+msgid "Automated WordPress migration"
+msgstr ""
+
+#: src/admin/src/settings/components/PromoSidebar.jsx:50
+msgid "Site health, security, and performance checks"
+msgstr ""
+
+#: src/admin/src/settings/components/PromoSidebar.jsx:59
+msgid "Start 14-Day Free Trial →"
+msgstr ""
+
+#: src/admin/src/settings/components/SettingsPage.jsx:238
 msgid "Toggle menu"
 msgstr ""
 
-#: src/admin/src/settings/components/SettingsPage.jsx:100
-msgid "There are errors in diagnostics that may negatively affect your static export."
+#: src/admin/src/settings/components/SettingsPage.jsx:240
+msgid "Simply Static menu"
 msgstr ""
 
-#: src/admin/src/settings/components/SettingsPage.jsx:101
+#: src/admin/src/settings/components/SettingsPage.jsx:242
+#: src/admin/src/settings/pages/UAMSettings.jsx:188
+msgid "Menu"
+msgstr ""
+
+#: src/admin/src/settings/components/SettingsPage.jsx:243
+msgid "Close menu"
+msgstr ""
+
+#: src/admin/src/settings/components/SettingsPage.jsx:273
+msgid "There are errors in diagnostics that may negatively affect your static push."
+msgstr ""
+
+#: src/admin/src/settings/components/SettingsPage.jsx:274
 msgid "Please review them and get them fixed to avoid problems."
 msgstr ""
 
-#: src/admin/src/settings/components/SettingsPage.jsx:110
+#: src/admin/src/settings/components/SettingsPage.jsx:283
 msgid "Visit Diagnostics"
 msgstr ""
 
-#: src/admin/src/settings/components/SettingsPage.jsx:125
+#: src/admin/src/settings/components/SettingsPage.jsx:298
 msgid "You are using the pro version without a valid license."
 msgstr ""
 
-#: src/admin/src/settings/components/SettingsPage.jsx:126
+#: src/admin/src/settings/components/SettingsPage.jsx:299
 msgid "We have temporarily disabled all the pro features now. Please contact our support to have the problem solved."
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarMultisite.jsx:20
+#: src/admin/src/settings/components/SettingsPage.jsx:302
+msgid "Contact Support"
+msgstr ""
+
+#: src/admin/src/settings/components/SidebarMultisite.jsx:12
+#: src/admin/src/settings/components/SidebarSite.jsx:402
+msgid "Simply Static logo"
+msgstr ""
+
+#: src/admin/src/settings/components/SidebarMultisite.jsx:18
 msgid "Changelog"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarMultisite.jsx:23
-#: src/admin/src/settings/components/SidebarSite.jsx:447
+#: src/admin/src/settings/components/SidebarMultisite.jsx:21
+#: src/admin/src/settings/components/SidebarSite.jsx:692
 msgid "Documentation"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarSite.jsx:85
+#: src/admin/src/settings/components/SidebarSite.jsx:154
 msgid "Use current settings"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarSite.jsx:220
-#: src/admin/src/settings/pages/Utilities.jsx:115
-msgid "Export"
-msgstr ""
-
-#: src/admin/src/settings/components/SidebarSite.jsx:224
-msgid "Export Changes"
-msgstr ""
-
-#: src/admin/src/settings/components/SidebarSite.jsx:227
-msgid "Export Changes (Requires Simply Static Pro)"
-msgstr ""
-
-#: src/admin/src/settings/components/SidebarSite.jsx:262
-msgid "An export from another site is running. Upgrade to queue them."
-msgstr ""
-
-#: src/admin/src/settings/components/SidebarSite.jsx:276
-#: src/admin/src/settings/pages/Utilities.jsx:174
-msgid "Import"
+#: src/admin/src/settings/components/SidebarSite.jsx:269
+msgid "The export could not be cancelled. Please try again."
 msgstr ""
 
 #: src/admin/src/settings/components/SidebarSite.jsx:280
-msgid "Choose a subsite to import settings from."
+msgid "The export could not be paused. Please try again."
 msgstr ""
 
 #: src/admin/src/settings/components/SidebarSite.jsx:290
-#: src/admin/src/settings/pages/Utilities.jsx:185
+msgid "The export could not be resumed. Please try again."
+msgstr ""
+
+#: src/admin/src/settings/components/SidebarSite.jsx:301
+msgid "The settings could not be imported. Please try again."
+msgstr ""
+
+#: src/admin/src/settings/components/SidebarSite.jsx:326
+#: src/admin/src/settings/pages/UAMSettings.jsx:54
+#: src/admin/src/settings/pages/Workflow.jsx:392
+msgid "Builds"
+msgstr ""
+
+#: src/admin/src/settings/components/SidebarSite.jsx:369
+msgid "Languages"
+msgstr ""
+
+#: src/admin/src/settings/components/SidebarSite.jsx:417
+#: src/admin/src/settings/pages/Workflow.jsx:486
+msgid "Full Site"
+msgstr ""
+
+#: src/admin/src/settings/components/SidebarSite.jsx:419
+msgid "Changes Only"
+msgstr ""
+
+#: src/admin/src/settings/components/SidebarSite.jsx:422
+msgid "Changes Only (Requires Simply Static Pro)"
+msgstr ""
+
+#: src/admin/src/settings/components/SidebarSite.jsx:463
+msgid "Upgrade to Simply Static Pro to push only changes."
+msgstr ""
+
+#: src/admin/src/settings/components/SidebarSite.jsx:484
+msgid "A push from another site is running. Upgrade to queue them."
+msgstr ""
+
+#: src/admin/src/settings/components/SidebarSite.jsx:492
+msgid "Reset push lock"
+msgstr ""
+
+#: src/admin/src/settings/components/SidebarSite.jsx:506
+#: src/admin/src/settings/pages/Utilities.jsx:216
+msgid "Import"
+msgstr ""
+
+#: src/admin/src/settings/components/SidebarSite.jsx:510
+msgid "Choose a subsite to import settings from."
+msgstr ""
+
+#: src/admin/src/settings/components/SidebarSite.jsx:526
+#: src/admin/src/settings/pages/Utilities.jsx:236
 msgid "Import Settings"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarSite.jsx:298
-msgid "Settings successfully imported."
+#: src/admin/src/settings/components/SidebarSite.jsx:535
+msgid "Importing settings…"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarSite.jsx:309
-#: src/admin/src/settings/pages/UAMSettings.jsx:127
+#: src/admin/src/settings/components/SidebarSite.jsx:546
+#: src/admin/src/settings/pages/UAMSettings.jsx:128
 msgid "Tools"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarSite.jsx:341
+#: src/admin/src/settings/components/SidebarSite.jsx:578
 #: src/admin/src/settings/pages/UAMSettings.jsx:30
 msgid "General"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarSite.jsx:352
+#: src/admin/src/settings/components/SidebarSite.jsx:588
 #: src/admin/src/settings/pages/UAMSettings.jsx:31
 msgid "Deploy"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarSite.jsx:365
-#: src/admin/src/settings/pages/FormSettings.jsx:92
+#: src/admin/src/settings/components/SidebarSite.jsx:600
+#: src/admin/src/settings/pages/FormSettings.jsx:172
 #: src/admin/src/settings/pages/UAMSettings.jsx:32
 msgid "Forms"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarSite.jsx:375
-#: src/admin/src/settings/pages/SearchSettings.jsx:56
-#: src/admin/src/settings/pages/SearchSettings.jsx:131
+#: src/admin/src/settings/components/SidebarSite.jsx:610
+#: src/admin/src/settings/pages/SearchSettings.jsx:54
+#: src/admin/src/settings/pages/SearchSettings.jsx:129
 #: src/admin/src/settings/pages/UAMSettings.jsx:33
 msgid "Search"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarSite.jsx:385
+#: src/admin/src/settings/components/SidebarSite.jsx:620
 #: src/admin/src/settings/pages/UAMSettings.jsx:34
 msgid "Optimize"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarSite.jsx:395
+#: src/admin/src/settings/components/SidebarSite.jsx:630
 #: src/admin/src/settings/pages/UAMSettings.jsx:35
-msgid "Workflow"
+msgid "Hide WP"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarSite.jsx:402
-#: src/admin/src/settings/pages/UAMSettings.jsx:168
+#: src/admin/src/settings/components/SidebarSite.jsx:637
+#: src/admin/src/settings/pages/UAMSettings.jsx:169
 msgid "Advanced"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarSite.jsx:410
-#: src/admin/src/settings/pages/IntegrationsSettings.jsx:103
-#: src/admin/src/settings/pages/UAMSettings.jsx:39
+#: src/admin/src/settings/components/SidebarSite.jsx:645
+#: src/admin/src/settings/pages/UAMSettings.jsx:40
 msgid "Integrations"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarSite.jsx:420
-#: src/admin/src/settings/pages/UAMSettings.jsx:40
+#: src/admin/src/settings/components/SidebarSite.jsx:655
+#: src/admin/src/settings/pages/UAMSettings.jsx:36
+msgid "Workflow"
+msgstr ""
+
+#: src/admin/src/settings/components/SidebarSite.jsx:665
+#: src/admin/src/settings/pages/UAMSettings.jsx:41
 msgid "Utilities"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarSite.jsx:430
-#: src/admin/src/settings/pages/UAMSettings.jsx:41
+#: src/admin/src/settings/components/SidebarSite.jsx:675
+#: src/admin/src/settings/pages/UAMSettings.jsx:42
 msgid "Debug"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarSite.jsx:440
-#: src/admin/src/settings/pages/UAMSettings.jsx:42
+#: src/admin/src/settings/components/SidebarSite.jsx:685
+#: src/admin/src/settings/pages/UAMSettings.jsx:43
 msgid "UAM"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarSite.jsx:452
-msgid "Video Course"
+#: src/admin/src/settings/components/SidebarSite.jsx:690
+msgid "Learn"
 msgstr ""
 
-#: src/admin/src/settings/components/SidebarSite.jsx:455
+#: src/admin/src/settings/components/SidebarSite.jsx:695
 msgid "Tutorials"
 msgstr ""
 
@@ -1317,16 +2124,30 @@ msgstr ""
 msgid "Upgrade to manage from network."
 msgstr ""
 
-#: src/admin/src/settings/components/Sites.jsx:112
+#: src/admin/src/settings/components/Sites.jsx:121
 msgid "Name"
 msgstr ""
 
-#: src/admin/src/settings/components/Sites.jsx:113
+#: src/admin/src/settings/components/Sites.jsx:122
 msgid "Status"
 msgstr ""
 
-#: src/admin/src/settings/components/Sites.jsx:114
+#: src/admin/src/settings/components/Sites.jsx:123
 msgid "Actions"
+msgstr ""
+
+#: src/admin/src/settings/components/StudioNotice.jsx:11
+msgid "Explore Pro →"
+msgstr ""
+
+#: src/admin/src/settings/components/VersionInfo.jsx:14
+#: src/admin/src/settings/components/VersionInfo.jsx:31
+msgid "Version"
+msgstr ""
+
+#: src/admin/src/settings/components/VersionInfo.jsx:19
+#: src/admin/src/settings/components/VersionInfo.jsx:25
+msgid "Free"
 msgstr ""
 
 #: src/admin/src/settings/pages/DebugSettings.jsx:47
@@ -1341,1609 +2162,1921 @@ msgstr ""
 msgid "Request failed. Please try again."
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:82
-msgid "How to set up basic auth"
-msgstr ""
-
-#: src/admin/src/settings/pages/DebugSettings.jsx:87
+#: src/admin/src/settings/pages/DebugSettings.jsx:85
 msgid "If you've secured WordPress with HTTP Basic Auth you need to specify the username and password to use below."
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:90
+#: src/admin/src/settings/pages/DebugSettings.jsx:88
 msgid "Basic Auth Username"
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:101
+#: src/admin/src/settings/pages/DebugSettings.jsx:99
 msgid "Basic Auth Password"
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:112
+#: src/admin/src/settings/pages/DebugSettings.jsx:110
 msgid "Enable Basic Auth"
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:118
+#: src/admin/src/settings/pages/DebugSettings.jsx:116
 msgid "Automatically setting up Basic Auth requires Simply Static Pro."
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:122
+#: src/admin/src/settings/pages/DebugSettings.jsx:120
 msgid "Once enabled we will put your entire website behind password protection."
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:137
+#: src/admin/src/settings/pages/DebugSettings.jsx:135
 msgid "Requires Username & Password to work"
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:146
+#: src/admin/src/settings/pages/DebugSettings.jsx:143
 msgid "Temporary Files"
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:150
+#: src/admin/src/settings/pages/DebugSettings.jsx:148
+msgid "Temporary files are managed by Studio"
+msgstr ""
+
+#: src/admin/src/settings/pages/DebugSettings.jsx:151
+msgid "Studio provisions and cleans up build storage automatically for each environment, so there is no temporary directory to configure."
+msgstr ""
+
+#: src/admin/src/settings/pages/DebugSettings.jsx:155
 msgid "Temporary Files Directory"
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:153
-msgid "Optionally specify the directory to save your temporary files. This directory must exist and be writeable."
+#: src/admin/src/settings/pages/DebugSettings.jsx:158
+msgid "Optionally specify the directory to save your temporary files. This directory must exist and be writable."
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:178
+#: src/admin/src/settings/pages/DebugSettings.jsx:184
 msgid "Clearing…"
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:178
+#: src/admin/src/settings/pages/DebugSettings.jsx:184
 msgid "Clear Temporary Files"
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:186
+#: src/admin/src/settings/pages/DebugSettings.jsx:191
 msgid "Whitelist Plugins"
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:190
+#: src/admin/src/settings/pages/DebugSettings.jsx:195
 msgid "Whitelist plugins in diagnostics"
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:192
+#: src/admin/src/settings/pages/DebugSettings.jsx:197
 msgid "If you want to exclude certain plugins from the diagnostics check add the plugin slugs here (one per line)."
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:205
+#: src/admin/src/settings/pages/DebugSettings.jsx:209
 msgid "Proxy Setup"
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:211
+#: src/admin/src/settings/pages/DebugSettings.jsx:214
+msgid "Proxy setup is handled by Studio"
+msgstr ""
+
+#: src/admin/src/settings/pages/DebugSettings.jsx:217
+msgid "Studio already knows the WordPress origin and public Studio URL for this environment, so you do not need to configure a proxy URL manually."
+msgstr ""
+
+#: src/admin/src/settings/pages/DebugSettings.jsx:223
 msgid "If the URL of your WordPress installation differs from the public-facing URL (Proxy Setup), add the public URL here."
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:227
+#: src/admin/src/settings/pages/DebugSettings.jsx:239
 msgid "Debug Log"
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:231
+#: src/admin/src/settings/pages/DebugSettings.jsx:243
 msgid "Activate Debug Log"
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:232
+#: src/admin/src/settings/pages/DebugSettings.jsx:244
 msgid "Enable it to download the debug log from Simply Static -> Generate."
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:246
+#: src/admin/src/settings/pages/DebugSettings.jsx:257
 msgid "Cron"
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:250
-msgid "Use server-side cron job"
+#: src/admin/src/settings/pages/DebugSettings.jsx:262
+msgid "Cron is automatic on Studio"
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:251
-msgid "Enable this if you use a server-side cron job instead of the default WP-Cron."
+#: src/admin/src/settings/pages/DebugSettings.jsx:265
+msgid "Studio starts builds automatically when your site changes, so you do not need a server-side cron job to trigger exports."
 msgstr ""
 
 #: src/admin/src/settings/pages/DebugSettings.jsx:269
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:919
-#: src/admin/src/settings/pages/FormSettings.jsx:366
-#: src/admin/src/settings/pages/GeneralSettings.jsx:869
-#: src/admin/src/settings/pages/IntegrationsSettings.jsx:130
-#: src/admin/src/settings/pages/Optimize.jsx:696
-#: src/admin/src/settings/pages/SearchSettings.jsx:437
-#: src/admin/src/settings/pages/UAMSettings.jsx:234
-#: src/admin/src/settings/pages/Workflow.jsx:450
+msgid "Use server-side cron job"
+msgstr ""
+
+#: src/admin/src/settings/pages/DebugSettings.jsx:270
+msgid "Enable this if you use a server-side cron job instead of the default WP-Cron."
+msgstr ""
+
+#: src/admin/src/settings/pages/DebugSettings.jsx:288
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1180
+#: src/admin/src/settings/pages/FormSettings.jsx:447
+#: src/admin/src/settings/pages/GeneralSettings.jsx:883
+#: src/admin/src/settings/pages/HideWP.jsx:424
+#: src/admin/src/settings/pages/IntegrationsSettings.jsx:120
+#: src/admin/src/settings/pages/Optimize.jsx:668
+#: src/admin/src/settings/pages/SearchSettings.jsx:513
+#: src/admin/src/settings/pages/UAMSettings.jsx:235
+#: src/admin/src/settings/pages/Workflow.jsx:514
 msgid "Settings saved successfully."
 msgstr ""
 
-#: src/admin/src/settings/pages/DebugSettings.jsx:279
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:932
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:936
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:940
-#: src/admin/src/settings/pages/FormSettings.jsx:377
-#: src/admin/src/settings/pages/GeneralSettings.jsx:880
-#: src/admin/src/settings/pages/IntegrationsSettings.jsx:140
-#: src/admin/src/settings/pages/Optimize.jsx:707
-#: src/admin/src/settings/pages/SearchSettings.jsx:448
-#: src/admin/src/settings/pages/UAMSettings.jsx:243
-#: src/admin/src/settings/pages/Workflow.jsx:470
+#: src/admin/src/settings/pages/DebugSettings.jsx:298
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1191
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1196
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1200
+#: src/admin/src/settings/pages/FormSettings.jsx:458
+#: src/admin/src/settings/pages/GeneralSettings.jsx:894
+#: src/admin/src/settings/pages/HideWP.jsx:435
+#: src/admin/src/settings/pages/IntegrationsSettings.jsx:130
+#: src/admin/src/settings/pages/Optimize.jsx:679
+#: src/admin/src/settings/pages/SearchSettings.jsx:524
+#: src/admin/src/settings/pages/UAMSettings.jsx:244
+#: src/admin/src/settings/pages/Workflow.jsx:534
 msgid "Save Settings"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:44
-msgid "ZIP Archive"
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:51
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:916
+msgid "FTP"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:45
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:169
-msgid "Local Directory"
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:47
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:816
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:52
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1039
 msgid "SFTP"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:48
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:223
-msgid "GitHub"
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:49
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:54
 msgid "AWS S3"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:50
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:516
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:55
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:604
 msgid "Bunny CDN"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:51
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:438
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:56
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:528
 msgid "Tiiny.host"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:105
-#: src/admin/src/settings/pages/FormSettings.jsx:52
-#: src/admin/src/settings/pages/GeneralSettings.jsx:233
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:115
+#: src/admin/src/settings/pages/FormSettings.jsx:53
+#: src/admin/src/settings/pages/GeneralSettings.jsx:220
 msgid "No page selected"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:114
-msgid "Deployment Settings"
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:117
-msgid "Choose from a variety of deployment methods. Depending on your selection we either provide a ZIP file, export to a local directory or send your files to a remote destination."
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:119
-msgid "Deployment method"
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:140
-msgid "The all-in-one Static WordPress cloud-hosting platform."
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:143
-msgid "Enjoy secure WordPress, the fastest exports, and the best-performing static site hosting in one package."
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:138
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:142
+msgid "Something went wrong."
 msgstr ""
 
 #: src/admin/src/settings/pages/DeploymentSettings.jsx:154
-msgid "ZIP"
+msgid "⚡ Migrate to Static Studio"
 msgstr ""
 
 #: src/admin/src/settings/pages/DeploymentSettings.jsx:155
-msgid "How to export a ZIP file"
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:160
-msgid "Get a download link in the activity log once the static export has finished."
+msgid "The all-in-one Static WordPress cloud-hosting platform. Enjoy secure WordPress, the fastest exports, and the best-performing static site hosting in one package."
 msgstr ""
 
 #: src/admin/src/settings/pages/DeploymentSettings.jsx:170
-msgid "How to deploy to a local directory"
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:243
+msgid "Installing…"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:175
-#: src/admin/src/settings/pages/GeneralSettings.jsx:356
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:172
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:245
+msgid "Open Migration Settings"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:173
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:246
+msgid "Install & Activate Migration Plugin"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:185
+msgid "Deployment Settings"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:188
+msgid "Choose from a variety of deployment methods. Depending on your selection we either provide a ZIP file, export to a local directory or send your files to a remote destination."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:190
+msgid "Deployment method"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:207
+msgid "Deployment is automatic on Studio"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:208
+msgid "See how Pro deployment works →"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:210
+msgid "Your site is built and published automatically every time you make a change, with no destinations to set up and no pipelines to maintain. That's the whole idea of Studio."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:211
+msgid "Want to choose exactly where your files go? Deploying to GitHub, Amazon S3, BunnyCDN, FTP, SFTP and more is part of Simply Static Pro, where you own and control your deployment pipeline."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:222
+msgid "The all-in-one Static WordPress cloud-hosting platform."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:225
+msgid "Enjoy secure WordPress, the fastest exports, and the best-performing static site hosting in one package."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:228
+msgid "Migrate your existing WordPress site to Static Studio with one click."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:249
+msgid "Learn more about Static Studio"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:257
+msgid "ZIP"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:261
+msgid "Get a download link in the activity log once the static export has finished."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:274
+#: src/admin/src/settings/pages/GeneralSettings.jsx:370
 msgid "Path"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:177
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:276
 msgid "This is the directory where your static files will be saved. We will create it automatically on the first export if it doesn't exist."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:198
-#: src/admin/src/settings/pages/GeneralSettings.jsx:802
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:297
+#: src/admin/src/settings/pages/GeneralSettings.jsx:818
 msgid "Copied home path"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:198
-#: src/admin/src/settings/pages/GeneralSettings.jsx:802
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:297
+#: src/admin/src/settings/pages/GeneralSettings.jsx:818
 msgid "Copy home path"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:202
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:301
 msgid "Clear Local Directory"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:205
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:304
 msgid "Clear local directory before running an export."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:206
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:305
 msgid "Don't clear local directory before running an export."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:224
-msgid "How to deploy to a GitHub (2/2)"
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:236
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:333
 msgid "GitHub enables you to export your static website to one of the common static hosting providers like Netlify, Cloudflare Pages or GitHub Pages."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:239
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:336
 msgid "Account Type"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:241
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:338
 msgid "Depending on the account type the settings fields will change."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:246
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:343
 msgid "Personal"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:247
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:257
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:344
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:354
 msgid "Organization"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:259
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:356
 msgid "Enter the name of your organization."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:270
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:367
 msgid "Username"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:272
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:369
 msgid "Enter your GitHub username."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:283
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:456
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:380
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:544
 msgid "E-Mail"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:285
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:382
 msgid "Enter your GitHub email address. This will be used to commit files to your repository."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:298
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:393
 msgid "Personal Access Token"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:300
-msgid "How to prepare your GitHub account"
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:307
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:397
 msgid "You need a personal access token from GitHub. Learn how to get one "
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:309
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:337
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:538
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:557
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:667
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:685
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:399
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:427
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:624
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:643
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:751
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:769
 msgid "here"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:322
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:412
 msgid "Repository"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:324
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:414
 msgid "Enter a name for your repository (lowercase without spaces or special characters)."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:335
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:425
 msgid "Ensure to create the repository and add a readme file to it before running an export as shown in the docs "
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:342
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:432
 msgid "Folder"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:344
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:434
 msgid "Enter a relative path to a folder if you want to push files under it. Example: for github.com/USER/REPOSITORY/folder1, enter folder1"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:357
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:447
 msgid "You need to create the repository manually within your organization before connecting it."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:363
-msgid "Visiblity"
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:453
+msgid "Visibility"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:365
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:455
 msgid "Decide if you want to make your repository public or private."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:370
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:460
 msgid "Public"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:371
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:461
 msgid "Private"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:380
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:470
 msgid "Branch"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:383
-msgid "Simply Static automatically uses \"main\" as branch. You may want to modify that for example to gh-pages. for GitHub Pages."
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:473
+msgid "Simply Static automatically uses \"main\" as the branch. For GitHub Pages, you may want to change it to gh-pages."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:394
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:780
-#: src/admin/src/settings/pages/Workflow.jsx:405
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:484
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:864
+#: src/admin/src/settings/pages/Workflow.jsx:469
 msgid "Webhook URL"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:396
-msgid "Enter your Webhook URL here and Simply Static will send a POST request after all files are commited to GitHub."
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:406
-msgid "Throttle Requests"
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:407
-msgid "Enable this option if you are experiencing issues with the GitHub API rate limit."
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:418
-msgid "Batch size"
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:420
-msgid "Enter the number of files you want to be processed in a single batch. If current export fails to deploy, lower the number."
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:439
-msgid "How to deploy to Tiiny.host"
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:452
-msgid "Deploying to Tiiny.host is the easiest and fastest deployment option available in Simply Static Pro."
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:460
-msgid "This field is auto-filled with the e-mail address used for activating Simply Static Pro."
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:461
-msgid "An account will be created automatically on your first deployment."
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:470
-msgid "Subdomain"
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:472
-msgid "That's the part before your TLD. Your full URL is the combination of the subdomain plus the domain suffix."
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:483
-msgid "Domain Suffix"
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:485
-msgid "This defaults to tiiny.site. If you have a custom domain configured in Tiiny.host, you can also use  that one."
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:486
+msgid "Enter your Webhook URL here and Simply Static will send a POST request after all files are committed to GitHub."
 msgstr ""
 
 #: src/admin/src/settings/pages/DeploymentSettings.jsx:496
+msgid "Throttle Requests"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:497
+msgid "Enable this option if you are experiencing issues with the GitHub API rate limit."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:508
+msgid "Batch size"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:510
+msgid "Enter the number of files you want to be processed in a single batch. If current export fails to deploy, lower the number."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:540
+msgid "Deploying to Tiiny.host is the easiest and fastest deployment option available in Simply Static Pro."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:548
+msgid "This field is auto-filled with the email address used for activating Simply Static Pro."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:549
+msgid "An account will be created automatically on your first deployment."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:558
+msgid "Subdomain"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:560
+msgid "That's the part before your TLD. Your full URL is the combination of the subdomain plus the domain suffix."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:571
+msgid "Domain Suffix"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:573
+msgid "This defaults to tiiny.site. If you have a custom domain configured in Tiiny.host, you can also use that one."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:584
 msgid "Password Protection"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:498
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:586
 msgid "Adding a password will activate password protection on your static site. The website is only visible with the password."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:517
-msgid "How to deploy to Bunny CDN"
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:530
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:616
 msgid "Bunny CDN is a fast and reliable CDN provider that you can run your static website on."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:532
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:618
 msgid "Bunny CDN API Key"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:536
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:622
 msgid "Enter your API Key from Bunny CDN. You can find your API-Key as described "
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:551
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:637
 msgid "Storage Host"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:555
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:641
 msgid "Depending on your location, you have a different storage host. You find out which URL to use "
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:570
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:656
 msgid "Bunny CDN Access Key"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:572
-msgid "Enter your Acess Key from Bunny CDN. You will find it within your storage zone setttings within FTP & API Access -> Password."
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:658
+msgid "Enter your Access Key from Bunny CDN. You will find it in your storage zone settings under FTP & API Access -> Password."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:583
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:669
 msgid "Pull Zone"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:585
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:671
 msgid "A pull zone is the connection of your CDN to the internet. Simply Static will try to find an existing pull zone with the provided name, if there is none it creates a new pull zone."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:596
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:682
 msgid "Storage Zone"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:598
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:684
 msgid "A storage zone contains your static files. Simply Static will try to find an existing storage zone with the provided name, if there is none it creates a new storage zone."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:609
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:754
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:695
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:838
 msgid "Subdirectory"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:612
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:698
 msgid "If you want to transfer the files to a specific subdirectory on your storage zone add the name of that directory here."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:630
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:716
 msgid "Amazon AWS S3"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:631
-msgid "How to deploy to Amazon AWS S3"
-msgstr ""
-
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:644
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:728
 msgid "Authentication Method"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:647
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:731
 msgid "AWS IAM Access Key"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:648
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:732
 msgid "AWS EC2"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:661
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:745
 msgid "Access Key ID"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:665
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:749
 msgid "Enter your Access Key from AWS. Learn how to get one "
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:679
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:763
 msgid "Secret Access Key"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:683
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:767
 msgid "Enter your Secret Key from AWS. Learn how to get one "
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:699
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:783
 msgid "Region"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:704
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:788
 msgid "US East (Ohio)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:705
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:789
 msgid "US East (N. Virginia)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:706
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:790
 msgid "US West (N. California)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:707
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:791
 msgid "US West (Oregon)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:708
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:792
 msgid "Africa (Cape Town)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:709
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:793
 msgid "Asia Pacific (Hong Kong)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:710
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:794
 msgid "Asia Pacific (Hyderabad)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:711
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:795
 msgid "Asia Pacific (Jakarta)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:712
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:796
 msgid "Asia Pacific (Melbourne)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:713
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:797
 msgid "Asia Pacific (Mumbai)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:714
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:798
 msgid "Asia Pacific (Osaka)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:715
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:799
 msgid "Asia Pacific (Seoul)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:716
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:800
 msgid "Asia Pacific (Singapore)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:717
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:801
 msgid "Asia Pacific (Sydney)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:718
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:802
 msgid "Asia Pacific (Tokyo)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:719
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:803
 msgid "Canada (Central)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:720
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:804
 msgid "Europe (Frankfurt)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:721
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:805
 msgid "Europe (Ireland)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:722
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:806
 msgid "Europe (London)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:723
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:807
 msgid "Europe (Milan)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:724
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:808
 msgid "Europe (Paris)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:725
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:809
 msgid "Europe (Spain)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:726
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:810
 msgid "Europe (Stockholm)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:727
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:811
 msgid "Europe (Zurich)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:728
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:812
 msgid "Middle East (Bahrain)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:729
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:813
 msgid "Middle East (UAE)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:730
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:814
 msgid "South America (São Paulo)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:731
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:815
 msgid "AWS GovCloud (US-East)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:732
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:816
 msgid "AWS GovCloud (US-West)"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:741
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:825
 msgid "Bucket"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:743
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:827
 msgid "Add the name of your bucket here."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:756
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:840
 msgid "Add an optional subdirectory for your bucket"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:767
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:851
 msgid "Cloudfront Distribution ID"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:769
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:853
 msgid "We automatically invalidate the cache after each export."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:782
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:866
 msgid "Enter your Webhook URL here and Simply Static will send a POST request after all files are transferred to AWS S3."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:793
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:877
+msgid "Disable ACL on uploads?"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:880
+msgid "ACL header will not be sent. Required for buckets with \"Bucket owner enforced\" (ACLs disabled)."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:881
+msgid "ACL header will be sent with uploads. Disable this if your bucket has ACLs disabled."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:893
 msgid "Empty bucket before new export?"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:796
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:896
 msgid "Clear bucket before new export."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:797
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:897
 msgid "Don't clear bucket before new export."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:817
-msgid "How to deploy via SFTP"
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:930
+msgid "The PHP FTP extension is not installed. Ask the server administrator to enable it before using FTP deployment."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:830
-#: src/admin/src/settings/pages/GeneralSettings.jsx:337
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:936
+msgid "Plain FTP does not encrypt credentials or uploaded files. Use SFTP whenever your hosting provider supports it."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:941
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1051
+#: src/admin/src/settings/pages/GeneralSettings.jsx:350
 msgid "Host"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:832
-msgid "Enter your SFTP host."
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:943
+msgid "Enter your FTP host without a path."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:843
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:954
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1064
 msgid "Port"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:846
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:957
+msgid "Enter your FTP port. The default is 21."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:967
+msgid "FTP username"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:968
+msgid "Enter your FTP username."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:981
+msgid "FTP password"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:984
+msgid "Enter your FTP password. You can also define SSP_FTP_PASS in wp-config.php."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:994
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1091
+msgid "Connection timeout"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:999
+msgid "Stop a stalled FTP connection after this many seconds."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1009
+msgid "FTP folder"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1010
+msgid "Leave empty to use the FTP account default, or enter the folder that should contain the static site (for example, \"public_html\")."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1022
+msgid "Passive mode"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1023
+msgid "Recommended for shared hosting and servers behind a firewall."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1053
+msgid "Enter your SFTP host."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1067
 msgid "Enter your SFTP port."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:856
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1077
 msgid "SFTP username"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:857
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1078
 msgid "Enter your SFTP username."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:870
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1096
+msgid "Stop a stalled SFTP connection after this many seconds."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1106
 msgid "SFTP password"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:873
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1109
 msgid "Enter your SFTP password."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:883
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1119
 msgid "SFTP private key"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:886
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1122
 msgid "OPTIONAL: This is only required if you need to authenticate via a private key to access your SFTP server."
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:887
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1123
 msgid "Enter your SFTP private key if you want passwordless upload and the server is configured to allow it. You can set it as a constant in wp-config.php by using define('SSP_SFTP_KEY', 'YOUR_KEY')"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:895
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1131
+msgid "SSH host key fingerprint"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1132
+msgid "Optional: pin the server host key with an OpenSSH SHA256 fingerprint (for example, SHA256:abc…). The deployment stops if the key changes."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1145
 msgid "SFTP folder"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:896
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1146
 msgid "Leave empty to upload to the default SFTP folder. Enter a folder path where you want the static files to be uploaded to (example: \"uploads\" will upload to uploads folder. \"uploads/new-folder\" will upload files to \"new-folder\"). "
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:962
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1159
+msgid "Bulk upload via zip archive"
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1160
+msgid "Instead of uploading files one by one, this creates a zip archive locally, uploads it as a single file, and extracts it on the remote server. This can significantly speed up deployments with many files. Requires unzip or python3 on the remote server."
+msgstr ""
+
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1226
 msgid "Save settings to test"
 msgstr ""
 
-#: src/admin/src/settings/pages/DeploymentSettings.jsx:963
+#: src/admin/src/settings/pages/DeploymentSettings.jsx:1227
 msgid "Test Deployment"
 msgstr ""
 
-#: src/admin/src/settings/pages/Diagnostics.jsx:34
-msgid "How to use diagnostics"
-msgstr ""
-
-#: src/admin/src/settings/pages/Diagnostics.jsx:39
+#: src/admin/src/settings/pages/Diagnostics.jsx:36
 msgid "Our diagnostics tool provides detailed insights into your WordPress installation and server configuration and tells you exactly what needs to be optimized to get the most out of Simply Static. Click the button below to get the latest results."
 msgstr ""
 
-#: src/admin/src/settings/pages/Diagnostics.jsx:42
+#: src/admin/src/settings/pages/Diagnostics.jsx:39
 msgid "Reset Diagnostics"
 msgstr ""
 
-#: src/admin/src/settings/pages/Diagnostics.jsx:49
+#: src/admin/src/settings/pages/Diagnostics.jsx:46
 msgid "Diagnostics resetted successfully."
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:104
+#: src/admin/src/settings/pages/FormSettings.jsx:69
+msgid "Failed to detect credentials."
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:99
+msgid "Turnstile credentials copied from "
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:111
+msgid "reCAPTCHA credentials copied from "
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:117
+msgid " reCAPTCHA credentials were found - switch to the matching reCAPTCHA version to use them."
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:119
+msgid " Turnstile credentials were found - switch to Turnstile to use them."
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:121
+msgid " reCAPTCHA v3 credentials were found - switch to reCAPTCHA v3 to use them."
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:123
+msgid " reCAPTCHA v2 credentials were found - switch to reCAPTCHA v2 to use them."
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:128
+msgid "No credentials found for the selected captcha service."
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:138
+msgid "Error detecting credentials: "
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:138
+msgid "Unknown error"
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:184
 msgid "Use forms?"
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:108
+#: src/admin/src/settings/pages/FormSettings.jsx:188
 msgid "Use Forms on your static website."
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:109
+#: src/admin/src/settings/pages/FormSettings.jsx:189
 msgid "Don't use forms on your static website."
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:120
+#: src/admin/src/settings/pages/FormSettings.jsx:200
 msgid "Store form entries"
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:124
+#: src/admin/src/settings/pages/FormSettings.jsx:204
 msgid "Store form entries inside WordPress (requires Simply Static Webhook)."
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:125
+#: src/admin/src/settings/pages/FormSettings.jsx:205
 msgid "Do not store form entries in WordPress."
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:137
+#: src/admin/src/settings/pages/FormSettings.jsx:217
+msgid "Enable conditional loading"
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:221
+msgid "Form scripts are only loaded on pages that contain a connected form."
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:222
+msgid "Form scripts are loaded on all pages for maximum compatibility."
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:234
 msgid "Create a form connection"
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:146
+#: src/admin/src/settings/pages/FormSettings.jsx:243
 msgid "Comments"
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:158
+#: src/admin/src/settings/pages/FormSettings.jsx:255
 msgid "Use comments?"
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:162
+#: src/admin/src/settings/pages/FormSettings.jsx:259
 msgid "Use comments on your static website."
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:163
+#: src/admin/src/settings/pages/FormSettings.jsx:260
 msgid "Don't use comments on your static website."
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:178
-msgid "The post will be regenerated after comment submission, but it might take a while so its good practice to redirect the visitor."
+#: src/admin/src/settings/pages/FormSettings.jsx:275
+msgid "The post will be regenerated after comment submission, but it might take a while, so it is good practice to redirect the visitor."
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:198
+#: src/admin/src/settings/pages/FormSettings.jsx:295
 msgid "Captcha"
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:209
+#: src/admin/src/settings/pages/FormSettings.jsx:306
 msgid "We will automatically protect your forms and comments with a captcha on your static site."
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:211
+#: src/admin/src/settings/pages/FormSettings.jsx:308
 msgid "Captcha Service"
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:212
-msgid "Choose which captcha service to use. More options coming soon."
+#: src/admin/src/settings/pages/FormSettings.jsx:309
+msgid "Choose which captcha service to use."
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:218
+#: src/admin/src/settings/pages/FormSettings.jsx:315
+msgid "Choose Service"
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:316
 msgid "Cloudflare Turnstile"
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:226
-msgid "Site Key"
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:227
-msgid "Your public key will be used on the static site."
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:228
-msgid "Enter your Turnstile site key"
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:237
-msgid "Secret Key"
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:238
-msgid "Your secret key will be stored in WordPress."
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:239
-msgid "Enter your Turnstile secret key"
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:249
-msgid "Theme"
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:250
-msgid "Choose how the widget should look on your site."
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:256
-msgid "Auto"
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:257
-msgid "Light"
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:258
-msgid "Dark"
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:264
-msgid "Size"
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:265
-msgid "Choose the widget size."
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:271
-msgid "Normal"
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:272
-msgid "Flexible"
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:273
-msgid "Compact"
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:289
-msgid "CORS"
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:290
-msgid "How to deal with CORS"
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:303
-msgid "Enable CORS"
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:306
-msgid "CORS settings enabled. Configure options below."
-msgstr ""
-
-#: src/admin/src/settings/pages/FormSettings.jsx:307
-msgid "Turn on to configure CORS for Forms and Comments requests."
+#: src/admin/src/settings/pages/FormSettings.jsx:317
+msgid "Google reCAPTCHA v2 (Checkbox)"
 msgstr ""
 
 #: src/admin/src/settings/pages/FormSettings.jsx:318
-msgid "When using Forms and Comments in Simply Static Pro you may encounter CORS issues as you make requests from your static website to your original one."
+msgid "Google reCAPTCHA v3"
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:322
-msgid "Due to the variety of server setups out there, you may need to make changes on your server."
+#: src/admin/src/settings/pages/FormSettings.jsx:346
+msgid "Detecting..."
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:327
-msgid "Static URL"
+#: src/admin/src/settings/pages/FormSettings.jsx:347
+msgid "Copy existing Credentials"
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:332
-msgid "Add the URL of your static website to allow CORS from it."
+#: src/admin/src/settings/pages/FormSettings.jsx:350
+msgid "Automatically detect and copy captcha credentials from form plugins like Contact Form 7, WPForms, or Fluent Forms."
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:340
-msgid "Select CORS method"
+#: src/admin/src/settings/pages/FormSettings.jsx:356
+#: src/admin/src/settings/pages/FormSettings.jsx:412
+msgid "Site Key"
 msgstr ""
 
-#: src/admin/src/settings/pages/FormSettings.jsx:344
-msgid "Choose one of the methods to allow CORS for your website."
+#: src/admin/src/settings/pages/FormSettings.jsx:357
+#: src/admin/src/settings/pages/FormSettings.jsx:413
+msgid "Your public key will be used on the static site."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:294
-#: src/admin/src/settings/pages/GeneralSettings.jsx:301
-msgid "Replacing URLs"
+#: src/admin/src/settings/pages/FormSettings.jsx:358
+msgid "Enter your Turnstile site key"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:295
-msgid "How to replace URLs"
+#: src/admin/src/settings/pages/FormSettings.jsx:367
+#: src/admin/src/settings/pages/FormSettings.jsx:423
+msgid "Secret Key"
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:368
+#: src/admin/src/settings/pages/FormSettings.jsx:424
+msgid "Your secret key will be stored in WordPress."
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:369
+msgid "Enter your Turnstile secret key"
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:379
+msgid "Theme"
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:380
+msgid "Choose how the widget should look on your site."
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:386
+msgid "Auto"
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:387
+msgid "Light"
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:388
+msgid "Dark"
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:394
+msgid "Size"
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:395
+msgid "Choose the widget size."
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:401
+msgid "Normal"
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:402
+msgid "Flexible"
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:403
+msgid "Compact"
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:414
+msgid "Enter your reCAPTCHA site key"
+msgstr ""
+
+#: src/admin/src/settings/pages/FormSettings.jsx:425
+msgid "Enter your reCAPTCHA secret key"
 msgstr ""
 
 #: src/admin/src/settings/pages/GeneralSettings.jsx:299
-msgid "When exporting your static site, any links to your WordPress site will be replaced by one of the following: absolute URLs, relative URLs, or URLs contructed for offline use."
+#: src/admin/src/settings/pages/GeneralSettings.jsx:312
+msgid "Replacing URLs"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:306
-msgid "Absolute URLs"
+#: src/admin/src/settings/pages/GeneralSettings.jsx:304
+msgid "URL replacement is handled by Studio"
 msgstr ""
 
 #: src/admin/src/settings/pages/GeneralSettings.jsx:307
+msgid "Studio manages the public URL for this environment automatically, so you do not need to configure replacement URLs manually."
+msgstr ""
+
+#: src/admin/src/settings/pages/GeneralSettings.jsx:310
+msgid "When exporting your static site, any links to your WordPress site will be replaced by one of the following: absolute URLs, relative URLs, or URLs constructed for offline use."
+msgstr ""
+
+#: src/admin/src/settings/pages/GeneralSettings.jsx:318
+msgid "Absolute URLs"
+msgstr ""
+
+#: src/admin/src/settings/pages/GeneralSettings.jsx:319
 msgid "Relative Path"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:308
+#: src/admin/src/settings/pages/GeneralSettings.jsx:320
 msgid "Offline Usage"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:320
+#: src/admin/src/settings/pages/GeneralSettings.jsx:332
 msgid "Scheme"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:350
+#: src/admin/src/settings/pages/GeneralSettings.jsx:364
 msgid "Convert all URLs for your WordPress site to absolute URLs at the domain specified above."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:368
+#: src/admin/src/settings/pages/GeneralSettings.jsx:383
 msgid "Convert all URLs for your WordPress site to relative URLs that will work at any domain."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:369
+#: src/admin/src/settings/pages/GeneralSettings.jsx:384
 msgid "Optionally specify a path above if you intend to place the files in a subdirectory."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:372
+#: src/admin/src/settings/pages/GeneralSettings.jsx:387
 msgid "Example"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:373
+#: src/admin/src/settings/pages/GeneralSettings.jsx:388
 msgid "enter /path above if you wanted to serve your files at www.example.com/path/"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:378
+#: src/admin/src/settings/pages/GeneralSettings.jsx:393
 msgid "Convert all URLs for your WordPress site so that you can browse the site locally on your own computer without hosting it on a web server."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:382
+#: src/admin/src/settings/pages/GeneralSettings.jsx:397
 msgid "Force URL replacements"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:386
+#: src/admin/src/settings/pages/GeneralSettings.jsx:402
 msgid "Replace all occurrences of the WordPress URL with the static URL (includes inline CSS and JS)."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:387
+#: src/admin/src/settings/pages/GeneralSettings.jsx:403
 msgid "Replace only occurrences of the WordPress URL that match our tag list."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:401
+#: src/admin/src/settings/pages/GeneralSettings.jsx:417
 msgid "Enhanced Crawl"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:402
-msgid "How Enhanced Crawl improves your static exports"
-msgstr ""
-
-#: src/admin/src/settings/pages/GeneralSettings.jsx:406
+#: src/admin/src/settings/pages/GeneralSettings.jsx:420
 msgid "Enhanced Crawl uses native WordPress functions to find all pages and files when running a static export."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:411
+#: src/admin/src/settings/pages/GeneralSettings.jsx:425
 msgid "Enable Enhanced Crawl"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:416
+#: src/admin/src/settings/pages/GeneralSettings.jsx:430
 msgid "Find pages and files via Enhanced Crawl."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:417
+#: src/admin/src/settings/pages/GeneralSettings.jsx:431
 msgid "Don't find pages and files via Enhanced Crawl."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:432
+#: src/admin/src/settings/pages/GeneralSettings.jsx:446
 msgid "Error loading crawlers: "
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:440
+#: src/admin/src/settings/pages/GeneralSettings.jsx:454
 msgid "Active Crawlers"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:471
+#: src/admin/src/settings/pages/GeneralSettings.jsx:485
 msgid "Select which crawlers to activate. If none selected, all crawlers will be active by default."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:486
+#: src/admin/src/settings/pages/GeneralSettings.jsx:500
 msgid "Error loading post types: "
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:494
+#: src/admin/src/settings/pages/GeneralSettings.jsx:508
 msgid "Post Types to Include"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:525
-msgid "Select which post types to include in the static export. If you remove all selections, all post types will be included by default."
+#: src/admin/src/settings/pages/GeneralSettings.jsx:540
+msgid "Select which post types to include in the static export. All public post types are selected by default."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:535
+#: src/admin/src/settings/pages/GeneralSettings.jsx:550
 msgid "Loading post types..."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:544
+#: src/admin/src/settings/pages/GeneralSettings.jsx:559
 msgid "Error loading plugins: "
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:552
+#: src/admin/src/settings/pages/GeneralSettings.jsx:567
 msgid "Plugins to Include"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:569
+#: src/admin/src/settings/pages/GeneralSettings.jsx:591
 msgid "Select which active plugins to include. All active plugins are included by default; remove tokens to exclude them."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:584
+#: src/admin/src/settings/pages/GeneralSettings.jsx:606
 msgid "Loading plugins..."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:593
+#: src/admin/src/settings/pages/GeneralSettings.jsx:615
 msgid "Error loading themes: "
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:604
+#: src/admin/src/settings/pages/GeneralSettings.jsx:626
 msgid "Themes to Include"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:621
+#: src/admin/src/settings/pages/GeneralSettings.jsx:643
 msgid "Select which theme(s) to include. The active theme and parent (if any) are included by default; remove tokens to exclude them."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:636
+#: src/admin/src/settings/pages/GeneralSettings.jsx:658
 msgid "Loading themes..."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:656
+#: src/admin/src/settings/pages/GeneralSettings.jsx:678
 msgid "Loading crawlers..."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:666
+#: src/admin/src/settings/pages/GeneralSettings.jsx:687
 msgid "404"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:667
-msgid "How to manage 404 pages?"
-msgstr ""
-
-#: src/admin/src/settings/pages/GeneralSettings.jsx:676
+#: src/admin/src/settings/pages/GeneralSettings.jsx:694
 msgid "Generate 404 Page?"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:681
+#: src/admin/src/settings/pages/GeneralSettings.jsx:699
 msgid "Generate a 404 page based on your theme template."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:682
+#: src/admin/src/settings/pages/GeneralSettings.jsx:700
 msgid "Don't generate a 404 page."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:699
-#: src/admin/src/settings/pages/GeneralSettings.jsx:707
+#: src/admin/src/settings/pages/GeneralSettings.jsx:717
+#: src/admin/src/settings/pages/GeneralSettings.jsx:725
 msgid "Custom 404 page (optional)"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:720
+#: src/admin/src/settings/pages/GeneralSettings.jsx:738
 msgid "If selected, Simply Static will use the content of this page for the 404 page instead of the theme default."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:751
-msgid "Failed to start 404 export."
+#: src/admin/src/settings/pages/GeneralSettings.jsx:769
+msgid "Failed to start 404 push."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:755
-msgid "Export 404 Page"
+#: src/admin/src/settings/pages/GeneralSettings.jsx:773
+msgid "Push 404 Page"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:765
+#: src/admin/src/settings/pages/GeneralSettings.jsx:783
 msgid "Include"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:766
-#: src/admin/src/settings/pages/GeneralSettings.jsx:846
-msgid "Include & Exclude files and pages"
-msgstr ""
-
-#: src/admin/src/settings/pages/GeneralSettings.jsx:771
+#: src/admin/src/settings/pages/GeneralSettings.jsx:787
+#: src/admin/src/settings/pages/Optimize.jsx:589
 msgid "Additional URLs"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:774
+#: src/admin/src/settings/pages/GeneralSettings.jsx:790
 msgid "You can enter full URLs or regex (wrap with / /). Examples: https://example.com/private/ or /\\/blog\\/.*$/i (one per line)."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:781
+#: src/admin/src/settings/pages/GeneralSettings.jsx:797
 msgid "Additional Files and Directories"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:784
+#: src/admin/src/settings/pages/GeneralSettings.jsx:800
 msgid "Enter absolute paths or regex (wrap with / /). Examples: /\\.pdf$/i or /wp-content\\/uploads\\/reports\\/.*/ (one per line)."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:808
+#: src/admin/src/settings/pages/GeneralSettings.jsx:824
 msgid "Include RSS Feeds?"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:813
+#: src/admin/src/settings/pages/GeneralSettings.jsx:829
 msgid "Include feed URLs of all your posts."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:814
+#: src/admin/src/settings/pages/GeneralSettings.jsx:830
 msgid "Don't include feed URLs for all your posts."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:826
+#: src/admin/src/settings/pages/GeneralSettings.jsx:842
 msgid "Include Rest API?"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:831
+#: src/admin/src/settings/pages/GeneralSettings.jsx:847
 msgid "Include all Rest API endpoints as JSON files."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:832
+#: src/admin/src/settings/pages/GeneralSettings.jsx:848
 msgid "Don't include Rest API endpoints as JSON files."
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:845
+#: src/admin/src/settings/pages/GeneralSettings.jsx:861
 msgid "Exclude"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:851
-msgid "Urls to exclude"
+#: src/admin/src/settings/pages/GeneralSettings.jsx:865
+msgid "URLs to exclude"
 msgstr ""
 
-#: src/admin/src/settings/pages/GeneralSettings.jsx:854
+#: src/admin/src/settings/pages/GeneralSettings.jsx:868
 msgid "You can enter substrings or regex (wrap with / /). Examples: .jpg or /\\.(pdf|zip)$/i or //private/.*/ (one per line)."
 msgstr ""
 
-#: src/admin/src/settings/pages/Generate.jsx:44
+#: src/admin/src/settings/pages/Generate.jsx:51
 msgid "Debugging"
 msgstr ""
 
-#: src/admin/src/settings/pages/Generate.jsx:57
+#: src/admin/src/settings/pages/Generate.jsx:64
 msgid "Export Log"
 msgstr ""
 
-#: src/admin/src/settings/pages/IntegrationsSettings.jsx:106
-msgid "Control Integrations that will be active during the export of the static site."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:180
-msgid "Minify"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:181
-msgid "How to minify HTML, CSS and JavaScript?"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:194
-msgid "Minify Files?"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:198
-msgid "Enable minify files on your static website."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:199
-msgid "Don't enable minify files on your static website."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:212
-msgid "Minify HTML"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:216
-msgid "Minify HTML files."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:217
-msgid "Don't minify HTML files."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:228
-msgid "Leave quotes inside HTML attributes"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:231
-msgid "If there are issues with comments or JavaScript when minifying HTML, toggle this ON."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:241
-msgid "Minify CSS"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:245
-msgid "Minify CSS files."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:246
-msgid "Don't minify CSS files."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:257
-msgid "Exclude Stylesheet URLs"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:259
-#: src/admin/src/settings/pages/Optimize.jsx:303
-msgid "Exclude URLs from minification (one per line)."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:267
-msgid "Minify Inline CSS"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:271
-msgid "Minify Inline CSS."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:272
-msgid "Don't minify Inline CSS."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:284
-msgid "Minify JavaScript"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:288
-msgid "Minify JavaScript files."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:289
-msgid "Don't minify JavaScript files."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:301
-msgid "Exclude JavaScript URLs"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:311
-msgid "Minify Inline JavaScript"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:315
-msgid "Minify Inline JavaScript."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:316
-msgid "Don't minify Inline JavaScript."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:339
-msgid "Image Optimization"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:340
-msgid "How to optimize images with ShortPixel?"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:353
-msgid "Optimize Images with ShortPixel?"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:357
-msgid "Optimize images with the ShortPixel API."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:358
-msgid "Don't optimize images with the ShortPixel API."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:369
-msgid "ShortPixel API Key"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:380
-msgid "Convert to webP"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:384
-msgid "Convert images to webp format."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:385
-msgid "Don't convert images to webp format"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:394
-msgid "Backup the original images?"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:398
-msgid "Back original images."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:399
-msgid "Don't backup original images."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:409
-msgid "It will preserve every image which might increase your disk space usage."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:414
-msgid "Restore Original Images"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:417
-msgid "Restoring..."
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:429
+#: src/admin/src/settings/pages/HideWP.jsx:125
 msgid "Replace"
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:430
-msgid "How to replace WP default paths"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:443
+#: src/admin/src/settings/pages/HideWP.jsx:137
 msgid "wp-content directory"
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:444
+#: src/admin/src/settings/pages/HideWP.jsx:138
 msgid "Replace the \"wp-content\" directory."
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:457
+#: src/admin/src/settings/pages/HideWP.jsx:151
 msgid "wp-includes directory"
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:458
+#: src/admin/src/settings/pages/HideWP.jsx:152
 msgid "Replace the \"wp-includes\" directory."
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:471
-msgid "uploads directory"
+#: src/admin/src/settings/pages/HideWP.jsx:165
+msgid "Uploads directory"
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:472
+#: src/admin/src/settings/pages/HideWP.jsx:192
 msgid "Replace the \"wp-content/uploads\" directory."
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:486
-msgid "plugins directory"
+#: src/admin/src/settings/pages/HideWP.jsx:196
+msgid "Plugins directory"
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:487
+#: src/admin/src/settings/pages/HideWP.jsx:223
 msgid "Replace the \"wp-content/plugins\" directory."
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:501
-msgid "themes directory"
+#: src/admin/src/settings/pages/HideWP.jsx:227
+msgid "Themes directory"
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:502
+#: src/admin/src/settings/pages/HideWP.jsx:254
 msgid "Replace the \"wp-content/themes\" directory."
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:516
+#: src/admin/src/settings/pages/HideWP.jsx:258
 msgid "Theme style name"
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:517
+#: src/admin/src/settings/pages/HideWP.jsx:259
 msgid "Replace the style.css filename."
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:533
+#: src/admin/src/settings/pages/HideWP.jsx:275
 msgid "Author URL"
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:534
+#: src/admin/src/settings/pages/HideWP.jsx:276
 msgid "Replace the author url."
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:554
+#: src/admin/src/settings/pages/HideWP.jsx:296
 msgid "Hide"
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:555
-#: src/admin/src/settings/pages/Optimize.jsx:635
-msgid "How to hide and disable WP core features"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:568
-msgid "Hide HTML Comments"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:578
+#: src/admin/src/settings/pages/HideWP.jsx:308
 msgid "Hide WordPress Version"
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:588
+#: src/admin/src/settings/pages/HideWP.jsx:318
 msgid "Hide WordPress Generator Meta"
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:598
+#: src/admin/src/settings/pages/HideWP.jsx:328
 msgid "Hide DNS Prefetch WordPress link"
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:608
+#: src/admin/src/settings/pages/HideWP.jsx:338
 msgid "Hide RSD Header"
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:618
-msgid "Hide Emojis if you don't use them"
-msgstr ""
-
-#: src/admin/src/settings/pages/Optimize.jsx:634
+#: src/admin/src/settings/pages/HideWP.jsx:354
 msgid "Disable"
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:648
+#: src/admin/src/settings/pages/HideWP.jsx:366
 msgid "Disable XML-RPC"
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:658
+#: src/admin/src/settings/pages/HideWP.jsx:376
 msgid "Disable Embed Scripts"
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:668
+#: src/admin/src/settings/pages/HideWP.jsx:386
 msgid "Disable DB Debug in Frontend"
 msgstr ""
 
-#: src/admin/src/settings/pages/Optimize.jsx:678
+#: src/admin/src/settings/pages/HideWP.jsx:396
 msgid "Disable WLW Manifest Scripts"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:68
+#: src/admin/src/settings/pages/HideWP.jsx:406
+msgid "Disable Emojis"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:143
+msgid "Minify & Aggregation"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:154
+msgid "Minify and aggregate CSS, JavaScript, and HTML files to reduce file sizes and HTTP requests for faster page loads."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:156
+msgid "Enable Minify & Aggregation?"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:160
+msgid "Minify and aggregate files on your static website."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:161
+msgid "Don't minify or aggregate files on your static website."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:175
+msgid "Minification is handled by Studio"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:178
+msgid "Studio prepares optimized build assets automatically, so the low-level CSS and JavaScript minification options are not needed for Studio environments."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:181
+msgid "Minify"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:184
+msgid "Minify CSS"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:188
+msgid "Minify CSS files."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:189
+msgid "Don't minify CSS files."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:200
+msgid "Exclude Stylesheet URLs"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:202
+#: src/admin/src/settings/pages/Optimize.jsx:230
+msgid "Exclude URLs from minification (one per line)."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:212
+msgid "Minify JavaScript"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:216
+msgid "Minify JavaScript files."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:217
+msgid "Don't minify JavaScript files."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:228
+msgid "Exclude JavaScript URLs"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:240
+msgid "Protect jQuery Globals"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:242
+msgid "Prevent mangling of jQuery, $, and wp global variables during JS minification."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:251
+msgid "Aggregate"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:254
+msgid "Aggregate CSS"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:256
+msgid "Combine multiple CSS files into fewer bundles grouped by media attribute and deferral status."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:266
+msgid "Aggregate JavaScript"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:268
+msgid "Combine multiple JS files into fewer bundles grouped by loading attributes (defer, async, delayed) and position (head/body)."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:278
+msgid "Exclude Patterns"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:280
+msgid "Glob patterns for files to exclude from aggregation (one per line). Use this for scripts that break when concatenated, such as Google Maps init scripts, payment gateway SDKs, or scripts using document.write()."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:298
+msgid "Defer & Delay"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:309
+msgid "Eliminate render-blocking CSS and JavaScript resources to improve Lighthouse scores and page load speed."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:311
+msgid "Enable Defer & Delay?"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:315
+msgid "Optimize render-blocking resources during static export."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:316
+msgid "Don't optimize render-blocking resources."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:329
+msgid "Defer Non-Critical CSS"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:331
+msgid "Convert non-critical stylesheets to load asynchronously using the media=\"print\" pattern."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:342
+msgid "Critical CSS Patterns"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:344
+msgid "Glob patterns for stylesheets that must remain render-blocking (one per line). Default: */style.css, */styles.css, */global.css, */theme*.css, */wp-block-*.css"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:355
+msgid "Defer Synchronous Scripts"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:357
+msgid "Add the defer attribute to render-blocking scripts. Preserves execution order (safe for jQuery dependencies)."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:368
+msgid "Defer Exclude Patterns"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:370
+msgid "Additional glob patterns for scripts to exclude from deferral (one per line). Built-in patterns already exclude WordPress core scripts: jQuery, wp-i18n, wp-hooks, wp-url, wp-api-fetch, and wp-api."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:381
+msgid "Optimize Google Fonts"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:383
+msgid "Preload Google Fonts stylesheets, inject the Google Fonts preconnect hint, and add display=swap for faster font loading."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:393
+msgid "Add Preconnect Hints"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:395
+msgid "Add preconnect resource hints for high-value third-party font, icon, script, and image origins found in exported pages."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:405
+msgid "Delay Non-Critical JavaScript"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:407
+msgid "Delay third-party scripts (analytics, tag managers, tracking pixels) until user interaction to reduce Total Blocking Time. Scripts load on first click, scroll, or keypress."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:418
+msgid "Additional Delay Patterns"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:420
+msgid "Additional glob patterns for scripts to delay (one per line). Built-in patterns already cover Google (Tag Manager, Analytics, Ads, reCAPTCHA), HubSpot, Facebook/Meta Pixel, Hotjar, Clarity, Bing UET, Cloudflare (Insights, Turnstile), CleanTalk, Matomo/Piwik, Plausible, Twitter/X, LinkedIn, Pinterest, Tawk.to, Crisp, LiveChat, Intercom, Drift, Tidio, Segment, Amplitude, Mixpanel, Optimizely, Mouseflow, Lucky Orange, Crazy Egg, FullStory, LogRocket, and Sentry."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:429
+msgid "Delay Exclude Patterns"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:431
+msgid "Glob patterns for scripts that must run without Simply Static's interaction delay (one per line). Patterns match script URLs, element IDs, and inline script content. You can also add data-ssp-no-delay to a script tag. Exclusions do not override your consent manager."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:440
+msgid "Delay Fallback Timeout (seconds)"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:446
+msgid "Release delayed scripts after this many seconds if there is no user interaction. Use 0 to release them immediately."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:463
+msgid "Image Optimization"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:476
+msgid "Image optimization is handled by Studio"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:479
+msgid "Studio optimizes the static build pipeline for its hosting environment, so you do not need to connect ShortPixel for Studio deployments."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:483
+msgid "Optimize Images with ShortPixel?"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:487
+msgid "Optimize images with the ShortPixel API."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:488
+msgid "Don't optimize images with the ShortPixel API."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:499
+msgid "ShortPixel API Key"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:510
+msgid "Convert to WebP"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:514
+msgid "Convert images to WebP format."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:515
+msgid "Don't convert images to WebP format."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:524
+msgid "Backup the original images?"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:528
+msgid "Back original images."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:529
+msgid "Don't backup original images."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:539
+msgid "It will preserve every image which might increase your disk space usage."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:544
+msgid "Restore Original Images"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:547
+msgid "Restoring..."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:559
+msgid "Critical CSS"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:564
+msgid "Requires Static Studio"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:570
+msgid "Generate critical above-the-fold CSS to eliminate render-blocking stylesheets and improve page load speed. Critical CSS is generated for the homepage and injected into every page."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:572
+msgid "Enable Critical CSS Generation?"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:576
+msgid "Critical CSS will be generated during static export."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:577
+msgid "Don't generate critical CSS."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:591
+msgid "By default, critical CSS is generated from the homepage only. Add additional page URLs here (one per line) if those pages have significantly different styles."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:600
+msgid "Custom CSS"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:602
+msgid "Add custom CSS that will be appended to the generated critical CSS. Use this to fix minor visual glitches."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:618
+msgid "Versioning"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:630
+msgid "Version CSS?"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:634
+msgid "Appends a version query string to CSS files."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:635
+msgid "Don't append a version query string to CSS files."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:645
+msgid "Version JavaScript?"
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:649
+msgid "Appends a version query string to JavaScript files."
+msgstr ""
+
+#: src/admin/src/settings/pages/Optimize.jsx:650
+msgid "Don't append a version query string to JavaScript files."
+msgstr ""
+
+#: src/admin/src/settings/pages/SearchSettings.jsx:66
 msgid "Use search?"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:72
+#: src/admin/src/settings/pages/SearchSettings.jsx:70
 msgid "Use search on your static website."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:73
+#: src/admin/src/settings/pages/SearchSettings.jsx:71
 msgid "Don't use search on your static website."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:83
+#: src/admin/src/settings/pages/SearchSettings.jsx:81
 msgid "Search Type"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:85
+#: src/admin/src/settings/pages/SearchSettings.jsx:83
 msgid "Decide which search type you want to use. Fuse runs locally based on a file, and Algolia is an external API service."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:103
+#: src/admin/src/settings/pages/SearchSettings.jsx:101
 msgid "Use Search Results Page"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:105
+#: src/admin/src/settings/pages/SearchSettings.jsx:103
 msgid "Simply Static will create a static search results page and the export will include a special __qs directory."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:114
+#: src/admin/src/settings/pages/SearchSettings.jsx:112
 msgid "Use Submit Button"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:116
+#: src/admin/src/settings/pages/SearchSettings.jsx:114
 msgid "Show or hide the submit button in the search UI."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:127
+#: src/admin/src/settings/pages/SearchSettings.jsx:125
 msgid "Submit button text"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:132
+#: src/admin/src/settings/pages/SearchSettings.jsx:130
 msgid "Customize the submit button text or HTML (e.g., add an icon)."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:143
+#: src/admin/src/settings/pages/SearchSettings.jsx:141
 msgid "Show excerpt in suggestions/results"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:145
+#: src/admin/src/settings/pages/SearchSettings.jsx:143
 msgid "Enable to display the excerpt below each search suggestion and result item."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:155
+#: src/admin/src/settings/pages/SearchSettings.jsx:153
 msgid "Input placeholder"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:159
+#: src/admin/src/settings/pages/SearchSettings.jsx:157
 msgid "Search.."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:160
+#: src/admin/src/settings/pages/SearchSettings.jsx:158
 msgid "Customize the placeholder text for the search input."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:173
+#: src/admin/src/settings/pages/SearchSettings.jsx:171
 msgid "How to select data with meta tags"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:174
+#: src/admin/src/settings/pages/SearchSettings.jsx:172
 msgid "Targeting for excerpt in the meta description tag."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:178
-#: src/admin/src/settings/pages/SearchSettings.jsx:186
+#: src/admin/src/settings/pages/SearchSettings.jsx:176
+#: src/admin/src/settings/pages/SearchSettings.jsx:184
 msgid "Adding such meta in the excerpt field would be:"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:182
+#: src/admin/src/settings/pages/SearchSettings.jsx:180
 msgid "Targeting for title in the property meta tag."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:190
+#: src/admin/src/settings/pages/SearchSettings.jsx:188
 msgid "If the second item (after | ) is not <code>content</code>, we'll use it as value of that attribute (<code>property=\"og:title\"</code> in this example) and use <code>content</code> for value."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:191
+#: src/admin/src/settings/pages/SearchSettings.jsx:189
 msgid "Caution: Use meta tags that exist everywhere for title."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:200
+#: src/admin/src/settings/pages/SearchSettings.jsx:198
 msgid "Indexing"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:212
-msgid "CSS-Selector for Title"
+#: src/admin/src/settings/pages/SearchSettings.jsx:210
+msgid "CSS selector for title"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:219
+#: src/admin/src/settings/pages/SearchSettings.jsx:217
 msgid "Add the CSS selector which contains the title of the page/post"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:221
-#: src/admin/src/settings/pages/SearchSettings.jsx:241
-#: src/admin/src/settings/pages/SearchSettings.jsx:262
+#: src/admin/src/settings/pages/SearchSettings.jsx:219
+#: src/admin/src/settings/pages/SearchSettings.jsx:239
+#: src/admin/src/settings/pages/SearchSettings.jsx:260
 msgid "Or meta tags. Click for more information."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:232
-msgid "CSS-Selector for Content"
+#: src/admin/src/settings/pages/SearchSettings.jsx:230
+msgid "CSS selector for content"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:239
+#: src/admin/src/settings/pages/SearchSettings.jsx:237
 msgid "Add the CSS selector which contains the content of the page/post."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:253
-msgid "CSS-Selector for Excerpt"
+#: src/admin/src/settings/pages/SearchSettings.jsx:251
+msgid "CSS selector for excerpt"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:260
+#: src/admin/src/settings/pages/SearchSettings.jsx:258
 msgid "Add the CSS selector which contains the excerpt of the page/post."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:274
+#: src/admin/src/settings/pages/SearchSettings.jsx:272
 msgid "Exclude URLs"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:277
-msgid "Exclude URLs from indexing (one per line). You can use full URLs, parts of an URL or plain words (like stop words)."
+#: src/admin/src/settings/pages/SearchSettings.jsx:275
+msgid "Exclude URLs from indexing (one per line). You can use full URLs, parts of a URL, or plain words (such as stop words)."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:294
+#: src/admin/src/settings/pages/SearchSettings.jsx:292
 msgid "Fuse.js"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:295
-msgid "How to add search with FuseJS"
+#: src/admin/src/settings/pages/SearchSettings.jsx:304
+#: src/admin/src/settings/pages/SearchSettings.jsx:488
+msgid "CSS selector"
 msgstr ""
 
 #: src/admin/src/settings/pages/SearchSettings.jsx:308
-#: src/admin/src/settings/pages/SearchSettings.jsx:412
-msgid "CSS-Selector"
+#: src/admin/src/settings/pages/SearchSettings.jsx:492
+msgid "Add the CSS selector for the <form> element that contains your search input field."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:312
-#: src/admin/src/settings/pages/SearchSettings.jsx:416
-msgid "Add the CSS selector for the <form> element that contains your search input field."
+#: src/admin/src/settings/pages/SearchSettings.jsx:316
+#: src/admin/src/settings/pages/SearchSettings.jsx:500
+msgid "If you have multiple search elements with different CSS selectors, separate them by a comma (,) such as: .search-form, .custom-search-form"
 msgstr ""
 
 #: src/admin/src/settings/pages/SearchSettings.jsx:320
@@ -2954,48 +4087,76 @@ msgstr ""
 msgid " A threshold of 0.0 requires a perfect match, a threshold of 1.0 would match anything."
 msgstr ""
 
+#: src/admin/src/settings/pages/SearchSettings.jsx:337
+msgid "Use Extended Search"
+msgstr ""
+
+#: src/admin/src/settings/pages/SearchSettings.jsx:339
+msgid "Enable Fuse.js extended search operators such as exact match, prefix, suffix, and inverse match."
+msgstr ""
+
 #: src/admin/src/settings/pages/SearchSettings.jsx:347
+msgid "Ignore Location"
+msgstr ""
+
+#: src/admin/src/settings/pages/SearchSettings.jsx:349
+msgid "When enabled, the search will look for a match anywhere in the string, regardless of position. By default, Fuse.js favors matches near the beginning of a string."
+msgstr ""
+
+#: src/admin/src/settings/pages/SearchSettings.jsx:357
+msgid "Weight"
+msgstr ""
+
+#: src/admin/src/settings/pages/SearchSettings.jsx:358
+msgid "Weighted search allows you to prioritize certain fields in your search results. A higher weight means results matching that field will appear higher in the results list. Default weight is 1."
+msgstr ""
+
+#: src/admin/src/settings/pages/SearchSettings.jsx:363
+msgid "Title Weight"
+msgstr ""
+
+#: src/admin/src/settings/pages/SearchSettings.jsx:380
+msgid "Content Weight"
+msgstr ""
+
+#: src/admin/src/settings/pages/SearchSettings.jsx:397
+msgid "Excerpt Weight"
+msgstr ""
+
+#: src/admin/src/settings/pages/SearchSettings.jsx:425
 msgid "Algolia API"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:348
-msgid "How to add search with the Algolia API"
-msgstr ""
-
-#: src/admin/src/settings/pages/SearchSettings.jsx:361
+#: src/admin/src/settings/pages/SearchSettings.jsx:437
 msgid "Application ID"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:365
+#: src/admin/src/settings/pages/SearchSettings.jsx:441
 msgid "Add your Algolia App ID."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:374
+#: src/admin/src/settings/pages/SearchSettings.jsx:450
 msgid "Admin API Key"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:378
+#: src/admin/src/settings/pages/SearchSettings.jsx:454
 msgid "Add your Algolia Admin API Key."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:387
+#: src/admin/src/settings/pages/SearchSettings.jsx:463
 msgid "Search-Only API Key"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:391
+#: src/admin/src/settings/pages/SearchSettings.jsx:467
 msgid "Add your Algolia Search-Only API Key here. This is the only key that will be visible on your static site."
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:400
+#: src/admin/src/settings/pages/SearchSettings.jsx:476
 msgid "Name for your index"
 msgstr ""
 
-#: src/admin/src/settings/pages/SearchSettings.jsx:404
+#: src/admin/src/settings/pages/SearchSettings.jsx:480
 msgid "Add your Algolia index name here."
-msgstr ""
-
-#: src/admin/src/settings/pages/SearchSettings.jsx:424
-msgid "If you have multiple search elements with different CSS selectors, separate them by a comma (,) such as: .search-form, .custom-search-form"
 msgstr ""
 
 #: src/admin/src/settings/pages/UAMSettings.jsx:16
@@ -3018,280 +4179,295 @@ msgstr ""
 msgid "Subscriber"
 msgstr ""
 
-#: src/admin/src/settings/pages/UAMSettings.jsx:50
+#: src/admin/src/settings/pages/UAMSettings.jsx:51
 msgid "Form Connections"
 msgstr ""
 
-#: src/admin/src/settings/pages/UAMSettings.jsx:53
-msgid "Builds"
-msgstr ""
-
-#: src/admin/src/settings/pages/UAMSettings.jsx:113
+#: src/admin/src/settings/pages/UAMSettings.jsx:114
 msgid "UAM (User Access Management)"
 msgstr ""
 
-#: src/admin/src/settings/pages/UAMSettings.jsx:117
+#: src/admin/src/settings/pages/UAMSettings.jsx:118
 msgid "Control who can access Simply Static pages, menu entries, and selected features by assigning a minimum WordPress role."
 msgstr ""
 
-#: src/admin/src/settings/pages/UAMSettings.jsx:187
-msgid "Menu"
-msgstr ""
-
-#: src/admin/src/settings/pages/UAMSettings.jsx:209
+#: src/admin/src/settings/pages/UAMSettings.jsx:210
 msgid "Features"
 msgstr ""
 
-#: src/admin/src/settings/pages/UAMSettings.jsx:215
+#: src/admin/src/settings/pages/UAMSettings.jsx:216
 msgid "Admin Bar"
 msgstr ""
 
-#: src/admin/src/settings/pages/UAMSettings.jsx:221
+#: src/admin/src/settings/pages/UAMSettings.jsx:222
 msgid "Single Export (Button)"
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:100
+#: src/admin/src/settings/pages/Utilities.jsx:81
+msgid "Import data must be a JSON object."
+msgstr ""
+
+#: src/admin/src/settings/pages/Utilities.jsx:87
+msgid "Enter valid settings JSON before importing."
+msgstr ""
+
+#: src/admin/src/settings/pages/Utilities.jsx:128
 msgid "Failed to prepare export JSON."
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:105
+#: src/admin/src/settings/pages/Utilities.jsx:133
 msgid "Failed to fetch export data."
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:116
-#: src/admin/src/settings/pages/Utilities.jsx:175
-msgid "Export & Import settings"
+#: src/admin/src/settings/pages/Utilities.jsx:149
+msgid "Import, reset, and migration actions are unavailable until the active export or rollback finishes."
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:123
+#: src/admin/src/settings/pages/Utilities.jsx:159
+msgid "Export"
+msgstr ""
+
+#: src/admin/src/settings/pages/Utilities.jsx:165
 msgid "Export Settings"
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:129
+#: src/admin/src/settings/pages/Utilities.jsx:171
 msgid "Preparing export..."
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:161
+#: src/admin/src/settings/pages/Utilities.jsx:203
 msgid "Copied!"
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:161
+#: src/admin/src/settings/pages/Utilities.jsx:203
 msgid "Copy export data"
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:180
+#: src/admin/src/settings/pages/Utilities.jsx:220
 msgid "Paste in the JSON string you got from your export to import all settings for the plugin."
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:192
+#: src/admin/src/settings/pages/Utilities.jsx:223
+msgid "Settings JSON to import"
+msgstr ""
+
+#: src/admin/src/settings/pages/Utilities.jsx:243
 msgid "Settings imported successfully."
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:205
+#: src/admin/src/settings/pages/Utilities.jsx:256
 msgid "Reset"
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:208
+#: src/admin/src/settings/pages/Utilities.jsx:259
 msgid "By clicking the \"Reset Plugin Settings\", you will reset all plugin settings. This can be useful if you want to import a new set of settings or you want a fresh start."
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:209
+#: src/admin/src/settings/pages/Utilities.jsx:260
 msgid "If you click the \"Reset Database Table\" button instead, you will keep all your settings, and we will only recreate our DB table."
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:210
+#: src/admin/src/settings/pages/Utilities.jsx:261
 msgid "If the background process is stuck and your debug log shows \"There is already an export running\", use the \"Reset Background Queue\" button to clear the queue and locks."
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:213
+#: src/admin/src/settings/pages/Utilities.jsx:266
 msgid "Reset Plugin Settings"
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:215
+#: src/admin/src/settings/pages/Utilities.jsx:270
 msgid "Reset Database Table"
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:217
+#: src/admin/src/settings/pages/Utilities.jsx:274
 msgid "Reset Background Queue"
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:224
-msgid "Settings resetted successfully."
+#: src/admin/src/settings/pages/Utilities.jsx:281
+msgid "Settings reset successfully."
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:237
-msgid "Database table resetted successfully."
+#: src/admin/src/settings/pages/Utilities.jsx:294
+msgid "Database table reset successfully."
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:250
+#: src/admin/src/settings/pages/Utilities.jsx:307
 msgid "Background queue reset successfully."
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:263
+#: src/admin/src/settings/pages/Utilities.jsx:320
 msgid "Migrate Settings"
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:266
+#: src/admin/src/settings/pages/Utilities.jsx:323
 msgid "Migrate all of your settings to Simply Static 3.0"
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:269
+#: src/admin/src/settings/pages/Utilities.jsx:328
 msgid "Migrate settings"
 msgstr ""
 
-#: src/admin/src/settings/pages/Utilities.jsx:276
-msgid "Settings migration successfully."
+#: src/admin/src/settings/pages/Utilities.jsx:335
+msgid "Settings migration completed successfully."
 msgstr ""
 
-#: src/admin/src/settings/pages/Workflow.jsx:196
-msgid "Single Exports"
+#: src/admin/src/settings/pages/Workflow.jsx:228
+msgid "Single Push"
 msgstr ""
 
-#: src/admin/src/settings/pages/Workflow.jsx:209
-msgid "Use Single Exports?"
+#: src/admin/src/settings/pages/Workflow.jsx:241
+msgid "Use Single Push?"
 msgstr ""
 
-#: src/admin/src/settings/pages/Workflow.jsx:211
+#: src/admin/src/settings/pages/Workflow.jsx:243
 msgid "Quickly push updates to your static site while editing pages/posts."
 msgstr ""
 
-#: src/admin/src/settings/pages/Workflow.jsx:212
+#: src/admin/src/settings/pages/Workflow.jsx:244
 msgid "Do not allow quick updates while editing posts/pages."
 msgstr ""
 
-#: src/admin/src/settings/pages/Workflow.jsx:224
-msgid "Use Auto Export?"
+#: src/admin/src/settings/pages/Workflow.jsx:256
+msgid "Use Auto Push?"
 msgstr ""
 
-#: src/admin/src/settings/pages/Workflow.jsx:226
-msgid "Automatically schedule a Single Export when a post/page is updated/published."
-msgstr ""
-
-#: src/admin/src/settings/pages/Workflow.jsx:227
-msgid "Do not automatically run Single Export when a post/page is updated/published."
-msgstr ""
-
-#: src/admin/src/settings/pages/Workflow.jsx:239
-msgid "Auto Export Post Types"
-msgstr ""
-
-#: src/admin/src/settings/pages/Workflow.jsx:244
-#: src/admin/src/settings/pages/Workflow.jsx:253
-msgid "Choose which public post types should trigger automatic Single Exports when updated. If none is selected, all public post types are used."
+#: src/admin/src/settings/pages/Workflow.jsx:258
+msgid "Automatically schedule a Single Push when a post/page is updated/published."
 msgstr ""
 
 #: src/admin/src/settings/pages/Workflow.jsx:259
-msgid "Auto export delay (seconds)"
+msgid "Do not automatically run Single Push when a post/page is updated/published."
 msgstr ""
 
-#: src/admin/src/settings/pages/Workflow.jsx:260
-msgid "Delay before the automatic Single Export starts after a change is detected."
+#: src/admin/src/settings/pages/Workflow.jsx:271
+msgid "Auto Push Post Types"
 msgstr ""
 
-#: src/admin/src/settings/pages/Workflow.jsx:275
+#: src/admin/src/settings/pages/Workflow.jsx:276
+#: src/admin/src/settings/pages/Workflow.jsx:285
+msgid "Choose which public post types should trigger automatic single pushes when updated. If none is selected, all public post types are used."
+msgstr ""
+
+#: src/admin/src/settings/pages/Workflow.jsx:291
+msgid "Auto push delay (seconds)"
+msgstr ""
+
+#: src/admin/src/settings/pages/Workflow.jsx:292
+msgid "Delay before the automatic Single Push starts after a change is detected."
+msgstr ""
+
+#: src/admin/src/settings/pages/Workflow.jsx:307
 msgid "Pages to update"
 msgstr ""
 
-#: src/admin/src/settings/pages/Workflow.jsx:281
-msgid "Select which pages should start a Single Export. If none selected, we use your homepage."
-msgstr ""
-
-#: src/admin/src/settings/pages/Workflow.jsx:290
-msgid "Choose which pages/files should be updated when running a Single Export."
-msgstr ""
-
-#: src/admin/src/settings/pages/Workflow.jsx:294
-msgid "Taxonomy Archives"
-msgstr ""
-
-#: src/admin/src/settings/pages/Workflow.jsx:300
-msgid "Choose which taxonomy archives to include for selected pages/posts (e.g., Categories, Tags, or custom taxonomies)."
-msgstr ""
-
-#: src/admin/src/settings/pages/Workflow.jsx:309
-msgid "Choose which taxonomies should be updated when running a Single Export."
-msgstr ""
-
 #: src/admin/src/settings/pages/Workflow.jsx:313
-msgid "Update archives (author/date/post_type)"
+msgid "Select which pages should start a Single Push. If none selected, we use your homepage."
 msgstr ""
 
-#: src/admin/src/settings/pages/Workflow.jsx:315
-msgid "Update archive URLs when running a Single Export."
-msgstr ""
-
-#: src/admin/src/settings/pages/Workflow.jsx:316
-msgid "Do not update archive URLs."
+#: src/admin/src/settings/pages/Workflow.jsx:322
+msgid "Choose which pages/files should be updated when running a Single Push."
 msgstr ""
 
 #: src/admin/src/settings/pages/Workflow.jsx:326
-msgid "Update pagination"
+msgid "Taxonomy Archives"
 msgstr ""
 
-#: src/admin/src/settings/pages/Workflow.jsx:328
-msgid "Update pagination URLs when running a Single Export."
-msgstr ""
-
-#: src/admin/src/settings/pages/Workflow.jsx:329
-msgid "Do not update pagination URLs."
-msgstr ""
-
-#: src/admin/src/settings/pages/Workflow.jsx:339
-msgid "Update XML sitemap"
+#: src/admin/src/settings/pages/Workflow.jsx:332
+msgid "Choose which taxonomy archives to include for selected pages/posts (e.g., Categories, Tags, or custom taxonomies)."
 msgstr ""
 
 #: src/admin/src/settings/pages/Workflow.jsx:341
-msgid "Update XML sitemaps when running a Single Export."
+msgid "Choose which taxonomies should be updated when running a Single Push."
 msgstr ""
 
-#: src/admin/src/settings/pages/Workflow.jsx:342
-msgid "Do not update XML sitemaps."
+#: src/admin/src/settings/pages/Workflow.jsx:345
+msgid "Update archives (author/date/post_type)"
+msgstr ""
+
+#: src/admin/src/settings/pages/Workflow.jsx:347
+msgid "Update archive URLs when running a Single Push."
+msgstr ""
+
+#: src/admin/src/settings/pages/Workflow.jsx:348
+msgid "Do not update archive URLs."
+msgstr ""
+
+#: src/admin/src/settings/pages/Workflow.jsx:358
+msgid "Update pagination"
 msgstr ""
 
 #: src/admin/src/settings/pages/Workflow.jsx:360
-msgid "Build Exports"
+msgid "Update pagination URLs when running a Single Push."
+msgstr ""
+
+#: src/admin/src/settings/pages/Workflow.jsx:361
+msgid "Do not update pagination URLs."
+msgstr ""
+
+#: src/admin/src/settings/pages/Workflow.jsx:371
+msgid "Update XML sitemap"
 msgstr ""
 
 #: src/admin/src/settings/pages/Workflow.jsx:373
-msgid "Use Build Exports?"
+msgid "Update XML sitemaps when running a Single Push."
 msgstr ""
 
-#: src/admin/src/settings/pages/Workflow.jsx:375
-msgid "Use build exports to quickly update a list of pages and files on your static site."
+#: src/admin/src/settings/pages/Workflow.jsx:374
+msgid "Do not update XML sitemaps."
 msgstr ""
 
-#: src/admin/src/settings/pages/Workflow.jsx:376
-msgid "Build Exports are disabled."
+#: src/admin/src/settings/pages/Workflow.jsx:405
+msgid "Enable Builds"
 msgstr ""
 
-#: src/admin/src/settings/pages/Workflow.jsx:392
-msgid "Webhook"
+#: src/admin/src/settings/pages/Workflow.jsx:407
+msgid "Use builds to quickly update a list of pages and files on your static site."
 msgstr ""
 
-#: src/admin/src/settings/pages/Workflow.jsx:414
-msgid "Simply Static will POST a JSON payload to this URL after exports finish."
-msgstr ""
-
-#: src/admin/src/settings/pages/Workflow.jsx:416
-msgid "Fire for these export types:"
-msgstr ""
-
-#: src/admin/src/settings/pages/Workflow.jsx:422
-msgid "Export (full)"
-msgstr ""
-
-#: src/admin/src/settings/pages/Workflow.jsx:423
-msgid "Update"
+#: src/admin/src/settings/pages/Workflow.jsx:408
+msgid "Builds are disabled."
 msgstr ""
 
 #: src/admin/src/settings/pages/Workflow.jsx:424
-msgid "Build"
+msgid "Tools Submenu"
 msgstr ""
 
-#: src/admin/src/settings/pages/Workflow.jsx:424
-msgid "Single"
+#: src/admin/src/settings/pages/Workflow.jsx:437
+msgid "Move menu to Tools submenu"
+msgstr ""
+
+#: src/admin/src/settings/pages/Workflow.jsx:439
+msgid "The Simply Static menu is placed under the Tools menu in the admin sidebar."
 msgstr ""
 
 #: src/admin/src/settings/pages/Workflow.jsx:440
+msgid "The Simply Static menu is shown as a top-level item in the admin sidebar."
+msgstr ""
+
+#: src/admin/src/settings/pages/Workflow.jsx:456
+msgid "Webhook"
+msgstr ""
+
+#: src/admin/src/settings/pages/Workflow.jsx:478
+msgid "Simply Static will POST a JSON payload to this URL after pushes finish."
+msgstr ""
+
+#: src/admin/src/settings/pages/Workflow.jsx:480
+msgid "Fire for these push types:"
+msgstr ""
+
+#: src/admin/src/settings/pages/Workflow.jsx:487
+msgid "Update"
+msgstr ""
+
+#: src/admin/src/settings/pages/Workflow.jsx:488
+msgid "Build"
+msgstr ""
+
+#: src/admin/src/settings/pages/Workflow.jsx:488
+msgid "Single"
+msgstr ""
+
+#: src/admin/src/settings/pages/Workflow.jsx:504
 msgid "Payload includes event, site_url, export_type, identifiers (when available), timestamp, and success."
 msgstr ""

@@ -155,7 +155,7 @@ function DebugSettings() {
                     label={__('Temporary Files Directory', 'simply-static')}
                     type={"text"}
                     placeholder={options.temp_files_dir}
-                    help={__('Optionally specify the directory to save your temporary files. This directory must exist and be writeable.', 'simply-static')}
+                    help={__('Optionally specify the directory to save your temporary files. This directory must exist and be writable.', 'simply-static')}
                     __next40pxDefaultSize
                     __nextHasNoMarginBottom
                     disabled={isStudio()}
