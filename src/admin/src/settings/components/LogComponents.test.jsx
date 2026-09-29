@@ -156,6 +156,23 @@ describe( 'ActivityLog', () => {
 		useInterval.mockReset();
 	} );
 
+	it( 'keeps the waiting state while a running export has no log entries', async () => {
+		apiFetch.mockResolvedValue( {
+			status: 200,
+			data: [],
+			running: true,
+		} );
+
+		renderWithContext(
+			<ActivityLog />,
+			{ ...activityContext, isRunning: true }
+		);
+
+		expect(
+			await screen.findByText( 'Waiting for new push…' )
+		).not.toBeNull();
+	} );
+
 	it( 'renders server-provided markup as inert text', async () => {
 		apiFetch.mockResolvedValue(
 			JSON.stringify( {

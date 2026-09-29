@@ -827,7 +827,7 @@ class Plugin {
 			$local_dir = apply_filters( 'ss_local_dir', $this->options->get( 'local_dir' ) );
 
 			// Make sure the directory exists and is not empty.
-			if ( is_dir( $local_dir ) ) {
+			if ( is_string( $local_dir ) && Util::is_path_allowed_by_open_basedir( $local_dir ) && is_dir( $local_dir ) ) {
 				$iterator = new \FilesystemIterator( $local_dir, \FilesystemIterator::SKIP_DOTS );
 				if ( $iterator->valid() ) {
 					Transfer_Files_Locally_Task::delete_local_directory_static_files( $local_dir, $this->options );

@@ -106,22 +106,12 @@ class Divi_Crawler extends Crawler {
 	public function detect() : array {
 		$asset_urls = [];
 
-		$site_url = site_url();
-		$wp_path  = ABSPATH;
-
-		$directories = [
-			// Divi cache directory (generated assets)
-			'/wp-content/et-cache'          => $wp_path . 'wp-content/et-cache',
-			// Divi theme assets
-			'/wp-content/themes/Divi'        => $wp_path . 'wp-content/themes/Divi',
-		];
-
-		foreach ( $directories as $url_path => $dir_path ) {
-			if ( is_dir( $dir_path ) ) {
-				$directory_urls = $this->scan_directory_for_assets( $dir_path, $site_url . $url_path );
+		foreach ( $this->get_scan_directories() as $directory ) {
+			if ( is_dir( $directory['basedir'] ) ) {
+				$directory_urls = $this->scan_directory_for_assets( $directory['basedir'], $directory['baseurl'] );
 				$asset_urls     = array_merge( $asset_urls, $directory_urls );
 			} else {
-				\Simply_Static\Util::debug_log( "Directory does not exist: $dir_path" );
+				\Simply_Static\Util::debug_log( 'Directory does not exist: ' . $directory['basedir'] );
 			}
 		}
 
@@ -141,15 +131,113 @@ class Divi_Crawler extends Crawler {
 	public function add_urls_to_queue(): int {
 		return $this->enqueue_directory_batch(
 			'divi_crawler_state',
-			array(
-				array( 'basedir' => ABSPATH . 'wp-content/et-cache', 'baseurl' => site_url( '/wp-content/et-cache' ) ),
-				array( 'basedir' => ABSPATH . 'wp-content/themes/Divi', 'baseurl' => site_url( '/wp-content/themes/Divi' ) ),
-			),
+			$this->get_scan_directories(),
 			array( 'css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'woff', 'woff2', 'ttf', 'eot', 'otf', 'ico', 'mp4', 'webm' ),
 			(array) apply_filters( 'ss_skip_crawl_divi_directories', array( '.git', 'node_modules', 'vendor/bin', 'vendor/composer', 'tests' ) ),
 			'simply_static_divi_crawler_max_entries_per_batch',
 			'simply_static_divi_crawler_max_batch_seconds'
 		);
+	}
+
+	/**
+	 * Return Divi asset roots appropriate for the active major version.
+	 *
+	 * Divi 5 exposes the assets used by a rendered page through its Dynamic
+	 * Assets system. Simply Static's normal URL extraction follows those assets,
+	 * while this crawler only needs to preserve Divi's generated cache. Divi 4
+	 * and unknown versions retain the complete-theme crawl as a compatibility
+	 * fallback.
+	 *
+	 * @return array<int,array{basedir:string,baseurl:string}>
+	 */
+	protected function get_scan_directories(): array {
+		$content_dir = defined( 'WP_CONTENT_DIR' ) ? WP_CONTENT_DIR : ABSPATH . 'wp-content';
+		$content_url = defined( 'WP_CONTENT_URL' ) ? WP_CONTENT_URL : site_url( '/wp-content' );
+		$version     = $this->get_divi_theme_version();
+		$legacy      = $this->should_use_legacy_asset_crawl( $version );
+		$directories = array(
+			array(
+				'basedir' => rtrim( $content_dir, "/\\" ) . DIRECTORY_SEPARATOR . 'et-cache',
+				'baseurl' => rtrim( $content_url, '/' ) . '/et-cache',
+			),
+		);
+
+		if ( $legacy ) {
+			$theme_dir = function_exists( 'get_template_directory' )
+				? get_template_directory()
+				: $content_dir . DIRECTORY_SEPARATOR . 'themes' . DIRECTORY_SEPARATOR . 'Divi';
+			$theme_url = function_exists( 'get_template_directory_uri' )
+				? get_template_directory_uri()
+				: rtrim( $content_url, '/' ) . '/themes/Divi';
+			$directories[] = array( 'basedir' => $theme_dir, 'baseurl' => $theme_url );
+		}
+
+		/**
+		 * Filter the filesystem roots scanned by the Divi crawler.
+		 *
+		 * @param array $directories Divi asset roots.
+		 * @param bool  $legacy       Whether the legacy full-theme fallback is active.
+		 * @param string $version     Detected Divi parent-theme version.
+		 */
+		return (array) apply_filters(
+			'ss_divi_crawler_directories',
+			$directories,
+			$legacy,
+			$version
+		);
+	}
+
+	/**
+	 * Whether to retain the Divi 4 full-theme compatibility crawl.
+	 *
+	 * @param string|null $version Detected version, when already available.
+	 *
+	 * @return bool
+	 */
+	protected function should_use_legacy_asset_crawl( $version = null ): bool {
+		$version = is_string( $version ) ? $version : $this->get_divi_theme_version();
+		$legacy  = true;
+
+		if ( preg_match( '/^(\d+)/', $version, $matches ) ) {
+			$legacy = (int) $matches[1] < 5;
+		}
+
+		return (bool) apply_filters( 'ss_divi_use_legacy_asset_crawl', $legacy, $version );
+	}
+
+	/**
+	 * Return the active Divi parent-theme version.
+	 *
+	 * @return string
+	 */
+	protected function get_divi_theme_version(): string {
+		if ( ! function_exists( 'wp_get_theme' ) ) {
+			return '';
+		}
+
+		$theme = wp_get_theme();
+		if ( ! $theme ) {
+			return '';
+		}
+
+		if ( method_exists( $theme, 'parent' ) ) {
+			$parent = $theme->parent();
+			if ( $parent ) {
+				$parent_name       = method_exists( $parent, 'get' ) ? $parent->get( 'Name' ) : '';
+				$parent_stylesheet = method_exists( $parent, 'get_stylesheet' ) ? $parent->get_stylesheet() : '';
+				if ( $this->is_divi_identifier( $parent_name ) || $this->is_divi_identifier( $parent_stylesheet ) ) {
+					return method_exists( $parent, 'get' ) ? trim( (string) $parent->get( 'Version' ) ) : '';
+				}
+			}
+		}
+
+		$template = method_exists( $theme, 'get_template' ) ? $theme->get_template() : '';
+		$name     = method_exists( $theme, 'get' ) ? $theme->get( 'Name' ) : '';
+		if ( $this->is_divi_identifier( $template ) || $this->is_divi_identifier( $name ) ) {
+			return method_exists( $theme, 'get' ) ? trim( (string) $theme->get( 'Version' ) ) : '';
+		}
+
+		return '';
 	}
 
 	/**

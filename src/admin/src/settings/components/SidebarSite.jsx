@@ -194,6 +194,10 @@ function SidebarSite( props = null ) {
         }
 
         setDisabledButton(true);
+		// Start progress polling immediately. Some local/restricted runtimes keep
+		// the start request open while their inline worker begins processing, so
+		// waiting for this request would hide all intermediate activity updates.
+		setIsRunning(true);
         setIsResumed(false);
         setIsPaused(false);
         const languagePrefix = 'language:';
@@ -212,6 +216,7 @@ function SidebarSite( props = null ) {
             if (json.status === 500) {
                 alert(json.message);
                 setDisabledButton(false);
+				setIsRunning(false);
                 return;
 			}
 			if (json.status === 409) {
@@ -225,10 +230,10 @@ function SidebarSite( props = null ) {
 					});
 				}
 				alert(message);
+				setIsRunning(false);
 				setDisabledButton(!!rollbackState || isRunning || isPaused || isRollbackRunning);
 				return;
             }
-            setIsRunning(true);
         }).catch(error => {
 			const isConflict = error && error.data && 409 === error.data.status;
 			const rollbackState = isConflict ? getRollbackConflict(error.data) : null;
@@ -243,6 +248,7 @@ function SidebarSite( props = null ) {
 			}
 
 			alert(message);
+			setIsRunning(false);
 			setDisabledButton(!!rollbackState || isRunning || isPaused || isRollbackRunning);
 		});
     }

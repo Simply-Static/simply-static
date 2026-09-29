@@ -4,7 +4,7 @@ Tags: jamstack, performance, security, static site generator
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag:  3.8.14
+Stable tag:  3.8.15
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -274,6 +274,13 @@ Settings - Configure your static site export options
 Diagnostics - Check your WordPress environment for compatibility
 
 == Changelog ==
+
+= 3.8.15 =
+
+* Added compatibility with WordPress Studio filesystem paths and open_basedir restrictions
+* Improved activity log feedback while a new export is starting
+* Optimized Divi 5 exports by preserving Dynamic Assets and avoiding complete parent-theme crawls
+* Preserved full-theme crawling and performance-option fallbacks for Divi 4 and unknown Divi versions
 
 = 3.8.14 =
 

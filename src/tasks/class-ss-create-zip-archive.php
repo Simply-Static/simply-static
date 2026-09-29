@@ -98,12 +98,7 @@ class Create_Zip_Archive_Task extends Task {
 		$batch_offset = (int) $this->options->get( 'zip_batch_offset' );
 		$is_first_batch = ( 0 === $batch_offset );
 
-		$temp_dir = $this->options->get( 'temp_files_dir' );
-
-		if ( empty( $temp_dir ) ) {
-			$upload_dir = wp_upload_dir();
-			$temp_dir   = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
-		}
+		$temp_dir = Util::get_temp_dir();
 
 		// Only clean temp dir on the first batch.
 		if ( $is_first_batch ) {

@@ -119,6 +119,13 @@ class Transfer_Files_Locally_Task extends Task {
 	}
 
 	public function maybe_create_local_directory() {
+		if ( ! is_string( $this->destination_dir ) || ! Util::is_path_allowed_by_open_basedir( $this->destination_dir ) ) {
+			Util::debug_log( 'Local destination directory is outside the paths allowed by open_basedir: ' . (string) $this->destination_dir );
+			$this->save_status_message( 'Unable to access destination directory: ' . (string) $this->destination_dir );
+
+			return false;
+		}
+
 		if ( is_dir( $this->destination_dir ) ) {
 			return true;
 		}

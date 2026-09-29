@@ -3140,44 +3140,162 @@ class Util {
 	 *
 	 */
 	public static function get_temp_dir() {
-		$options = get_option( 'simply-static' );
-
-		// Preferred base temp directory from settings if provided and safe
-		if ( ! empty( $options['temp_files_dir'] ) ) {
-			$temp_dir = $options['temp_files_dir'];
-			// If a stream wrapper path is provided by a plugin (e.g., Infinite Uploads), avoid using it for local temp work.
-			if ( function_exists( 'wp_is_stream' ) && wp_is_stream( $temp_dir ) ) {
-				$temp_dir = '';
-			}
+		$configured_dir = '';
+		if ( class_exists( __NAMESPACE__ . '\\Options' ) ) {
+			$configured_dir = Options::instance()->get( 'temp_files_dir' );
 		} else {
-			$temp_dir = '';
+			$options        = get_option( 'simply-static' );
+			$configured_dir = is_array( $options ) && isset( $options['temp_files_dir'] )
+				? $options['temp_files_dir']
+				: '';
 		}
 
-		// Fallback to uploads dir if not set by option
-		if ( $temp_dir === '' ) {
-			$upload_dir = wp_upload_dir();
-			$basedir    = isset( $upload_dir['basedir'] ) ? $upload_dir['basedir'] : '';
-			// Guard against stream wrappers like iu:// from offload plugins
-			if ( $basedir && ( ! function_exists( 'wp_is_stream' ) || ! wp_is_stream( $basedir ) ) ) {
-				$temp_dir = $basedir . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
+		$candidates = array();
+		if ( is_string( $configured_dir ) && '' !== trim( $configured_dir ) ) {
+			$candidates[] = $configured_dir;
+		}
+
+		$upload_dir = wp_upload_dir( null, false );
+		if ( is_array( $upload_dir ) && ! empty( $upload_dir['basedir'] ) ) {
+			$candidates[] = rtrim( $upload_dir['basedir'], "/\\" ) . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
+		}
+
+		if ( defined( 'WP_CONTENT_DIR' ) && WP_CONTENT_DIR ) {
+			$candidates[] = rtrim( WP_CONTENT_DIR, "/\\" ) . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
+		}
+
+		$candidates[] = rtrim( sys_get_temp_dir(), "/\\" ) . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
+		$candidates   = array_values( array_unique( array_filter( $candidates, 'is_string' ) ) );
+		$allowed_dir  = '';
+
+		foreach ( $candidates as $candidate ) {
+			if (
+				'' === trim( $candidate )
+				|| ( function_exists( 'wp_is_stream' ) && wp_is_stream( $candidate ) )
+				|| ! self::is_path_allowed_by_open_basedir( $candidate )
+			) {
+				continue;
+			}
+
+			// Retain an allowed path for diagnostics even when the directory cannot
+			// be created. In normal WordPress environments the uploads or content
+			// candidate will always be both allowed and writable.
+			if ( '' === $allowed_dir ) {
+				$allowed_dir = $candidate;
+			}
+
+			if ( is_dir( $candidate ) || ( wp_mkdir_p( $candidate ) && is_dir( $candidate ) ) ) {
+				return trailingslashit( $candidate );
 			}
 		}
 
-		// Final fallback to a guaranteed local path under WP_CONTENT_DIR or system temp
-		if ( $temp_dir === '' || ( function_exists( 'wp_is_stream' ) && wp_is_stream( $temp_dir ) ) ) {
-			if ( defined( 'WP_CONTENT_DIR' ) && WP_CONTENT_DIR ) {
-				$temp_dir = rtrim( WP_CONTENT_DIR, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
-			} else {
-				$temp_dir = rtrim( sys_get_temp_dir(), DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
+		return '' !== $allowed_dir ? trailingslashit( $allowed_dir ) : '';
+	}
+
+	/**
+	 * Check a path against PHP's open_basedir restriction without touching it.
+	 *
+	 * Imported WordPress databases can contain absolute paths from their source
+	 * host. Filesystem predicates emit warnings when those paths sit outside a
+	 * restricted runtime such as WordPress Studio, so callers must perform this
+	 * lexical check before is_dir(), file_exists(), or wp_mkdir_p().
+	 *
+	 * @param string $path Candidate local filesystem path.
+	 *
+	 * @return bool
+	 */
+	public static function is_path_allowed_by_open_basedir( $path ) {
+		if ( ! is_string( $path ) || '' === trim( $path ) || false !== strpos( $path, "\0" ) ) {
+			return false;
+		}
+
+		$restriction = ini_get( 'open_basedir' );
+		if ( false === $restriction || '' === trim( (string) $restriction ) ) {
+			return true;
+		}
+
+		$normalized_path = self::normalize_filesystem_path( $path );
+		if ( '' === $normalized_path ) {
+			return false;
+		}
+
+		foreach ( explode( PATH_SEPARATOR, (string) $restriction ) as $base_dir ) {
+			$base_dir = trim( $base_dir );
+			if ( '' === $base_dir ) {
+				continue;
+			}
+
+			$normalized_base = self::normalize_filesystem_path( $base_dir );
+			if ( '' === $normalized_base ) {
+				continue;
+			}
+
+			$path_for_comparison = $normalized_path;
+			$base_for_comparison = $normalized_base;
+			if ( '\\' === DIRECTORY_SEPARATOR ) {
+				$path_for_comparison = strtolower( $path_for_comparison );
+				$base_for_comparison = strtolower( $base_for_comparison );
+			}
+
+			if (
+				$path_for_comparison === $base_for_comparison
+				|| 0 === strpos( $path_for_comparison, rtrim( $base_for_comparison, '/' ) . '/' )
+			) {
+				return true;
 			}
 		}
 
-		// Ensure directory exists
-		if ( ! is_dir( $temp_dir ) ) {
-			wp_mkdir_p( $temp_dir );
+		return false;
+	}
+
+	/**
+	 * Normalize a filesystem path lexically, including dot segments.
+	 *
+	 * This intentionally avoids realpath(), which would itself touch a path that
+	 * may be forbidden by open_basedir.
+	 *
+	 * @param string $path Filesystem path.
+	 *
+	 * @return string
+	 */
+	private static function normalize_filesystem_path( $path ) {
+		$path = self::normalize_slashes( trim( (string) $path ) );
+		if ( '' === $path ) {
+			return '';
 		}
 
-		return trailingslashit( $temp_dir );
+		$is_windows_path = (bool) preg_match( '#^[A-Za-z]:/#', $path );
+		$is_absolute     = '/' === substr( $path, 0, 1 ) || $is_windows_path;
+		if ( ! $is_absolute ) {
+			$current_dir = getcwd();
+			if ( false === $current_dir || '' === $current_dir ) {
+				return '';
+			}
+			$path = rtrim( self::normalize_slashes( $current_dir ), '/' ) . '/' . $path;
+			$is_windows_path = (bool) preg_match( '#^[A-Za-z]:/#', $path );
+		}
+
+		$prefix = '/';
+		if ( $is_windows_path ) {
+			$prefix = strtoupper( substr( $path, 0, 2 ) ) . '/';
+			$path   = substr( $path, 3 );
+		} else {
+			$path = ltrim( $path, '/' );
+		}
+
+		$segments = array();
+		foreach ( explode( '/', $path ) as $segment ) {
+			if ( '' === $segment || '.' === $segment ) {
+				continue;
+			}
+			if ( '..' === $segment ) {
+				array_pop( $segments );
+				continue;
+			}
+			$segments[] = $segment;
+		}
+
+		return rtrim( $prefix . implode( '/', $segments ), '/' ) ?: $prefix;
 	}
 
 	/**

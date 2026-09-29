@@ -234,6 +234,11 @@ class Setup_Task extends Task {
 
 		foreach ( array_chunk( (array) $file_literals, $batch_size ) as $chunk ) {
 			foreach ( $chunk as $item ) {
+				if ( ! is_string( $item ) || ! Util::is_path_allowed_by_open_basedir( $item ) ) {
+					Util::debug_log( 'Skipping additional file outside the paths allowed by open_basedir: ' . (string) $item );
+					continue;
+				}
+
 				// If item is a file, convert to url and insert into database.
 				// If item is a directory, recursively iterate and grab all files,
 				// and for each file, convert to url and insert into database.
@@ -292,6 +297,7 @@ class Setup_Task extends Task {
 			$added = 0;
 			$skip_dirs = (array) apply_filters( 'ss_additional_file_regex_skip_dirs', [ '.git', 'node_modules', 'vendor', 'cache', 'tmp', 'temp', basename( $this->options->get_archive_dir() ) ] );
 			foreach ( (array) $roots as $root ) {
+				if ( ! is_string( $root ) || ! Util::is_path_allowed_by_open_basedir( $root ) ) { continue; }
 				if ( ! is_dir( $root ) ) { continue; }
 				try {
 					$it = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $root, \RecursiveDirectoryIterator::SKIP_DOTS ) );
@@ -358,16 +364,11 @@ class Setup_Task extends Task {
 	 */
 	public function delete_temp_static_files() {
 		$options           = Options::instance();
-		$dir               = $options->get( 'temp_files_dir' );
+		$dir               = Util::get_temp_dir();
 		$delete_temp_files = apply_filters( 'ss_delete_temp_files', true );
 
 		if ( ! $delete_temp_files ) {
 			return false;
-		}
-
-		if ( empty( $dir ) ) {
-			$upload_dir = wp_upload_dir();
-			$dir        = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'simply-static' . DIRECTORY_SEPARATOR . 'temp-files';
 		}
 
 		if ( false === file_exists( $dir ) || 'update' === $options->get( 'generate_type' ) ) {
