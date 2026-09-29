@@ -485,7 +485,7 @@ class Diagnostic {
 		$unwritable_message = sprintf( __( 'Web server can not write to Local Directory: %s', 'simply-static' ), $local_dir );
 
 		return array(
-			'test'        => is_writable( $local_dir ),
+			'test'        => is_string( $local_dir ) && Util::is_path_allowed_by_open_basedir( $local_dir ) && is_writable( $local_dir ),
 			'description' => $writable_message,
 			'error'       => $unwritable_message,
 		);

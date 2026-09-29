@@ -84,6 +84,7 @@ class Divi_Integration extends Integration {
 		add_action( 'ss_after_background_queue_reset', [ $this, 'restore_divi_performance_options' ], 10, 0 );
 		add_action( 'simply_static_deactivated', [ $this, 'restore_divi_performance_options' ], 10, 0 );
 		add_filter( 'ss_after_replace_urls_in_html', [ $this, 'replace_data_fac_urls' ], 10, 2 );
+		add_filter( 'ss_theme_asset_crawler_directories', [ $this, 'filter_theme_asset_crawler_directories' ], 10, 2 );
 	}
 
 	/**
@@ -101,6 +102,15 @@ class Divi_Integration extends Integration {
 		}
 
 		if ( ! $this->dependency_active() ) {
+			return;
+		}
+
+		// Divi 5's Dynamic Assets system already exposes only the runtime assets
+		// used by the rendered page. Keep those settings intact so normal URL
+		// extraction can produce a lean export. Unknown and Divi 4 versions retain
+		// the legacy compatibility behavior below.
+		if ( ! $this->should_use_legacy_asset_crawl() ) {
+			Util::debug_log( 'Divi Integration: preserving Divi 5 dynamic asset settings.' );
 			return;
 		}
 
@@ -129,6 +139,44 @@ class Divi_Integration extends Integration {
 			update_option( $option_name, $change['updated'] );
 			Util::debug_log( sprintf( 'Divi Integration: temporarily disabled %d performance option(s) in "%s".', $change['count'], $option_name ) );
 		}
+	}
+
+	/**
+	 * Remove the complete Divi parent-theme tree from generic theme discovery on
+	 * Divi 5. The page extractor queues referenced runtime assets and the Divi
+	 * crawler preserves generated et-cache files. Child-theme assets remain part
+	 * of the generic theme crawl.
+	 *
+	 * @param array $directories Theme crawler roots.
+	 * @param mixed $crawler     Theme crawler instance.
+	 *
+	 * @return array
+	 */
+	public function filter_theme_asset_crawler_directories( $directories, $crawler = null ) {
+		if ( ! is_array( $directories ) || ! $this->dependency_active() || $this->should_use_legacy_asset_crawl() ) {
+			return $directories;
+		}
+
+		$divi_directory = function_exists( 'get_template_directory' ) ? get_template_directory() : '';
+		$divi_directory = rtrim( Util::normalize_slashes( (string) $divi_directory ), '/' );
+		if ( '' === $divi_directory ) {
+			return $directories;
+		}
+
+		return array_values(
+			array_filter(
+				$directories,
+				static function ( $directory ) use ( $divi_directory ) {
+					if ( ! is_array( $directory ) || ! isset( $directory['basedir'] ) ) {
+						return true;
+					}
+
+					$candidate = rtrim( Util::normalize_slashes( (string) $directory['basedir'] ), '/' );
+
+					return $candidate !== $divi_directory;
+				}
+			)
+		);
 	}
 
 	/**
@@ -302,6 +350,61 @@ class Divi_Integration extends Integration {
 		}
 
 		return $changes;
+	}
+
+	/**
+	 * Whether to retain the Divi 4 full-theme compatibility behavior.
+	 *
+	 * Unknown versions deliberately use the legacy path. The filter also lets a
+	 * site restore the full crawl if a third-party Divi extension relies on an
+	 * asset that cannot be discovered from rendered output.
+	 *
+	 * @return bool
+	 */
+	protected function should_use_legacy_asset_crawl() {
+		$version = $this->get_divi_theme_version();
+		$legacy  = true;
+
+		if ( preg_match( '/^(\d+)/', $version, $matches ) ) {
+			$legacy = (int) $matches[1] < 5;
+		}
+
+		return (bool) apply_filters( 'ss_divi_use_legacy_asset_crawl', $legacy, $version );
+	}
+
+	/**
+	 * Return the active Divi parent-theme version.
+	 *
+	 * @return string
+	 */
+	protected function get_divi_theme_version() {
+		if ( ! function_exists( 'wp_get_theme' ) ) {
+			return '';
+		}
+
+		$theme = wp_get_theme();
+		if ( ! $theme ) {
+			return '';
+		}
+
+		if ( method_exists( $theme, 'parent' ) ) {
+			$parent = $theme->parent();
+			if ( $parent ) {
+				$parent_name       = method_exists( $parent, 'get' ) ? $parent->get( 'Name' ) : '';
+				$parent_stylesheet = method_exists( $parent, 'get_stylesheet' ) ? $parent->get_stylesheet() : '';
+				if ( $this->is_divi_identifier( $parent_name ) || $this->is_divi_identifier( $parent_stylesheet ) ) {
+					return method_exists( $parent, 'get' ) ? trim( (string) $parent->get( 'Version' ) ) : '';
+				}
+			}
+		}
+
+		$template = method_exists( $theme, 'get_template' ) ? $theme->get_template() : '';
+		$name     = method_exists( $theme, 'get' ) ? $theme->get( 'Name' ) : '';
+		if ( $this->is_divi_identifier( $template ) || $this->is_divi_identifier( $name ) ) {
+			return method_exists( $theme, 'get' ) ? trim( (string) $theme->get( 'Version' ) ) : '';
+		}
+
+		return '';
 	}
 
 	/**

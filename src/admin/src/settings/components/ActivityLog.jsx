@@ -105,7 +105,14 @@ function ActivityLog() {
 					return;
 				}
 
-				const terminal = Object.entries( json.data ).map(
+				const entries = Object.entries( json.data );
+				if ( 0 === entries.length ) {
+					// Do not replace the useful waiting state with an empty terminal
+					// while the worker is starting and has not persisted its first line.
+					return;
+				}
+
+				const terminal = entries.map(
 					( [ message, entry ] ) => {
 						const safeEntry =
 							entry && typeof entry === 'object' ? entry : {};

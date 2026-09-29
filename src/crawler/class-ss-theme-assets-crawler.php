@@ -36,24 +36,8 @@ class Theme_Assets_Crawler extends Crawler {
 	public function detect(): array {
 		$asset_urls = [];
 
-		$allowed = (array) \Simply_Static\Options::instance()->get( 'themes_to_include' );
-		$allowed = is_array( $allowed ) ? array_filter( array_map( 'strval', $allowed ) ) : [];
-		$allowed = apply_filters( 'ss_crawlable_themes', $allowed );
-
-		$themes     = [];
-		$child_slug = get_stylesheet();
-		if ( empty( $allowed ) || in_array( $child_slug, $allowed, true ) ) {
-			$themes[] = [ get_stylesheet_directory(), get_stylesheet_directory_uri() ];
-		}
-		$parent_slug = get_template();
-		if ( $parent_slug && $parent_slug !== $child_slug ) {
-			if ( empty( $allowed ) || in_array( $parent_slug, $allowed, true ) ) {
-				$themes[] = [ get_template_directory(), get_template_directory_uri() ];
-			}
-		}
-
-		foreach ( $themes as [$dir, $url] ) {
-			$asset_urls = array_merge( $asset_urls, $this->scan_directory_for_assets( $dir, $url ) );
+		foreach ( $this->get_scan_directories() as $directory ) {
+			$asset_urls = array_merge( $asset_urls, $this->scan_directory_for_assets( $directory['basedir'], $directory['baseurl'] ) );
 		}
 
 		return $asset_urls;
@@ -93,37 +77,66 @@ class Theme_Assets_Crawler extends Crawler {
 			'tests'
 		] );
 
-		$allowed = (array) \Simply_Static\Options::instance()->get( 'themes_to_include' );
-		$allowed = is_array( $allowed ) ? array_filter( array_map( 'strval', $allowed ) ) : [];
-		$allowed = apply_filters( 'ss_crawlable_themes', $allowed );
-
-		$themes     = [];
-		$child_slug = get_stylesheet();
-		if ( empty( $allowed ) || in_array( $child_slug, $allowed, true ) ) {
-			$themes[] = [ get_stylesheet_directory(), get_stylesheet_directory_uri() ];
-		}
-		$parent_slug = get_template();
-		if ( wp_get_theme()->parent() ) {
-			$parent_dir = get_template_directory();
-			$parent_url = get_template_directory_uri();
-			if ( $parent_dir !== ( $themes[0][0] ?? '' ) ) {
-				if ( empty( $allowed ) || in_array( $parent_slug, $allowed, true ) ) {
-					$themes[] = [ $parent_dir, $parent_url ];
-				}
-			}
-		}
-
-		$directories = array_map( static function ( $theme ) {
-			return array( 'basedir' => $theme[0], 'baseurl' => $theme[1] );
-		}, $themes );
-
 		return $this->enqueue_directory_batch(
 			'theme_assets_crawler_state',
-			$directories,
+			$this->get_scan_directories(),
 			$extensions,
 			(array) $skip_dirs,
 			'simply_static_theme_assets_crawler_max_entries_per_batch',
 			'simply_static_theme_assets_crawler_max_batch_seconds'
+		);
+	}
+
+	/**
+	 * Return active theme roots after integration-specific filtering.
+	 *
+	 * @return array<int,array{basedir:string,baseurl:string,slug:string}>
+	 */
+	protected function get_scan_directories(): array {
+		$allowed = (array) \Simply_Static\Options::instance()->get( 'themes_to_include' );
+		$allowed = is_array( $allowed ) ? array_filter( array_map( 'strval', $allowed ) ) : [];
+		$allowed = apply_filters( 'ss_crawlable_themes', $allowed );
+
+		$directories = array();
+		$child_slug  = get_stylesheet();
+		if ( empty( $allowed ) || in_array( $child_slug, $allowed, true ) ) {
+			$directories[] = array(
+				'basedir' => get_stylesheet_directory(),
+				'baseurl' => get_stylesheet_directory_uri(),
+				'slug'    => $child_slug,
+			);
+		}
+
+		$parent_slug = get_template();
+		if ( $parent_slug && $parent_slug !== $child_slug && ( empty( $allowed ) || in_array( $parent_slug, $allowed, true ) ) ) {
+			$directories[] = array(
+				'basedir' => get_template_directory(),
+				'baseurl' => get_template_directory_uri(),
+				'slug'    => $parent_slug,
+			);
+		}
+
+		/**
+		 * Filter active-theme roots before the Theme Assets crawler scans them.
+		 *
+		 * Integrations can remove a broad theme root when rendered-page discovery
+		 * provides a more precise source of runtime assets.
+		 *
+		 * @param array $directories Theme asset roots.
+		 * @param Theme_Assets_Crawler $crawler Current crawler instance.
+		 */
+		$directories = (array) apply_filters( 'ss_theme_asset_crawler_directories', $directories, $this );
+
+		return array_values(
+			array_filter(
+				$directories,
+				static function ( $directory ) {
+					return is_array( $directory )
+						&& isset( $directory['basedir'], $directory['baseurl'] )
+						&& is_string( $directory['basedir'] )
+						&& is_string( $directory['baseurl'] );
+				}
+			)
 		);
 	}
 

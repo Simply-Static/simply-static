@@ -262,6 +262,32 @@ final class UtilSecurityTest extends UnitTestCase {
 		self::assertSame( array( '.', '..' ), scandir( $managed ) );
 	}
 
+	/**
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_temp_directory_ignores_an_imported_path_outside_open_basedir(): void {
+		$upload_root = sys_get_temp_dir() . '/simply-static-open-basedir-' . uniqid( '', true );
+		$allowed_paths = sys_get_temp_dir() . PATH_SEPARATOR . dirname( __DIR__, 2 );
+		$previous_restriction = ini_set( 'open_basedir', $allowed_paths );
+		if ( false === $previous_restriction ) {
+			self::markTestSkipped( 'The PHP runtime does not permit tightening open_basedir.' );
+		}
+
+		WpEnv::$upload_dir = array(
+			'basedir' => $upload_root,
+			'baseurl' => 'https://example.test/wp-content/uploads',
+		);
+		WpEnv::$options['simply-static']['temp_files_dir'] = '/var/www/html/wp-content/uploads/simply-static/temp-files/';
+		Options::reinstance();
+
+		$expected = trailingslashit( $upload_root . '/simply-static/temp-files' );
+		self::assertSame( $expected, Util::get_temp_dir() );
+		self::assertDirectoryExists( $expected );
+		self::assertFalse( Util::is_path_allowed_by_open_basedir( '/var/www/html/wp-content/uploads' ) );
+		self::assertTrue( Util::is_path_allowed_by_open_basedir( $expected ) );
+	}
+
 	public function test_portable_import_preserves_top_level_and_nested_destination_secrets(): void {
 		$current = array(
 			'delivery_method'             => 'sftp',

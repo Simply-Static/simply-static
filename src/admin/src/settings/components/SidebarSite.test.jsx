@@ -89,10 +89,15 @@ jest.mock( './GenerateButtons', () => {
 
 	return {
 		__esModule: true,
-		default: ( { cancelExport, pauseExport, resumeExport } ) =>
+		default: ( { startExport, cancelExport, pauseExport, resumeExport } ) =>
 			React.createElement(
 				'div',
 				null,
+				React.createElement(
+					'button',
+					{ type: 'button', onClick: startExport },
+					'Generate'
+				),
 				React.createElement(
 					'button',
 					{ type: 'button', onClick: cancelExport },
@@ -260,6 +265,35 @@ describe( 'SidebarSite actions', () => {
 			expect( global.alert ).not.toHaveBeenCalled();
 		}
 	);
+
+	it( 'starts progress polling before the export request resolves', async () => {
+		let resolveStart;
+		apiFetch.mockImplementation( ( { path } ) => {
+			if ( '/simplystatic/v1/start-export' === path ) {
+				return new Promise( ( resolve ) => {
+					resolveStart = resolve;
+				} );
+			}
+			if ( '/simplystatic/v1/unpushed-changes' === path ) {
+				return Promise.resolve(
+					JSON.stringify( { status: 200, data: { total: 0 } } )
+				);
+			}
+
+			return Promise.resolve( JSON.stringify( { status: 200 } ) );
+		} );
+		const { setters } = renderSidebar( { isRunning: false } );
+
+		fireEvent.click( screen.getByRole( 'button', { name: 'Generate' } ) );
+
+		expect( setters.setIsRunning ).toHaveBeenCalledWith( true );
+		expect( resolveStart ).toEqual( expect.any( Function ) );
+
+		await act( async () => {
+			resolveStart( JSON.stringify( { status: 200 } ) );
+		} );
+		expect( setters.setIsRunning ).toHaveBeenCalledTimes( 1 );
+	} );
 
 	it( 'only shows maintained learning resources', async () => {
 		await act( async () => {
