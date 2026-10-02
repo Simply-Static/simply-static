@@ -1131,3 +1131,35 @@ toplevel_page_simply-static img {
     }
   }
 }
+
+.ss-custom-replacement-row {
+  background: #f6f7f7;
+  border: 1px solid #dcdcde;
+  border-radius: 2px;
+  margin-bottom: 12px;
+  padding: 12px;
+
+  .components-flex {
+    align-items: flex-end;
+    gap: 12px;
+  }
+
+  .components-base-control__label {
+    margin-top: 0;
+  }
+
+  .ss-custom-replacement-remove {
+    flex: 0 0 auto;
+    width: auto;
+  }
+}
+
+@media screen and (max-width: 782px) {
+  .ss-custom-replacement-row .components-flex {
+    flex-direction: column;
+  }
+
+  .ss-custom-replacement-row .ss-custom-replacement-remove {
+    align-self: flex-end;
+  }
+}

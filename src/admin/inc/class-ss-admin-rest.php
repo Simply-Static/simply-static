@@ -1191,6 +1191,8 @@ class Admin_Rest {
         foreach ( $options as $key => $value ) {
             if ( in_array( $key, $multiline_fields, true ) ) {
                 $options[ $key ] = sanitize_textarea_field( $value );
+			} elseif ( 'custom_replacements' === $key ) {
+				$options[ $key ] = $this->sanitize_custom_replacements( $value );
             } elseif ( in_array( $key, $array_fields, true ) ) {
                 if ( is_array( $value ) ) {
                     $options[ $key ] = array_map( 'sanitize_text_field', $value );
@@ -1354,6 +1356,48 @@ class Admin_Rest {
 
         return json_encode( [ 'status' => 200, 'message' => 'Ok' ] );
     }
+
+	/**
+	 * Sanitize ordered custom replacement pairs without altering their text.
+	 *
+	 * Whitespace and markup are valid replacement content, so these values must
+	 * not pass through sanitize_text_field(). Limits keep a malformed settings
+	 * payload from making an export consume unbounded memory.
+	 *
+	 * @param mixed $value Raw replacement option.
+	 * @return array<int,array{search:string,replace:string}>
+	 */
+	private function sanitize_custom_replacements( $value ) {
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		$sanitized = array();
+		foreach ( array_slice( $value, 0, 100 ) as $replacement ) {
+			if ( ! is_array( $replacement ) || ! array_key_exists( 'search', $replacement ) ) {
+				continue;
+			}
+
+			$search  = $replacement['search'];
+			$replace = array_key_exists( 'replace', $replacement ) ? $replacement['replace'] : '';
+			if ( ( ! is_scalar( $search ) && null !== $search ) || ( ! is_scalar( $replace ) && null !== $replace ) ) {
+				continue;
+			}
+
+			$search  = str_replace( "\0", '', (string) $search );
+			$replace = str_replace( "\0", '', (string) $replace );
+			if ( '' === $search || strlen( $search ) > 65536 || strlen( $replace ) > 262144 ) {
+				continue;
+			}
+
+			$sanitized[] = array(
+				'search'  => $search,
+				'replace' => $replace,
+			);
+		}
+
+		return $sanitized;
+	}
 
     // Admin-only plugin list centralized in Util::get_admin_only_plugins().
 

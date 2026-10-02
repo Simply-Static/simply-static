@@ -30,6 +30,7 @@ function HideWP() {
     const [wpThemesDirectory, setWpThemesDirectory] = useState('themes');
     const [themeStyleName, setThemeStyleName] = useState('style');
     const [authorUrl, setAuthorUrl] = useState('author');
+    const [customReplacements, setCustomReplacements] = useState([]);
     const [hideVersion, setHideVersion] = useState(false);
     const [hidePrefetch, setHidePrefetch] = useState(false);
     const [hideGenerator, setHideGenerator] = useState(false);
@@ -79,6 +80,15 @@ function HideWP() {
             setAuthorUrl(settings.author_url);
         }
 
+		setCustomReplacements(
+			Array.isArray(settings.custom_replacements)
+				? settings.custom_replacements.map((replacement) => ({
+					search: String(replacement?.search ?? ''),
+					replace: String(replacement?.replace ?? ''),
+				}))
+				: []
+		);
+
         if (settings.hide_version) {
             setHideVersion(settings.hide_version);
         }
@@ -116,6 +126,19 @@ function HideWP() {
         }
 
     }, [settings]);
+
+	const updateCustomReplacements = (replacements) => {
+		setCustomReplacements(replacements);
+		updateSetting('custom_replacements', replacements);
+	};
+
+	const updateCustomReplacement = (index, field, value) => {
+		updateCustomReplacements(customReplacements.map((replacement, replacementIndex) => (
+			replacementIndex === index
+				? {...replacement, [field]: value}
+				: replacement
+		)));
+	};
 
     return (<div className={"inner-settings"}>
         <Card>
@@ -286,6 +309,78 @@ function HideWP() {
                     }}
                 />
 
+            </CardBody>
+        </Card>
+        <Spacer margin={5}/>
+        <Card>
+            <CardHeader>
+                <Flex>
+                    <FlexItem>
+                        <b>{__('Custom replacements', 'simply-static')}</b>
+                    </FlexItem>
+                    {('free' === options.plan || !isPro()) &&
+                        <FlexItem>
+                            <ExternalLink
+                                href="https://simplystatic.com"> {__('Requires Simply Static Pro', 'simply-static')}</ExternalLink>
+                        </FlexItem>
+                    }
+                </Flex>
+            </CardHeader>
+            <CardBody>
+                <p>{__('Replace your own strings in generated text files after the export is built and before it is deployed. Rules run from top to bottom; leave “Replace with” empty to remove a string.', 'simply-static')}</p>
+                {customReplacements.map((replacement, index) => (
+                    <div className="ss-custom-replacement-row" key={index}>
+                        <Flex align="flex-end">
+                            <FlexItem isBlock>
+                                <TextControl
+                                    label={__('Search for', 'simply-static')}
+                                    value={replacement.search}
+                                    maxLength={65536}
+                                    disabled={('free' === options.plan || !isPro())}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
+                                    onChange={(value) => updateCustomReplacement(index, 'search', value)}
+                                />
+                            </FlexItem>
+                            <FlexItem isBlock>
+                                <TextControl
+                                    label={__('Replace with', 'simply-static')}
+                                    value={replacement.replace}
+                                    maxLength={262144}
+                                    disabled={('free' === options.plan || !isPro())}
+                                    __next40pxDefaultSize
+                                    __nextHasNoMarginBottom
+                                    onChange={(value) => updateCustomReplacement(index, 'replace', value)}
+                                />
+                            </FlexItem>
+                            <FlexItem className="ss-custom-replacement-remove">
+                                <Button
+                                    icon="trash"
+                                    label={__('Remove replacement', 'simply-static')}
+                                    variant="tertiary"
+                                    isDestructive
+                                    disabled={('free' === options.plan || !isPro())}
+                                    onClick={() => updateCustomReplacements(
+										customReplacements.filter((replacementItem, replacementIndex) => (
+											replacementItem && replacementIndex !== index
+										))
+									)}
+                                />
+                            </FlexItem>
+                        </Flex>
+                    </div>
+                ))}
+                <Button
+                    icon="plus-alt2"
+                    variant="secondary"
+                    disabled={('free' === options.plan || !isPro() || customReplacements.length >= 100)}
+                    onClick={() => updateCustomReplacements([
+						...customReplacements,
+						{search: '', replace: ''},
+					])}
+                >
+                    {__('Add replacement', 'simply-static')}
+                </Button>
             </CardBody>
         </Card>
         <Spacer margin={5}/>

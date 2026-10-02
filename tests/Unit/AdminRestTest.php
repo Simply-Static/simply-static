@@ -126,6 +126,33 @@ final class AdminRestTest extends UnitTestCase {
 		self::assertTrue( $saved['sftp_bulk_upload'] );
 	}
 
+	public function test_save_settings_preserves_valid_custom_replacement_text_and_rejects_invalid_rows(): void {
+		$this->saveSettings(
+			array(
+				'custom_replacements' => array(
+					array(
+						'search'  => "<meta name=\"generator\">\n",
+						'replace' => "  <meta name=\"site\" content=\"static\">\n",
+					),
+					array( 'search' => '', 'replace' => 'must be ignored' ),
+					array( 'search' => array( 'invalid' ), 'replace' => 'must be ignored' ),
+					array( 'search' => "remove\0null", 'replace' => "safe\0value" ),
+				),
+			)
+		);
+
+		self::assertSame(
+			array(
+				array(
+					'search'  => "<meta name=\"generator\">\n",
+					'replace' => "  <meta name=\"site\" content=\"static\">\n",
+				),
+				array( 'search' => 'removenull', 'replace' => 'safevalue' ),
+			),
+			WpEnv::$options['simply-static']['custom_replacements']
+		);
+	}
+
 	/**
 	 * @dataProvider unsafeWebhookProvider
 	 */
