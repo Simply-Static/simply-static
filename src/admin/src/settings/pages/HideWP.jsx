@@ -316,7 +316,7 @@ function HideWP() {
             <CardHeader>
                 <Flex>
                     <FlexItem>
-                        <b>{__('Custom replacements', 'simply-static')}</b>
+                        <b>{__('Custom Replacements', 'simply-static')}</b>
                     </FlexItem>
                     {('free' === options.plan || !isPro()) &&
                         <FlexItem>
