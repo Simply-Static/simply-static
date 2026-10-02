@@ -204,6 +204,7 @@ class Upgrade_Handler {
 			'wp_themes_directory'           => 'themes',
 			'theme_style_name'              => 'style',
 			'author_url'                    => '',
+			'custom_replacements'           => array(),
 			'hide_comments'                 => false,
 			'hide_version'                  => false,
 			'hide_generator'                => false,
