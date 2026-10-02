@@ -514,6 +514,29 @@ final class UrlExtractorTest extends UnitTestCase {
 		self::assertFalse( Util::is_local_url( $runtime_origin . '/after-extraction' ) );
 	}
 
+	public function test_preserves_same_host_links_outside_configured_wordpress_path(): void {
+		$origin_url   = 'https://kekacclserver.kek.jp/accl/sokendai/eng';
+		$local_url    = $origin_url . '/course/';
+		$external_url = 'https://kekacclserver.kek.jp/local/sokendailocaleng/corecurriculum/teacherslist_2026second';
+
+		WpEnv::$home_url = $origin_url;
+		WpEnv::$site_url = $origin_url;
+		WpEnv::$options['simply-static']['destination_host'] = 'www2.kek.jp/accl/sokendai/eng/';
+		Options::reinstance();
+
+		$html = '<a href="' . $local_url . '">Local page</a>'
+			. '<a href="' . $external_url . '">Separate WordPress site</a>';
+		$extractor = $this->extractor( 'html', $html, 'page.html', $origin_url . '/page/' );
+
+		$urls = $extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertStringContainsString( 'href="https://www2.kek.jp/accl/sokendai/eng/course/"', $body );
+		self::assertStringContainsString( 'href="' . $external_url . '"', $body );
+		self::assertContains( $local_url, $urls );
+		self::assertNotContains( $external_url, $urls );
+	}
+
 	public function test_preserves_excluded_php_form_actions_during_force_replace(): void {
 		WpEnv::$options['simply-static']['force_replace_url'] = true;
 		Options::reinstance();

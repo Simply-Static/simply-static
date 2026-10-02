@@ -265,15 +265,18 @@ class Url_Extractor {
 		$source_origin                = $this->get_static_page_origin();
 		$source_origin_is_configured = $this->is_configured_local_origin( $source_origin );
 		$this->active_source_origin   = $source_origin;
+		// Configured bases retain their install paths; adding a bare origin here
+		// would incorrectly make sibling applications on the same host local.
+		$register_source_origin       = '' !== $source_origin && ! $source_origin_is_configured;
 
-		if ( '' !== $source_origin ) {
+		if ( $register_source_origin ) {
 			add_filter( 'ss_local_url_bases', array( $this, 'add_active_source_origin_to_local_url_bases' ) );
 		}
 
 		try {
 			return $this->extract_and_update_urls_for_source_origin( $source_origin, $source_origin_is_configured );
 		} finally {
-			if ( '' !== $source_origin ) {
+			if ( $register_source_origin ) {
 				remove_filter( 'ss_local_url_bases', array( $this, 'add_active_source_origin_to_local_url_bases' ) );
 			}
 
