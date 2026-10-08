@@ -163,6 +163,13 @@ class Url_Extractor {
 	private $active_source_origin = '';
 
 	/**
+	 * Additional URL regexes that should still be followed during Enhanced Crawl.
+	 *
+	 * @var string[]|null
+	 */
+	private $additional_url_regexes = null;
+
+	/**
 	 * Constructor
 	 *
 	 * @param string $static_page Simply_Static\Page to extract URLs from
@@ -2748,13 +2755,18 @@ class Url_Extractor {
 
 		if ( $url && Util::is_local_url( $url ) ) {
 			// Smart Crawl handles broad URL discovery, but directly referenced
-			// local assets must still be queued so mounted exports cannot miss
-			// critical CSS, JS, fonts, and images when a crawler is disabled or
-			// does not know about a runtime-generated asset URL.
-			if ( ! $this->options->get( 'smart_crawl' ) || Util::is_local_asset_url( $url ) ) {
+			// local assets and links explicitly selected by an Additional URLs
+			// regex must still be queued. Regex matches can represent virtual
+			// routes that WordPress object crawlers cannot enumerate.
+			$queue_url         = Util::remove_params_and_fragment( $url );
+			$should_follow_url = ! $this->options->get( 'smart_crawl' )
+				|| Util::is_local_asset_url( $url )
+				|| $this->matches_additional_url_regex( $queue_url );
+
+			if ( $should_follow_url ) {
 				$this->extracted_urls[] = apply_filters(
 					'simply_static_extracted_url',
-					Util::remove_params_and_fragment( $url ),
+					$queue_url,
 					$url,
 					$this->static_page
 				);
@@ -2764,6 +2776,36 @@ class Url_Extractor {
 		}
 
 		return $url;
+	}
+
+	/**
+	 * Determine whether a discovered URL matches an Additional URLs regex.
+	 *
+	 * The setup task can resolve regexes against known WordPress objects, but
+	 * runtime-generated rewrite endpoints only become known when linked from an
+	 * exported page. Cache the configured regexes for this extractor so those
+	 * links can opt back into following while Enhanced Crawl is enabled.
+	 *
+	 * @param string $url Absolute local URL.
+	 *
+	 * @return bool
+	 */
+	private function matches_additional_url_regex( $url ) {
+		if ( null === $this->additional_url_regexes ) {
+			$additional_urls = apply_filters( 'ss_setup_task_additional_urls', $this->options->get( 'additional_urls' ) );
+			$additional_urls = apply_filters( 'ss_additional_urls', Util::string_to_array( $additional_urls ) );
+			$patterns        = Util::parse_patterns( (array) $additional_urls );
+
+			$this->additional_url_regexes = (array) $patterns['regex'];
+		}
+
+		foreach ( $this->additional_url_regexes as $pattern ) {
+			if ( 1 === @preg_match( $pattern, $url ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

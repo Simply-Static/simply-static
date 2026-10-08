@@ -97,6 +97,23 @@ final class UrlExtractorTest extends UnitTestCase {
 		}
 	}
 
+	public function test_smart_crawl_follows_page_links_matching_an_additional_url_regex(): void {
+		WpEnv::$options['simply-static']['smart_crawl'] = true;
+		WpEnv::$options['simply-static']['additional_urls'] = '/\\/faq\\/.*$/i';
+		Options::reinstance();
+
+		$html = '<a href="/faq/">FAQ index</a>'
+			. '<a href="/faq/bad-credit-boat-loans-faqs">FAQ category</a>'
+			. '<a href="/about/">About</a>'
+			. '<link rel="stylesheet" href="/wp-content/themes/site/style.css">';
+		$urls = $this->extractor( 'html', $html )->extract_and_update_urls();
+
+		self::assertContains( 'https://example.test/faq/', $urls );
+		self::assertContains( 'https://example.test/faq/bad-credit-boat-loans-faqs', $urls );
+		self::assertContains( 'https://example.test/wp-content/themes/site/style.css', $urls );
+		self::assertNotContains( 'https://example.test/about/', $urls );
+	}
+
 	public function test_removes_wordpress_rest_discovery_links_when_rest_api_is_not_exported(): void {
 		WpEnv::$options['simply-static']['add_rest_api'] = false;
 		Options::reinstance();
