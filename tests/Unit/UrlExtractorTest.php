@@ -531,6 +531,53 @@ final class UrlExtractorTest extends UnitTestCase {
 		self::assertFalse( Util::is_local_url( $runtime_origin . '/after-extraction' ) );
 	}
 
+	public function test_rewrites_retired_studio_wordpress_origin_embedded_in_current_runtime_page(): void {
+		$current_origin  = 'https://wp-dqwlo1s08duf7rn.onstatic.studio';
+		$legacy_origin   = 'https://wp.ewx03qnbk7ve09k.static4.studio';
+		$image_path      = '/wp-content/uploads/2025/11/hero2-1920x688.jpg';
+		WpEnv::$home_url = $current_origin;
+		WpEnv::$site_url = $current_origin;
+		$html            = '<html><head>'
+			. '<link rel="preconnect" href="' . $legacy_origin . '">'
+			. '<script type="application/ld+json">'
+			. '{"@type":"WebSite","url":"' . $current_origin . '",'
+			. '"image":{"@type":"ImageObject","url":"' . $legacy_origin . $image_path . '"}}'
+			. '</script></head><body>'
+			. '<img src="' . $legacy_origin . $image_path . '" '
+			. 'srcset="' . $legacy_origin . $image_path . ' 1920w, '
+			. $current_origin . '/wp-content/uploads/2025/11/hero2-768x275.jpg 768w">'
+			. '<a href="https://wp.example.org/support/">External WordPress host</a>'
+			. '</body></html>';
+
+		$extractor = $this->extractor( 'html', $html, 'index.html', $current_origin . '/' );
+		$urls      = $extractor->extract_and_update_urls();
+		$body      = $extractor->get_body();
+
+		self::assertStringNotContainsString( $current_origin, $body );
+		self::assertStringNotContainsString( $legacy_origin, $body );
+		self::assertStringNotContainsString( 'rel="preconnect"', $body );
+		self::assertStringContainsString( '"url":"https://static.example.test"', $body );
+		self::assertStringContainsString( '"url":"https://static.example.test' . $image_path . '"', $body );
+		self::assertStringContainsString( 'src="https://static.example.test' . $image_path . '"', $body );
+		self::assertStringContainsString( 'href="https://wp.example.org/support/"', $body );
+		self::assertContains( $current_origin . $image_path, $urls );
+	}
+
+	public function test_preserves_studio_wordpress_links_on_non_studio_exports(): void {
+		$studio_origin = 'https://wp.example123.static4.studio';
+		$image_url     = $studio_origin . '/wp-content/uploads/external.jpg';
+		$html          = '<link rel="preconnect" href="' . $studio_origin . '">'
+			. '<img src="' . $image_url . '">';
+		$extractor     = $this->extractor( 'html', $html );
+
+		$urls = $extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertStringContainsString( 'href="' . $studio_origin . '/"', $body );
+		self::assertStringContainsString( 'src="' . $image_url . '"', $body );
+		self::assertNotContains( $image_url, $urls );
+	}
+
 	public function test_preserves_same_host_links_outside_configured_wordpress_path(): void {
 		$origin_url   = 'https://kekacclserver.kek.jp/accl/sokendai/eng';
 		$local_url    = $origin_url . '/course/';
