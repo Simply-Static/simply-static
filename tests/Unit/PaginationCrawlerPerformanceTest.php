@@ -16,6 +16,30 @@ namespace Simply_Static\Crawler {
 	function get_permalink( $post_id ) {
 		return 'https://example.test/post-' . (int) $post_id . '/';
 	}
+
+	function get_year_link( $year ) {
+		return 'https://example.test/' . (int) $year . '/';
+	}
+
+	function get_month_link( $year, $month ) {
+		return sprintf( 'https://example.test/%d/%02d/', (int) $year, (int) $month );
+	}
+
+	function get_day_link( $year, $month, $day ) {
+		return sprintf( 'https://example.test/%d/%02d/%02d/', (int) $year, (int) $month, (int) $day );
+	}
+
+	function get_categories( $args = array() ) {
+		return array();
+	}
+
+	function get_tags( $args = array() ) {
+		return array();
+	}
+
+	function get_users( $args = array() ) {
+		return array();
+	}
 }
 
 namespace Simply_Static\Tests\Unit {
@@ -25,10 +49,50 @@ namespace Simply_Static\Tests\Unit {
 	use Simply_Static\Tests\Support\UnitTestCase;
 	use Simply_Static\Tests\Support\WpTestEnvironment as WpEnv;
 
+	final class PaginationCrawlerWpdb {
+
+		/** @var string */
+		public $posts = 'wp_posts';
+
+		/** @var string[] */
+		public $queries = array();
+
+		/** @var array<string,object[]> */
+		private $archives;
+
+		/** @param array<string,object[]> $archives */
+		public function __construct( array $archives ) {
+			$this->archives = $archives;
+		}
+
+		public function prepare( string $query, int $limit ): string {
+			return str_replace( '%d', (string) $limit, $query );
+		}
+
+		/** @return object[] */
+		public function get_results( string $query ): array {
+			$this->queries[] = $query;
+
+			if ( false !== strpos( $query, 'DAYOFMONTH(post_date) AS day' ) ) {
+				return $this->archives['daily'];
+			}
+
+			if ( false !== strpos( $query, 'MONTH(post_date) AS month' ) ) {
+				return $this->archives['monthly'];
+			}
+
+			return $this->archives['yearly'];
+		}
+	}
+
 	final class PaginationCrawlerPerformanceTest extends UnitTestCase {
+
+		/** @var mixed */
+		private $previous_wpdb;
 
 		protected function setUp(): void {
 			parent::setUp();
+			$this->previous_wpdb = $GLOBALS['wpdb'] ?? null;
 			$this->requireSource( 'src/class-ss-plugin.php' );
 			$this->requireSource( 'src/class-ss-options.php' );
 			$this->requireSource( 'src/class-ss-util.php' );
@@ -51,6 +115,11 @@ namespace Simply_Static\Tests\Unit {
 
 		protected function tearDown(): void {
 			unset( $GLOBALS['simply_static_pagination_queries'], $GLOBALS['simply_static_pagination_posts'] );
+			if ( null === $this->previous_wpdb ) {
+				unset( $GLOBALS['wpdb'] );
+			} else {
+				$GLOBALS['wpdb'] = $this->previous_wpdb;
+			}
 			parent::tearDown();
 		}
 
@@ -112,6 +181,52 @@ namespace Simply_Static\Tests\Unit {
 				array( 'https://example.test/knowledge-articles/page/2/' ),
 				$urls
 			);
+		}
+
+		/**
+		 * @see https://github.com/Simply-Static/simply-static/issues/470
+		 */
+		public function test_date_archive_pagination_is_discovered(): void {
+			$database = new PaginationCrawlerWpdb(
+				array(
+					'yearly' => array(
+						(object) array( 'year' => 2018, 'posts' => 21 ),
+					),
+					'monthly' => array(
+						(object) array( 'year' => 2018, 'month' => 11, 'posts' => 11 ),
+						(object) array( 'year' => 2018, 'month' => 10, 'posts' => 10 ),
+					),
+					'daily' => array(
+						(object) array( 'year' => 2018, 'month' => 11, 'day' => 1, 'posts' => 25 ),
+					),
+				)
+			);
+			$GLOBALS['wpdb'] = $database;
+			WpEnv::$options['posts_per_page'] = 10;
+			WpEnv::$options['simply-static'] = array(
+				'post_types'            => array( 'post' ),
+				'post_types_configured' => true,
+			);
+			WpEnv::$post_type_counts['post'] = 0;
+
+			$crawler = new Pagination_Crawler();
+			$method  = new ReflectionMethod( Pagination_Crawler::class, 'get_archive_pagination' );
+			$method->setAccessible( true );
+			$urls = $method->invoke( $crawler );
+
+			self::assertSame(
+				array(
+					'https://example.test/2018/page/2/',
+					'https://example.test/2018/page/3/',
+					'https://example.test/2018/11/page/2/',
+					'https://example.test/2018/11/01/page/2/',
+					'https://example.test/2018/11/01/page/3/',
+				),
+				$urls
+			);
+			self::assertCount( 3, $database->queries );
+			self::assertStringContainsString( "post_type = 'post' AND post_status = 'publish'", $database->queries[0] );
+			self::assertStringContainsString( 'LIMIT 5000', $database->queries[0] );
 		}
 	}
 }
