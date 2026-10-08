@@ -217,12 +217,110 @@ class Pagination_Crawler extends Crawler {
 							}
 						}
 					}
+
+					// Get pagination for yearly, monthly, and daily date archives.
+					$remaining_urls = $max_generated_urls - count( $urls );
+					if ( $remaining_urls > 0 ) {
+						$urls = array_merge(
+							$urls,
+							$this->get_date_archive_pagination( $posts_per_page, $max_archive_objects, $remaining_urls )
+						);
+					}
 				}
 			}
 		}
 
 		// Dedupe before returning
 		return array_values( array_unique( $urls ) );
+	}
+
+	/**
+	 * Get pagination URLs for yearly, monthly, and daily post archives.
+	 *
+	 * @see https://github.com/Simply-Static/simply-static/issues/470
+	 *
+	 * @param int $posts_per_page      Number of posts shown on an archive page.
+	 * @param int $max_archive_objects Maximum archive rows to inspect per date type.
+	 * @param int $max_urls            Maximum number of URLs to return.
+	 *
+	 * @return array List of date archive pagination URLs.
+	 */
+	private function get_date_archive_pagination( int $posts_per_page, int $max_archive_objects, int $max_urls ) : array {
+		global $wpdb;
+
+		$urls = [];
+		if ( $posts_per_page < 1 || $max_archive_objects < 1 || $max_urls < 1 || ! isset( $wpdb->posts ) ) {
+			return $urls;
+		}
+
+		$date_archives = [
+			[
+				'fields'  => 'YEAR(post_date) AS year',
+				'groupby' => 'YEAR(post_date)',
+				'context' => 'yearly_date_candidates',
+				'link'    => static function ( $archive ) {
+					return get_year_link( (int) $archive->year );
+				},
+			],
+			[
+				'fields'  => 'YEAR(post_date) AS year, MONTH(post_date) AS month',
+				'groupby' => 'YEAR(post_date), MONTH(post_date)',
+				'context' => 'monthly_date_candidates',
+				'link'    => static function ( $archive ) {
+					return get_month_link( (int) $archive->year, (int) $archive->month );
+				},
+			],
+			[
+				'fields'  => 'YEAR(post_date) AS year, MONTH(post_date) AS month, DAYOFMONTH(post_date) AS day',
+				'groupby' => 'YEAR(post_date), MONTH(post_date), DAYOFMONTH(post_date)',
+				'context' => 'daily_date_candidates',
+				'link'    => static function ( $archive ) {
+					return get_day_link( (int) $archive->year, (int) $archive->month, (int) $archive->day );
+				},
+			],
+		];
+
+		foreach ( $date_archives as $date_archive ) {
+			if ( count( $urls ) >= $max_urls ) {
+				break;
+			}
+
+			$query = $wpdb->prepare(
+				"SELECT {$date_archive['fields']}, COUNT(ID) AS posts FROM {$wpdb->posts} WHERE post_type = 'post' AND post_status = 'publish' GROUP BY {$date_archive['groupby']} ORDER BY post_date DESC LIMIT %d",
+				$max_archive_objects
+			);
+			$archives = $wpdb->get_results( $query );
+			$archives = is_array( $archives ) ? $archives : [];
+
+			if ( count( $archives ) >= $max_archive_objects ) {
+				$this->report_truncation( $date_archive['context'], $max_archive_objects, count( $archives ) );
+			}
+
+			foreach ( $archives as $archive ) {
+				if ( count( $urls ) >= $max_urls ) {
+					break;
+				}
+				if ( ! is_object( $archive ) || ! isset( $archive->posts ) ) {
+					continue;
+				}
+
+				$total_pages = (int) ceil( max( 0, (int) $archive->posts ) / $posts_per_page );
+				if ( $total_pages < 2 ) {
+					continue;
+				}
+
+				$archive_link = call_user_func( $date_archive['link'], $archive );
+				if ( ! is_string( $archive_link ) || '' === $archive_link ) {
+					continue;
+				}
+
+				for ( $page = 2; $page <= $total_pages && count( $urls ) < $max_urls; $page++ ) {
+					$urls[] = trailingslashit( rtrim( $archive_link, '/' ) ) . 'page/' . $page . '/';
+				}
+			}
+		}
+
+		return $urls;
 	}
 
 	/**
