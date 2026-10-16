@@ -486,8 +486,8 @@ class Url_Extractor {
 	 *
 	 * The fetched page origin is included when WordPress does not already know
 	 * about it. On Static Studio, also include managed WordPress aliases found in
-	 * the page. Migrations can leave a retired staticN.studio alias in post data
-	 * even though the page is now fetched through an onstatic.studio runtime.
+	 * the page. Migrations can leave a retired Static Studio alias in post data
+	 * even though the page is now fetched through a different managed runtime.
 	 *
 	 * @param string $source_origin Fetched page origin.
 	 *
@@ -512,18 +512,271 @@ class Url_Extractor {
 		// Normalize JSON-escaped slashes for detection only. The replacement pass
 		// still operates on the original body and handles both representations.
 		$body = str_replace( '\\/', '/', $body );
-		$pattern = '~(?:https?:)?//(wp(?:-|\\.)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.(?:onstatic|static\\d*)\\.studio)(?=$|[/?#\\s<>"\'])~i';
-		$matched = preg_match_all( $pattern, $body, $matches );
+		// Retired onstatic/staticN aliases predate tenant-stable metadata and can
+		// occur throughout migrated builder content.
+		$retired_pattern = '~(?:https?:)?//(wp(?:-|\\.)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.(?:onstatic|static\\d*)\\.studio)(?=$|[/?#\\s<>"\'])~i';
+		$matched         = preg_match_all( $retired_pattern, $body, $matches );
+		if ( false !== $matched && 0 !== $matched ) {
+			foreach ( $matches[1] as $host ) {
+				$origins[] = 'https://' . strtolower( $host );
+			}
+		}
+
+		// Current ls-static aliases are valid tenant URLs. Limit their discovery to
+		// the exact Oxygen/Breakdance configuration object which owns homeUrl; a
+		// generic widget may legitimately point its own homeUrl at another tenant.
+		foreach ( $this->get_builder_home_url_origins( $body ) as $builder_origin ) {
+			$origins[] = $builder_origin;
+		}
+
+		return array_values( array_unique( array_filter( $origins ) ) );
+	}
+
+	/**
+	 * Find managed homeUrl origins inside Oxygen and Breakdance assignments.
+	 *
+	 * @param string $body Page body with JSON slash escapes normalized.
+	 *
+	 * @return array
+	 */
+	private function get_builder_home_url_origins( $body ) {
+		$origins            = array();
+		$assignment_pattern = '~(?:^|[^a-z0-9_$\\.])(?:window\\.)?(?:OxygenFrontend|BreakdanceFrontend)(\\s*\\.\\s*data)?\\s*=\\s*\\{~i';
+		$matched            = preg_match_all( $assignment_pattern, $body, $assignments, PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
 
 		if ( false === $matched || 0 === $matched ) {
 			return $origins;
 		}
 
-		foreach ( $matches[1] as $host ) {
-			$origins[] = 'https://' . strtolower( $host );
+		foreach ( $assignments as $assignment ) {
+			$assignment_text   = $assignment[0][0];
+			$assignment_offset = (int) $assignment[0][1];
+			$identifier_offset = 0;
+			if ( preg_match( '~(?:window\s*\.\s*)?(?:OxygenFrontend|BreakdanceFrontend)~i', $assignment_text, $identifier, PREG_OFFSET_CAPTURE ) ) {
+				$identifier_offset = (int) $identifier[0][1];
+			}
+			if ( ! $this->is_javascript_code_offset( $body, $assignment_offset + $identifier_offset ) ) {
+				continue;
+			}
+			$opening_brace     = $assignment_offset + strrpos( $assignment_text, '{' );
+			$object            = $this->get_javascript_object_at_offset( $body, $opening_brace );
+
+			if ( '' === $object ) {
+				continue;
+			}
+
+			$is_data_assignment = isset( $assignment[1][0] ) && '' !== trim( $assignment[1][0] );
+			$data_object        = $is_data_assignment ? $object : $this->get_top_level_javascript_object_property( $object, 'data' );
+			if ( '' === $data_object ) {
+				continue;
+			}
+
+			foreach ( $this->get_top_level_managed_home_url_origins( $data_object ) as $home_url_origin ) {
+				$origins[] = $home_url_origin;
+			}
 		}
 
-		return array_values( array_unique( array_filter( $origins ) ) );
+		return array_values( array_unique( $origins ) );
+	}
+
+	/**
+	 * Confirm that a regex assignment candidate is executable script, not text.
+	 *
+	 * @param string $source Page or JavaScript source.
+	 * @param int    $offset Candidate byte offset.
+	 *
+	 * @return bool
+	 */
+	private function is_javascript_code_offset( $source, $offset ) {
+		$offset     = min( max( 0, (int) $offset ), strlen( $source ) );
+		$scan_start = 0;
+		$before     = substr( $source, 0, $offset );
+		$script     = strripos( $before, '<script' );
+		$end_script = strripos( $before, '</script' );
+
+		if ( false !== $script && ( false === $end_script || $script > $end_script ) ) {
+			$tag_end = strpos( $source, '>', $script );
+			if ( false === $tag_end || $tag_end >= $offset ) {
+				return false;
+			}
+			$scan_start = $tag_end + 1;
+		}
+
+		$script_source = substr( $source, $scan_start, $offset - $scan_start );
+
+		return -1 !== $this->get_javascript_brace_depth_at_offset( $script_source, strlen( $script_source ) );
+	}
+
+	/**
+	 * Get one top-level object-valued property from a JavaScript object.
+	 *
+	 * @param string $object JavaScript object source.
+	 * @param string $property Property name.
+	 *
+	 * @return string
+	 */
+	private function get_top_level_javascript_object_property( $object, $property ) {
+		$property_pattern = '~(?:["\']' . preg_quote( $property, '~' ) . '["\']|(?<![a-z0-9_$])' . preg_quote( $property, '~' ) . '(?![a-z0-9_$]))\\s*:\\s*\\{~i';
+		$matched          = preg_match_all( $property_pattern, $object, $properties, PREG_OFFSET_CAPTURE );
+
+		if ( false === $matched || 0 === $matched ) {
+			return '';
+		}
+
+		foreach ( $properties[0] as $candidate ) {
+			if ( 1 !== $this->get_javascript_brace_depth_at_offset( $object, (int) $candidate[1] ) ) {
+				continue;
+			}
+
+			$opening_brace = (int) $candidate[1] + strrpos( $candidate[0], '{' );
+
+			return $this->get_javascript_object_at_offset( $object, $opening_brace );
+		}
+
+		return '';
+	}
+
+	/**
+	 * Get a managed homeUrl declared directly on a builder data object.
+	 *
+	 * @param string $data_object Builder data object source.
+	 *
+	 * @return array
+	 */
+	private function get_top_level_managed_home_url_origins( $data_object ) {
+		$origins          = array();
+		$home_url_pattern = '~["\']homeUrl["\']\\s*:\\s*["\'](?:https?:)?//(wp(?:-|\\.)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.ls-static\\.studio)(?=$|[/?#\\s<>"\'])~i';
+		$matched          = preg_match_all( $home_url_pattern, $data_object, $home_urls, PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
+
+		if ( false === $matched || 0 === $matched ) {
+			return $origins;
+		}
+
+		foreach ( $home_urls as $home_url ) {
+			if ( 1 !== $this->get_javascript_brace_depth_at_offset( $data_object, (int) $home_url[0][1] ) ) {
+				continue;
+			}
+
+			$origins[] = 'https://' . strtolower( $home_url[1][0] );
+		}
+
+		return array_values( array_unique( $origins ) );
+	}
+
+	/**
+	 * Calculate object-brace depth at one byte offset, ignoring quoted strings.
+	 *
+	 * @param string $source JavaScript source.
+	 * @param int    $offset Byte offset.
+	 *
+	 * @return int
+	 */
+	private function get_javascript_brace_depth_at_offset( $source, $offset ) {
+		$depth         = 0;
+		$quote         = '';
+		$escaped       = false;
+		$line_comment  = false;
+		$block_comment = false;
+		$limit         = min( max( 0, (int) $offset ), strlen( $source ) );
+
+		for ( $index = 0; $index < $limit; $index ++ ) {
+			$character = $source[ $index ];
+			$next      = $index + 1 < $limit ? $source[ $index + 1 ] : '';
+
+			if ( $line_comment ) {
+				if ( "\n" === $character || "\r" === $character ) {
+					$line_comment = false;
+				}
+				continue;
+			}
+
+			if ( $block_comment ) {
+				if ( '*' === $character && '/' === $next ) {
+					$block_comment = false;
+					$index ++;
+				}
+				continue;
+			}
+
+			if ( '' !== $quote ) {
+				if ( $escaped ) {
+					$escaped = false;
+				} elseif ( '\\' === $character ) {
+					$escaped = true;
+				} elseif ( $quote === $character ) {
+					$quote = '';
+				}
+				continue;
+			}
+
+			if ( '/' === $character && '/' === $next ) {
+				$line_comment = true;
+				$index ++;
+			} elseif ( '/' === $character && '*' === $next ) {
+				$block_comment = true;
+				$index ++;
+			} elseif ( '"' === $character || "'" === $character || '`' === $character ) {
+				$quote = $character;
+			} elseif ( '{' === $character ) {
+				$depth ++;
+			} elseif ( '}' === $character ) {
+				$depth --;
+			}
+		}
+
+		// A regex candidate inside a quoted payload is not an object member even
+		// when the surrounding object's brace depth happens to be one.
+		return '' === $quote && ! $line_comment && ! $block_comment ? $depth : -1;
+	}
+
+	/**
+	 * Return one balanced JavaScript object starting at an opening brace.
+	 *
+	 * Builder frontend data is emitted as a JSON-compatible object. Tracking
+	 * quoted strings keeps braces within values from terminating the assignment.
+	 *
+	 * @param string $body Page body.
+	 * @param int    $opening_brace Opening-brace byte offset.
+	 *
+	 * @return string
+	 */
+	private function get_javascript_object_at_offset( $body, $opening_brace ) {
+		$length  = strlen( $body );
+		$depth   = 0;
+		$quote   = '';
+		$escaped = false;
+
+		if ( $opening_brace < 0 || $opening_brace >= $length || '{' !== $body[ $opening_brace ] ) {
+			return '';
+		}
+
+		for ( $index = $opening_brace; $index < $length; $index ++ ) {
+			$character = $body[ $index ];
+
+			if ( '' !== $quote ) {
+				if ( $escaped ) {
+					$escaped = false;
+				} elseif ( '\\' === $character ) {
+					$escaped = true;
+				} elseif ( $quote === $character ) {
+					$quote = '';
+				}
+				continue;
+			}
+
+			if ( '"' === $character || "'" === $character ) {
+				$quote = $character;
+			} elseif ( '{' === $character ) {
+				$depth ++;
+			} elseif ( '}' === $character ) {
+				$depth --;
+				if ( 0 === $depth ) {
+					return substr( $body, $opening_brace, $index - $opening_brace + 1 );
+				}
+			}
+		}
+
+		return '';
 	}
 
 	/**
@@ -543,7 +796,7 @@ class Url_Extractor {
 			$parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $candidate ) : parse_url( $candidate );
 			$host  = is_array( $parts ) && ! empty( $parts['host'] ) ? strtolower( (string) $parts['host'] ) : '';
 
-			if ( preg_match( '/^wp(?:-|\\.)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.(?:onstatic|static\\d*)\\.studio$/', $host ) ) {
+			if ( preg_match( '/^wp(?:-|\\.)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.(?:ls-static|onstatic|static\\d*)\\.studio$/', $host ) ) {
 				return true;
 			}
 		}
@@ -647,10 +900,34 @@ class Url_Extractor {
 			$response_body = $_result;
 		}
 
-		$escaped_source      = addcslashes( untrailingslashit( $source_origin ), '/' );
 		$escaped_destination = addcslashes( untrailingslashit( $destination_url ), '/' );
-		$response_body       = str_ireplace( $escaped_source, $escaped_destination, $response_body );
-		$response_body       = str_ireplace( urlencode( $source_origin ), urlencode( $destination_url ), $response_body );
+		// Match HTTPS, HTTP, and protocol-relative JSON strings without treating a
+		// managed hostname as a prefix of an unrelated suffixed hostname.
+		$escaped_pattern     = '~(?:(?:https?:)?\\\\/\\\\/)' . preg_quote( $authority, '~' ) . '(?=$|\\\\/|[/?#\s<>"\'])~i';
+		$_result             = preg_replace_callback(
+			$escaped_pattern,
+			static function () use ( $escaped_destination ) {
+				return $escaped_destination;
+			},
+			$response_body
+		);
+		if ( null !== $_result ) {
+			$response_body = $_result;
+		}
+
+		$encoded_authority = urlencode( $authority );
+		// Encoded origins need the same authority boundary as plain and JSON URLs.
+		$encoded_pattern   = '~(?:(?:https?%3A)?%2F%2F)' . preg_quote( $encoded_authority, '~' ) . '(?=$|%2F|%3F|%23|%22|%27|%20|%26|[/?#\s<>"\'])~i';
+		$_result           = preg_replace_callback(
+			$encoded_pattern,
+			static function () use ( $destination_url ) {
+				return urlencode( $destination_url );
+			},
+			$response_body
+		);
+		if ( null !== $_result ) {
+			$response_body = $_result;
+		}
 
 		$this->save_body( $response_body );
 	}
