@@ -9,17 +9,21 @@ use Simply_Static\Page;
 use Simply_Static\Page_Handler;
 use Simply_Static\Tests\Support\UnitTestCase;
 use Simply_Static\Tests\Support\WpTestEnvironment as WpEnv;
+use Simply_Static\Url_Extractor;
 use Simply_Static\Url_Fetcher;
 use Simply_Static\Util;
 
 require_once dirname( __DIR__, 2 ) . '/src/class-ss-plugin.php';
 require_once dirname( __DIR__, 2 ) . '/src/class-ss-options.php';
 require_once dirname( __DIR__, 2 ) . '/src/class-ss-phpuri.php';
+require_once dirname( __DIR__, 2 ) . '/src/class-ss-html-encoding-helper.php';
 require_once dirname( __DIR__, 2 ) . '/src/class-ss-util.php';
+require_once dirname( __DIR__, 2 ) . '/src/class-ss-query.php';
 require_once dirname( __DIR__, 2 ) . '/src/models/class-ss-model.php';
 require_once dirname( __DIR__, 2 ) . '/src/models/class-ss-page.php';
 require_once dirname( __DIR__, 2 ) . '/src/handlers/class-ss-page-handler.php';
 require_once dirname( __DIR__, 2 ) . '/src/class-ss-url-fetcher.php';
+require_once dirname( __DIR__, 2 ) . '/src/class-ss-url-extractor.php';
 
 final class LocalAssetContainmentPageHandler extends Page_Handler {
 }
@@ -123,6 +127,85 @@ final class LocalAssetContainmentTest extends UnitTestCase {
 			file_get_contents( $this->archive_dir . '/wp-content/uploads/' . basename( $this->upload_asset_dir ) . '/upload.json' )
 		);
 		self::assertSame( array(), WpEnv::$remote_requests );
+	}
+
+	public function test_bundled_form_scripts_follow_renamed_content_path_through_export(): void {
+		WpEnv::$options['simply-static'] = array_merge(
+			WpEnv::$options['simply-static'],
+			array(
+				'temp_files_dir'        => dirname( $this->archive_dir ),
+				'archive_name'          => basename( $this->archive_dir ),
+				'destination_url_type'  => 'absolute',
+				'destination_scheme'    => 'https://',
+				'destination_host'      => 'static.example.test',
+				'wp_content_directory'  => 'assets',
+				'wp_plugins_directory'  => 'lib',
+				'wp_uploads_directory'  => 'media',
+				'wp_includes_directory' => 'addons',
+				'wp_themes_directory'   => 'template',
+			)
+		);
+		Options::reinstance();
+
+		$relative_directory = 'mu-plugins/simply-static-studio-helper/dependencies/simply-static-pro/assets';
+		$source_directory   = WP_CONTENT_DIR . '/' . $relative_directory;
+		$public_directory   = 'assets/' . $relative_directory;
+		$assets             = array(
+			'ssp-form-webhook-public.js' => 'window.sspWebhook = true;',
+			'ssp-form-validation.js'     => 'window.sspValidation = true;',
+		);
+		$previous_files     = array();
+
+		wp_mkdir_p( $source_directory );
+		foreach ( $assets as $filename => $contents ) {
+			$source_file = $source_directory . '/' . $filename;
+			$previous_files[ $source_file ] = is_file( $source_file ) ? file_get_contents( $source_file ) : null;
+			file_put_contents( $source_file, $contents );
+		}
+
+		try {
+			$script_tags = '';
+			foreach ( array_keys( $assets ) as $filename ) {
+				$script_tags .= '<script src="' . WP_CONTENT_URL . '/' . $relative_directory . '/' . $filename . '"></script>';
+			}
+
+			file_put_contents( $this->archive_dir . '/index.html', $script_tags );
+			$html_page = LocalAssetContainmentPage::initialize(
+				array(
+					'id'               => 1,
+					'url'              => 'https://example.test/',
+					'file_path'        => 'index.html',
+					'http_status_code' => 200,
+					'content_type'     => 'text/html; charset=UTF-8',
+				)
+			);
+			$extractor = new Url_Extractor( $html_page );
+			$urls      = array_values( $extractor->extract_and_update_urls() );
+
+			foreach ( $assets as $filename => $contents ) {
+				$source_url = WP_CONTENT_URL . '/' . $relative_directory . '/' . $filename;
+				self::assertContains( $source_url, $urls );
+				self::assertStringContainsString(
+					'https://static.example.test/' . $public_directory . '/' . $filename,
+					$extractor->get_body()
+				);
+
+				$asset_page = $this->pageFor( $source_url );
+				self::assertTrue( $this->fetcher->fetch( $asset_page ) );
+				self::assertSame( $public_directory . '/' . $filename, $asset_page->file_path );
+				self::assertSame( $contents, file_get_contents( $this->archive_dir . '/' . $asset_page->file_path ) );
+			}
+
+			self::assertSame( array(), WpEnv::$remote_requests );
+		} finally {
+			foreach ( $previous_files as $source_file => $contents ) {
+				if ( null === $contents ) {
+					@unlink( $source_file );
+				} else {
+					file_put_contents( $source_file, $contents );
+				}
+			}
+		}
 	}
 
 	/**

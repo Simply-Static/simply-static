@@ -328,6 +328,38 @@ final class UrlExtractorTest extends UnitTestCase {
 		self::assertStringContainsString( 'const email = "user@example.test";', $body );
 	}
 
+	/**
+	 * @dataProvider builderFrontendHomeUrlProvider
+	 */
+	public function test_rewrites_builder_home_url_at_script_string_boundary( string $frontend, bool $escaped ): void {
+		$origin          = 'https://example.test';
+		$attacker_origin = $origin . '.attacker.test';
+		$home_url        = $escaped ? addcslashes( $origin, '/' ) : $origin;
+		$attacker_url    = $escaped ? addcslashes( $attacker_origin, '/' ) : $attacker_origin;
+		$destination     = $escaped ? 'https:\/\/static.example.test' : 'https://static.example.test';
+		$html            = '<script>window.' . $frontend . ' = {"data":{'
+			. '"homeUrl":"' . $home_url . '",'
+			. '"externalHomeUrl":"' . $attacker_url . '"'
+			. '}};</script>';
+		$extractor       = $this->extractor( 'html', $html );
+
+		$extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertStringContainsString( '"homeUrl":"' . $destination . '"', $body );
+		self::assertStringContainsString( '"externalHomeUrl":"' . $attacker_url . '"', $body );
+	}
+
+	/** @return array<string,array{string,bool}> */
+	public function builderFrontendHomeUrlProvider(): array {
+		return array(
+			'Oxygen escaped'       => array( 'OxygenFrontend', true ),
+			'Oxygen unescaped'     => array( 'OxygenFrontend', false ),
+			'Breakdance escaped'   => array( 'BreakdanceFrontend', true ),
+			'Breakdance unescaped' => array( 'BreakdanceFrontend', false ),
+		);
+	}
+
 	public function test_preserves_bare_origin_host_for_non_absolute_exports(): void {
 		WpEnv::$options['simply-static']['destination_url_type'] = 'relative';
 		WpEnv::$options['simply-static']['relative_path'] = '/';
@@ -561,6 +593,143 @@ final class UrlExtractorTest extends UnitTestCase {
 		self::assertStringContainsString( 'src="https://static.example.test' . $image_path . '"', $body );
 		self::assertStringContainsString( 'href="https://wp.example.org/support/"', $body );
 		self::assertContains( $current_origin . $image_path, $urls );
+	}
+
+	public function test_rewrites_managed_ls_static_aliases_without_rewriting_suffixed_hosts(): void {
+		$current_origin    = 'https://wp-current123.ls-static.studio';
+		$migrated_origin   = 'https://wp-migrated456.ls-static.studio';
+		$attacker_origin   = $migrated_origin . '.attacker.test';
+		$other_tenant      = 'https://wp-validtenant789.ls-static.studio';
+		$escaped_origin    = addcslashes( $migrated_origin, '/' );
+		$escaped_attacker  = addcslashes( $attacker_origin, '/' );
+		WpEnv::$home_url   = $current_origin;
+		WpEnv::$site_url   = $current_origin;
+		$html              = '<script>window.OxygenFrontend = {"data":{'
+			. '"homeUrl":"' . $escaped_origin . '",'
+			. '"externalHomeUrl":"' . $escaped_attacker . '"'
+			. '}};</script>'
+			. '<script>window.BreakdanceFrontend = {"data":{'
+			. '"homeUrl":"' . $migrated_origin . '",'
+			. '"externalHomeUrl":"' . $attacker_origin . '"'
+			. '}};</script>'
+			. '<a href="' . $other_tenant . '/privacy/">Other Studio tenant</a>';
+		$extractor         = $this->extractor( 'html', $html, 'index.html', $current_origin . '/' );
+
+		$extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertStringContainsString( '"homeUrl":"https:\/\/static.example.test"', $body );
+		self::assertStringContainsString( '"homeUrl":"https://static.example.test"', $body );
+		self::assertStringContainsString( '"externalHomeUrl":"' . $escaped_attacker . '"', $body );
+		self::assertStringContainsString( '"externalHomeUrl":"' . $attacker_origin . '"', $body );
+		self::assertStringContainsString( 'href="' . $other_tenant . '/privacy/"', $body );
+	}
+
+	public function test_preserves_generic_widget_home_url_for_another_ls_static_tenant(): void {
+		$current_origin  = 'https://wp-current123.ls-static.studio';
+		$builder_origin  = 'https://wp-migrated456.ls-static.studio';
+		$widget_origin   = 'https://wp-widget789.ls-static.studio';
+		WpEnv::$home_url = $current_origin;
+		WpEnv::$site_url = $current_origin;
+		$html            = '<script>'
+			. 'window.OxygenFrontend = {"data":{"homeUrl":"' . $builder_origin . '"}};'
+			. 'window.CustomerWidget = {"homeUrl":"' . $widget_origin . '","asset":"' . $widget_origin . '/app.js"};'
+			. '</script>';
+		$extractor       = $this->extractor( 'html', $html, 'index.html', $current_origin . '/' );
+
+		$extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertStringContainsString( '"homeUrl":"https://static.example.test"', $body );
+		self::assertStringContainsString( '"homeUrl":"' . $widget_origin . '"', $body );
+		self::assertStringContainsString( '"asset":"' . $widget_origin . '/app.js"', $body );
+	}
+
+	public function test_rewrites_only_data_home_url_inside_builder_frontend_objects(): void {
+		$current_origin   = 'https://wp-current123.ls-static.studio';
+		$data_origin      = 'https://wp-data456.ls-static.studio';
+		$nested_origin    = 'https://wp-nested789.ls-static.studio';
+		$direct_origin    = 'https://wp-direct012.ls-static.studio';
+		$serialized_data  = 'https://wp-serialized345.ls-static.studio';
+		$serialized_home  = 'https://wp-payload678.ls-static.studio';
+		WpEnv::$home_url  = $current_origin;
+		WpEnv::$site_url  = $current_origin;
+		$html             = '<script>'
+			. 'window.OxygenFrontend = {'
+			. '"integration":{"homeUrl":"' . $nested_origin . '"},'
+			. '"serialized":"data:{\\"homeUrl\\":\\"' . $serialized_data . '\\"}",'
+			. '"data":{"homeUrl":"' . $data_origin . '",'
+			. '"payload":"{\\"homeUrl\\":\\"' . $serialized_home . '\\"}"}'
+			. '};'
+			. 'window.BreakdanceFrontend.data = {"homeUrl":"' . $direct_origin . '"};'
+			. '</script>';
+		$extractor        = $this->extractor( 'html', $html, 'index.html', $current_origin . '/' );
+
+		$extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertSame( 2, substr_count( $body, '"homeUrl":"https://static.example.test"' ) );
+		self::assertStringContainsString( '"homeUrl":"' . $nested_origin . '"', $body );
+		self::assertStringContainsString( $serialized_data, $body );
+		self::assertStringContainsString( $serialized_home, $body );
+	}
+
+	public function test_ignores_builder_assignment_text_inside_javascript_strings(): void {
+		$current_origin = 'https://wp-current123.ls-static.studio';
+		$real_origin    = 'https://wp-real456.ls-static.studio';
+		$example_origin = 'https://wp-example789.ls-static.studio';
+		WpEnv::$home_url = $current_origin;
+		WpEnv::$site_url = $current_origin;
+		$html            = '<script>'
+			. "const example = 'window.OxygenFrontend = {\"data\":{\"homeUrl\":\"" . $example_origin . "\"}}';"
+			. 'window.OxygenFrontend = {"data":{"homeUrl":"' . $real_origin . '"}};'
+			. 'window.CustomerWidget = {"asset":"' . $example_origin . '/app.js"};'
+			. '</script>';
+		$extractor       = $this->extractor( 'html', $html, 'index.html', $current_origin . '/' );
+
+		$extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertStringContainsString( '"homeUrl":"https://static.example.test"', $body );
+		self::assertStringContainsString( '"homeUrl":"' . $example_origin . '"', $body );
+		self::assertStringContainsString( '"asset":"' . $example_origin . '/app.js"', $body );
+	}
+
+	public function test_rewrites_all_serialized_managed_alias_schemes_with_url_boundaries(): void {
+		$current_origin   = 'https://wp-current123.ls-static.studio';
+		$migrated_host    = 'wp-migrated456.ls-static.studio';
+		$attacker_host    = $migrated_host . '.attacker.test';
+		$destination      = 'https://static.example.test';
+		$escaped_sources  = array(
+			addcslashes( 'https://' . $migrated_host, '/' ),
+			addcslashes( 'http://' . $migrated_host, '/' ),
+			addcslashes( '//' . $migrated_host, '/' ),
+		);
+		$encoded_sources  = array(
+			urlencode( 'https://' . $migrated_host ),
+			urlencode( 'http://' . $migrated_host ),
+			urlencode( '//' . $migrated_host ),
+		);
+		$escaped_attacker = addcslashes( 'https://' . $attacker_host, '/' );
+		$encoded_attacker = urlencode( 'https://' . $attacker_host );
+		WpEnv::$home_url  = $current_origin;
+		WpEnv::$site_url  = $current_origin;
+		$html             = '<script>window.OxygenFrontend = {"data":{'
+			. '"homeUrl":"' . $escaped_sources[0] . '",'
+			. '"escaped":[' . implode( ',', array_map( static function ( $origin ) { return '"' . $origin . '"'; }, array_slice( $escaped_sources, 1 ) ) ) . '],'
+			. '"encoded":[' . implode( ',', array_map( static function ( $origin ) { return '"' . $origin . '"'; }, $encoded_sources ) ) . '],'
+			. '"escapedExternal":"' . $escaped_attacker . '",'
+			. '"encodedExternal":"' . $encoded_attacker . '"'
+			. '}};</script>';
+		$extractor        = $this->extractor( 'html', $html, 'index.html', $current_origin . '/' );
+
+		$extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertSame( 3, substr_count( $body, addcslashes( $destination, '/' ) ) );
+		self::assertSame( 3, substr_count( $body, urlencode( $destination ) ) );
+		self::assertStringContainsString( $escaped_attacker, $body );
+		self::assertStringContainsString( $encoded_attacker, $body );
 	}
 
 	public function test_preserves_studio_wordpress_links_on_non_studio_exports(): void {

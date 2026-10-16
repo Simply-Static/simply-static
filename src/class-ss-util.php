@@ -1188,7 +1188,9 @@ class Util {
 	 *
 	 * origin_host() may include a subdirectory (for example example.com/wp).
 	 * Without a boundary, raw replacements can treat /wp-includes as though it
-	 * started with the /wp base and leave broken suffixes like -includes.
+	 * started with the /wp base and leave broken suffixes like -includes. Quotes
+	 * and markup whitespace are valid boundaries when the URL is a complete
+	 * JSON, JavaScript, or HTML string value.
 	 *
 	 * @param bool $encoded Whether the target text is URL-encoded.
 	 * @param bool $allow_port Whether to allow any port when origin_url has none.
@@ -1202,7 +1204,7 @@ class Util {
 			$origin_host = self::origin_host();
 			$pattern     = preg_quote( $encoded ? urlencode( $origin_host ) : $origin_host, '/' );
 
-			return $pattern . ( $encoded ? '(?=$|%2F|%3F|%23)' : '(?=$|[\/?#])' );
+			return $pattern . ( $encoded ? '(?=$|%2F|%3F|%23)' : '(?=$|[\/?#\s<>"\'])' );
 		}
 
 		$host = (string) $origin_parts['host'];
@@ -1221,19 +1223,20 @@ class Util {
 			$port_pattern = '(?::\d+)?';
 		}
 
-		return preg_quote( $host, '/' ) . $port_pattern . preg_quote( $path, '/' ) . '(?=$|[\/?#])';
+		return preg_quote( $host, '/' ) . $port_pattern . preg_quote( $path, '/' ) . '(?=$|[\/?#\s<>"\'])';
 	}
 
 	/**
 	 * Build a regex-safe JSON-escaped origin URL pattern with a path boundary.
 	 *
 	 * WordPress often writes URLs in JSON as https:\/\/example.com\/wp\/path.
-	 * A boundary prevents /wp from partially matching /wp-includes.
+	 * A boundary prevents /wp from partially matching /wp-includes while still
+	 * allowing an origin-only URL immediately followed by a closing quote.
 	 *
 	 * @return string Regex fragment.
 	 */
 	public static function json_escaped_origin_url_pattern() {
-		return preg_quote( addcslashes( untrailingslashit( self::origin_url() ), '/' ), '/' ) . '(?=$|\\\\\/|[?#])';
+		return preg_quote( addcslashes( untrailingslashit( self::origin_url() ), '/' ), '/' ) . '(?=$|\\\\\/|[\/?#\s<>"\'])';
 	}
 
 	/**
