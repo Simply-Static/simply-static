@@ -433,6 +433,19 @@ final class UrlExtractorTest extends UnitTestCase {
 		self::assertStringNotContainsString( 'SCRIPT_PLACEHOLDER', $body );
 	}
 
+	public function test_preserves_html_closing_tags_inside_inline_scripts(): void {
+		$script = '<script>const label = "<b>Important</b>"; document.body.dataset.label = label;</script>';
+		$html   = '<html><head></head><body>' . $script . '</body></html>';
+		$extractor = $this->extractor( 'html', $html );
+
+		$extractor->extract_and_update_urls();
+		$body = $extractor->get_body();
+
+		self::assertStringContainsString( $script, $body );
+		self::assertStringContainsString( '</b>', $body );
+		self::assertStringNotContainsString( 'SCRIPT_PLACEHOLDER', $body );
+	}
+
 	public function test_relative_and_offline_destination_modes_produce_local_paths(): void {
 		WpEnv::$options['simply-static']['destination_url_type'] = 'relative';
 		WpEnv::$options['simply-static']['relative_path'] = '/';
