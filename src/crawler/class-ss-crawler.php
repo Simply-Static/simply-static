@@ -119,6 +119,54 @@ abstract class Crawler {
 	}
 
 	/**
+	 * Add a language-specific URL for each active WPML language.
+	 *
+	 * Enhanced Crawl does not follow ordinary page links, so URL types that do
+	 * not have a translated WordPress object of their own (such as home, author,
+	 * and date archive URLs) must be seeded explicitly for every language.
+	 *
+	 * @param string[] $urls WordPress-generated URLs.
+	 *
+	 * @return string[] Original URLs plus their WPML language variants.
+	 */
+	protected function expand_wpml_urls( array $urls ) : array {
+		$languages = apply_filters(
+			'wpml_active_languages',
+			null,
+			array( 'skip_missing' => 0 )
+		);
+
+		if ( ! is_array( $languages ) || empty( $languages ) ) {
+			return $urls;
+		}
+
+		$expanded_urls = $urls;
+
+		foreach ( $urls as $url ) {
+			if ( ! is_string( $url ) || '' === trim( $url ) ) {
+				continue;
+			}
+
+			foreach ( $languages as $code => $language ) {
+				$language_code = is_array( $language ) && isset( $language['language_code'] )
+					? $language['language_code']
+					: $code;
+
+				if ( ! is_string( $language_code ) || '' === trim( $language_code ) ) {
+					continue;
+				}
+
+				$translated_url = apply_filters( 'wpml_permalink', $url, $language_code );
+				if ( is_string( $translated_url ) && '' !== trim( $translated_url ) ) {
+					$expanded_urls[] = $translated_url;
+				}
+			}
+		}
+
+		return array_values( array_unique( $expanded_urls ) );
+	}
+
+	/**
 	 * Add one set of URLs to the page queue.
 	 *
 	 * @param array $urls URLs to enqueue.

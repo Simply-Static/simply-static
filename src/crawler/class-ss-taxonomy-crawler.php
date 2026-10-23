@@ -66,7 +66,7 @@ class Taxonomy_Crawler extends Crawler {
 			}
 		}
 		
-		return $taxonomy_urls;
+		return $this->expand_wpml_urls( $taxonomy_urls );
 	}
 
 	/**
@@ -111,7 +111,7 @@ class Taxonomy_Crawler extends Crawler {
 				}
 			}
 
-			$added               = $this->enqueue_urls( $urls );
+			$added               = $this->enqueue_urls( $this->expand_wpml_urls( $urls ) );
 			$added_now          += $added;
 			$state['added']     += $added;
 			$state['scanned']   += count( $term_ids );
