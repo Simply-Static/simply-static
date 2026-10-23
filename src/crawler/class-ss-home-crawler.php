@@ -53,6 +53,6 @@ class Home_Crawler extends Crawler {
 			}
 		}
 
-		return $home_urls;
+		return $this->expand_wpml_urls( $home_urls );
 	}
 }

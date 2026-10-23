@@ -49,7 +49,7 @@ class Author_Crawler extends Crawler {
 			$author_urls[] = $permalink;
 		}
 
-		return $author_urls;
+		return $this->expand_wpml_urls( $author_urls );
 	}
 
 	/**
@@ -84,7 +84,7 @@ class Author_Crawler extends Crawler {
 			}
 		}
 
-		$added            = $this->enqueue_urls( $urls );
+		$added            = $this->enqueue_urls( $this->expand_wpml_urls( $urls ) );
 		$state['offset']  += count( $user_ids );
 		$state['scanned'] += count( $user_ids );
 		$state['added']   += $added;

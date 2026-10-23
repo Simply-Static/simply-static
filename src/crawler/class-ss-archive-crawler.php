@@ -90,7 +90,7 @@ class Archive_Crawler extends Crawler {
 			$archive_urls = $matches[1];
 		}
 
-		return $archive_urls;
+		return $this->expand_wpml_urls( $archive_urls );
 	}
 
 	/**
@@ -135,7 +135,7 @@ class Archive_Crawler extends Crawler {
 			$urls[ get_day_link( $year, $month, $day ) ]   = get_day_link( $year, $month, $day );
 		}
 
-		$added             = $this->enqueue_urls( array_values( $urls ) );
+		$added             = $this->enqueue_urls( $this->expand_wpml_urls( array_values( $urls ) ) );
 		$state['added']    += $added;
 		$state['scanned']  += count( $rows );
 		$this->progress     = array( 'added' => $state['added'], 'scanned' => $state['scanned'] );
