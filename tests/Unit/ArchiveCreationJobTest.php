@@ -188,6 +188,17 @@ final class ArchiveCreationJobHarness extends Archive_Creation_Job {
 		return $this->batches;
 	}
 
+	/** @param mixed[] $data */
+	public function update( $key, $data ) {
+		foreach ( $this->batches as $batch ) {
+			if ( isset( $batch->key ) && $key === $batch->key ) {
+				$batch->data = $data;
+			}
+		}
+
+		return $this;
+	}
+
 	/** @param mixed $data */
 	public function push_to_queue( $data ) {
 		$this->queued[] = $data;
@@ -762,7 +773,7 @@ final class ArchiveCreationJobTest extends UnitTestCase {
 			'Crawler exploded',
 			$this->options->get( 'archive_status_messages' )['error']['message']
 		);
-		self::assertContains( 'ss_completed', WpEnv::$action_log );
+		self::assertNotContains( 'ss_completed', WpEnv::$action_log );
 	}
 
 	public function test_task_constructor_type_errors_enter_terminal_exception_path(): void {
@@ -840,10 +851,12 @@ final class ArchiveCreationJobTest extends UnitTestCase {
 			'cancel'     => $cancel_task,
 		);
 		$completion_results = array();
+		$queue_seen_by_completion = null;
 		add_action(
 			'ss_completed',
-			static function ( string $result ) use ( &$completion_results ): void {
+			static function ( string $result ) use ( &$completion_results, &$queue_seen_by_completion, $job ): void {
 				$completion_results[] = $result;
+				$queue_seen_by_completion = $job->batch ? $job->batch->data : array();
 			},
 			10,
 			1
@@ -852,6 +865,7 @@ final class ArchiveCreationJobTest extends UnitTestCase {
 		self::assertSame( 'cancel', $job->run_handle() );
 
 		self::assertSame( array( 'error' ), $completion_results );
+		self::assertSame( array( 'cancel' ), $queue_seen_by_completion );
 		self::assertSame( 1, $error_task->perform_calls );
 		self::assertSame( 1, $cancel_task->perform_calls );
 		self::assertNull( $job->batch );
@@ -859,6 +873,37 @@ final class ArchiveCreationJobTest extends UnitTestCase {
 		self::assertSame( array(), $this->options->get( 'archive_task_list' ) );
 		self::assertSame( 1, $job->clear_calls );
 		self::assertSame( 0, $job->dispatch_calls );
+	}
+
+	public function test_throwing_terminal_callback_cannot_strand_failed_task(): void {
+		$this->options
+			->set( 'archive_start_time', '2026-07-12 10:00:00' )
+			->set( 'archive_end_time', null )
+			->set( 'archive_task_list', array( 'fetch_urls' ) );
+		$error_task = new ArchiveTaskDouble();
+		$error_task->result = new \WP_Error( 'deploy_failed', 'Generated homepage is missing' );
+		$cancel_task = new ArchiveTaskDouble();
+		$cancel_task->result = true;
+		$job = new ArchiveFailureLifecycleHarness( $this->options );
+		$job->task_objects = array(
+			'fetch_urls' => $error_task,
+			'cancel'     => $cancel_task,
+		);
+		$queue_seen_by_completion = null;
+		add_action(
+			'ss_completed',
+			static function () use ( &$queue_seen_by_completion, $job ): void {
+				$queue_seen_by_completion = $job->batch ? $job->batch->data : array();
+				throw new \RuntimeException( 'Webhook callback failed' );
+			}
+		);
+
+		self::assertSame( 'cancel', $job->run_handle() );
+
+		self::assertSame( array( 'cancel' ), $queue_seen_by_completion );
+		self::assertSame( 1, $cancel_task->perform_calls );
+		self::assertNull( $job->batch );
+		self::assertArrayNotHasKey( 'done', $this->options->get( 'archive_status_messages' ) );
 	}
 
 	public function test_missing_task_full_lifecycle_is_terminal_and_never_reports_success(): void {
@@ -908,6 +953,7 @@ final class ArchiveCreationJobTest extends UnitTestCase {
 		);
 
 		$this->job->batches = array( (object) array( 'data' => array( 'fetch_urls' ) ) );
+		self::assertSame( 'fetch_urls', $this->job->get_queued_task() );
 		self::assertSame( 37, $this->job->get_progress() );
 
 		$this->job->batches = array( (object) array( 'data' => array( 'create_zip_archive' ) ) );
@@ -919,6 +965,73 @@ final class ArchiveCreationJobTest extends UnitTestCase {
 
 		$this->job->batches = array( (object) array( 'data' => array( 12, 'done' ) ) );
 		self::assertSame( 100, $this->job->get_progress() );
+	}
+
+	public function test_cron_healthcheck_repairs_a_legacy_orphaned_terminal_queue(): void {
+		$this->options
+			->set( 'archive_start_time', '2026-07-12 10:00:00' )
+			->set( 'archive_end_time', '2026-07-12 11:00:00' )
+			->set(
+				'archive_status_messages',
+				array( 'error' => array( 'message' => 'The generated homepage is missing.' ) )
+			);
+		$this->job->batches = array(
+			(object) array(
+				'key'  => 'wp_archive_creation_job_batch_test',
+				'data' => array( 'simply_static_studio_deploy' ),
+			),
+		);
+
+		$this->job->handle_cron_healthcheck();
+
+		self::assertSame( array( 'cancel' ), $this->job->batches[0]->data );
+		self::assertSame( 1, $this->job->dispatch_calls );
+		self::assertSame( 1, $this->job->lock_calls );
+		self::assertSame( 1, $this->job->unlock_calls );
+	}
+
+	public function test_cron_healthcheck_leaves_a_valid_terminal_cleanup_queue_unchanged(): void {
+		$this->options
+			->set( 'archive_end_time', '2026-07-12 11:00:00' )
+			->set(
+				'archive_status_messages',
+				array( 'error' => array( 'message' => 'The generated homepage is missing.' ) )
+			);
+		$this->job->batches = array(
+			(object) array(
+				'key'  => 'wp_archive_creation_job_batch_test',
+				'data' => array( 'cancel' ),
+			),
+		);
+
+		$this->job->handle_cron_healthcheck();
+
+		self::assertSame( array( 'cancel' ), $this->job->batches[0]->data );
+		self::assertSame( 1, $this->job->dispatch_calls );
+		self::assertSame( 0, $this->job->lock_calls );
+	}
+
+	public function test_cron_healthcheck_does_not_repair_a_queue_owned_by_a_live_worker(): void {
+		$this->options
+			->set( 'archive_end_time', '2026-07-12 11:00:00' )
+			->set(
+				'archive_status_messages',
+				array( 'error' => array( 'message' => 'The generated homepage is missing.' ) )
+			);
+		$this->job->batches = array(
+			(object) array(
+				'key'  => 'wp_archive_creation_job_batch_test',
+				'data' => array( 'simply_static_studio_deploy' ),
+			),
+		);
+		$this->job->active_lock_for_test = true;
+		$this->job->processing_for_test  = true;
+
+		$this->job->handle_cron_healthcheck();
+
+		self::assertSame( array( 'simply_static_studio_deploy' ), $this->job->batches[0]->data );
+		self::assertSame( 0, $this->job->dispatch_calls );
+		self::assertSame( 0, $this->job->lock_calls );
 	}
 
 	public function test_progress_handles_invalid_or_throwing_task_counters(): void {

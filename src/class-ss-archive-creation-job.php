@@ -50,6 +50,13 @@ class Archive_Creation_Job extends Background_Process {
 	protected $is_task_processing = false;
 
 	/**
+	 * Terminal notification waiting for the current queue transition to persist.
+	 *
+	 * @var array{result:string,message:string}|null
+	 */
+	protected $pending_terminal_notification = null;
+
+	/**
 	 * Performs initializion of the options structure
 	 *
 	 * @param string $option_key The options key name
@@ -372,7 +379,7 @@ class Archive_Creation_Job extends Background_Process {
 				);
 				$this->options->set( 'archive_end_time', Util::formatted_datetime() );
 				$this->save_status_message( $message, 'error' );
-				do_action( 'ss_completed', 'error', $message );
+				$this->defer_terminal_notification( 'error', $message );
 
 				// Let the regular cancellation task run its cleanup when available.
 				// If that class is itself missing, remove the queue item to avoid an
@@ -539,6 +546,70 @@ class Archive_Creation_Job extends Background_Process {
 	}
 
 	/**
+	 * Repair a legacy terminal queue before the ordinary health check dispatches
+	 * it again. A failed task must have been replaced by `cancel`; seeing the
+	 * original task after the terminal error was saved means a callback ended the
+	 * request in the narrow pre-persistence window used by older versions.
+	 */
+	public function handle_cron_healthcheck() {
+		$this->recover_orphaned_terminal_queue();
+		parent::handle_cron_healthcheck();
+	}
+
+	/** Replace only an unlocked, failed terminal queue with its cleanup task. */
+	protected function recover_orphaned_terminal_queue() {
+		if ( ! $this->has_orphaned_terminal_queue() || $this->has_active_process_lock() ) {
+			return;
+		}
+
+		if ( false === $this->lock_process() ) {
+			return;
+		}
+
+		try {
+			// Re-check after taking the worker lock so a concurrent request cannot
+			// finish or replace this queue between detection and repair.
+			if ( ! $this->has_orphaned_terminal_queue() ) {
+				return;
+			}
+
+			$batches = $this->get_batches();
+			$first   = ! empty( $batches ) ? array_shift( $batches ) : null;
+			if ( ! is_object( $first ) || empty( $first->key ) ) {
+				return;
+			}
+
+			$this->update( $first->key, array( 'cancel' ) );
+			foreach ( $batches as $batch ) {
+				if ( is_object( $batch ) && ! empty( $batch->key ) ) {
+					$this->delete( $batch->key );
+				}
+			}
+
+			Util::debug_log( 'Recovered an orphaned terminal export queue; cleanup will continue from the cancel task.' );
+		} finally {
+			$this->unlock_process();
+		}
+	}
+
+	/** Return whether a failed terminal export still contains real work. */
+	protected function has_orphaned_terminal_queue() {
+		if ( ! $this->is_queued() || $this->is_paused() || $this->is_cancelled() ) {
+			return false;
+		}
+
+		$end_time = $this->options->get( 'archive_end_time' );
+		$messages = $this->options->get( 'archive_status_messages' );
+		$error    = is_array( $messages ) && isset( $messages['error'] ) ? $messages['error'] : null;
+		$error_message = is_array( $error ) && isset( $error['message'] ) ? $error['message'] : $error;
+
+		return null !== $end_time
+			&& is_scalar( $error_message )
+			&& '' !== trim( (string) $error_message )
+			&& 'cancel' !== $this->get_queued_task();
+	}
+
+	/**
 	 * Return the current archive creation progress as a percentage.
 	 *
 	 * @return int Progress from 0 to 100.
@@ -570,6 +641,11 @@ class Archive_Creation_Job extends Background_Process {
 		$progress      = ( ( $task_index + $task_fraction ) / count( $task_list ) ) * 100;
 
 		return max( 0, min( 99, (int) floor( $progress ) ) );
+	}
+
+	/** Return the task name at the head of the persisted queue. */
+	public function get_queued_task() {
+		return $this->get_current_queued_task();
 	}
 
 	/**
@@ -722,7 +798,7 @@ class Archive_Creation_Job extends Background_Process {
 		);
 		$this->options->set( 'archive_end_time', Util::formatted_datetime() );
 		$this->save_status_message( $message, 'error' );
-		do_action( 'ss_completed', 'exception', $message );
+		$this->defer_terminal_notification( 'exception', $message );
 
 		return 'cancel';
 	}
@@ -745,9 +821,40 @@ class Archive_Creation_Job extends Background_Process {
 		);
 		$this->options->set( 'archive_end_time', Util::formatted_datetime() );
 		$this->save_status_message( $message, 'error' );
-		do_action( 'ss_completed', 'error', $message );
+		$this->defer_terminal_notification( 'error', $message );
 
 		return 'cancel';
+	}
+
+	/**
+	 * Defer terminal callbacks until the failed task has become `cancel` in the
+	 * durable queue. Webhook callbacks are external integration code and may end
+	 * the request; the queue must already be recoverable before they run.
+	 */
+	protected function defer_terminal_notification( $result, $message ) {
+		$this->pending_terminal_notification = array(
+			'result'  => (string) $result,
+			'message' => (string) $message,
+		);
+	}
+
+	/** Publish a deferred terminal callback after the queue transition is safe. */
+	protected function after_batch_persisted() {
+		if ( ! is_array( $this->pending_terminal_notification ) ) {
+			return;
+		}
+
+		$notification = $this->pending_terminal_notification;
+		$this->pending_terminal_notification = null;
+
+		try {
+			do_action( 'ss_completed', $notification['result'], $notification['message'] );
+		} catch ( \Throwable $exception ) {
+			// The terminal result is already persisted and the queue now contains
+			// only cleanup work. A broken integration callback must not stop that
+			// cleanup from draining.
+			Util::debug_log( 'A terminal export callback failed: ' . $exception->getMessage() );
+		}
 	}
 
 	/**
