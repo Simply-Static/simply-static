@@ -4,7 +4,7 @@ Tags: jamstack, performance, security, static site generator
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag:  3.8.18
+Stable tag:  3.8.19
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -274,6 +274,11 @@ Settings - Configure your static site export options
 Diagnostics - Check your WordPress environment for compatibility
 
 == Changelog ==
+
+= 3.8.19 =
+
+* Fixed WPML language variants being skipped for home, author, taxonomy, and date archive URLs during Enhanced Crawl exports
+* Fixed failed exports getting stuck in the background queue and added recovery for affected queues
 
 = 3.8.18 =
 
