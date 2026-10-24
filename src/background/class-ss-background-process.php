@@ -1357,6 +1357,12 @@ abstract class Background_Process extends Async_Request {
 				$this->delete( $batch->key );
 			}
 
+			// Consumers may publish lifecycle events here, after the replacement
+			// task (or the batch deletion) is durable. Running those callbacks from
+			// task() is unsafe: a callback that exits or fatals can otherwise leave
+			// the just-failed task in the persisted queue forever.
+			$this->after_batch_persisted();
+
 			if( $this->switched_to_blog ) {
 				restore_current_blog();
 			}
@@ -1568,6 +1574,17 @@ abstract class Background_Process extends Async_Request {
 	 */
 	public function cancel_process() {
 		$this->cancel();
+	}
+
+	/**
+	 * Run work that must happen only after the current batch state is durable.
+	 *
+	 * Subclasses can override this for lifecycle notifications whose callbacks
+	 * must not be able to strand the task that just finished.
+	 *
+	 * @return void
+	 */
+	protected function after_batch_persisted() {
 	}
 
 	/**
