@@ -56,6 +56,10 @@ class Rule_File_Handler {
             if ( '' === $filename ) {
                 continue;
             }
+            if ( Util::is_url_excluded( home_url( '/' . $filename ) ) ) {
+                Util::debug_log( '[Rule File] Skipping URL-excluded file: ' . $filename );
+                continue;
+            }
 
             $source = trailingslashit( $archive_dir ) . $filename;
             $dest   = trailingslashit( $destination_dir ) . $filename;
