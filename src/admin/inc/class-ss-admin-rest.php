@@ -748,6 +748,8 @@ class Admin_Rest {
 
         $options          = Options::reinstance();
         $last_export_end  = $options->get( 'archive_end_time' );
+        $status_messages  = $options->get( 'archive_status_messages' );
+        $last_export_failed = is_array( $status_messages ) && ! empty( $status_messages['error'] );
         $modified_count   = 0;
         $media_count      = 0;
         $deleted_count    = 0;
@@ -815,6 +817,7 @@ class Admin_Rest {
                 'modified_count' => $modified_count,
                 'media_count'    => $media_count,
                 'deleted_count'  => $deleted_count,
+                'last_export_failed' => $last_export_failed,
             ),
         ) );
     }

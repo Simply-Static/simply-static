@@ -148,7 +148,7 @@ class Setup_Task extends Task {
   $robots_txt = ABSPATH . 'robots.txt';
   $include_robots = (bool) apply_filters( 'ss_include_robots_txt_in_export', true );
 
-  if ( $include_robots && file_exists( $robots_txt ) ) {
+  if ( $include_robots && ! Util::is_url_excluded( home_url( '/robots.txt' ) ) && file_exists( $robots_txt ) ) {
       $file_literals[] = $robots_txt;
   } else if ( ! $include_robots ) {
       Util::debug_log( 'robots.txt inclusion disabled via ss_include_robots_txt_in_export filter' );
@@ -158,7 +158,7 @@ class Setup_Task extends Task {
   $llms_txt = ABSPATH . 'llms.txt';
   $include_llms = (bool) apply_filters( 'ss_include_llms_txt_in_export', true );
 
-  if ( $include_llms && file_exists( $llms_txt ) ) {
+  if ( $include_llms && ! Util::is_url_excluded( home_url( '/llms.txt' ) ) && file_exists( $llms_txt ) ) {
       $file_literals[] = $llms_txt;
   } else if ( ! $include_llms ) {
       Util::debug_log( 'llms.txt inclusion disabled via ss_include_llms_txt_in_export filter' );
@@ -168,7 +168,7 @@ class Setup_Task extends Task {
   $redirects_file = ABSPATH . '_redirects';
   $include_redirects = (bool) apply_filters( 'ss_include_redirects_in_export', true );
 
-  if ( $include_redirects && file_exists( $redirects_file ) ) {
+  if ( $include_redirects && ! Util::is_url_excluded( home_url( '/_redirects' ) ) && file_exists( $redirects_file ) ) {
       $file_literals[] = $redirects_file;
   } else if ( ! $include_redirects ) {
       Util::debug_log( '_redirects inclusion disabled via ss_include_redirects_in_export filter' );
@@ -178,7 +178,7 @@ class Setup_Task extends Task {
   $headers_file = ABSPATH . '_headers';
   $include_headers = (bool) apply_filters( 'ss_include_headers_in_export', true );
 
-  if ( $include_headers && file_exists( $headers_file ) ) {
+  if ( $include_headers && ! Util::is_url_excluded( home_url( '/_headers' ) ) && file_exists( $headers_file ) ) {
       $file_literals[] = $headers_file;
   } else if ( ! $include_headers ) {
       Util::debug_log( '_headers inclusion disabled via ss_include_headers_in_export filter' );

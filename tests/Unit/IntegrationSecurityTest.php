@@ -6,8 +6,11 @@ namespace Simply_Static\Tests\Unit;
 
 use Simply_Static\Integration;
 use Simply_Static\Options;
+use Simply_Static\AIO_SEO_Integration;
+use Simply_Static\Rank_Math_Integration;
 use Simply_Static\Tests\Support\UnitTestCase;
 use Simply_Static\Tests\Support\WpTestEnvironment as WpEnv;
+use Simply_Static\Yoast_Integration;
 
 final class IntegrationSecurityTest extends UnitTestCase {
 
@@ -21,6 +24,9 @@ final class IntegrationSecurityTest extends UnitTestCase {
 		$this->requireSource( 'src/class-ss-phpuri.php' );
 		$this->requireSource( 'src/class-ss-util.php' );
 		$this->requireSource( 'src/integrations/class-ss-integration.php' );
+		$this->requireSource( 'src/integrations/class-ss-aio-seo-integration.php' );
+		$this->requireSource( 'src/integrations/class-ss-rank-math-integration.php' );
+		$this->requireSource( 'src/integrations/class-ss-yoast-integration.php' );
 
 		WpEnv::$options['simply-static'] = array(
 			'http_basic_auth_username' => 'crawler',
@@ -143,5 +149,43 @@ final class IntegrationSecurityTest extends UnitTestCase {
 			array( 'https://example.test/existing' ),
 			$this->integration->add_dynamic_robots_url( array( 'https://example.test/existing' ) )
 		);
+	}
+
+	/** @dataProvider robotsExclusionProvider */
+	public function test_dynamic_robots_url_honors_url_exclusions( string $exclusion ): void {
+		WpEnv::$options['simply-static']['urls_to_exclude'] = $exclusion;
+		Options::reinstance();
+
+		self::assertSame(
+			array( 'https://example.test/existing' ),
+			$this->integration->add_dynamic_robots_url( array( 'https://example.test/existing' ) )
+		);
+	}
+
+	/** @return array<string,array{string}> */
+	public function robotsExclusionProvider(): array {
+		return array(
+			'filename' => array( 'robots.txt' ),
+			'root path' => array( '/robots.txt' ),
+		);
+	}
+
+	public function test_seo_integrations_do_not_generate_excluded_rule_files_directly(): void {
+		WpEnv::$options['simply-static']['archive_name'] = 'excluded-rule-files';
+		WpEnv::$options['simply-static']['urls_to_exclude'] = "robots.txt\nllms.txt";
+		Options::reinstance();
+
+		$integrations = array(
+			new AIO_SEO_Integration(),
+			new Rank_Math_Integration(),
+			new Yoast_Integration(),
+		);
+		foreach ( $integrations as $integration ) {
+			self::assertSame( array(), $integration->maybe_add_text_files( array() ) );
+		}
+
+		self::assertSame( array(), WpEnv::$remote_requests );
+		self::assertFileDoesNotExist( Options::instance()->get_archive_dir() . 'robots.txt' );
+		self::assertFileDoesNotExist( Options::instance()->get_archive_dir() . 'llms.txt' );
 	}
 }

@@ -245,9 +245,11 @@ class AIO_SEO_Integration extends Integration {
 	public function maybe_add_text_files( $additional_files ) {
 		$additional_files = is_array( $additional_files ) ? $additional_files : [];
 
-		// Global flags to allow disabling robots.txt and llms.txt entirely.
-		$include_robots = (bool) apply_filters( 'ss_include_robots_txt_in_export', true );
-		$include_llms   = (bool) apply_filters( 'ss_include_llms_txt_in_export', true );
+		// Global flags and URL exclusions can disable robots.txt and llms.txt entirely.
+		$include_robots = (bool) apply_filters( 'ss_include_robots_txt_in_export', true )
+			&& ! Util::is_url_excluded( home_url( '/robots.txt' ) );
+		$include_llms   = (bool) apply_filters( 'ss_include_llms_txt_in_export', true )
+			&& ! Util::is_url_excluded( home_url( '/llms.txt' ) );
 
 		$robots_physical = ABSPATH . 'robots.txt';
 		$llms_physical   = ABSPATH . 'llms.txt';
@@ -263,7 +265,7 @@ class AIO_SEO_Integration extends Integration {
 				}
 			}
 		} elseif ( ! $include_llms ) {
-			Util::debug_log( '[AIOSEO] llms.txt generation disabled via ss_include_llms_txt_in_export' );
+			Util::debug_log( '[AIOSEO] llms.txt generation disabled by export settings or URL exclusions' );
 		}
 
 		$archive_dir = Options::instance()->get_archive_dir();
@@ -287,7 +289,7 @@ class AIO_SEO_Integration extends Integration {
 				}
 			}
 		} elseif ( ! $include_robots ) {
-			Util::debug_log( '[AIOSEO] robots.txt generation disabled via ss_include_robots_txt_in_export' );
+			Util::debug_log( '[AIOSEO] robots.txt generation disabled by export settings or URL exclusions' );
 		}
 
 		// llms.txt via public endpoint (if plugin provides it)
@@ -306,7 +308,7 @@ class AIO_SEO_Integration extends Integration {
 				}
 			}
 		} elseif ( ! $include_llms ) {
-			Util::debug_log( '[AIOSEO] llms.txt generation disabled via ss_include_llms_txt_in_export' );
+			Util::debug_log( '[AIOSEO] llms.txt generation disabled by export settings or URL exclusions' );
 		}
 
 		return $additional_files;

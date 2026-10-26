@@ -165,11 +165,14 @@ function SidebarSite( props = null ) {
         }).then(resp => {
             const json = JSON.parse(resp);
             const total = json.data ? json.data.total : 0;
+            const lastExportFailed = !!(json.data && json.data.last_export_failed);
             setUnpushedChanges(total);
 
             if (!hasAutoSelectedExportType.current && !hasSelectedExportTypeManually.current) {
                 // Auto-select "Export Changes" when there are unpushed changes and Pro is available.
-                if (total > 0 && 'pro' === options.plan && isPro()) {
+                // A failed run has no trustworthy deployment baseline, so keep Full Site
+                // selected for the retry even when WordPress reports newer content.
+                if (total > 0 && !lastExportFailed && 'pro' === options.plan && isPro()) {
                     setSelectedExportType('update');
                 } else {
                     setSelectedExportType('export');

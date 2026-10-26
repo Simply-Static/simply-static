@@ -161,6 +161,7 @@ abstract class Integration {
 		if (
 			! (bool) apply_filters( 'ss_include_robots_txt_in_export', true )
 			|| file_exists( ABSPATH . 'robots.txt' )
+			|| Util::is_url_excluded( home_url( '/robots.txt' ) )
 		) {
 			return $urls;
 		}

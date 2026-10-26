@@ -201,6 +201,7 @@ function renderSidebar( contextOverrides = {} ) {
 
 describe( 'SidebarSite actions', () => {
 	beforeEach( () => {
+		options.plan = 'free';
 		options.is_multisite = false;
 		options.selectable_sites = [];
 		actionResponse = JSON.stringify( { status: 200 } );
@@ -293,6 +294,44 @@ describe( 'SidebarSite actions', () => {
 			resolveStart( JSON.stringify( { status: 200 } ) );
 		} );
 		expect( setters.setIsRunning ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'auto-selects Changes Only after a successful export with unpushed changes', async () => {
+		options.plan = 'pro';
+		apiFetch.mockImplementation( ( { path } ) => {
+			if ( '/simplystatic/v1/unpushed-changes' === path ) {
+				return Promise.resolve( JSON.stringify( {
+					status: 200,
+					data: { total: 3, last_export_failed: false },
+				} ) );
+			}
+
+			return Promise.resolve( actionResponse );
+		} );
+		renderSidebar( { isRunning: false, isPro: () => true } );
+
+		await waitFor( () =>
+			expect( screen.getByRole( 'combobox' ).value ).toBe( 'update' )
+		);
+	} );
+
+	it( 'keeps Full Site selected when the previous export failed', async () => {
+		options.plan = 'pro';
+		apiFetch.mockImplementation( ( { path } ) => {
+			if ( '/simplystatic/v1/unpushed-changes' === path ) {
+				return Promise.resolve( JSON.stringify( {
+					status: 200,
+					data: { total: 3, last_export_failed: true },
+				} ) );
+			}
+
+			return Promise.resolve( actionResponse );
+		} );
+		renderSidebar( { isRunning: false, isPro: () => true } );
+
+		await waitFor( () =>
+			expect( screen.getByRole( 'combobox' ).value ).toBe( 'export' )
+		);
 	} );
 
 	it( 'only shows maintained learning resources', async () => {

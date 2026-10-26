@@ -15,6 +15,8 @@ use Simply_Static\Tests\Support\WpTestEnvironment as WpEnv;
 use Simply_Static\Upgrade_Handler;
 
 final class AdminControllerWpdb {
+	/** @var string */
+	public $prefix = 'wp_';
 
 	/** @var array<int,array<string,mixed>> */
 	public $page_rows = array();
@@ -196,6 +198,24 @@ final class AdminControllerCoverageTest extends UnitTestCase {
 		self::assertFalse( $this->routePermission( '/install-studio-migrate', 'POST' ) );
 		WpEnv::$capabilities['activate_plugins'] = true;
 		self::assertTrue( $this->routePermission( '/install-studio-migrate', 'POST' ) );
+	}
+
+	public function test_unpushed_changes_reports_whether_the_previous_export_failed(): void {
+		WpEnv::$options['simply-static'] = array(
+			'archive_end_time' => null,
+			'archive_status_messages' => array(
+				'error' => array( 'message' => 'Amazon S3 rejected robots.txt.' ),
+			),
+		);
+
+		$failed = json_decode( (string) $this->rest->get_unpushed_changes(), true );
+		self::assertTrue( $failed['data']['last_export_failed'] );
+
+		WpEnv::$options['simply-static']['archive_status_messages'] = array(
+			'done' => array( 'message' => 'Done' ),
+		);
+		$successful = json_decode( (string) $this->rest->get_unpushed_changes(), true );
+		self::assertFalse( $successful['data']['last_export_failed'] );
 	}
 
 	public function test_multisite_routes_require_network_capabilities(): void {

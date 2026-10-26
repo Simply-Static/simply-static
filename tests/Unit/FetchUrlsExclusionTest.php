@@ -70,4 +70,19 @@ final class FetchUrlsExclusionTest extends UnitTestCase {
 		self::assertTrue( $page->saved );
 		self::assertSame( 'Do not save or follow', $page->status_message );
 	}
+
+	public function test_incremental_export_clears_stale_file_path_for_user_excluded_url(): void {
+		Options::instance()->set( 'urls_to_exclude', 'robots.txt' );
+		$page = new ExcludedBackupPage( 'https://example.test/robots.txt' );
+		$page->file_path = 'robots.txt';
+
+		$method = new ReflectionMethod( Fetch_Urls_Task::class, 'process_page' );
+		$method->setAccessible( true );
+		$method->invoke( new Fetch_Urls_Task(), $page );
+
+		self::assertNull( $page->file_path );
+		self::assertNotNull( $page->last_checked_at );
+		self::assertTrue( $page->saved );
+		self::assertSame( 'Do not save or follow', $page->status_message );
+	}
 }
