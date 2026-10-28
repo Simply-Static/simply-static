@@ -72,6 +72,30 @@ final class DeployManifestServiceTest extends UnitTestCase {
 		self::assertStringContainsString( "file_path != ''", $wpdb->selectQueries[0] );
 	}
 
+	public function test_manifest_records_are_loaded_in_bounded_query_batches(): void {
+		global $wpdb;
+
+		$wpdb = new ManifestWpdb();
+		for ( $id = 1; $id <= 1201; $id++ ) {
+			$wpdb->selectResults[] = array(
+				'id'               => $id,
+				'url'              => sprintf( 'https://example.test/page-%d/', $id ),
+				'file_path'        => sprintf( 'page-%d/index.html', $id ),
+				'content_type'     => 'text/html',
+				'http_status_code' => 200,
+			);
+		}
+
+		$records = $this->service()->buildRecords();
+
+		self::assertCount( 1201, $records );
+		self::assertCount( 3, $wpdb->selectQueries );
+		self::assertStringContainsString( 'ORDER BY url ASC, id ASC LIMIT 500', $wpdb->selectQueries[0] );
+		self::assertStringContainsString( 'LIMIT 500 OFFSET 500', $wpdb->selectQueries[1] );
+		self::assertStringContainsString( 'LIMIT 500 OFFSET 1000', $wpdb->selectQueries[2] );
+		self::assertLessThanOrEqual( 500, $wpdb->largestSelectResult );
+	}
+
 	public function test_manifest_and_urls_are_persisted_in_one_transaction(): void {
 		global $wpdb;
 
@@ -88,6 +112,87 @@ final class DeployManifestServiceTest extends UnitTestCase {
 		self::assertSame( 'deploy-test', $wpdb->inserts[0]['data']['deploy_id'] );
 		self::assertContains( 'https://example.test/', $wpdb->prepareCalls[0]['args'] );
 		self::assertContains( 'https://example.test/about/', $wpdb->prepareCalls[0]['args'] );
+	}
+
+	public function test_completion_persists_manifest_from_streamed_url_batches(): void {
+		global $wpdb;
+
+		$wpdb    = new ManifestWpdb();
+		$service = new class extends Deploy_Manifest_Service {
+			public function __construct() {
+			}
+
+			/** @return array<string,mixed> */
+			public function persistStreamed(): array {
+				return $this->persist_current_manifest_streaming( 'success' );
+			}
+
+			/** @return array<string,mixed> */
+			protected function build_manifest_metadata( $result = 'success' ) {
+				return array(
+					'manifest_version'   => '1.0',
+					'deploy_id'          => 'streamed-deploy',
+					'site_id'            => '1',
+					'environment_id'     => null,
+					'domain'             => 'https://example.test',
+					'mount_path'         => '',
+					'started_at'         => '2026-07-12 10:00:00',
+					'finished_at'        => '2026-07-12 10:00:03',
+					'duration_seconds'   => 3,
+					'status'             => 'success',
+					'plugin_version'     => 'test',
+					'studio_version'     => null,
+					'wp_version'         => '6.8',
+					'php_version'        => PHP_VERSION,
+					'theme'              => array(),
+					'detected_builders'  => array(),
+					'export_config_hash' => 'sha256:test',
+					'generate_type'      => 'export',
+					'url_counts'         => $this->count_url_records( array() ),
+					'warnings'           => array(),
+					'errors'             => array(),
+					'root_files'         => array(),
+					'snapshot_id'        => null,
+					'urls'               => array(),
+				);
+			}
+
+			/** @return \Generator<int,array<int,array<string,mixed>>> */
+			protected function get_url_record_batches() {
+				yield array( $this->record( 1 ), $this->record( 2 ) );
+				yield array( $this->record( 3 ) );
+			}
+
+			/** @return array<string,mixed> */
+			private function record( int $id ): array {
+				return array(
+					'url'                => sprintf( 'https://example.test/page-%d/', $id ),
+					'source_url'         => null,
+					'static_path'        => sprintf( 'page-%d/index.html', $id ),
+					'type'               => 'page',
+					'status_code'        => 200,
+					'content_hash'       => null,
+					'file_size'          => 10,
+					'redirect_target'    => null,
+					'found_on'           => array(),
+					'in_sitemap'         => null,
+					'markdown_generated' => null,
+					'warnings'           => array(),
+					'errors'             => array(),
+				);
+			}
+		};
+
+		$manifest = $service->persistStreamed();
+
+		self::assertSame( 3, $manifest['url_counts']['total'] );
+		self::assertSame( 3, $manifest['url_counts']['successful'] );
+		self::assertCount( 2, $wpdb->prepareCalls );
+		self::assertCount( 1, $wpdb->updates );
+		self::assertSame( 'streamed-deploy', $wpdb->updates[0]['where']['deploy_id'] );
+		self::assertSame( 3, json_decode( $wpdb->updates[0]['data']['url_counts'], true )['total'] );
+		self::assertSame( 'START TRANSACTION', $wpdb->queries[0] );
+		self::assertSame( 'COMMIT', $wpdb->queries[3] );
 	}
 
 	public function test_failed_url_insert_rolls_back_the_manifest(): void {
@@ -215,6 +320,9 @@ final class ManifestWpdb {
 	/** @var array<int,array{table:string,data:array<string,mixed>}> */
 	public $inserts = array();
 
+	/** @var array<int,array{table:string,data:array<string,mixed>,where:array<string,mixed>}> */
+	public $updates = array();
+
 	/** @var array<int,array{sql:string,args:array<int,mixed>}> */
 	public $prepareCalls = array();
 
@@ -223,6 +331,9 @@ final class ManifestWpdb {
 
 	/** @var string[] */
 	public $selectQueries = array();
+
+	/** @var int */
+	public $largestSelectResult = 0;
 
 	/** @var string|null */
 	public $failQueryContaining = null;
@@ -234,7 +345,17 @@ final class ManifestWpdb {
 	/** @return array<int,array<string,mixed>> */
 	public function get_results( string $sql, $output = null ): array {
 		$this->selectQueries[] = $sql;
-		return $this->selectResults;
+		$results = $this->selectResults;
+
+		if ( preg_match( '/\bLIMIT\s+(\d+)(?:\s+OFFSET\s+(\d+))?/i', $sql, $matches ) ) {
+			$limit   = (int) $matches[1];
+			$offset  = isset( $matches[2] ) ? (int) $matches[2] : 0;
+			$results = array_slice( $results, $offset, $limit );
+		}
+
+		$this->largestSelectResult = max( $this->largestSelectResult, count( $results ) );
+
+		return $results;
 	}
 
 	/** @return int|false */
@@ -267,6 +388,15 @@ final class ManifestWpdb {
 	 */
 	public function insert( string $table, array $data ) {
 		$this->inserts[] = array( 'table' => $table, 'data' => $data );
+		return 1;
+	}
+
+	/** @param array<string,mixed> $data
+	 *  @param array<string,mixed> $where
+	 *  @return int|false
+	 */
+	public function update( string $table, array $data, array $where ) {
+		$this->updates[] = array( 'table' => $table, 'data' => $data, 'where' => $where );
 		return 1;
 	}
 }
