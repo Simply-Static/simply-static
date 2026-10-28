@@ -70,10 +70,7 @@ class Deploy_Manifest_Service {
 	 */
 	public function store_current_manifest( $result = 'success', $message = '' ) {
 		try {
-			$manifest = $this->build_current_manifest( $result, $message );
-			$this->persist_manifest( $manifest );
-
-			return $manifest;
+			return $this->persist_current_manifest_streaming( $result, $message );
 		} catch ( \Throwable $e ) {
 			Util::debug_log( 'Unable to store deploy manifest: ' . $e->getMessage() );
 			return null;
@@ -89,6 +86,35 @@ class Deploy_Manifest_Service {
 	 * @return array
 	 */
 	public function build_current_manifest( $result = 'success', $message = '' ) {
+		$manifest   = $this->build_manifest_metadata( $result );
+		$records    = $this->build_url_records();
+		$root_files = array_values( array_filter( $records, array( $this, 'is_root_record' ) ) );
+		$errors     = $this->collect_manifest_messages( $records, 'errors' );
+
+		if ( ! empty( $message ) && 'success' !== $manifest['status'] ) {
+			$errors[] = array(
+				'code'    => $manifest['status'],
+				'message' => wp_strip_all_tags( (string) $message ),
+			);
+		}
+
+		$manifest['url_counts'] = $this->count_url_records( $records );
+		$manifest['warnings']   = $this->collect_manifest_messages( $records, 'warnings' );
+		$manifest['errors']     = $errors;
+		$manifest['root_files'] = $this->summarize_root_files( $root_files );
+		$manifest['urls']       = $records;
+
+		return apply_filters( 'ss_deploy_manifest', $manifest, $records, $this );
+	}
+
+	/**
+	 * Build manifest metadata that does not require loading URL rows.
+	 *
+	 * @param string $result Export result.
+	 *
+	 * @return array
+	 */
+	protected function build_manifest_metadata( $result = 'success' ) {
 		$deploy_id = $this->options->get( 'archive_deploy_id' );
 
 		if ( empty( $deploy_id ) ) {
@@ -98,53 +124,38 @@ class Deploy_Manifest_Service {
 
 		$started_at  = $this->options->get( 'archive_start_time' );
 		$finished_at = $this->options->get( 'archive_end_time' );
-		$status      = $this->normalize_status( $result );
-		$records     = $this->build_url_records();
-		$counts      = $this->count_url_records( $records );
-		$root_files  = array_values( array_filter( $records, array( $this, 'is_root_record' ) ) );
-		$warnings    = $this->collect_manifest_messages( $records, 'warnings' );
-		$errors      = $this->collect_manifest_messages( $records, 'errors' );
+		$duration    = null;
 
-		if ( ! empty( $message ) && 'success' !== $status ) {
-			$errors[] = array(
-				'code'    => $status,
-				'message' => wp_strip_all_tags( (string) $message ),
-			);
-		}
-
-		$duration = null;
 		if ( ! empty( $started_at ) && ! empty( $finished_at ) ) {
 			$duration = max( 0, strtotime( $finished_at ) - strtotime( $started_at ) );
 		}
 
-		$manifest = array(
-			'manifest_version' => self::MANIFEST_VERSION,
-			'deploy_id'        => $deploy_id,
-			'site_id'          => (string) get_current_blog_id(),
-			'environment_id'   => null,
-			'domain'           => $this->get_domain(),
-			'mount_path'       => $this->get_mount_path(),
-			'started_at'       => $started_at,
-			'finished_at'      => $finished_at,
-			'duration_seconds' => $duration,
-			'status'           => $status,
-			'plugin_version'   => defined( 'SIMPLY_STATIC_VERSION' ) ? SIMPLY_STATIC_VERSION : null,
-			'studio_version'   => defined( 'SSS_VERSION' ) ? SSS_VERSION : null,
-			'wp_version'       => get_bloginfo( 'version' ),
-			'php_version'      => PHP_VERSION,
-			'theme'            => $this->get_theme(),
-			'detected_builders'=> $this->get_detected_builders(),
+		return array(
+			'manifest_version'   => self::MANIFEST_VERSION,
+			'deploy_id'          => $deploy_id,
+			'site_id'            => (string) get_current_blog_id(),
+			'environment_id'     => null,
+			'domain'             => $this->get_domain(),
+			'mount_path'         => $this->get_mount_path(),
+			'started_at'         => $started_at,
+			'finished_at'        => $finished_at,
+			'duration_seconds'   => $duration,
+			'status'             => $this->normalize_status( $result ),
+			'plugin_version'     => defined( 'SIMPLY_STATIC_VERSION' ) ? SIMPLY_STATIC_VERSION : null,
+			'studio_version'     => defined( 'SSS_VERSION' ) ? SSS_VERSION : null,
+			'wp_version'         => get_bloginfo( 'version' ),
+			'php_version'        => PHP_VERSION,
+			'theme'              => $this->get_theme(),
+			'detected_builders'  => $this->get_detected_builders(),
 			'export_config_hash' => $this->get_export_config_hash(),
-			'generate_type'    => $this->options->get( 'generate_type' ),
-			'url_counts'       => $counts,
-			'warnings'         => $warnings,
-			'errors'           => $errors,
-			'root_files'       => $this->summarize_root_files( $root_files ),
-			'snapshot_id'      => null,
-			'urls'             => $records,
+			'generate_type'      => $this->options->get( 'generate_type' ),
+			'url_counts'         => $this->count_url_records( array() ),
+			'warnings'           => array(),
+			'errors'             => array(),
+			'root_files'         => array(),
+			'snapshot_id'        => null,
+			'urls'               => array(),
 		);
-
-		return apply_filters( 'ss_deploy_manifest', $manifest, $records, $this );
 	}
 
 	/**
@@ -349,6 +360,170 @@ class Deploy_Manifest_Service {
 	}
 
 	/**
+	 * Persist the current manifest without retaining every Page model and URL
+	 * record in memory at the same time.
+	 *
+	 * Large exports can contain tens of thousands of URLs. Building the complete
+	 * Page object list and a second complete array of formatted records can cause a
+	 * fatal memory spike at the very end of an otherwise successful export. The
+	 * manifest row is provisional inside this transaction while bounded URL
+	 * batches are stored and their summary is accumulated, then it is finalized
+	 * before commit.
+	 *
+	 * @param string $result  Export result.
+	 * @param string $message Optional failure message.
+	 *
+	 * @return array
+	 */
+	protected function persist_current_manifest_streaming( $result = 'success', $message = '' ) {
+		global $wpdb;
+
+		$manifest       = $this->build_manifest_metadata( $result );
+		$manifest_table = Deploy_Manifest::table_name();
+		$url_table      = Deploy_Manifest_Url::table_name();
+		$deploy_id      = $manifest['deploy_id'];
+		$site_id        = (int) get_current_blog_id();
+		$now            = Util::formatted_datetime();
+
+		if ( false === $wpdb->query( 'START TRANSACTION' ) ) {
+			throw new \RuntimeException( 'Unable to start a deploy manifest transaction.' );
+		}
+
+		try {
+			// Delete child rows first so this remains compatible if a foreign key is
+			// added to the manifest URL table in a future schema revision.
+			if ( false === $wpdb->delete( $url_table, array( 'deploy_id' => $deploy_id, 'site_id' => $site_id ) ) ) {
+				throw new \RuntimeException( 'Unable to remove the previous deploy manifest URLs.' );
+			}
+
+			if ( false === $wpdb->delete( $manifest_table, array( 'deploy_id' => $deploy_id, 'site_id' => $site_id ) ) ) {
+				throw new \RuntimeException( 'Unable to remove the previous deploy manifest.' );
+			}
+
+			$manifest_copy = $manifest;
+			unset( $manifest_copy['urls'] );
+
+			$inserted = $wpdb->insert(
+				$manifest_table,
+				array(
+					'deploy_id'        => $deploy_id,
+					'site_id'          => $site_id,
+					'manifest_version' => $manifest['manifest_version'],
+					'status'           => $manifest['status'],
+					'domain'           => $manifest['domain'],
+					'mount_path'       => $manifest['mount_path'],
+					'started_at'       => $manifest['started_at'],
+					'finished_at'      => $manifest['finished_at'],
+					'duration_seconds' => $manifest['duration_seconds'],
+					'plugin_version'   => $manifest['plugin_version'],
+					'wp_version'       => $manifest['wp_version'],
+					'php_version'      => $manifest['php_version'],
+					'generate_type'    => $manifest['generate_type'],
+					'url_counts'       => wp_json_encode( $manifest['url_counts'] ),
+					'root_files'       => wp_json_encode( $manifest['root_files'] ),
+					'warnings'         => wp_json_encode( $manifest['warnings'] ),
+					'errors'           => wp_json_encode( $manifest['errors'] ),
+					'manifest'         => wp_json_encode( $manifest_copy ),
+					'created_at'       => $now,
+					'updated_at'       => $now,
+				)
+			);
+
+			if ( false === $inserted ) {
+				throw new \RuntimeException( 'Unable to store the deploy manifest.' );
+			}
+
+			$counts      = $this->count_url_records( array() );
+			$root_files  = array();
+			$warnings    = array();
+			$errors      = array();
+
+			foreach ( $this->get_url_record_batches() as $records ) {
+				$batch_counts = $this->count_url_records( $records );
+				foreach ( $counts as $key => $value ) {
+					$counts[ $key ] += isset( $batch_counts[ $key ] ) ? (int) $batch_counts[ $key ] : 0;
+				}
+
+				foreach ( $records as $record ) {
+					if ( $this->is_root_record( $record ) ) {
+						$root_files[] = $record;
+					}
+
+					foreach ( array( 'warnings', 'errors' ) as $message_type ) {
+						if ( empty( $record[ $message_type ] ) ) {
+							continue;
+						}
+
+						foreach ( $record[ $message_type ] as $record_message ) {
+							$record_message['url'] = $record['url'];
+							if ( 'warnings' === $message_type ) {
+								$warnings[] = $record_message;
+							} else {
+								$errors[] = $record_message;
+							}
+						}
+					}
+				}
+
+				$this->persist_manifest_urls( $url_table, $deploy_id, $site_id, $records, $now );
+			}
+
+			if ( ! empty( $message ) && 'success' !== $manifest['status'] ) {
+				$errors[] = array(
+					'code'    => $manifest['status'],
+					'message' => wp_strip_all_tags( (string) $message ),
+				);
+			}
+
+			$manifest['url_counts'] = $counts;
+			$manifest['root_files'] = $this->summarize_root_files( $root_files );
+			$manifest['warnings']   = $warnings;
+			$manifest['errors']     = $errors;
+			$manifest               = apply_filters( 'ss_deploy_manifest', $manifest, array(), $this );
+
+			$manifest_copy = $manifest;
+			unset( $manifest_copy['urls'] );
+
+			$updated = $wpdb->update(
+				$manifest_table,
+				array(
+					'manifest_version' => $manifest['manifest_version'],
+					'status'           => $manifest['status'],
+					'domain'           => $manifest['domain'],
+					'mount_path'       => $manifest['mount_path'],
+					'started_at'       => $manifest['started_at'],
+					'finished_at'      => $manifest['finished_at'],
+					'duration_seconds' => $manifest['duration_seconds'],
+					'plugin_version'   => $manifest['plugin_version'],
+					'wp_version'       => $manifest['wp_version'],
+					'php_version'      => $manifest['php_version'],
+					'generate_type'    => $manifest['generate_type'],
+					'url_counts'       => wp_json_encode( $manifest['url_counts'] ),
+					'root_files'       => wp_json_encode( $manifest['root_files'] ),
+					'warnings'         => wp_json_encode( $manifest['warnings'] ),
+					'errors'           => wp_json_encode( $manifest['errors'] ),
+					'manifest'         => wp_json_encode( $manifest_copy ),
+					'updated_at'       => $now,
+				),
+				array( 'deploy_id' => $deploy_id, 'site_id' => $site_id )
+			);
+
+			if ( false === $updated ) {
+				throw new \RuntimeException( 'Unable to finalize the deploy manifest.' );
+			}
+
+			if ( false === $wpdb->query( 'COMMIT' ) ) {
+				throw new \RuntimeException( 'Unable to commit the deploy manifest.' );
+			}
+		} catch ( \Throwable $e ) {
+			$wpdb->query( 'ROLLBACK' );
+			throw $e;
+		}
+
+		return $manifest;
+	}
+
+	/**
 	 * Persist manifest metadata and URL records.
 	 *
 	 * @param array $manifest Manifest.
@@ -515,27 +690,59 @@ class Deploy_Manifest_Service {
 	 * @return array
 	 */
 	protected function build_url_records() {
-		$query = Page::query()
-			->where( 'file_path IS NOT NULL' )
-			->where( "file_path != ''" )
-			->order( 'url ASC' );
-		$scope = $this->get_export_scope();
-		$this->apply_scope( $query, $scope );
-		$pages = $query->find();
+		$records = array();
 
-		if ( empty( $pages ) ) {
-			return array();
-		}
-
-		$records     = array();
-		$parent_urls = $this->get_parent_url_map( $pages );
-
-		foreach ( $pages as $page ) {
-			$parent_id = (int) $page->found_on_id;
-			$records[] = $this->format_page_record( $page, $parent_urls[ $parent_id ] ?? null );
+		foreach ( $this->get_url_record_batches() as $batch ) {
+			foreach ( $batch as $record ) {
+				$records[] = $record;
+			}
 		}
 
 		return $records;
+	}
+
+	/**
+	 * Yield formatted URL records in bounded query batches.
+	 *
+	 * @return \Generator<int,array<int,array<string,mixed>>>
+	 */
+	protected function get_url_record_batches() {
+		$batch_size = max( 1, min( 2000, (int) apply_filters( 'ss_deploy_manifest_query_batch_size', 500 ) ) );
+		$scope      = $this->get_export_scope();
+		$offset     = 0;
+
+		do {
+			$query = Page::query()
+				->where( 'file_path IS NOT NULL' )
+				->where( "file_path != ''" )
+				->order( 'url ASC, id ASC' )
+				->limit( $batch_size );
+
+			if ( $offset > 0 ) {
+				$query->offset( $offset );
+			}
+
+			$this->apply_scope( $query, $scope );
+			$pages = $query->find();
+
+			if ( empty( $pages ) ) {
+				break;
+			}
+
+			$records     = array();
+			$parent_urls = $this->get_parent_url_map( $pages );
+
+			foreach ( $pages as $page ) {
+				$parent_id = (int) $page->found_on_id;
+				$records[] = $this->format_page_record( $page, $parent_urls[ $parent_id ] ?? null );
+			}
+
+			$page_count = count( $pages );
+			$offset    += $page_count;
+			yield $records;
+
+			unset( $pages, $records, $parent_urls );
+		} while ( $page_count === $batch_size );
 	}
 
 	/**
