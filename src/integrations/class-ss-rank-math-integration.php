@@ -590,7 +590,9 @@ class Rank_Math_Integration extends Integration {
 		if ( $scripts ) {
 			foreach ( $scripts as $script ) {
 				$decoded_text = html_entity_decode( $script->nodeValue, ENT_NOQUOTES );
-				$text = preg_replace( '/(https?:)?\/\/' . Util::origin_host_pattern() . '/i', $options->get_destination_url(), $decoded_text );
+				$text         = preg_replace( '/(https?:)?\/\/' . Util::origin_host_pattern() . '/i', $options->get_destination_url(), $decoded_text );
+				$text         = is_string( $text ) ? $text : $decoded_text;
+				$text         = $this->replace_managed_wordpress_origins( $text, $options->get_destination_url() );
 				$script->nodeValue = $text;
 			}
 		}
@@ -601,6 +603,45 @@ class Rank_Math_Integration extends Integration {
 		}
 
 		return $doc;
+	}
+
+	/**
+	 * Replace platform-managed WordPress aliases that Rank Math can source from
+	 * an author's Website field or from runtime-aware WordPress metadata.
+	 *
+	 * A Static Studio site can use its public custom domain as WordPress's
+	 * configured origin while Rank Math still emits the private runtime alias in
+	 * WebSite.url or Person.sameAs. The regular origin replacement cannot match
+	 * that second host, so sanitize it directly before the schema is saved.
+	 *
+	 * @param string $schema          Decoded Rank Math JSON-LD.
+	 * @param string $destination_url Public static destination URL.
+	 *
+	 * @return string
+	 */
+	private function replace_managed_wordpress_origins( $schema, $destination_url ) {
+		$options = Options::instance();
+		if ( ! defined( 'SSS_VERSION' ) && 'simply-static-studio' !== $options->get( 'delivery_method' ) ) {
+			return $schema;
+		}
+
+		$destination_url = untrailingslashit( (string) $destination_url );
+		if ( '' === $destination_url || './' === $destination_url ) {
+			return $schema;
+		}
+
+		$managed_host = 'wp(?:-|\\.)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.(?:onstatic|static\\d*)\\.studio';
+		$plain_pattern = '~(?:https?:)?//' . $managed_host . '(?=$|[/?#\\s<>"\'])~i';
+		$replaced      = preg_replace( $plain_pattern, $destination_url, $schema );
+		if ( is_string( $replaced ) ) {
+			$schema = $replaced;
+		}
+
+		$escaped_pattern     = '~(?:(?:https?:)?\\\\/\\\\/)' . $managed_host . '(?=$|\\\\/|[/?#\\s<>"\'])~i';
+		$escaped_destination = addcslashes( $destination_url, '/' );
+		$replaced            = preg_replace( $escaped_pattern, $escaped_destination, $schema );
+
+		return is_string( $replaced ) ? $replaced : $schema;
 	}
 
 	/**

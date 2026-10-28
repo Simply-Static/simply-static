@@ -137,6 +137,58 @@ final class IntegrationSecurityTest extends UnitTestCase {
 		self::assertSame( array( 'https://example.test/a.xml' ), $this->integration->parse( $response ) );
 	}
 
+	public function test_rank_math_schema_replaces_managed_studio_origins(): void {
+		WpEnv::$options['simply-static'] = array(
+			'delivery_method'     => 'simply-static-studio',
+			'destination_url_type' => 'absolute',
+			'destination_scheme'   => 'https://',
+			'destination_host'     => 'www.rootz.test',
+		);
+		Options::reinstance();
+
+		$managed_origin = 'https://wp-ay95mtke8lh8t09.onstatic.studio';
+		$legacy_origin  = 'https:\/\/wp.ewx03qnbk7ve09k.static4.studio';
+		$attacker_url   = $managed_origin . '.attacker.test/profile';
+		$schema         = '<html><head><script type="application/ld+json" class="rank-math-schema">'
+			. '{"@graph":['
+			. '{"@type":"WebSite","url":"' . $managed_origin . '"},'
+			. '{"@type":"Person","name":"admin","sameAs":["' . $managed_origin . '"]},'
+			. '{"@type":"ImageObject","url":"' . $legacy_origin . '\/wp-content\/uploads\/author.jpg"},'
+			. '{"@type":"Thing","url":"' . $attacker_url . '"}'
+			. ']}'
+			. '</script></head><body></body></html>';
+
+		$output = ( new Rank_Math_Integration() )->replace_json_schema( $schema, 'https://www.rootz.test/' );
+
+		self::assertIsString( $output );
+		self::assertStringNotContainsString( $managed_origin . '"', $output );
+		self::assertStringNotContainsString( 'wp.ewx03qnbk7ve09k.static4.studio', $output );
+		self::assertStringContainsString( '"url":"https://www.rootz.test"', $output );
+		self::assertStringContainsString( '"sameAs":["https://www.rootz.test"]', $output );
+		self::assertStringContainsString( 'https:\/\/www.rootz.test\/wp-content\/uploads\/author.jpg', $output );
+		self::assertStringContainsString( $attacker_url, $output );
+	}
+
+	public function test_rank_math_schema_keeps_managed_urls_outside_studio_exports(): void {
+		WpEnv::$options['simply-static'] = array(
+			'delivery_method'     => 'local',
+			'destination_url_type' => 'absolute',
+			'destination_scheme'   => 'https://',
+			'destination_host'     => 'static.example.test',
+		);
+		Options::reinstance();
+
+		$managed_origin = 'https://wp-example.onstatic.studio';
+		$schema         = '<script type="application/ld+json" class="rank-math-schema">'
+			. '{"@type":"Person","sameAs":["' . $managed_origin . '"]}'
+			. '</script>';
+
+		$output = ( new Rank_Math_Integration() )->replace_json_schema( $schema, 'https://example.test/' );
+
+		self::assertIsString( $output );
+		self::assertStringContainsString( $managed_origin, $output );
+	}
+
 	public function test_dynamic_robots_url_is_queued_for_page_driven_deployments(): void {
 		self::assertSame(
 			array( 'https://example.test/existing', 'https://example.test/robots.txt' ),
