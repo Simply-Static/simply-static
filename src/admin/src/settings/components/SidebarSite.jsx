@@ -16,7 +16,7 @@ import GenerateButtons from "./GenerateButtons";
 import EnvironmentSidebar from "./EnvironmentSidebar";
 import apiFetch from "@wordpress/api-fetch";
 import useInterval from "../../hooks/useInterval";
-import {getRollbackConflict} from "../utils/export";
+import {getExportStartErrorMessage, getRollbackConflict} from "../utils/export";
 
 const {__, _n, sprintf} = wp.i18n;
 
@@ -223,7 +223,11 @@ function SidebarSite( props = null ) {
                 return;
 			}
 			if (json.status === 409) {
-				const message = json.message || rollbackMessage;
+				const message = getExportStartErrorMessage(
+					json,
+					__('The export could not be started. Please try again.', 'simply-static'),
+					rollbackMessage
+				);
 				const rollbackState = getRollbackConflict(json);
 				if (rollbackState) {
 					setSnapshotRollback({
@@ -240,7 +244,11 @@ function SidebarSite( props = null ) {
         }).catch(error => {
 			const isConflict = error && error.data && 409 === error.data.status;
 			const rollbackState = isConflict ? getRollbackConflict(error.data) : null;
-			const message = error.message || rollbackMessage;
+			const message = getExportStartErrorMessage(
+				error,
+				__('The export could not be started. Please try again.', 'simply-static'),
+				rollbackMessage
+			);
 
 			if (rollbackState) {
 				setSnapshotRollback({
