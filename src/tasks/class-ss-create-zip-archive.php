@@ -23,6 +23,9 @@ class Create_Zip_Archive_Task extends Task {
 	 */
 	const BATCH_SIZE = 2500;
 
+	/** Maximum uncompressed bytes queued before flushing a batch. */
+	const BATCH_BYTES = 33554432;
+
 	/**
 	 * Non-autoloaded option containing the potentially large file snapshot.
 	 */
@@ -79,6 +82,7 @@ class Create_Zip_Archive_Task extends Task {
 	 */
 	private function cleanup_batch_state() {
 		$this->options->set( 'zip_batch_offset', null );
+		$this->options->set( 'zip_batch_state', null );
 		$this->options->set( 'zip_total_files', null );
 		$this->options->set( 'zip_files', null );
 		$this->options->save();
@@ -397,6 +401,27 @@ class Create_Zip_Archive_Task extends Task {
 	 */
 	private function create_zip_batched( $zip_filename, $archive_dir, $batch_offset, $is_first_batch, $all_files ) {
 		$batch_size = max( 1, min( 10000, (int) apply_filters( 'ss_zip_batch_size', self::BATCH_SIZE ) ) );
+		$batch_bytes = max( 1, (int) apply_filters( 'ss_zip_batch_bytes', self::BATCH_BYTES ) );
+		$state = $this->options->get( 'zip_batch_state' );
+		$attempts = 0;
+
+		if ( is_array( $state ) && isset( $state['offset'], $state['size'], $state['bytes'] ) && (int) $state['offset'] === $batch_offset ) {
+			$batch_size  = min( $batch_size, max( 1, (int) $state['size'] ) );
+			$batch_bytes = min( $batch_bytes, max( 1, (int) $state['bytes'] ) );
+			if ( ! empty( $state['pending'] ) ) {
+				$previous_count = max( 1, (int) ( $state['count'] ?? $batch_size ) );
+				$attempts = 1 === $previous_count ? (int) ( $state['attempts'] ?? 0 ) + 1 : 0;
+				if ( 1 === $previous_count && $attempts >= 2 ) {
+					return new \WP_Error(
+						'zip_batch_interrupted',
+						__( 'ZIP creation was repeatedly interrupted while finalizing a single file. Check the server time, memory, and disk limits, or use Local Directory delivery.', 'simply-static' )
+					);
+				}
+				$batch_size  = min( $batch_size, max( 1, (int) floor( $previous_count / 2 ) ) );
+				$batch_bytes = max( 1, (int) floor( $batch_bytes / 2 ) );
+				Util::debug_log( 'Previous ZIP batch was interrupted at offset ' . $batch_offset . '; retrying with at most ' . $batch_size . ' file(s) and ' . $batch_bytes . ' bytes.' );
+			}
+		}
 
 		if ( $is_first_batch ) {
 			Util::debug_log( 'Creating zip archive via ZipArchive (ZIP64 capable if libzip supports it)' );
@@ -404,9 +429,14 @@ class Create_Zip_Archive_Task extends Task {
 			Util::debug_log( 'Resuming zip archive creation at offset ' . $batch_offset );
 		}
 
-		// Open the zip: CREATE | OVERWRITE for first batch, CREATE only for subsequent batches (append).
+		// A saved offset is valid only while the already committed archive exists.
+		if ( ! $is_first_batch && ! is_file( $zip_filename ) ) {
+			return new \WP_Error( 'zip_file_missing', __( 'The partial ZIP archive is missing. Please restart the export.', 'simply-static' ) );
+		}
+
+		// Open the zip: CREATE | OVERWRITE for first batch, append only for subsequent batches.
 		$zip = new \ZipArchive();
-		$flags = $is_first_batch ? ( \ZipArchive::CREATE | \ZipArchive::OVERWRITE ) : \ZipArchive::CREATE;
+		$flags = $is_first_batch ? ( \ZipArchive::CREATE | \ZipArchive::OVERWRITE ) : 0;
 		$opened = $zip->open( $zip_filename, $flags );
 		if ( true !== $opened ) {
 			return new \WP_Error(
@@ -434,8 +464,29 @@ class Create_Zip_Archive_Task extends Task {
 			$this->options->save();
 		}
 
-		// Determine the slice of files for this batch.
-		$batch_files = array_slice( $all_files, $batch_offset, $batch_size );
+		// addFile() queues compression until close(). Bound both the file count and
+		// source bytes so a few large media files cannot make every retry time out.
+		$batch_files = array();
+		$source_bytes = 0;
+		foreach ( array_slice( $all_files, $batch_offset, $batch_size ) as $path ) {
+			$file_bytes = is_file( $path ) ? (int) filesize( $path ) : 0;
+			if ( ! empty( $batch_files ) && $source_bytes + $file_bytes > $batch_bytes ) {
+				break;
+			}
+			$batch_files[] = $path;
+			$source_bytes += $file_bytes;
+		}
+
+		// Persist before compression. If PHP is killed during close(), the next
+		// worker retries this offset with a smaller batch instead of looping forever.
+		$this->options->set( 'zip_batch_state', array(
+			'offset'   => $batch_offset,
+			'size'     => $batch_size,
+			'bytes'    => $batch_bytes,
+			'count'    => count( $batch_files ),
+			'attempts' => $attempts,
+			'pending'  => true,
+		) )->save();
 		$count       = 0;
 		$failed_files = array();
 
@@ -452,11 +503,12 @@ class Create_Zip_Archive_Task extends Task {
 
 			// Periodic progress logging for very large exports.
 			if ( ( ++$count % 1000 ) === 0 ) {
-				Util::debug_log( 'Added ' . ( $batch_offset + $count ) . ' of ' . $total_files . ' files to zip so far...' );
+				Util::debug_log( 'Queued ' . ( $batch_offset + $count ) . ' of ' . $total_files . ' files for ZIP compression...' );
 			}
 		}
 
 		// Close the zip to flush this batch to disk.
+		Util::debug_log( 'Finalizing ZIP batch at offset ' . $batch_offset . ': ' . count( $batch_files ) . ' file(s), ' . $source_bytes . ' source bytes.' );
 		$closed = $zip->close();
 		if ( true !== $closed ) {
 			$status = method_exists( $zip, 'getStatusString' ) ? $zip->getStatusString() : 'unknown error';
@@ -484,14 +536,18 @@ class Create_Zip_Archive_Task extends Task {
 		}
 
 		$new_offset = $batch_offset + count( $batch_files );
+		$this->options->set( 'zip_batch_offset', $new_offset );
+		$this->options->set( 'zip_batch_state', array(
+			'offset'  => $new_offset,
+			'size'    => $batch_size,
+			'bytes'   => $batch_bytes,
+			'pending' => false,
+		) )->save();
 
 		Util::debug_log( 'Batch complete: added files ' . ( $batch_offset + 1 ) . '-' . $new_offset . ' of ' . $total_files );
 
 		// Check if there are more files to process.
 		if ( $new_offset < $total_files ) {
-			$this->options->set( 'zip_batch_offset', $new_offset );
-			$this->options->save();
-
 			$this->save_status_message(
 				sprintf(
 					/* translators: 1: files processed so far, 2: total files */

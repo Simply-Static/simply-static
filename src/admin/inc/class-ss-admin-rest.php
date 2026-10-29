@@ -1024,6 +1024,7 @@ class Admin_Rest {
 			'generate_type',
 			'deploy_manifest_schema_version',
 			'zip_batch_offset',
+			'zip_batch_state',
 			'zip_total_files',
 			'zip_files',
 			'version',
@@ -1264,6 +1265,7 @@ class Admin_Rest {
 			'generate_type',
 			'archive_task_list',
 			'zip_batch_offset',
+			'zip_batch_state',
 			'zip_total_files',
 			'zip_files',
 			'version',
@@ -1498,6 +1500,7 @@ class Admin_Rest {
 				'generate_type'            => 'export',
 				'archive_task_list'        => array(),
 				'zip_batch_offset'         => null,
+				'zip_batch_state'          => null,
 				'zip_total_files'          => null,
 				'zip_files'                => null,
 			);

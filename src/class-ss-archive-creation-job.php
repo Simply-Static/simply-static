@@ -236,6 +236,7 @@ class Archive_Creation_Job extends Background_Process {
 					->set( 'generate_type', $type )
 					->set( 'archive_task_list', $task_list )
 					->set( 'zip_batch_offset', null )
+					->set( 'zip_batch_state', null )
 					->set( 'zip_total_files', null )
 					->set( 'zip_files', null )
 					->save();

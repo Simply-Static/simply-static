@@ -75,6 +75,11 @@ class Transfer_Files_Locally_Task extends Task {
 			 */
 			do_action( 'ss_before_finish_transferring_files_locally', $this->destination_dir, $this->archive_dir, $this );
 
+			$homepage_result = $this->validate_homepage_file( $this->destination_dir, true );
+			if ( is_wp_error( $homepage_result ) ) {
+				return $homepage_result;
+			}
+
 			if ( $this->options->get( 'destination_url_type' ) == 'absolute' ) {
 				$destination_url = trailingslashit( $this->options->get_destination_url() );
 				$this->save_status_message(
