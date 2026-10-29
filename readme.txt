@@ -4,7 +4,7 @@ Tags: jamstack, performance, security, static site generator
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag:  3.8.19
+Stable tag:  3.8.20
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -274,6 +274,14 @@ Settings - Configure your static site export options
 Diagnostics - Check your WordPress environment for compatibility
 
 == Changelog ==
+
+= 3.8.20 =
+
+* Fixed excluded URLs being reintroduced through generated rule files and stale deploy paths
+* Fixed Static Studio origin URLs remaining in Rank Math structured data
+* Fixed misleading rollback messages when ordinary exports fail to start
+* Reduced memory usage when saving deploy manifests for large exports
+* Fixed incomplete exports reporting success when homepage output is missing and improved recovery for interrupted ZIP batches
 
 = 3.8.19 =
 
