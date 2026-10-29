@@ -61,9 +61,14 @@ class Generate_404_Task extends Task {
 			$generated = $this->generate_404_page( '', 0 );
 		}
 
-		if ( $generated ) {
-			$this->save_status_message( __( '404 Page generated', 'simply-static' ) );
+		if ( ! $generated ) {
+			return new \WP_Error(
+				'generate_404_failed',
+				__( 'Could not generate 404.html. Check that your custom 404 page or theme 404 page can be fetched from this WordPress site.', 'simply-static' )
+			);
 		}
+
+		$this->save_status_message( __( '404 Page generated', 'simply-static' ) );
 
 		return true;
 	}

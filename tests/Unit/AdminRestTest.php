@@ -35,6 +35,7 @@ final class AdminRestTest extends UnitTestCase {
 			'archive_task_list'                => array( 'setup', 'fetch_urls' ),
 			'generate_type'                   => 'update',
 			'zip_batch_offset'                => 2500,
+			'zip_batch_state'                 => array( 'offset' => 2500, 'pending' => true ),
 			'zip_total_files'                 => 100000,
 			'zip_files'                       => array( '/srv/private-export/index.html' ),
 			'provider'                        => array(
@@ -194,6 +195,7 @@ final class AdminRestTest extends UnitTestCase {
 			'generate_type'                  => 'update',
 			'archive_task_list'              => array( 'setup', 'fetch_urls', 'create_zip_archive', 'wrapup' ),
 			'zip_batch_offset'               => 250,
+			'zip_batch_state'                => array( 'offset' => 250, 'pending' => true ),
 			'zip_total_files'                => 900,
 			'zip_files'                      => array( '/tmp/archive/a.html', '/tmp/archive/b.html' ),
 			'version'                        => '3.4.5',
@@ -208,6 +210,7 @@ final class AdminRestTest extends UnitTestCase {
 			'generate_type'           => 'export',
 			'archive_task_list'       => array( 'injected_task' ),
 			'zip_batch_offset'        => 0,
+			'zip_batch_state'         => array( 'offset' => 0, 'pending' => false ),
 			'zip_total_files'         => 0,
 			'zip_files'               => array(),
 			'version'                 => '0.0.0',

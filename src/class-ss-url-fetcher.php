@@ -62,9 +62,12 @@ class Url_Fetcher {
 	 */
 	public static function instance() {
 		if ( null === self::$instance ) {
-			self::$instance              = new self();
-			self::$instance->archive_dir = Options::instance()->get_archive_dir();
+			self::$instance = new self();
 		}
+
+		// A CLI process or multisite queue can reuse this singleton across exports.
+		// Resolve the directory from the current site's export options each time.
+		self::$instance->archive_dir = Options::instance()->get_archive_dir();
 
 		return self::$instance;
 	}

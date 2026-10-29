@@ -467,6 +467,7 @@ final class ArchiveCreationJobTest extends UnitTestCase {
 			->set( 'archive_status_messages', array( 'old' => array( 'message' => 'stale' ) ) )
 			->set( 'archive_task_list', array( 'stale_task' ) )
 			->set( 'zip_batch_offset', 90 )
+			->set( 'zip_batch_state', array( 'offset' => 90, 'pending' => true ) )
 			->set( 'zip_total_files', 100 )
 			->set( 'zip_files', array( '/tmp/old' ) );
 		$type_seen_by_filter = null;
@@ -489,6 +490,7 @@ final class ArchiveCreationJobTest extends UnitTestCase {
 		self::assertSame( '2026-07-12 12:00:00', $this->options->get( 'archive_start_time' ) );
 		self::assertNull( $this->options->get( 'archive_end_time' ) );
 		self::assertNull( $this->options->get( 'zip_batch_offset' ) );
+		self::assertNull( $this->options->get( 'zip_batch_state' ) );
 		self::assertNull( $this->options->get( 'zip_total_files' ) );
 		self::assertNull( $this->options->get( 'zip_files' ) );
 		self::assertNotEmpty( $this->options->get( 'archive_deploy_id' ) );

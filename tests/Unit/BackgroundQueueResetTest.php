@@ -116,6 +116,7 @@ namespace Simply_Static\Tests\Unit {
 				'generate_type'          => 'update',
 				'archive_task_list'      => array( 'setup', 'fetch_urls', 'wrapup' ),
 				'zip_batch_offset'       => 500,
+				'zip_batch_state'        => array( 'offset' => 500, 'pending' => true ),
 				'zip_total_files'        => 1000,
 				'zip_files'              => array( '/tmp/one', '/tmp/two' ),
 			);
@@ -191,6 +192,7 @@ namespace Simply_Static\Tests\Unit {
 			self::assertSame( 'export', $options['generate_type'] );
 			self::assertSame( array(), $options['archive_task_list'] );
 			self::assertNull( $options['zip_batch_offset'] );
+			self::assertNull( $options['zip_batch_state'] );
 			self::assertNull( $options['zip_total_files'] );
 			self::assertNull( $options['zip_files'] );
 

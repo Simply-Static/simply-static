@@ -89,6 +89,100 @@ final class ZipArchiveTaskTest extends UnitTestCase {
 		self::assertFileExists( untrailingslashit( $this->archive_dir ) . '.zip' );
 	}
 
+	public function test_batches_limit_source_bytes_and_allow_one_oversized_file_to_progress(): void {
+		$contents = array( 'a.txt' => 'aaaa', 'b.txt' => 'bbbbbbb', 'c.txt' => 'c', 'd.txt' => str_repeat( 'd', 100 ) );
+		foreach ( $contents as $name => $content ) {
+			file_put_contents( $this->archive_dir . $name, $content );
+		}
+		add_filter( 'ss_zip_batch_bytes', static function () { return 8; } );
+
+		$task = new Create_Zip_Archive_Task();
+		self::assertFalse( $task->create_zip() );
+		self::assertSame( 1, Options::instance()->get( 'zip_batch_offset' ) );
+		self::assertFalse( $task->create_zip() );
+		self::assertSame( 3, Options::instance()->get( 'zip_batch_offset' ) );
+		self::assertIsString( $task->create_zip() );
+
+		$zip = new \ZipArchive();
+		self::assertTrue( $zip->open( untrailingslashit( $this->archive_dir ) . '.zip' ) );
+		foreach ( $contents as $name => $content ) {
+			self::assertSame( $content, $zip->getFromName( $name ) );
+		}
+		$zip->close();
+	}
+
+	public function test_interrupted_batch_shrinks_and_replays_without_omitting_or_duplicating_files(): void {
+		for ( $index = 0; $index < 12; $index++ ) {
+			file_put_contents( $this->archive_dir . sprintf( '%02d.txt', $index ), 'file ' . $index );
+		}
+		$batch_size = 2;
+		add_filter( 'ss_zip_batch_size', static function () use ( &$batch_size ) { return $batch_size; } );
+		$task = new Create_Zip_Archive_Task();
+		self::assertFalse( $task->create_zip() );
+
+		// Simulate the worker dying after close() committed some entries, before
+		// the corresponding offset was saved. Retrying must replace those names.
+		$zip = new \ZipArchive();
+		self::assertTrue( $zip->open( untrailingslashit( $this->archive_dir ) . '.zip' ) );
+		for ( $index = 2; $index < 6; $index++ ) {
+			$name = sprintf( '%02d.txt', $index );
+			self::assertTrue( $zip->addFile( $this->archive_dir . $name, $name ) );
+		}
+		self::assertTrue( $zip->close() );
+		Options::instance()->set( 'zip_batch_state', array(
+			'offset' => 2, 'size' => 8, 'bytes' => Create_Zip_Archive_Task::BATCH_BYTES,
+			'count' => 8, 'attempts' => 0, 'pending' => true,
+		) )->save();
+		$batch_size = 8;
+
+		self::assertFalse( $task->create_zip() );
+		self::assertSame( 6, Options::instance()->get( 'zip_batch_offset' ) );
+		self::assertSame( 4, Options::instance()->get( 'zip_batch_state' )['size'] );
+		self::assertFalse( Options::instance()->get( 'zip_batch_state' )['pending'] );
+		// Keep the smaller batch size after recovery, avoiding another timeout.
+		self::assertFalse( $task->create_zip() );
+		self::assertSame( 10, Options::instance()->get( 'zip_batch_offset' ) );
+		self::assertTrue( $task->perform() );
+		self::assertNull( Options::instance()->get( 'zip_batch_state' ) );
+
+		self::assertTrue( $zip->open( untrailingslashit( $this->archive_dir ) . '.zip' ) );
+		self::assertSame( 12, $zip->numFiles );
+		for ( $index = 0; $index < 12; $index++ ) {
+			self::assertSame( 'file ' . $index, $zip->getFromName( sprintf( '%02d.txt', $index ) ) );
+		}
+		$zip->close();
+	}
+
+	public function test_repeated_interruption_of_a_single_file_returns_an_error_instead_of_retrying_forever(): void {
+		file_put_contents( $this->archive_dir . 'only.txt', 'content' );
+		Options::instance()->set( 'zip_batch_state', array(
+			'offset' => 0, 'size' => 1, 'bytes' => 1,
+			'count' => 1, 'attempts' => 1, 'pending' => true,
+		) )->save();
+
+		$result = ( new Create_Zip_Archive_Task() )->perform();
+
+		self::assertInstanceOf( \WP_Error::class, $result );
+		self::assertSame( 'zip_batch_interrupted', $result->get_error_code() );
+		self::assertNull( Options::instance()->get( 'zip_batch_state' ) );
+		self::assertArrayNotHasKey( 'create_zip_archive', WpEnv::$options['simply-static']['archive_status_messages'] );
+	}
+
+	public function test_resuming_without_the_committed_archive_cannot_publish_a_zip_with_missing_files(): void {
+		file_put_contents( $this->archive_dir . 'a.txt', 'alpha' );
+		file_put_contents( $this->archive_dir . 'b.txt', 'beta' );
+		add_filter( 'ss_zip_batch_size', static function () { return 1; } );
+		$task = new Create_Zip_Archive_Task();
+		self::assertFalse( $task->create_zip() );
+		unlink( untrailingslashit( $this->archive_dir ) . '.zip' );
+
+		$result = $task->perform();
+
+		self::assertInstanceOf( \WP_Error::class, $result );
+		self::assertSame( 'zip_file_missing', $result->get_error_code() );
+		self::assertArrayNotHasKey( 'link', WpEnv::$options['simply-static']['archive_status_messages']['create_zip_archive'] );
+	}
+
 	public function test_perform_publishes_structured_download_link(): void {
 		file_put_contents( $this->archive_dir . 'index.html', '<h1>Archived</h1>' );
 		$zip_file = WP_CONTENT_DIR . '/uploads/simply-static/activity-link-test.zip';

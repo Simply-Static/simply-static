@@ -186,6 +186,11 @@ class Fetch_Urls_Task extends Task {
 
 		// If we've processed all pages for this export, signal completion of this task.
 		if ( $done ) {
+			$homepage_result = $this->validate_homepage_file( $this->archive_dir );
+			if ( is_wp_error( $homepage_result ) ) {
+				return $homepage_result;
+			}
+
 			do_action( 'ss_finished_fetching_pages' );
 		}
 
