@@ -76,6 +76,46 @@ class Page extends Model {
 	protected static $primary_key = 'id';
 
 	/**
+	 * Claim a pending page and persist its retry attempt in the same write.
+	 *
+	 * Fetch, Markdown and delivery tasks all run this for every page. Keeping
+	 * the claim and retry counter together avoids a second model update per
+	 * artifact, while still recording the attempt before external processing.
+	 *
+	 * @param string $column Processing timestamp column.
+	 * @param string $start_time Current export timestamp.
+	 * @return bool Whether this worker claimed the page.
+	 */
+	public function claim_for_processing( $column, $start_time ) : bool {
+		if ( ! in_array( $column, array( 'last_checked_at', 'last_transferred_at' ), true ) ) {
+			throw new \InvalidArgumentException( 'A valid page processing column is required.' );
+		}
+
+		global $wpdb;
+		$table = self::table_name();
+		$now = Util::formatted_datetime();
+		$attempts = (int) $this->fetch_attempts;
+		$claimed = $wpdb->query( $wpdb->prepare(
+			"UPDATE {$table} SET {$column} = %s, fetch_attempts = %d, updated_at = %s WHERE id = %d AND ( {$column} IS NULL OR {$column} < %s ) AND fetch_attempts = %d AND fetch_attempts < 3",
+			$now,
+			$attempts + 1,
+			$now,
+			$this->id,
+			$start_time,
+			$attempts
+		) );
+		if ( ! $claimed ) {
+			return false;
+		}
+
+		$persisted = array( $column => $now, 'fetch_attempts' => $attempts + 1, 'updated_at' => $now );
+		$this->attributes( $persisted );
+		$this->mark_fields_clean( $persisted );
+
+		return true;
+	}
+
+	/**
 	 * Get the number of pages for each group of status codes, e.g. 1xx, 2xx, 3xx
 	 *
 	 * @return array Assoc. array of status code to number of pages, e.g. '2' => 183

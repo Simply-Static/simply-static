@@ -243,7 +243,7 @@ class Model {
 	 * @param array $fields Fields and values sent to the database.
 	 * @return void
 	 */
-	private function mark_fields_clean( $fields ) {
+	protected function mark_fields_clean( $fields ) {
 		foreach ( $fields as $field_name => $field_value ) {
 			$this->original_data[ $field_name ] = $field_value;
 
