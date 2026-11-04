@@ -73,6 +73,12 @@ final class WpTestEnvironment {
 	/** @var array<int,string> */
 	public static $post_statuses = array();
 
+	/** @var array<int,array<string,array<int,mixed>>> */
+	public static $post_meta = array();
+
+	/** @var array<int,string> */
+	public static $permalinks = array();
+
 	/** @var array<string,int> */
 	public static $url_post_ids = array();
 
@@ -138,6 +144,8 @@ final class WpTestEnvironment {
 		self::$post_type_counts = array();
 		self::$registered_post_statuses = array();
 		self::$post_statuses     = array();
+		self::$post_meta         = array();
+		self::$permalinks        = array();
 		self::$url_post_ids      = array();
 		self::$taxonomies       = null;
 		self::$valid_nonces     = array();
