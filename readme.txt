@@ -4,7 +4,7 @@ Tags: jamstack, performance, security, static site generator
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag:  3.8.20
+Stable tag:  3.8.21
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -274,6 +274,11 @@ Settings - Configure your static site export options
 Diagnostics - Check your WordPress environment for compatibility
 
 == Changelog ==
+
+= 3.8.21 =
+
+* Reduced multilingual taxonomy crawling overhead and improved page processing performance for large exports
+* Fixed destination self-canonicals excluding posts from Yoast sitemaps and removed internal forms from SEO plugin sitemaps
 
 = 3.8.20 =
 
