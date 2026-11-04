@@ -102,12 +102,12 @@ trait canProcessPages {
 	 */
 	public function process_pages() {
 		$pages_to_process       = $this->get_pages_to_process();
-		$total_pages            = $this->get_total_pages();
 		$pages_to_process_count = count( $pages_to_process );
 
-		Util::debug_log( "Total pages: " . $total_pages . '; Pages remaining: ' . $pages_to_process_count );
+		Util::debug_log( 'Pages in processing batch: ' . $pages_to_process_count );
 
 		if ( $pages_to_process_count === 0 ) {
+			$total_pages     = $this->get_total_pages();
 			$processed_pages = $this->get_processed_pages();
 			$message         = $this->processed_pages_message( $processed_pages, $total_pages );
 			// In 404-only exports, force the transfer log to reflect a single artifact.
@@ -163,24 +163,27 @@ trait canProcessPages {
 			global $wpdb;
 			$table_name = Page::table_name();
 			$start_time = $this->get_start_time();
-			$now        = Util::formatted_datetime();
-			$claimed    = $wpdb->query( $wpdb->prepare(
-				"UPDATE {$table_name} SET {$this->processing_column} = %s WHERE id = %d AND ( {$this->processing_column} IS NULL OR {$this->processing_column} < %s )",
-				$now,
-				$static_page->id,
-				$start_time
-			) );
-
- 		if ( ! $claimed ) {
-				continue;
+			if ( $static_page instanceof Page ) {
+				$claimed = $static_page->claim_for_processing( $this->processing_column, $start_time );
+			} else {
+				// Preserve support for extensions that provide page-like objects.
+				$now     = Util::formatted_datetime();
+				$claimed = $wpdb->query( $wpdb->prepare(
+					"UPDATE {$table_name} SET {$this->processing_column} = %s WHERE id = %d AND ( {$this->processing_column} IS NULL OR {$this->processing_column} < %s )",
+					$now,
+					$static_page->id,
+					$start_time
+				) );
+				if ( $claimed ) {
+					$static_page->{$this->processing_column} = $now;
+					$static_page->fetch_attempts = (int) $static_page->fetch_attempts + 1;
+					$static_page->save();
+				}
 			}
 
-			// Refresh the in-memory object so it reflects the claimed timestamp.
-			$static_page->{$this->processing_column} = $now;
-
-			// Increment fetch attempts.
-			$static_page->fetch_attempts = (int) $static_page->fetch_attempts + 1;
-			$static_page->save();
+			if ( ! $claimed ) {
+				continue;
+			}
 
 			try {
 				$this->process_page( $static_page );
