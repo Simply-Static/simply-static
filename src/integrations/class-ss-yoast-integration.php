@@ -11,6 +11,20 @@ class Yoast_Integration extends Integration {
 	 */
 	protected $id = 'yoast';
 
+	/**
+	 * Whether a post type sitemap is currently being generated.
+	 *
+	 * @var bool
+	 */
+	private $normalizing_sitemap_canonicals = false;
+
+	/**
+	 * Prevent recursive metadata reads while inspecting the stored canonical.
+	 *
+	 * @var bool
+	 */
+	private $reading_sitemap_metadata = false;
+
 	public function __construct() {
 		$this->name = __( 'Yoast', 'simply-static' );
 		$this->description = __( 'Automatically includes your XML sitemaps, handles URL replacements in schema.org markup, and creates redirects on your static site for you.', 'simply-static' );
@@ -22,6 +36,10 @@ class Yoast_Integration extends Integration {
 	 * @return void
 	 */
 	public function run() {
+		add_filter( 'wpseo_sitemap_exclude_post_type', [ $this, 'exclude_form_sitemap' ], 10, 2 );
+		add_filter( 'wpseo_build_sitemap_post_type', [ $this, 'prepare_sitemap_canonical_metadata' ] );
+		add_filter( 'wpseo_sitemap_urlset', [ $this, 'finish_sitemap_canonical_metadata' ] );
+		add_filter( 'status_header', [ $this, 'reset_sitemap_canonical_metadata_on_error' ], 10, 2 );
 		add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_page' ] );
 		add_action( 'ss_after_setup_task', [ $this, 'register_redirections' ] );
 		add_action( 'ss_dom_before_save', [ $this, 'replace_json_schema' ], 10, 2 );
@@ -40,6 +58,131 @@ class Yoast_Integration extends Integration {
 		}
 
 		$this->include_file( 'handlers/class-ss-yoast-sitemap-handler.php' );
+	}
+
+	/**
+	 * Keep internal form connections out of Yoast's public sitemaps.
+	 *
+	 * @param bool   $excluded Whether the post type is already excluded.
+	 * @param string $post_type Post type name.
+	 * @return bool
+	 */
+	public function exclude_form_sitemap( $excluded, $post_type ) {
+		return 'ssp-form' === $post_type ? true : $excluded;
+	}
+
+	/**
+	 * Normalize destination self-canonicals only while Yoast builds sitemap links.
+	 *
+	 * Yoast excludes posts whose stored canonical differs from their WordPress
+	 * permalink, including a self-canonical on the configured static destination.
+	 *
+	 * @param string $type Sitemap type.
+	 * @return string
+	 */
+	public function prepare_sitemap_canonical_metadata( $type ) {
+		$this->finish_sitemap_canonical_metadata( '' );
+
+		$options = Options::instance();
+		if ( ! is_string( $type ) || ! post_type_exists( $type ) || 'absolute' !== $options->get( 'destination_url_type' ) ) {
+			return $type;
+		}
+
+		$destination = wp_parse_url( $options->get_destination_url() );
+		if (
+			! is_array( $destination )
+			|| empty( $destination['host'] )
+			|| ! isset( $destination['scheme'] )
+			|| ! in_array( strtolower( $destination['scheme'] ), array( 'http', 'https' ), true )
+			|| isset( $destination['user'] ) || isset( $destination['pass'] )
+			|| isset( $destination['query'] ) || isset( $destination['fragment'] )
+		) {
+			return $type;
+		}
+
+		$this->normalizing_sitemap_canonicals = true;
+		add_filter( 'get_post_metadata', [ $this, 'normalize_sitemap_canonical_metadata' ], 10, 4 );
+
+		return $type;
+	}
+
+	/**
+	 * Present an origin self-canonical to Yoast without changing stored metadata.
+	 *
+	 * Yoast reads the entire metadata array through get_post_custom(), so both
+	 * all-metadata reads and individual canonical reads must be supported.
+	 *
+	 * @param mixed  $value     Existing metadata short-circuit value.
+	 * @param int    $object_id Post ID.
+	 * @param string $meta_key  Requested metadata key, or empty for all metadata.
+	 * @param bool   $single    Whether a single metadata value was requested.
+	 * @return mixed
+	 */
+	public function normalize_sitemap_canonical_metadata( $value, $object_id, $meta_key, $single ) {
+		$canonical_key = '_yoast_wpseo_canonical';
+		if (
+			null !== $value
+			|| ! $this->normalizing_sitemap_canonicals
+			|| $this->reading_sitemap_metadata
+			|| ( '' !== $meta_key && $canonical_key !== $meta_key )
+		) {
+			return $value;
+		}
+
+		$this->reading_sitemap_metadata = true;
+		try {
+			$metadata = \get_post_meta( $object_id );
+			if ( ! is_array( $metadata ) || empty( $metadata[ $canonical_key ][0] ) || ! is_string( $metadata[ $canonical_key ][0] ) ) {
+				return $value;
+			}
+			$permalink = \get_permalink( $object_id );
+		} finally {
+			$this->reading_sitemap_metadata = false;
+		}
+
+		if (
+			! is_string( $permalink )
+			|| ! Util::is_local_origin_url( $permalink )
+		) {
+			return $value;
+		}
+
+		$destination_permalink = Util::replace_origin_urls_in_text( $permalink );
+		if ( $destination_permalink === $permalink || $metadata[ $canonical_key ][0] !== $destination_permalink ) {
+			return $value;
+		}
+
+		$metadata[ $canonical_key ][0] = $permalink;
+
+		return '' === $meta_key ? $metadata : $metadata[ $canonical_key ];
+	}
+
+	/**
+	 * Stop normalizing metadata after the sitemap provider has returned its links.
+	 *
+	 * @param string $urlset Sitemap opening XML, returned unchanged.
+	 * @return string
+	 */
+	public function finish_sitemap_canonical_metadata( $urlset ) {
+		$this->normalizing_sitemap_canonicals = false;
+		remove_filter( 'get_post_metadata', [ $this, 'normalize_sitemap_canonical_metadata' ], 10 );
+
+		return $urlset;
+	}
+
+	/**
+	 * Also clean up when Yoast rejects a sitemap before reaching the renderer.
+	 *
+	 * @param string $status_header HTTP status header, returned unchanged.
+	 * @param int    $code          HTTP status code.
+	 * @return string
+	 */
+	public function reset_sitemap_canonical_metadata_on_error( $status_header, $code ) {
+		if ( $code >= 400 ) {
+			$this->finish_sitemap_canonical_metadata( '' );
+		}
+
+		return $status_header;
 	}
 
 	/**

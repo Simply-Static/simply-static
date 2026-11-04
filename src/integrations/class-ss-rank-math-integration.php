@@ -33,6 +33,7 @@ class Rank_Math_Integration extends Integration {
 	 * @return void
 	 */
 	public function run() {
+		add_filter( 'rank_math/sitemap/exclude_post_type', [ $this, 'exclude_form_sitemap' ], 10, 2 );
 		add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_page' ] );
 		add_action( 'ss_after_setup_task', [ $this, 'register_redirections' ] );
 		add_filter( 'simply_static_registered_redirect', [ $this, 'get_registered_redirect' ], 10, 2 );
@@ -48,6 +49,17 @@ class Rank_Math_Integration extends Integration {
 		}
 
 		$this->include_file( 'handlers/class-ss-rank-math-sitemap-handler.php' );
+	}
+
+	/**
+	 * Keep internal form connections out of Rank Math's public sitemaps.
+	 *
+	 * @param bool   $excluded Whether the post type is already excluded.
+	 * @param string $post_type Post type name.
+	 * @return bool
+	 */
+	public function exclude_form_sitemap( $excluded, $post_type ) {
+		return 'ssp-form' === $post_type ? true : $excluded;
 	}
 
 	/**

@@ -23,6 +23,7 @@ class SEOPress_Integration extends Integration {
 	 */
 	public function run() {
 		add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_pages' ] );
+		add_filter( 'option_seopress_xml_sitemap_option_name', [ $this, 'exclude_internal_forms_from_sitemap' ] );
 
 		// Maybe update sitemap on single export.
 		$add_sitemap_single_export = apply_filters( 'ssp_single_export_add_xml_sitemap', false );
@@ -32,6 +33,24 @@ class SEOPress_Integration extends Integration {
 		}
 
 		$this->include_file( 'handlers/class-ss-seopress-sitemap-handler.php' );
+	}
+
+	/**
+	 * Remove internal form records from SEOPress's sitemap post type selection.
+	 *
+	 * Both the sitemap index and individual post type routes read this option.
+	 * Filter the read value so forms cannot be listed or requested directly,
+	 * while preserving the stored settings and all other sitemap exclusions.
+	 *
+	 * @param mixed $options SEOPress sitemap options.
+	 * @return mixed
+	 */
+	public function exclude_internal_forms_from_sitemap( $options ) {
+		if ( is_array( $options ) && isset( $options['seopress_xml_sitemap_post_types_list'] ) && is_array( $options['seopress_xml_sitemap_post_types_list'] ) ) {
+			unset( $options['seopress_xml_sitemap_post_types_list']['ssp-form'] );
+		}
+
+		return $options;
 	}
 
 	/**

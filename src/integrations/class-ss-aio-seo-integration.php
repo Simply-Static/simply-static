@@ -22,6 +22,7 @@ class AIO_SEO_Integration extends Integration {
 	 * @return void
 	 */
 	public function run() {
+		add_filter( 'aioseo_public_post_types', [ $this, 'exclude_form_post_type' ], 10, 2 );
 		add_filter( 'aioseo_unrecognized_allowed_query_args', [ $this, 'allowed_query_args' ] );
 		add_action( 'ss_after_setup_task', [ $this, 'register_sitemap_pages' ] );
 		add_action( 'ss_finished_fetching_pages', [ $this, 'finalize_sitemap_files' ] );
@@ -30,6 +31,27 @@ class AIO_SEO_Integration extends Integration {
 		add_filter( 'ss_additional_files', [ $this, 'maybe_add_text_files' ] );
 
 		$this->include_file( 'handlers/class-ss-aio-seo-sitemap-handler.php' );
+	}
+
+	/**
+	 * Exclude internal form connections from AIOSEO's public content types.
+	 *
+	 * AIOSEO uses this list to select both sitemap indexes and their entries.
+	 *
+	 * @param array $post_types Public post type names or metadata arrays.
+	 * @param bool  $names_only Whether the list contains names only.
+	 * @return array
+	 */
+	public function exclude_form_post_type( $post_types, $names_only ) {
+		return array_values(
+			array_filter(
+				$post_types,
+				static function ( $post_type ) use ( $names_only ) {
+					$name = $names_only ? $post_type : ( $post_type['name'] ?? '' );
+					return 'ssp-form' !== $name;
+				}
+			)
+		);
 	}
 
     /**

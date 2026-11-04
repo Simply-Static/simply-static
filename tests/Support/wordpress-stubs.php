@@ -807,6 +807,28 @@ function get_post_types( $args = array(), $output = 'names' ) {
 	return array( 'post' => 'post', 'page' => 'page', 'attachment' => 'attachment' );
 }
 
+function post_type_exists( $post_type ) {
+	$post_types = get_post_types();
+	return isset( $post_types[ $post_type ] ) || in_array( $post_type, $post_types, true );
+}
+
+function get_post_meta( $post_id, $key = '', $single = false ) {
+	$value = apply_filters( 'get_post_metadata', null, (int) $post_id, $key, $single, 'post' );
+	if ( null !== $value ) {
+		return $single && is_array( $value ) ? ( $value[0] ?? null ) : $value;
+	}
+
+	$metadata = WpEnv::$post_meta[ (int) $post_id ] ?? array();
+	if ( '' === $key ) {
+		return $metadata;
+	}
+	if ( ! isset( $metadata[ $key ] ) ) {
+		return $single ? '' : array();
+	}
+
+	return $single ? maybe_unserialize( $metadata[ $key ][0] ) : array_map( 'maybe_unserialize', $metadata[ $key ] );
+}
+
 function get_post_stati( $args = array(), $output = 'names', $operator = 'and' ) {
 	$statuses = WpEnv::$registered_post_statuses;
 	if ( empty( $statuses ) ) {
@@ -849,6 +871,10 @@ function get_post_type_archive_link( $post_type ) {
 }
 
 function get_permalink( $post_id ) {
+	if ( isset( WpEnv::$permalinks[ (int) $post_id ] ) ) {
+		return WpEnv::$permalinks[ (int) $post_id ];
+	}
+
 	return 'https://example.test/post-' . (int) $post_id . '/';
 }
 
