@@ -538,6 +538,7 @@ function wp_mkdir_p( $path ) {
 }
 
 function dbDelta( $queries = '', $execute = true ) {
+	apply_filters( 'dbdelta_queries', is_array( $queries ) ? $queries : array( $queries ) );
 	return array();
 }
 

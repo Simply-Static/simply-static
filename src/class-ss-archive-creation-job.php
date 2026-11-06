@@ -230,6 +230,7 @@ class Archive_Creation_Job extends Background_Process {
 
 				$this->options
 					->set( 'archive_status_messages', array() )
+					->set( 'archive_page_write_error', null )
 					->set( 'archive_deploy_id', function_exists( 'wp_generate_uuid4' ) ? wp_generate_uuid4() : uniqid( 'deploy_', true ) )
 					->set( 'archive_start_time', Util::formatted_datetime() )
 					->set( 'archive_end_time', null )
@@ -368,6 +369,16 @@ class Archive_Creation_Job extends Background_Process {
 		Util::debug_log( "Current task: " . $task_name );
 
 		try {
+			// A failed page write makes the export incomplete even when an
+			// integration ignores save()'s return value. Never retry that task or
+			// proceed to delivery; leave the cancellation task free to clean up.
+			if ( 'cancel' !== $task_name ) {
+				$page_write_error = $this->get_page_write_error();
+				if ( $page_write_error ) {
+					return $this->error_occurred( $page_write_error );
+				}
+			}
+
 			// Construction is part of task execution: integration constructors can
 			// throw Error/TypeError just as perform() can.
 			$task = $this->get_task_object( $task_name );
@@ -400,6 +411,12 @@ class Archive_Creation_Job extends Background_Process {
 
 			Util::debug_log( 'Performing task: ' . $task_name );
 			$is_done = $task->perform();
+			if ( 'cancel' !== $task_name ) {
+				$page_write_error = $this->get_page_write_error();
+				if ( $page_write_error ) {
+					return $this->error_occurred( $page_write_error );
+				}
+			}
 
 			Util::debug_log( 'Task performed: ' . (bool)$is_done );
 
@@ -430,6 +447,20 @@ class Archive_Creation_Job extends Background_Process {
 			Util::debug_log( 'Caught a task throwable' );
 			return $this->exception_occurred( $exception );
 		}
+	}
+
+	/**
+	 * Retrieve the first page write failure recorded during this export.
+	 *
+	 * @return \WP_Error|null
+	 */
+	protected function get_page_write_error() {
+		$message = $this->options->get( 'archive_page_write_error' );
+		if ( is_string( $message ) && '' !== $message ) {
+			return new \WP_Error( 'ss_page_write_failed', esc_html( $message ) );
+		}
+
+		return null;
 	}
 
 	/**
@@ -801,7 +832,7 @@ class Archive_Creation_Job extends Background_Process {
 		$message = sprintf(
 			/* translators: %s: exception message. */
 			__( 'An exception occurred: %s', 'simply-static' ),
-			$exception->getMessage()
+			esc_html( $exception->getMessage() )
 		);
 		$this->options->set( 'archive_end_time', Util::formatted_datetime() );
 		$this->save_status_message( $message, 'error' );

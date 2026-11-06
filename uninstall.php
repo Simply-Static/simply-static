@@ -215,6 +215,7 @@ function ss_cleanup_site_uninstall( $site_id ) {
 
 	$options = array(
 		'simply-static',
+		'simply_static_pages_schema_version',
 		'simply_static_zip_files',
 		'simply-static-404-only',
 		'simply-static-use-single',

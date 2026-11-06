@@ -98,6 +98,8 @@ final class RetryStateTask extends Task {
 
 	/** @var bool */
 	public $exclude_exhausted_from_total = false;
+	/** @var callable|null */
+	public $on_process;
 
 	public function __construct( RetryStatePage $page, bool $should_fail = false ) {
 		parent::__construct();
@@ -132,6 +134,9 @@ final class RetryStateTask extends Task {
 			throw $this->failure;
 		}
 
+		if ( $this->on_process ) {
+			call_user_func( $this->on_process );
+		}
 		if ( $this->should_fail ) {
 			throw new \RuntimeException( 'Transient fetch failure' );
 		}
@@ -344,5 +349,44 @@ final class PageProcessingFailureTest extends UnitTestCase {
 		self::assertSame( 0, $page->fetch_attempts );
 		self::assertFalse( $pro_stage->perform() );
 		self::assertSame( 1, $page->fetch_attempts );
+	}
+
+	public function test_recorded_write_failure_blocks_processing_even_when_queue_is_empty(): void {
+		Options::instance()
+			->set( 'archive_start_time', '2026-07-12 10:00:00' )
+			->set( 'archive_page_write_error', 'Unable to save https://example.test/?q=<b>url</b>: database error.' );
+
+		$result = ( new ExhaustedPagesTask() )->perform();
+
+		self::assertInstanceOf( \WP_Error::class, $result );
+		self::assertSame( 'ss_page_write_failed', $result->get_error_code() );
+		self::assertStringContainsString( '&lt;b&gt;url&lt;/b&gt;', $result->get_error_message() );
+		self::assertSame( array(), $this->wpdb->queries );
+	}
+
+	public function test_a_swallowed_write_exception_remains_terminal_after_a_later_save_succeeds(): void {
+		Options::instance()->set( 'archive_start_time', '2026-07-12 10:00:00' );
+		$page = new RetryStatePage();
+		$task = new RetryStateTask( $page );
+		$task->on_process = static function (): void {
+			Options::instance()->set( 'archive_page_write_error', 'Unable to save https://example.test/child/: database error.' );
+			throw new \RuntimeException( 'A page write failed during processing.' );
+		};
+
+		$result = $task->perform();
+
+		self::assertInstanceOf( \WP_Error::class, $result );
+		self::assertStringContainsString( 'https://example.test/child/', $result->get_error_message() );
+		self::assertSame( array( 1, 1 ), $page->saved_attempts );
+		self::assertArrayNotHasKey( 'task', Options::instance()->get( 'archive_status_messages' ) );
+	}
+
+	public function test_an_old_write_failure_does_not_affect_a_completed_export(): void {
+		Options::instance()
+			->set( 'archive_start_time', '2026-07-12 10:00:00' )
+			->set( 'archive_end_time', '2026-07-12 11:00:00' )
+			->set( 'archive_page_write_error', 'A previous export failed.' );
+
+		self::assertTrue( ( new ExhaustedPagesTask() )->perform() );
 	}
 }

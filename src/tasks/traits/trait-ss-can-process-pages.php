@@ -138,10 +138,15 @@ trait canProcessPages {
 	/**
 	 * Process Pages that have to be processed/transferred.
 	 *
-	 * @return bool True when done or only skipped records remain, false when work remains.
+	 * @return bool|\WP_Error True when done, false when work remains, or a page write error.
 	 * @throws \Exception
 	 */
 	public function process_pages() {
+		$page_write_error = $this->get_page_write_error();
+		if ( $page_write_error ) {
+			return $page_write_error;
+		}
+
 		$pages_to_process       = $this->get_pages_to_process();
 		$pages_to_process_count = count( $pages_to_process );
 
@@ -286,6 +291,14 @@ trait canProcessPages {
 				$static_page->set_error_message( $e->getMessage() );
 				$static_page->save();
 			}
+		}
+
+		// A per-page exception handler may have recovered from an unrelated
+		// error after a failed save. Keep that failed write terminal even if a
+		// later write succeeded, especially in the synchronous CLI task loop.
+		$page_write_error = $this->get_page_write_error();
+		if ( $page_write_error ) {
+			return $page_write_error;
 		}
 
 		$total_pages     = $this->get_total_pages();

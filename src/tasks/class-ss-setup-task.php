@@ -17,9 +17,20 @@ class Setup_Task extends Task {
 	/**
 	 * Do the initial setup for generating a static archive
 	 *
-	 * @return boolean true this always completes in one run, so returns true.
+	 * @return true|\WP_Error True when setup succeeds, or a database error.
 	 */
 	public function perform() {
+		// A network export can switch blogs after the normal plugin upgrade ran.
+		if ( ! Page::maybe_upgrade_schema() ) {
+			return new \WP_Error(
+				'pages_schema_upgrade_failed',
+				__( 'Unable to prepare the pages database table for long URLs. Check the database permissions and try the export again.', 'simply-static' )
+			);
+		}
+
+		// The synchronous CLI runner starts setup without Archive::start().
+		$this->options->set( 'archive_page_write_error', null )->save();
+
 		$message = __( 'Setting up', 'simply-static' );
 		$this->save_status_message( $message );
 
@@ -57,9 +68,14 @@ class Setup_Task extends Task {
 		$this->add_origin_and_additional_urls_to_db( $additional_urls );
 		$this->add_additional_files_to_db( $this->options->get( 'additional_files' ) );
 
+		$page_write_error = $this->get_page_write_error();
+		if ( $page_write_error ) {
+			return $page_write_error;
+		}
+
 		do_action( 'ss_after_setup_task' );
 
-		return true;
+		return $this->get_page_write_error() ?: true;
 	}
 
 	/**
@@ -120,8 +136,9 @@ class Setup_Task extends Task {
 						$static_page = Page::query()->find_or_initialize_by( 'url', $cand );
 						$static_page->set_status_message( __( 'Additional URL (regex)', 'simply-static' ) );
 						$static_page->found_on_id = 0;
-						$static_page->save();
-						$added++;
+						if ( $static_page->save() ) {
+							$added++;
+						}
 						break; // already matched one pattern
 					}
 				}

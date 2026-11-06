@@ -53,11 +53,17 @@ final class ArchiveTaskDouble {
 	/** @var bool */
 	public $throw_on_progress = false;
 
+	/** @var callable|null */
+	public $on_perform;
+
 	/** @return mixed */
 	public function perform() {
 		++$this->perform_calls;
 		if ( $this->throwable ) {
 			throw $this->throwable;
+		}
+		if ( $this->on_perform ) {
+			call_user_func( $this->on_perform );
 		}
 
 		return $this->result;
@@ -491,6 +497,7 @@ final class ArchiveCreationJobTest extends UnitTestCase {
 	public function test_start_persists_type_before_filtering_and_resets_stale_archive_state(): void {
 		$this->options
 			->set( 'archive_status_messages', array( 'old' => array( 'message' => 'stale' ) ) )
+			->set( 'archive_page_write_error', 'A previous export failed to save a page.' )
 			->set( 'archive_task_list', array( 'stale_task' ) )
 			->set( 'zip_batch_offset', 90 )
 			->set( 'zip_batch_state', array( 'offset' => 90, 'pending' => true ) )
@@ -513,6 +520,7 @@ final class ArchiveCreationJobTest extends UnitTestCase {
 		self::assertSame( 1, $this->job->unlock_calls );
 		self::assertSame( 5, $this->job->get_current_site_id() );
 		self::assertSame( array(), $this->options->get( 'archive_status_messages' ) );
+		self::assertNull( $this->options->get( 'archive_page_write_error' ) );
 		self::assertSame( '2026-07-12 12:00:00', $this->options->get( 'archive_start_time' ) );
 		self::assertNull( $this->options->get( 'archive_end_time' ) );
 		self::assertNull( $this->options->get( 'zip_batch_offset' ) );
@@ -893,6 +901,99 @@ final class ArchiveCreationJobTest extends UnitTestCase {
 		self::assertSame( 'missing', $this->job->get_current_task() );
 		$this->job->task_objects['cancel'] = false;
 		self::assertFalse( $this->job->run_task( 'cancel' ) );
+	}
+
+	public function test_recorded_page_write_failure_blocks_delivery_before_it_runs(): void {
+		$this->options->set( 'archive_page_write_error', 'Unable to save https://example.test/long-url/: database write failed.' );
+		$delivery = new ArchiveTaskDouble();
+		$delivery->result = true;
+		$this->job->task_objects['transfer_files_locally'] = $delivery;
+
+		self::assertSame( 'cancel', $this->job->run_task( 'transfer_files_locally' ) );
+		self::assertSame( 0, $delivery->perform_calls );
+		self::assertStringContainsString(
+			'https://example.test/long-url/',
+			$this->options->get( 'archive_status_messages' )['error']['message']
+		);
+	}
+
+	public function test_task_exception_keeps_url_markup_as_text_in_the_activity_log(): void {
+		$task = new ArchiveTaskDouble();
+		$task->throwable = new \RuntimeException( 'Unable to save https://example.test/?q=<b>url</b>' );
+		$this->job->task_objects['setup'] = $task;
+
+		self::assertSame( 'cancel', $this->job->run_task( 'setup' ) );
+		self::assertStringContainsString(
+			'&lt;b&gt;url&lt;/b&gt;',
+			$this->options->get( 'archive_status_messages' )['error']['message']
+		);
+	}
+
+	/** @dataProvider pageWriteTaskResults */
+	public function test_ignored_page_write_failure_cancels_instead_of_retrying_or_advancing( bool $task_result ): void {
+		$current = new ArchiveTaskDouble();
+		$current->result = $task_result;
+		$current->on_perform = function (): void {
+			$this->options->set( 'archive_page_write_error', 'Unable to save https://example.test/?q=<b>url</b>: write failed.' );
+		};
+		$delivery = new ArchiveTaskDouble();
+		$this->job->task_objects = array(
+			'fetch_urls'             => $current,
+			'transfer_files_locally' => $delivery,
+		);
+		$this->options->set( 'archive_task_list', array( 'fetch_urls', 'transfer_files_locally' ) );
+
+		self::assertSame( 'cancel', $this->job->run_task( 'fetch_urls' ) );
+		self::assertSame( 1, $current->perform_calls );
+		self::assertSame( 0, $delivery->cleanup_calls );
+		self::assertSame( 0, $delivery->perform_calls );
+		self::assertStringContainsString(
+			'&lt;b&gt;url&lt;/b&gt;',
+			$this->options->get( 'archive_status_messages' )['error']['message']
+		);
+	}
+
+	/** @return array<string,array{bool}> */
+	public function pageWriteTaskResults(): array {
+		return array(
+			'completed task' => array( true ),
+			'incomplete task' => array( false ),
+		);
+	}
+
+	public function test_page_write_failure_runs_cancel_cleanup_without_emitting_success(): void {
+		$this->options
+			->set( 'archive_start_time', '2026-07-12 10:00:00' )
+			->set( 'archive_end_time', null )
+			->set( 'archive_task_list', array( 'fetch_urls' ) );
+		$failed_task = new ArchiveTaskDouble();
+		$failed_task->result = true;
+		$failed_task->on_perform = function (): void {
+			$this->options->set( 'archive_page_write_error', 'Unable to save https://example.test/page/: database write failed.' );
+		};
+		$cancel_task = new ArchiveTaskDouble();
+		$cancel_task->result = true;
+		$job = new ArchiveFailureLifecycleHarness( $this->options );
+		$job->task_objects = array(
+			'fetch_urls' => $failed_task,
+			'cancel'     => $cancel_task,
+		);
+		$completion_results = array();
+		add_action(
+			'ss_completed',
+			static function ( string $result ) use ( &$completion_results ): void {
+				$completion_results[] = $result;
+			}
+		);
+
+		self::assertSame( 'cancel', $job->run_handle() );
+		self::assertSame( array( 'error' ), $completion_results );
+		self::assertSame( 1, $cancel_task->perform_calls );
+		self::assertNull( $job->batch );
+		self::assertSame( array(), $this->options->get( 'archive_task_list' ) );
+		self::assertSame( 1, $job->clear_calls );
+		self::assertSame( 0, $job->dispatch_calls );
+		self::assertArrayNotHasKey( 'done', $this->options->get( 'archive_status_messages' ) );
 	}
 
 	public function test_full_error_lifecycle_runs_cancel_cleanup_without_emitting_success(): void {
