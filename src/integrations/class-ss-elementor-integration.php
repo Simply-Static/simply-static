@@ -47,6 +47,7 @@ class Elementor_Integration extends Integration {
 	 */
 	public function run() {
 		add_filter( 'ss_html_after_restored_attributes', [ $this, 'extract_elementor_settings' ], 20, 2 );
+		add_action( 'elementor/css-file/before_enqueue', [ $this, 'ensure_api_styles_registered' ] );
 
 		// Register Elementor widgets
 		add_action( 'elementor/widgets/register', [ $this, 'register_widgets' ] );
@@ -81,6 +82,34 @@ class Elementor_Integration extends Integration {
 
 		if ( class_exists( 'simply_static_pro\Single' ) ) {
 			add_filter( 'ssp_single_related_attachment_urls', [ $this, 'add_elementor_thumbnails' ], 10, 2 );
+		}
+	}
+
+	/**
+	 * Keep inline post CSS out of Elementor's JSON responses.
+	 *
+	 * Editor saves and previews can render builder content through AJAX or REST
+	 * before wp_enqueue_scripts has registered the frontend stylesheet. Elementor
+	 * then echoes inline CSS ahead of its content buffer, corrupting the response.
+	 * Register its styles so CSS is collected by WordPress instead. This also
+	 * covers cached inline CSS on sites where the print method has since changed.
+	 *
+	 * @return void
+	 */
+	public function ensure_api_styles_registered() {
+		$is_api_request = wp_doing_ajax()
+			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
+			|| ( function_exists( 'wp_is_rest_endpoint' ) && wp_is_rest_endpoint() );
+
+		if ( ! $is_api_request || wp_style_is( 'elementor-frontend', 'registered' ) ) {
+			return;
+		}
+
+		if ( class_exists( '\\Elementor\\Plugin' ) ) {
+			$elementor = \Elementor\Plugin::$instance;
+			if ( $elementor && isset( $elementor->frontend ) ) {
+				$elementor->frontend->register_styles();
+			}
 		}
 	}
 
