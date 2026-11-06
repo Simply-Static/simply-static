@@ -75,20 +75,42 @@ class Fetch_Urls_Task extends Task {
 				return;
 			}
 
-			$success = Url_Fetcher::instance()->fetch( $static_page );
+			/**
+			 * Total HTTP time budget for one page, including fallback requests.
+			 *
+			 * Sharing a deadline prevents an empty response or the unprepared-URL
+			 * fallback from each starting another full timeout on restricted hosts.
+			 *
+			 * @param int|float $timeout Maximum seconds allowed for fetching a page.
+			 * @param Page      $static_page Page being fetched.
+			 */
+			$timeout  = (float) apply_filters( 'simply_static_fetch_timeout', Url_Fetcher::TIMEOUT, $static_page );
+			$deadline = microtime( true ) + max( 0, $timeout );
+			$success  = Url_Fetcher::instance()->fetch( $static_page, true, $deadline );
 		}
 
 		if ( ! $success ) {
-			throw new \RuntimeException( 'Unable to fetch and save URL: ' . $static_page->url );
+			$static_page->file_path = null;
+			throw new Skip_Further_Processing_Exception( $static_page->error_message ?: 'Unable to fetch and save URL: ' . $static_page->url );
 		}
 
 		// Not found? It's maybe a redirection page. Let's try it without our param.
 		if ( $static_page->http_status_code === 404 ) {
-			$success = Url_Fetcher::instance()->fetch( $static_page, false );
+			$success = Url_Fetcher::instance()->fetch( $static_page, false, $deadline );
 
 			if ( ! $success ) {
-				throw new \RuntimeException( 'Unable to fetch and save URL without the page-handler parameter: ' . $static_page->url );
+				$static_page->file_path = null;
+				throw new Skip_Further_Processing_Exception( $static_page->error_message ?: 'Unable to fetch and save URL without the page-handler parameter: ' . $static_page->url );
 			}
+		}
+
+		// A busy origin can return a temporary HTTP error without a transport
+		// failure. Keep the page pending and yield so the existing retry allowance
+		// can recover it instead of marking a missing file as successfully fetched.
+		$status_code = (int) $static_page->http_status_code;
+		if ( in_array( $status_code, array( 408, 429 ), true ) || ( $status_code >= 500 && $status_code <= 599 ) ) {
+			$static_page->file_path = null;
+			throw new Skip_Further_Processing_Exception( sprintf( 'Temporary HTTP %d response when fetching URL: %s', $status_code, $static_page->url ) );
 		}
 
 		// If we get a 30x redirect...

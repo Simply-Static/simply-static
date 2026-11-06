@@ -80,6 +80,47 @@ trait canProcessPages {
 	}
 
 	/**
+	 * Restore claims left by a worker that ended before completing a page.
+	 *
+	 * The archive job calls this only while it owns the process lock, before
+	 * starting a task. A successful page clears fetch_attempts; a current
+	 * processing timestamp with attempts remaining therefore identifies an
+	 * interrupted claim, including an interrupted final attempt.
+	 *
+	 * @return int Number of interrupted claims restored.
+	 */
+	public function recover_interrupted_pages() {
+		if ( ! in_array( $this->processing_column, array( 'last_checked_at', 'last_transferred_at' ), true ) ) {
+			throw new \InvalidArgumentException( 'A valid page processing column is required.' );
+		}
+
+		$start_time = $this->get_start_time();
+		if ( ! is_string( $start_time ) || '' === $start_time ) {
+			return 0;
+		}
+
+		global $wpdb;
+		$table_name = Page::table_name();
+		// An interrupted fetch may have saved a partial file before it stopped.
+		// Transfer retries still need their existing generated file.
+		$clear_file_path = 'fetch_urls' === static::$task_name && 'last_checked_at' === $this->processing_column ? ', file_path = NULL' : '';
+		$recovered = $wpdb->query( $wpdb->prepare(
+			"UPDATE {$table_name} SET {$this->processing_column} = NULL{$clear_file_path} WHERE {$this->processing_column} >= %s AND fetch_attempts > 0",
+			$start_time
+		) );
+
+		if ( false === $recovered ) {
+			throw new \RuntimeException( 'Unable to restore interrupted page processing claims.' );
+		}
+
+		if ( $recovered > 0 ) {
+			Util::debug_log( 'Restored ' . $recovered . ' interrupted page processing claims for ' . static::$task_name . '.' );
+		}
+
+		return (int) $recovered;
+	}
+
+	/**
 	 * Maximum number of seconds process_pages() should run before yielding
 	 * back to the background process dispatcher.
 	 *
@@ -142,8 +183,9 @@ trait canProcessPages {
 
 		// Time-limit awareness: yield back to handle() before the server
 		// hard-kills the PHP process on restricted hosting.
-		$batch_start    = time();
-		$max_batch_time = (int) apply_filters( 'simply_static_max_batch_time', $this->max_batch_time );
+		$batch_start          = time();
+		$max_batch_time       = (int) apply_filters( 'simply_static_max_batch_time', $this->max_batch_time );
+		$had_processing_error = false;
 
  	while ( $static_page = array_shift( $pages_to_process ) ) {
 			// Yield if we are approaching the time limit.
@@ -154,6 +196,12 @@ trait canProcessPages {
 
 			if ( method_exists( $this, 'check_if_running' ) ) {
 				$this->check_if_running();
+			}
+
+			// A task can begin near the end of an existing worker window.
+			// Check that shared budget before claiming another page.
+			if ( ! $this->can_continue_processing() ) {
+				break;
 			}
 
 			// Atomically claim this page so that concurrent workers (e.g.
@@ -200,31 +248,41 @@ trait canProcessPages {
 				// cron healthcheck to spawn a concurrent worker.
 				$this->maybe_refresh_process_lock();
 			} catch ( Skip_Further_Processing_Exception $e ) {
+				$had_processing_error = true;
 				Util::debug_log( 'Encountered Processing Error. We are skipping further until next iteration. Error: ' . $e->getMessage() );
 				// Reset the claim so the page can be retried on next iteration.
 				$wpdb->query( $wpdb->prepare(
 					"UPDATE {$table_name} SET {$this->processing_column} = NULL WHERE id = %d",
 					$static_page->id
 				) );
+				// Keep the in-memory record in sync so save() cannot restore the claim.
+				$static_page->{$this->processing_column} = null;
 				$static_page->set_error_message( $e->getMessage() );
 				$static_page->save();
+				$this->maybe_yield_process();
 				break;
 			} catch ( \Exception $e ) {
+				$had_processing_error = true;
 				Util::debug_log( 'Page URL: ' . $static_page->url . ' not being processed. Error: ' . $e->getMessage() );
 				// Reset the claim so the page can be retried on next iteration.
 				$wpdb->query( $wpdb->prepare(
 					"UPDATE {$table_name} SET {$this->processing_column} = NULL WHERE id = %d",
 					$static_page->id
 				) );
+				// Keep the in-memory record in sync so save() cannot restore the claim.
+				$static_page->{$this->processing_column} = null;
 				$static_page->set_error_message( $e->getMessage() );
 				$static_page->save();
 			} catch ( \Throwable $e ) {
+				$had_processing_error = true;
 				Util::debug_log( 'Page URL: ' . $static_page->url . ' not being processed. Error: ' . $e->getMessage() );
 				// Reset the claim so the page can be retried on next iteration.
 				$wpdb->query( $wpdb->prepare(
 					"UPDATE {$table_name} SET {$this->processing_column} = NULL WHERE id = %d",
 					$static_page->id
 				) );
+				// Keep the in-memory record in sync so save() cannot restore the claim.
+				$static_page->{$this->processing_column} = null;
 				$static_page->set_error_message( $e->getMessage() );
 				$static_page->save();
 			}
@@ -236,7 +294,9 @@ trait canProcessPages {
 		$this->save_status_message( $message );
 		Util::debug_log( "Total pages: " . $total_pages . '; Pages remaining: ' . ( $total_pages - $processed_pages ) );
 
-		return $processed_pages >= $total_pages;
+		// Exhausted attempts are excluded from totals. Revisit an error batch
+		// once more so the empty-queue branch records its skipped-page warning.
+		return ! $had_processing_error && $processed_pages >= $total_pages;
 	}
 
 	/**
@@ -481,6 +541,32 @@ trait canProcessPages {
 		}
 
 		return $query;
+	}
+
+	/** Respect an active worker's limits while allowing direct task calls. */
+	protected function can_continue_processing() {
+		try {
+			$job = Plugin::instance()->get_archive_creation_job();
+			if ( $job && method_exists( $job, 'is_worker_active' ) && $job->is_worker_active() && method_exists( $job, 'should_continue' ) ) {
+				return $job->should_continue();
+			}
+		} catch ( \Throwable $e ) {
+			// Direct task callers may not have an initialized background job.
+		}
+
+		return true;
+	}
+
+	/** End this worker window so transient failures retry in a later request. */
+	protected function maybe_yield_process() {
+		try {
+			$job = Plugin::instance()->get_archive_creation_job();
+			if ( $job && method_exists( $job, 'request_yield' ) ) {
+				$job->request_yield();
+			}
+		} catch ( \Throwable $e ) {
+			// Direct task callers may not have a background job to yield.
+		}
 	}
 
 	/**

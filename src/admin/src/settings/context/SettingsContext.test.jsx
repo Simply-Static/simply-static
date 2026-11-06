@@ -22,6 +22,7 @@ jest.mock( '../../hooks/useInterval', () => ( {
 const { act, render, waitFor } = require( '@testing-library/react' );
 const { useContext } = require( '@wordpress/element' );
 const apiFetch = require( '@wordpress/api-fetch' ).default;
+const useInterval = require( '../../hooks/useInterval' ).default;
 const SettingsContextProvider = require( './SettingsContext' ).default;
 const {
 	SettingsContext,
@@ -49,7 +50,7 @@ describe( 'parseActionResponse', () => {
 	} );
 } );
 
-describe( 'SettingsContext maintenance actions', () => {
+describe( 'SettingsContext actions and polling', () => {
 	let currentContext;
 
 	function CaptureContext() {
@@ -60,6 +61,7 @@ describe( 'SettingsContext maintenance actions', () => {
 	beforeEach( () => {
 		currentContext = null;
 		apiFetch.mockReset();
+		useInterval.mockClear();
 		apiFetch.mockImplementation( ( request ) => {
 			if ( request.path === '/simplystatic/v1/settings' && ! request.method ) {
 				return Promise.resolve( { delivery_method: 'local' } );
@@ -86,6 +88,57 @@ describe( 'SettingsContext maintenance actions', () => {
 			} )
 		);
 	}
+
+	function latestStatusPoll() {
+		return useInterval.mock.calls.filter( ( [ , delay ] ) => delay === 5000 ).pop()[ 0 ];
+	}
+
+	it( 'keeps one status request pending across interval ticks and renders', async () => {
+		await renderProvider();
+		await act( async () => currentContext.setIsRunning( true ) );
+
+		let finishPoll;
+		apiFetch.mockImplementationOnce( () => new Promise( ( resolve ) => {
+			finishPoll = resolve;
+		} ) );
+
+		let pendingPoll;
+		await act( async () => {
+			pendingPoll = latestStatusPoll()();
+			await latestStatusPoll()();
+			currentContext.setIsPaused( true );
+		} );
+		await act( async () => latestStatusPoll()() );
+		expect( apiFetch.mock.calls.filter( ( [ request ] ) => request.path === '/simplystatic/v1/is-running' ) ).toHaveLength( 2 );
+
+		await act( async () => {
+			finishPoll( JSON.stringify( { running: true, paused: false } ) );
+			await pendingPoll;
+		} );
+		expect( currentContext.isRunning ).toBe( true );
+		expect( currentContext.isPaused ).toBe( false );
+
+		await act( async () => latestStatusPoll()() );
+		expect( apiFetch.mock.calls.filter( ( [ request ] ) => request.path === '/simplystatic/v1/is-running' ) ).toHaveLength( 3 );
+	} );
+
+	it.each( [
+		[ 'transport error', () => Promise.reject( new Error( 'Gateway timeout' ) ) ],
+		[ 'invalid JSON', () => Promise.resolve( 'Bad Gateway' ) ],
+		[ 'server error', () => Promise.resolve( JSON.stringify( { status: 500, message: 'Unavailable' } ) ) ],
+	] )( 'retries polling after a %s while preserving the last state', async ( label, response ) => {
+		await renderProvider();
+		await act( async () => currentContext.setIsRunning( true ) );
+		apiFetch.mockImplementationOnce( response );
+
+		await act( async () => latestStatusPoll()() );
+		expect( currentContext.isRunning ).toBe( true );
+		expect( currentContext.isPaused ).toBe( false );
+
+		await act( async () => latestStatusPoll()() );
+		expect( currentContext.isRunning ).toBe( false );
+		expect( apiFetch.mock.calls.filter( ( [ request ] ) => request.path === '/simplystatic/v1/is-running' ) ).toHaveLength( 3 );
+	} );
 
 	it( 'marks portable imports and refreshes the server-sanitized settings', async () => {
 		await renderProvider();

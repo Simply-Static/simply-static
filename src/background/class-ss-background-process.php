@@ -97,18 +97,25 @@ abstract class Background_Process extends Async_Request {
 	protected $seconds_between_batches = 0;
 
 	/**
-	 * Whether this dispatch is currently running inline (not via loopback).
+	 * Whether this PHP request has already scheduled an inline worker window.
 	 *
 	 * @var bool
 	 */
 	protected $is_inline = false;
 
 	/**
-	 * Whether an inline shutdown continuation has already been registered.
+	 * Whether a worker window has already started in this PHP request.
 	 *
 	 * @var bool
 	 */
-	protected $inline_dispatch_pending = false;
+	protected $worker_window_started = false;
+
+	/**
+	 * Whether the current worker should yield after persisting its task state.
+	 *
+	 * @var bool
+	 */
+	protected $yield_requested = false;
 
 	/**
 	 * Whether response finalization was attempted before inline work began.
@@ -401,39 +408,34 @@ abstract class Background_Process extends Async_Request {
 	 *
 	 * This is a fallback for environments where the loopback wp_remote_post()
 	 * to admin-ajax.php fails (DNS, reverse-proxy, firewall, or hosting issues).
-	 * The queue is processed in the current PHP process after the response has
-	 * been sent, keeping the UI responsive.
+	 * One bounded worker window is processed in the current PHP process after
+	 * the response has been sent. Further work resumes in a fresh request via
+	 * the status poll or scheduled cron healthcheck, freeing this PHP worker.
 	 *
 	 * @return bool True to indicate inline dispatch was scheduled.
 	 */
 	protected function dispatch_inline() {
-		// Multiple callers can request a continuation before shutdown begins.
-		// Keep a single pending callback, while allowing the callback itself to
-		// schedule the next bounded worker window when queue work remains.
-		if ( $this->inline_dispatch_pending ) {
+		// Chaining shutdown callbacks keeps every window in the same PHP request,
+		// resetting its time budget without releasing the host's PHP worker. Keep
+		// only one window per request, including an async worker whose next remote
+		// dispatch failed; dispatch() already scheduled recovery.
+		if ( $this->is_inline || $this->worker_window_started ) {
 			return true;
 		}
 
-		$this->is_inline               = true;
-		$this->inline_dispatch_pending = true;
+		$this->is_inline = true;
 
 		// Prevent wp_die() from terminating the shutdown function.
 		// handle() calls maybe_wp_die() at the end, which would otherwise
-		// kill execution before chained batches can run.
+		// kill execution before the worker can finish its cleanup.
 		add_filter( $this->identifier . '_wp_die', '__return_false' );
 
 		$process        = $this;
 		$target_site_id = $this->current_site_id;
 
 		$this->register_inline_shutdown_handler( function () use ( $process, $target_site_id ) {
-			// Release the pending slot before handling. If handle() reaches its
-			// time or memory boundary with work left, dispatch_inline() can now
-			// register exactly one immediate continuation.
-			$process->inline_dispatch_pending = false;
-
 			// A paused queue must remain dormant until resume() explicitly
-			// dispatches it again. Continuing inline here would spin through
-			// shutdown callbacks without doing useful work.
+			// dispatches it again in another request.
 			if ( $process->is_paused() ) {
 				return;
 			}
@@ -904,6 +906,7 @@ abstract class Background_Process extends Async_Request {
 	public function lock_process( $reset_start_time = true ) {
 		if ( $reset_start_time ) {
 			$this->start_time = time(); // Set start time of current process.
+			$this->yield_requested = false;
 
 			$database_lock = $this->acquire_database_lock();
 			if ( false === $database_lock ) {
@@ -1278,6 +1281,7 @@ abstract class Background_Process extends Async_Request {
 		if ( false === $this->lock_process() ) {
 			return $this->maybe_wp_die();
 		}
+		$this->worker_window_started = true;
 
 		if ( $this->is_cancelled() ) {
 			Util::debug_log( 'Background process cancelled before handling batch. Clearing queue.' );
@@ -1657,11 +1661,40 @@ abstract class Background_Process extends Async_Request {
 	}
 
 	/**
+	 * Whether this PHP request is currently executing its worker window.
+	 *
+	 * Task callers outside a worker can use this to avoid applying an unstarted
+	 * worker's time budget. A released worker remains inactive while waiting for
+	 * a future request to resume the queue.
+	 *
+	 * @return bool
+	 */
+	public function is_worker_active() {
+		return $this->worker_window_started && ! $this->process_lock_released;
+	}
+
+	/**
+	 * End this worker window after the current task state has been persisted.
+	 *
+	 * The queued task can resume in a fresh worker without immediately retrying
+	 * the same failing request in this worker.
+	 *
+	 * @return void
+	 */
+	public function request_yield() {
+		$this->yield_requested = true;
+	}
+
+	/**
 	 * Should any processing continue?
 	 *
 	 * @return bool
 	 */
 	public function should_continue() {
+		if ( $this->yield_requested ) {
+			return false;
+		}
+
 		/**
 		 * Filter whether the current background process should continue running the task
 		 * if there is data to be processed.

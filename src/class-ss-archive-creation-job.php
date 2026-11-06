@@ -392,6 +392,12 @@ class Archive_Creation_Job extends Background_Process {
 				return $task_name;
 			}
 
+			// Only the worker owning the export lock may reclaim interrupted pages.
+			// Status polling and task inspection must never release a live claim.
+			if ( method_exists( $task, 'recover_interrupted_pages' ) && $this->owns_process_lock() ) {
+				$task->recover_interrupted_pages();
+			}
+
 			Util::debug_log( 'Performing task: ' . $task_name );
 			$is_done = $task->perform();
 
