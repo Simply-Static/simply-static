@@ -128,7 +128,8 @@ final class WpTestEnvironment {
 	public static $errors = array();
 
 	public static function reset(): void {
-		self::$options          = array();
+		// Most unit tests model an installed plugin; migration tests remove this.
+		self::$options          = array( 'simply_static_pages_schema_version' => '1' );
 		self::$site_options     = array();
 		self::$transients       = array();
 		self::$site_transients  = array();

@@ -9,6 +9,26 @@ use Simply_Static\Tests\Support\UnitTestCase;
 use Simply_Static\Tests\Support\WpTestEnvironment as WpEnv;
 
 final class MigrationWpdb {
+	public function get_var( $query ) {
+		return null;
+	}
+
+	public function prepare( $query, ...$args ): string {
+		return vsprintf( str_replace( '%s', "'%s'", $query ), $args );
+	}
+
+	public function esc_like( $value ): string {
+		return addcslashes( $value, '_%\\' );
+	}
+
+	public function get_row( $query, $output = null ) {
+		return array( 'Type' => 'text' );
+	}
+
+	public function get_results( $query, $output = null ): array {
+		return array( array( 'Column_name' => 'url', 'Sub_part' => '191', 'Non_unique' => '1' ) );
+	}
+
 	public function get_charset_collate(): string {
 		return '';
 	}

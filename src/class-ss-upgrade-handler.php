@@ -303,6 +303,8 @@ class Upgrade_Handler {
 				self::$options
 					->set( 'version', SIMPLY_STATIC_VERSION )
 					->save();
+			} else {
+				Page::maybe_upgrade_schema();
 			}
 		}
 	}

@@ -12,6 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Page extends Model {
 
+	const SCHEMA_VERSION = '1';
+	const SCHEMA_VERSION_OPTION = 'simply_static_pages_schema_version';
+
 	/**
 	 * Protected status codes.
 	 *
@@ -37,9 +40,9 @@ class Page extends Model {
 		'post_id'             => 'BIGINT(20) UNSIGNED NULL',
 		'found_on_id'         => 'BIGINT(20) UNSIGNED NULL',
 		'site_id'             => 'BIGINT(20) UNSIGNED NULL',
-		'url'                 => 'VARCHAR(255) NOT NULL',
+		'url'                 => 'TEXT NOT NULL',
 		'redirect_url'        => 'TEXT NULL',
-		'file_path'           => 'VARCHAR(255) NULL',
+		'file_path'           => 'TEXT NULL',
 		'http_status_code'    => 'SMALLINT(20) NULL',
 		'content_type'        => 'VARCHAR(255) NULL',
 		'content_hash'        => 'BINARY(20) NULL',
@@ -62,7 +65,7 @@ class Page extends Model {
 	 */
 	protected static $indexes = array(
 		'PRIMARY KEY  (id)',
-		'KEY url (url)',
+		'KEY url (url(191))',
 		'KEY last_checked_at (last_checked_at)',
 		'KEY last_modified_at (last_modified_at)',
 		'KEY last_transferred_at (last_transferred_at)'
@@ -74,6 +77,221 @@ class Page extends Model {
 	 * @var string
 	 */
 	protected static $primary_key = 'id';
+
+	/**
+	 * Upgrade the current site's table independently of the plugin version.
+	 *
+	 * Use a blog option rather than network settings: each multisite blog owns
+	 * its own pages table and must complete its own migration.
+	 *
+	 * @return bool Whether the pages schema is ready.
+	 */
+	public static function maybe_upgrade_schema() {
+		if ( self::SCHEMA_VERSION === get_option( self::SCHEMA_VERSION_OPTION ) ) {
+			return true;
+		}
+
+		return static::create_or_update_table();
+	}
+
+	/**
+	 * Prepare a switched multisite blog before a lookup primes wpdb metadata.
+	 * Pro can prepare builds before the setup task or archive start hook runs.
+	 *
+	 * @return Query
+	 */
+	public static function query() {
+		static::maybe_upgrade_schema();
+		return parent::query();
+	}
+
+	/**
+	 * Create the pages table or widen existing URL storage without losing data.
+	 *
+	 * dbDelta ignores index prefix changes and can reset a column's charset.
+	 * Convert the URL, path and index together, preserving each collation,
+	 * before dbDelta synchronizes the remaining table definition.
+	 *
+	 * @return bool Whether the URL/path columns and URL index are ready.
+	 */
+	public static function create_or_update_table() {
+		global $wpdb;
+
+		delete_option( self::SCHEMA_VERSION_OPTION );
+		$table = self::table_name();
+		$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) );
+
+		if ( $exists ) {
+			$changes = array();
+			foreach ( array( 'url' => 'NOT NULL', 'file_path' => 'NULL' ) as $name => $nullable ) {
+				$column = $wpdb->get_row( "SHOW FULL COLUMNS FROM `{$table}` WHERE Field = '{$name}'", ARRAY_A );
+				if ( ! $column || ! empty( $wpdb->last_error ) ) {
+					return false;
+				}
+				if ( ! self::is_text_column_ready( $column ) ) {
+					$collation = $column['Collation'];
+					if ( ! is_string( $collation ) || ! preg_match( '/\A[a-z0-9]+_[a-z0-9_]+\z/i', $collation ) ) {
+						return false;
+					}
+					$charset = explode( '_', $collation )[0];
+					$changes[] = "MODIFY `{$name}` TEXT CHARACTER SET {$charset} COLLATE {$collation} {$nullable}";
+				}
+			}
+
+			$indexes = $wpdb->get_results( "SHOW INDEX FROM `{$table}` WHERE Key_name = 'url'", ARRAY_A );
+			if ( ! empty( $wpdb->last_error ) ) {
+				return false;
+			}
+
+			if ( ! self::is_url_index_ready( $indexes ) ) {
+				if ( $indexes ) {
+					$changes[] = 'DROP INDEX `url`';
+				}
+				$changes[] = 'ADD KEY `url` (`url`(191))';
+			}
+			if ( $changes ) {
+				$updated = $wpdb->query( "ALTER TABLE `{$table}` " . implode( ', ', $changes ) );
+				if ( false === $updated ) {
+					return false;
+				}
+			}
+		} elseif ( ! empty( $wpdb->last_error ) ) {
+			return false;
+		}
+
+		parent::create_or_update_table();
+
+		// dbDelta reports intended changes even if SQL fails. Verify the schema
+		// before marking this blog complete so a later request can retry.
+		foreach ( array( 'url', 'file_path' ) as $name ) {
+			$column = $wpdb->get_row( "SHOW COLUMNS FROM `{$table}` WHERE Field = '{$name}'", ARRAY_A );
+			if ( ! self::is_text_column_ready( $column ) || ! empty( $wpdb->last_error ) ) {
+				return false;
+			}
+		}
+		$indexes = $wpdb->get_results( "SHOW INDEX FROM `{$table}` WHERE Key_name = 'url'", ARRAY_A );
+		if ( ! self::is_url_index_ready( $indexes ) ) {
+			return false;
+		}
+
+		update_option( self::SCHEMA_VERSION_OPTION, self::SCHEMA_VERSION, false );
+		return true;
+	}
+
+	/** @return bool Whether the column can store at least a full TEXT value. */
+	private static function is_text_column_ready( $column ) {
+		return is_array( $column ) && isset( $column['Type'] )
+			&& in_array( strtolower( $column['Type'] ), array( 'text', 'mediumtext', 'longtext' ), true );
+	}
+
+	/**
+	 * Check that the URL lookup index is non-unique and fits utf8mb4 key limits.
+	 *
+	 * @param array|null $indexes Rows returned by SHOW INDEX.
+	 * @return bool Whether the expected URL prefix index exists.
+	 */
+	private static function is_url_index_ready( $indexes ) {
+		return is_array( $indexes ) && 1 === count( $indexes )
+			&& 'url' === $indexes[0]['Column_name']
+			&& 191 === (int) $indexes[0]['Sub_part']
+			&& 1 === (int) $indexes[0]['Non_unique'];
+	}
+
+	/**
+	 * Persist a page without silently discarding URLs or database errors.
+	 *
+	 * Reporting here also covers integrations that do not inspect save()'s
+	 * return value. Keep dirty fields for retries. Under WP-CLI, throw
+	 * after reporting so the command can clean up and exit with a failure code.
+	 *
+	 * @return bool Whether the page was saved.
+	 * @throws \RuntimeException When a page write fails under WP-CLI.
+	 */
+	public function save() {
+		if ( ! static::maybe_upgrade_schema() ) {
+			return $this->report_save_failure(
+				__( 'Unable to upgrade the pages database table. Check the database permissions and try again.', 'simply-static' )
+			);
+		}
+
+		// MySQL TEXT is limited by bytes, including for multibyte URLs. Sites
+		// that already use a wider TEXT type can retain their larger URLs.
+		$url_bytes = strlen( (string) $this->url );
+		if ( $url_bytes > 65535 ) {
+			global $wpdb;
+			$limit = 65535;
+			if ( method_exists( $wpdb, 'get_col_length' ) ) {
+				$length = $wpdb->get_col_length( static::table_name(), 'url' );
+				if ( is_array( $length ) && 'byte' === ( $length['type'] ?? null ) ) {
+					$limit = max( $limit, (int) ( $length['length'] ?? 0 ) );
+				}
+			}
+			if ( $url_bytes > $limit ) {
+				return $this->report_save_failure(
+					sprintf(
+						/* translators: %s: maximum URL length in bytes. */
+						__( 'The URL exceeds the storage limit of %s bytes.', 'simply-static' ),
+						number_format( $limit )
+					)
+				);
+			}
+		}
+
+		if ( ! parent::save() ) {
+			global $wpdb;
+			return $this->report_save_failure( (string) ( $wpdb->last_error ?? '' ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Make a failed page write visible even when the page row does not exist.
+	 *
+	 * @param string $reason Database or validation error captured before logging.
+	 * @return false
+	 */
+	protected function report_save_failure( $reason ) {
+		if ( '' === trim( $reason ) ) {
+			$reason = __( 'The database rejected the write. A field may be too long or contain invalid data; check the database schema and permissions.', 'simply-static' );
+		}
+
+		$message = sprintf(
+			/* translators: 1: page URL, 2: database table, 3: error reason. */
+			__( 'Unable to save URL "%1$s" to %2$s: %3$s', 'simply-static' ),
+			(string) $this->url,
+			self::table_name(),
+			$reason
+		);
+		// Do not let URL or database text inject extra log lines or CLI controls.
+		$message = preg_replace( '/[\x00-\x1F\x7F]/', ' ', $message );
+		Util::debug_log( $message );
+
+		$options = Options::instance();
+		$key     = 'page_write_error_' . md5( (string) $this->url );
+		$messages = Util::add_archive_status_message(
+			$options->get( 'archive_status_messages' ),
+			$key,
+			esc_html( $message )
+		);
+		$options->set( 'archive_status_messages', $messages );
+
+		// The job checks this at task boundaries before starting delivery, so an
+		// incomplete queue cannot be reported as a successful export.
+		$is_exporting = null !== $options->get( 'archive_start_time' ) && null === $options->get( 'archive_end_time' );
+		if ( $is_exporting && ! $options->get( 'archive_page_write_error' ) ) {
+			$options->set( 'archive_page_write_error', $message );
+		}
+		$options->save();
+
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			\WP_CLI::warning( $message );
+			// Build/single preparation may write pages before the archive starts.
+			throw new \RuntimeException( $message );
+		}
+
+		return false;
+	}
 
 	/**
 	 * Claim a pending page and persist its retry attempt in the same write.
@@ -104,6 +322,9 @@ class Page extends Model {
 			$start_time,
 			$attempts
 		) );
+		if ( false === $claimed ) {
+			return $this->report_save_failure( (string) ( $wpdb->last_error ?? '' ) );
+		}
 		if ( ! $claimed ) {
 			return false;
 		}
