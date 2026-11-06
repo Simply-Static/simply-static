@@ -311,7 +311,22 @@ function check_ajax_referer( $action = -1, $query_arg = false, $stop = true ) {
 }
 
 function wp_doing_ajax() {
-	return false;
+	return WpEnv::$doing_ajax;
+}
+
+function wp_is_rest_endpoint() {
+	return WpEnv::$rest_endpoint;
+}
+
+function wp_register_style( $handle, $src, $deps = array(), $ver = false, $media = 'all' ) {
+	if ( ! isset( WpEnv::$registered_styles[ $handle ] ) ) {
+		WpEnv::$registered_styles[ $handle ] = compact( 'src', 'deps', 'ver', 'media' );
+	}
+	return true;
+}
+
+function wp_style_is( $handle, $status = 'enqueued' ) {
+	return 'registered' === $status && isset( WpEnv::$registered_styles[ $handle ] );
 }
 
 function wp_generate_uuid4() {
