@@ -1121,6 +1121,19 @@ abstract class Background_Process extends Async_Request {
 	}
 
 	/**
+	 * Whether this worker holds an exclusive lock suitable for claim recovery.
+	 *
+	 * Transient fallback locks can be overwritten by overlapping workers. They
+	 * allow ordinary exports to continue, but cannot safely authorize releasing
+	 * page claims that may still belong to another active worker.
+	 *
+	 * @return bool
+	 */
+	protected function has_exclusive_process_lock() {
+		return $this->database_lock_acquired && ! $this->process_lock_released && $this->owns_process_lock();
+	}
+
+	/**
 	 * Check whether a process lock is older than the configured lock duration.
 	 *
 	 * @param string $lock_value Current lock transient value.

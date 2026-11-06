@@ -9,6 +9,7 @@ class Fetch_Urls_Task extends Task {
 
 	use canProcessPages {
 		get_generate_type as parent_get_generate_type;
+		recover_interrupted_pages as protected parent_recover_interrupted_pages;
 	}
 
 	/**
@@ -42,6 +43,71 @@ class Fetch_Urls_Task extends Task {
 		$this->archive_start_time = $this->options->get( 'archive_start_time' );
 		$this->processing_column  = 'last_checked_at';
 		$this->needs_file_path    = false;
+	}
+
+	/**
+	 * Remove unfinished fetch artifacts before releasing their processing claims.
+	 *
+	 * Full ZIP exports include files directly from disk. Clearing only file_path
+	 * would leave an interrupted final attempt's unprocessed HTML in that ZIP.
+	 * Keep the record intact if cleanup cannot safely finish.
+	 *
+	 * @return int Number of interrupted claims restored.
+	 */
+	public function recover_interrupted_pages() {
+		$start_time = $this->get_start_time();
+		if ( ! is_string( $start_time ) || '' === $start_time ) {
+			return 0;
+		}
+
+		$pages = Page::query()
+			->where( 'last_checked_at >= ?', $start_time )
+			->where( 'fetch_attempts > 0' )
+			->where( 'file_path IS NOT NULL' )
+			->where( "file_path != ''" )
+			->find();
+		if ( null === $pages ) {
+			throw new \RuntimeException( 'Unable to find interrupted fetch artifacts for cleanup.' );
+		}
+
+		foreach ( $pages as $page ) {
+			$relative_path = Util::normalize_slashes( (string) $page->file_path );
+			if ( false !== strpos( $relative_path, "\0" ) || '/' === substr( $relative_path, 0, 1 ) || preg_match( '/^[A-Za-z]:/', $relative_path ) || in_array( '..', explode( '/', $relative_path ), true ) ) {
+				throw new \RuntimeException( 'Refusing to remove an unsafe interrupted fetch path: ' . $relative_path );
+			}
+
+			$file = Util::combine_path( $this->archive_dir, $relative_path );
+			if ( ! file_exists( $file ) && ! is_link( $file ) ) {
+				continue;
+			}
+
+			$archive_path = realpath( $this->archive_dir );
+			$real_file    = realpath( $file );
+			$archive_path = false === $archive_path ? '' : rtrim( Util::normalize_slashes( $archive_path ), '/' ) . '/';
+			$real_file    = false === $real_file ? '' : Util::normalize_slashes( $real_file );
+			if ( '\\' === DIRECTORY_SEPARATOR ) {
+				$archive_path = strtolower( $archive_path );
+				$real_file    = strtolower( $real_file );
+			}
+			if ( '' === $archive_path || '' === $real_file || 0 !== strpos( $real_file, $archive_path ) || ! is_file( $file ) ) {
+				throw new \RuntimeException( 'Refusing to remove an interrupted fetch file outside the archive or a non-file: ' . $relative_path );
+			}
+
+			$completed_aliases = Page::query()
+				->where( 'file_path = ?', $page->file_path )
+				->where( 'last_checked_at >= ?', $start_time )
+				->where( 'fetch_attempts = 0' )
+				->count();
+			if ( null === $completed_aliases || (int) $completed_aliases > 0 ) {
+				throw new \RuntimeException( 'Unable to safely remove an interrupted fetch file shared with a completed page: ' . $relative_path );
+			}
+
+			if ( ! @unlink( $file ) ) {
+				throw new \RuntimeException( 'Unable to remove an interrupted fetch file: ' . $relative_path );
+			}
+		}
+
+		return $this->parent_recover_interrupted_pages();
 	}
 
 	protected function process_page( $static_page ) {

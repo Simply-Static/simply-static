@@ -144,6 +144,10 @@ class BackgroundStateProcess extends Background_Process {
 		return $this->owns_process_lock();
 	}
 
+	public function exclusive_lock_for_test(): bool {
+		return $this->has_exclusive_process_lock();
+	}
+
 	public function lock_is_stale_for_test( string $value ): bool {
 		return $this->is_process_lock_stale( $value );
 	}
@@ -743,6 +747,45 @@ final class BackgroundProcessStateTest extends UnitTestCase {
 		self::assertFalse( $owner->owns_lock_for_test() );
 		self::assertContains( 'wp_state_process_process_locked', WpEnv::$action_log );
 		self::assertContains( 'wp_state_process_process_unlocked', WpEnv::$action_log );
+	}
+
+	public function test_claim_recovery_requires_an_owned_unreleased_advisory_lock(): void {
+		$this->wpdb->database_lock_result = '1';
+		$owner = new BackgroundStateProcess();
+		$other = new BackgroundStateProcess();
+
+		self::assertFalse( $owner->exclusive_lock_for_test() );
+		self::assertTrue( $owner->lock_process() );
+		self::assertTrue( $owner->exclusive_lock_for_test() );
+		self::assertFalse( $other->exclusive_lock_for_test() );
+
+		$this->wpdb->database_lock_result = '0';
+		self::assertFalse( $other->lock_process() );
+		self::assertFalse( $other->exclusive_lock_for_test() );
+		self::assertTrue( $owner->exclusive_lock_for_test() );
+
+		$owned_value = WpEnv::$site_transients['wp_state_process_process_lock'];
+		WpEnv::$site_transients['wp_state_process_process_lock'] = microtime() . ':another-worker';
+		self::assertFalse( $owner->exclusive_lock_for_test() );
+		WpEnv::$site_transients['wp_state_process_process_lock'] = $owned_value;
+
+		$owner->unlock_for_test();
+		self::assertFalse( $owner->exclusive_lock_for_test() );
+	}
+
+	public function test_overlapping_transient_fallback_workers_cannot_authorize_claim_recovery(): void {
+		$first = new BackgroundStateProcess();
+		$second = new BackgroundStateProcess();
+
+		// Unsupported advisory locks retain the existing export fallback.
+		self::assertTrue( $first->lock_process() );
+		self::assertTrue( $first->owns_lock_for_test() );
+		self::assertFalse( $first->exclusive_lock_for_test() );
+		self::assertTrue( $second->lock_process() );
+		self::assertTrue( $second->owns_lock_for_test() );
+		self::assertFalse( $first->owns_lock_for_test() );
+		self::assertFalse( $first->exclusive_lock_for_test() );
+		self::assertFalse( $second->exclusive_lock_for_test() );
 	}
 
 	public function test_stale_and_malformed_lock_values_are_classified_without_releasing_active_foreign_locks(): void {

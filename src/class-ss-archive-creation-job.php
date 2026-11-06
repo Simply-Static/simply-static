@@ -392,9 +392,9 @@ class Archive_Creation_Job extends Background_Process {
 				return $task_name;
 			}
 
-			// Only the worker owning the export lock may reclaim interrupted pages.
-			// Status polling and task inspection must never release a live claim.
-			if ( method_exists( $task, 'recover_interrupted_pages' ) && $this->owns_process_lock() ) {
+			// Recovery requires an exclusive advisory lock. Transient-only hosts
+			// keep exporting without reclaiming another worker's potentially live pages.
+			if ( method_exists( $task, 'recover_interrupted_pages' ) && $this->has_exclusive_process_lock() ) {
 				$task->recover_interrupted_pages();
 			}
 
