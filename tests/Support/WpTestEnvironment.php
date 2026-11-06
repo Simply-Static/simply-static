@@ -46,6 +46,9 @@ final class WpTestEnvironment {
 	/** @var array<string,array<string,mixed>> */
 	public static $registered_scripts = array();
 
+	/** @var array<string,array<string,mixed>> */
+	public static $registered_styles = array();
+
 	/** @var string[] */
 	public static $action_log = array();
 
@@ -94,6 +97,12 @@ final class WpTestEnvironment {
 	/** @var bool */
 	public static $is_admin = true;
 
+	/** @var bool */
+	public static $doing_ajax = false;
+
+	/** @var bool */
+	public static $rest_endpoint = false;
+
 	/** @var int */
 	public static $current_blog_id = 1;
 
@@ -135,6 +144,7 @@ final class WpTestEnvironment {
 		);
 		self::$routes           = array();
 		self::$registered_scripts = array();
+		self::$registered_styles = array();
 		self::$action_log       = array();
 		self::$capabilities     = array();
 		self::$site_capabilities = array();
@@ -151,6 +161,8 @@ final class WpTestEnvironment {
 		self::$valid_nonces     = array();
 		self::$nonce_verifications = array();
 		self::$is_admin         = true;
+		self::$doing_ajax       = false;
+		self::$rest_endpoint    = false;
 		self::$current_blog_id  = 1;
 		self::$blog_stack       = array();
 		self::$multisite        = false;
