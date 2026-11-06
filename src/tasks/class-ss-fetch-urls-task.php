@@ -176,7 +176,7 @@ class Fetch_Urls_Task extends Task {
 		$status_code = (int) $static_page->http_status_code;
 		if ( in_array( $status_code, array( 408, 429 ), true ) || ( $status_code >= 500 && $status_code <= 599 ) ) {
 			$static_page->file_path = null;
-			throw new Skip_Further_Processing_Exception( sprintf( 'Temporary HTTP %d response when fetching URL: %s', $status_code, $static_page->url ) );
+			throw new Skip_Further_Processing_Exception( sprintf( 'Temporary HTTP %d response when fetching this URL.', $status_code ) );
 		}
 
 		// If we get a 30x redirect...

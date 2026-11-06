@@ -29,6 +29,9 @@ final class FetchRetryWpdb {
 
 	public $row;
 
+	public $last_error = '';
+	public $rejected_error_messages = 0;
+
 	public function get_blog_prefix(): string {
 		return 'wp_';
 	}
@@ -58,7 +61,16 @@ final class FetchRetryWpdb {
 		throw new \RuntimeException( 'Unexpected fetch-retry query: ' . $query );
 	}
 
-	public function update( string $table, array $fields, array $where ): int {
+	/** @return int|false */
+	public function update( string $table, array $fields, array $where ) {
+		// The URL/path columns are TEXT; error_message remains VARCHAR(255).
+		if ( isset( $fields['error_message'] ) && strlen( $fields['error_message'] ) > 255 ) {
+			$this->last_error = "Data too long for column 'error_message'";
+			++$this->rejected_error_messages;
+			return false;
+		}
+
+		$this->last_error = '';
 		$this->row = array_merge( $this->row, $fields );
 		return 1;
 	}
@@ -174,6 +186,30 @@ final class FetchUrlsRetryTest extends UnitTestCase {
 		self::assertNull( $this->database->row['error_message'] );
 		self::assertSame( 'page/index.html', $this->database->row['file_path'] );
 		self::assertSame( '<html>Page</html>', file_get_contents( Options::instance()->get_archive_dir() . 'page/index.html' ) );
+	}
+
+	public function test_long_url_temporary_failure_stays_retryable_without_a_page_write_error(): void {
+		$nested_path = str_repeat( 'nested/', 40 ) . 'page/';
+		$this->database->row['url'] = 'https://example.test/' . $nested_path;
+		self::assertGreaterThan( 255, strlen( $this->database->row['url'] ) );
+		$this->respond( 503 );
+
+		self::assertFalse( ( new FetchRetryTask( $this->database ) )->perform() );
+		self::assertSame( 1, $this->database->row['fetch_attempts'] );
+		self::assertNull( $this->database->row['last_checked_at'] );
+		self::assertNull( $this->database->row['file_path'] );
+		self::assertStringContainsString( 'HTTP 503', $this->database->row['error_message'] );
+		self::assertLessThanOrEqual( 255, strlen( $this->database->row['error_message'] ) );
+		self::assertNull( Options::instance()->get( 'archive_page_write_error' ) );
+		self::assertSame( 0, $this->database->rejected_error_messages );
+
+		$this->respond( 200 );
+		self::assertTrue( ( new FetchRetryTask( $this->database ) )->perform() );
+		self::assertSame( 0, $this->database->row['fetch_attempts'] );
+		self::assertNull( $this->database->row['error_message'] );
+		self::assertNull( Options::instance()->get( 'archive_page_write_error' ) );
+		self::assertSame( $nested_path . 'index.html', $this->database->row['file_path'] );
+		self::assertSame( '<html>Page</html>', file_get_contents( Options::instance()->get_archive_dir() . $nested_path . 'index.html' ) );
 	}
 
 	public static function transient_statuses(): array {
