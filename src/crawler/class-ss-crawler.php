@@ -238,8 +238,9 @@ abstract class Crawler {
 				);
 				$static_page->found_on_id = 0;
 				$this->configure_static_page( $static_page, $url );
-				$static_page->save();
-				$count++;
+				if ( $static_page->save() ) {
+					$count++;
+				}
 			}
 
 			// Allow other processes to run

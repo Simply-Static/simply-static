@@ -163,6 +163,28 @@ abstract class Task {
 	}
 
 	/**
+	 * Return a page write failure while the current export is active.
+	 *
+	 * Synchronous CLI exports call tasks directly, so they need the same
+	 * failure signal as the background archive dispatcher.
+	 *
+	 * @return \WP_Error|null
+	 */
+	protected function get_page_write_error() {
+		$message = $this->options->get( 'archive_page_write_error' );
+		if (
+			$this->options->get( 'archive_start_time' )
+			&& ! $this->options->get( 'archive_end_time' )
+			&& is_string( $message )
+			&& '' !== $message
+		) {
+			return new \WP_Error( 'ss_page_write_failed', esc_html( $message ) );
+		}
+
+		return null;
+	}
+
+	/**
 	 * @unused
 	 * @deprecated Not used anymore.
 	 *
