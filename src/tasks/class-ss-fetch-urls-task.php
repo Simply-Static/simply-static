@@ -9,6 +9,7 @@ class Fetch_Urls_Task extends Task {
 
 	use canProcessPages {
 		get_generate_type as parent_get_generate_type;
+		recover_interrupted_pages as protected parent_recover_interrupted_pages;
 	}
 
 	/**
@@ -44,6 +45,71 @@ class Fetch_Urls_Task extends Task {
 		$this->needs_file_path    = false;
 	}
 
+	/**
+	 * Remove unfinished fetch artifacts before releasing their processing claims.
+	 *
+	 * Full ZIP exports include files directly from disk. Clearing only file_path
+	 * would leave an interrupted final attempt's unprocessed HTML in that ZIP.
+	 * Keep the record intact if cleanup cannot safely finish.
+	 *
+	 * @return int Number of interrupted claims restored.
+	 */
+	public function recover_interrupted_pages() {
+		$start_time = $this->get_start_time();
+		if ( ! is_string( $start_time ) || '' === $start_time ) {
+			return 0;
+		}
+
+		$pages = Page::query()
+			->where( 'last_checked_at >= ?', $start_time )
+			->where( 'fetch_attempts > 0' )
+			->where( 'file_path IS NOT NULL' )
+			->where( "file_path != ''" )
+			->find();
+		if ( null === $pages ) {
+			throw new \RuntimeException( 'Unable to find interrupted fetch artifacts for cleanup.' );
+		}
+
+		foreach ( $pages as $page ) {
+			$relative_path = Util::normalize_slashes( (string) $page->file_path );
+			if ( false !== strpos( $relative_path, "\0" ) || '/' === substr( $relative_path, 0, 1 ) || preg_match( '/^[A-Za-z]:/', $relative_path ) || in_array( '..', explode( '/', $relative_path ), true ) ) {
+				throw new \RuntimeException( 'Refusing to remove an unsafe interrupted fetch path: ' . $relative_path );
+			}
+
+			$file = Util::combine_path( $this->archive_dir, $relative_path );
+			if ( ! file_exists( $file ) && ! is_link( $file ) ) {
+				continue;
+			}
+
+			$archive_path = realpath( $this->archive_dir );
+			$real_file    = realpath( $file );
+			$archive_path = false === $archive_path ? '' : rtrim( Util::normalize_slashes( $archive_path ), '/' ) . '/';
+			$real_file    = false === $real_file ? '' : Util::normalize_slashes( $real_file );
+			if ( '\\' === DIRECTORY_SEPARATOR ) {
+				$archive_path = strtolower( $archive_path );
+				$real_file    = strtolower( $real_file );
+			}
+			if ( '' === $archive_path || '' === $real_file || 0 !== strpos( $real_file, $archive_path ) || ! is_file( $file ) ) {
+				throw new \RuntimeException( 'Refusing to remove an interrupted fetch file outside the archive or a non-file: ' . $relative_path );
+			}
+
+			$completed_aliases = Page::query()
+				->where( 'file_path = ?', $page->file_path )
+				->where( 'last_checked_at >= ?', $start_time )
+				->where( 'fetch_attempts = 0' )
+				->count();
+			if ( null === $completed_aliases || (int) $completed_aliases > 0 ) {
+				throw new \RuntimeException( 'Unable to safely remove an interrupted fetch file shared with a completed page: ' . $relative_path );
+			}
+
+			if ( ! @unlink( $file ) ) {
+				throw new \RuntimeException( 'Unable to remove an interrupted fetch file: ' . $relative_path );
+			}
+		}
+
+		return $this->parent_recover_interrupted_pages();
+	}
+
 	protected function process_page( $static_page ) {
 		Util::debug_log( "URL: " . $static_page->url );
 
@@ -75,20 +141,42 @@ class Fetch_Urls_Task extends Task {
 				return;
 			}
 
-			$success = Url_Fetcher::instance()->fetch( $static_page );
+			/**
+			 * Total HTTP time budget for one page, including fallback requests.
+			 *
+			 * Sharing a deadline prevents an empty response or the unprepared-URL
+			 * fallback from each starting another full timeout on restricted hosts.
+			 *
+			 * @param int|float $timeout Maximum seconds allowed for fetching a page.
+			 * @param Page      $static_page Page being fetched.
+			 */
+			$timeout  = (float) apply_filters( 'simply_static_fetch_timeout', Url_Fetcher::TIMEOUT, $static_page );
+			$deadline = microtime( true ) + max( 0, $timeout );
+			$success  = Url_Fetcher::instance()->fetch( $static_page, true, $deadline );
 		}
 
 		if ( ! $success ) {
-			throw new \RuntimeException( 'Unable to fetch and save URL: ' . $static_page->url );
+			$static_page->file_path = null;
+			throw new Skip_Further_Processing_Exception( $static_page->error_message ?: 'Unable to fetch and save URL: ' . $static_page->url );
 		}
 
 		// Not found? It's maybe a redirection page. Let's try it without our param.
 		if ( $static_page->http_status_code === 404 ) {
-			$success = Url_Fetcher::instance()->fetch( $static_page, false );
+			$success = Url_Fetcher::instance()->fetch( $static_page, false, $deadline );
 
 			if ( ! $success ) {
-				throw new \RuntimeException( 'Unable to fetch and save URL without the page-handler parameter: ' . $static_page->url );
+				$static_page->file_path = null;
+				throw new Skip_Further_Processing_Exception( $static_page->error_message ?: 'Unable to fetch and save URL without the page-handler parameter: ' . $static_page->url );
 			}
+		}
+
+		// A busy origin can return a temporary HTTP error without a transport
+		// failure. Keep the page pending and yield so the existing retry allowance
+		// can recover it instead of marking a missing file as successfully fetched.
+		$status_code = (int) $static_page->http_status_code;
+		if ( in_array( $status_code, array( 408, 429 ), true ) || ( $status_code >= 500 && $status_code <= 599 ) ) {
+			$static_page->file_path = null;
+			throw new Skip_Further_Processing_Exception( sprintf( 'Temporary HTTP %d response when fetching this URL.', $status_code ) );
 		}
 
 		// If we get a 30x redirect...

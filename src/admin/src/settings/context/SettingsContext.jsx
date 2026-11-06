@@ -51,6 +51,7 @@ function SettingsContextProvider(props) {
     const [blogId, setBlogId] = useState(1);
     const [queuedIntegrations, setQueuedIntegrations] = useState([]);
     const [showMobileNav, setShowMobileNav] = useState(false);
+    const runningCheckPending = useRef(false);
     const isRollbackRunning = !!snapshotRollback.running;
 
     const getSettings = () => {
@@ -114,12 +115,18 @@ function SettingsContextProvider(props) {
         }).then(parseActionResponse).then(getSettings);
     }
 
-    const checkIfRunning = () => {
-        apiFetch({
-            path: '/simplystatic/v1/is-running',
-            method: 'GET'
-        }).then(resp => {
-            var json = 'string' === typeof resp ? JSON.parse(resp) : resp;
+    const checkIfRunning = async () => {
+        if (runningCheckPending.current) {
+            return;
+        }
+
+        runningCheckPending.current = true;
+        try {
+            const resp = await apiFetch({
+                path: '/simplystatic/v1/is-running',
+                method: 'GET'
+            });
+            const json = parseActionResponse(resp);
             setIsRunning(json.running);
             setIsPaused(json.paused);
             if ( json.snapshot_rollback ) {
@@ -128,7 +135,12 @@ function SettingsContextProvider(props) {
             if ( json.delayed ) {
               setIsDelayed(json.delayed_until);
             }
-        });
+        } catch (error) {
+            // Keep the last known state after a transient polling failure.
+            // The next interval can retry without piling up pending requests.
+        } finally {
+            runningCheckPending.current = false;
+        }
     }
 
     const importSettings = (newSettings) => {
@@ -305,9 +317,7 @@ function SettingsContextProvider(props) {
     }, isDelayed > 0 ? 1000 : null);
 
 
-  useInterval(() => {
-        checkIfRunning();
-    }, isRunning || isDelayed || isRollbackRunning ? 5000 : null);
+  useInterval(checkIfRunning, isRunning || isDelayed || isRollbackRunning ? 5000 : null);
 
     // Removed legacy redirect marker handler; router uses 'ss-initial-page' on bootstrap
 

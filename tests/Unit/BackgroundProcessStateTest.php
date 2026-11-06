@@ -144,6 +144,10 @@ class BackgroundStateProcess extends Background_Process {
 		return $this->owns_process_lock();
 	}
 
+	public function exclusive_lock_for_test(): bool {
+		return $this->has_exclusive_process_lock();
+	}
+
 	public function lock_is_stale_for_test( string $value ): bool {
 		return $this->is_process_lock_stale( $value );
 	}
@@ -240,6 +244,14 @@ final class BackgroundInlineContinuationProcess extends BackgroundStateProcess {
 		return false;
 	}
 
+	public function dispatch() {
+		return $this->dispatch_via_background();
+	}
+
+	protected function is_loopback_available() {
+		return false;
+	}
+
 	/** @return bool */
 	public function schedule_inline() {
 		return parent::dispatch_inline();
@@ -252,7 +264,7 @@ final class BackgroundInlineContinuationProcess extends BackgroundStateProcess {
 
 	protected function handle() {
 		++$this->handle_calls;
-		parent::dispatch_inline();
+		$this->dispatch();
 	}
 
 	protected function finish_http_response_for_inline_processing() {
@@ -352,7 +364,7 @@ final class BackgroundHealthcheckProcess extends BackgroundStateProcess {
 	}
 }
 
-final class BackgroundHandleProcess extends BackgroundStateProcess {
+class BackgroundHandleProcess extends BackgroundStateProcess {
 
 	/** @var object */
 	public $batch;
@@ -374,6 +386,9 @@ final class BackgroundHandleProcess extends BackgroundStateProcess {
 
 	/** @var int */
 	public $task_calls = 0;
+
+	/** @var bool */
+	public $worker_active_during_task = false;
 
 	/** @var int */
 	public $lock_calls = 0;
@@ -404,6 +419,7 @@ final class BackgroundHandleProcess extends BackgroundStateProcess {
 	/** @param mixed $item */
 	protected function task( $item ) {
 		++$this->task_calls;
+		$this->worker_active_during_task = $this->is_worker_active();
 		if ( $this->cancel_during_task ) {
 			update_option( $this->status_key(), self::STATUS_CANCELLED );
 		}
@@ -469,6 +485,29 @@ final class BackgroundHandleProcess extends BackgroundStateProcess {
 
 	public function run_handle() {
 		return parent::handle();
+	}
+}
+
+final class BackgroundAsyncFallbackProcess extends BackgroundHandleProcess {
+
+	/** @var callable[] */
+	public $shutdown_handlers = array();
+
+	public function dispatch() {
+		return $this->dispatch_via_background();
+	}
+
+	public function is_processing() {
+		return false;
+	}
+
+	protected function is_loopback_available() {
+		return true;
+	}
+
+	/** @param callable $handler */
+	protected function register_inline_shutdown_handler( $handler ) {
+		$this->shutdown_handlers[] = $handler;
 	}
 }
 
@@ -710,6 +749,45 @@ final class BackgroundProcessStateTest extends UnitTestCase {
 		self::assertContains( 'wp_state_process_process_unlocked', WpEnv::$action_log );
 	}
 
+	public function test_claim_recovery_requires_an_owned_unreleased_advisory_lock(): void {
+		$this->wpdb->database_lock_result = '1';
+		$owner = new BackgroundStateProcess();
+		$other = new BackgroundStateProcess();
+
+		self::assertFalse( $owner->exclusive_lock_for_test() );
+		self::assertTrue( $owner->lock_process() );
+		self::assertTrue( $owner->exclusive_lock_for_test() );
+		self::assertFalse( $other->exclusive_lock_for_test() );
+
+		$this->wpdb->database_lock_result = '0';
+		self::assertFalse( $other->lock_process() );
+		self::assertFalse( $other->exclusive_lock_for_test() );
+		self::assertTrue( $owner->exclusive_lock_for_test() );
+
+		$owned_value = WpEnv::$site_transients['wp_state_process_process_lock'];
+		WpEnv::$site_transients['wp_state_process_process_lock'] = microtime() . ':another-worker';
+		self::assertFalse( $owner->exclusive_lock_for_test() );
+		WpEnv::$site_transients['wp_state_process_process_lock'] = $owned_value;
+
+		$owner->unlock_for_test();
+		self::assertFalse( $owner->exclusive_lock_for_test() );
+	}
+
+	public function test_overlapping_transient_fallback_workers_cannot_authorize_claim_recovery(): void {
+		$first = new BackgroundStateProcess();
+		$second = new BackgroundStateProcess();
+
+		// Unsupported advisory locks retain the existing export fallback.
+		self::assertTrue( $first->lock_process() );
+		self::assertTrue( $first->owns_lock_for_test() );
+		self::assertFalse( $first->exclusive_lock_for_test() );
+		self::assertTrue( $second->lock_process() );
+		self::assertTrue( $second->owns_lock_for_test() );
+		self::assertFalse( $first->owns_lock_for_test() );
+		self::assertFalse( $first->exclusive_lock_for_test() );
+		self::assertFalse( $second->exclusive_lock_for_test() );
+	}
+
 	public function test_stale_and_malformed_lock_values_are_classified_without_releasing_active_foreign_locks(): void {
 		$process = new BackgroundStateProcess();
 		$stale   = '0.00000000 ' . ( time() - 120 ) . ':token';
@@ -790,24 +868,32 @@ final class BackgroundProcessStateTest extends UnitTestCase {
 		self::assertSame( 1, $process->inline_calls );
 	}
 
-	public function test_inline_fallback_keeps_one_pending_handler_and_immediately_continues(): void {
+	public function test_inline_fallback_yields_after_one_window_and_a_fresh_request_can_resume(): void {
 		$process = new BackgroundInlineContinuationProcess();
 
-		self::assertTrue( $process->schedule_inline() );
-		self::assertTrue( $process->schedule_inline() );
+		self::assertTrue( $process->dispatch() );
+		self::assertTrue( $process->dispatch() );
 		self::assertCount( 1, $process->shutdown_handlers );
 
 		$process->run_shutdown_handler( 0 );
 
 		self::assertSame( 1, $process->handle_calls );
 		self::assertSame( 1, $process->finish_response_calls );
-		self::assertCount( 2, $process->shutdown_handlers );
+		self::assertCount( 1, $process->shutdown_handlers );
+		self::assertSame( 3, $process->schedule_calls );
+		self::assertTrue( $process->dispatch() );
+		self::assertCount( 1, $process->shutdown_handlers );
 
-		$process->run_shutdown_handler( 1 );
+		// A later cron/poll request creates a fresh process and resumes the queue.
+		$next_request = new BackgroundInlineContinuationProcess();
+		$next_request->batches = array( (object) array( 'key' => 'batch', 'data' => array( 'task' ) ) );
+		$next_request->handle_cron_healthcheck();
+		self::assertCount( 1, $next_request->shutdown_handlers );
+		$next_request->run_shutdown_handler( 0 );
 
-		self::assertSame( 2, $process->handle_calls );
-		self::assertSame( 1, $process->finish_response_calls );
-		self::assertCount( 3, $process->shutdown_handlers );
+		self::assertSame( 1, $next_request->handle_calls );
+		self::assertSame( 1, $next_request->finish_response_calls );
+		self::assertCount( 1, $next_request->shutdown_handlers );
 	}
 
 	public function test_inline_fallback_does_not_continue_a_paused_queue(): void {
@@ -983,6 +1069,16 @@ final class BackgroundProcessStateTest extends UnitTestCase {
 		self::assertArrayNotHasKey( 'wp_state_process_process_lock', WpEnv::$site_transients );
 	}
 
+	public function test_worker_is_active_only_during_its_locked_execution_window(): void {
+		$process = new BackgroundHandleProcess();
+		$process->use_real_lock = true;
+
+		self::assertFalse( $process->is_worker_active() );
+		self::assertSame( 'handled', $process->run_handle() );
+		self::assertTrue( $process->worker_active_during_task );
+		self::assertFalse( $process->is_worker_active() );
+	}
+
 	public function test_handle_persists_incomplete_items_and_dispatches_the_next_worker(): void {
 		$process = new BackgroundHandleProcess();
 		$process->task_result = 'retry';
@@ -994,6 +1090,26 @@ final class BackgroundProcessStateTest extends UnitTestCase {
 		self::assertSame( 0, $process->delete_calls );
 		self::assertSame( 1, $process->dispatch_calls );
 		self::assertSame( 0, $process->complete_calls );
+	}
+
+	public function test_failed_async_continuation_preserves_queue_without_running_another_inline_window(): void {
+		$process = new BackgroundAsyncFallbackProcess();
+		$process->task_result = 'retry';
+		$process->continue = false;
+		WpEnv::$remote_response = new \WP_Error( 'loopback', 'Connection refused' );
+
+		self::assertSame( 'handled', $process->run_handle() );
+
+		self::assertSame( 1, $process->task_calls );
+		self::assertSame( array( 'retry' ), $process->batch->data );
+		self::assertSame( 1, $process->update_calls );
+		self::assertSame( 0, $process->delete_calls );
+		self::assertSame( 0, $process->complete_calls );
+		self::assertSame( 1, $process->schedule_calls );
+		self::assertSame( 0, $process->clear_calls );
+		self::assertCount( 0, $process->shutdown_handlers );
+		self::assertCount( 1, WpEnv::$remote_requests );
+		self::assertSame( 'no', WpEnv::$site_transients['wp_state_process_loopback_available'] );
 	}
 
 	public function test_handle_cancellation_before_and_after_task_clears_the_queue(): void {
@@ -1065,6 +1181,24 @@ final class BackgroundProcessStateTest extends UnitTestCase {
 		add_filter( 'wp_state_process_time_exceeded', '__return_true' );
 		self::assertTrue( $process->time_exceeded_for_test() );
 		self::assertFalse( $process->should_continue() );
+	}
+
+	public function test_requested_yield_survives_lock_refresh_until_a_new_worker_starts(): void {
+		$process = new BackgroundStateProcess();
+		$process->lock_process();
+		self::assertTrue( $process->should_continue() );
+
+		$process->request_yield();
+		$process->lock_process( false );
+		self::assertFalse( $process->should_continue() );
+
+		add_filter( 'wp_state_process_should_continue', '__return_true' );
+		self::assertFalse( $process->should_continue() );
+
+		$process->unlock_for_test();
+		$process->lock_process();
+		self::assertTrue( $process->should_continue() );
+		$process->unlock_for_test();
 	}
 
 	public function test_base_complete_clears_status_schedule_and_emits_chain_action(): void {

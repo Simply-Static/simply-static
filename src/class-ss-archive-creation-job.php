@@ -403,6 +403,12 @@ class Archive_Creation_Job extends Background_Process {
 				return $task_name;
 			}
 
+			// Recovery requires an exclusive advisory lock. Transient-only hosts
+			// keep exporting without reclaiming another worker's potentially live pages.
+			if ( method_exists( $task, 'recover_interrupted_pages' ) && $this->has_exclusive_process_lock() ) {
+				$task->recover_interrupted_pages();
+			}
+
 			Util::debug_log( 'Performing task: ' . $task_name );
 			$is_done = $task->perform();
 			if ( 'cancel' !== $task_name ) {

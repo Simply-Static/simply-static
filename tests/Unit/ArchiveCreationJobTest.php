@@ -93,6 +93,21 @@ final class ArchiveTaskDouble {
 	}
 }
 
+final class ArchiveRecoverableTaskDouble {
+
+	/** @var string[] */
+	public $calls = array();
+
+	public function recover_interrupted_pages(): void {
+		$this->calls[] = 'recover';
+	}
+
+	public function perform(): bool {
+		$this->calls[] = 'perform';
+		return false;
+	}
+}
+
 final class ArchiveCancelTaskDouble {
 
 	/** @var int */
@@ -152,6 +167,9 @@ final class ArchiveCreationJobHarness extends Archive_Creation_Job {
 
 	/** @var bool */
 	public $active_lock_for_test = false;
+
+	/** @var bool */
+	public $exclusive_lock_for_test = false;
 
 	/** @var int */
 	public $clear_event_calls = 0;
@@ -236,6 +254,14 @@ final class ArchiveCreationJobHarness extends Archive_Creation_Job {
 
 	public function has_active_process_lock() {
 		return $this->active_lock_for_test;
+	}
+
+	protected function owns_process_lock() {
+		return $this->active_lock_for_test;
+	}
+
+	protected function has_exclusive_process_lock() {
+		return $this->exclusive_lock_for_test && $this->active_lock_for_test;
 	}
 
 	protected function unlock_process() {
@@ -729,6 +755,37 @@ final class ArchiveCreationJobTest extends UnitTestCase {
 			'Definitely_missing_Task',
 			$this->options->get( 'archive_status_messages' )['error']['message']
 		);
+	}
+
+	public function test_only_the_exclusive_lock_owner_recovers_interrupted_pages_before_performing_a_task(): void {
+		$task = new ArchiveRecoverableTaskDouble();
+		$this->job->task_objects['fetch_urls'] = $task;
+
+		self::assertSame( 'fetch_urls', $this->job->run_task( 'fetch_urls' ) );
+		self::assertSame( array( 'perform' ), $task->calls );
+
+		// Transient-only ownership still runs the task without reclaiming pages.
+		$task->calls = array();
+		$this->job->active_lock_for_test = true;
+		self::assertSame( 'fetch_urls', $this->job->run_task( 'fetch_urls' ) );
+		self::assertSame( array( 'perform' ), $task->calls );
+
+		$task->calls = array();
+		$this->job->exclusive_lock_for_test = true;
+		self::assertSame( 'fetch_urls', $this->job->run_task( 'fetch_urls' ) );
+		self::assertSame( array( 'recover', 'perform' ), $task->calls );
+
+		// An advisory flag alone is insufficient if another worker owns the lock.
+		$task->calls = array();
+		$this->job->active_lock_for_test = false;
+		self::assertSame( 'fetch_urls', $this->job->run_task( 'fetch_urls' ) );
+		self::assertSame( array( 'perform' ), $task->calls );
+
+		$task->calls = array();
+		$this->job->active_lock_for_test = true;
+		$this->job->paused_for_test = true;
+		self::assertSame( 'fetch_urls', $this->job->run_task( 'fetch_urls' ) );
+		self::assertSame( array(), $task->calls );
 	}
 
 	public function test_task_retries_when_paused_or_incomplete(): void {

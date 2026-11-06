@@ -75,11 +75,13 @@ class Url_Fetcher {
 	/**
 	 * Fetch the URL and return a \WP_Error if we get one, otherwise a Response class.
 	 *
-	 * @param \Simply_Static\Page $static_page URL to fetch
+	 * @param \Simply_Static\Page $static_page URL to fetch.
+	 * @param bool $prepare_url Whether to apply the page handler.
+	 * @param float|null $deadline Shared HTTP deadline for this page and its fallbacks.
 	 *
 	 * @return boolean                        Was the fetch successful?
 	 */
-	public function fetch( Page $static_page, $prepare_url = true ) {
+	public function fetch( Page $static_page, $prepare_url = true, $deadline = null ) {
 		$original_url = $static_page->url;
 		$url          = $original_url;
 
@@ -144,16 +146,16 @@ class Url_Fetcher {
 				} else {
 					// If copy fails, fall back to remote_get
 					Util::debug_log( "Failed to copy local file, falling back to remote_get" );
-					$response = self::remote_get( Util::get_source_url_from_local_url( $url ), $temp_filename );
+					$response = self::remote_get( Util::get_source_url_from_local_url( $url ), $temp_filename, $deadline );
 				}
 			} else {
 				// If no safe local file exists, fall back to remote_get.
 				Util::debug_log( "Local file not found, falling back to remote_get" );
-				$response = self::remote_get( Util::get_source_url_from_local_url( $url ), $temp_filename );
+				$response = self::remote_get( Util::get_source_url_from_local_url( $url ), $temp_filename, $deadline );
 			}
 		} else {
 			// Not a local asset, use remote_get as before
-			$response = self::remote_get( $url, $temp_filename );
+			$response = self::remote_get( $url, $temp_filename, $deadline );
 		}
 
 		$filesize = file_exists( $temp_filename ) ? filesize( $temp_filename ) : 0;
@@ -176,28 +178,30 @@ class Url_Fetcher {
 						}
 					}
 				}
-					// Attempt 2: Do a non-streamed request and write body manually.
-					if ( ! $recovered ) {
-						$alt_url  = isset( $is_local_asset ) && $is_local_asset ? Util::get_source_url_from_local_url( $url ) : $url;
-						$alt_args = array(
-							'timeout'     => self::TIMEOUT,
-							'user-agent'  => apply_filters( 'ss_crawler_user_agent', self::DEFAULT_USER_AGENT ),
-							'sslverify'   => (bool) apply_filters( 'ss_remote_get_sslverify', Util::should_verify_ssl( $alt_url ), $alt_url ),
-							'redirection' => 0,
-							'blocking'    => true,
-							'decompress'  => true,
-						);
-						$authorization = Util::get_basic_auth_header_for_url( $alt_url );
-						if ( null !== $authorization ) {
-							$alt_args['headers'] = array( 'Authorization' => $authorization );
-						}
-						$alt_resp = wp_remote_get( $alt_url, apply_filters( 'ss_remote_get_args', $alt_args ) );
+				// Attempt 2: Do a non-streamed request and write body manually.
+				if ( ! $recovered ) {
+					$alt_url  = isset( $is_local_asset ) && $is_local_asset ? Util::get_source_url_from_local_url( $url ) : $url;
+					$alt_args = array(
+						'timeout'     => self::TIMEOUT,
+						'user-agent'  => apply_filters( 'ss_crawler_user_agent', self::DEFAULT_USER_AGENT ),
+						'sslverify'   => (bool) apply_filters( 'ss_remote_get_sslverify', Util::should_verify_ssl( $alt_url ), $alt_url ),
+						'redirection' => 0,
+						'blocking'    => true,
+						'decompress'  => true,
+					);
+					$authorization = Util::get_basic_auth_header_for_url( $alt_url );
+					if ( null !== $authorization ) {
+						$alt_args['headers'] = array( 'Authorization' => $authorization );
+					}
+					$alt_args = self::apply_request_deadline( apply_filters( 'ss_remote_get_args', $alt_args ), $deadline );
+					$alt_resp = is_wp_error( $alt_args ) ? $alt_args : wp_remote_get( $alt_url, $alt_args );
+					// Keep recovery errors/statuses even when there is no response body.
+					$response = $alt_resp;
 					if ( ! is_wp_error( $alt_resp ) ) {
 						$body = wp_remote_retrieve_body( $alt_resp );
 						if ( strlen( $body ) > 0 ) {
 							file_put_contents( $temp_filename, $body );
 							$filesize  = filesize( $temp_filename );
-							$response  = $alt_resp; // use headers from non-streamed response
 							$recovered = true;
 							Util::debug_log( 'Recovered by non-streamed request. Size: ' . $filesize . ' bytes' );
 						}
@@ -620,7 +624,7 @@ class Url_Fetcher {
 		return null;
 	}
 
-	public static function remote_get( $url, $filename = null ) {
+	public static function remote_get( $url, $filename = null, $deadline = null ) {
 		$allowed = (bool) apply_filters( 'ss_url_fetcher_allow_request', Util::is_local_origin_url( $url ), $url );
 		if ( ! $allowed ) {
 			return new \WP_Error( 'simply_static_unsafe_url', __( 'Refusing to fetch a URL outside the configured WordPress origin.', 'simply-static' ) );
@@ -663,7 +667,36 @@ class Url_Fetcher {
 
 		$args['headers'] = $headers;
 
-		return wp_remote_get( $url, apply_filters( 'ss_remote_get_args', $args ) );
+		$args = self::apply_request_deadline( apply_filters( 'ss_remote_get_args', $args ), $deadline );
+
+		return is_wp_error( $args ) ? $args : wp_remote_get( $url, $args );
+	}
+
+	/**
+	 * Keep primary and recovery requests within one page's HTTP time budget.
+	 *
+	 * Apply this after request filters so a fallback cannot start another full
+	 * timeout while the host is about to terminate the worker. Direct callers
+	 * without a deadline retain their configured request timeout.
+	 *
+	 * @param array $args Filtered WordPress HTTP request arguments.
+	 * @param float|null $deadline Absolute deadline from microtime(true).
+	 * @return array|\WP_Error
+	 */
+	protected static function apply_request_deadline( $args, $deadline ) {
+		if ( null === $deadline ) {
+			return $args;
+		}
+
+		$remaining = $deadline - microtime( true );
+		if ( $remaining <= 0 ) {
+			return new \WP_Error( 'simply_static_fetch_timeout', __( 'The time limit for fetching this page was reached.', 'simply-static' ) );
+		}
+
+		$timeout = isset( $args['timeout'] ) && is_numeric( $args['timeout'] ) && $args['timeout'] > 0 ? (float) $args['timeout'] : self::TIMEOUT;
+		$args['timeout'] = min( $timeout, $remaining );
+
+		return $args;
 	}
 
 }
