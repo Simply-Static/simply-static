@@ -29,20 +29,6 @@ class Wp_Includes_Crawler extends Crawler {
 	}
 
 	/**
-	 * Check if the crawler is active.
-	 *
-	 * @return boolean
-	 */
-	public function is_active() {
-		// If smart_crawl is enabled, we force this crawler to be active to ensure core assets are preserved.
-		if ( \Simply_Static\Options::instance()->get( 'smart_crawl' ) ) {
-			return true;
-		}
-
-		return parent::is_active();
-	}
-
-	/**
 	 * Detect wp-includes files.
 	 *
 	 * @return array List of wp-includes file URLs

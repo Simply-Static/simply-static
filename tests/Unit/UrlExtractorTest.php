@@ -114,6 +114,40 @@ final class UrlExtractorTest extends UnitTestCase {
 		self::assertNotContains( 'https://example.test/about/', $urls );
 	}
 
+	public function test_smart_crawl_discovers_referenced_core_assets_with_includes_crawler_disabled(): void {
+		WpEnv::$options['simply-static']['smart_crawl'] = true;
+		WpEnv::$options['simply-static']['crawlers']    = array( 'home', 'post_type' );
+		Options::reinstance();
+
+		$html = '<link rel="stylesheet" href="/wp-includes/css/dashicons.min.css?ver=6.8">'
+			. '<script src="/wp-includes/js/jquery/jquery.min.js?ver=3.7.1"></script>'
+			. '<a href="/about/">About</a>';
+		$extractor = $this->extractor( 'html', $html );
+		$urls      = $extractor->extract_and_update_urls();
+
+		self::assertContains( 'https://example.test/wp-includes/css/dashicons.min.css', $urls );
+		self::assertContains( 'https://example.test/wp-includes/js/jquery/jquery.min.js', $urls );
+		self::assertNotContains( 'https://example.test/about/', $urls );
+		self::assertStringContainsString( 'https://static.example.test/wp-includes/css/dashicons.min.css', $extractor->get_body() );
+		self::assertStringContainsString( 'https://static.example.test/wp-includes/js/jquery/jquery.min.js', $extractor->get_body() );
+	}
+
+	public function test_smart_crawl_discovers_core_stylesheet_dependencies_with_includes_crawler_disabled(): void {
+		WpEnv::$options['simply-static']['smart_crawl'] = true;
+		WpEnv::$options['simply-static']['crawlers']    = array( 'home', 'post_type' );
+		Options::reinstance();
+
+		$css = '@font-face{font-family:dashicons;src:url("../fonts/dashicons.woff2")} '
+			. '.icon{background-image:url("../images/spinner.gif")}';
+		$extractor = $this->extractor( 'css', $css, 'dashicons.min.css', 'https://example.test/wp-includes/css/dashicons.min.css' );
+		$urls      = $extractor->extract_and_update_urls();
+
+		self::assertContains( 'https://example.test/wp-includes/fonts/dashicons.woff2', $urls );
+		self::assertContains( 'https://example.test/wp-includes/images/spinner.gif', $urls );
+		self::assertStringContainsString( 'https://static.example.test/wp-includes/fonts/dashicons.woff2', $extractor->get_body() );
+		self::assertStringContainsString( 'https://static.example.test/wp-includes/images/spinner.gif', $extractor->get_body() );
+	}
+
 	public function test_removes_wordpress_rest_discovery_links_when_rest_api_is_not_exported(): void {
 		WpEnv::$options['simply-static']['add_rest_api'] = false;
 		Options::reinstance();
