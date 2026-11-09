@@ -126,7 +126,10 @@ class Discover_Urls_Task extends Task {
 					$scanned
 				)
 			);
-			$this->yield_after_current_crawler();
+			// The crawler persisted its bounded checkpoint. Let the background
+			// worker run another batch while its existing time/memory budget allows;
+			// forcing a new request here makes inline hosts wait for cron after
+			// every small discovery batch, even when it took only a second.
 
 			return false;
 		}
@@ -145,7 +148,6 @@ class Discover_Urls_Task extends Task {
 
 		$crawler_index++;
 		$this->options->set( $this->crawler_index_option, $crawler_index )->save();
-		$this->yield_after_current_crawler();
 
 		if ( $crawler_index < count( $active_crawlers ) ) {
 			return false;
@@ -187,24 +189,6 @@ class Discover_Urls_Task extends Task {
 		$this->cleanup();
 
 		return true;
-	}
-
-	/**
-	 * Stop the current background process after one crawler has run.
-	 *
-	 * @return void
-	 */
-	private function yield_after_current_crawler() {
-		$filter = 'wp_archive_creation_job_should_continue';
-		$job    = Plugin::instance()->get_archive_creation_job();
-
-		if ( $job && method_exists( $job, 'get_identifier' ) ) {
-			$filter = $job->get_identifier() . '_should_continue';
-		}
-
-		add_filter( $filter, static function () {
-			return false;
-		}, PHP_INT_MAX );
 	}
 
 	/**
