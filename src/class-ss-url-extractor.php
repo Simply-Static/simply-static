@@ -3144,8 +3144,8 @@ class Url_Extractor {
 	 *
 	 * The setup task can resolve regexes against known WordPress objects, but
 	 * runtime-generated rewrite endpoints only become known when linked from an
-	 * exported page. Cache the configured regexes for this extractor so those
-	 * links can opt back into following while Enhanced Crawl is enabled.
+	 * exported page. Reuse setup's archive-scoped regexes without rerunning
+	 * providers whose setup hooks may generate files or query large catalogs.
 	 *
 	 * @param string $url Absolute local URL.
 	 *
@@ -3153,11 +3153,31 @@ class Url_Extractor {
 	 */
 	private function matches_additional_url_regex( $url ) {
 		if ( null === $this->additional_url_regexes ) {
-			$additional_urls = apply_filters( 'ss_setup_task_additional_urls', $this->options->get( 'additional_urls' ) );
-			$additional_urls = apply_filters( 'ss_additional_urls', Util::string_to_array( $additional_urls ) );
-			$patterns        = Util::parse_patterns( (array) $additional_urls );
-
-			$this->additional_url_regexes = (array) $patterns['regex'];
+			$identity = array(
+				'deploy_id'    => $this->options->get( 'archive_deploy_id' ),
+				'archive_name' => $this->options->get( 'archive_name' ),
+				'started_at'   => $this->options->get( 'archive_start_time' ),
+				'blog_id'      => get_current_blog_id(),
+			);
+			$has_identity = true;
+			foreach ( array( 'deploy_id', 'archive_name', 'started_at' ) as $key ) {
+				if ( ! is_string( $identity[ $key ] ) || '' === trim( $identity[ $key ] ) ) {
+					$has_identity = false;
+				}
+			}
+			$snapshot = $this->options->get( 'archive_additional_url_regexes' );
+			if ( $has_identity && ! $this->options->get( 'archive_end_time' )
+				&& is_array( $snapshot ) && isset( $snapshot['identity'], $snapshot['regexes'] )
+				&& $identity === $snapshot['identity'] && is_array( $snapshot['regexes'] )
+				&& count( $snapshot['regexes'] ) === count( array_filter( $snapshot['regexes'], 'is_string' ) )
+			) {
+				$this->additional_url_regexes = $snapshot['regexes'];
+			} else {
+				// Legacy jobs and standalone extraction have no trustworthy setup
+				// snapshot. Follow configured regexes without replaying providers.
+				$patterns = Util::parse_patterns( Util::string_to_array( $this->options->get( 'additional_urls' ) ) );
+				$this->additional_url_regexes = (array) $patterns['regex'];
+			}
 		}
 
 		foreach ( $this->additional_url_regexes as $pattern ) {
