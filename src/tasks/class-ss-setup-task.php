@@ -100,6 +100,32 @@ class Setup_Task extends Task {
 		$literals = (array) $parsed['literals'];
 		$regexes  = (array) $parsed['regex'];
 
+		// Providers can generate files or query external catalogs. Resolve them
+		// during setup only, then retain the final regexes for later workers.
+		$identity = array(
+			'deploy_id'    => $this->options->get( 'archive_deploy_id' ),
+			'archive_name' => $this->options->get( 'archive_name' ),
+			'started_at'   => $this->options->get( 'archive_start_time' ),
+			'blog_id'      => get_current_blog_id(),
+		);
+		$has_identity = true;
+		foreach ( array( 'deploy_id', 'archive_name', 'started_at' ) as $key ) {
+			if ( ! is_string( $identity[ $key ] ) || '' === trim( $identity[ $key ] ) ) {
+				$has_identity = false;
+			}
+		}
+		if ( $has_identity ) {
+			$this->options->set( 'archive_additional_url_regexes', array(
+				'identity' => $identity,
+				'regexes'  => array_values( $regexes ),
+			) );
+		} else {
+			$this->options->destroy( 'archive_additional_url_regexes' );
+		}
+		if ( ! $this->options->save() ) {
+			throw new \RuntimeException( __( 'Unable to save the export URL patterns.', 'simply-static' ) );
+		}
+
 		// Process literal Additional URLs in batches to avoid memory exhaustion with very large lists.
 		$batch_size = (int) apply_filters( 'ss_additional_urls_batch_size', 50 );
 		if ( $batch_size < 1 ) { $batch_size = 50; }
