@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Simply_Static\Tests\Unit;
 
-use ReflectionMethod;
 use Simply_Static\Admin_Rest;
 use Simply_Static\Tests\Support\UnitTestCase;
 use Simply_Static\Tests\Support\WpTestEnvironment as WpEnv;
@@ -273,22 +272,6 @@ final class AdminRestTest extends UnitTestCase {
 
 		self::assertSame( array(), WpEnv::$options['simply-static']['integrations'] );
 		self::assertSame( array(), $this->rest->get_settings()['integrations'] );
-	}
-
-	public function test_studio_migration_package_checksum_is_fail_closed(): void {
-		$package = tempnam( sys_get_temp_dir(), 'ss-studio-package-' );
-		self::assertNotFalse( $package );
-		file_put_contents( $package, 'reviewed package bytes' );
-
-		$method = new ReflectionMethod( Admin_Rest::class, 'downloaded_package_matches_checksum' );
-		$method->setAccessible( true );
-		try {
-			self::assertTrue( $method->invoke( $this->rest, $package, hash_file( 'sha256', $package ) ) );
-			self::assertFalse( $method->invoke( $this->rest, $package, str_repeat( '0', 64 ) ) );
-			self::assertFalse( $method->invoke( $this->rest, $package, 'not-a-sha256' ) );
-		} finally {
-			unlink( $package );
-		}
 	}
 
 	/** @param array<string,mixed> $params */

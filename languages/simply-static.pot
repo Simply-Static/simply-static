@@ -266,11 +266,11 @@ msgstr ""
 msgid "Temporary files cannot be cleared while the export queue is active."
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-rest.php:1877
-msgid "The migration plugin package failed integrity verification."
+#: src/admin/inc/class-ss-admin-rest.php:1924
+msgid "WordPress.org did not provide a migration plugin package."
 msgstr ""
 
-#: src/admin/inc/class-ss-admin-rest.php:1899
+#: src/admin/inc/class-ss-admin-rest.php:1942
 msgid "Plugin installation failed."
 msgstr ""
 

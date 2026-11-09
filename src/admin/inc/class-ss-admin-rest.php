@@ -18,9 +18,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Admin_Rest {
 
-	/** SHA-256 of the reviewed Static Studio migration package. */
-	const STUDIO_MIGRATE_PACKAGE_SHA256 = '4e9e4e86a429603367e15f181f1631d8459fe0ba2a7c16b5b89add72da0f954f';
-
     /** @var Admin_Rest|null */
     protected static $instance = null;
 
@@ -1861,18 +1858,20 @@ class Admin_Rest {
     /**
      * Install and activate the Static Studio migration plugin.
      *
-     * Downloads the plugin from the Static Studio API, installs it,
-     * activates it and returns the redirect URL to the migration page.
+     * Fetches the plugin package from WordPress.org, installs it, activates it
+     * and returns the redirect URL to the migration page.
      *
      * @return \WP_REST_Response
      */
     public function install_studio_migrate() {
-        $plugin_slug = 'simply-static-studio-backup-migrate/simply-static-studio-backup-migrate.php';
-        $plugin_zip  = 'https://api.static.studio/storage/v1/object/public/plugins/simply-static-studio-backup-migrate.zip';
-        $redirect    = admin_url( 'tools.php?page=studio-backup' );
+        $plugin_directory_slug = 'simply-static-studio-backup-migrate';
+        $plugin_file           = $plugin_directory_slug . '/simply-static-studio-backup-migrate.php';
+        $redirect              = admin_url( 'tools.php?page=studio-backup' );
+
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
         // Already active — just redirect.
-        if ( is_plugin_active( $plugin_slug ) ) {
+        if ( is_plugin_active( $plugin_file ) ) {
             return new \WP_REST_Response( [
                 'success'  => true,
                 'redirect' => $redirect,
@@ -1880,8 +1879,8 @@ class Admin_Rest {
         }
 
         // Already installed but not active — activate it.
-        if ( file_exists( WP_PLUGIN_DIR . '/' . $plugin_slug ) ) {
-            $result = activate_plugin( $plugin_slug );
+        if ( file_exists( WP_PLUGIN_DIR . '/' . $plugin_file ) ) {
+            $result = activate_plugin( $plugin_file );
 
             if ( is_wp_error( $result ) ) {
                 return new \WP_REST_Response( [
@@ -1900,41 +1899,35 @@ class Admin_Rest {
         require_once ABSPATH . 'wp-admin/includes/file.php';
         require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
         require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-        require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-        $downloaded = download_url( $plugin_zip, 30 );
+        $plugin_information = plugins_api( 'plugin_information', array(
+            'slug'   => $plugin_directory_slug,
+            'fields' => array(
+                'sections' => false,
+            ),
+        ) );
 
-		if ( is_wp_error( $downloaded ) ) {
-			return new \WP_REST_Response( [
-				'success' => false,
-				'message' => $downloaded->get_error_message(),
-			], 502 );
-		}
+        if ( is_wp_error( $plugin_information ) ) {
+            return new \WP_REST_Response( array(
+                'success' => false,
+                'message' => $plugin_information->get_error_message(),
+            ), 502 );
+        }
 
-		$max_package_bytes = max( 1024 * 1024, min( 200 * 1024 * 1024, (int) apply_filters( 'ss_studio_migrate_max_package_bytes', 50 * 1024 * 1024 ) ) );
-		$package_size      = is_file( $downloaded ) ? filesize( $downloaded ) : false;
-		$expected_hash     = (string) apply_filters( 'ss_studio_migrate_package_sha256', self::STUDIO_MIGRATE_PACKAGE_SHA256 );
-		if (
-			false === $package_size
-			|| $package_size < 1
-			|| $package_size > $max_package_bytes
-			|| ! $this->downloaded_package_matches_checksum( $downloaded, $expected_hash )
-		) {
-			$this->delete_downloaded_package( $downloaded );
+        $download_link = is_object( $plugin_information ) && isset( $plugin_information->download_link )
+            ? $plugin_information->download_link
+            : '';
 
-			return new \WP_REST_Response( [
-				'success' => false,
-				'message' => __( 'The migration plugin package failed integrity verification.', 'simply-static' ),
-			], 502 );
-		}
+        if ( ! is_string( $download_link ) || '' === $download_link ) {
+            return new \WP_REST_Response( array(
+                'success' => false,
+                'message' => __( 'WordPress.org did not provide a migration plugin package.', 'simply-static' ),
+            ), 502 );
+        }
 
-		$skin     = new \WP_Ajax_Upgrader_Skin();
-		$upgrader = new \Plugin_Upgrader( $skin );
-		try {
-			$installed = $upgrader->install( $downloaded );
-		} finally {
-			$this->delete_downloaded_package( $downloaded );
-		}
+        $skin      = new \WP_Ajax_Upgrader_Skin();
+        $upgrader  = new \Plugin_Upgrader( $skin );
+        $installed = $upgrader->install( $download_link );
 
         if ( is_wp_error( $installed ) ) {
             return new \WP_REST_Response( [
@@ -1950,7 +1943,7 @@ class Admin_Rest {
             ], 500 );
         }
 
-        $result = activate_plugin( $plugin_slug );
+        $result = activate_plugin( $plugin_file );
 
         if ( is_wp_error( $result ) ) {
             return new \WP_REST_Response( [
@@ -1964,33 +1957,6 @@ class Admin_Rest {
             'redirect' => $redirect,
         ] );
     }
-
-	/**
-	 * Verify a downloaded package against a pinned SHA-256 digest.
-	 *
-	 * @param string $filename      Local package filename.
-	 * @param string $expected_hash Expected lowercase/uppercase SHA-256 digest.
-	 * @return bool
-	 */
-	private function downloaded_package_matches_checksum( $filename, $expected_hash ) {
-		$expected_hash = strtolower( trim( (string) $expected_hash ) );
-		if ( ! preg_match( '/^[a-f0-9]{64}$/', $expected_hash ) || ! is_file( $filename ) ) {
-			return false;
-		}
-
-		$actual_hash = hash_file( 'sha256', $filename );
-
-		return is_string( $actual_hash ) && hash_equals( $expected_hash, strtolower( $actual_hash ) );
-	}
-
-	/** @param string $filename Temporary package filename. */
-	private function delete_downloaded_package( $filename ) {
-		if ( function_exists( 'wp_delete_file' ) ) {
-			wp_delete_file( $filename );
-		} elseif ( is_file( $filename ) ) {
-			unlink( $filename );
-		}
-	}
 
 	/**
 	 * Perform pause/resume/cancel with guaranteed multisite context cleanup.
