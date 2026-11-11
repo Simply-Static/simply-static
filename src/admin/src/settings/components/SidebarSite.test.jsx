@@ -296,6 +296,34 @@ describe( 'SidebarSite actions', () => {
 		expect( setters.setIsRunning ).toHaveBeenCalledTimes( 1 );
 	} );
 
+	it.each( [ 409, 500, 503 ] )( 'keeps a rejected push visible after the alert for status %s', async ( status ) => {
+		const message = 'A platform backup is active. Wait for it to finish before starting an export.';
+		actionResponse = JSON.stringify( { status, message } );
+		const { setters, context } = renderSidebar( { isRunning: false } );
+
+		fireEvent.click( screen.getByRole( 'button', { name: 'Generate' } ) );
+
+		await screen.findByText( message );
+		expect( screen.getByRole( 'alert' ).textContent ).toContain( message );
+		expect( global.alert ).toHaveBeenCalledWith( message );
+		expect( setters.setIsRunning ).toHaveBeenLastCalledWith( false );
+		expect( context.setSnapshotRollback ).not.toHaveBeenCalled();
+	} );
+
+	it( 'keeps HTTP push failures visible without exposing HTML', async () => {
+		const message = '<img src=x onerror="alert(1)">Backup active';
+		apiFetch.mockImplementation( ( { path } ) => path === '/simplystatic/v1/start-export'
+			? Promise.reject( { message, data: { status: 409 } } )
+			: Promise.resolve( JSON.stringify( { status: 200, data: { total: 0 } } ) ) );
+		const { container, setters } = renderSidebar( { isRunning: false } );
+
+		fireEvent.click( screen.getByRole( 'button', { name: 'Generate' } ) );
+
+		await screen.findByText( message );
+		expect( container.querySelector( '[onerror]' ) ).toBeNull();
+		expect( setters.setIsRunning ).toHaveBeenLastCalledWith( false );
+	} );
+
 	it( 'auto-selects Changes Only after a successful export with unpushed changes', async () => {
 		options.plan = 'pro';
 		apiFetch.mockImplementation( ( { path } ) => {

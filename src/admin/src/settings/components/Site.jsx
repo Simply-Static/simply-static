@@ -2,7 +2,8 @@ import apiFetch from "@wordpress/api-fetch";
 import Buttons from "./GenerateButtons";
 import {useState} from "@wordpress/element";
 import {useEffect} from "react";
-import {Button, Dashicon} from "@wordpress/components";
+import {Button, Dashicon, Notice} from "@wordpress/components";
+import {getExportStartErrorMessage} from "../utils/export";
 
 const {__} = wp.i18n;
 
@@ -12,6 +13,7 @@ function Site(props) {
     const [canGenerate, setCanGenerate] = useState(!site.running && !site.paused);
     const [isRunning, setIsRunning] = useState(site.running);
     const [isPaused, setIsPaused] = useState(site.paused);
+    const [exportError, setExportError] = useState('');
 
     useEffect(() => {
         if (isRunning) {
@@ -26,6 +28,7 @@ function Site(props) {
     }, [site]);
 
     const startExport = () => {
+        setExportError('');
         setCanGenerate(false);
         setIsPaused(false);
 
@@ -38,12 +41,19 @@ function Site(props) {
                 'is_network_admin': options.is_network
             }
         }).then(resp => {
-            var json = JSON.parse(resp);
-            if (json.status === 500) {
-                setCanGenerate(true);
-                return;
+            const json = typeof resp === 'string' ? JSON.parse(resp) : resp;
+            if (json && Number(json.status) >= 400) {
+                throw json;
             }
             setIsRunning(true);
+        }).catch(error => {
+            setExportError(getExportStartErrorMessage(
+                error,
+                __('The export could not be started. Please try again.', 'simply-static'),
+                __('Rollback in progress. Please wait before starting an export.', 'simply-static')
+            ));
+            setIsRunning(false);
+            setCanGenerate(true);
         });
     }
 
@@ -104,6 +114,9 @@ function Site(props) {
                 {site.status}
             </td>
             <td className={'generate-container network-generate-container'}>
+                {exportError && <Notice status="error" isDismissible={false}>
+                    <p>{exportError}</p>
+                </Notice>}
                 <Buttons
                     site={site}
                     canGenerate={canGenerate}
