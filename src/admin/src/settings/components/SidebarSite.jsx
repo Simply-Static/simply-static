@@ -89,6 +89,7 @@ function SidebarSite( props = null ) {
     const [canRunExport, setCanRunExport] = useState(true);
     const [isResettingLock, setIsResettingLock] = useState(false);
     const [unpushedChanges, setUnpushedChanges] = useState(0);
+    const [exportError, setExportError] = useState('');
     const hasAutoSelectedExportType = useRef(false);
     const hasSelectedExportTypeManually = useRef(false);
     const rollbackMessage = snapshotRollback && snapshotRollback.message ? snapshotRollback.message : __('Rollback in progress. Simply Static export actions are locked until the rollback has finished.', 'simply-static');
@@ -191,6 +192,7 @@ function SidebarSite( props = null ) {
     }, [settings, isRunning]);
 
     const startExport = () => {
+        setExportError('');
         if (isRollbackRunning) {
             alert(rollbackMessage);
             return;
@@ -215,14 +217,8 @@ function SidebarSite( props = null ) {
                 'language': isLanguageExport ? selectedExportType.replace(languagePrefix, '') : ''
             }
         }).then(resp => {
-            var json = JSON.parse(resp);
-            if (json.status === 500) {
-                alert(json.message);
-                setDisabledButton(false);
-				setIsRunning(false);
-                return;
-			}
-			if (json.status === 409) {
+            const json = typeof resp === 'string' ? JSON.parse(resp) : resp;
+			if (Number(json.status) >= 400) {
 				const message = getExportStartErrorMessage(
 					json,
 					__('The export could not be started. Please try again.', 'simply-static'),
@@ -236,6 +232,7 @@ function SidebarSite( props = null ) {
 						message: message,
 					});
 				}
+				setExportError(message);
 				alert(message);
 				setIsRunning(false);
 				setDisabledButton(!!rollbackState || isRunning || isPaused || isRollbackRunning);
@@ -258,6 +255,7 @@ function SidebarSite( props = null ) {
 				});
 			}
 
+			setExportError(message);
 			alert(message);
 			setIsRunning(false);
 			setDisabledButton(!!rollbackState || isRunning || isPaused || isRollbackRunning);
@@ -420,6 +418,9 @@ function SidebarSite( props = null ) {
                  src={options.logo}/>
         </div>
         <div className={`generate-container ${disabledButton && !isRollbackRunning ? 'generating' : ''} ${isRollbackRunning ? 'rollback-locked' : ''}`}>
+            {exportError && <Notice status="error" isDismissible={false}>
+                <p>{exportError}</p>
+            </Notice>}
             <SelectControl
                 className={'generate-type'}
                 value={selectedExportType}
