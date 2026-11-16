@@ -117,6 +117,14 @@ final class PaginationCrawlerSecurityTest extends UnitTestCase {
 			'safety limit reached',
 			WpEnv::$options['simply-static']['archive_status_messages']['pagination_warning']['message']
 		);
+		self::assertStringContainsString(
+			'simply_static_pagination_max_generated_urls',
+			WpEnv::$options['simply-static']['archive_status_messages']['pagination_warning']['message']
+		);
+		self::assertStringContainsString(
+			'Export will continue',
+			WpEnv::$options['simply-static']['archive_status_messages']['pagination_warning']['message']
+		);
 	}
 
 	/** @return string[] */

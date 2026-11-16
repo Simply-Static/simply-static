@@ -351,10 +351,16 @@ class Pagination_Crawler extends Crawler {
 		$posts_scanned = 0;
 		$posts         = [];
 		$query_size    = 0;
-		for ( $offset = 0; $offset < $max_posts_to_scan && count( $urls ) < $max_generated_urls; $offset += $batch_size ) {
-			$query_size = min( $batch_size, $max_posts_to_scan - $offset );
-			$posts      = get_posts( [
+		for ( $offset = 0; $offset < $max_posts_to_scan; $offset += $batch_size ) {
+			$query_size     = min( $batch_size, $max_posts_to_scan - $offset );
+			$query_args     = array(
 				'post_type'              => $post_type_param,
+				// Search only actual pagination candidates. Counting every post
+				// against this budget truncates large blogs before their first
+				// <!--nextpage--> post, even though most posts need no work here.
+				's'                      => '<!--nextpage-->',
+				'sentence'               => true,
+				'search_columns'         => array( 'post_content' ),
 				'posts_per_page'         => $query_size,
 				'offset'                 => $offset,
 				'orderby'                => 'ID',
@@ -363,7 +369,8 @@ class Pagination_Crawler extends Crawler {
 				'no_found_rows'          => true,
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
-			] );
+			);
+			$posts          = get_posts( $query_args );
 			$posts_scanned += count( $posts );
 
 			foreach ( $posts as $post ) {
@@ -374,7 +381,12 @@ class Pagination_Crawler extends Crawler {
 					$pages    = substr_count( $content, '<!--nextpage-->' ) + 1;
 					$permalink = get_permalink( $post->ID );
 
-					for ( $i = 2; $i <= $pages && count( $urls ) < $max_generated_urls; $i++ ) {
+					for ( $i = 2; $i <= $pages; $i++ ) {
+						if ( count( $urls ) >= $max_generated_urls ) {
+							$this->report_truncation( 'post_urls', $max_generated_urls, count( $urls ) + $pages - $i + 1 );
+
+							return $urls;
+						}
 						$urls[] = trailingslashit( rtrim( $permalink, '/' ) ) . $i . '/';
 					}
 				}
@@ -385,7 +397,17 @@ class Pagination_Crawler extends Crawler {
 			}
 		}
 		if ( $posts_scanned >= $max_posts_to_scan && $query_size > 0 && count( $posts ) >= $query_size ) {
-			$this->report_truncation( 'post_candidates', $max_posts_to_scan, $posts_scanned );
+			// Reaching the budget exactly does not prove that anything was omitted.
+			// Read at most one further candidate before reporting truncation.
+			$query_args['offset']         = $max_posts_to_scan;
+			$query_args['posts_per_page'] = 1;
+			if ( ! empty( get_posts( $query_args ) ) ) {
+				if ( count( $urls ) >= $max_generated_urls ) {
+					$this->report_truncation( 'post_urls', $max_generated_urls, count( $urls ) + 1 );
+				} else {
+					$this->report_truncation( 'post_candidates', $max_posts_to_scan, $posts_scanned + 1 );
+				}
+			}
 		}
 
 		return $urls;
@@ -463,7 +485,7 @@ class Pagination_Crawler extends Crawler {
 		$scan_deadline       = microtime( true ) + $global_scan_seconds;
 		foreach ( $pages as $page ) {
 			if ( microtime( true ) >= $scan_deadline ) {
-				$this->report_truncation( 'page_template_deadline', count( $urls ), count( $pages ) );
+				$this->report_truncation( 'page_template_deadline', $global_scan_seconds, count( $pages ) );
 				break;
 			}
 			$page_url = get_permalink( $page->ID );
@@ -636,11 +658,25 @@ class Pagination_Crawler extends Crawler {
 	 * @param int    $seen    Number of candidates observed, when known.
 	 */
 	private function report_truncation( $context, $limit, $seen ) : void {
+		$filters = array(
+			'post_candidates'          => 'simply_static_pagination_max_posts_to_scan',
+			'page_template_candidates' => 'simply_static_pagination_max_page_templates_to_scan',
+			'page_template_deadline'   => 'simply_static_pagination_total_scan_seconds',
+			'category_candidates'      => 'simply_static_pagination_max_archive_objects',
+			'tag_candidates'           => 'simply_static_pagination_max_archive_objects',
+			'author_candidates'        => 'simply_static_pagination_max_archive_objects',
+			'yearly_date_candidates'   => 'simply_static_pagination_max_archive_objects',
+			'monthly_date_candidates'  => 'simply_static_pagination_max_archive_objects',
+			'daily_date_candidates'    => 'simply_static_pagination_max_archive_objects',
+		);
+		$filter  = isset( $filters[ $context ] ) ? $filters[ $context ] : 'simply_static_pagination_max_generated_urls';
 		$message = sprintf(
-			'Pagination Crawler: safety limit reached (%s, limit %d, observed %d). Adjust the pagination safety filters for this site if complete discovery requires a higher limit.',
+			/* translators: 1: pagination limit context, 2: configured limit, 3: observed count, 4: WordPress filter name. */
+			__( 'Pagination Crawler: safety limit reached (%1$s, limit %2$d, observed %3$d). Export will continue with the discovered URLs; some pagination may be missing. Adjust the %4$s filter if this site requires a higher limit.', 'simply-static' ),
 			(string) $context,
 			(int) $limit,
-			(int) $seen
+			(int) $seen,
+			$filter
 		);
 		\Simply_Static\Util::debug_log( $message );
 		if ( class_exists( '\\Simply_Static\\Options' ) ) {

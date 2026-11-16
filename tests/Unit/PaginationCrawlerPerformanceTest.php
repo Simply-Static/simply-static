@@ -7,6 +7,11 @@ namespace Simply_Static\Crawler {
 	function get_posts( $args = array() ) {
 		$GLOBALS['simply_static_pagination_queries'][] = $args;
 		$posts  = isset( $GLOBALS['simply_static_pagination_posts'] ) ? $GLOBALS['simply_static_pagination_posts'] : array();
+		if ( isset( $args['s'] ) ) {
+			$posts = array_values( array_filter( $posts, static function ( $post ) use ( $args ): bool {
+				return false !== strpos( $post->post_content, $args['s'] );
+			} ) );
+		}
 		$offset = isset( $args['offset'] ) ? (int) $args['offset'] : 0;
 		$limit  = isset( $args['posts_per_page'] ) ? (int) $args['posts_per_page'] : count( $posts );
 
@@ -145,11 +150,14 @@ namespace Simply_Static\Tests\Unit {
 			self::assertCount( 24, $urls );
 			self::assertSame( 'https://example.test/post-1/2/', $urls[0] );
 			self::assertSame( 'https://example.test/post-12/3/', $urls[23] );
-			self::assertCount( 2, $GLOBALS['simply_static_pagination_queries'] );
+			self::assertCount( 3, $GLOBALS['simply_static_pagination_queries'] );
 			self::assertSame( 0, $GLOBALS['simply_static_pagination_queries'][0]['offset'] );
 			self::assertSame( 10, $GLOBALS['simply_static_pagination_queries'][0]['posts_per_page'] );
 			self::assertSame( 10, $GLOBALS['simply_static_pagination_queries'][1]['offset'] );
 			self::assertSame( 2, $GLOBALS['simply_static_pagination_queries'][1]['posts_per_page'] );
+			self::assertSame( 12, $GLOBALS['simply_static_pagination_queries'][2]['offset'] );
+			self::assertSame( 1, $GLOBALS['simply_static_pagination_queries'][2]['posts_per_page'] );
+			self::assertContains( 'simply_static_pagination_truncated', WpEnv::$action_log );
 			self::assertTrue( $GLOBALS['simply_static_pagination_queries'][0]['no_found_rows'] );
 			self::assertFalse( $GLOBALS['simply_static_pagination_queries'][0]['update_post_meta_cache'] );
 		}
@@ -181,6 +189,57 @@ namespace Simply_Static\Tests\Unit {
 				array( 'https://example.test/knowledge-articles/page/2/' ),
 				$urls
 			);
+		}
+
+		public function test_exact_candidate_limit_does_not_report_missing_pagination(): void {
+			$GLOBALS['simply_static_pagination_posts'] = array_slice( $GLOBALS['simply_static_pagination_posts'], 0, 12 );
+			add_filter( 'simply_static_pagination_max_posts_to_scan', static function (): int { return 12; } );
+			$crawler = new Pagination_Crawler();
+			$method = new ReflectionMethod( Pagination_Crawler::class, 'get_post_pagination' );
+			$method->setAccessible( true );
+
+			self::assertCount( 24, $method->invoke( $crawler ) );
+			self::assertNotContains( 'simply_static_pagination_truncated', WpEnv::$action_log );
+		}
+
+		/** @dataProvider generated_url_limits */
+		public function test_post_pagination_warns_only_when_generated_urls_are_omitted( int $page_breaks, bool $truncated ): void {
+			$GLOBALS['simply_static_pagination_posts'] = array(
+				(object) array( 'ID' => 1, 'post_content' => str_repeat( '<!--nextpage-->', $page_breaks ) ),
+			);
+			add_filter( 'simply_static_pagination_max_generated_urls', static function (): int { return 100; } );
+			$crawler = new Pagination_Crawler();
+			$method  = new ReflectionMethod( Pagination_Crawler::class, 'get_post_pagination' );
+			$method->setAccessible( true );
+
+			self::assertCount( 100, $method->invoke( $crawler ) );
+			self::assertSame( $truncated, in_array( 'simply_static_pagination_truncated', WpEnv::$action_log, true ) );
+			if ( $truncated ) {
+				self::assertStringContainsString( 'simply_static_pagination_max_generated_urls', WpEnv::$options['simply-static']['archive_status_messages']['pagination_warning']['message'] );
+			}
+		}
+
+		public function generated_url_limits(): array {
+			return array( 'exact limit' => array( 100, false ), 'truncation' => array( 150, true ) );
+		}
+
+		public function test_large_blog_only_counts_posts_with_page_breaks_against_scan_limit(): void {
+			$posts = array();
+			for ( $id = 1; $id <= 34000; ++$id ) {
+				$posts[] = (object) array( 'ID' => $id, 'post_content' => 'Ordinary blog post' );
+			}
+			$posts[] = (object) array( 'ID' => 34001, 'post_content' => 'First<!--nextpage-->Second' );
+			$GLOBALS['simply_static_pagination_posts'] = $posts;
+
+			$crawler = new Pagination_Crawler();
+			$method = new ReflectionMethod( Pagination_Crawler::class, 'get_post_pagination' );
+			$method->setAccessible( true );
+
+			self::assertSame( array( 'https://example.test/post-34001/2/' ), $method->invoke( $crawler ) );
+			self::assertCount( 1, $GLOBALS['simply_static_pagination_queries'] );
+			self::assertSame( array( 'post_content' ), $GLOBALS['simply_static_pagination_queries'][0]['search_columns'] );
+			self::assertTrue( $GLOBALS['simply_static_pagination_queries'][0]['sentence'] );
+			self::assertNotContains( 'simply_static_pagination_truncated', WpEnv::$action_log );
 		}
 
 		/**
