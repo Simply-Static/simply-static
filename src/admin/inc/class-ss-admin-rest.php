@@ -731,17 +731,14 @@ class Admin_Rest {
         ] );
     }
 
-    /**
-     * Count unpushed changes since the last export.
-     *
-     * Considers:
-     * 1. Posts/pages modified after the last export end time.
-     * 2. Rows in the Pro delete-tracker table (if it exists).
-     *
-     * Pro supplies the successful environment/language checkpoint when available.
-     *
-     * @return string|\WP_Error JSON response with total count, or a detection error.
-     */
+	/**
+	 * Count pending content using Pro's successful checkpoint when available.
+	 *
+	 * The free fallback counts public content modified after the last export
+	 * and rows remaining in the Pro deletion tracker, when that table exists.
+	 *
+	 * @return string|\WP_Error JSON response with total count, or a detection error.
+	 */
     public function get_unpushed_changes() {
         global $wpdb;
 
