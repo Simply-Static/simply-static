@@ -88,7 +88,9 @@ function SidebarSite( props = null ) {
     const [selectedExportType, setSelectedExportType] = useState('export');
     const [canRunExport, setCanRunExport] = useState(true);
     const [isResettingLock, setIsResettingLock] = useState(false);
-    const [unpushedChanges, setUnpushedChanges] = useState(0);
+    const [unpushedChanges, setUnpushedChanges] = useState(null);
+    const [changesUnavailable, setChangesUnavailable] = useState(false);
+    const [fullExportRequired, setFullExportRequired] = useState(false);
     const [exportError, setExportError] = useState('');
     const hasAutoSelectedExportType = useRef(false);
     const hasSelectedExportTypeManually = useRef(false);
@@ -160,35 +162,40 @@ function SidebarSite( props = null ) {
 
     // Fetch unpushed changes count on mount and after each export finishes.
     useEffect(() => {
+        let active = true;
         apiFetch({
             path: '/simplystatic/v1/unpushed-changes',
             method: 'GET',
         }).then(resp => {
-            const json = JSON.parse(resp);
-            const total = json.data ? json.data.total : 0;
-            const lastExportFailed = !!(json.data && json.data.last_export_failed);
+            if (!active) return;
+            const json = parseArchiveActionResponse(resp, __('Changes could not be checked. Please try again.', 'simply-static'));
+            const total = json.data?.total;
+            if (!Number.isSafeInteger(total) || total < 0 || json.data?.detection_available === false) {
+                throw new Error('Change detection unavailable');
+            }
+            const requiresFull = json.data.full_export_required === true;
+            const lastExportFailed = !!json.data.last_export_failed;
             setUnpushedChanges(total);
-
+            setChangesUnavailable(false);
+            setFullExportRequired(requiresFull);
+            if (requiresFull) {
+                setSelectedExportType(previous => previous === 'update' ? 'export' : previous);
+            }
             if (!hasAutoSelectedExportType.current && !hasSelectedExportTypeManually.current) {
-                // Auto-select "Export Changes" when there are unpushed changes and Pro is available.
-                // A failed run has no trustworthy deployment baseline, so keep Full Site
-                // selected for the retry even when WordPress reports newer content.
-                if (total > 0 && !lastExportFailed && 'pro' === options.plan && isPro()) {
-                    setSelectedExportType('update');
-                } else {
-                    setSelectedExportType('export');
-                }
-
+                setSelectedExportType(total > 0 && !lastExportFailed && !requiresFull && 'pro' === options.plan && isPro() ? 'update' : 'export');
                 hasAutoSelectedExportType.current = true;
             }
         }).catch(() => {
-            setUnpushedChanges(0);
-
+            if (!active) return;
+            setUnpushedChanges(null);
+            setChangesUnavailable(true);
+            // Preserve an observed full-export requirement when a refresh fails.
             if (!hasAutoSelectedExportType.current && !hasSelectedExportTypeManually.current) {
                 setSelectedExportType('export');
                 hasAutoSelectedExportType.current = true;
             }
         });
+        return () => { active = false; };
     }, [settings, isRunning]);
 
     const startExport = () => {
@@ -434,7 +441,7 @@ function SidebarSite( props = null ) {
             >
                 <option value="export">{__('Full Site', 'simply-static')}</option>
                 {'pro' === options.plan && isPro() ?
-                    <option value="update">{__('Changes Only', 'simply-static')}</option>
+                    <option value="update" disabled={fullExportRequired}>{__('Changes Only', 'simply-static')}</option>
                     :
                     <option disabled
                             value="update">{__('Changes Only (Requires Simply Static Pro)', 'simply-static')}</option>
@@ -471,6 +478,17 @@ function SidebarSite( props = null ) {
                     </Notice>
                 </>
             }
+
+            {changesUnavailable && !isRunning && !isPaused && (
+                <Notice status="warning" isDismissible={false}>
+                    <p>{__('Changes could not be checked. You can still request an export; WordPress will check its requirements before starting.', 'simply-static')}</p>
+                </Notice>
+            )}
+            {fullExportRequired && !isRunning && !isPaused && (
+                <Notice status="warning" isDismissible={false}>
+                    <p>{__('A site-wide change requires a Full Site export to refresh all affected pages and archives.', 'simply-static')}</p>
+                </Notice>
+            )}
 
             {unpushedChanges > 0 && !isRollbackRunning && !isRunning && !isPaused && ('pro' === options.plan && isPro()) &&
                 <Notice status="info" isDismissible={false} className={"unpushed-changes-notice"}>

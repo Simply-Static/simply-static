@@ -731,15 +731,14 @@ class Admin_Rest {
         ] );
     }
 
-    /**
-     * Count unpushed changes since the last export.
-     *
-     * Considers:
-     * 1. Posts/pages modified after the last export end time.
-     * 2. Rows in the Pro delete-tracker table (if it exists).
-     *
-     * @return string JSON response with total count.
-     */
+	/**
+	 * Count pending content using Pro's successful checkpoint when available.
+	 *
+	 * The free fallback counts public content modified after the last export
+	 * and rows remaining in the Pro deletion tracker, when that table exists.
+	 *
+	 * @return string|\WP_Error JSON response with total count, or a detection error.
+	 */
     public function get_unpushed_changes() {
         global $wpdb;
 
@@ -747,6 +746,28 @@ class Admin_Rest {
         $last_export_end  = $options->get( 'archive_end_time' );
         $status_messages  = $options->get( 'archive_status_messages' );
         $last_export_failed = is_array( $status_messages ) && ! empty( $status_messages['error'] );
+		try {
+			$summary = apply_filters( 'ss_pending_changes_summary', null );
+		} catch ( \Throwable $error ) {
+			return new \WP_Error( 'ss_change_detection_unavailable', __( 'Changes could not be checked. Please try again.', 'simply-static' ), array( 'status' => 503 ) );
+		}
+		if ( null !== $summary && ( ! is_array( $summary ) || ! isset( $summary['changes_count'] ) || ! is_int( $summary['changes_count'] ) || $summary['changes_count'] < 0 || false === ( $summary['detection_available'] ?? true ) ) ) {
+			return new \WP_Error( 'ss_change_detection_unavailable', __( 'Changes could not be checked. Please try again.', 'simply-static' ), array( 'status' => 503 ) );
+		}
+		if ( is_array( $summary ) ) {
+			return wp_json_encode(
+				array(
+					'status' => 200,
+					'data'   => array_merge(
+						$summary,
+						array(
+							'total'              => $summary['changes_count'],
+							'last_export_failed' => $last_export_failed,
+						)
+					),
+				)
+			);
+		}
         $modified_count   = 0;
         $media_count      = 0;
         $deleted_count    = 0;
