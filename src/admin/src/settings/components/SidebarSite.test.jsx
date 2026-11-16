@@ -343,6 +343,25 @@ describe( 'SidebarSite actions', () => {
 		);
 	} );
 
+	it( 'requires Full Site for site-wide changes even with pending content', async () => {
+		options.plan = 'pro';
+		apiFetch.mockImplementation( ( { path } ) => path === '/simplystatic/v1/unpushed-changes'
+			? Promise.resolve( JSON.stringify( { status: 200, data: { total: 3, full_export_required: true } } ) )
+			: Promise.resolve( actionResponse ) );
+		renderSidebar( { isRunning: false, isPro: () => true } );
+		await screen.findByText( /A site-wide change requires a Full Site export/ );
+		expect( screen.getByRole( 'combobox' ).value ).toBe( 'export' );
+		expect( document.querySelector( 'option[value="update"]' ).disabled ).toBe( true );
+	} );
+
+	it( 'shows unavailable change detection instead of silently clearing the count', async () => {
+		apiFetch.mockImplementation( ( { path } ) => path === '/simplystatic/v1/unpushed-changes'
+			? Promise.reject( new Error( 'offline' ) ) : Promise.resolve( actionResponse ) );
+		renderSidebar( { isRunning: false } );
+		await screen.findByText( /Changes could not be checked/ );
+		expect( screen.getByRole( 'combobox' ).value ).toBe( 'export' );
+	} );
+
 	it( 'keeps Full Site selected when the previous export failed', async () => {
 		options.plan = 'pro';
 		apiFetch.mockImplementation( ( { path } ) => {

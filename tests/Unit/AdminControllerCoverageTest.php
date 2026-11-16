@@ -218,6 +218,34 @@ final class AdminControllerCoverageTest extends UnitTestCase {
 		self::assertFalse( $successful['data']['last_export_failed'] );
 	}
 
+	public function test_unpushed_changes_uses_shared_pro_checkpoint_and_full_export_requirement(): void {
+		add_filter( 'ss_pending_changes_summary', static function () {
+			return array( 'changes_count' => 2, 'full_export_required' => true, 'detection_available' => true );
+		} );
+		$result = json_decode( $this->rest->get_unpushed_changes(), true );
+		self::assertSame( 2, $result['data']['total'] );
+		self::assertTrue( $result['data']['full_export_required'] );
+	}
+
+	public function test_malformed_shared_detection_does_not_report_zero_changes(): void {
+		add_filter( 'ss_pending_changes_summary', static function () {
+			return array( 'changes_count' => null );
+		} );
+		$result = $this->rest->get_unpushed_changes();
+		self::assertInstanceOf( \WP_Error::class, $result );
+		self::assertSame( 'ss_change_detection_unavailable', $result->get_error_code() );
+	}
+
+	public function test_failed_shared_detection_does_not_report_zero_changes(): void {
+		add_filter( 'ss_pending_changes_summary', static function () {
+			throw new \RuntimeException( 'Database unavailable' );
+		} );
+		$result = $this->rest->get_unpushed_changes();
+		self::assertInstanceOf( \WP_Error::class, $result );
+		self::assertSame( 'ss_change_detection_unavailable', $result->get_error_code() );
+		self::assertSame( 503, $result->get_error_data()['status'] );
+	}
+
 	public function test_multisite_routes_require_network_capabilities(): void {
 		WpEnv::$multisite = true;
 		$this->rest->rest_api_init();
