@@ -553,7 +553,14 @@ trait canProcessPages {
 			$query->where( "file_path != ''" );
 		}
 
-		return $query;
+		/**
+		 * Scope every processing, progress and retry query consistently.
+		 *
+		 * @param Query  $query             Base Page query.
+		 * @param Task   $task              Current task.
+		 * @param string $processing_column Fetch or transfer timestamp column.
+		 */
+		return apply_filters( 'simply_static_task_pages_query', $query, $this, $this->processing_column );
 	}
 
 	/** Respect an active worker's limits while allowing direct task calls. */
