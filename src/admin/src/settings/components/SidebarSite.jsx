@@ -14,6 +14,7 @@ import {SettingsContext} from "../context/SettingsContext";
 import VersionInfo from "./VersionInfo";
 import GenerateButtons from "./GenerateButtons";
 import EnvironmentSidebar from "./EnvironmentSidebar";
+import PendingChangesModal from "./PendingChangesModal";
 import apiFetch from "@wordpress/api-fetch";
 import useInterval from "../../hooks/useInterval";
 import {getExportStartErrorMessage, getRollbackConflict} from "../utils/export";
@@ -89,6 +90,9 @@ function SidebarSite( props = null ) {
     const [canRunExport, setCanRunExport] = useState(true);
     const [isResettingLock, setIsResettingLock] = useState(false);
     const [unpushedChanges, setUnpushedChanges] = useState(null);
+    const [pendingChangesOpen, setPendingChangesOpen] = useState(false);
+    const [pendingChangesDetailsAvailable, setPendingChangesDetailsAvailable] = useState(false);
+    const [changesRefreshKey, setChangesRefreshKey] = useState(0);
     const [changesUnavailable, setChangesUnavailable] = useState(false);
     const [fullExportRequired, setFullExportRequired] = useState(false);
     const [exportError, setExportError] = useState('');
@@ -178,6 +182,7 @@ function SidebarSite( props = null ) {
             setUnpushedChanges(total);
             setChangesUnavailable(false);
             setFullExportRequired(requiresFull);
+            setPendingChangesDetailsAvailable(json.data.details_available === true);
             if (requiresFull) {
                 setSelectedExportType(previous => previous === 'update' ? 'export' : previous);
             }
@@ -189,6 +194,7 @@ function SidebarSite( props = null ) {
             if (!active) return;
             setUnpushedChanges(null);
             setChangesUnavailable(true);
+            setPendingChangesDetailsAvailable(false);
             // Preserve an observed full-export requirement when a refresh fails.
             if (!hasAutoSelectedExportType.current && !hasSelectedExportTypeManually.current) {
                 setSelectedExportType('export');
@@ -196,7 +202,18 @@ function SidebarSite( props = null ) {
             }
         });
         return () => { active = false; };
-    }, [settings, isRunning]);
+    }, [settings, isRunning, changesRefreshKey]);
+
+    const refreshChangesAfterClear = (response) => {
+        if (response && Number.isSafeInteger(response.total) && response.total >= 0) {
+            setUnpushedChanges(response.total);
+            if (0 === response.total && !hasSelectedExportTypeManually.current) {
+                setSelectedExportType(previous => previous === 'update' ? 'export' : previous);
+            }
+        }
+
+        setChangesRefreshKey(previous => previous + 1);
+    };
 
     const startExport = () => {
         setExportError('');
@@ -490,9 +507,20 @@ function SidebarSite( props = null ) {
                 </Notice>
             )}
 
-            {unpushedChanges > 0 && !isRollbackRunning && !isRunning && !isPaused && ('pro' === options.plan && isPro()) &&
+            {unpushedChanges > 0 && ('pro' === options.plan && isPro()) &&
                 <Notice status="info" isDismissible={false} className={"unpushed-changes-notice"}>
-                    <p>{unpushedChangesMessage}</p>
+                    {pendingChangesDetailsAvailable
+                        ? <Button
+                            variant="link"
+                            onClick={() => setPendingChangesOpen(true)}
+                            disabled={disabledButton}
+                            aria-label={sprintf(
+                                /* translators: %d: number of changes that have not been pushed. */
+                                __('Review %d unpushed changes', 'simply-static'),
+                                unpushedChanges
+                            )}
+                        >{unpushedChangesMessage}</Button>
+                        : <p>{unpushedChangesMessage}</p>}
                 </Notice>
             }
             {unpushedChanges > 0 && !isRollbackRunning && !isRunning && !isPaused && !('pro' === options.plan && isPro()) &&
@@ -502,6 +530,12 @@ function SidebarSite( props = null ) {
                     </Notice>
                 </Tooltip>
             }
+
+            {pendingChangesOpen && <PendingChangesModal
+                actionsDisabled={disabledButton}
+                onCleared={refreshChangesAfterClear}
+                onRequestClose={() => setPendingChangesOpen(false)}
+            />}
 
             {!isRollbackRunning && !canRunExport && options.is_multisite && <>
                 <Button

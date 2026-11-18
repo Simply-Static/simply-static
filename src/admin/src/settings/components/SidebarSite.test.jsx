@@ -3,7 +3,13 @@ global.wp = {
 		__: ( value ) => value,
 		_n: ( singular, plural, number ) =>
 			1 === number ? singular : plural,
-		sprintf: ( value, number ) => value.replace( '%d', number ),
+		sprintf: ( value, ...args ) => {
+			let nextArg = 0;
+			return value.replace( /%(?:(\d+)\$)?[ds]/g, ( match, position ) => {
+				const index = position ? Number( position ) - 1 : nextArg++;
+				return args[ index ];
+			} );
+		},
 	},
 };
 
@@ -41,18 +47,25 @@ jest.mock( '@wordpress/components', () => {
 		__experimentalSpacer: wrap( 'div' ),
 		Animate: ( { children } ) =>
 			'string' === typeof children ? children : children( {} ),
-		Button: ( { children, href, target, onClick, disabled, className } ) =>
+		Button: ( { children, href, target, onClick, disabled, className, 'aria-label': ariaLabel } ) =>
 			href
 				? React.createElement( 'a', { href, target, className }, children )
 				: React.createElement(
 						'button',
-						{ type: 'button', onClick, disabled, className },
+						{ type: 'button', onClick, disabled, className, 'aria-label': ariaLabel },
 						children
 				  ),
 		Card: wrap( 'div' ),
 		CardBody: wrap( 'div' ),
 		Dashicon: ( { icon } ) =>
 			React.createElement( 'span', { 'data-icon': icon } ),
+		Modal: ( { children, title, onRequestClose, className } ) =>
+			React.createElement(
+				'div',
+				{ role: 'dialog', 'aria-label': title, className },
+				React.createElement( 'button', { type: 'button', onClick: onRequestClose }, 'Close' ),
+				children
+			),
 		Notice: ( { children, className } ) =>
 			React.createElement( 'div', { role: 'alert', className }, children ),
 		SelectControl: ( {
@@ -81,6 +94,7 @@ jest.mock( '@wordpress/components', () => {
 					)
 			),
 		Tooltip: wrap( 'div' ),
+		Spinner: () => React.createElement( 'span', null, 'Loading' ),
 	};
 } );
 
@@ -341,6 +355,173 @@ describe( 'SidebarSite actions', () => {
 		await waitFor( () =>
 			expect( screen.getByRole( 'combobox' ).value ).toBe( 'update' )
 		);
+	} );
+
+	it( 'opens the pending changes review when detailed results are available', async () => {
+		options.plan = 'pro';
+		apiFetch.mockImplementation( ( { path } ) => {
+			if ( '/simplystatic/v1/unpushed-changes' === path ) {
+				return Promise.resolve( JSON.stringify( {
+					status: 200,
+					data: { total: 3, details_available: true },
+				} ) );
+			}
+			if ( path.startsWith( '/simplystatic/v1/pending-changes?' ) ) {
+				return Promise.resolve( {
+					items: [],
+					total: 0,
+					total_pages: 1,
+					page: 1,
+					review_token: 'review-1',
+					can_clear: true,
+					full_export_required: false,
+					full_export_reasons: [],
+				} );
+			}
+
+			return Promise.resolve( actionResponse );
+		} );
+		renderSidebar( { isRunning: false, isPro: () => true } );
+
+		fireEvent.click( await screen.findByRole( 'button', { name: 'Review 3 unpushed changes' } ) );
+
+		await screen.findByRole( 'dialog', { name: 'Pending changes' } );
+		expect( apiFetch ).toHaveBeenCalledWith( {
+			path: '/simplystatic/v1/pending-changes?page=1&per_page=20',
+			method: 'GET',
+		} );
+	} );
+
+	it( 'keeps the legacy unpushed count non-interactive without the details flag', async () => {
+		options.plan = 'pro';
+		apiFetch.mockImplementation( ( { path } ) => path === '/simplystatic/v1/unpushed-changes'
+			? Promise.resolve( JSON.stringify( { status: 200, data: { total: 3 } } ) )
+			: Promise.resolve( actionResponse ) );
+		renderSidebar( { isRunning: false, isPro: () => true } );
+
+		await screen.findByText( 'You have 3 unpushed changes.' );
+		expect( screen.queryByRole( 'button', { name: 'Review 3 unpushed changes' } ) ).toBeNull();
+	} );
+
+	it( 'refreshes the sidebar summary after the modal clears a review', async () => {
+		options.plan = 'pro';
+		let summaryRequests = 0;
+		apiFetch.mockImplementation( ( { path, method } ) => {
+			if ( '/simplystatic/v1/unpushed-changes' === path ) {
+				summaryRequests += 1;
+				return Promise.resolve( JSON.stringify( {
+					status: 200,
+					data: { total: 1 === summaryRequests ? 1 : 0, details_available: true },
+				} ) );
+			}
+			if ( 'POST' === method && '/simplystatic/v1/pending-changes/clear' === path ) {
+				return Promise.resolve( { cleared: true, total: 0, summary: { changes_count: 0 } } );
+			}
+			if ( path.startsWith( '/simplystatic/v1/pending-changes?' ) ) {
+				return Promise.resolve( {
+					items: [ { id: 1, title: 'Home', url: 'https://example.com/', type: 'content', modified_gmt: '2026-11-18 10:00:00' } ],
+					total: 1,
+					total_pages: 1,
+					page: 1,
+					review_token: 'review-1',
+					can_clear: true,
+					full_export_required: false,
+					full_export_reasons: [],
+				} );
+			}
+
+			return Promise.resolve( actionResponse );
+		} );
+		renderSidebar( { isRunning: false, isPro: () => true } );
+
+		fireEvent.click( await screen.findByRole( 'button', { name: 'Review 1 unpushed changes' } ) );
+		fireEvent.click( await screen.findByRole( 'button', { name: 'Clear tracked changes' } ) );
+		fireEvent.click( screen.getByRole( 'button', { name: 'Confirm clear' } ) );
+
+		await waitFor( () => expect( summaryRequests ).toBe( 2 ) );
+		expect( screen.queryByText( 'You have 1 unpushed change.' ) ).toBeNull();
+		expect( screen.getByRole( 'combobox' ).value ).toBe( 'export' );
+	} );
+
+	it( 'keeps a manually selected Changes Only type after clearing the last change', async () => {
+		options.plan = 'pro';
+		let summaryRequests = 0;
+		apiFetch.mockImplementation( ( { path, method } ) => {
+			if ( '/simplystatic/v1/unpushed-changes' === path ) {
+				summaryRequests += 1;
+				return Promise.resolve( JSON.stringify( {
+					status: 200,
+					data: { total: 1 === summaryRequests ? 1 : 0, details_available: true },
+				} ) );
+			}
+			if ( 'POST' === method && '/simplystatic/v1/pending-changes/clear' === path ) {
+				return Promise.resolve( { cleared: true, total: 0, summary: { changes_count: 0 } } );
+			}
+			if ( path.startsWith( '/simplystatic/v1/pending-changes?' ) ) {
+				return Promise.resolve( {
+					items: [ { id: 1, title: 'Home', url: 'https://example.com/', type: 'content', modified_gmt: '2026-11-18 10:00:00' } ],
+					total: 1,
+					total_pages: 1,
+					page: 1,
+					review_token: 'review-1',
+					can_clear: true,
+					full_export_required: false,
+					full_export_reasons: [],
+				} );
+			}
+
+			return Promise.resolve( actionResponse );
+		} );
+		renderSidebar( { isRunning: false, isPro: () => true } );
+
+		const exportType = screen.getByRole( 'combobox' );
+		await waitFor( () => expect( exportType.value ).toBe( 'update' ) );
+		fireEvent.change( exportType, { target: { value: 'export' } } );
+		fireEvent.change( exportType, { target: { value: 'update' } } );
+		fireEvent.click( screen.getByRole( 'button', { name: 'Review 1 unpushed changes' } ) );
+		fireEvent.click( await screen.findByRole( 'button', { name: 'Clear tracked changes' } ) );
+		fireEvent.click( screen.getByRole( 'button', { name: 'Confirm clear' } ) );
+
+		await screen.findByText( 'The tracked Changes Only list was cleared.' );
+		expect( exportType.value ).toBe( 'update' );
+	} );
+
+	it( 'keeps clear success visible when the sidebar count refresh fails', async () => {
+		options.plan = 'pro';
+		let summaryRequests = 0;
+		apiFetch.mockImplementation( ( { path, method } ) => {
+			if ( '/simplystatic/v1/unpushed-changes' === path ) {
+				summaryRequests += 1;
+				return 1 === summaryRequests
+					? Promise.resolve( JSON.stringify( { status: 200, data: { total: 1, details_available: true } } ) )
+					: Promise.reject( new Error( 'Summary refresh failed' ) );
+			}
+			if ( 'POST' === method && '/simplystatic/v1/pending-changes/clear' === path ) {
+				return Promise.resolve( { cleared: true, total: 0, summary: { changes_count: 0 } } );
+			}
+			if ( path.startsWith( '/simplystatic/v1/pending-changes?' ) ) {
+				return Promise.resolve( {
+					items: [ { id: 1, title: 'Home', url: 'https://example.com/', type: 'content', modified_gmt: '2026-11-18 10:00:00' } ],
+					total: 1,
+					total_pages: 1,
+					page: 1,
+					review_token: 'review-1',
+					can_clear: true,
+					full_export_required: false,
+					full_export_reasons: [],
+				} );
+			}
+
+			return Promise.resolve( actionResponse );
+		} );
+		renderSidebar( { isRunning: false, isPro: () => true } );
+
+		fireEvent.click( await screen.findByRole( 'button', { name: 'Review 1 unpushed changes' } ) );
+		fireEvent.click( await screen.findByRole( 'button', { name: 'Clear tracked changes' } ) );
+		fireEvent.click( screen.getByRole( 'button', { name: 'Confirm clear' } ) );
+
+		expect( await screen.findByText( 'The tracked Changes Only list was cleared.' ) ).not.toBeNull();
+		expect( await screen.findByText( /Changes could not be checked/ ) ).not.toBeNull();
 	} );
 
 	it( 'requires Full Site for site-wide changes even with pending content', async () => {
